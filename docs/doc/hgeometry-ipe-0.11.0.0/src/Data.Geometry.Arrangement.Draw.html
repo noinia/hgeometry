@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Geometry.Arrangement.Draw</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Functions for Drawing arrangements</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Arrangement.Draw</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Geometry.Arrangement</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.html"><span class="hs-identifier">Data.Geometry.Ipe</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Draw.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Draw</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- | Draws an arrangement</span><span>
+</span><span id="line-19"></span><span id="local-6989586621679537779"><span id="local-6989586621679537780"><span id="local-6989586621679537781"><span id="local-6989586621679537782"><span id="local-6989586621679537783"><span id="local-6989586621679537784"><span class="annot"><a href="Data.Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-type">drawArrangement</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arrangement</span></span><span> </span><span class="annot"><a href="#local-6989586621679537784"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537783"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537782"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537781"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537780"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537779"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537779"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span><span>
+</span><span id="line-20"></span><span id="drawArrangement"><span class="annot"><span class="annottext">drawArrangement :: IpeOut (Arrangement s l v e f r) Group r
+</span><a href="Data.Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-var hs-var">drawArrangement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall k (s :: k) v e f r.
+IpeOut (PlanarSubdivision s v e f r) Group r
+</span><a href="Data.Geometry.PlanarSubdivision.Draw.html#drawPlanarSubdivision%27"><span class="hs-identifier hs-var">drawPlanarSubdivision'</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision s v e f r
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (Arrangement s l v e f r -&gt; PlanarSubdivision s v e f r)
+-&gt; Arrangement s l v e f r
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e f r)
+  (Arrangement s l v e f r)
+  (PlanarSubdivision s v e f r)
+-&gt; Arrangement s l v e f r -&gt; PlanarSubdivision s v e f r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e f r)
+  (Arrangement s l v e f r)
+  (PlanarSubdivision s v e f r)
+forall k (s :: k) l v1 e1 f1 r v2 e2 f2.
+Lens
+  (Arrangement s l v1 e1 f1 r)
+  (Arrangement s l v2 e2 f2 r)
+  (PlanarSubdivision s v1 e1 f1 r)
+  (PlanarSubdivision s v2 e2 f2 r)
+</span><span class="hs-identifier hs-var">subdivision</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- | Draws an arrangement</span><span>
+</span><span id="line-23"></span><span id="local-6989586621679537769"><span id="local-6989586621679537770"><span id="local-6989586621679537771"><span id="local-6989586621679537772"><span id="local-6989586621679537773"><span class="annot"><a href="Data.Geometry.Arrangement.Draw.html#drawColoredArrangement"><span class="hs-identifier hs-type">drawColoredArrangement</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arrangement</span></span><span> </span><span class="annot"><a href="#local-6989586621679537773"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537772"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537771"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537770"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537769"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679537769"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537769"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-24"></span><span id="drawColoredArrangement"><span class="annot"><span class="annottext">drawColoredArrangement :: IpeOut (Arrangement s l v e (Maybe (IpeColor r)) r) Group r
+</span><a href="Data.Geometry.Arrangement.Draw.html#drawColoredArrangement"><span class="hs-identifier hs-var hs-var">drawColoredArrangement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e (Maybe (IpeColor r)) r
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall k (s :: k) v e r.
+IpeOut (PlanarSubdivision s v e (Maybe (IpeColor r)) r) Group r
+</span><a href="Data.Geometry.PlanarSubdivision.Draw.html#drawColoredPlanarSubdivision"><span class="hs-identifier hs-var">drawColoredPlanarSubdivision</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision s v e (Maybe (IpeColor r)) r
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (Arrangement s l v e (Maybe (IpeColor r)) r
+    -&gt; PlanarSubdivision s v e (Maybe (IpeColor r)) r)
+-&gt; Arrangement s l v e (Maybe (IpeColor r)) r
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
+  (Arrangement s l v e (Maybe (IpeColor r)) r)
+  (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
+-&gt; Arrangement s l v e (Maybe (IpeColor r)) r
+-&gt; PlanarSubdivision s v e (Maybe (IpeColor r)) r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
+  (Arrangement s l v e (Maybe (IpeColor r)) r)
+  (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
+forall k (s :: k) l v1 e1 f1 r v2 e2 f2.
+Lens
+  (Arrangement s l v1 e1 f1 r)
+  (Arrangement s l v2 e2 f2 r)
+  (PlanarSubdivision s v1 e1 f1 r)
+  (PlanarSubdivision s v2 e2 f2 r)
+</span><span class="hs-identifier hs-var">subdivision</span></span><span>
+</span><span id="line-25"></span></pre></body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Tree.Draw</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.LineSegment</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Point</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.html"><span class="hs-identifier">Data.Geometry.Ipe</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Tree</span></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- | Draws a tree</span><span>
+</span><span id="line-12"></span><span id="local-6989586621679538198"><span id="local-6989586621679538199"><span class="annot"><a href="Data.Tree.Draw.html#drawTree%27"><span class="hs-identifier hs-type">drawTree'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679538199"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679538198"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538199"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-13"></span><span id="drawTree%27"><span class="annot"><span class="annottext">drawTree' :: IpeOut (Tree (Point 2 r :+ p)) Group r
+</span><a href="Data.Tree.Draw.html#drawTree%27"><span class="hs-identifier hs-var hs-var">drawTree'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">([IpeObject r]
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (Tree (Point 2 r :+ p) -&gt; [IpeObject r])
+-&gt; Tree (Point 2 r :+ p)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p, Point 2 r :+ p) -&gt; IpeObject r)
+-&gt; [(Point 2 r :+ p, Point 2 r :+ p)] -&gt; [IpeObject r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Path r
+ :+ Attributes
+      (AttrMapSym1 r)
+      ('Layer
+         : ('[ 'Matrix, 'Pin, 'Transformations]
+            ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                  'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient])))
+-&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">((Path r
+  :+ Attributes
+       (AttrMapSym1 r)
+       ('Layer
+          : ('[ 'Matrix, 'Pin, 'Transformations]
+             ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                   'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient])))
+ -&gt; IpeObject r)
+-&gt; ((Point 2 r :+ p, Point 2 r :+ p)
+    -&gt; Path r
+       :+ Attributes
+            (AttrMapSym1 r)
+            ('Layer
+               : ('[ 'Matrix, 'Pin, 'Transformations]
+                  ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                        'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient])))
+-&gt; (Point 2 r :+ p, Point 2 r :+ p)
+-&gt; IpeObject r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Path r
+   :+ Attributes
+        (AttrMapSym1 r)
+        ('Layer
+           : ('[ 'Matrix, 'Pin, 'Transformations]
+              ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                    'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient]))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="Data.Geometry.Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span>  </span><span class="annot"><span class="annottext">(LineSegment 2 p r
+ -&gt; Path r
+    :+ Attributes
+         (AttrMapSym1 r)
+         ('Layer
+            : ('[ 'Matrix, 'Pin, 'Transformations]
+               ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                     'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient])))
+-&gt; ((Point 2 r :+ p, Point 2 r :+ p) -&gt; LineSegment 2 p r)
+-&gt; (Point 2 r :+ p, Point 2 r :+ p)
+-&gt; Path r
+   :+ Attributes
+        (AttrMapSym1 r)
+        ('Layer
+           : ('[ 'Matrix, 'Pin, 'Transformations]
+              ++ '[ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin, 'FillRule,
+                    'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient]))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; LineSegment 2 p r)
+-&gt; (Point 2 r :+ p, Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall (d :: Nat) r p.
+(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
+</span><span class="hs-identifier hs-var">ClosedLineSegment</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(Point 2 r :+ p, Point 2 r :+ p)] -&gt; [IpeObject r])
+-&gt; (Tree (Point 2 r :+ p) -&gt; [(Point 2 r :+ p, Point 2 r :+ p)])
+-&gt; Tree (Point 2 r :+ p)
+-&gt; [IpeObject r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Tree (Point 2 r :+ p) -&gt; [(Point 2 r :+ p, Point 2 r :+ p)]
+forall a. Tree a -&gt; [(a, a)]
+</span><a href="Data.Tree.Draw.html#treeEdges"><span class="hs-identifier hs-var">treeEdges</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span id="local-6989586621679538207"><span class="annot"><a href="Data.Tree.Draw.html#treeEdges"><span class="hs-identifier hs-type">treeEdges</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679538207"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679538207"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679538207"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
+</span><span id="line-17"></span><span id="treeEdges"><span class="annot"><span class="annottext">treeEdges :: Tree a -&gt; [(a, a)]
+</span><a href="Data.Tree.Draw.html#treeEdges"><span class="hs-identifier hs-var hs-var">treeEdges</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679538188"><span class="annot"><span class="annottext">v :: a
+</span><a href="#local-6989586621679538188"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679538187"><span class="annot"><span class="annottext">chs :: Forest a
+</span><a href="#local-6989586621679538187"><span class="hs-identifier hs-var">chs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Tree a -&gt; (a, a)) -&gt; Forest a -&gt; [(a, a)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679538188"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; (a, a)) -&gt; (Tree a -&gt; a) -&gt; Tree a -&gt; (a, a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; a
+forall a. Tree a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">rootLabel</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Forest a
+</span><a href="#local-6989586621679538187"><span class="hs-identifier hs-var">chs</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, a)] -&gt; [(a, a)] -&gt; [(a, a)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">(Tree a -&gt; [(a, a)]) -&gt; Forest a -&gt; [(a, a)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; [(a, a)]
+forall a. Tree a -&gt; [(a, a)]
+</span><a href="Data.Tree.Draw.html#treeEdges"><span class="hs-identifier hs-var">treeEdges</span></a></span><span> </span><span class="annot"><span class="annottext">Forest a
+</span><a href="#local-6989586621679538187"><span class="hs-identifier hs-var">chs</span></a></span><span>
+</span><span id="line-18"></span></pre></body></html>

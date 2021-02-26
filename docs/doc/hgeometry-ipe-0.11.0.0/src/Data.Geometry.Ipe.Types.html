@@ -1,0 +1,741 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE QuasiQuotes #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  Data.Geometry.Ipe.Types</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Data type modeling the various elements in Ipe files.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.Types</span><span class="hs-special">(</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#layerName"><span class="hs-identifier">layerName</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#imageData"><span class="hs-identifier">imageData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#rect"><span class="hs-identifier">rect</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#TextLabel"><span class="hs-identifier">TextLabel</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#MiniPage"><span class="hs-identifier">MiniPage</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#width"><span class="hs-identifier">width</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeSymbol"><span class="hs-identifier">IpeSymbol</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Symbol"><span class="hs-identifier">Symbol</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#symbolPoint"><span class="hs-identifier">symbolPoint</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#symbolName"><span class="hs-identifier">symbolName</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#pathSegments"><span class="hs-identifier">pathSegments</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#PathSegment"><span class="hs-identifier">PathSegment</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#groupItems"><span class="hs-identifier">groupItems</span></a></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier">IpeObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpeGroup"><span class="hs-identifier">_IpeGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpeImage"><span class="hs-identifier">_IpeImage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpeTextLabel"><span class="hs-identifier">_IpeTextLabel</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpeMiniPage"><span class="hs-identifier">_IpeMiniPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpeUse"><span class="hs-identifier">_IpeUse</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier">_IpePath</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject%27"><span class="hs-identifier">IpeObject'</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#ipeObject%27"><span class="hs-identifier">ipeObject'</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#ToObject"><span class="hs-identifier">ToObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier">IpeAttributes</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Attributes%27"><span class="hs-identifier">Attributes'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#AttributesOf"><span class="hs-identifier">AttributesOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#AttrMap"><span class="hs-identifier">AttrMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#AttrMapSym1"><span class="hs-identifier">AttrMapSym1</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#attributes"><span class="hs-identifier">attributes</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#traverseIpeAttrs"><span class="hs-identifier">traverseIpeAttrs</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#commonAttributes"><span class="hs-identifier">commonAttributes</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#flattenGroups"><span class="hs-identifier">flattenGroups</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#layerNames"><span class="hs-identifier">layerNames</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#activeLayer"><span class="hs-identifier">activeLayer</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#styleName"><span class="hs-identifier">styleName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#styleData"><span class="hs-identifier">styleData</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#basicIpeStyle"><span class="hs-identifier">basicIpeStyle</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#encoding"><span class="hs-identifier">encoding</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#preambleData"><span class="hs-identifier">preambleData</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeBitmap"><span class="hs-identifier">IpeBitmap</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#layers"><span class="hs-identifier">layers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#views"><span class="hs-identifier">views</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#content"><span class="hs-identifier">content</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#emptyPage"><span class="hs-identifier">emptyPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#fromContent"><span class="hs-identifier">fromContent</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#onLayer"><span class="hs-identifier">onLayer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#contentInView"><span class="hs-identifier">contentInView</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#withDefaults"><span class="hs-identifier">withDefaults</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#preamble"><span class="hs-identifier">preamble</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#styles"><span class="hs-identifier">styles</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#pages"><span class="hs-identifier">pages</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#ipeFile"><span class="hs-identifier">ipeFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#singlePageFile"><span class="hs-identifier">singlePageFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#singlePageFromContent"><span class="hs-identifier">singlePageFromContent</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">views</span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html"><span class="hs-identifier">Data.Geometry.Ipe.Attributes</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html#Matrix"><span class="hs-identifier">Matrix</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html"><span class="hs-identifier">Data.Geometry.Ipe.Content</span></a></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html"><span class="hs-identifier">Data.Geometry.Ipe.Layer</span></a></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Literal.html"><span class="hs-identifier">Data.Geometry.Ipe.Literal</span></a></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Endo</span></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Text.XML.Expat.Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Node</span></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | The definition of a view</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- make active layer into an index ?</span><span>
+</span><span id="line-79"></span><span class="hs-keyword">data</span><span> </span><span id="View"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier hs-var">View</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="View"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier hs-var">View</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_layerNames"><span class="annot"><span class="annottext">View -&gt; [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#_layerNames"><span class="hs-identifier hs-var hs-var">_layerNames</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-80"></span><span>                 </span><span class="hs-special">,</span><span> </span><span id="_activeLayer"><span class="annot"><span class="annottext">View -&gt; LayerName
+</span><a href="Data.Geometry.Ipe.Types.html#_activeLayer"><span class="hs-identifier hs-var hs-var">_activeLayer</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span>
+</span><span id="line-81"></span><span>                 </span><span class="hs-special">}</span><span>
+</span><span id="line-82"></span><span>          </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679534551"><span id="local-6989586621679534553"><span class="annot"><span class="annottext">View -&gt; View -&gt; Bool
+(View -&gt; View -&gt; Bool) -&gt; (View -&gt; View -&gt; Bool) -&gt; Eq View
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: View -&gt; View -&gt; Bool
+$c/= :: View -&gt; View -&gt; Bool
+== :: View -&gt; View -&gt; Bool
+$c== :: View -&gt; View -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679534535"><span id="local-6989586621679534537"><span id="local-6989586621679534539"><span id="local-6989586621679534541"><span id="local-6989586621679534543"><span id="local-6989586621679534545"><span id="local-6989586621679534547"><span class="annot"><span class="annottext">Eq View
+Eq View =&gt;
+(View -&gt; View -&gt; Ordering)
+-&gt; (View -&gt; View -&gt; Bool)
+-&gt; (View -&gt; View -&gt; Bool)
+-&gt; (View -&gt; View -&gt; Bool)
+-&gt; (View -&gt; View -&gt; Bool)
+-&gt; (View -&gt; View -&gt; View)
+-&gt; (View -&gt; View -&gt; View)
+-&gt; Ord View
+View -&gt; View -&gt; Bool
+View -&gt; View -&gt; Ordering
+View -&gt; View -&gt; View
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: View -&gt; View -&gt; View
+$cmin :: View -&gt; View -&gt; View
+max :: View -&gt; View -&gt; View
+$cmax :: View -&gt; View -&gt; View
+&gt;= :: View -&gt; View -&gt; Bool
+$c&gt;= :: View -&gt; View -&gt; Bool
+&gt; :: View -&gt; View -&gt; Bool
+$c&gt; :: View -&gt; View -&gt; Bool
+&lt;= :: View -&gt; View -&gt; Bool
+$c&lt;= :: View -&gt; View -&gt; Bool
+&lt; :: View -&gt; View -&gt; Bool
+$c&lt; :: View -&gt; View -&gt; Bool
+compare :: View -&gt; View -&gt; Ordering
+$ccompare :: View -&gt; View -&gt; Ordering
+$cp1Ord :: Eq View
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679534528"><span id="local-6989586621679534530"><span id="local-6989586621679534532"><span class="annot"><span class="annottext">Int -&gt; View -&gt; ShowS
+[View] -&gt; ShowS
+View -&gt; String
+(Int -&gt; View -&gt; ShowS)
+-&gt; (View -&gt; String) -&gt; ([View] -&gt; ShowS) -&gt; Show View
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [View] -&gt; ShowS
+$cshowList :: [View] -&gt; ShowS
+show :: View -&gt; String
+$cshow :: View -&gt; String
+showsPrec :: Int -&gt; View -&gt; ShowS
+$cshowsPrec :: Int -&gt; View -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span id="activeLayer"><span id="layerNames"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">View</span></span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- instance Default</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- | for now we pretty much ignore these</span><span>
+</span><span id="line-89"></span><span class="hs-keyword">data</span><span> </span><span id="IpeStyle"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier hs-var">IpeStyle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IpeStyle"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier hs-var">IpeStyle</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_styleName"><span class="annot"><span class="annottext">IpeStyle -&gt; Maybe Text
+</span><a href="Data.Geometry.Ipe.Types.html#_styleName"><span class="hs-identifier hs-var hs-var">_styleName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-90"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_styleData"><span class="annot"><span class="annottext">IpeStyle -&gt; Node Text Text
+</span><a href="Data.Geometry.Ipe.Types.html#_styleData"><span class="hs-identifier hs-var hs-var">_styleData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-91"></span><span>                         </span><span class="hs-special">}</span><span>
+</span><span id="line-92"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679534521"><span id="local-6989586621679534523"><span class="annot"><span class="annottext">IpeStyle -&gt; IpeStyle -&gt; Bool
+(IpeStyle -&gt; IpeStyle -&gt; Bool)
+-&gt; (IpeStyle -&gt; IpeStyle -&gt; Bool) -&gt; Eq IpeStyle
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: IpeStyle -&gt; IpeStyle -&gt; Bool
+$c/= :: IpeStyle -&gt; IpeStyle -&gt; Bool
+== :: IpeStyle -&gt; IpeStyle -&gt; Bool
+$c== :: IpeStyle -&gt; IpeStyle -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534515"><span id="local-6989586621679534517"><span id="local-6989586621679534519"><span class="annot"><span class="annottext">Int -&gt; IpeStyle -&gt; ShowS
+[IpeStyle] -&gt; ShowS
+IpeStyle -&gt; String
+(Int -&gt; IpeStyle -&gt; ShowS)
+-&gt; (IpeStyle -&gt; String) -&gt; ([IpeStyle] -&gt; ShowS) -&gt; Show IpeStyle
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [IpeStyle] -&gt; ShowS
+$cshowList :: [IpeStyle] -&gt; ShowS
+show :: IpeStyle -&gt; String
+$cshow :: IpeStyle -&gt; String
+showsPrec :: Int -&gt; IpeStyle -&gt; ShowS
+$cshowsPrec :: Int -&gt; IpeStyle -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span id="styleData"><span id="styleName"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IpeStyle</span></span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#basicIpeStyle"><span class="hs-identifier hs-type">basicIpeStyle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier hs-type">IpeStyle</span></a></span><span>
+</span><span id="line-97"></span><span id="basicIpeStyle"><span class="annot"><span class="annottext">basicIpeStyle :: IpeStyle
+</span><a href="Data.Geometry.Ipe.Types.html#basicIpeStyle"><span class="hs-identifier hs-var hs-var">basicIpeStyle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Text -&gt; Node Text Text -&gt; IpeStyle
+</span><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier hs-var">IpeStyle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Maybe Text
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;basic&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Node Text Text
+</span><a href="Data.Geometry.Ipe.Literal.html#xmlLiteral"><span class="hs-identifier hs-var">xmlLiteral</span></a></span><span> </span><span class="annot"><span class="">[litFile|resources/basic.isy|]</span></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- | The maybe string is the encoding</span><span>
+</span><span id="line-101"></span><span class="hs-keyword">data</span><span> </span><span id="IpePreamble"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePreamble"><span class="hs-identifier hs-var">IpePreamble</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="IpePreamble"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePreamble"><span class="hs-identifier hs-var">IpePreamble</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_encoding"><span class="annot"><span class="annottext">IpePreamble -&gt; Maybe Text
+</span><a href="Data.Geometry.Ipe.Types.html#_encoding"><span class="hs-identifier hs-var hs-var">_encoding</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-102"></span><span>                                </span><span class="hs-special">,</span><span> </span><span id="_preambleData"><span class="annot"><span class="annottext">IpePreamble -&gt; Text
+</span><a href="Data.Geometry.Ipe.Types.html#_preambleData"><span class="hs-identifier hs-var hs-var">_preambleData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-103"></span><span>                                </span><span class="hs-special">}</span><span>
+</span><span id="line-104"></span><span>                  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679534508"><span id="local-6989586621679534510"><span class="annot"><span class="annottext">IpePreamble -&gt; IpePreamble -&gt; Bool
+(IpePreamble -&gt; IpePreamble -&gt; Bool)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; Bool) -&gt; Eq IpePreamble
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c/= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+== :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c== :: IpePreamble -&gt; IpePreamble -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534500"><span id="local-6989586621679534502"><span id="local-6989586621679534504"><span id="local-6989586621679534506"><span class="annot"><span class="annottext">ReadPrec [IpePreamble]
+ReadPrec IpePreamble
+Int -&gt; ReadS IpePreamble
+ReadS [IpePreamble]
+(Int -&gt; ReadS IpePreamble)
+-&gt; ReadS [IpePreamble]
+-&gt; ReadPrec IpePreamble
+-&gt; ReadPrec [IpePreamble]
+-&gt; Read IpePreamble
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [IpePreamble]
+$creadListPrec :: ReadPrec [IpePreamble]
+readPrec :: ReadPrec IpePreamble
+$creadPrec :: ReadPrec IpePreamble
+readList :: ReadS [IpePreamble]
+$creadList :: ReadS [IpePreamble]
+readsPrec :: Int -&gt; ReadS IpePreamble
+$creadsPrec :: Int -&gt; ReadS IpePreamble
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534493"><span id="local-6989586621679534495"><span id="local-6989586621679534497"><span class="annot"><span class="annottext">Int -&gt; IpePreamble -&gt; ShowS
+[IpePreamble] -&gt; ShowS
+IpePreamble -&gt; String
+(Int -&gt; IpePreamble -&gt; ShowS)
+-&gt; (IpePreamble -&gt; String)
+-&gt; ([IpePreamble] -&gt; ShowS)
+-&gt; Show IpePreamble
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [IpePreamble] -&gt; ShowS
+$cshowList :: [IpePreamble] -&gt; ShowS
+show :: IpePreamble -&gt; String
+$cshow :: IpePreamble -&gt; String
+showsPrec :: Int -&gt; IpePreamble -&gt; ShowS
+$cshowsPrec :: Int -&gt; IpePreamble -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534478"><span id="local-6989586621679534480"><span id="local-6989586621679534482"><span id="local-6989586621679534484"><span id="local-6989586621679534486"><span id="local-6989586621679534488"><span id="local-6989586621679534490"><span class="annot"><span class="annottext">Eq IpePreamble
+Eq IpePreamble =&gt;
+(IpePreamble -&gt; IpePreamble -&gt; Ordering)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; Bool)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; Bool)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; Bool)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; Bool)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; IpePreamble)
+-&gt; (IpePreamble -&gt; IpePreamble -&gt; IpePreamble)
+-&gt; Ord IpePreamble
+IpePreamble -&gt; IpePreamble -&gt; Bool
+IpePreamble -&gt; IpePreamble -&gt; Ordering
+IpePreamble -&gt; IpePreamble -&gt; IpePreamble
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: IpePreamble -&gt; IpePreamble -&gt; IpePreamble
+$cmin :: IpePreamble -&gt; IpePreamble -&gt; IpePreamble
+max :: IpePreamble -&gt; IpePreamble -&gt; IpePreamble
+$cmax :: IpePreamble -&gt; IpePreamble -&gt; IpePreamble
+&gt;= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c&gt;= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+&gt; :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c&gt; :: IpePreamble -&gt; IpePreamble -&gt; Bool
+&lt;= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c&lt;= :: IpePreamble -&gt; IpePreamble -&gt; Bool
+&lt; :: IpePreamble -&gt; IpePreamble -&gt; Bool
+$c&lt; :: IpePreamble -&gt; IpePreamble -&gt; Bool
+compare :: IpePreamble -&gt; IpePreamble -&gt; Ordering
+$ccompare :: IpePreamble -&gt; IpePreamble -&gt; Ordering
+$cp1Ord :: Eq IpePreamble
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span id="preambleData"><span id="encoding"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IpePreamble</span></span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">type</span><span> </span><span id="IpeBitmap"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeBitmap"><span class="hs-identifier hs-var">IpeBitmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- Ipe Pages</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- | An IpePage is essentially a Group, together with a list of layers and a</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- list of views.</span><span>
+</span><span id="line-116"></span><span class="hs-keyword">data</span><span> </span><span id="IpePage"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-var">IpePage</span></a></span></span><span> </span><span id="local-6989586621679534736"><span class="annot"><a href="#local-6989586621679534736"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IpePage"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-var">IpePage</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_layers"><span class="annot"><span class="annottext">IpePage r -&gt; [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#_layers"><span class="hs-identifier hs-var hs-var">_layers</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-117"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_views"><span class="annot"><span class="annottext">IpePage r -&gt; [View]
+</span><a href="Data.Geometry.Ipe.Types.html#_views"><span class="hs-identifier hs-var hs-var">_views</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier hs-type">View</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-118"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_content"><span class="annot"><span class="annottext">IpePage r -&gt; [IpeObject r]
+</span><a href="Data.Geometry.Ipe.Types.html#_content"><span class="hs-identifier hs-var hs-var">_content</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534736"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-119"></span><span>                         </span><span class="hs-special">}</span><span>
+</span><span id="line-120"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679534471"><span id="local-6989586621679534473"><span class="annot"><span class="annottext">IpePage r -&gt; IpePage r -&gt; Bool
+(IpePage r -&gt; IpePage r -&gt; Bool)
+-&gt; (IpePage r -&gt; IpePage r -&gt; Bool) -&gt; Eq (IpePage r)
+forall r. Eq r =&gt; IpePage r -&gt; IpePage r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: IpePage r -&gt; IpePage r -&gt; Bool
+$c/= :: forall r. Eq r =&gt; IpePage r -&gt; IpePage r -&gt; Bool
+== :: IpePage r -&gt; IpePage r -&gt; Bool
+$c== :: forall r. Eq r =&gt; IpePage r -&gt; IpePage r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534465"><span id="local-6989586621679534467"><span id="local-6989586621679534469"><span class="annot"><span class="annottext">Int -&gt; IpePage r -&gt; ShowS
+[IpePage r] -&gt; ShowS
+IpePage r -&gt; String
+(Int -&gt; IpePage r -&gt; ShowS)
+-&gt; (IpePage r -&gt; String)
+-&gt; ([IpePage r] -&gt; ShowS)
+-&gt; Show (IpePage r)
+forall r. Show r =&gt; Int -&gt; IpePage r -&gt; ShowS
+forall r. Show r =&gt; [IpePage r] -&gt; ShowS
+forall r. Show r =&gt; IpePage r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [IpePage r] -&gt; ShowS
+$cshowList :: forall r. Show r =&gt; [IpePage r] -&gt; ShowS
+show :: IpePage r -&gt; String
+$cshow :: forall r. Show r =&gt; IpePage r -&gt; String
+showsPrec :: Int -&gt; IpePage r -&gt; ShowS
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; IpePage r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span id="content"><span id="views"><span id="layers"><span id="local-6989586621679534650"><span id="local-6989586621679534736"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IpePage</span></span></span></span></span></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- | Creates an empty page with one layer and view.</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679534464"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#emptyPage"><span class="hs-identifier hs-type">emptyPage</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534464"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-125"></span><span id="emptyPage"><span class="annot"><span class="annottext">emptyPage :: IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#emptyPage"><span class="hs-identifier hs-var hs-var">emptyPage</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IpeObject r] -&gt; IpePage r
+forall r. [IpeObject r] -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#fromContent"><span class="hs-identifier hs-var">fromContent</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | Creates a simple page with a single view.</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679534738"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#fromContent"><span class="hs-identifier hs-type">fromContent</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534738"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534738"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-129"></span><span id="fromContent"><span class="annot"><span class="annottext">fromContent :: [IpeObject r] -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#fromContent"><span class="hs-identifier hs-var hs-var">fromContent</span></a></span></span><span> </span><span id="local-6989586621679534463"><span class="annot"><span class="annottext">obs :: [IpeObject r]
+</span><a href="#local-6989586621679534463"><span class="hs-identifier hs-var">obs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LayerName] -&gt; [View] -&gt; [IpeObject r] -&gt; IpePage r
+forall r. [LayerName] -&gt; [View] -&gt; [IpeObject r] -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-var">IpePage</span></a></span><span> </span><span class="annot"><span class="annottext">[LayerName]
+</span><a href="#local-6989586621679534462"><span class="hs-identifier hs-var">layers'</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[LayerName] -&gt; LayerName -&gt; View
+</span><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier hs-var">View</span></a></span><span> </span><span class="annot"><span class="annottext">[LayerName]
+</span><a href="#local-6989586621679534462"><span class="hs-identifier hs-var">layers'</span></a></span><span> </span><span class="annot"><span class="annottext">LayerName
+</span><a href="#local-6989586621679534461"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+</span><a href="#local-6989586621679534463"><span class="hs-identifier hs-var">obs</span></a></span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621679534462"><span class="annot"><span class="annottext">layers' :: [LayerName]
+</span><a href="#local-6989586621679534462"><span class="hs-identifier hs-var hs-var">layers'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Set LayerName -&gt; [LayerName]
+forall a. Set a -&gt; [a]
+</span><span class="hs-identifier hs-var">Set.toList</span></span><span> </span><span class="annot"><span class="annottext">(Set LayerName -&gt; [LayerName])
+-&gt; ([LayerName] -&gt; Set LayerName) -&gt; [LayerName] -&gt; [LayerName]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[LayerName] -&gt; Set LayerName
+forall a. Ord a =&gt; [a] -&gt; Set a
+</span><span class="hs-identifier hs-var">Set.fromList</span></span><span> </span><span class="annot"><span class="annottext">([LayerName] -&gt; [LayerName]) -&gt; [LayerName] -&gt; [LayerName]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LayerName
+</span><a href="#local-6989586621679534461"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">LayerName -&gt; [LayerName] -&gt; [LayerName]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(IpeObject r -&gt; Maybe LayerName) -&gt; [IpeObject r] -&gt; [LayerName]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeObject r
+-&gt; Getting (Maybe LayerName) (IpeObject r) (Maybe LayerName)
+-&gt; Maybe LayerName
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Attributes (AttrMapSym1 r) CommonAttributes
+ -&gt; Const
+      (Maybe LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; IpeObject r -&gt; Const (Maybe LayerName) (IpeObject r)
+forall r.
+Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
+</span><a href="Data.Geometry.Ipe.Content.html#commonAttributes"><span class="hs-identifier hs-var">commonAttributes</span></a></span><span class="annot"><span class="annottext">((Attributes (AttrMapSym1 r) CommonAttributes
+  -&gt; Const
+       (Maybe LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+ -&gt; IpeObject r -&gt; Const (Maybe LayerName) (IpeObject r))
+-&gt; ((Maybe LayerName -&gt; Const (Maybe LayerName) (Maybe LayerName))
+    -&gt; Attributes (AttrMapSym1 r) CommonAttributes
+    -&gt; Const
+         (Maybe LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; Getting (Maybe LayerName) (IpeObject r) (Maybe LayerName)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+-&gt; Lens'
+     (Attributes (AttrMapSym1 r) CommonAttributes)
+     (Maybe (Apply (AttrMapSym1 r) 'Layer))
+forall k1 (at :: k1) (ats :: [k1]) (proxy :: k1 -&gt; *)
+       (f :: TyFun k1 * -&gt; *).
+(at &#8712; ats) =&gt;
+proxy at -&gt; Lens' (Attributes f ats) (Maybe (Apply f at))
+</span><a href="Data.Geometry.Ipe.Attributes.html#ixAttr"><span class="hs-identifier hs-var">ixAttr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+</span><a href="Data.Geometry.Ipe.Attributes.html#SLayer"><span class="hs-identifier hs-var">SLayer</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+</span><a href="#local-6989586621679534463"><span class="hs-identifier hs-var">obs</span></a></span><span>
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621679534461"><span class="annot"><span class="annottext">a :: LayerName
+</span><a href="#local-6989586621679534461"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;alpha&quot;</span></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- | Makes sure that the page has at least one layer and at least one</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- view, essentially matching the behaviour of ipe. In particular,</span><span>
+</span><span id="line-136"></span><span class="hs-comment">--</span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- - if the page does not have any layers, it creates a layer named &quot;alpha&quot;, and</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- - if the page does not have any views, it creates a view in which all layers are visible.</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--</span><span>
+</span><span id="line-140"></span><span id="local-6989586621679534454"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#withDefaults"><span class="hs-identifier hs-type">withDefaults</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534454"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534454"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-141"></span><span id="withDefaults"><span class="annot"><span class="annottext">withDefaults :: IpePage r -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#withDefaults"><span class="hs-identifier hs-var hs-var">withDefaults</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; IpePage r
+forall r. IpePage r -&gt; IpePage r
+</span><a href="#local-6989586621679534453"><span class="hs-identifier hs-var">addView</span></a></span><span> </span><span class="annot"><span class="annottext">(IpePage r -&gt; IpePage r)
+-&gt; (IpePage r -&gt; IpePage r) -&gt; IpePage r -&gt; IpePage r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; IpePage r
+forall r. IpePage r -&gt; IpePage r
+</span><a href="#local-6989586621679534452"><span class="hs-identifier hs-var">addLayer</span></a></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679534451"><span class="annot"><span class="annottext">whenNull :: [a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679534451"><span class="hs-identifier hs-var hs-var">whenNull</span></a></span></span><span> </span><span id="local-6989586621679534450"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679534450"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-144"></span><span>                    </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679534450"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-145"></span><span>                    </span><span id="local-6989586621679534449"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679534449"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679534449"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679534452"><span class="annot"><span class="annottext">addLayer :: IpePage r -&gt; IpePage r
+</span><a href="#local-6989586621679534452"><span class="hs-identifier hs-var hs-var">addLayer</span></a></span></span><span> </span><span id="local-6989586621679534448"><span class="annot"><span class="annottext">p :: IpePage r
+</span><a href="#local-6989586621679534448"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534448"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r -&gt; (IpePage r -&gt; IpePage r) -&gt; IpePage r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">([LayerName] -&gt; Identity [LayerName])
+-&gt; IpePage r -&gt; Identity (IpePage r)
+forall r. Lens' (IpePage r) [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#layers"><span class="hs-identifier hs-var">layers</span></a></span><span> </span><span class="annot"><span class="annottext">(([LayerName] -&gt; Identity [LayerName])
+ -&gt; IpePage r -&gt; Identity (IpePage r))
+-&gt; ([LayerName] -&gt; [LayerName]) -&gt; IpePage r -&gt; IpePage r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">[LayerName] -&gt; [LayerName] -&gt; [LayerName]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679534451"><span class="hs-identifier hs-var">whenNull</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-string">&quot;alpha&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-147"></span><span>    </span><span id="local-6989586621679534453"><span class="annot"><span class="annottext">addView :: IpePage r -&gt; IpePage r
+</span><a href="#local-6989586621679534453"><span class="hs-identifier hs-var hs-var">addView</span></a></span></span><span>  </span><span id="local-6989586621679534445"><span class="annot"><span class="annottext">p :: IpePage r
+</span><a href="#local-6989586621679534445"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534445"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r -&gt; (IpePage r -&gt; IpePage r) -&gt; IpePage r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">([View] -&gt; Identity [View]) -&gt; IpePage r -&gt; Identity (IpePage r)
+forall r. Lens' (IpePage r) [View]
+</span><a href="Data.Geometry.Ipe.Types.html#views"><span class="hs-identifier hs-var">views</span></a></span><span>  </span><span class="annot"><span class="annottext">(([View] -&gt; Identity [View]) -&gt; IpePage r -&gt; Identity (IpePage r))
+-&gt; ([View] -&gt; [View]) -&gt; IpePage r -&gt; IpePage r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">[View] -&gt; [View] -&gt; [View]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679534451"><span class="hs-identifier hs-var">whenNull</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[LayerName] -&gt; LayerName -&gt; View
+</span><a href="Data.Geometry.Ipe.Types.html#View"><span class="hs-identifier hs-var">View</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534445"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r
+-&gt; Getting [LayerName] (IpePage r) [LayerName] -&gt; [LayerName]
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting [LayerName] (IpePage r) [LayerName]
+forall r. Lens' (IpePage r) [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#layers"><span class="hs-identifier hs-var">layers</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LayerName] -&gt; LayerName
+forall a. [a] -&gt; a
+</span><span class="hs-identifier hs-var">head</span></span><span> </span><span class="annot"><span class="annottext">([LayerName] -&gt; LayerName) -&gt; [LayerName] -&gt; LayerName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534445"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r
+-&gt; Getting [LayerName] (IpePage r) [LayerName] -&gt; [LayerName]
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting [LayerName] (IpePage r) [LayerName]
+forall r. Lens' (IpePage r) [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#layers"><span class="hs-identifier hs-var">layers</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-148"></span><span>                 </span><span class="hs-comment">-- note that the head is save, since we just made sure</span><span>
+</span><span id="line-149"></span><span>                 </span><span class="hs-comment">-- with 'addLayer' that there is at least one layer</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- | This allows you to filter the objects on some layer.</span><span>
+</span><span id="line-152"></span><span class="hs-comment">--</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- &gt;&gt;&gt; let page = IpePage [] [] []</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- &gt;&gt;&gt; page^..content.onLayer &quot;myLayer&quot;</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- []</span><span>
+</span><span id="line-156"></span><span id="local-6989586621679534443"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#onLayer"><span class="hs-identifier hs-type">onLayer</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Getting</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Endo</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534443"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534443"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534443"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-157"></span><span id="onLayer"><span class="annot"><span class="annottext">onLayer :: LayerName
+-&gt; Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
+</span><a href="Data.Geometry.Ipe.Types.html#onLayer"><span class="hs-identifier hs-var hs-var">onLayer</span></a></span></span><span> </span><span id="local-6989586621679534442"><span class="annot"><span class="annottext">n :: LayerName
+</span><a href="#local-6989586621679534442"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
+forall (f :: * -&gt; *) a. Foldable f =&gt; IndexedFold Int (f a) a
+</span><span class="hs-identifier hs-var">folded</span></span><span class="annot"><span class="annottext">Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
+-&gt; ((IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+    -&gt; IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r -&gt; Bool)
+-&gt; (IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; IpeObject r
+-&gt; Const (Endo [IpeObject r]) (IpeObject r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a.
+(Choice p, Applicative f) =&gt;
+(a -&gt; Bool) -&gt; Optic' p f a a
+</span><span class="hs-identifier hs-var">filtered</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679534439"><span class="annot"><span class="annottext">o :: IpeObject r
+</span><a href="#local-6989586621679534439"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeObject r
+</span><a href="#local-6989586621679534439"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">IpeObject r
+-&gt; Getting (First LayerName) (IpeObject r) LayerName
+-&gt; Maybe LayerName
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><span class="hs-operator hs-var">^?</span></span><span class="annot"><span class="annottext">(Attributes (AttrMapSym1 r) CommonAttributes
+ -&gt; Const
+      (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; IpeObject r -&gt; Const (First LayerName) (IpeObject r)
+forall r.
+Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
+</span><a href="Data.Geometry.Ipe.Content.html#commonAttributes"><span class="hs-identifier hs-var">commonAttributes</span></a></span><span class="annot"><span class="annottext">((Attributes (AttrMapSym1 r) CommonAttributes
+  -&gt; Const
+       (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+ -&gt; IpeObject r -&gt; Const (First LayerName) (IpeObject r))
+-&gt; ((LayerName -&gt; Const (First LayerName) LayerName)
+    -&gt; Attributes (AttrMapSym1 r) CommonAttributes
+    -&gt; Const
+         (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; Getting (First LayerName) (IpeObject r) LayerName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+-&gt; Prism'
+     (Attributes (AttrMapSym1 r) CommonAttributes)
+     (Apply (AttrMapSym1 r) 'Layer)
+forall k1 (at :: k1) (ats :: [k1]) (proxy :: k1 -&gt; *)
+       (f :: TyFun k1 * -&gt; *).
+(at &#8712; ats, RecApplicative ats) =&gt;
+proxy at -&gt; Prism' (Attributes f ats) (Apply f at)
+</span><a href="Data.Geometry.Ipe.Attributes.html#_Attr"><span class="hs-identifier hs-var">_Attr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+</span><a href="Data.Geometry.Ipe.Attributes.html#SLayer"><span class="hs-identifier hs-var">SLayer</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe LayerName -&gt; Maybe LayerName -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LayerName -&gt; Maybe LayerName
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">LayerName
+</span><a href="#local-6989586621679534442"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- | Gets all objects that are visible in the given view.</span><span>
+</span><span id="line-160"></span><span class="hs-comment">--</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- Note that views are indexed starting from 0. If the page does not</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- have any explicit view definitions, this function returns an empty</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- list.</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- &gt;&gt;&gt; let page = IpePage [] [] []</span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- &gt;&gt;&gt; page^.contentInView 0</span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- []</span><span>
+</span><span id="line-168"></span><span id="local-6989586621679534436"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#contentInView"><span class="hs-identifier hs-type">contentInView</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Getter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534436"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534436"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-169"></span><span id="contentInView"><span class="annot"><span class="annottext">contentInView :: Word -&gt; Getter (IpePage r) [IpeObject r]
+</span><a href="Data.Geometry.Ipe.Types.html#contentInView"><span class="hs-identifier hs-var hs-var">contentInView</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679534435"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679534435"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IpePage r -&gt; [IpeObject r])
+-&gt; Optic' (-&gt;) f (IpePage r) [IpeObject r]
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; [IpeObject r]
+</span><a href="#local-6989586621679534433"><span class="hs-identifier hs-var">inView'</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-171"></span><span>    </span><span id="local-6989586621679534433"><span class="annot"><span class="annottext">inView' :: IpePage r -&gt; [IpeObject r]
+</span><a href="#local-6989586621679534433"><span class="hs-identifier hs-var hs-var">inView'</span></a></span></span><span> </span><span id="local-6989586621679534432"><span class="annot"><span class="annottext">p :: IpePage r
+</span><a href="#local-6989586621679534432"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679534431"><span class="annot"><span class="annottext">lrs :: Set LayerName
+</span><a href="#local-6989586621679534431"><span class="hs-identifier hs-var hs-var">lrs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LayerName] -&gt; Set LayerName
+forall a. Ord a =&gt; [a] -&gt; Set a
+</span><span class="hs-identifier hs-var">Set.fromList</span></span><span> </span><span class="annot"><span class="annottext">([LayerName] -&gt; Set LayerName)
+-&gt; ([View] -&gt; [LayerName]) -&gt; [View] -&gt; Set LayerName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(View -&gt; [LayerName]) -&gt; [View] -&gt; [LayerName]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">View -&gt; Getting [LayerName] View [LayerName] -&gt; [LayerName]
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting [LayerName] View [LayerName]
+Lens' View [LayerName]
+</span><a href="Data.Geometry.Ipe.Types.html#layerNames"><span class="hs-identifier hs-var">layerNames</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([View] -&gt; Set LayerName) -&gt; [View] -&gt; Set LayerName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534432"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r -&gt; Getting (Endo [View]) (IpePage r) View -&gt; [View]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">([View] -&gt; Const (Endo [View]) [View])
+-&gt; IpePage r -&gt; Const (Endo [View]) (IpePage r)
+forall r. Lens' (IpePage r) [View]
+</span><a href="Data.Geometry.Ipe.Types.html#views"><span class="hs-identifier hs-var">views</span></a></span><span class="annot"><span class="annottext">(([View] -&gt; Const (Endo [View]) [View])
+ -&gt; IpePage r -&gt; Const (Endo [View]) (IpePage r))
+-&gt; ((View -&gt; Const (Endo [View]) View)
+    -&gt; [View] -&gt; Const (Endo [View]) [View])
+-&gt; Getting (Endo [View]) (IpePage r) View
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index [View] -&gt; Traversal' [View] (IxValue [View])
+forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><span class="hs-identifier hs-var">ix</span></span><span> </span><span class="annot"><span class="annottext">Int
+Index [View]
+</span><a href="#local-6989586621679534435"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-172"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534432"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r
+-&gt; Getting (Endo [IpeObject r]) (IpePage r) (IpeObject r)
+-&gt; [IpeObject r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">([IpeObject r] -&gt; Const (Endo [IpeObject r]) [IpeObject r])
+-&gt; IpePage r -&gt; Const (Endo [IpeObject r]) (IpePage r)
+forall r r.
+Lens (IpePage r) (IpePage r) [IpeObject r] [IpeObject r]
+</span><a href="Data.Geometry.Ipe.Types.html#content"><span class="hs-identifier hs-var">content</span></a></span><span class="annot"><span class="annottext">(([IpeObject r] -&gt; Const (Endo [IpeObject r]) [IpeObject r])
+ -&gt; IpePage r -&gt; Const (Endo [IpeObject r]) (IpePage r))
+-&gt; ((IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+    -&gt; [IpeObject r] -&gt; Const (Endo [IpeObject r]) [IpeObject r])
+-&gt; Getting (Endo [IpeObject r]) (IpePage r) (IpeObject r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; [IpeObject r] -&gt; Const (Endo [IpeObject r]) [IpeObject r]
+forall (f :: * -&gt; *) a. Foldable f =&gt; IndexedFold Int (f a) a
+</span><span class="hs-identifier hs-var">folded</span></span><span class="annot"><span class="annottext">((IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+ -&gt; [IpeObject r] -&gt; Const (Endo [IpeObject r]) [IpeObject r])
+-&gt; ((IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+    -&gt; IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; (IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; [IpeObject r]
+-&gt; Const (Endo [IpeObject r]) [IpeObject r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r -&gt; Bool)
+-&gt; (IpeObject r -&gt; Const (Endo [IpeObject r]) (IpeObject r))
+-&gt; IpeObject r
+-&gt; Const (Endo [IpeObject r]) (IpeObject r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a.
+(Choice p, Applicative f) =&gt;
+(a -&gt; Bool) -&gt; Optic' p f a a
+</span><span class="hs-identifier hs-var">filtered</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Set LayerName -&gt; IpeObject r -&gt; Bool
+forall r. Set LayerName -&gt; IpeObject r -&gt; Bool
+</span><a href="#local-6989586621679534427"><span class="hs-identifier hs-var">inVisibleLayer</span></a></span><span> </span><span class="annot"><span class="annottext">Set LayerName
+</span><a href="#local-6989586621679534431"><span class="hs-identifier hs-var">lrs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span>    </span><span id="local-6989586621679534427"><span class="annot"><span class="annottext">inVisibleLayer :: Set LayerName -&gt; IpeObject r -&gt; Bool
+</span><a href="#local-6989586621679534427"><span class="hs-identifier hs-var hs-var">inVisibleLayer</span></a></span></span><span> </span><span id="local-6989586621679534426"><span class="annot"><span class="annottext">lrs :: Set LayerName
+</span><a href="#local-6989586621679534426"><span class="hs-identifier hs-var">lrs</span></a></span></span><span> </span><span id="local-6989586621679534425"><span class="annot"><span class="annottext">o :: IpeObject r
+</span><a href="#local-6989586621679534425"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (LayerName -&gt; Bool) -&gt; Maybe LayerName -&gt; Bool
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LayerName -&gt; Set LayerName -&gt; Bool
+forall a. Ord a =&gt; a -&gt; Set a -&gt; Bool
+</span><span class="hs-operator hs-var">`Set.member`</span></span><span> </span><span class="annot"><span class="annottext">Set LayerName
+</span><a href="#local-6989586621679534426"><span class="hs-identifier hs-var">lrs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe LayerName -&gt; Bool) -&gt; Maybe LayerName -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject r
+</span><a href="#local-6989586621679534425"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">IpeObject r
+-&gt; Getting (First LayerName) (IpeObject r) LayerName
+-&gt; Maybe LayerName
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><span class="hs-operator hs-var">^?</span></span><span class="annot"><span class="annottext">(Attributes (AttrMapSym1 r) CommonAttributes
+ -&gt; Const
+      (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; IpeObject r -&gt; Const (First LayerName) (IpeObject r)
+forall r.
+Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
+</span><a href="Data.Geometry.Ipe.Content.html#commonAttributes"><span class="hs-identifier hs-var">commonAttributes</span></a></span><span class="annot"><span class="annottext">((Attributes (AttrMapSym1 r) CommonAttributes
+  -&gt; Const
+       (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+ -&gt; IpeObject r -&gt; Const (First LayerName) (IpeObject r))
+-&gt; ((LayerName -&gt; Const (First LayerName) LayerName)
+    -&gt; Attributes (AttrMapSym1 r) CommonAttributes
+    -&gt; Const
+         (First LayerName) (Attributes (AttrMapSym1 r) CommonAttributes))
+-&gt; Getting (First LayerName) (IpeObject r) LayerName
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+-&gt; Prism'
+     (Attributes (AttrMapSym1 r) CommonAttributes)
+     (Apply (AttrMapSym1 r) 'Layer)
+forall k1 (at :: k1) (ats :: [k1]) (proxy :: k1 -&gt; *)
+       (f :: TyFun k1 * -&gt; *).
+(at &#8712; ats, RecApplicative ats) =&gt;
+proxy at -&gt; Prism' (Attributes f ats) (Apply f at)
+</span><a href="Data.Geometry.Ipe.Attributes.html#_Attr"><span class="hs-identifier hs-var">_Attr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+</span><a href="Data.Geometry.Ipe.Attributes.html#SLayer"><span class="hs-identifier hs-var">SLayer</span></a></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span class="hs-comment">-- | A complete ipe file</span><span>
+</span><span id="line-179"></span><span class="hs-keyword">data</span><span> </span><span id="IpeFile"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-var">IpeFile</span></a></span></span><span> </span><span id="local-6989586621679534629"><span class="annot"><a href="#local-6989586621679534629"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IpeFile"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-var">IpeFile</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_preamble"><span class="annot"><span class="annottext">IpeFile r -&gt; Maybe IpePreamble
+</span><a href="Data.Geometry.Ipe.Types.html#_preamble"><span class="hs-identifier hs-var hs-var">_preamble</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePreamble"><span class="hs-identifier hs-type">IpePreamble</span></a></span><span>
+</span><span id="line-180"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_styles"><span class="annot"><span class="annottext">IpeFile r -&gt; [IpeStyle]
+</span><a href="Data.Geometry.Ipe.Types.html#_styles"><span class="hs-identifier hs-var hs-var">_styles</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeStyle"><span class="hs-identifier hs-type">IpeStyle</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-181"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_pages"><span class="annot"><span class="annottext">IpeFile r -&gt; NonEmpty (IpePage r)
+</span><a href="Data.Geometry.Ipe.Types.html#_pages"><span class="hs-identifier hs-var hs-var">_pages</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NE.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534629"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-182"></span><span>                         </span><span class="hs-special">}</span><span>
+</span><span id="line-183"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679534416"><span id="local-6989586621679534418"><span class="annot"><span class="annottext">IpeFile r -&gt; IpeFile r -&gt; Bool
+(IpeFile r -&gt; IpeFile r -&gt; Bool)
+-&gt; (IpeFile r -&gt; IpeFile r -&gt; Bool) -&gt; Eq (IpeFile r)
+forall r. Eq r =&gt; IpeFile r -&gt; IpeFile r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: IpeFile r -&gt; IpeFile r -&gt; Bool
+$c/= :: forall r. Eq r =&gt; IpeFile r -&gt; IpeFile r -&gt; Bool
+== :: IpeFile r -&gt; IpeFile r -&gt; Bool
+$c== :: forall r. Eq r =&gt; IpeFile r -&gt; IpeFile r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679534410"><span id="local-6989586621679534412"><span id="local-6989586621679534414"><span class="annot"><span class="annottext">Int -&gt; IpeFile r -&gt; ShowS
+[IpeFile r] -&gt; ShowS
+IpeFile r -&gt; String
+(Int -&gt; IpeFile r -&gt; ShowS)
+-&gt; (IpeFile r -&gt; String)
+-&gt; ([IpeFile r] -&gt; ShowS)
+-&gt; Show (IpeFile r)
+forall r. Show r =&gt; Int -&gt; IpeFile r -&gt; ShowS
+forall r. Show r =&gt; [IpeFile r] -&gt; ShowS
+forall r. Show r =&gt; IpeFile r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [IpeFile r] -&gt; ShowS
+$cshowList :: forall r. Show r =&gt; [IpeFile r] -&gt; ShowS
+show :: IpeFile r -&gt; String
+$cshow :: forall r. Show r =&gt; IpeFile r -&gt; String
+showsPrec :: Int -&gt; IpeFile r -&gt; ShowS
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; IpeFile r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span id="local-6989586621679534409"><span id="pages"><span id="styles"><span id="preamble"><span id="local-6989586621679534629"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IpeFile</span></span></span></span></span></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- | Convenience constructor for creating an ipe file without preamble</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- and with the default stylesheet.</span><span>
+</span><span id="line-189"></span><span id="local-6989586621679534627"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#ipeFile"><span class="hs-identifier hs-type">ipeFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NE.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534627"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-type">IpeFile</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534627"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-190"></span><span id="ipeFile"><span class="annot"><span class="annottext">ipeFile :: NonEmpty (IpePage r) -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#ipeFile"><span class="hs-identifier hs-var hs-var">ipeFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe IpePreamble
+-&gt; [IpeStyle] -&gt; NonEmpty (IpePage r) -&gt; IpeFile r
+forall r.
+Maybe IpePreamble
+-&gt; [IpeStyle] -&gt; NonEmpty (IpePage r) -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-var">IpeFile</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe IpePreamble
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeStyle
+</span><a href="Data.Geometry.Ipe.Types.html#basicIpeStyle"><span class="hs-identifier hs-var">basicIpeStyle</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- | Convenience function to construct an ipe file consisting of a single page.</span><span>
+</span><span id="line-193"></span><span id="local-6989586621679534624"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#singlePageFile"><span class="hs-identifier hs-type">singlePageFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534624"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-type">IpeFile</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534624"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-194"></span><span id="singlePageFile"><span class="annot"><span class="annottext">singlePageFile :: IpePage r -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#singlePageFile"><span class="hs-identifier hs-var hs-var">singlePageFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (IpePage r) -&gt; IpeFile r
+forall r. NonEmpty (IpePage r) -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#ipeFile"><span class="hs-identifier hs-var">ipeFile</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (IpePage r) -&gt; IpeFile r)
+-&gt; (IpePage r -&gt; NonEmpty (IpePage r)) -&gt; IpePage r -&gt; IpeFile r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpePage r -&gt; [IpePage r] -&gt; NonEmpty (IpePage r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">NE.:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span class="hs-comment">-- | Create a single page ipe file from a list of IpeObjects</span><span>
+</span><span id="line-197"></span><span id="local-6989586621679534407"><span class="annot"><a href="Data.Geometry.Ipe.Types.html#singlePageFromContent"><span class="hs-identifier hs-type">singlePageFromContent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534407"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-type">IpeFile</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534407"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-198"></span><span id="singlePageFromContent"><span class="annot"><span class="annottext">singlePageFromContent :: [IpeObject r] -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#singlePageFromContent"><span class="hs-identifier hs-var hs-var">singlePageFromContent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; IpeFile r
+forall r. IpePage r -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Types.html#singlePageFile"><span class="hs-identifier hs-var">singlePageFile</span></a></span><span> </span><span class="annot"><span class="annottext">(IpePage r -&gt; IpeFile r)
+-&gt; ([IpeObject r] -&gt; IpePage r) -&gt; [IpeObject r] -&gt; IpeFile r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[IpeObject r] -&gt; IpePage r
+forall r. [IpeObject r] -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Types.html#fromContent"><span class="hs-identifier hs-var">fromContent</span></a></span><span>
+</span><span id="line-199"></span></pre></body></html>

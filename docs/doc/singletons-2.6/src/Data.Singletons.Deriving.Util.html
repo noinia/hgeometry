@@ -1,0 +1,880 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Singletons.Deriving.Util</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) 2018 Ryan Scott</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Utilities used by the `deriving` machinery in singletons.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.Deriving.Util</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Names.html"><span class="hs-identifier">Data.Singletons.Names</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html"><span class="hs-identifier">Data.Singletons.Syntax</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Util.html"><span class="hs-identifier">Data.Singletons.Util</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OSet</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- A generic type signature for describing how to produce a derived instance.</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">type</span><span> </span><span id="DerivDesc"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#DerivDesc"><span class="hs-identifier hs-var">DerivDesc</span></a></span></span><span> </span><span id="local-6989586621681358816"><span class="annot"><a href="#local-6989586621681358816"><span class="hs-identifier hs-type">q</span></a></span></span><span>
+</span><span id="line-28"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>  </span><span class="hs-comment">-- (Just ctx) if ctx was provided via StandaloneDeriving.</span><span>
+</span><span id="line-29"></span><span>                 </span><span class="hs-comment">-- Nothing if using a deriving clause.</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>       </span><span class="hs-comment">-- The data type argument to the class.</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-type">DataDecl</span></a></span><span>    </span><span class="hs-comment">-- The original data type information.</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358816"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#UInstDecl"><span class="hs-identifier hs-type">UInstDecl</span></a></span><span> </span><span class="hs-comment">-- The derived instance.</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- | Is this data type a non-vanilla data type? Here, \&quot;non-vanilla\&quot; refers to</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- any data type that cannot be expressed using Haskell98 syntax. For instance,</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- this GADT:</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- data Foo :: Type -&gt; Type where</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--   MkFoo :: forall a. a -&gt; Foo a</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-42"></span><span class="hs-comment">--</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- Is equivalent to this Haskell98 data type:</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- data Foo a = MkFoo a</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- However, the following GADT is non-vanilla:</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- data Bar :: Type -&gt; Type where</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--   MkBar :: Int -&gt; Bar Int</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- Since there is no equivalent Haskell98 data type. The closest you could get</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- is this:</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- data Bar a = (a ~ Int) =&gt; MkBar Int</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- Which requires language extensions to write.</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- A data type is a non-vanilla if one of the following conditions are met:</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- 1. A constructor has any existentially quantified type variables.</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- 2. A constructor has a context.</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- We care about this because some derivable stock classes, such as 'Enum',</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- forbid derived instances for non-vanilla data types.</span><span>
+</span><span id="line-73"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#isNonVanillaDataType"><span class="hs-identifier hs-type">isNonVanillaDataType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681358813"><span class="annot"><a href="#local-6989586621681358813"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358813"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358813"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-74"></span><span id="isNonVanillaDataType"><span class="annot"><span class="annottext">isNonVanillaDataType :: DType -&gt; [DCon] -&gt; q Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isNonVanillaDataType"><span class="hs-identifier hs-var hs-var">isNonVanillaDataType</span></a></span></span><span> </span><span id="local-6989586621681358812"><span class="annot"><span class="annottext">data_ty :: DType
+</span><a href="#local-6989586621681358812"><span class="hs-identifier hs-var">data_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DCon -&gt; q Bool) -&gt; [DCon] -&gt; q Bool
+forall a. (a -&gt; q Bool) -&gt; [a] -&gt; q Bool
+</span><a href="#local-6989586621681358811"><span class="hs-identifier hs-var">anyM</span></a></span><span> </span><span class="annot"><span class="annottext">((DCon -&gt; q Bool) -&gt; [DCon] -&gt; q Bool)
+-&gt; (DCon -&gt; q Bool) -&gt; [DCon] -&gt; q Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621681358810"><span class="annot"><span class="annottext">con :: DCon
+</span><a href="#local-6989586621681358810"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358808"><span class="annot"><span class="annottext">ctxt :: DCxt
+</span><a href="#local-6989586621681358808"><span class="hs-identifier hs-var">ctxt</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621681358807"><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358807"><span class="hs-identifier hs-var">ex_tvbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; DCon -&gt; q [DTyVarBndr]
+forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; DCon -&gt; q [DTyVarBndr]
+</span><span class="hs-identifier hs-var">conExistentialTvbs</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358812"><span class="hs-identifier hs-var">data_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DCon
+</span><a href="#local-6989586621681358810"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; q Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; q Bool) -&gt; Bool -&gt; q Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; Bool -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358807"><span class="hs-identifier hs-var">ex_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358808"><span class="hs-identifier hs-var">ctxt</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621681358908"><span class="annot"><a href="#local-6989586621681358811"><span class="hs-identifier hs-type">anyM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358908"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358813"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621681358908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358813"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621681358811"><span class="annot"><span class="annottext">anyM :: (a -&gt; q Bool) -&gt; [a] -&gt; q Bool
+</span><a href="#local-6989586621681358811"><span class="hs-identifier hs-var hs-var">anyM</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; q Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><a href="#local-6989586621681358811"><span class="hs-identifier hs-var">anyM</span></a></span><span> </span><span id="local-6989586621681358802"><span class="annot"><span class="annottext">p :: a -&gt; q Bool
+</span><a href="#local-6989586621681358802"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621681358801"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621681358801"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621681358800"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621681358800"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-81"></span><span>      </span><span id="local-6989586621681358799"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358799"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; q Bool
+</span><a href="#local-6989586621681358802"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358801"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358799"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; q Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">(a -&gt; q Bool) -&gt; [a] -&gt; q Bool
+forall a. (a -&gt; q Bool) -&gt; [a] -&gt; q Bool
+</span><a href="#local-6989586621681358811"><span class="hs-identifier hs-var">anyM</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; q Bool
+</span><a href="#local-6989586621681358802"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621681358800"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- Utilities for deriving Functor-like classes.</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- Much of this was cargo-culted from the GHC source code.</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-keyword">data</span><span> </span><span id="FFoldType"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FFoldType"><span class="hs-identifier hs-var">FFoldType</span></a></span></span><span> </span><span id="local-6989586621681358887"><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span></span><span>      </span><span class="hs-comment">-- Describes how to fold over a DType in a functor like way</span><span>
+</span><span id="line-90"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="FT"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FT"><span class="hs-identifier hs-var">FT</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="ft_triv"><span class="annot"><span class="annottext">FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_triv"><span class="hs-identifier hs-var hs-var">ft_triv</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-91"></span><span>          </span><span class="hs-comment">-- ^ Does not contain variable</span><span>
+</span><span id="line-92"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="ft_var"><span class="annot"><span class="annottext">FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_var"><span class="hs-identifier hs-var hs-var">ft_var</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-93"></span><span>          </span><span class="hs-comment">-- ^ The variable itself</span><span>
+</span><span id="line-94"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="ft_ty_app"><span class="annot"><span class="annottext">FFoldType a -&gt; DType -&gt; a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_ty_app"><span class="hs-identifier hs-var hs-var">ft_ty_app</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-95"></span><span>          </span><span class="hs-comment">-- ^ Type app, variable only in last argument</span><span>
+</span><span id="line-96"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="ft_bad_app"><span class="annot"><span class="annottext">FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_bad_app"><span class="hs-identifier hs-var hs-var">ft_bad_app</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-97"></span><span>          </span><span class="hs-comment">-- ^ Type app, variable other than in last argument</span><span>
+</span><span id="line-98"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="ft_forall"><span class="annot"><span class="annottext">FFoldType a -&gt; [DTyVarBndr] -&gt; a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_forall"><span class="hs-identifier hs-var hs-var">ft_forall</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTyVarBndr</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358887"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-99"></span><span>          </span><span class="hs-comment">-- ^ Forall type</span><span>
+</span><span id="line-100"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- Note that in GHC, this function is pure. It must be monadic here since we:</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- (1) Expand type synonyms</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- (2) Detect type family applications</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- Which require reification in Template Haskell, but are pure in Core.</span><span>
+</span><span id="line-108"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#functorLikeTraverse"><span class="hs-identifier hs-type">functorLikeTraverse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681358849"><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span></span><span> </span><span id="local-6989586621681358848"><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-109"></span><span>                       </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span>
+</span><span id="line-110"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>        </span><span class="hs-comment">-- ^ Variable to look for</span><span>
+</span><span id="line-111"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FFoldType"><span class="hs-identifier hs-type">FFoldType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-comment">-- ^ How to fold</span><span>
+</span><span id="line-112"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>       </span><span class="hs-comment">-- ^ Type to process</span><span>
+</span><span id="line-113"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-114"></span><span id="functorLikeTraverse"><span class="annot"><span class="annottext">functorLikeTraverse :: Name -&gt; FFoldType a -&gt; DType -&gt; q a
+</span><a href="Data.Singletons.Deriving.Util.html#functorLikeTraverse"><span class="hs-identifier hs-var hs-var">functorLikeTraverse</span></a></span></span><span> </span><span id="local-6989586621681358791"><span class="annot"><span class="annottext">var :: Name
+</span><a href="#local-6989586621681358791"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FT"><span class="hs-identifier hs-type">FT</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ft_triv :: forall a. FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_triv"><span class="hs-identifier hs-var">ft_triv</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681358790"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358790"><span class="hs-identifier hs-var">caseTrivial</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_var :: forall a. FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_var"><span class="hs-identifier hs-var">ft_var</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681358789"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358789"><span class="hs-identifier hs-var">caseVar</span></a></span></span><span>
+</span><span id="line-115"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_ty_app :: forall a. FFoldType a -&gt; DType -&gt; a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_ty_app"><span class="hs-identifier hs-var">ft_ty_app</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681358788"><span class="annot"><span class="annottext">DType -&gt; a -&gt; a
+</span><a href="#local-6989586621681358788"><span class="hs-identifier hs-var">caseTyApp</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_bad_app :: forall a. FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_bad_app"><span class="hs-identifier hs-var">ft_bad_app</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681358787"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358787"><span class="hs-identifier hs-var">caseWrongArg</span></a></span></span><span>
+</span><span id="line-116"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_forall :: forall a. FFoldType a -&gt; [DTyVarBndr] -&gt; a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_forall"><span class="hs-identifier hs-var">ft_forall</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681358786"><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; a -&gt; a
+</span><a href="#local-6989586621681358786"><span class="hs-identifier hs-var">caseForAll</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>                    </span><span id="local-6989586621681358785"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621681358785"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621681358784"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358784"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q DType
+forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; q DType
+</span><span class="hs-identifier hs-var">expandType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358785"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-119"></span><span>       </span><span class="hs-special">(</span><span id="local-6989586621681358782"><span class="annot"><span class="annottext">res :: a
+</span><a href="#local-6989586621681358782"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358784"><span class="hs-identifier hs-var">ty'</span></a></span><span>
+</span><span id="line-120"></span><span>       </span><span class="annot"><span class="annottext">a -&gt; q a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358782"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-122"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>
+</span><span id="line-123"></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- (result of type a, does type contain var)</span><span>
+</span><span id="line-124"></span><span>    </span><span id="local-6989586621681358781"><span class="annot"><span class="annottext">go :: DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppT</span></span><span> </span><span id="local-6989586621681358779"><span class="annot"><span class="annottext">f :: DType
+</span><a href="#local-6989586621681358779"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621681358778"><span class="annot"><span class="annottext">x :: DType
+</span><a href="#local-6989586621681358778"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-125"></span><span>      </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358777"><span class="annot"><span class="annottext">fc :: Bool
+</span><a href="#local-6989586621681358777"><span class="hs-identifier hs-var">fc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358779"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-126"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358777"><span class="hs-identifier hs-var">fc</span></a></span><span>
+</span><span id="line-127"></span><span>         </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358787"><span class="hs-identifier hs-var">caseWrongArg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>         </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681358776"><span class="annot"><span class="annottext">xr :: a
+</span><a href="#local-6989586621681358776"><span class="hs-identifier hs-var">xr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358775"><span class="annot"><span class="annottext">xc :: Bool
+</span><a href="#local-6989586621681358775"><span class="hs-identifier hs-var">xc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358778"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-129"></span><span>                 </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358775"><span class="hs-identifier hs-var">xc</span></a></span><span>
+</span><span id="line-130"></span><span>                    </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="annot"><a href="#local-6989586621681358774"><span class="hs-identifier hs-type">tyApp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>                             </span><span id="local-6989586621681358774"><span class="annot"><span class="annottext">tyApp :: q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var hs-var">tyApp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; a -&gt; a
+</span><a href="#local-6989586621681358788"><span class="hs-identifier hs-var">caseTyApp</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358779"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358776"><span class="hs-identifier hs-var">xr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-type">inspect</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>                             </span><span id="local-6989586621681358773"><span class="annot"><span class="annottext">inspect :: DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var hs-var">inspect</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681358771"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621681358771"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-135"></span><span>                               </span><span id="local-6989586621681358770"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358770"><span class="hs-identifier hs-var">itf</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; q Bool
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isTyFamilyName"><span class="hs-identifier hs-var">isTyFamilyName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358771"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-136"></span><span>                               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358770"><span class="hs-identifier hs-var">itf</span></a></span><span> </span><span class="hs-comment">-- We can't decompose type families, so</span><span>
+</span><span id="line-137"></span><span>                                      </span><span class="hs-comment">-- error if we encounter one here.</span><span>
+</span><span id="line-138"></span><span>                                  </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358787"><span class="hs-identifier hs-var">caseWrongArg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>                                  </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var">tyApp</span></a></span><span>
+</span><span id="line-140"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DForallT</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358767"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358767"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358767"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-141"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621681358765"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358765"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358765"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-142"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppT</span></span><span> </span><span id="local-6989586621681358764"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358764"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358764"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-143"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppKindT</span></span><span> </span><span id="local-6989586621681358762"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358762"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358762"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-144"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var">tyApp</span></a></span><span>
+</span><span id="line-145"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DArrowT</span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var">tyApp</span></a></span><span>
+</span><span id="line-146"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLitT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var">tyApp</span></a></span><span>
+</span><span id="line-147"></span><span>                             </span><span class="annot"><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DWildCardT</span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358774"><span class="hs-identifier hs-var">tyApp</span></a></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DType, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358779"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-150"></span><span>                              </span><span class="hs-special">(</span><span id="local-6989586621681358756"><span class="annot"><span class="annottext">f_head :: DType
+</span><a href="#local-6989586621681358756"><span class="hs-identifier hs-var">f_head</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358773"><span class="hs-identifier hs-var">inspect</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358756"><span class="hs-identifier hs-var">f_head</span></a></span><span>
+</span><span id="line-151"></span><span>                    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-152"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppKindT</span></span><span> </span><span id="local-6989586621681358754"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358754"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681358753"><span class="annot"><span class="annottext">k :: DType
+</span><a href="#local-6989586621681358753"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-153"></span><span>      </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358752"><span class="annot"><span class="annottext">kc :: Bool
+</span><a href="#local-6989586621681358752"><span class="hs-identifier hs-var">kc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358753"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-154"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358752"><span class="hs-identifier hs-var">kc</span></a></span><span>
+</span><span id="line-155"></span><span>         </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358787"><span class="hs-identifier hs-var">caseWrongArg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>         </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358754"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-157"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621681358751"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358751"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681358750"><span class="annot"><span class="annottext">k :: DType
+</span><a href="#local-6989586621681358750"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-158"></span><span>      </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358749"><span class="annot"><span class="annottext">kc :: Bool
+</span><a href="#local-6989586621681358749"><span class="hs-identifier hs-var">kc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358750"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-159"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358749"><span class="hs-identifier hs-var">kc</span></a></span><span>
+</span><span id="line-160"></span><span>         </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358787"><span class="hs-identifier hs-var">caseWrongArg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>         </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358751"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-162"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span id="local-6989586621681358748"><span class="annot"><span class="annottext">v :: Name
+</span><a href="#local-6989586621681358748"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-163"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358748"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358791"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358789"><span class="hs-identifier hs-var">caseVar</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-165"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DForallT</span></span><span> </span><span id="local-6989586621681358747"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681358747"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358746"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358746"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-166"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621681358745"><span class="annot"><span class="annottext">tr :: a
+</span><a href="#local-6989586621681358745"><span class="hs-identifier hs-var">tr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358744"><span class="annot"><span class="annottext">tc :: Bool
+</span><a href="#local-6989586621681358744"><span class="hs-identifier hs-var">tc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q (a, Bool)
+</span><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358746"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-167"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358791"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Name] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`notElem`</span></span><span> </span><span class="annot"><span class="annottext">(DTyVarBndr -&gt; Name) -&gt; [DTyVarBndr] -&gt; [Name]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr -&gt; Name
+</span><a href="Data.Singletons.Util.html#extractTvbName"><span class="hs-identifier hs-var">extractTvbName</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358747"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358744"><span class="hs-identifier hs-var">tc</span></a></span><span>
+</span><span id="line-168"></span><span>         </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; a -&gt; a
+</span><a href="#local-6989586621681358786"><span class="hs-identifier hs-var">caseForAll</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358747"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358745"><span class="hs-identifier hs-var">tr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-169"></span><span>         </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-170"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-171"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DArrowT</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-172"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLitT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-173"></span><span>    </span><span class="annot"><a href="#local-6989586621681358781"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DWildCardT</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var">trivial</span></a></span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span>    </span><span class="annot"><a href="#local-6989586621681358755"><span class="hs-identifier hs-type">trivial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681358849"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358848"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-176"></span><span>    </span><span id="local-6989586621681358755"><span class="annot"><span class="annottext">trivial :: q (a, Bool)
+</span><a href="#local-6989586621681358755"><span class="hs-identifier hs-var hs-var">trivial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, Bool) -&gt; q (a, Bool)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621681358790"><span class="hs-identifier hs-var">caseTrivial</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span id="local-6989586621681358883"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#isTyFamilyName"><span class="hs-identifier hs-type">isTyFamilyName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358883"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358883"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-179"></span><span id="isTyFamilyName"><span class="annot"><span class="annottext">isTyFamilyName :: Name -&gt; q Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isTyFamilyName"><span class="hs-identifier hs-var hs-var">isTyFamilyName</span></a></span></span><span> </span><span id="local-6989586621681358741"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621681358741"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-180"></span><span>  </span><span id="local-6989586621681358740"><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621681358740"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; q (Maybe DInfo)
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe DInfo)
+</span><span class="hs-identifier hs-var">dsReify</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358741"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-181"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; q Bool
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; q Bool) -&gt; Bool -&gt; q Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621681358740"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-182"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTyConI</span></span><span> </span><span id="local-6989586621681358737"><span class="annot"><span class="annottext">dec :: DDec
+</span><a href="#local-6989586621681358737"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DOpenTypeFamilyD</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span>   </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DDec
+</span><a href="#local-6989586621681358737"><span class="hs-identifier hs-var">dec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-184"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DClosedTypeFamilyD</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DDec
+</span><a href="#local-6989586621681358737"><span class="hs-identifier hs-var">dec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-185"></span><span>           </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- A crude approximation of cond_functorOK from GHC. This checks that:</span><span>
+</span><span id="line-188"></span><span class="hs-comment">--</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- (1) There's at least one type variable in the data type.</span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- (2) It doesn't use the last type variable in the wrong place, e.g. data T a = MkT (X a a)</span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- (3) It doesn't constrain the last type variable, e.g., data T a = Eq a =&gt; MkT a</span><span>
+</span><span id="line-192"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#functorLikeValidityChecks"><span class="hs-identifier hs-type">functorLikeValidityChecks</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681358733"><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-type">DataDecl</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-193"></span><span id="functorLikeValidityChecks"><span class="annot"><span class="annottext">functorLikeValidityChecks :: Bool -&gt; DataDecl -&gt; q ()
+</span><a href="Data.Singletons.Deriving.Util.html#functorLikeValidityChecks"><span class="hs-identifier hs-var hs-var">functorLikeValidityChecks</span></a></span></span><span> </span><span id="local-6989586621681358732"><span class="annot"><span class="annottext">allowConstrainedLastTyVar :: Bool
+</span><a href="#local-6989586621681358732"><span class="hs-identifier hs-var">allowConstrainedLastTyVar</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-type">DataDecl</span></a></span><span> </span><span id="local-6989586621681358730"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621681358730"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621681358729"><span class="annot"><span class="annottext">data_tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681358729"><span class="hs-identifier hs-var">data_tvbs</span></a></span></span><span> </span><span id="local-6989586621681358728"><span class="annot"><span class="annottext">cons :: [DCon]
+</span><a href="#local-6989586621681358728"><span class="hs-identifier hs-var">cons</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358729"><span class="hs-identifier hs-var">data_tvbs</span></a></span><span> </span><span class="hs-comment">-- (1)</span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; q ()
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; q ()) -&gt; String -&gt; q ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Data type &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358730"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot; must have some type parameters&quot;</span></span><span>
+</span><span id="line-196"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DCon -&gt; q ()) -&gt; [DCon] -&gt; q ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">DCon -&gt; q ()
+</span><a href="#local-6989586621681358725"><span class="hs-identifier hs-var">check_con</span></a></span><span> </span><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621681358728"><span class="hs-identifier hs-var">cons</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-199"></span><span>    </span><span class="annot"><a href="#local-6989586621681358725"><span class="hs-identifier hs-type">check_con</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-200"></span><span>    </span><span id="local-6989586621681358725"><span class="annot"><span class="annottext">check_con :: DCon -&gt; q ()
+</span><a href="#local-6989586621681358725"><span class="hs-identifier hs-var hs-var">check_con</span></a></span></span><span> </span><span id="local-6989586621681358724"><span class="annot"><span class="annottext">con :: DCon
+</span><a href="#local-6989586621681358724"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-201"></span><span>      </span><span class="annot"><span class="annottext">DCon -&gt; q ()
+</span><a href="#local-6989586621681358723"><span class="hs-identifier hs-var">check_universal</span></a></span><span> </span><span class="annot"><span class="annottext">DCon
+</span><a href="#local-6989586621681358724"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-202"></span><span>      </span><span id="local-6989586621681358722"><span class="annot"><span class="annottext">[q ()]
+</span><a href="#local-6989586621681358722"><span class="hs-identifier hs-var">checks</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FFoldType (q ()) -&gt; DCon -&gt; q [q ()]
+forall (q :: * -&gt; *) a. DsMonad q =&gt; FFoldType a -&gt; DCon -&gt; q [a]
+</span><a href="Data.Singletons.Deriving.Util.html#foldDataConArgs"><span class="hs-identifier hs-var">foldDataConArgs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; FFoldType (q ())
+</span><a href="#local-6989586621681358720"><span class="hs-identifier hs-var">ft_check</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DCon -&gt; Name
+</span><a href="Data.Singletons.Util.html#extractName"><span class="hs-identifier hs-var">extractName</span></a></span><span> </span><span class="annot"><span class="annottext">DCon
+</span><a href="#local-6989586621681358724"><span class="hs-identifier hs-var">con</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCon
+</span><a href="#local-6989586621681358724"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-203"></span><span>      </span><span class="annot"><span class="annottext">[q ()] -&gt; q ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a.
+(Foldable t, Monad m) =&gt;
+t (m a) -&gt; m ()
+</span><span class="hs-identifier hs-var">sequence_</span></span><span> </span><span class="annot"><span class="annottext">[q ()]
+</span><a href="#local-6989586621681358722"><span class="hs-identifier hs-var">checks</span></a></span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span>    </span><span class="hs-comment">-- (2)</span><span>
+</span><span id="line-206"></span><span>    </span><span class="annot"><a href="#local-6989586621681358723"><span class="hs-identifier hs-type">check_universal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>    </span><span id="local-6989586621681358723"><span class="annot"><span class="annottext">check_universal :: DCon -&gt; q ()
+</span><a href="#local-6989586621681358723"><span class="hs-identifier hs-var hs-var">check_universal</span></a></span></span><span> </span><span id="local-6989586621681358717"><span class="annot"><span class="annottext">con :: DCon
+</span><a href="#local-6989586621681358717"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span id="local-6989586621681358716"><span class="annot"><span class="annottext">con_tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681358716"><span class="hs-identifier hs-var">con_tvbs</span></a></span></span><span> </span><span id="local-6989586621681358715"><span class="annot"><span class="annottext">con_theta :: DCxt
+</span><a href="#local-6989586621681358715"><span class="hs-identifier hs-var">con_theta</span></a></span></span><span> </span><span id="local-6989586621681358714"><span class="annot"><span class="annottext">con_name :: Name
+</span><a href="#local-6989586621681358714"><span class="hs-identifier hs-var">con_name</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358713"><span class="annot"><span class="annottext">res_ty :: DType
+</span><a href="#local-6989586621681358713"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-208"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358732"><span class="hs-identifier hs-var">allowConstrainedLastTyVar</span></a></span><span>
+</span><span id="line-209"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; q ()
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358712"><span class="annot"><span class="annottext">res_ty_args :: [DTypeArg]
+</span><a href="#local-6989586621681358712"><span class="hs-identifier hs-var">res_ty_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DType, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358713"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><span id="line-211"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358711"><span class="annot"><span class="annottext">last_res_ty_arg :: DType
+</span><a href="#local-6989586621681358711"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; (DCxt, DType)
+forall a. [a] -&gt; ([a], a)
+</span><a href="Data.Singletons.Util.html#snocView"><span class="hs-identifier hs-var">snocView</span></a></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; (DCxt, DType)) -&gt; DCxt -&gt; (DCxt, DType)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><span class="hs-identifier hs-var">filterDTANormals</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621681358712"><span class="hs-identifier hs-var">res_ty_args</span></a></span><span>
+</span><span id="line-212"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681358708"><span class="annot"><span class="annottext">last_tv :: Name
+</span><a href="#local-6989586621681358708"><span class="hs-identifier hs-var">last_tv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; Maybe Name
+</span><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358711"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span><span>
+</span><span id="line-213"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621681358706"><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358706"><span class="hs-identifier hs-var">ex_tvbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; DCon -&gt; q [DTyVarBndr]
+forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; DCon -&gt; q [DTyVarBndr]
+</span><span class="hs-identifier hs-var">conExistentialTvbs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; [DTyVarBndr] -&gt; DType
+</span><a href="Data.Singletons.Util.html#foldTypeTvbs"><span class="hs-identifier hs-var">foldTypeTvbs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358730"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358729"><span class="hs-identifier hs-var">data_tvbs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCon
+</span><a href="#local-6989586621681358717"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-214"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681358704"><span class="annot"><span class="annottext">univ_tvb_names :: [Name]
+</span><a href="#local-6989586621681358704"><span class="hs-identifier hs-var hs-var">univ_tvb_names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DTyVarBndr -&gt; Name) -&gt; [DTyVarBndr] -&gt; [Name]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr -&gt; Name
+</span><a href="Data.Singletons.Util.html#extractTvbName"><span class="hs-identifier hs-var">extractTvbName</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358716"><span class="hs-identifier hs-var">con_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[Name] -&gt; [Name] -&gt; [Name]
+forall a. Eq a =&gt; [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">\\</span></span><span> </span><span class="annot"><span class="annottext">(DTyVarBndr -&gt; Name) -&gt; [DTyVarBndr] -&gt; [Name]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr -&gt; Name
+</span><a href="Data.Singletons.Util.html#extractTvbName"><span class="hs-identifier hs-var">extractTvbName</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358706"><span class="hs-identifier hs-var">ex_tvbs</span></a></span><span>
+</span><span id="line-215"></span><span>           </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358708"><span class="hs-identifier hs-var">last_tv</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Name] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621681358704"><span class="hs-identifier hs-var">univ_tvb_names</span></a></span><span>
+</span><span id="line-216"></span><span>                </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358708"><span class="hs-identifier hs-var">last_tv</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name -&gt; Bool
+forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><span class="hs-operator hs-var">`OSet.notMember`</span></span><span> </span><span class="annot"><span class="annottext">(DType -&gt; OSet Name) -&gt; DCxt -&gt; OSet Name
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><span class="hs-identifier hs-var">fvDType</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358715"><span class="hs-identifier hs-var">con_theta</span></a></span><span>
+</span><span id="line-217"></span><span>              </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">() -&gt; q ()
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-218"></span><span>              </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">String -&gt; q ()
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; q ()) -&gt; String -&gt; q ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String -&gt; String
+</span><a href="#local-6989586621681358698"><span class="hs-identifier hs-var">badCon</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358714"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621681358697"><span class="hs-identifier hs-var">existential</span></a></span><span>
+</span><span id="line-219"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-220"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; q ()
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; q ()) -&gt; String -&gt; q ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String -&gt; String
+</span><a href="#local-6989586621681358698"><span class="hs-identifier hs-var">badCon</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358714"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621681358697"><span class="hs-identifier hs-var">existential</span></a></span><span>
+</span><span id="line-221"></span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-comment">-- (3)</span><span>
+</span><span id="line-223"></span><span>    </span><span class="annot"><a href="#local-6989586621681358720"><span class="hs-identifier hs-type">ft_check</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FFoldType"><span class="hs-identifier hs-type">FFoldType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681358733"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-224"></span><span>    </span><span id="local-6989586621681358720"><span class="annot"><span class="annottext">ft_check :: Name -&gt; FFoldType (q ())
+</span><a href="#local-6989586621681358720"><span class="hs-identifier hs-var hs-var">ft_check</span></a></span></span><span> </span><span id="local-6989586621681358696"><span class="annot"><span class="annottext">con_name :: Name
+</span><a href="#local-6989586621681358696"><span class="hs-identifier hs-var">con_name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-225"></span><span>      </span><span class="annot"><span class="annottext">FT :: forall a.
+a
+-&gt; a
+-&gt; (DType -&gt; a -&gt; a)
+-&gt; a
+-&gt; ([DTyVarBndr] -&gt; a -&gt; a)
+-&gt; FFoldType a
+</span><a href="Data.Singletons.Deriving.Util.html#FT"><span class="hs-identifier hs-type hs-type">FT</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ft_triv :: q ()
+</span><a href="Data.Singletons.Deriving.Util.html#ft_triv"><span class="hs-identifier hs-var">ft_triv</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; q ()
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-226"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_var :: q ()
+</span><a href="Data.Singletons.Deriving.Util.html#ft_var"><span class="hs-identifier hs-var">ft_var</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; q ()
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-227"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_ty_app :: DType -&gt; q () -&gt; q ()
+</span><a href="Data.Singletons.Deriving.Util.html#ft_ty_app"><span class="hs-identifier hs-var">ft_ty_app</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358694"><span class="annot"><span class="annottext">x :: q ()
+</span><a href="#local-6989586621681358694"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">q ()
+</span><a href="#local-6989586621681358694"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-228"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_bad_app :: q ()
+</span><a href="Data.Singletons.Deriving.Util.html#ft_bad_app"><span class="hs-identifier hs-var">ft_bad_app</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; q ()
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; q ()) -&gt; String -&gt; q ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String -&gt; String
+</span><a href="#local-6989586621681358698"><span class="hs-identifier hs-var">badCon</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358696"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621681358693"><span class="hs-identifier hs-var">wrong_arg</span></a></span><span>
+</span><span id="line-229"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_forall :: [DTyVarBndr] -&gt; q () -&gt; q ()
+</span><a href="Data.Singletons.Deriving.Util.html#ft_forall"><span class="hs-identifier hs-var">ft_forall</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358692"><span class="annot"><span class="annottext">x :: q ()
+</span><a href="#local-6989586621681358692"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">q ()
+</span><a href="#local-6989586621681358692"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-230"></span><span>         </span><span class="hs-special">}</span><span>
+</span><span id="line-231"></span><span>
+</span><span id="line-232"></span><span>    </span><span class="annot"><a href="#local-6989586621681358698"><span class="hs-identifier hs-type">badCon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-233"></span><span>    </span><span id="local-6989586621681358698"><span class="annot"><span class="annottext">badCon :: Name -&gt; String -&gt; String
+</span><a href="#local-6989586621681358698"><span class="hs-identifier hs-var hs-var">badCon</span></a></span></span><span> </span><span id="local-6989586621681358691"><span class="annot"><span class="annottext">con_name :: Name
+</span><a href="#local-6989586621681358691"><span class="hs-identifier hs-var">con_name</span></a></span></span><span> </span><span id="local-6989586621681358690"><span class="annot"><span class="annottext">msg :: String
+</span><a href="#local-6989586621681358690"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Constructor &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358691"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621681358690"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-234"></span><span>
+</span><span id="line-235"></span><span>    </span><span class="annot"><a href="#local-6989586621681358697"><span class="hs-identifier hs-type">existential</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621681358693"><span class="hs-identifier hs-type">wrong_arg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621681358697"><span class="annot"><span class="annottext">existential :: String
+</span><a href="#local-6989586621681358697"><span class="hs-identifier hs-var hs-var">existential</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;must be truly polymorphic in the last argument of the data type&quot;</span></span><span>
+</span><span id="line-237"></span><span>    </span><span id="local-6989586621681358693"><span class="annot"><span class="annottext">wrong_arg :: String
+</span><a href="#local-6989586621681358693"><span class="hs-identifier hs-var hs-var">wrong_arg</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;must use the type variable only as the last argument of a data type&quot;</span></span><span>
+</span><span id="line-238"></span><span>
+</span><span id="line-239"></span><span class="hs-comment">-- Return all syntactic subterms of a type that contain the given variable somewhere.</span><span>
+</span><span id="line-240"></span><span class="hs-comment">-- These are the things that should appear in Functor-like instance constraints.</span><span>
+</span><span id="line-241"></span><span id="local-6989586621681358689"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#deepSubtypesContaining"><span class="hs-identifier hs-type">deepSubtypesContaining</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358689"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358689"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-242"></span><span id="deepSubtypesContaining"><span class="annot"><span class="annottext">deepSubtypesContaining :: Name -&gt; DType -&gt; q DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#deepSubtypesContaining"><span class="hs-identifier hs-var hs-var">deepSubtypesContaining</span></a></span></span><span> </span><span id="local-6989586621681358687"><span class="annot"><span class="annottext">tv :: Name
+</span><a href="#local-6989586621681358687"><span class="hs-identifier hs-var">tv</span></a></span></span><span>
+</span><span id="line-243"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; FFoldType DCxt -&gt; DType -&gt; q DCxt
+forall (q :: * -&gt; *) a.
+DsMonad q =&gt;
+Name -&gt; FFoldType a -&gt; DType -&gt; q a
+</span><a href="Data.Singletons.Deriving.Util.html#functorLikeTraverse"><span class="hs-identifier hs-var">functorLikeTraverse</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358687"><span class="hs-identifier hs-var">tv</span></a></span><span>
+</span><span id="line-244"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FT :: forall a.
+a
+-&gt; a
+-&gt; (DType -&gt; a -&gt; a)
+-&gt; a
+-&gt; ([DTyVarBndr] -&gt; a -&gt; a)
+-&gt; FFoldType a
+</span><a href="Data.Singletons.Deriving.Util.html#FT"><span class="hs-identifier hs-type hs-type">FT</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ft_triv :: DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#ft_triv"><span class="hs-identifier hs-var">ft_triv</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-245"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_var :: DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#ft_var"><span class="hs-identifier hs-var">ft_var</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-246"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_ty_app :: DType -&gt; DCxt -&gt; DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#ft_ty_app"><span class="hs-identifier hs-var">ft_ty_app</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span>
+</span><span id="line-247"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_bad_app :: DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#ft_bad_app"><span class="hs-identifier hs-var">ft_bad_app</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; DCxt
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;in other argument in deepSubtypesContaining&quot;</span></span><span>
+</span><span id="line-248"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ft_forall :: [DTyVarBndr] -&gt; DCxt -&gt; DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#ft_forall"><span class="hs-identifier hs-var">ft_forall</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621681358685"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681358685"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621681358684"><span class="annot"><span class="annottext">xs :: DCxt
+</span><a href="#local-6989586621681358684"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(DType -&gt; Bool) -&gt; DCxt -&gt; DCxt
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621681358683"><span class="annot"><span class="annottext">x :: DType
+</span><a href="#local-6989586621681358683"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(DTyVarBndr -&gt; Bool) -&gt; [DTyVarBndr] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTyVarBndr -&gt; Bool
+</span><a href="#local-6989586621681358681"><span class="hs-identifier hs-var">not_in_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358683"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681358685"><span class="hs-identifier hs-var">tvbs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358684"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-249"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-250"></span><span>    </span><span class="annot"><a href="#local-6989586621681358681"><span class="hs-identifier hs-type">not_in_ty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DTyVarBndr</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-251"></span><span>    </span><span id="local-6989586621681358681"><span class="annot"><span class="annottext">not_in_ty :: DType -&gt; DTyVarBndr -&gt; Bool
+</span><a href="#local-6989586621681358681"><span class="hs-identifier hs-var hs-var">not_in_ty</span></a></span></span><span> </span><span id="local-6989586621681358680"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621681358680"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621681358679"><span class="annot"><span class="annottext">tvb :: DTyVarBndr
+</span><a href="#local-6989586621681358679"><span class="hs-identifier hs-var">tvb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DTyVarBndr -&gt; Name
+</span><a href="Data.Singletons.Util.html#extractTvbName"><span class="hs-identifier hs-var">extractTvbName</span></a></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr
+</span><a href="#local-6989586621681358679"><span class="hs-identifier hs-var">tvb</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name -&gt; Bool
+forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><span class="hs-operator hs-var">`OSet.notMember`</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><span class="hs-identifier hs-var">fvDType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358680"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-252"></span><span>
+</span><span id="line-253"></span><span class="hs-comment">-- Fold over the arguments of a data constructor in a Functor-like way.</span><span>
+</span><span id="line-254"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#foldDataConArgs"><span class="hs-identifier hs-type">foldDataConArgs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681358862"><span class="annot"><a href="#local-6989586621681358862"><span class="hs-identifier hs-type">q</span></a></span></span><span> </span><span id="local-6989586621681358861"><span class="annot"><a href="#local-6989586621681358861"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358862"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#FFoldType"><span class="hs-identifier hs-type">FFoldType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681358861"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358862"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621681358861"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-255"></span><span id="foldDataConArgs"><span class="annot"><span class="annottext">foldDataConArgs :: FFoldType a -&gt; DCon -&gt; q [a]
+</span><a href="Data.Singletons.Deriving.Util.html#foldDataConArgs"><span class="hs-identifier hs-var hs-var">foldDataConArgs</span></a></span></span><span> </span><span id="local-6989586621681358678"><span class="annot"><span class="annottext">ft :: FFoldType a
+</span><a href="#local-6989586621681358678"><span class="hs-identifier hs-var">ft</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358677"><span class="annot"><span class="annottext">fields :: DConFields
+</span><a href="#local-6989586621681358677"><span class="hs-identifier hs-var">fields</span></a></span></span><span> </span><span id="local-6989586621681358676"><span class="annot"><span class="annottext">res_ty :: DType
+</span><a href="#local-6989586621681358676"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-256"></span><span>  </span><span id="local-6989586621681358675"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358675"><span class="hs-identifier hs-var">field_tys</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DType -&gt; q DType) -&gt; DCxt -&gt; q DCxt
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; q DType
+forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; q DType
+</span><span class="hs-identifier hs-var">expandType</span></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; q DCxt) -&gt; DCxt -&gt; q DCxt
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DConFields -&gt; DCxt
+</span><a href="Data.Singletons.Util.html#tysOfConFields"><span class="hs-identifier hs-var">tysOfConFields</span></a></span><span> </span><span class="annot"><span class="annottext">DConFields
+</span><a href="#local-6989586621681358677"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-257"></span><span>  </span><span class="annot"><span class="annottext">(DType -&gt; q a) -&gt; DCxt -&gt; q [a]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; q a
+</span><a href="#local-6989586621681358672"><span class="hs-identifier hs-var">foldArg</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358675"><span class="hs-identifier hs-var">field_tys</span></a></span><span>
+</span><span id="line-258"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-259"></span><span>    </span><span class="annot"><a href="#local-6989586621681358672"><span class="hs-identifier hs-type">foldArg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358862"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681358861"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-260"></span><span>    </span><span id="local-6989586621681358672"><span class="annot"><span class="annottext">foldArg :: DType -&gt; q a
+</span><a href="#local-6989586621681358672"><span class="hs-identifier hs-var hs-var">foldArg</span></a></span></span><span>
+</span><span id="line-261"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358671"><span class="annot"><span class="annottext">res_ty_args :: [DTypeArg]
+</span><a href="#local-6989586621681358671"><span class="hs-identifier hs-var">res_ty_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DType, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358676"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><span id="line-262"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358670"><span class="annot"><span class="annottext">last_res_ty_arg :: DType
+</span><a href="#local-6989586621681358670"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; (DCxt, DType)
+forall a. [a] -&gt; ([a], a)
+</span><a href="Data.Singletons.Util.html#snocView"><span class="hs-identifier hs-var">snocView</span></a></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; (DCxt, DType)) -&gt; DCxt -&gt; (DCxt, DType)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><span class="hs-identifier hs-var">filterDTANormals</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621681358671"><span class="hs-identifier hs-var">res_ty_args</span></a></span><span>
+</span><span id="line-263"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681358669"><span class="annot"><span class="annottext">last_tv :: Name
+</span><a href="#local-6989586621681358669"><span class="hs-identifier hs-var">last_tv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; Maybe Name
+</span><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358670"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span><span>
+</span><span id="line-264"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; FFoldType a -&gt; DType -&gt; q a
+forall (q :: * -&gt; *) a.
+DsMonad q =&gt;
+Name -&gt; FFoldType a -&gt; DType -&gt; q a
+</span><a href="Data.Singletons.Deriving.Util.html#functorLikeTraverse"><span class="hs-identifier hs-var">functorLikeTraverse</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358669"><span class="hs-identifier hs-var">last_tv</span></a></span><span> </span><span class="annot"><span class="annottext">FFoldType a
+</span><a href="#local-6989586621681358678"><span class="hs-identifier hs-var">ft</span></a></span><span>
+</span><span id="line-265"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-266"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">q a -&gt; DType -&gt; q a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; q a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FFoldType a -&gt; a
+forall a. FFoldType a -&gt; a
+</span><a href="Data.Singletons.Deriving.Util.html#ft_triv"><span class="hs-identifier hs-var hs-var">ft_triv</span></a></span><span> </span><span class="annot"><span class="annottext">FFoldType a
+</span><a href="#local-6989586621681358678"><span class="hs-identifier hs-var">ft</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-267"></span><span>
+</span><span id="line-268"></span><span class="hs-comment">-- If a type is a type variable (or a variable with a kind signature), return</span><span>
+</span><span id="line-269"></span><span class="hs-comment">-- 'Just' that. Otherwise, return 'Nothing'.</span><span>
+</span><span id="line-270"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-type">getDVarTName_maybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-271"></span><span id="getDVarTName_maybe"><span class="annot"><span class="annottext">getDVarTName_maybe :: DType -&gt; Maybe Name
+</span><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var hs-var">getDVarTName_maybe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621681358667"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621681358667"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; Maybe Name
+</span><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681358667"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-272"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span id="local-6989586621681358666"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621681358666"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358666"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-273"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Name
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-274"></span><span>
+</span><span id="line-275"></span><span class="hs-comment">-- Make a 'DLamE' using a fresh variable.</span><span>
+</span><span id="line-276"></span><span id="local-6989586621681358665"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#mkSimpleLam"><span class="hs-identifier hs-type">mkSimpleLam</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621681358665"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358665"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358665"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span></span><span>
+</span><span id="line-277"></span><span id="mkSimpleLam"><span class="annot"><span class="annottext">mkSimpleLam :: (DExp -&gt; q DExp) -&gt; q DExp
+</span><a href="Data.Singletons.Deriving.Util.html#mkSimpleLam"><span class="hs-identifier hs-var hs-var">mkSimpleLam</span></a></span></span><span> </span><span id="local-6989586621681358663"><span class="annot"><span class="annottext">lam :: DExp -&gt; q DExp
+</span><a href="#local-6989586621681358663"><span class="hs-identifier hs-var">lam</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-278"></span><span>  </span><span id="local-6989586621681358662"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358662"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; q Name
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">newUniqueName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;n&quot;</span></span><span>
+</span><span id="line-279"></span><span>  </span><span id="local-6989586621681358660"><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358660"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DExp -&gt; q DExp
+</span><a href="#local-6989586621681358663"><span class="hs-identifier hs-var">lam</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358662"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-280"></span><span>  </span><span class="annot"><span class="annottext">DExp -&gt; q DExp
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(DExp -&gt; q DExp) -&gt; DExp -&gt; q DExp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Name] -&gt; DExp -&gt; DExp
+</span><span class="hs-identifier hs-var">DLamE</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358662"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358660"><span class="hs-identifier hs-var">body</span></a></span><span>
+</span><span id="line-281"></span><span>
+</span><span id="line-282"></span><span class="hs-comment">-- Make a 'DLamE' using two fresh variables.</span><span>
+</span><span id="line-283"></span><span id="local-6989586621681358657"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#mkSimpleLam2"><span class="hs-identifier hs-type">mkSimpleLam2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621681358657"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358657"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358657"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span></span><span>
+</span><span id="line-284"></span><span id="mkSimpleLam2"><span class="annot"><span class="annottext">mkSimpleLam2 :: (DExp -&gt; DExp -&gt; q DExp) -&gt; q DExp
+</span><a href="Data.Singletons.Deriving.Util.html#mkSimpleLam2"><span class="hs-identifier hs-var hs-var">mkSimpleLam2</span></a></span></span><span> </span><span id="local-6989586621681358655"><span class="annot"><span class="annottext">lam :: DExp -&gt; DExp -&gt; q DExp
+</span><a href="#local-6989586621681358655"><span class="hs-identifier hs-var">lam</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-285"></span><span>  </span><span id="local-6989586621681358654"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358654"><span class="hs-identifier hs-var">n1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; q Name
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">newUniqueName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;n1&quot;</span></span><span>
+</span><span id="line-286"></span><span>  </span><span id="local-6989586621681358653"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358653"><span class="hs-identifier hs-var">n2</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; q Name
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">newUniqueName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;n2&quot;</span></span><span>
+</span><span id="line-287"></span><span>  </span><span id="local-6989586621681358652"><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358652"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DExp -&gt; q DExp
+</span><a href="#local-6989586621681358655"><span class="hs-identifier hs-var">lam</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358654"><span class="hs-identifier hs-var">n1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358653"><span class="hs-identifier hs-var">n2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-288"></span><span>  </span><span class="annot"><span class="annottext">DExp -&gt; q DExp
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(DExp -&gt; q DExp) -&gt; DExp -&gt; q DExp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Name] -&gt; DExp -&gt; DExp
+</span><span class="hs-identifier hs-var">DLamE</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358654"><span class="hs-identifier hs-var">n1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358653"><span class="hs-identifier hs-var">n2</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358652"><span class="hs-identifier hs-var">body</span></a></span><span>
+</span><span id="line-289"></span><span>
+</span><span id="line-290"></span><span class="hs-comment">-- &quot;Con a1 a2 a3 -&gt; fold [x1 a1, x2 a2, x3 a3]&quot;</span><span>
+</span><span id="line-291"></span><span class="hs-comment">--</span><span>
+</span><span id="line-292"></span><span class="hs-comment">-- @mkSimpleConClause fold extra_pats con insides@ produces a match clause in</span><span>
+</span><span id="line-293"></span><span class="hs-comment">-- which the LHS pattern-matches on @extra_pats@, followed by a match on the</span><span>
+</span><span id="line-294"></span><span class="hs-comment">-- constructor @con@ and its arguments. The RHS folds (with @fold@) over @con@</span><span>
+</span><span id="line-295"></span><span class="hs-comment">-- and its arguments, applying an expression (from @insides@) to each of the</span><span>
+</span><span id="line-296"></span><span class="hs-comment">-- respective arguments of @con@.</span><span>
+</span><span id="line-297"></span><span id="local-6989586621681358651"><span class="annot"><a href="Data.Singletons.Deriving.Util.html#mkSimpleConClause"><span class="hs-identifier hs-type">mkSimpleConClause</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621681358651"><span class="hs-identifier hs-type">q</span></a></span><span>
+</span><span id="line-298"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">)</span><span>
+</span><span id="line-299"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DPat</span></span><span class="hs-special">]</span><span>
+</span><span id="line-300"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span>
+</span><span id="line-301"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">]</span><span>
+</span><span id="line-302"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358651"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DClause</span></span></span><span>
+</span><span id="line-303"></span><span id="mkSimpleConClause"><span class="annot"><span class="annottext">mkSimpleConClause :: (Name -&gt; [DExp] -&gt; DExp) -&gt; [DPat] -&gt; DCon -&gt; [DExp] -&gt; q DClause
+</span><a href="Data.Singletons.Deriving.Util.html#mkSimpleConClause"><span class="hs-identifier hs-var hs-var">mkSimpleConClause</span></a></span></span><span> </span><span id="local-6989586621681358649"><span class="annot"><span class="annottext">fold :: Name -&gt; [DExp] -&gt; DExp
+</span><a href="#local-6989586621681358649"><span class="hs-identifier hs-var">fold</span></a></span></span><span> </span><span id="local-6989586621681358648"><span class="annot"><span class="annottext">extra_pats :: [DPat]
+</span><a href="#local-6989586621681358648"><span class="hs-identifier hs-var">extra_pats</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358647"><span class="annot"><span class="annottext">con_name :: Name
+</span><a href="#local-6989586621681358647"><span class="hs-identifier hs-var">con_name</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span id="local-6989586621681358646"><span class="annot"><span class="annottext">insides :: [DExp]
+</span><a href="#local-6989586621681358646"><span class="hs-identifier hs-var">insides</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-304"></span><span>  </span><span id="local-6989586621681358645"><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621681358645"><span class="hs-identifier hs-var">vars_needed</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; q Name -&gt; q [Name]
+forall (m :: * -&gt; *) a. Applicative m =&gt; Int -&gt; m a -&gt; m [a]
+</span><span class="hs-identifier hs-var">replicateM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DExp] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[DExp]
+</span><a href="#local-6989586621681358646"><span class="hs-identifier hs-var">insides</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(q Name -&gt; q [Name]) -&gt; q Name -&gt; q [Name]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; q Name
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">newUniqueName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;a&quot;</span></span><span>
+</span><span id="line-305"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681358642"><span class="annot"><span class="annottext">pat :: DPat
+</span><a href="#local-6989586621681358642"><span class="hs-identifier hs-var hs-var">pat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DPat] -&gt; DPat
+</span><span class="hs-identifier hs-var">DConP</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358647"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Name -&gt; DPat) -&gt; [Name] -&gt; [DPat]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DPat
+</span><span class="hs-identifier hs-var">DVarP</span></span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621681358645"><span class="hs-identifier hs-var">vars_needed</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-306"></span><span>      </span><span id="local-6989586621681358639"><span class="annot"><span class="annottext">rhs :: DExp
+</span><a href="#local-6989586621681358639"><span class="hs-identifier hs-var hs-var">rhs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DExp] -&gt; DExp
+</span><a href="#local-6989586621681358649"><span class="hs-identifier hs-var">fold</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358647"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(DExp -&gt; Name -&gt; DExp) -&gt; [DExp] -&gt; [Name] -&gt; [DExp]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621681358637"><span class="annot"><span class="annottext">i :: DExp
+</span><a href="#local-6989586621681358637"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621681358636"><span class="annot"><span class="annottext">v :: Name
+</span><a href="#local-6989586621681358636"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358637"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DExp -&gt; DExp
+</span><span class="hs-operator hs-var">`DAppE`</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358636"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DExp]
+</span><a href="#local-6989586621681358646"><span class="hs-identifier hs-var">insides</span></a></span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621681358645"><span class="hs-identifier hs-var">vars_needed</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-307"></span><span>  </span><span class="annot"><span class="annottext">DClause -&gt; q DClause
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(DClause -&gt; q DClause) -&gt; DClause -&gt; q DClause
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DPat] -&gt; DExp -&gt; DClause
+</span><span class="hs-identifier hs-var">DClause</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DPat]
+</span><a href="#local-6989586621681358648"><span class="hs-identifier hs-var">extra_pats</span></a></span><span> </span><span class="annot"><span class="annottext">[DPat] -&gt; [DPat] -&gt; [DPat]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621681358642"><span class="hs-identifier hs-var">pat</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681358639"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-308"></span><span>
+</span><span id="line-309"></span><span class="hs-comment">-- 'True' if the derived class's last argument is of kind (Type -&gt; Type),</span><span>
+</span><span id="line-310"></span><span class="hs-comment">-- and thus needs a different constraint inference approach.</span><span>
+</span><span id="line-311"></span><span class="hs-comment">--</span><span>
+</span><span id="line-312"></span><span class="hs-comment">-- Really, we should be determining this information by inspecting the kind</span><span>
+</span><span id="line-313"></span><span class="hs-comment">-- of the class being used. But that comes dangerously close to kind</span><span>
+</span><span id="line-314"></span><span class="hs-comment">-- inference territory, so for now we simply hardcode which stock derivable</span><span>
+</span><span id="line-315"></span><span class="hs-comment">-- classes are Functor-like.</span><span>
+</span><span id="line-316"></span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#isFunctorLikeClassName"><span class="hs-identifier hs-type">isFunctorLikeClassName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-317"></span><span id="isFunctorLikeClassName"><span class="annot"><span class="annottext">isFunctorLikeClassName :: Name -&gt; Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isFunctorLikeClassName"><span class="hs-identifier hs-var hs-var">isFunctorLikeClassName</span></a></span></span><span> </span><span id="local-6989586621681358632"><span class="annot"><span class="annottext">class_name :: Name
+</span><a href="#local-6989586621681358632"><span class="hs-identifier hs-var">class_name</span></a></span></span><span>
+</span><span id="line-318"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358632"><span class="hs-identifier hs-var">class_name</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Name] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#functorName"><span class="hs-identifier hs-var">functorName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#foldableName"><span class="hs-identifier hs-var">foldableName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#traversableName"><span class="hs-identifier hs-var">traversableName</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-319"></span></pre></body></html>

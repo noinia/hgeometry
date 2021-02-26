@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, FlexibleContexts #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- | Type classes to allow for XML handling functions to be generalized to</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- work with different document types.</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Text.XML.Expat.Internal.DocumentClass</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html"><span class="hs-identifier">Text.XML.Expat.Internal.NodeClass</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#NodeClass"><span class="hs-identifier">NodeClass</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mzero</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.Class</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">List</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- | XML declaration, consisting of version, encoding and standalone.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- The formatting functions always outputs only UTF-8, regardless</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- of what encoding is specified here.  If you want to produce a document in a</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- different encoding, then set the encoding here, format the document, and then</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- convert the output text from UTF-8 to your desired encoding using some</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- text conversion library.</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="XMLDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-var">XMLDeclaration</span></a></span></span><span> </span><span id="local-6989586621679113320"><span class="annot"><a href="#local-6989586621679113320"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="XMLDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-var">XMLDeclaration</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679113320"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679113320"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113315"><span id="local-6989586621679113317"><span class="annot"><span class="annottext">XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+(XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool)
+-&gt; (XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool)
+-&gt; Eq (XMLDeclaration text)
+forall text.
+Eq text =&gt;
+XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+$c/= :: forall text.
+Eq text =&gt;
+XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+== :: XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+$c== :: forall text.
+Eq text =&gt;
+XMLDeclaration text -&gt; XMLDeclaration text -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679113308"><span id="local-6989586621679113310"><span id="local-6989586621679113312"><span class="annot"><span class="annottext">Int -&gt; XMLDeclaration text -&gt; ShowS
+[XMLDeclaration text] -&gt; ShowS
+XMLDeclaration text -&gt; String
+(Int -&gt; XMLDeclaration text -&gt; ShowS)
+-&gt; (XMLDeclaration text -&gt; String)
+-&gt; ([XMLDeclaration text] -&gt; ShowS)
+-&gt; Show (XMLDeclaration text)
+forall text. Show text =&gt; Int -&gt; XMLDeclaration text -&gt; ShowS
+forall text. Show text =&gt; [XMLDeclaration text] -&gt; ShowS
+forall text. Show text =&gt; XMLDeclaration text -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [XMLDeclaration text] -&gt; ShowS
+$cshowList :: forall text. Show text =&gt; [XMLDeclaration text] -&gt; ShowS
+show :: XMLDeclaration text -&gt; String
+$cshow :: forall text. Show text =&gt; XMLDeclaration text -&gt; String
+showsPrec :: Int -&gt; XMLDeclaration text -&gt; ShowS
+$cshowsPrec :: forall text. Show text =&gt; Int -&gt; XMLDeclaration text -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- | Stub for future expansion.</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">data</span><span> </span><span id="DocumentTypeDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-var">DocumentTypeDeclaration</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113306"><span class="annot"><a href="#local-6989586621679113306"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679113305"><span class="annot"><a href="#local-6989586621679113305"><span class="hs-identifier hs-type">tag</span></a></span></span><span> </span><span id="local-6989586621679113304"><span class="annot"><a href="#local-6989586621679113304"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DocumentTypeDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-var">DocumentTypeDeclaration</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113299"><span id="local-6989586621679113301"><span class="annot"><span class="annottext">DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+(DocumentTypeDeclaration c tag text
+ -&gt; DocumentTypeDeclaration c tag text -&gt; Bool)
+-&gt; (DocumentTypeDeclaration c tag text
+    -&gt; DocumentTypeDeclaration c tag text -&gt; Bool)
+-&gt; Eq (DocumentTypeDeclaration c tag text)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall (c :: * -&gt; *) tag text.
+DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+/= :: DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+$c/= :: forall (c :: * -&gt; *) tag text.
+DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+== :: DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+$c== :: forall (c :: * -&gt; *) tag text.
+DocumentTypeDeclaration c tag text
+-&gt; DocumentTypeDeclaration c tag text -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679113293"><span id="local-6989586621679113295"><span id="local-6989586621679113297"><span class="annot"><span class="annottext">Int -&gt; DocumentTypeDeclaration c tag text -&gt; ShowS
+[DocumentTypeDeclaration c tag text] -&gt; ShowS
+DocumentTypeDeclaration c tag text -&gt; String
+(Int -&gt; DocumentTypeDeclaration c tag text -&gt; ShowS)
+-&gt; (DocumentTypeDeclaration c tag text -&gt; String)
+-&gt; ([DocumentTypeDeclaration c tag text] -&gt; ShowS)
+-&gt; Show (DocumentTypeDeclaration c tag text)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall (c :: * -&gt; *) tag text.
+Int -&gt; DocumentTypeDeclaration c tag text -&gt; ShowS
+forall (c :: * -&gt; *) tag text.
+[DocumentTypeDeclaration c tag text] -&gt; ShowS
+forall (c :: * -&gt; *) tag text.
+DocumentTypeDeclaration c tag text -&gt; String
+showList :: [DocumentTypeDeclaration c tag text] -&gt; ShowS
+$cshowList :: forall (c :: * -&gt; *) tag text.
+[DocumentTypeDeclaration c tag text] -&gt; ShowS
+show :: DocumentTypeDeclaration c tag text -&gt; String
+$cshow :: forall (c :: * -&gt; *) tag text.
+DocumentTypeDeclaration c tag text -&gt; String
+showsPrec :: Int -&gt; DocumentTypeDeclaration c tag text -&gt; ShowS
+$cshowsPrec :: forall (c :: * -&gt; *) tag text.
+Int -&gt; DocumentTypeDeclaration c tag text -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="Misc"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-var">Misc</span></a></span></span><span> </span><span id="local-6989586621679113292"><span class="annot"><a href="#local-6989586621679113292"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-25"></span><span>    </span><span id="Comment"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Comment"><span class="hs-identifier hs-var">Comment</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679113292"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-26"></span><span>    </span><span id="ProcessingInstruction"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#ProcessingInstruction"><span class="hs-identifier hs-var">ProcessingInstruction</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679113292"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679113292"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span id="local-6989586621679113289"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679113284"><span id="local-6989586621679113286"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679113289"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113289"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679113283"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Misc text -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679113281"><span class="annot"><span class="annottext">d :: Int
+</span><a href="#local-6989586621679113281"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#ProcessingInstruction"><span class="hs-identifier hs-type">ProcessingInstruction</span></a></span><span> </span><span id="local-6989586621679113280"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679113280"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679113279"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679113279"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679113281"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-30"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;ProcessingInstruction &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; text -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113280"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot; &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; text -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113279"><span class="hs-identifier hs-var">txt</span></a></span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span id="local-6989586621679113275"><span class="annot"><span class="annottext">d :: Int
+</span><a href="#local-6989586621679113275"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Comment"><span class="hs-identifier hs-type">Comment</span></a></span><span> </span><span id="local-6989586621679113274"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679113274"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679113275"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Comment &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; text -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113274"><span class="hs-identifier hs-var">t</span></a></span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679113273"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679113270"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679113273"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113273"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#ProcessingInstruction"><span class="hs-identifier hs-type">ProcessingInstruction</span></a></span><span> </span><span id="local-6989586621679113269"><span class="annot"><span class="annottext">t1 :: text
+</span><a href="#local-6989586621679113269"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621679113268"><span class="annot"><span class="annottext">d1 :: text
+</span><a href="#local-6989586621679113268"><span class="hs-identifier hs-var">d1</span></a></span></span><span> </span><span id="local-6989586621679113267"><span class="annot"><span class="annottext">== :: Misc text -&gt; Misc text -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#ProcessingInstruction"><span class="hs-identifier hs-type">ProcessingInstruction</span></a></span><span> </span><span id="local-6989586621679113266"><span class="annot"><span class="annottext">t2 :: text
+</span><a href="#local-6989586621679113266"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span id="local-6989586621679113265"><span class="annot"><span class="annottext">d2 :: text
+</span><a href="#local-6989586621679113265"><span class="hs-identifier hs-var">d2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-35"></span><span>        </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113269"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">text -&gt; text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113266"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-36"></span><span>        </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113268"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">text -&gt; text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113265"><span class="hs-identifier hs-var">d2</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Comment"><span class="hs-identifier hs-type">Comment</span></a></span><span> </span><span id="local-6989586621679113263"><span class="annot"><span class="annottext">t1 :: text
+</span><a href="#local-6989586621679113263"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Comment"><span class="hs-identifier hs-type">Comment</span></a></span><span> </span><span id="local-6989586621679113262"><span class="annot"><span class="annottext">t2 :: text
+</span><a href="#local-6989586621679113262"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113263"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">text -&gt; text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113262"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679113261"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679113261"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113261"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621679113258"><span class="annot"><span class="annottext">rnf :: Misc text -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#ProcessingInstruction"><span class="hs-identifier hs-type">ProcessingInstruction</span></a></span><span> </span><span id="local-6989586621679113256"><span class="annot"><span class="annottext">target :: text
+</span><a href="#local-6989586621679113256"><span class="hs-identifier hs-var">target</span></a></span></span><span> </span><span id="local-6989586621679113255"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679113255"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(text, text) -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113256"><span class="hs-identifier hs-var">target</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113255"><span class="hs-identifier hs-var">txt</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Comment"><span class="hs-identifier hs-type">Comment</span></a></span><span> </span><span id="local-6989586621679113254"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679113254"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113254"><span class="hs-identifier hs-var">txt</span></a></span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="NodeType"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-var">NodeType</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113253"><span class="annot"><a href="#local-6989586621679113253"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">List</span></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#NodeClass"><span class="hs-identifier hs-type">NodeClass</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="DocumentClass"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-var">DocumentClass</span></a></span></span><span> </span><span id="local-6989586621679113356"><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113355"><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-comment">-- | Get the XML declaration for this document.</span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679113342"><span id="local-6989586621679113343"><span id="getXMLDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#getXMLDeclaration"><span class="hs-identifier hs-type">getXMLDeclaration</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113343"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113342"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-type">XMLDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113342"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-comment">-- | Get the Document Type Declaration (DTD) for this document.</span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679113340"><span id="local-6989586621679113341"><span id="getDocumentTypeDeclaration"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#getDocumentTypeDeclaration"><span class="hs-identifier hs-type">getDocumentTypeDeclaration</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113341"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113340"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-type">DocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113341"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113340"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-comment">-- | Get the top-level 'Misc' nodes for this document.</span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679113338"><span id="local-6989586621679113339"><span id="getTopLevelMiscs"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#getTopLevelMiscs"><span class="hs-identifier hs-type">getTopLevelMiscs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113339"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113338"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113338"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-comment">-- | Get the root element for this document.</span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679113336"><span id="local-6989586621679113337"><span id="getRoot"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#getRoot"><span class="hs-identifier hs-type">getRoot</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113337"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113336"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113337"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113336"><span class="hs-identifier hs-type">text</span></a></span></span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-comment">-- | Make a document with the specified fields.</span><span>
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621679113352"><span id="local-6989586621679113353"><span id="mkDocument"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-type">mkDocument</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-type">XMLDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113353"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-type">DocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113352"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113353"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113353"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113352"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113353"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-64"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113356"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113355"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113352"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113353"><span class="hs-identifier hs-type">text</span></a></span></span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Make a document with the specified root node and all other information</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- set to defaults.</span><span>
+</span><span id="line-68"></span><span id="local-6989586621679113244"><span id="local-6989586621679113245"><span id="local-6989586621679113246"><span id="local-6989586621679113247"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#mkPlainDocument"><span class="hs-identifier hs-type">mkPlainDocument</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-type">DocumentClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113247"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113246"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113247"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113246"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113245"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113244"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113247"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113246"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113245"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113244"><span class="hs-identifier hs-type">text</span></a></span></span></span></span></span><span>
+</span><span id="line-69"></span><span id="mkPlainDocument"><span class="annot"><span class="annottext">mkPlainDocument :: NodeType d c tag text -&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkPlainDocument"><span class="hs-identifier hs-var hs-var">mkPlainDocument</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+DocumentClass d c =&gt;
+Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-var">mkDocument</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">Maybe (DocumentTypeDeclaration c tag text)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">c (Misc text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span id="local-6989586621679113239"><span id="local-6989586621679113240"><span id="local-6989586621679113241"><span id="local-6989586621679113242"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyXMLDeclaration"><span class="hs-identifier hs-type">modifyXMLDeclaration</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-type">DocumentClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113242"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113241"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-72"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-type">XMLDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113240"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#XMLDeclaration"><span class="hs-identifier hs-type">XMLDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113240"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113242"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113241"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113239"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113240"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-74"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113242"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113241"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113239"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113240"><span class="hs-identifier hs-type">text</span></a></span></span></span></span></span><span>
+</span><span id="line-75"></span><span id="modifyXMLDeclaration"><span class="annot"><span class="annottext">modifyXMLDeclaration :: (Maybe (XMLDeclaration text) -&gt; Maybe (XMLDeclaration text))
+-&gt; d c tag text -&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyXMLDeclaration"><span class="hs-identifier hs-var hs-var">modifyXMLDeclaration</span></a></span></span><span> </span><span id="local-6989586621679113237"><span class="annot"><span class="annottext">f :: Maybe (XMLDeclaration text) -&gt; Maybe (XMLDeclaration text)
+</span><a href="#local-6989586621679113237"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679113236"><span class="annot"><span class="annottext">doc :: d c tag text
+</span><a href="#local-6989586621679113236"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+DocumentClass d c =&gt;
+Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-var">mkDocument</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text) -&gt; Maybe (XMLDeclaration text)
+</span><a href="#local-6989586621679113237"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (XMLDeclaration text) -&gt; Maybe (XMLDeclaration text))
+-&gt; Maybe (XMLDeclaration text) -&gt; Maybe (XMLDeclaration text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (XMLDeclaration text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (XMLDeclaration text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getXMLDeclaration"><span class="hs-identifier hs-var">getXMLDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113236"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getDocumentTypeDeclaration"><span class="hs-identifier hs-var">getDocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113236"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; c (Misc text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; c (Misc text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getTopLevelMiscs"><span class="hs-identifier hs-var">getTopLevelMiscs</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113236"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; NodeType d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; NodeType d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getRoot"><span class="hs-identifier hs-var">getRoot</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113236"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679113232"><span id="local-6989586621679113233"><span id="local-6989586621679113234"><span id="local-6989586621679113235"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyDocumentTypeDeclaration"><span class="hs-identifier hs-type">modifyDocumentTypeDeclaration</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-type">DocumentClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113235"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113234"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-79"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-type">DocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113234"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113233"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113232"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentTypeDeclaration"><span class="hs-identifier hs-type">DocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113234"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113233"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113232"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113235"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113234"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113233"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113232"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-81"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113235"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113234"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113233"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113232"><span class="hs-identifier hs-type">text</span></a></span></span></span></span></span><span>
+</span><span id="line-82"></span><span id="modifyDocumentTypeDeclaration"><span class="annot"><span class="annottext">modifyDocumentTypeDeclaration :: (Maybe (DocumentTypeDeclaration c tag text)
+ -&gt; Maybe (DocumentTypeDeclaration c tag text))
+-&gt; d c tag text -&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyDocumentTypeDeclaration"><span class="hs-identifier hs-var hs-var">modifyDocumentTypeDeclaration</span></a></span></span><span> </span><span id="local-6989586621679113230"><span class="annot"><span class="annottext">f :: Maybe (DocumentTypeDeclaration c tag text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="#local-6989586621679113230"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679113229"><span class="annot"><span class="annottext">doc :: d c tag text
+</span><a href="#local-6989586621679113229"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+DocumentClass d c =&gt;
+Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-var">mkDocument</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (XMLDeclaration text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (XMLDeclaration text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getXMLDeclaration"><span class="hs-identifier hs-var">getXMLDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113229"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (DocumentTypeDeclaration c tag text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="#local-6989586621679113230"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (DocumentTypeDeclaration c tag text)
+ -&gt; Maybe (DocumentTypeDeclaration c tag text))
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getDocumentTypeDeclaration"><span class="hs-identifier hs-var">getDocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113229"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; c (Misc text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; c (Misc text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getTopLevelMiscs"><span class="hs-identifier hs-var">getTopLevelMiscs</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113229"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; NodeType d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; NodeType d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getRoot"><span class="hs-identifier hs-var">getRoot</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113229"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679113225"><span id="local-6989586621679113226"><span id="local-6989586621679113227"><span id="local-6989586621679113228"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyTopLevelMiscs"><span class="hs-identifier hs-type">modifyTopLevelMiscs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-type">DocumentClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113228"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-86"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679113227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113226"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#Misc"><span class="hs-identifier hs-type">Misc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113226"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113228"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113225"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113226"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-88"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113228"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113225"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113226"><span class="hs-identifier hs-type">text</span></a></span></span></span></span></span><span>
+</span><span id="line-89"></span><span id="modifyTopLevelMiscs"><span class="annot"><span class="annottext">modifyTopLevelMiscs :: (c (Misc text) -&gt; c (Misc text)) -&gt; d c tag text -&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyTopLevelMiscs"><span class="hs-identifier hs-var hs-var">modifyTopLevelMiscs</span></a></span></span><span> </span><span id="local-6989586621679113223"><span class="annot"><span class="annottext">f :: c (Misc text) -&gt; c (Misc text)
+</span><a href="#local-6989586621679113223"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679113222"><span class="annot"><span class="annottext">doc :: d c tag text
+</span><a href="#local-6989586621679113222"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+DocumentClass d c =&gt;
+Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-var">mkDocument</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (XMLDeclaration text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (XMLDeclaration text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getXMLDeclaration"><span class="hs-identifier hs-var">getXMLDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113222"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getDocumentTypeDeclaration"><span class="hs-identifier hs-var">getDocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113222"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c (Misc text) -&gt; c (Misc text)
+</span><a href="#local-6989586621679113223"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(c (Misc text) -&gt; c (Misc text)) -&gt; c (Misc text) -&gt; c (Misc text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">d c tag text -&gt; c (Misc text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; c (Misc text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getTopLevelMiscs"><span class="hs-identifier hs-var">getTopLevelMiscs</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113222"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; NodeType d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; NodeType d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getRoot"><span class="hs-identifier hs-var">getRoot</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113222"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span id="local-6989586621679113218"><span id="local-6989586621679113219"><span id="local-6989586621679113220"><span id="local-6989586621679113221"><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyRoot"><span class="hs-identifier hs-type">modifyRoot</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#DocumentClass"><span class="hs-identifier hs-type">DocumentClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113221"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113220"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-93"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113221"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113220"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113219"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113218"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.DocumentClass.html#NodeType"><span class="hs-identifier hs-type">NodeType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113221"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113220"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113219"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113218"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113221"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113220"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113219"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113218"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-95"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113221"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113220"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113219"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113218"><span class="hs-identifier hs-type">text</span></a></span></span></span></span></span><span>
+</span><span id="line-96"></span><span id="modifyRoot"><span class="annot"><span class="annottext">modifyRoot :: (NodeType d c tag text -&gt; NodeType d c tag text)
+-&gt; d c tag text -&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#modifyRoot"><span class="hs-identifier hs-var hs-var">modifyRoot</span></a></span></span><span> </span><span id="local-6989586621679113216"><span class="annot"><span class="annottext">f :: NodeType d c tag text -&gt; NodeType d c tag text
+</span><a href="#local-6989586621679113216"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679113215"><span class="annot"><span class="annottext">doc :: d c tag text
+</span><a href="#local-6989586621679113215"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+DocumentClass d c =&gt;
+Maybe (XMLDeclaration text)
+-&gt; Maybe (DocumentTypeDeclaration c tag text)
+-&gt; c (Misc text)
+-&gt; NodeType d c tag text
+-&gt; d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#mkDocument"><span class="hs-identifier hs-var">mkDocument</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (XMLDeclaration text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (XMLDeclaration text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getXMLDeclaration"><span class="hs-identifier hs-var">getXMLDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113215"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; Maybe (DocumentTypeDeclaration c tag text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getDocumentTypeDeclaration"><span class="hs-identifier hs-var">getDocumentTypeDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113215"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">d c tag text -&gt; c (Misc text)
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; c (Misc text)
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getTopLevelMiscs"><span class="hs-identifier hs-var">getTopLevelMiscs</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113215"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeType d c tag text -&gt; NodeType d c tag text
+</span><a href="#local-6989586621679113216"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(NodeType d c tag text -&gt; NodeType d c tag text)
+-&gt; NodeType d c tag text -&gt; NodeType d c tag text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">d c tag text -&gt; NodeType d c tag text
+forall (d :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag text.
+DocumentClass d c =&gt;
+d c tag text -&gt; NodeType d c tag text
+</span><a href="Text.XML.Expat.Internal.DocumentClass.html#getRoot"><span class="hs-identifier hs-var">getRoot</span></a></span><span> </span><span class="annot"><span class="annottext">d c tag text
+</span><a href="#local-6989586621679113215"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span></pre></body></html>

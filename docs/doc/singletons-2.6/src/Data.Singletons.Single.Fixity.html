@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.Single.Fixity</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">exp</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">cxt</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NameSpace</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Quasi</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Util.html"><span class="hs-identifier">Data.Singletons.Util</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Names.html"><span class="hs-identifier">Data.Singletons.Names</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span id="local-6989586621681356933"><span class="annot"><a href="Data.Singletons.Single.Fixity.html#singInfixDecl"><span class="hs-identifier hs-type">singInfixDecl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681356933"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fixity</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681356933"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span></span><span>
+</span><span id="line-11"></span><span id="singInfixDecl"><span class="annot"><span class="annottext">singInfixDecl :: Name -&gt; Fixity -&gt; q DLetDec
+</span><a href="Data.Singletons.Single.Fixity.html#singInfixDecl"><span class="hs-identifier hs-var hs-var">singInfixDecl</span></a></span></span><span> </span><span id="local-6989586621681356921"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681356920"><span class="annot"><span class="annottext">fixity :: Fixity
+</span><a href="#local-6989586621681356920"><span class="hs-identifier hs-var">fixity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-12"></span><span>  </span><span id="local-6989586621681356919"><span class="annot"><span class="annottext">Maybe NameSpace
+</span><a href="#local-6989586621681356919"><span class="hs-identifier hs-var">mb_ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; q (Maybe NameSpace)
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe NameSpace)
+</span><span class="hs-identifier hs-var">reifyNameSpace</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><span class="annottext">DLetDec -&gt; q DLetDec
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(DLetDec -&gt; q DLetDec) -&gt; DLetDec -&gt; q DLetDec
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Fixity -&gt; Name -&gt; DLetDec
+</span><span class="hs-identifier hs-var">DInfixD</span></span><span> </span><span class="annot"><span class="annottext">Fixity
+</span><a href="#local-6989586621681356920"><span class="hs-identifier hs-var">fixity</span></a></span><span>
+</span><span id="line-14"></span><span>       </span><span class="annot"><span class="annottext">(Name -&gt; DLetDec) -&gt; Name -&gt; DLetDec
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe NameSpace
+</span><a href="#local-6989586621681356919"><span class="hs-identifier hs-var">mb_ns</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-15"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TcClsName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.Singletons.Names.html#singTyConName"><span class="hs-identifier hs-var">singTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-16"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DataName</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.Singletons.Names.html#singDataConName"><span class="hs-identifier hs-var">singDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-17"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">VarName</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.Singletons.Names.html#singValName"><span class="hs-identifier hs-var">singValName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-18"></span><span>           </span><span class="hs-comment">-- If we can't find the Name for some odd reason,</span><span>
+</span><span id="line-19"></span><span>           </span><span class="hs-comment">-- fall back to singValName</span><span>
+</span><span id="line-20"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.Singletons.Names.html#singValName"><span class="hs-identifier hs-var">singValName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356921"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span id="local-6989586621681356910"><span class="annot"><a href="Data.Singletons.Single.Fixity.html#singFixityDeclaration"><span class="hs-identifier hs-type">singFixityDeclaration</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681356910"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681356910"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-23"></span><span id="singFixityDeclaration"><span class="annot"><span class="annottext">singFixityDeclaration :: Name -&gt; q [DDec]
+</span><a href="Data.Singletons.Single.Fixity.html#singFixityDeclaration"><span class="hs-identifier hs-var hs-var">singFixityDeclaration</span></a></span></span><span> </span><span id="local-6989586621681356908"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681356908"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621681356907"><span class="annot"><span class="annottext">Maybe Fixity
+</span><a href="#local-6989586621681356907"><span class="hs-identifier hs-var">mFixity</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; q (Maybe Fixity)
+forall (m :: * -&gt; *). Quasi m =&gt; Name -&gt; m (Maybe Fixity)
+</span><span class="hs-identifier hs-var">qReifyFixity</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356908"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Fixity
+</span><a href="#local-6989586621681356907"><span class="hs-identifier hs-var">mFixity</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[DDec] -&gt; q [DDec]
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681356905"><span class="annot"><span class="annottext">fixity :: Fixity
+</span><a href="#local-6989586621681356905"><span class="hs-identifier hs-var">fixity</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[q DDec] -&gt; q [DDec]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a.
+(Traversable t, Applicative f) =&gt;
+t (f a) -&gt; f (t a)
+</span><span class="hs-identifier hs-var">sequenceA</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DLetDec -&gt; DDec
+</span><span class="hs-identifier hs-var">DLetDec</span></span><span> </span><span class="annot"><span class="annottext">(DLetDec -&gt; DDec) -&gt; q DLetDec -&gt; q DDec
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Fixity -&gt; q DLetDec
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; Fixity -&gt; q DLetDec
+</span><a href="Data.Singletons.Single.Fixity.html#singInfixDecl"><span class="hs-identifier hs-var">singInfixDecl</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356908"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Fixity
+</span><a href="#local-6989586621681356905"><span class="hs-identifier hs-var">fixity</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span id="local-6989586621681356901"><span class="annot"><a href="Data.Singletons.Single.Fixity.html#singFixityDeclarations"><span class="hs-identifier hs-type">singFixityDeclarations</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681356901"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681356901"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-30"></span><span id="singFixityDeclarations"><span class="annot"><span class="annottext">singFixityDeclarations :: [Name] -&gt; q [DDec]
+</span><a href="Data.Singletons.Single.Fixity.html#singFixityDeclarations"><span class="hs-identifier hs-var hs-var">singFixityDeclarations</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Name -&gt; q [DDec]) -&gt; [Name] -&gt; q [DDec]
+forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Data.Singletons.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; q [DDec]
+forall (m :: * -&gt; *). DsMonad m =&gt; Name -&gt; m [DDec]
+</span><a href="#local-6989586621681356898"><span class="hs-identifier hs-var">trySingFixityDeclaration</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621681356898"><span class="annot"><span class="annottext">trySingFixityDeclaration :: Name -&gt; m [DDec]
+</span><a href="#local-6989586621681356898"><span class="hs-identifier hs-var hs-var">trySingFixityDeclaration</span></a></span></span><span> </span><span id="local-6989586621681356897"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681356897"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="annottext">m [DDec] -&gt; m [DDec] -&gt; m [DDec]
+forall (m :: * -&gt; *) a. Quasi m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">qRecover</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DDec] -&gt; m [DDec]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; m [DDec]
+forall (m :: * -&gt; *). DsMonad m =&gt; Name -&gt; m [DDec]
+</span><a href="Data.Singletons.Single.Fixity.html#singFixityDeclaration"><span class="hs-identifier hs-var">singFixityDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681356897"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span></pre></body></html>

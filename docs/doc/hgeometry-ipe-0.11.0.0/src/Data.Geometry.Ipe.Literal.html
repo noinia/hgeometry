@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.Literal</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Quote</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.XML.Expat.Tree</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="annot"><a href="Data.Geometry.Ipe.Literal.html#literally"><span class="hs-identifier hs-type">literally</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exp</span></span><span>
+</span><span id="line-12"></span><span id="literally"><span class="annot"><span class="annottext">literally :: String -&gt; Q Exp
+</span><a href="Data.Geometry.Ipe.Literal.html#literally"><span class="hs-identifier hs-var hs-var">literally</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Exp -&gt; Q Exp
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Exp -&gt; Q Exp) -&gt; (String -&gt; Exp) -&gt; String -&gt; Q Exp
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Lit -&gt; Exp
+</span><span class="hs-identifier hs-var">LitE</span></span><span> </span><span class="annot"><span class="annottext">(Lit -&gt; Exp) -&gt; (String -&gt; Lit) -&gt; String -&gt; Exp
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Lit
+</span><span class="hs-identifier hs-var">StringL</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="annot"><a href="Data.Geometry.Ipe.Literal.html#lit"><span class="hs-identifier hs-type">lit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">QuasiQuoter</span></span><span>
+</span><span id="line-15"></span><span id="lit"><span class="annot"><span class="annottext">lit :: QuasiQuoter
+</span><a href="Data.Geometry.Ipe.Literal.html#lit"><span class="hs-identifier hs-var hs-var">lit</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QuasiQuoter :: (String -&gt; Q Exp)
+-&gt; (String -&gt; Q Pat)
+-&gt; (String -&gt; Q Type)
+-&gt; (String -&gt; Q [Dec])
+-&gt; QuasiQuoter
+</span><span class="hs-identifier hs-type hs-type">QuasiQuoter</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">quoteExp :: String -&gt; Q Exp
+</span><span class="hs-identifier hs-var">quoteExp</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Q Exp
+</span><a href="Data.Geometry.Ipe.Literal.html#literally"><span class="hs-identifier hs-var">literally</span></a></span><span>
+</span><span id="line-16"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">quotePat :: String -&gt; Q Pat
+</span><span class="hs-identifier hs-var">quotePat</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Q Pat
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span>
+</span><span id="line-17"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">quoteType :: String -&gt; Q Type
+</span><span class="hs-identifier hs-var">quoteType</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Q Type
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span>
+</span><span id="line-18"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">quoteDec :: String -&gt; Q [Dec]
+</span><span class="hs-identifier hs-var">quoteDec</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Q [Dec]
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span>
+</span><span id="line-19"></span><span>                  </span><span class="hs-special">}</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><a href="Data.Geometry.Ipe.Literal.html#litFile"><span class="hs-identifier hs-type">litFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">QuasiQuoter</span></span><span>
+</span><span id="line-22"></span><span id="litFile"><span class="annot"><span class="annottext">litFile :: QuasiQuoter
+</span><a href="Data.Geometry.Ipe.Literal.html#litFile"><span class="hs-identifier hs-var hs-var">litFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QuasiQuoter -&gt; QuasiQuoter
+</span><span class="hs-identifier hs-var">quoteFile</span></span><span> </span><span class="annot"><span class="annottext">QuasiQuoter
+</span><a href="Data.Geometry.Ipe.Literal.html#lit"><span class="hs-identifier hs-var">lit</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="annot"><a href="Data.Geometry.Ipe.Literal.html#xmlLiteral"><span class="hs-identifier hs-type">xmlLiteral</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-26"></span><span id="xmlLiteral"><span class="annot"><span class="annottext">xmlLiteral :: String -&gt; Node Text Text
+</span><a href="Data.Geometry.Ipe.Literal.html#xmlLiteral"><span class="hs-identifier hs-var hs-var">xmlLiteral</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(XMLParseError -&gt; Node Text Text)
+-&gt; (Node Text Text -&gt; Node Text Text)
+-&gt; Either XMLParseError (Node Text Text)
+-&gt; Node Text Text
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; String -&gt; Node Text Text
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;xmlLiteral. error parsing xml: &quot;</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Node Text Text)
+-&gt; (XMLParseError -&gt; String) -&gt; XMLParseError -&gt; Node Text Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">XMLParseError -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Node Text Text -&gt; Node Text Text
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-27"></span><span>           </span><span class="annot"><span class="annottext">(Either XMLParseError (Node Text Text) -&gt; Node Text Text)
+-&gt; (String -&gt; Either XMLParseError (Node Text Text))
+-&gt; String
+-&gt; Node Text Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>  </span><span class="annot"><span class="annottext">ParseOptions Text Text
+-&gt; ByteString -&gt; Either XMLParseError (Node Text Text)
+forall tag text.
+(GenericXMLString tag, GenericXMLString text) =&gt;
+ParseOptions tag text
+-&gt; ByteString -&gt; Either XMLParseError (Node tag text)
+</span><span class="hs-identifier hs-var">parse'</span></span><span> </span><span class="annot"><span class="annottext">ParseOptions Text Text
+forall tag text. ParseOptions tag text
+</span><span class="hs-identifier hs-var">defaultParseOptions</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either XMLParseError (Node Text Text))
+-&gt; (String -&gt; ByteString)
+-&gt; String
+-&gt; Either XMLParseError (Node Text Text)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ByteString
+</span><span class="hs-identifier hs-var">C.pack</span></span><span>
+</span><span id="line-28"></span></pre></body></html>

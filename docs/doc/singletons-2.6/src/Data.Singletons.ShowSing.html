@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE EmptyCase #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE QuantifiedConstraints #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Module      :  Data.Singletons.ShowSing</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- Copyright   :  (C) 2017 Ryan Scott</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- Defines the class 'ShowSing' type synonym, which is useful for defining</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- 'Show' instances for singleton types.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.ShowSing</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-comment">-- * The 'ShowSing' type</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier">ShowSing</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Internal utilities</span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier">ShowSing'</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html"><span class="hs-identifier">Data.Singletons.Internal</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html"><span class="hs-identifier">Data.Singletons.Prelude.Instances</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Single.html"><span class="hs-identifier">Data.Singletons.Single</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TypeLits.Internal.html"><span class="hs-identifier">Data.Singletons.TypeLits.Internal</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Util.html"><span class="hs-identifier">Data.Singletons.Util</span></a></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">appPrec</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">appPrec1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TN</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | In addition to the promoted and singled versions of the 'Show' class that</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- @singletons@ provides, it is also useful to be able to directly define</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- 'Show' instances for singleton types themselves. Doing so is almost entirely</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- straightforward, as a derived 'Show' instance does 90 percent of the work.</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- The last 10 percent&#8212;getting the right instance context&#8212;is a bit tricky, and</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- that's where 'ShowSing' comes into play.</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- As an example, let's consider the singleton type for lists. We want to write</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- an instance with the following shape:</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- instance ??? =&gt; 'Show' ('SList' (z :: [k])) where</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--   showsPrec p 'SNil' = showString \&quot;SNil\&quot;</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--   showsPrec p ('SCons' sx sxs) =</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--     showParen (p &gt; 10) $ showString \&quot;SCons \&quot; . showsPrec 11 sx</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--                        . showSpace . showsPrec 11 sxs</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- To figure out what should go in place of @???@, observe that we require the</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- type of each field to also be 'Show' instances. In other words, we need</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- something like @('Show' ('Sing' (a :: k)))@. But this isn't quite right, as the</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- type variable @a@ doesn't appear in the instance head. In fact, this @a@</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- type is really referring to an existentially quantified type variable in the</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- 'SCons' constructor, so it doesn't make sense to try and use it like this.</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- Luckily, the @QuantifiedConstraints@ language extension provides a solution</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- to this problem. This lets you write a context of the form</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- @(forall a. 'Show' ('Sing' (a :: k)))@, which demands that there be an instance</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- for @'Show' ('Sing' (a :: k))@ that is parametric in the use of @a@.</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- This lets us write something closer to this:</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- instance (forall a. 'Show' ('Sing' (a :: k))) =&gt; 'SList' ('Sing' (z :: [k])) where ...</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- The 'ShowSing' class is a thin wrapper around</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- @(forall a. 'Show' ('Sing' (a :: k)))@. With 'ShowSing', our final instance</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- declaration becomes this:</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- instance 'ShowSing' k =&gt; 'Show' ('SList' (z :: [k])) where</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--   showsPrec p 'SNil' = showString \&quot;SNil\&quot;</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--   showsPrec p ('SCons' (sx :: 'Sing' x) (sxs :: 'Sing' xs)) =</span><span>
+</span><span id="line-87"></span><span class="hs-comment">--     (showParen (p &gt; 10) $ showString \&quot;SCons \&quot; . showsPrec 11 sx</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--                         . showSpace . showsPrec 11 sxs)</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--       :: (ShowSing' x, ShowSing' xs) =&gt; ShowS</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- (Note that the actual definition of 'ShowSing' is slightly more complicated</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- than what this documentation might suggest. For the full story, as well as</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- an explanation of why we need an explicit</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- @(ShowSing' x, ShowSing' xs) =&gt; ShowS@ signature at the end,</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- refer to the documentation for `ShowSing'`.)</span><span>
+</span><span id="line-97"></span><span class="hs-comment">--</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- When singling a derived 'Show' instance, @singletons@ will also generate</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- a 'Show' instance for the corresponding singleton type using 'ShowSing'.</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- In other words, if you give @singletons@ a derived 'Show' instance, then</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- you'll receive the following in return:</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- * A promoted (@PShow@) instance</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- * A singled (@SShow@) instance</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- * A 'Show' instance for the singleton type</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- What a bargain!</span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- One might wonder we we simply don't define ShowSing as</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- @type ShowSing k = (forall (z :: k). ShowSing' z)@ instead of going the</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- extra mile to define it as a class.</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- See Note [Define ShowSing as a class, not a type synonym] for an explanation.</span><span>
+</span><span id="line-113"></span><span class="hs-keyword">class</span><span>    </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681368635"><span class="annot"><a href="#local-6989586621681368635"><span class="hs-identifier hs-type">z</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681368632"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368635"><span class="hs-identifier hs-type">z</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="ShowSing"><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier hs-var">ShowSing</span></a></span></span><span> </span><span id="local-6989586621681368632"><span class="annot"><a href="#local-6989586621681368632"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-114"></span><span id="local-6989586621681368533"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681368530"><span class="annot"><a href="#local-6989586621681368530"><span class="hs-identifier hs-type">z</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681368533"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368530"><span class="hs-identifier hs-type">z</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier hs-type">ShowSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368533"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- | The workhorse that powers 'ShowSing'. The only reason that `ShowSing'`</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- exists is to work around GHC's inability to put type families in the head</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- of a quantified constraint (see</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- &lt;https://gitlab.haskell.org/ghc/ghc/issues/14860 this GHC issue&gt; for more</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- details on this point). In other words, GHC will not let you define</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- 'ShowSing' like so:</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- class (forall (z :: k). 'Show' ('Sing' z)) =&gt; 'ShowSing' k</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-126"></span><span class="hs-comment">--</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- By replacing @'Show' ('Sing' z)@ with @ShowSing' z@, we are able to avoid</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- this restriction for the most part. There is one major downside to using</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- @ShowSing'@, however: deriving 'Show' instances for singleton types does</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- not work out of the box. In other words, if you try to do this:</span><span>
+</span><span id="line-131"></span><span class="hs-comment">--</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- deriving instance 'ShowSing' k =&gt; 'Show' ('SList' (z :: [k]))</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- Then GHC will complain to the effect that it could not deduce a</span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- @'Show' ('Sing' x)@ constraint. This is due to</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- &lt;https://gitlab.haskell.org/ghc/ghc/issues/16365 another unfortunate GHC bug&gt;</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- that prevents GHC from realizing that @'ShowSing' k@ implies</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- @'Show' ('Sing' (x :: k))@. The workaround is to force GHC to come to its</span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- senses by using an explicit type signature:</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--</span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- instance 'ShowSing' k =&gt; 'Show' ('SList' (z :: [k])) where</span><span>
+</span><span id="line-145"></span><span class="hs-comment">--   showsPrec p 'SNil' = showString \&quot;SNil\&quot;</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--   showsPrec p ('SCons' (sx :: 'Sing' x) (sxs :: 'Sing' xs)) =</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--     (showParen (p &gt; 10) $ showString \&quot;SCons \&quot; . showsPrec 11 sx</span><span>
+</span><span id="line-148"></span><span class="hs-comment">--                         . showSpace . showsPrec 11 sxs)</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--       :: (ShowSing' x, ShowSing' xs) =&gt; ShowS</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-151"></span><span class="hs-comment">--</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- The use of @ShowSing' x@ in the signature is sufficient to make the</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- constraint solver connect the dots between @'ShowSing' k@ and</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- @'Show' ('Sing' (x :: k))@. (The @ShowSing' xs@ constraint is not strictly</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- necessary, but it is shown here since that is in fact the code that</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- @singletons@ will generate for this instance.)</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- Because @deriving 'Show'@ will not insert these explicit signatures for us,</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- it is not possible to derive 'Show' instances for singleton types.</span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- Thankfully, @singletons@' Template Haskell machinery can do this manual</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- gruntwork for us 99% of the time, but if you ever find yourself in a</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- situation where you must define a 'Show' instance for a singleton type by</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- hand, this is important to keep in mind.</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- Note that there is one potential future direction that might alleviate this</span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- pain. We could define `ShowSing'` like this instead:</span><span>
+</span><span id="line-167"></span><span class="hs-comment">--</span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- class (forall sing. sing ~ 'Sing' =&gt; 'Show' (sing z)) =&gt; ShowSing' z</span><span>
+</span><span id="line-170"></span><span class="hs-comment">-- instance 'Show' ('Sing' z) =&gt; ShowSing' z</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-172"></span><span class="hs-comment">--</span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- For many examples, this lets you just derive 'Show' instances for singleton</span><span>
+</span><span id="line-174"></span><span class="hs-comment">-- types like you would expect. Alas, this topples over on @Bar@ in the</span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- following example:</span><span>
+</span><span id="line-176"></span><span class="hs-comment">--</span><span>
+</span><span id="line-177"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-178"></span><span class="hs-comment">-- newtype Foo a = MkFoo a</span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- data SFoo :: forall a. Foo a -&gt; Type where</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--   SMkFoo :: Sing x -&gt; SFoo (MkFoo x)</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- type instance Sing = SFoo</span><span>
+</span><span id="line-182"></span><span class="hs-comment">-- deriving instance ShowSing a =&gt; Show (SFoo (z :: Foo a))</span><span>
+</span><span id="line-183"></span><span class="hs-comment">--</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- newtype Bar a = MkBar (Foo a)</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- data SBar :: forall a. Bar a -&gt; Type where</span><span>
+</span><span id="line-186"></span><span class="hs-comment">--   SMkBar :: Sing x -&gt; SBar (MkBar x)</span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- type instance Sing = SBar</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- deriving instance ShowSing (Foo a) =&gt; Show (SBar (z :: Bar a))</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-190"></span><span class="hs-comment">--</span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- This fails because</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- of&#8212;you guessed it&#8212;&lt;https://gitlab.haskell.org/ghc/ghc/issues/16502 another GHC bug&gt;.</span><span>
+</span><span id="line-193"></span><span class="hs-comment">-- Bummer. Unless that bug were to be fixed, the current definition of</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- `ShowSing'` is the best that we can do.</span><span>
+</span><span id="line-195"></span><span class="hs-keyword">class</span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier hs-type">Sing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368627"><span class="hs-identifier hs-type">z</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="ShowSing%27"><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-var">ShowSing'</span></a></span></span><span> </span><span id="local-6989586621681368627"><span class="annot"><a href="#local-6989586621681368627"><span class="hs-identifier hs-type">z</span></a></span></span><span>
+</span><span id="line-196"></span><span id="local-6989586621681368529"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier hs-type">Sing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368529"><span class="hs-identifier hs-type">z</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368529"><span class="hs-identifier hs-type">z</span></a></span></span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span class="hs-comment">{-
+Note [Define ShowSing as a class, not a type synonym]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In an ideal world, we would simply define ShowSing like this:
+
+  type ShowSing k = (forall (z :: k). ShowSing' z) :: Constraint)
+
+In fact, I used to define ShowSing in a manner similar to this in version 2.5
+of singletons. However, I realized some time after 2.5's release that the
+this encoding is unfeasible at the time being due to GHC Trac #15888.
+
+To be more precise, the exact issue involves an infelicity in the way
+QuantifiedConstraints interacts with recursive type class instances.
+Consider the following example (from #371):
+
+  $(singletons [d|
+    data X a = X1 | X2 (Y a) deriving Show
+    data Y a = Y1 | Y2 (X a) deriving Show
+    |])
+
+This will generate the following instances:
+
+  deriving instance ShowSing (Y a) =&gt; Show (Sing (z :: X a))
+  deriving instance ShowSing (X a) =&gt; Show (Sing (z :: Y a))
+
+So far, so good. Now, suppose you try to actually `show` a singleton for X.
+For example:
+
+  show (sing @(X1 :: X Bool))
+
+Somewhat surprisingly, this will be rejected by the typechecker with the
+following error:
+
+    &#8226; Reduction stack overflow; size = 201
+      When simplifying the following type: Show (Sing z)
+
+To see why this happens, observe what goes on if we expand the occurrences of
+the ShowSing type synonym in the generated instances:
+
+  deriving instance (forall z. ShowSing' (z :: Y a)) =&gt; Show (Sing (z :: X a))
+  deriving instance (forall z. ShowSing' (z :: X a)) =&gt; Show (Sing (z :: Y a))
+
+Due to the way QuantifiedConstraints currently works (as surmised in Trac
+#15888), when GHC has a Wanted `ShowSing' (X1 :: X Bool)` constraint, it
+chooses the appropriate instance and emits a Wanted
+`forall z. ShowSing' (z :: Y Bool)` constraint (from the instance context).
+GHC skolemizes the `z` to `z1` and tries to solve a Wanted
+`ShowSing' (z1 :: Y Bool)` constraint. GHC chooses the appropriate instance
+and emits a Wanted `forall z. ShowSing' (z :: X Bool)` constraint. GHC
+skolemizes the `z` to `z2` and tries to solve a Wanted
+`ShowSing' (z2 :: X Bool)` constraint... we repeat the process and find
+ourselves in an infinite loop that eventually overflows the reduction stack.
+Eep.
+
+Until Trac #15888 is fixed, there are two possible ways to work around this
+problem:
+
+1. Make derived instances' type inference more clever. If you look closely,
+   you'll notice that the `ShowSing (X a)`/`ShowSing (Y a)` constraints in
+   the generated instances are entirely redundant and could safely be left
+   off. But determining this would require significantly improving singletons'
+   Template Haskell capabilities for type inference, which is a path that we
+   usually spurn in favor of keeping the generated code dumb but predictable.
+2. Define `ShowSing` as a class (with a single instance) instead of a type
+   synonym. `ShowSing`-as-a-class ties the recursive knot during instance
+   resolution and thus avoids the problems that the type synonym version
+   currently suffers from.
+
+Given the two options, (2) is by far the easier option, so that is what we
+ultimately went with.
+-}</span><span>
+</span><span id="line-269"></span><span>
+</span><span id="line-270"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-271"></span><span class="hs-comment">-- (S)WrappedSing instances</span><span>
+</span><span id="line-272"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span id="local-6989586621681368525"><span id="local-6989586621681368526"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681368520"><span id="local-6989586621681368522"><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier hs-type">ShowSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368526"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#WrappedSing"><span class="hs-identifier hs-type">WrappedSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681368525"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681368526"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-275"></span><span>  </span><span id="local-6989586621681368518"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; WrappedSing a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621681368516"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681368516"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#WrapSing"><span class="hs-identifier hs-type">WrapSing</span></a></span><span> </span><span id="local-6989586621681368514"><span class="annot"><span class="annottext">s :: Sing a
+</span><a href="#local-6989586621681368514"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681368516"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-276"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;WrapSing {unwrapSing = &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Sing a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681368514"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="hs-char">'}'</span></span><span>
+</span><span id="line-277"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368525"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span></span></span><span>
+</span><span id="line-278"></span><span>
+</span><span id="line-279"></span><span id="local-6989586621681368507"><span id="local-6989586621681368508"><span id="local-6989586621681368509"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681368502"><span id="local-6989586621681368504"><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier hs-type">ShowSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368508"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SWrappedSing"><span class="hs-identifier hs-type">SWrappedSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681368507"><span class="hs-identifier hs-type">ws</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#WrappedSing"><span class="hs-identifier hs-type">WrappedSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681368509"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621681368508"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-280"></span><span>  </span><span id="local-6989586621681368501"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; SWrappedSing ws -&gt; ShowS
+</span><a href="#local-6989586621681368501"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621681368500"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681368500"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SWrapSing"><span class="hs-identifier hs-type">SWrapSing</span></a></span><span> </span><span id="local-6989586621681368498"><span class="annot"><span class="annottext">s :: Sing a
+</span><a href="#local-6989586621681368498"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681368500"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-281"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;SWrapSing {sUnwrapSing = &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Sing a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681368498"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="hs-char">'}'</span></span><span>
+</span><span id="line-282"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368509"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span></span></span></span><span>
+</span><span id="line-283"></span><span>
+</span><span id="line-284"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-285"></span><span class="hs-comment">-- TypeLits instances</span><span>
+</span><span id="line-286"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-287"></span><span>
+</span><span id="line-288"></span><span class="hs-comment">-- These are a bit special because the singleton constructor does not uniquely</span><span>
+</span><span id="line-289"></span><span class="hs-comment">-- determine the type being used in the constructor's return type (e.g., all Nats</span><span>
+</span><span id="line-290"></span><span class="hs-comment">-- have the same singleton constructor, SNat). To compensate for this, we display</span><span>
+</span><span id="line-291"></span><span class="hs-comment">-- the type being used using visible type application. (Thanks to @cumber on #179</span><span>
+</span><span id="line-292"></span><span class="hs-comment">-- for suggesting this implementation.)</span><span>
+</span><span id="line-293"></span><span>
+</span><span id="line-294"></span><span id="local-6989586621681368497"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681368492"><span id="local-6989586621681368494"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeLits.Internal.html#SNat"><span class="hs-identifier hs-type">SNat</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368497"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-295"></span><span>  </span><span id="local-6989586621681368491"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; SNat n -&gt; ShowS
+</span><a href="#local-6989586621681368491"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621681368490"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681368490"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621681368489"><span class="annot"><span class="annottext">n :: SNat n
+</span><a href="#local-6989586621681368489"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">SNat n
+</span><a href="Data.Singletons.TypeLits.Internal.html#SNat"><span class="hs-identifier hs-var">SNat</span></a></span><span>
+</span><span id="line-296"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681368490"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">appPrec</span></span><span class="hs-special">)</span><span>
+</span><span id="line-297"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;SNat @&quot;</span></span><span>
+</span><span id="line-298"></span><span>        </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Natural -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">appPrec1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n -&gt; Natural
+forall (n :: Nat) (proxy :: Nat -&gt; *).
+KnownNat n =&gt;
+proxy n -&gt; Natural
+</span><span class="hs-identifier hs-var">TN.natVal</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621681368489"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-299"></span><span>      </span><span class="hs-special">)</span></span><span>
+</span><span id="line-300"></span><span>
+</span><span id="line-301"></span><span id="local-6989586621681368485"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681368480"><span id="local-6989586621681368482"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeLits.Internal.html#SSymbol"><span class="hs-identifier hs-type">SSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681368485"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-302"></span><span>  </span><span id="local-6989586621681368479"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; SSymbol s -&gt; ShowS
+</span><a href="#local-6989586621681368479"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621681368478"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681368478"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621681368477"><span class="annot"><span class="annottext">s :: SSymbol s
+</span><a href="#local-6989586621681368477"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">SSymbol s
+</span><a href="Data.Singletons.TypeLits.Internal.html#SSym"><span class="hs-identifier hs-var">SSym</span></a></span><span>
+</span><span id="line-303"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681368478"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">appPrec</span></span><span class="hs-special">)</span><span>
+</span><span id="line-304"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;SSym @&quot;</span></span><span>
+</span><span id="line-305"></span><span>        </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">appPrec1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SSymbol s -&gt; String
+forall (n :: Symbol) (proxy :: Symbol -&gt; *).
+KnownSymbol n =&gt;
+proxy n -&gt; String
+</span><span class="hs-identifier hs-var">symbolVal</span></span><span> </span><span class="annot"><span class="annottext">SSymbol s
+</span><a href="#local-6989586621681368477"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-306"></span><span>      </span><span class="hs-special">)</span></span><span>
+</span><span id="line-307"></span><span>
+</span><span id="line-308"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-309"></span><span class="hs-comment">-- Template Haskell-generated instances</span><span>
+</span><span id="line-310"></span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-311"></span><span>
+</span><span id="line-312"></span><span class="hs-special">$(</span><span id="local-6989586621681368359"><span id="local-6989586621681368361"><span id="local-6989586621681368363"><span id="local-6989586621681368365"><span id="local-6989586621681368367"><span id="local-6989586621681368369"><span id="local-6989586621681368371"><span id="local-6989586621681368373"><span id="local-6989586621681368375"><span id="local-6989586621681368377"><span id="local-6989586621681368379"><span id="local-6989586621681368381"><span id="local-6989586621681368383"><span id="local-6989586621681368385"><span id="local-6989586621681368387"><span id="local-6989586621681368389"><span id="local-6989586621681368391"><span id="local-6989586621681368393"><span id="local-6989586621681368395"><span id="local-6989586621681368397"><span id="local-6989586621681368399"><span id="local-6989586621681368401"><span id="local-6989586621681368403"><span id="local-6989586621681368405"><span id="local-6989586621681368407"><span id="local-6989586621681368409"><span id="local-6989586621681368411"><span id="local-6989586621681368413"><span id="local-6989586621681368415"><span id="local-6989586621681368417"><span id="local-6989586621681368419"><span id="local-6989586621681368421"><span id="local-6989586621681368423"><span id="local-6989586621681368425"><span id="local-6989586621681368427"><span id="local-6989586621681368429"><span id="local-6989586621681368431"><span id="local-6989586621681368433"><span id="local-6989586621681368435"><span id="local-6989586621681368437"><span id="local-6989586621681368439"><span id="local-6989586621681368441"><span id="local-6989586621681368443"><span id="local-6989586621681368445"><span id="local-6989586621681368447"><span id="local-6989586621681368449"><span id="local-6989586621681368450"><span id="local-6989586621681368451"><span id="local-6989586621681368452"><span id="local-6989586621681368453"><span id="local-6989586621681368454"><span id="local-6989586621681368455"><span id="local-6989586621681368456"><span id="local-6989586621681368457"><span id="local-6989586621681368458"><span id="local-6989586621681368459"><span id="local-6989586621681368460"><span id="local-6989586621681368461"><span id="local-6989586621681368462"><span id="local-6989586621681368463"><span id="local-6989586621681368464"><span id="local-6989586621681368465"><span id="local-6989586621681368466"><span id="local-6989586621681368467"><span id="local-6989586621681368468"><span id="local-6989586621681368469"><span id="local-6989586621681368470"><span id="local-6989586621681368471"><span id="local-6989586621681368472"><span id="local-6989586621681368473"><span id="local-6989586621681368474"><span class="hs-identifier">showSingInstances</span><span> </span><span class="hs-identifier">basicTypes</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-313"></span></pre></body></html>

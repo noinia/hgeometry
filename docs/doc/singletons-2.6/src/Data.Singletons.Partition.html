@@ -1,0 +1,1142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Singletons.Partition</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) 2015 Richard Eisenberg</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Partitions a list of declarations into its bits</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-15"></span><span class="hs-pragma">{-# LANGUAGE TupleSections #-}</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.Partition</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">exp</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html"><span class="hs-identifier">Data.Singletons.Syntax</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Ord.html"><span class="hs-identifier">Data.Singletons.Deriving.Ord</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Bounded.html"><span class="hs-identifier">Data.Singletons.Deriving.Bounded</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Enum.html"><span class="hs-identifier">Data.Singletons.Deriving.Enum</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Foldable.html"><span class="hs-identifier">Data.Singletons.Deriving.Foldable</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Functor.html"><span class="hs-identifier">Data.Singletons.Deriving.Functor</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Show.html"><span class="hs-identifier">Data.Singletons.Deriving.Show</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Traversable.html"><span class="hs-identifier">Data.Singletons.Deriving.Traversable</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html"><span class="hs-identifier">Data.Singletons.Deriving.Util</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Names.html"><span class="hs-identifier">Data.Singletons.Names</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">showName</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Ppr</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OMap</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">OMap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Util.html"><span class="hs-identifier">Data.Singletons.Util</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">bimap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="PartitionedDecs"><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-var">PartitionedDecs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>  </span><span id="PDecs"><span class="annot"><a href="Data.Singletons.Partition.html#PDecs"><span class="hs-identifier hs-var">PDecs</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="pd_let_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [DLetDec]
+</span><a href="Data.Singletons.Partition.html#pd_let_decs"><span class="hs-identifier hs-var hs-var">pd_let_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span class="hs-special">]</span><span>
+</span><span id="line-45"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_class_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [UClassDecl]
+</span><a href="Data.Singletons.Partition.html#pd_class_decs"><span class="hs-identifier hs-var hs-var">pd_class_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#UClassDecl"><span class="hs-identifier hs-type">UClassDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_instance_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [UInstDecl]
+</span><a href="Data.Singletons.Partition.html#pd_instance_decs"><span class="hs-identifier hs-var hs-var">pd_instance_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#UInstDecl"><span class="hs-identifier hs-type">UInstDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-47"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_data_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [DataDecl]
+</span><a href="Data.Singletons.Partition.html#pd_data_decs"><span class="hs-identifier hs-var hs-var">pd_data_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-type">DataDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-48"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_ty_syn_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [TySynDecl]
+</span><a href="Data.Singletons.Partition.html#pd_ty_syn_decs"><span class="hs-identifier hs-var hs-var">pd_ty_syn_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#TySynDecl"><span class="hs-identifier hs-type">TySynDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_open_type_family_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [OpenTypeFamilyDecl]
+</span><a href="Data.Singletons.Partition.html#pd_open_type_family_decs"><span class="hs-identifier hs-var hs-var">pd_open_type_family_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#OpenTypeFamilyDecl"><span class="hs-identifier hs-type">OpenTypeFamilyDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-50"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_closed_type_family_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [ClosedTypeFamilyDecl]
+</span><a href="Data.Singletons.Partition.html#pd_closed_type_family_decs"><span class="hs-identifier hs-var hs-var">pd_closed_type_family_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#ClosedTypeFamilyDecl"><span class="hs-identifier hs-type">ClosedTypeFamilyDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-51"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_derived_eq_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [DerivedEqDecl]
+</span><a href="Data.Singletons.Partition.html#pd_derived_eq_decs"><span class="hs-identifier hs-var hs-var">pd_derived_eq_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#DerivedEqDecl"><span class="hs-identifier hs-type">DerivedEqDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-52"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pd_derived_show_decs"><span class="annot"><span class="annottext">PartitionedDecs -&gt; [DerivedShowDecl]
+</span><a href="Data.Singletons.Partition.html#pd_derived_show_decs"><span class="hs-identifier hs-var hs-var">pd_derived_show_decs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#DerivedShowDecl"><span class="hs-identifier hs-type">DerivedShowDecl</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-53"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681360405"><span id="local-6989586621681360407"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><a href="Data.Singletons.Partition.html#PDecs"><span class="hs-identifier hs-type">PDecs</span></a></span><span> </span><span id="local-6989586621681360403"><span class="annot"><span class="annottext">a1 :: [DLetDec]
+</span><a href="#local-6989586621681360403"><span class="hs-identifier hs-var">a1</span></a></span></span><span> </span><span id="local-6989586621681360402"><span class="annot"><span class="annottext">b1 :: [UClassDecl]
+</span><a href="#local-6989586621681360402"><span class="hs-identifier hs-var">b1</span></a></span></span><span> </span><span id="local-6989586621681360401"><span class="annot"><span class="annottext">c1 :: [UInstDecl]
+</span><a href="#local-6989586621681360401"><span class="hs-identifier hs-var">c1</span></a></span></span><span> </span><span id="local-6989586621681360400"><span class="annot"><span class="annottext">d1 :: [DataDecl]
+</span><a href="#local-6989586621681360400"><span class="hs-identifier hs-var">d1</span></a></span></span><span> </span><span id="local-6989586621681360399"><span class="annot"><span class="annottext">e1 :: [TySynDecl]
+</span><a href="#local-6989586621681360399"><span class="hs-identifier hs-var">e1</span></a></span></span><span> </span><span id="local-6989586621681360398"><span class="annot"><span class="annottext">f1 :: [OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360398"><span class="hs-identifier hs-var">f1</span></a></span></span><span> </span><span id="local-6989586621681360397"><span class="annot"><span class="annottext">g1 :: [ClosedTypeFamilyDecl]
+</span><a href="#local-6989586621681360397"><span class="hs-identifier hs-var">g1</span></a></span></span><span> </span><span id="local-6989586621681360396"><span class="annot"><span class="annottext">h1 :: [DerivedEqDecl]
+</span><a href="#local-6989586621681360396"><span class="hs-identifier hs-var">h1</span></a></span></span><span> </span><span id="local-6989586621681360395"><span class="annot"><span class="annottext">i1 :: [DerivedShowDecl]
+</span><a href="#local-6989586621681360395"><span class="hs-identifier hs-var">i1</span></a></span></span><span> </span><span id="local-6989586621681360394"><span class="annot"><span class="annottext">&lt;&gt; :: PartitionedDecs -&gt; PartitionedDecs -&gt; PartitionedDecs
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PDecs"><span class="hs-identifier hs-type">PDecs</span></a></span><span> </span><span id="local-6989586621681360393"><span class="annot"><span class="annottext">a2 :: [DLetDec]
+</span><a href="#local-6989586621681360393"><span class="hs-identifier hs-var">a2</span></a></span></span><span> </span><span id="local-6989586621681360392"><span class="annot"><span class="annottext">b2 :: [UClassDecl]
+</span><a href="#local-6989586621681360392"><span class="hs-identifier hs-var">b2</span></a></span></span><span> </span><span id="local-6989586621681360391"><span class="annot"><span class="annottext">c2 :: [UInstDecl]
+</span><a href="#local-6989586621681360391"><span class="hs-identifier hs-var">c2</span></a></span></span><span> </span><span id="local-6989586621681360390"><span class="annot"><span class="annottext">d2 :: [DataDecl]
+</span><a href="#local-6989586621681360390"><span class="hs-identifier hs-var">d2</span></a></span></span><span> </span><span id="local-6989586621681360389"><span class="annot"><span class="annottext">e2 :: [TySynDecl]
+</span><a href="#local-6989586621681360389"><span class="hs-identifier hs-var">e2</span></a></span></span><span> </span><span id="local-6989586621681360388"><span class="annot"><span class="annottext">f2 :: [OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360388"><span class="hs-identifier hs-var">f2</span></a></span></span><span> </span><span id="local-6989586621681360387"><span class="annot"><span class="annottext">g2 :: [ClosedTypeFamilyDecl]
+</span><a href="#local-6989586621681360387"><span class="hs-identifier hs-var">g2</span></a></span></span><span> </span><span id="local-6989586621681360386"><span class="annot"><span class="annottext">h2 :: [DerivedEqDecl]
+</span><a href="#local-6989586621681360386"><span class="hs-identifier hs-var">h2</span></a></span></span><span> </span><span id="local-6989586621681360385"><span class="annot"><span class="annottext">i2 :: [DerivedShowDecl]
+</span><a href="#local-6989586621681360385"><span class="hs-identifier hs-var">i2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">[DLetDec]
+-&gt; [UClassDecl]
+-&gt; [UInstDecl]
+-&gt; [DataDecl]
+-&gt; [TySynDecl]
+-&gt; [OpenTypeFamilyDecl]
+-&gt; [ClosedTypeFamilyDecl]
+-&gt; [DerivedEqDecl]
+-&gt; [DerivedShowDecl]
+-&gt; PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#PDecs"><span class="hs-identifier hs-var">PDecs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621681360403"><span class="hs-identifier hs-var">a1</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec] -&gt; [DLetDec] -&gt; [DLetDec]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621681360393"><span class="hs-identifier hs-var">a2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[UClassDecl]
+</span><a href="#local-6989586621681360402"><span class="hs-identifier hs-var">b1</span></a></span><span> </span><span class="annot"><span class="annottext">[UClassDecl] -&gt; [UClassDecl] -&gt; [UClassDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[UClassDecl]
+</span><a href="#local-6989586621681360392"><span class="hs-identifier hs-var">b2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[UInstDecl]
+</span><a href="#local-6989586621681360401"><span class="hs-identifier hs-var">c1</span></a></span><span> </span><span class="annot"><span class="annottext">[UInstDecl] -&gt; [UInstDecl] -&gt; [UInstDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[UInstDecl]
+</span><a href="#local-6989586621681360391"><span class="hs-identifier hs-var">c2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DataDecl]
+</span><a href="#local-6989586621681360400"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">[DataDecl] -&gt; [DataDecl] -&gt; [DataDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DataDecl]
+</span><a href="#local-6989586621681360390"><span class="hs-identifier hs-var">d2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[TySynDecl]
+</span><a href="#local-6989586621681360399"><span class="hs-identifier hs-var">e1</span></a></span><span> </span><span class="annot"><span class="annottext">[TySynDecl] -&gt; [TySynDecl] -&gt; [TySynDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[TySynDecl]
+</span><a href="#local-6989586621681360389"><span class="hs-identifier hs-var">e2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360398"><span class="hs-identifier hs-var">f1</span></a></span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+-&gt; [OpenTypeFamilyDecl] -&gt; [OpenTypeFamilyDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360388"><span class="hs-identifier hs-var">f2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[ClosedTypeFamilyDecl]
+</span><a href="#local-6989586621681360397"><span class="hs-identifier hs-var">g1</span></a></span><span> </span><span class="annot"><span class="annottext">[ClosedTypeFamilyDecl]
+-&gt; [ClosedTypeFamilyDecl] -&gt; [ClosedTypeFamilyDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[ClosedTypeFamilyDecl]
+</span><a href="#local-6989586621681360387"><span class="hs-identifier hs-var">g2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DerivedEqDecl]
+</span><a href="#local-6989586621681360396"><span class="hs-identifier hs-var">h1</span></a></span><span> </span><span class="annot"><span class="annottext">[DerivedEqDecl] -&gt; [DerivedEqDecl] -&gt; [DerivedEqDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DerivedEqDecl]
+</span><a href="#local-6989586621681360386"><span class="hs-identifier hs-var">h2</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DerivedShowDecl]
+</span><a href="#local-6989586621681360395"><span class="hs-identifier hs-var">i1</span></a></span><span> </span><span class="annot"><span class="annottext">[DerivedShowDecl] -&gt; [DerivedShowDecl] -&gt; [DerivedShowDecl]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DerivedShowDecl]
+</span><a href="#local-6989586621681360385"><span class="hs-identifier hs-var">i2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681360380"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621681360378"><span class="annot"><span class="annottext">mempty :: PartitionedDecs
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+-&gt; [UClassDecl]
+-&gt; [UInstDecl]
+-&gt; [DataDecl]
+-&gt; [TySynDecl]
+-&gt; [OpenTypeFamilyDecl]
+-&gt; [ClosedTypeFamilyDecl]
+-&gt; [DerivedEqDecl]
+-&gt; [DerivedShowDecl]
+-&gt; PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#PDecs"><span class="hs-identifier hs-var">PDecs</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621681360377"><span class="annot"><span class="annottext">mappend :: PartitionedDecs -&gt; PartitionedDecs -&gt; PartitionedDecs
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; PartitionedDecs -&gt; PartitionedDecs
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | Split up a @[DDec]@ into its pieces, extracting 'Ord' instances</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- from deriving clauses</span><span>
+</span><span id="line-66"></span><span id="local-6989586621681360376"><span class="annot"><a href="Data.Singletons.Partition.html#partitionDecs"><span class="hs-identifier hs-type">partitionDecs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681360376"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360376"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span></span><span>
+</span><span id="line-67"></span><span id="partitionDecs"><span class="annot"><span class="annottext">partitionDecs :: [DDec] -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDecs"><span class="hs-identifier hs-var hs-var">partitionDecs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DDec -&gt; m PartitionedDecs) -&gt; [DDec] -&gt; m PartitionedDecs
+forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Data.Singletons.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="annot"><span class="annottext">DDec -&gt; m PartitionedDecs
+forall (m :: * -&gt; *). DsMonad m =&gt; DDec -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621681360531"><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-type">partitionDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681360531"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360531"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span></span><span>
+</span><span id="line-70"></span><span id="partitionDec"><span class="annot"><span class="annottext">partitionDec :: DDec -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var hs-var">partitionDec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DPragmaD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-71"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span id="local-6989586621681360370"><span class="annot"><span class="annottext">letdec :: DLetDec
+</span><a href="#local-6989586621681360370"><span class="hs-identifier hs-var">letdec</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_let_decs :: [DLetDec]
+</span><a href="Data.Singletons.Partition.html#pd_let_decs"><span class="hs-identifier hs-var">pd_let_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621681360370"><span class="hs-identifier hs-var">letdec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DDataD</span></span><span> </span><span id="local-6989586621681360368"><span class="annot"><span class="annottext">_nd :: NewOrData
+</span><a href="#local-6989586621681360368"><span class="hs-identifier hs-var">_nd</span></a></span></span><span> </span><span id="local-6989586621681360367"><span class="annot"><span class="annottext">_cxt :: DCxt
+</span><a href="#local-6989586621681360367"><span class="hs-identifier hs-var">_cxt</span></a></span></span><span> </span><span id="local-6989586621681360366"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360366"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360365"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681360365"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621681360364"><span class="annot"><span class="annottext">mk :: Maybe DKind
+</span><a href="#local-6989586621681360364"><span class="hs-identifier hs-var">mk</span></a></span></span><span> </span><span id="local-6989586621681360363"><span class="annot"><span class="annottext">cons :: [DCon]
+</span><a href="#local-6989586621681360363"><span class="hs-identifier hs-var">cons</span></a></span></span><span> </span><span id="local-6989586621681360362"><span class="annot"><span class="annottext">derivings :: [DDerivClause]
+</span><a href="#local-6989586621681360362"><span class="hs-identifier hs-var">derivings</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621681360361"><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360361"><span class="hs-identifier hs-var">all_tvbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; Maybe DKind -&gt; m [DTyVarBndr]
+forall (q :: * -&gt; *).
+DsMonad q =&gt;
+[DTyVarBndr] -&gt; Maybe DKind -&gt; q [DTyVarBndr]
+</span><a href="Data.Singletons.Util.html#buildDataDTvbs"><span class="hs-identifier hs-var">buildDataDTvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360365"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DKind
+</span><a href="#local-6989586621681360364"><span class="hs-identifier hs-var">mk</span></a></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360359"><span class="annot"><span class="annottext">data_decl :: DataDecl
+</span><a href="#local-6989586621681360359"><span class="hs-identifier hs-var hs-var">data_decl</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DTyVarBndr] -&gt; [DCon] -&gt; DataDecl
+</span><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-var">DataDecl</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360366"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360361"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621681360363"><span class="hs-identifier hs-var">cons</span></a></span><span>
+</span><span id="line-76"></span><span>      </span><span id="local-6989586621681360357"><span class="annot"><span class="annottext">derived_dec :: PartitionedDecs
+</span><a href="#local-6989586621681360357"><span class="hs-identifier hs-var hs-var">derived_dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_data_decs :: [DataDecl]
+</span><a href="Data.Singletons.Partition.html#pd_data_decs"><span class="hs-identifier hs-var">pd_data_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DataDecl
+</span><a href="#local-6989586621681360359"><span class="hs-identifier hs-var">data_decl</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621681360356"><span class="annot"><span class="annottext">[PartitionedDecs]
+</span><a href="#local-6989586621681360356"><span class="hs-identifier hs-var">derived_decs</span></a></span></span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">((Maybe DDerivStrategy, DKind) -&gt; m PartitionedDecs)
+-&gt; [(Maybe DDerivStrategy, DKind)] -&gt; m [PartitionedDecs]
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621681360354"><span class="annot"><span class="annottext">strat :: Maybe DDerivStrategy
+</span><a href="#local-6989586621681360354"><span class="hs-identifier hs-var">strat</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360353"><span class="annot"><span class="annottext">deriv_pred :: DKind
+</span><a href="#local-6989586621681360353"><span class="hs-identifier hs-var">deriv_pred</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-79"></span><span>              </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360352"><span class="annot"><span class="annottext">etad_tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681360352"><span class="hs-identifier hs-var hs-var">etad_tvbs</span></a></span></span><span>
+</span><span id="line-80"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360350"><span class="annot"><span class="annottext">pred_name :: Name
+</span><a href="#local-6989586621681360350"><span class="hs-identifier hs-var">pred_name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; (DKind, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360353"><span class="hs-identifier hs-var">deriv_pred</span></a></span><span>
+</span><span id="line-81"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isFunctorLikeClassName"><span class="hs-identifier hs-var">isFunctorLikeClassName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360350"><span class="hs-identifier hs-var">pred_name</span></a></span><span>
+</span><span id="line-82"></span><span>                      </span><span class="hs-comment">-- If deriving Functor, Foldable, or Traversable,</span><span>
+</span><span id="line-83"></span><span>                      </span><span class="hs-comment">-- we need to use one less type variable than we normally do.</span><span>
+</span><span id="line-84"></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [DTyVarBndr] -&gt; [DTyVarBndr]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">take</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360361"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360361"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span>
+</span><span id="line-85"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-86"></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360361"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span>
+</span><span id="line-87"></span><span>                  </span><span id="local-6989586621681360345"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360345"><span class="hs-identifier hs-var hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; [DTyVarBndr] -&gt; DKind
+</span><a href="Data.Singletons.Util.html#foldTypeTvbs"><span class="hs-identifier hs-var">foldTypeTvbs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DKind
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360366"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360352"><span class="hs-identifier hs-var">etad_tvbs</span></a></span><span>
+</span><span id="line-88"></span><span>              </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+-&gt; DKind -&gt; Maybe DCxt -&gt; DKind -&gt; DataDecl -&gt; m PartitionedDecs
+forall (m :: * -&gt; *).
+DsMonad m =&gt;
+Maybe DDerivStrategy
+-&gt; DKind -&gt; Maybe DCxt -&gt; DKind -&gt; DataDecl -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDeriving"><span class="hs-identifier hs-var">partitionDeriving</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360354"><span class="hs-identifier hs-var">strat</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360353"><span class="hs-identifier hs-var">deriv_pred</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DCxt
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360345"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">DataDecl
+</span><a href="#local-6989586621681360359"><span class="hs-identifier hs-var">data_decl</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>      </span><span class="annot"><span class="annottext">([(Maybe DDerivStrategy, DKind)] -&gt; m [PartitionedDecs])
+-&gt; [(Maybe DDerivStrategy, DKind)] -&gt; m [PartitionedDecs]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(DDerivClause -&gt; [(Maybe DDerivStrategy, DKind)])
+-&gt; [DDerivClause] -&gt; [(Maybe DDerivStrategy, DKind)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">DDerivClause -&gt; [(Maybe DDerivStrategy, DKind)]
+</span><a href="#local-6989586621681360341"><span class="hs-identifier hs-var">flatten_clause</span></a></span><span> </span><span class="annot"><span class="annottext">[DDerivClause]
+</span><a href="#local-6989586621681360362"><span class="hs-identifier hs-var">derivings</span></a></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[PartitionedDecs] -&gt; PartitionedDecs
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span> </span><span class="annot"><span class="annottext">([PartitionedDecs] -&gt; PartitionedDecs)
+-&gt; [PartitionedDecs] -&gt; PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+</span><a href="#local-6989586621681360357"><span class="hs-identifier hs-var">derived_dec</span></a></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; [PartitionedDecs] -&gt; [PartitionedDecs]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[PartitionedDecs]
+</span><a href="#local-6989586621681360356"><span class="hs-identifier hs-var">derived_decs</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>    </span><span class="annot"><a href="#local-6989586621681360341"><span class="hs-identifier hs-type">flatten_clause</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDerivClause</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDerivStrategy</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-93"></span><span>    </span><span id="local-6989586621681360341"><span class="annot"><span class="annottext">flatten_clause :: DDerivClause -&gt; [(Maybe DDerivStrategy, DKind)]
+</span><a href="#local-6989586621681360341"><span class="hs-identifier hs-var hs-var">flatten_clause</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DDerivClause</span></span><span> </span><span id="local-6989586621681360338"><span class="annot"><span class="annottext">strat :: Maybe DDerivStrategy
+</span><a href="#local-6989586621681360338"><span class="hs-identifier hs-var">strat</span></a></span></span><span> </span><span id="local-6989586621681360337"><span class="annot"><span class="annottext">preds :: DCxt
+</span><a href="#local-6989586621681360337"><span class="hs-identifier hs-var">preds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-94"></span><span>      </span><span class="annot"><span class="annottext">(DKind -&gt; (Maybe DDerivStrategy, DKind))
+-&gt; DCxt -&gt; [(Maybe DDerivStrategy, DKind)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621681360336"><span class="annot"><span class="annottext">p :: DKind
+</span><a href="#local-6989586621681360336"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360338"><span class="hs-identifier hs-var">strat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360336"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360337"><span class="hs-identifier hs-var">preds</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DClassD</span></span><span> </span><span id="local-6989586621681360334"><span class="annot"><span class="annottext">cxt :: DCxt
+</span><a href="#local-6989586621681360334"><span class="hs-identifier hs-var">cxt</span></a></span></span><span> </span><span id="local-6989586621681360333"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360333"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360332"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681360332"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621681360331"><span class="annot"><span class="annottext">fds :: [FunDep]
+</span><a href="#local-6989586621681360331"><span class="hs-identifier hs-var">fds</span></a></span></span><span> </span><span id="local-6989586621681360330"><span class="annot"><span class="annottext">decs :: [DDec]
+</span><a href="#local-6989586621681360330"><span class="hs-identifier hs-var">decs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621681360329"><span class="annot"><span class="annottext">lde :: ULetDecEnv
+</span><a href="#local-6989586621681360329"><span class="hs-identifier hs-var">lde</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360328"><span class="annot"><span class="annottext">otfs :: [OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360328"><span class="hs-identifier hs-var">otfs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DDec -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl]))
+-&gt; [DDec] -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Data.Singletons.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="annot"><span class="annottext">DDec -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (m :: * -&gt; *).
+MonadFail m =&gt;
+DDec -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+</span><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681360330"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_class_decs :: [UClassDecl]
+</span><a href="Data.Singletons.Partition.html#pd_class_decs"><span class="hs-identifier hs-var">pd_class_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">ClassDecl :: forall (ann :: AnnotationFlag).
+DCxt
+-&gt; Name
+-&gt; [DTyVarBndr]
+-&gt; [FunDep]
+-&gt; LetDecEnv ann
+-&gt; ClassDecl ann
+</span><a href="Data.Singletons.Syntax.html#ClassDecl"><span class="hs-identifier hs-type hs-type">ClassDecl</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cd_cxt :: DCxt
+</span><a href="Data.Singletons.Syntax.html#cd_cxt"><span class="hs-identifier hs-var">cd_cxt</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360334"><span class="hs-identifier hs-var">cxt</span></a></span><span>
+</span><span id="line-99"></span><span>                                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cd_name :: Name
+</span><a href="Data.Singletons.Syntax.html#cd_name"><span class="hs-identifier hs-var">cd_name</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360333"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-100"></span><span>                                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cd_tvbs :: [DTyVarBndr]
+</span><a href="Data.Singletons.Syntax.html#cd_tvbs"><span class="hs-identifier hs-var">cd_tvbs</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360332"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-101"></span><span>                                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cd_fds :: [FunDep]
+</span><a href="Data.Singletons.Syntax.html#cd_fds"><span class="hs-identifier hs-var">cd_fds</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[FunDep]
+</span><a href="#local-6989586621681360331"><span class="hs-identifier hs-var">fds</span></a></span><span>
+</span><span id="line-102"></span><span>                                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cd_lde :: ULetDecEnv
+</span><a href="Data.Singletons.Syntax.html#cd_lde"><span class="hs-identifier hs-var">cd_lde</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ULetDecEnv
+</span><a href="#local-6989586621681360329"><span class="hs-identifier hs-var">lde</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pd_open_type_family_decs :: [OpenTypeFamilyDecl]
+</span><a href="Data.Singletons.Partition.html#pd_open_type_family_decs"><span class="hs-identifier hs-var">pd_open_type_family_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+</span><a href="#local-6989586621681360328"><span class="hs-identifier hs-var">otfs</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-104"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DInstanceD</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681360318"><span class="annot"><span class="annottext">cxt :: DCxt
+</span><a href="#local-6989586621681360318"><span class="hs-identifier hs-var">cxt</span></a></span></span><span> </span><span id="local-6989586621681360317"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360317"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621681360316"><span class="annot"><span class="annottext">decs :: [DDec]
+</span><a href="#local-6989586621681360316"><span class="hs-identifier hs-var">decs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621681360315"><span class="annot"><span class="annottext">defns :: [(Name, ULetDecRHS)]
+</span><a href="#local-6989586621681360315"><span class="hs-identifier hs-var">defns</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360314"><span class="annot"><span class="annottext">sigs :: OMap Name DKind
+</span><a href="#local-6989586621681360314"><span class="hs-identifier hs-var">sigs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+ -&gt; ([(Name, ULetDecRHS)], OMap Name DKind))
+-&gt; m ([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+-&gt; m ([(Name, ULetDecRHS)], OMap Name DKind)
+forall (m :: * -&gt; *) a1 r. Monad m =&gt; (a1 -&gt; r) -&gt; m a1 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([Maybe (Name, ULetDecRHS)] -&gt; [(Name, ULetDecRHS)])
+-&gt; ([OMap Name DKind] -&gt; OMap Name DKind)
+-&gt; ([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+-&gt; ([(Name, ULetDecRHS)], OMap Name DKind)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">[Maybe (Name, ULetDecRHS)] -&gt; [(Name, ULetDecRHS)]
+forall a. [Maybe a] -&gt; [a]
+</span><span class="hs-identifier hs-var">catMaybes</span></span><span> </span><span class="annot"><span class="annottext">[OMap Name DKind] -&gt; OMap Name DKind
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(m ([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+ -&gt; m ([(Name, ULetDecRHS)], OMap Name DKind))
+-&gt; m ([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+-&gt; m ([(Name, ULetDecRHS)], OMap Name DKind)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-106"></span><span>                   </span><span class="annot"><span class="annottext">(DDec -&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind))
+-&gt; [DDec] -&gt; m ([Maybe (Name, ULetDecRHS)], [OMap Name DKind])
+forall (m :: * -&gt; *) a b c.
+Applicative m =&gt;
+(a -&gt; m (b, c)) -&gt; [a] -&gt; m ([b], [c])
+</span><span class="hs-identifier hs-var">mapAndUnzipM</span></span><span> </span><span class="annot"><span class="annottext">DDec -&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (m :: * -&gt; *).
+MonadFail m =&gt;
+DDec -&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+</span><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681360316"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621681360309"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360309"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360308"><span class="annot"><span class="annottext">tys :: DCxt
+</span><a href="#local-6989586621681360308"><span class="hs-identifier hs-var">tys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DKind -&gt; m (Name, DCxt)
+forall (m :: * -&gt; *).
+MonadFail m =&gt;
+DCxt -&gt; DKind -&gt; m (Name, DCxt)
+</span><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360317"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-108"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_instance_decs :: [UInstDecl]
+</span><a href="Data.Singletons.Partition.html#pd_instance_decs"><span class="hs-identifier hs-var">pd_instance_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">InstDecl :: forall (ann :: AnnotationFlag).
+DCxt
+-&gt; Name
+-&gt; DCxt
+-&gt; OMap Name DKind
+-&gt; [(Name, LetDecRHS ann)]
+-&gt; InstDecl ann
+</span><a href="Data.Singletons.Syntax.html#InstDecl"><span class="hs-identifier hs-type hs-type">InstDecl</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">id_cxt :: DCxt
+</span><a href="Data.Singletons.Syntax.html#id_cxt"><span class="hs-identifier hs-var">id_cxt</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360318"><span class="hs-identifier hs-var">cxt</span></a></span><span>
+</span><span id="line-109"></span><span>                                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_name :: Name
+</span><a href="Data.Singletons.Syntax.html#id_name"><span class="hs-identifier hs-var">id_name</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360309"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-110"></span><span>                                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_arg_tys :: DCxt
+</span><a href="Data.Singletons.Syntax.html#id_arg_tys"><span class="hs-identifier hs-var">id_arg_tys</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360308"><span class="hs-identifier hs-var">tys</span></a></span><span>
+</span><span id="line-111"></span><span>                                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_sigs :: OMap Name DKind
+</span><a href="Data.Singletons.Syntax.html#id_sigs"><span class="hs-identifier hs-var">id_sigs</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+</span><a href="#local-6989586621681360314"><span class="hs-identifier hs-var">sigs</span></a></span><span>
+</span><span id="line-112"></span><span>                                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_meths :: [(Name, ULetDecRHS)]
+</span><a href="Data.Singletons.Syntax.html#id_meths"><span class="hs-identifier hs-var">id_meths</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, ULetDecRHS)]
+</span><a href="#local-6989586621681360315"><span class="hs-identifier hs-var">defns</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621681360307"><span class="annot"><span class="annottext">split_app_tys :: DCxt -&gt; DKind -&gt; m (Name, DCxt)
+</span><a href="#local-6989586621681360307"><span class="hs-identifier hs-var hs-var">split_app_tys</span></a></span></span><span> </span><span id="local-6989586621681360299"><span class="annot"><span class="annottext">acc :: DCxt
+</span><a href="#local-6989586621681360299"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppT</span></span><span> </span><span id="local-6989586621681360297"><span class="annot"><span class="annottext">t1 :: DKind
+</span><a href="#local-6989586621681360297"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621681360296"><span class="annot"><span class="annottext">t2 :: DKind
+</span><a href="#local-6989586621681360296"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DKind -&gt; m (Name, DCxt)
+</span><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360296"><span class="hs-identifier hs-var">t2</span></a></span><span class="annot"><span class="annottext">DKind -&gt; DCxt -&gt; DCxt
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360299"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360297"><span class="hs-identifier hs-var">t1</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span id="local-6989586621681360295"><span class="annot"><span class="annottext">acc :: DCxt
+</span><a href="#local-6989586621681360295"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360294"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360294"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Name, DCxt) -&gt; m (Name, DCxt)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360294"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360295"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>    </span><span class="annot"><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span id="local-6989586621681360293"><span class="annot"><span class="annottext">acc :: DCxt
+</span><a href="#local-6989586621681360293"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621681360291"><span class="annot"><span class="annottext">t :: DKind
+</span><a href="#local-6989586621681360291"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DKind -&gt; m (Name, DCxt)
+</span><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360293"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360291"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-117"></span><span>    </span><span class="annot"><a href="#local-6989586621681360307"><span class="hs-identifier hs-var">split_app_tys</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; m (Name, DCxt)
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; m (Name, DCxt)) -&gt; String -&gt; m (Name, DCxt)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Illegal instance head: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DKind -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360317"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-118"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DRoleAnnotD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>  </span><span class="hs-comment">-- ignore these</span><span>
+</span><span id="line-119"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTySynD</span></span><span> </span><span id="local-6989586621681360287"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360287"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360286"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681360286"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621681360285"><span class="annot"><span class="annottext">rhs :: DKind
+</span><a href="#local-6989586621681360285"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-comment">-- See Note [Partitioning, type synonyms, and type families]</span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_ty_syn_decs :: [TySynDecl]
+</span><a href="Data.Singletons.Partition.html#pd_ty_syn_decs"><span class="hs-identifier hs-var">pd_ty_syn_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name -&gt; [DTyVarBndr] -&gt; DKind -&gt; TySynDecl
+</span><a href="Data.Singletons.Syntax.html#TySynDecl"><span class="hs-identifier hs-var">TySynDecl</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360287"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360286"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360285"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-122"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DClosedTypeFamilyD</span></span><span> </span><span id="local-6989586621681360282"><span class="annot"><span class="annottext">tf_head :: DTypeFamilyHead
+</span><a href="#local-6989586621681360282"><span class="hs-identifier hs-var">tf_head</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-123"></span><span>  </span><span class="hs-comment">-- See Note [Partitioning, type synonyms, and type families]</span><span>
+</span><span id="line-124"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_closed_type_family_decs :: [ClosedTypeFamilyDecl]
+</span><a href="Data.Singletons.Partition.html#pd_closed_type_family_decs"><span class="hs-identifier hs-var">pd_closed_type_family_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DTypeFamilyHead -&gt; ClosedTypeFamilyDecl
+forall (info :: FamilyInfo). DTypeFamilyHead -&gt; TypeFamilyDecl info
+</span><a href="Data.Singletons.Syntax.html#TypeFamilyDecl"><span class="hs-identifier hs-var">TypeFamilyDecl</span></a></span><span> </span><span class="annot"><span class="annottext">DTypeFamilyHead
+</span><a href="#local-6989586621681360282"><span class="hs-identifier hs-var">tf_head</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-125"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DOpenTypeFamilyD</span></span><span> </span><span id="local-6989586621681360279"><span class="annot"><span class="annottext">tf_head :: DTypeFamilyHead
+</span><a href="#local-6989586621681360279"><span class="hs-identifier hs-var">tf_head</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-comment">-- See Note [Partitioning, type synonyms, and type families]</span><span>
+</span><span id="line-127"></span><span>  </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_open_type_family_decs :: [OpenTypeFamilyDecl]
+</span><a href="Data.Singletons.Partition.html#pd_open_type_family_decs"><span class="hs-identifier hs-var">pd_open_type_family_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DTypeFamilyHead -&gt; OpenTypeFamilyDecl
+forall (info :: FamilyInfo). DTypeFamilyHead -&gt; TypeFamilyDecl info
+</span><a href="Data.Singletons.Syntax.html#TypeFamilyDecl"><span class="hs-identifier hs-var">TypeFamilyDecl</span></a></span><span> </span><span class="annot"><span class="annottext">DTypeFamilyHead
+</span><a href="#local-6989586621681360279"><span class="hs-identifier hs-var">tf_head</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-128"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTySynInstD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-comment">-- There's no need to track type family instances, since</span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-comment">-- we already record the type family itself separately.</span><span>
+</span><span id="line-131"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DStandaloneDerivD</span></span><span> </span><span id="local-6989586621681360276"><span class="annot"><span class="annottext">mb_strat :: Maybe DDerivStrategy
+</span><a href="#local-6989586621681360276"><span class="hs-identifier hs-var">mb_strat</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681360275"><span class="annot"><span class="annottext">ctxt :: DCxt
+</span><a href="#local-6989586621681360275"><span class="hs-identifier hs-var">ctxt</span></a></span></span><span> </span><span id="local-6989586621681360274"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360274"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; (DKind, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360274"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621681360273"><span class="annot"><span class="annottext">cls_pred_ty :: DKind
+</span><a href="#local-6989586621681360273"><span class="hs-identifier hs-var">cls_pred_ty</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360272"><span class="annot"><span class="annottext">cls_tys :: [DTypeArg]
+</span><a href="#local-6989586621681360272"><span class="hs-identifier hs-var">cls_tys</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360271"><span class="annot"><span class="annottext">cls_normal_tys :: DCxt
+</span><a href="#local-6989586621681360271"><span class="hs-identifier hs-var hs-var">cls_normal_tys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><span class="hs-identifier hs-var">filterDTANormals</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621681360272"><span class="hs-identifier hs-var">cls_tys</span></a></span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DCxt -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360271"><span class="hs-identifier hs-var">cls_normal_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- We can't handle zero-parameter type classes</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360267"><span class="annot"><span class="annottext">cls_arg_tys :: DCxt
+</span><a href="#local-6989586621681360267"><span class="hs-identifier hs-var hs-var">cls_arg_tys</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DCxt
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">init</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360271"><span class="hs-identifier hs-var">cls_normal_tys</span></a></span><span>
+</span><span id="line-137"></span><span>            </span><span id="local-6989586621681360265"><span class="annot"><span class="annottext">data_ty :: DKind
+</span><a href="#local-6989586621681360265"><span class="hs-identifier hs-var hs-var">data_ty</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DKind
+forall a. [a] -&gt; a
+</span><span class="hs-identifier hs-var">last</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360271"><span class="hs-identifier hs-var">cls_normal_tys</span></a></span><span>
+</span><span id="line-138"></span><span>            </span><span id="local-6989586621681360263"><span class="annot"><span class="annottext">data_ty_head :: DKind
+</span><a href="#local-6989586621681360263"><span class="hs-identifier hs-var hs-var">data_ty_head</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; (DKind, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360265"><span class="hs-identifier hs-var">data_ty</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681360262"><span class="annot"><span class="annottext">ty_head :: DKind
+</span><a href="#local-6989586621681360262"><span class="hs-identifier hs-var">ty_head</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360262"><span class="hs-identifier hs-var">ty_head</span></a></span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360261"><span class="annot"><span class="annottext">data_tycon :: Name
+</span><a href="#local-6989586621681360261"><span class="hs-identifier hs-var">data_tycon</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360263"><span class="hs-identifier hs-var">data_ty_head</span></a></span><span> </span><span class="hs-comment">-- We can't handle deriving an instance for something</span><span>
+</span><span id="line-140"></span><span>                                         </span><span class="hs-comment">-- other than a type constructor application</span><span>
+</span><span id="line-141"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360260"><span class="annot"><span class="annottext">cls_pred :: DKind
+</span><a href="#local-6989586621681360260"><span class="hs-identifier hs-var hs-var">cls_pred</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; DCxt -&gt; DKind
+</span><a href="Data.Singletons.Util.html#foldType"><span class="hs-identifier hs-var">foldType</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360273"><span class="hs-identifier hs-var">cls_pred_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360267"><span class="hs-identifier hs-var">cls_arg_tys</span></a></span><span>
+</span><span id="line-142"></span><span>            </span><span id="local-6989586621681360258"><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621681360258"><span class="hs-identifier hs-var">dinfo</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; m (Maybe DInfo)
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe DInfo)
+</span><span class="hs-identifier hs-var">dsReify</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360261"><span class="hs-identifier hs-var">data_tycon</span></a></span><span>
+</span><span id="line-143"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621681360258"><span class="hs-identifier hs-var">dinfo</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-144"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTyConI</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DDataD</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681360255"><span class="annot"><span class="annottext">dn :: Name
+</span><a href="#local-6989586621681360255"><span class="hs-identifier hs-var">dn</span></a></span></span><span> </span><span id="local-6989586621681360254"><span class="annot"><span class="annottext">dtvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621681360254"><span class="hs-identifier hs-var">dtvbs</span></a></span></span><span> </span><span id="local-6989586621681360253"><span class="annot"><span class="annottext">dk :: Maybe DKind
+</span><a href="#local-6989586621681360253"><span class="hs-identifier hs-var">dk</span></a></span></span><span> </span><span id="local-6989586621681360252"><span class="annot"><span class="annottext">dcons :: [DCon]
+</span><a href="#local-6989586621681360252"><span class="hs-identifier hs-var">dcons</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-145"></span><span>                </span><span id="local-6989586621681360251"><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360251"><span class="hs-identifier hs-var">all_tvbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; Maybe DKind -&gt; m [DTyVarBndr]
+forall (q :: * -&gt; *).
+DsMonad q =&gt;
+[DTyVarBndr] -&gt; Maybe DKind -&gt; q [DTyVarBndr]
+</span><a href="Data.Singletons.Util.html#buildDataDTvbs"><span class="hs-identifier hs-var">buildDataDTvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360254"><span class="hs-identifier hs-var">dtvbs</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DKind
+</span><a href="#local-6989586621681360253"><span class="hs-identifier hs-var">dk</span></a></span><span>
+</span><span id="line-146"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360250"><span class="annot"><span class="annottext">data_decl :: DataDecl
+</span><a href="#local-6989586621681360250"><span class="hs-identifier hs-var hs-var">data_decl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DTyVarBndr] -&gt; [DCon] -&gt; DataDecl
+</span><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-var">DataDecl</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360255"><span class="hs-identifier hs-var">dn</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621681360251"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621681360252"><span class="hs-identifier hs-var">dcons</span></a></span><span>
+</span><span id="line-147"></span><span>                </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+-&gt; DKind -&gt; Maybe DCxt -&gt; DKind -&gt; DataDecl -&gt; m PartitionedDecs
+forall (m :: * -&gt; *).
+DsMonad m =&gt;
+Maybe DDerivStrategy
+-&gt; DKind -&gt; Maybe DCxt -&gt; DKind -&gt; DataDecl -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDeriving"><span class="hs-identifier hs-var">partitionDeriving</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360276"><span class="hs-identifier hs-var">mb_strat</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360260"><span class="hs-identifier hs-var">cls_pred</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DCxt -&gt; Maybe DCxt
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681360275"><span class="hs-identifier hs-var">ctxt</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360265"><span class="hs-identifier hs-var">data_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DataDecl
+</span><a href="#local-6989586621681360250"><span class="hs-identifier hs-var">data_decl</span></a></span><span>
+</span><span id="line-148"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-149"></span><span>                </span><span class="annot"><span class="annottext">String -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; m PartitionedDecs) -&gt; String -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Standalone derived instance for something other than a datatype: &quot;</span></span><span>
+</span><span id="line-150"></span><span>                       </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DKind -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360265"><span class="hs-identifier hs-var">data_ty</span></a></span><span>
+</span><span id="line-151"></span><span>              </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; m PartitionedDecs) -&gt; String -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Cannot find &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DKind -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360265"><span class="hs-identifier hs-var">data_ty</span></a></span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-153"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDec"><span class="hs-identifier hs-var">partitionDec</span></a></span><span> </span><span id="local-6989586621681360249"><span class="annot"><span class="annottext">dec :: DDec
+</span><a href="#local-6989586621681360249"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; m PartitionedDecs) -&gt; String -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Declaration cannot be promoted: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; String
+forall a. Ppr a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">pprint</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DDec -&gt; [Dec]
+</span><span class="hs-identifier hs-var">decToTH</span></span><span> </span><span class="annot"><span class="annottext">DDec
+</span><a href="#local-6989586621681360249"><span class="hs-identifier hs-var">dec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span id="local-6989586621681360498"><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-type">partitionClassDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="annot"><a href="#local-6989586621681360498"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360498"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Syntax.html#ULetDecEnv"><span class="hs-identifier hs-type">ULetDecEnv</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Syntax.html#OpenTypeFamilyDecl"><span class="hs-identifier hs-type">OpenTypeFamilyDecl</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span></span><span>
+</span><span id="line-157"></span><span id="partitionClassDec"><span class="annot"><span class="annottext">partitionClassDec :: DDec -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+</span><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var hs-var">partitionClassDec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigD</span></span><span> </span><span id="local-6989586621681360245"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360245"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360244"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360244"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-158"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DKind -&gt; ULetDecEnv
+</span><a href="Data.Singletons.Syntax.html#typeBinding"><span class="hs-identifier hs-var">typeBinding</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360245"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360244"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DValD</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarP</span></span><span> </span><span id="local-6989586621681360240"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360240"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681360239"><span class="annot"><span class="annottext">exp :: DExp
+</span><a href="#local-6989586621681360239"><span class="hs-identifier hs-var">exp</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-160"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; ULetDecRHS -&gt; ULetDecEnv
+</span><a href="Data.Singletons.Syntax.html#valueBinding"><span class="hs-identifier hs-var">valueBinding</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360240"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DExp -&gt; ULetDecRHS
+</span><a href="Data.Singletons.Syntax.html#UValue"><span class="hs-identifier hs-var">UValue</span></a></span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681360239"><span class="hs-identifier hs-var">exp</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DFunD</span></span><span> </span><span id="local-6989586621681360235"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360235"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360234"><span class="annot"><span class="annottext">clauses :: [DClause]
+</span><a href="#local-6989586621681360234"><span class="hs-identifier hs-var">clauses</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-162"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; ULetDecRHS -&gt; ULetDecEnv
+</span><a href="Data.Singletons.Syntax.html#valueBinding"><span class="hs-identifier hs-var">valueBinding</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360235"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DClause] -&gt; ULetDecRHS
+</span><a href="Data.Singletons.Syntax.html#UFunction"><span class="hs-identifier hs-var">UFunction</span></a></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621681360234"><span class="hs-identifier hs-var">clauses</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-163"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DInfixD</span></span><span> </span><span id="local-6989586621681360231"><span class="annot"><span class="annottext">fixity :: Fixity
+</span><a href="#local-6989586621681360231"><span class="hs-identifier hs-var">fixity</span></a></span></span><span> </span><span id="local-6989586621681360230"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360230"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-164"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Fixity -&gt; Name -&gt; ULetDecEnv
+</span><a href="Data.Singletons.Syntax.html#infixDecl"><span class="hs-identifier hs-var">infixDecl</span></a></span><span> </span><span class="annot"><span class="annottext">Fixity
+</span><a href="#local-6989586621681360231"><span class="hs-identifier hs-var">fixity</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360230"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DPragmaD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-166"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ULetDecEnv
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-167"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DOpenTypeFamilyD</span></span><span> </span><span id="local-6989586621681360228"><span class="annot"><span class="annottext">tf_head :: DTypeFamilyHead
+</span><a href="#local-6989586621681360228"><span class="hs-identifier hs-var">tf_head</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-168"></span><span>  </span><span class="hs-comment">-- See Note [Partitioning, type synonyms, and type families]</span><span>
+</span><span id="line-169"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ULetDecEnv
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DTypeFamilyHead -&gt; OpenTypeFamilyDecl
+forall (info :: FamilyInfo). DTypeFamilyHead -&gt; TypeFamilyDecl info
+</span><a href="Data.Singletons.Syntax.html#TypeFamilyDecl"><span class="hs-identifier hs-var">TypeFamilyDecl</span></a></span><span> </span><span class="annot"><span class="annottext">DTypeFamilyHead
+</span><a href="#local-6989586621681360228"><span class="hs-identifier hs-var">tf_head</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTySynInstD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-comment">-- There's no need to track associated type family default equations, since</span><span>
+</span><span id="line-172"></span><span>  </span><span class="hs-comment">-- we already record the type family itself separately.</span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="annottext">(ULetDecEnv, [OpenTypeFamilyDecl])
+-&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ULetDecEnv
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[OpenTypeFamilyDecl]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionClassDec"><span class="hs-identifier hs-var">partitionClassDec</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-175"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; m (ULetDecEnv, [OpenTypeFamilyDecl])
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Only method declarations can be promoted within a class.&quot;</span></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span id="local-6989586621681360477"><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-type">partitionInstanceDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="annot"><a href="#local-6989586621681360477"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span>
+</span><span id="line-178"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360477"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#ULetDecRHS"><span class="hs-identifier hs-type">ULetDecRHS</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- right-hand sides of methods</span><span>
+</span><span id="line-179"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>          </span><span class="hs-comment">-- method type signatures</span><span>
+</span><span id="line-180"></span><span>                          </span><span class="hs-special">)</span></span><span>
+</span><span id="line-181"></span><span id="partitionInstanceDec"><span class="annot"><span class="annottext">partitionInstanceDec :: DDec -&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+</span><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var hs-var">partitionInstanceDec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DValD</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarP</span></span><span> </span><span id="local-6989586621681360226"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360226"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681360225"><span class="annot"><span class="annottext">exp :: DExp
+</span><a href="#local-6989586621681360225"><span class="hs-identifier hs-var">exp</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-182"></span><span>  </span><span class="annot"><span class="annottext">(Maybe (Name, ULetDecRHS), OMap Name DKind)
+-&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Name, ULetDecRHS) -&gt; Maybe (Name, ULetDecRHS)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360226"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DExp -&gt; ULetDecRHS
+</span><a href="Data.Singletons.Syntax.html#UValue"><span class="hs-identifier hs-var">UValue</span></a></span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621681360225"><span class="hs-identifier hs-var">exp</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DFunD</span></span><span> </span><span id="local-6989586621681360224"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360224"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360223"><span class="annot"><span class="annottext">clauses :: [DClause]
+</span><a href="#local-6989586621681360223"><span class="hs-identifier hs-var">clauses</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-184"></span><span>  </span><span class="annot"><span class="annottext">(Maybe (Name, ULetDecRHS), OMap Name DKind)
+-&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Name, ULetDecRHS) -&gt; Maybe (Name, ULetDecRHS)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360224"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[DClause] -&gt; ULetDecRHS
+</span><a href="Data.Singletons.Syntax.html#UFunction"><span class="hs-identifier hs-var">UFunction</span></a></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621681360223"><span class="hs-identifier hs-var">clauses</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-185"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigD</span></span><span> </span><span id="local-6989586621681360222"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621681360222"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621681360221"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360221"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-186"></span><span>  </span><span class="annot"><span class="annottext">(Maybe (Name, ULetDecRHS), OMap Name DKind)
+-&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Name, ULetDecRHS)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DKind -&gt; OMap Name DKind
+forall k v. k -&gt; v -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OMap.singleton</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360222"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360221"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLetDec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DPragmaD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-188"></span><span>  </span><span class="annot"><span class="annottext">(Maybe (Name, ULetDecRHS), OMap Name DKind)
+-&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Name, ULetDecRHS)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-189"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTySynInstD</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-190"></span><span>  </span><span class="annot"><span class="annottext">(Maybe (Name, ULetDecRHS), OMap Name DKind)
+-&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Name, ULetDecRHS)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-191"></span><span>  </span><span class="hs-comment">-- There's no need to track associated type family instances, since</span><span>
+</span><span id="line-192"></span><span>  </span><span class="hs-comment">-- we already record the type family itself separately.</span><span>
+</span><span id="line-193"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionInstanceDec"><span class="hs-identifier hs-var">partitionInstanceDec</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-194"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; m (Maybe (Name, ULetDecRHS), OMap Name DKind)
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Only method bodies can be promoted within an instance.&quot;</span></span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span class="annot"><a href="Data.Singletons.Partition.html#partitionDeriving"><span class="hs-identifier hs-type">partitionDeriving</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681360506"><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDerivStrategy</span></span><span>
+</span><span id="line-199"></span><span>                </span><span class="hs-comment">-- ^ The deriving strategy, if present.</span><span>
+</span><span id="line-200"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span>      </span><span class="hs-comment">-- ^ The class being derived (e.g., 'Eq'), possibly applied to</span><span>
+</span><span id="line-201"></span><span>                </span><span class="hs-comment">--   some number of arguments (e.g., @C Int Bool@).</span><span>
+</span><span id="line-202"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span> </span><span class="hs-comment">-- ^ @'Just' ctx@ if @ctx@ was provided via @StandaloneDeriving@.</span><span>
+</span><span id="line-203"></span><span>                </span><span class="hs-comment">--   'Nothing' if using a @deriving@ clause.</span><span>
+</span><span id="line-204"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>      </span><span class="hs-comment">-- ^ The data type argument to the class.</span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#DataDecl"><span class="hs-identifier hs-type">DataDecl</span></a></span><span>   </span><span class="hs-comment">-- ^ The original data type information (e.g., its constructors).</span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span><span>
+</span><span id="line-207"></span><span id="partitionDeriving"><span class="annot"><span class="annottext">partitionDeriving :: Maybe DDerivStrategy
+-&gt; DKind -&gt; Maybe DCxt -&gt; DKind -&gt; DataDecl -&gt; m PartitionedDecs
+</span><a href="Data.Singletons.Partition.html#partitionDeriving"><span class="hs-identifier hs-var hs-var">partitionDeriving</span></a></span></span><span> </span><span id="local-6989586621681360219"><span class="annot"><span class="annottext">mb_strat :: Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span></span><span> </span><span id="local-6989586621681360218"><span class="annot"><span class="annottext">deriv_pred :: DKind
+</span><a href="#local-6989586621681360218"><span class="hs-identifier hs-var">deriv_pred</span></a></span></span><span> </span><span id="local-6989586621681360217"><span class="annot"><span class="annottext">mb_ctxt :: Maybe DCxt
+</span><a href="#local-6989586621681360217"><span class="hs-identifier hs-var">mb_ctxt</span></a></span></span><span> </span><span id="local-6989586621681360216"><span class="annot"><span class="annottext">ty :: DKind
+</span><a href="#local-6989586621681360216"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621681360215"><span class="annot"><span class="annottext">data_decl :: DataDecl
+</span><a href="#local-6989586621681360215"><span class="hs-identifier hs-var">data_decl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-208"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; (DKind, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360218"><span class="hs-identifier hs-var">deriv_pred</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-209"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360214"><span class="annot"><span class="annottext">deriv_name :: Name
+</span><a href="#local-6989586621681360214"><span class="hs-identifier hs-var">deriv_name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681360213"><span class="annot"><span class="annottext">arg_tys :: [DTypeArg]
+</span><a href="#local-6989586621681360213"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>         </span><span class="hs-comment">-- Here, we are more conservative than GHC: DeriveAnyClass only kicks</span><span>
+</span><span id="line-211"></span><span>         </span><span class="hs-comment">-- in if the user explicitly chooses to do so with the anyclass</span><span>
+</span><span id="line-212"></span><span>         </span><span class="hs-comment">-- deriving strategy</span><span>
+</span><span id="line-213"></span><span>       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DAnyclassStrategy</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span><span>
+</span><span id="line-214"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span>
+</span><span id="line-215"></span><span>           </span><span class="annot"><span class="annottext">InstDecl :: forall (ann :: AnnotationFlag).
+DCxt
+-&gt; Name
+-&gt; DCxt
+-&gt; OMap Name DKind
+-&gt; [(Name, LetDecRHS ann)]
+-&gt; InstDecl ann
+</span><a href="Data.Singletons.Syntax.html#InstDecl"><span class="hs-identifier hs-type hs-type">InstDecl</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">id_cxt :: DCxt
+</span><a href="Data.Singletons.Syntax.html#id_cxt"><span class="hs-identifier hs-var">id_cxt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; Maybe DCxt -&gt; DCxt
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Maybe DCxt
+</span><a href="#local-6989586621681360217"><span class="hs-identifier hs-var">mb_ctxt</span></a></span><span>
+</span><span id="line-216"></span><span>                      </span><span class="hs-comment">-- For now at least, there's no point in attempting to</span><span>
+</span><span id="line-217"></span><span>                      </span><span class="hs-comment">-- infer an instance context for DeriveAnyClass, since</span><span>
+</span><span id="line-218"></span><span>                      </span><span class="hs-comment">-- the other language feature that requires it,</span><span>
+</span><span id="line-219"></span><span>                      </span><span class="hs-comment">-- DefaultSignatures, can't be singled. Thus, inferring an</span><span>
+</span><span id="line-220"></span><span>                      </span><span class="hs-comment">-- empty context will Just Work for all currently supported</span><span>
+</span><span id="line-221"></span><span>                      </span><span class="hs-comment">-- default implementations.</span><span>
+</span><span id="line-222"></span><span>                      </span><span class="hs-comment">--</span><span>
+</span><span id="line-223"></span><span>                      </span><span class="hs-comment">-- (Of course, if a user specifies a context with</span><span>
+</span><span id="line-224"></span><span>                      </span><span class="hs-comment">-- StandaloneDeriving, use that.)</span><span>
+</span><span id="line-225"></span><span>
+</span><span id="line-226"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_name :: Name
+</span><a href="Data.Singletons.Syntax.html#id_name"><span class="hs-identifier hs-var">id_name</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360214"><span class="hs-identifier hs-var">deriv_name</span></a></span><span>
+</span><span id="line-227"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_arg_tys :: DCxt
+</span><a href="Data.Singletons.Syntax.html#id_arg_tys"><span class="hs-identifier hs-var">id_arg_tys</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><span class="hs-identifier hs-var">filterDTANormals</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621681360213"><span class="hs-identifier hs-var">arg_tys</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DCxt -&gt; DCxt
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360216"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-228"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_sigs :: OMap Name DKind
+</span><a href="Data.Singletons.Syntax.html#id_sigs"><span class="hs-identifier hs-var">id_sigs</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap Name DKind
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-229"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">id_meths :: [(Name, ULetDecRHS)]
+</span><a href="Data.Singletons.Syntax.html#id_meths"><span class="hs-identifier hs-var">id_meths</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span>       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DNewtypeStrategy</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span><span>
+</span><span id="line-232"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">String -&gt; m ()
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q ()
+</span><a href="Data.Singletons.Util.html#qReportWarning"><span class="hs-identifier hs-var">qReportWarning</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;GeneralizedNewtypeDeriving is ignored by `singletons`.&quot;</span></span><span>
+</span><span id="line-233"></span><span>            </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-234"></span><span>
+</span><span id="line-235"></span><span>       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DViaStrategy</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span><span>
+</span><span id="line-236"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">String -&gt; m ()
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q ()
+</span><a href="Data.Singletons.Util.html#qReportWarning"><span class="hs-identifier hs-var">qReportWarning</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;DerivingVia is ignored by `singletons`.&quot;</span></span><span>
+</span><span id="line-237"></span><span>            </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-238"></span><span>
+</span><span id="line-239"></span><span>    </span><span class="hs-comment">-- Stock classes. These are derived only if `singletons` supports them</span><span>
+</span><span id="line-240"></span><span>    </span><span class="hs-comment">-- (and, optionally, if an explicit stock deriving strategy is used)</span><span>
+</span><span id="line-241"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360206"><span class="annot"><span class="annottext">deriv_name :: Name
+</span><a href="#local-6989586621681360206"><span class="hs-identifier hs-var">deriv_name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- For now, all stock derivable class supported in</span><span>
+</span><span id="line-242"></span><span>                           </span><span class="hs-comment">-- singletons take just one argument (the data</span><span>
+</span><span id="line-243"></span><span>                           </span><span class="hs-comment">-- type itself)</span><span>
+</span><span id="line-244"></span><span>       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681360205"><span class="hs-identifier hs-var">stock_or_default</span></a></span><span>
+</span><span id="line-245"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681360204"><span class="annot"><span class="annottext">decs :: m PartitionedDecs
+</span><a href="#local-6989586621681360204"><span class="hs-identifier hs-var">decs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Map Name (m PartitionedDecs) -&gt; Maybe (m PartitionedDecs)
+forall k a. Ord k =&gt; k -&gt; Map k a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Map.lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360206"><span class="hs-identifier hs-var">deriv_name</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name (m PartitionedDecs)
+</span><a href="#local-6989586621681360202"><span class="hs-identifier hs-var">stock_map</span></a></span><span>
+</span><span id="line-246"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">m PartitionedDecs
+</span><a href="#local-6989586621681360204"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-247"></span><span>
+</span><span id="line-248"></span><span>         </span><span class="hs-comment">-- If we can't find a stock class, but the user bothered to use an</span><span>
+</span><span id="line-249"></span><span>         </span><span class="hs-comment">-- explicit stock keyword, we can at least warn them about it.</span><span>
+</span><span id="line-250"></span><span>       </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DStockStrategy</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span><span>
+</span><span id="line-251"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">String -&gt; m ()
+forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q ()
+</span><a href="Data.Singletons.Util.html#qReportWarning"><span class="hs-identifier hs-var">qReportWarning</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; m ()) -&gt; String -&gt; m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;`singletons` doesn't recognize the stock class &quot;</span></span><span>
+</span><span id="line-252"></span><span>                             </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; String
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360206"><span class="hs-identifier hs-var">deriv_name</span></a></span><span>
+</span><span id="line-253"></span><span>            </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-254"></span><span>
+</span><span id="line-255"></span><span>    </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-comment">-- singletons doesn't support deriving this instance</span><span>
+</span><span id="line-256"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-257"></span><span>      </span><span class="annot"><a href="#local-6989586621681360199"><span class="hs-identifier hs-type">mk_instance</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html#DerivDesc"><span class="hs-identifier hs-type">DerivDesc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#UInstDecl"><span class="hs-identifier hs-type">UInstDecl</span></a></span><span>
+</span><span id="line-258"></span><span>      </span><span id="local-6989586621681360199"><span class="annot"><span class="annottext">mk_instance :: DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var hs-var">mk_instance</span></a></span></span><span> </span><span id="local-6989586621681360198"><span class="annot"><span class="annottext">maker :: DerivDesc m
+</span><a href="#local-6989586621681360198"><span class="hs-identifier hs-var">maker</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+</span><a href="#local-6989586621681360198"><span class="hs-identifier hs-var">maker</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DCxt
+</span><a href="#local-6989586621681360217"><span class="hs-identifier hs-var">mb_ctxt</span></a></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360216"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">DataDecl
+</span><a href="#local-6989586621681360215"><span class="hs-identifier hs-var">data_decl</span></a></span><span>
+</span><span id="line-259"></span><span>
+</span><span id="line-260"></span><span>      </span><span id="local-6989586621681360211"><span class="annot"><span class="annottext">mk_derived_inst :: UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var hs-var">mk_derived_inst</span></a></span></span><span>    </span><span id="local-6989586621681360197"><span class="annot"><span class="annottext">dec :: UInstDecl
+</span><a href="#local-6989586621681360197"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_instance_decs :: [UInstDecl]
+</span><a href="Data.Singletons.Partition.html#pd_instance_decs"><span class="hs-identifier hs-var">pd_instance_decs</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">UInstDecl
+</span><a href="#local-6989586621681360197"><span class="hs-identifier hs-var">dec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-261"></span><span>      </span><span id="local-6989586621681360196"><span class="annot"><span class="annottext">mk_derived_eq_inst :: DerivedEqDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360196"><span class="hs-identifier hs-var hs-var">mk_derived_eq_inst</span></a></span></span><span> </span><span id="local-6989586621681360195"><span class="annot"><span class="annottext">dec :: DerivedEqDecl
+</span><a href="#local-6989586621681360195"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_derived_eq_decs :: [DerivedEqDecl]
+</span><a href="Data.Singletons.Partition.html#pd_derived_eq_decs"><span class="hs-identifier hs-var">pd_derived_eq_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DerivedEqDecl
+</span><a href="#local-6989586621681360195"><span class="hs-identifier hs-var">dec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-262"></span><span>
+</span><span id="line-263"></span><span>      </span><span id="local-6989586621681360426"><span class="annot"><a href="#local-6989586621681360194"><span class="hs-identifier hs-type">derived_decl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#DerivedDecl"><span class="hs-identifier hs-type">DerivedDecl</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681360426"><span class="hs-identifier hs-type">cls</span></a></span></span><span>
+</span><span id="line-264"></span><span>      </span><span id="local-6989586621681360194"><span class="annot"><span class="annottext">derived_decl :: DerivedDecl cls
+</span><a href="#local-6989586621681360194"><span class="hs-identifier hs-var hs-var">derived_decl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DerivedDecl :: forall (cls :: * -&gt; Constraint).
+Maybe DCxt -&gt; DKind -&gt; Name -&gt; DataDecl -&gt; DerivedDecl cls
+</span><a href="Data.Singletons.Syntax.html#DerivedDecl"><span class="hs-identifier hs-type hs-type">DerivedDecl</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ded_mb_cxt :: Maybe DCxt
+</span><a href="#local-6989586621681360191"><span class="hs-identifier hs-var">ded_mb_cxt</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe DCxt
+</span><a href="#local-6989586621681360217"><span class="hs-identifier hs-var">mb_ctxt</span></a></span><span>
+</span><span id="line-265"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ded_type :: DKind
+</span><a href="#local-6989586621681360190"><span class="hs-identifier hs-var">ded_type</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360216"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-266"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ded_type_tycon :: Name
+</span><a href="#local-6989586621681360189"><span class="hs-identifier hs-var">ded_type_tycon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360188"><span class="hs-identifier hs-var">ty_tycon</span></a></span><span>
+</span><span id="line-267"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ded_decl :: DataDecl
+</span><a href="#local-6989586621681360187"><span class="hs-identifier hs-var">ded_decl</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DataDecl
+</span><a href="#local-6989586621681360215"><span class="hs-identifier hs-var">data_decl</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-268"></span><span>        </span><span class="hs-keyword">where</span><span>
+</span><span id="line-269"></span><span>          </span><span class="annot"><a href="#local-6989586621681360188"><span class="hs-identifier hs-type">ty_tycon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-270"></span><span>          </span><span id="local-6989586621681360188"><span class="annot"><span class="annottext">ty_tycon :: Name
+</span><a href="#local-6989586621681360188"><span class="hs-identifier hs-var hs-var">ty_tycon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DKind -&gt; (DKind, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360216"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-271"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681360186"><span class="annot"><span class="annottext">tc :: Name
+</span><a href="#local-6989586621681360186"><span class="hs-identifier hs-var">tc</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681360186"><span class="hs-identifier hs-var">tc</span></a></span><span>
+</span><span id="line-272"></span><span>                       </span><span class="hs-special">(</span><span id="local-6989586621681360185"><span class="annot"><span class="annottext">t :: DKind
+</span><a href="#local-6989586621681360185"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span>        </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Name
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Name) -&gt; String -&gt; Name
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Not a data type: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DKind -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">DKind
+</span><a href="#local-6989586621681360185"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-273"></span><span>      </span><span id="local-6989586621681360205"><span class="annot"><span class="annottext">stock_or_default :: Bool
+</span><a href="#local-6989586621681360205"><span class="hs-identifier hs-var hs-var">stock_or_default</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy -&gt; Bool
+</span><a href="Data.Singletons.Partition.html#isStockOrDefault"><span class="hs-identifier hs-var">isStockOrDefault</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DDerivStrategy
+</span><a href="#local-6989586621681360219"><span class="hs-identifier hs-var">mb_strat</span></a></span><span>
+</span><span id="line-274"></span><span>
+</span><span id="line-275"></span><span>      </span><span class="hs-comment">-- A mapping from all stock derivable classes (that singletons supports)</span><span>
+</span><span id="line-276"></span><span>      </span><span class="hs-comment">-- to to derived code that they produce.</span><span>
+</span><span id="line-277"></span><span>      </span><span class="annot"><a href="#local-6989586621681360202"><span class="hs-identifier hs-type">stock_map</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681360506"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Partition.html#PartitionedDecs"><span class="hs-identifier hs-type">PartitionedDecs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-278"></span><span>      </span><span id="local-6989586621681360202"><span class="annot"><span class="annottext">stock_map :: Map Name (m PartitionedDecs)
+</span><a href="#local-6989586621681360202"><span class="hs-identifier hs-var hs-var">stock_map</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, m PartitionedDecs)] -&gt; Map Name (m PartitionedDecs)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.fromList</span></span><span>
+</span><span id="line-279"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#ordName"><span class="hs-identifier hs-var">ordName</span></a></span><span class="hs-special">,</span><span>         </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Ord.html#mkOrdInstance"><span class="hs-identifier hs-var">mkOrdInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-280"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#boundedName"><span class="hs-identifier hs-var">boundedName</span></a></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Bounded.html#mkBoundedInstance"><span class="hs-identifier hs-var">mkBoundedInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-281"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#enumName"><span class="hs-identifier hs-var">enumName</span></a></span><span class="hs-special">,</span><span>        </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Enum.html#mkEnumInstance"><span class="hs-identifier hs-var">mkEnumInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-282"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#functorName"><span class="hs-identifier hs-var">functorName</span></a></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Functor.html#mkFunctorInstance"><span class="hs-identifier hs-var">mkFunctorInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-283"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#foldableName"><span class="hs-identifier hs-var">foldableName</span></a></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Foldable.html#mkFoldableInstance"><span class="hs-identifier hs-var">mkFoldableInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-284"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#traversableName"><span class="hs-identifier hs-var">traversableName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">UInstDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360211"><span class="hs-identifier hs-var">mk_derived_inst</span></a></span><span> </span><span class="annot"><span class="annottext">(UInstDecl -&gt; PartitionedDecs) -&gt; m UInstDecl -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Traversable.html#mkTraversableInstance"><span class="hs-identifier hs-var">mkTraversableInstance</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-285"></span><span>          </span><span class="hs-comment">-- See Note [DerivedDecl] in Data.Singletons.Syntax</span><span>
+</span><span id="line-286"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#eqName"><span class="hs-identifier hs-var">eqName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DerivedEqDecl -&gt; PartitionedDecs
+</span><a href="#local-6989586621681360196"><span class="hs-identifier hs-var">mk_derived_eq_inst</span></a></span><span> </span><span class="annot"><span class="annottext">DerivedEqDecl
+forall (cls :: * -&gt; Constraint). DerivedDecl cls
+</span><a href="#local-6989586621681360194"><span class="hs-identifier hs-var">derived_decl</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-287"></span><span>          </span><span class="hs-comment">-- See Note [DerivedDecl] in Data.Singletons.Syntax</span><span>
+</span><span id="line-288"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.Names.html#showName"><span class="hs-identifier hs-var">showName</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-comment">-- These will become PShow/SShow instances...</span><span>
+</span><span id="line-289"></span><span>                         </span><span id="local-6989586621681360166"><span class="annot"><span class="annottext">UInstDecl
+</span><a href="#local-6989586621681360166"><span class="hs-identifier hs-var">inst_for_promotion</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DerivDesc m -&gt; m UInstDecl
+</span><a href="#local-6989586621681360199"><span class="hs-identifier hs-var">mk_instance</span></a></span><span> </span><span class="annot"><span class="annottext">(DerivDesc m -&gt; m UInstDecl) -&gt; DerivDesc m -&gt; m UInstDecl
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowMode -&gt; DerivDesc m
+forall (q :: * -&gt; *). DsMonad q =&gt; ShowMode -&gt; DerivDesc q
+</span><a href="Data.Singletons.Deriving.Show.html#mkShowInstance"><span class="hs-identifier hs-var">mkShowInstance</span></a></span><span> </span><span class="annot"><span class="annottext">ShowMode
+</span><a href="Data.Singletons.Deriving.Show.html#ForPromotion"><span class="hs-identifier hs-var">ForPromotion</span></a></span><span>
+</span><span id="line-290"></span><span>                         </span><span class="hs-comment">-- ...and this will become a Show instance.</span><span>
+</span><span id="line-291"></span><span>                         </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681360163"><span class="annot"><span class="annottext">inst_for_show :: DerivedDecl cls
+</span><a href="#local-6989586621681360163"><span class="hs-identifier hs-var hs-var">inst_for_show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DerivedDecl cls
+forall (cls :: * -&gt; Constraint). DerivedDecl cls
+</span><a href="#local-6989586621681360194"><span class="hs-identifier hs-var">derived_decl</span></a></span><span>
+</span><span id="line-292"></span><span>                         </span><span class="annot"><span class="annottext">PartitionedDecs -&gt; m PartitionedDecs
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(PartitionedDecs -&gt; m PartitionedDecs)
+-&gt; PartitionedDecs -&gt; m PartitionedDecs
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PartitionedDecs
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pd_instance_decs :: [UInstDecl]
+</span><a href="Data.Singletons.Partition.html#pd_instance_decs"><span class="hs-identifier hs-var">pd_instance_decs</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">UInstDecl
+</span><a href="#local-6989586621681360166"><span class="hs-identifier hs-var">inst_for_promotion</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-293"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pd_derived_show_decs :: [DerivedShowDecl]
+</span><a href="Data.Singletons.Partition.html#pd_derived_show_decs"><span class="hs-identifier hs-var">pd_derived_show_decs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DerivedShowDecl
+forall (cls :: * -&gt; Constraint). DerivedDecl cls
+</span><a href="#local-6989586621681360163"><span class="hs-identifier hs-var">inst_for_show</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-294"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-295"></span><span>
+</span><span id="line-296"></span><span class="hs-comment">-- Is this being used with an explicit stock strategy, or no strategy at all?</span><span>
+</span><span id="line-297"></span><span class="annot"><a href="Data.Singletons.Partition.html#isStockOrDefault"><span class="hs-identifier hs-type">isStockOrDefault</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DDerivStrategy</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-298"></span><span id="isStockOrDefault"><span class="annot"><span class="annottext">isStockOrDefault :: Maybe DDerivStrategy -&gt; Bool
+</span><a href="Data.Singletons.Partition.html#isStockOrDefault"><span class="hs-identifier hs-var hs-var">isStockOrDefault</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-299"></span><span class="annot"><a href="Data.Singletons.Partition.html#isStockOrDefault"><span class="hs-identifier hs-var">isStockOrDefault</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DStockStrategy</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-300"></span><span class="annot"><a href="Data.Singletons.Partition.html#isStockOrDefault"><span class="hs-identifier hs-var">isStockOrDefault</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-301"></span><span>
+</span><span id="line-302"></span><span class="hs-comment">{-
+Note [Partitioning, type synonyms, and type families]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The process of singling does not produce any new declarations corresponding to
+type synonyms or type families, so they are &quot;ignored&quot; in a sense. Nevertheless,
+we explicitly track them during partitioning, since we want to create
+defunctionalization symbols for them.
+
+Also note that:
+
+1. Other uses of type synonyms in singled code will be expanded away.
+2. Other uses of type families in singled code are unlikely to work at present
+   due to Trac #12564.
+-}</span><span>
+</span><span id="line-316"></span></pre></body></html>

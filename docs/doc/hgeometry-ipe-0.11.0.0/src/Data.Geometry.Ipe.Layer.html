@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.Layer</span><span class="hs-special">(</span><span>
+</span><span id="line-3"></span><span>  </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#layerName"><span class="hs-identifier">layerName</span></a></span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">newtype</span><span> </span><span id="LayerName"><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LayerName"><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_layerName"><span class="annot"><span class="annottext">LayerName -&gt; Text
+</span><a href="Data.Geometry.Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679530169"><span id="local-6989586621679530171"><span id="local-6989586621679530173"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
+[LayerName] -&gt; ShowS
+LayerName -&gt; String
+(Int -&gt; LayerName -&gt; ShowS)
+-&gt; (LayerName -&gt; String)
+-&gt; ([LayerName] -&gt; ShowS)
+-&gt; Show LayerName
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [LayerName] -&gt; ShowS
+$cshowList :: [LayerName] -&gt; ShowS
+show :: LayerName -&gt; String
+$cshow :: LayerName -&gt; String
+showsPrec :: Int -&gt; LayerName -&gt; ShowS
+$cshowsPrec :: Int -&gt; LayerName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679530160"><span id="local-6989586621679530162"><span id="local-6989586621679530164"><span id="local-6989586621679530166"><span class="annot"><span class="annottext">ReadPrec [LayerName]
+ReadPrec LayerName
+Int -&gt; ReadS LayerName
+ReadS [LayerName]
+(Int -&gt; ReadS LayerName)
+-&gt; ReadS [LayerName]
+-&gt; ReadPrec LayerName
+-&gt; ReadPrec [LayerName]
+-&gt; Read LayerName
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [LayerName]
+$creadListPrec :: ReadPrec [LayerName]
+readPrec :: ReadPrec LayerName
+$creadPrec :: ReadPrec LayerName
+readList :: ReadS [LayerName]
+$creadList :: ReadS [LayerName]
+readsPrec :: Int -&gt; ReadS LayerName
+$creadsPrec :: Int -&gt; ReadS LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679530155"><span id="local-6989586621679530157"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
+(LayerName -&gt; LayerName -&gt; Bool)
+-&gt; (LayerName -&gt; LayerName -&gt; Bool) -&gt; Eq LayerName
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: LayerName -&gt; LayerName -&gt; Bool
+$c/= :: LayerName -&gt; LayerName -&gt; Bool
+== :: LayerName -&gt; LayerName -&gt; Bool
+$c== :: LayerName -&gt; LayerName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679530139"><span id="local-6989586621679530141"><span id="local-6989586621679530143"><span id="local-6989586621679530145"><span id="local-6989586621679530147"><span id="local-6989586621679530149"><span id="local-6989586621679530151"><span class="annot"><span class="annottext">Eq LayerName
+Eq LayerName =&gt;
+(LayerName -&gt; LayerName -&gt; Ordering)
+-&gt; (LayerName -&gt; LayerName -&gt; Bool)
+-&gt; (LayerName -&gt; LayerName -&gt; Bool)
+-&gt; (LayerName -&gt; LayerName -&gt; Bool)
+-&gt; (LayerName -&gt; LayerName -&gt; Bool)
+-&gt; (LayerName -&gt; LayerName -&gt; LayerName)
+-&gt; (LayerName -&gt; LayerName -&gt; LayerName)
+-&gt; Ord LayerName
+LayerName -&gt; LayerName -&gt; Bool
+LayerName -&gt; LayerName -&gt; Ordering
+LayerName -&gt; LayerName -&gt; LayerName
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: LayerName -&gt; LayerName -&gt; LayerName
+$cmin :: LayerName -&gt; LayerName -&gt; LayerName
+max :: LayerName -&gt; LayerName -&gt; LayerName
+$cmax :: LayerName -&gt; LayerName -&gt; LayerName
+&gt;= :: LayerName -&gt; LayerName -&gt; Bool
+$c&gt;= :: LayerName -&gt; LayerName -&gt; Bool
+&gt; :: LayerName -&gt; LayerName -&gt; Bool
+$c&gt; :: LayerName -&gt; LayerName -&gt; Bool
+&lt;= :: LayerName -&gt; LayerName -&gt; Bool
+$c&lt;= :: LayerName -&gt; LayerName -&gt; Bool
+&lt; :: LayerName -&gt; LayerName -&gt; Bool
+$c&lt; :: LayerName -&gt; LayerName -&gt; Bool
+compare :: LayerName -&gt; LayerName -&gt; Ordering
+$ccompare :: LayerName -&gt; LayerName -&gt; Ordering
+$cp1Ord :: Eq LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679530136"><span class="annot"><span class="annottext">String -&gt; LayerName
+(String -&gt; LayerName) -&gt; IsString LayerName
+forall a. (String -&gt; a) -&gt; IsString a
+fromString :: String -&gt; LayerName
+$cfromString :: String -&gt; LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">IsString</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span id="layerName"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">LayerName</span></span><span>
+</span><span id="line-14"></span></pre></body></html>

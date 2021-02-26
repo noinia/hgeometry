@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Singletons.Deriving.Infer</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) 2015 Richard Eisenberg</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Infers constraints for a `deriving` class</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.Deriving.Infer</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Infer.html#inferConstraints"><span class="hs-identifier">inferConstraints</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Infer.html#inferConstraintsDef"><span class="hs-identifier">inferConstraintsDef</span></a></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Deriving.Util.html"><span class="hs-identifier">Data.Singletons.Deriving.Util</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Util.html"><span class="hs-identifier">Data.Singletons.Util</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- @inferConstraints cls inst_ty cons@ infers the instance context for a</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- derived type class instance of @cls@ for @inst_ty@, using the constructors</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- @cons@. For instance, if @cls@ is 'Ord' and @inst_ty@ is @Either a b@, then</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- that means we are attempting to derive the instance:</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- instance ??? =&gt; Ord (Either a b)</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- The role of 'inferConstraints' is to determine what @???@ should be in that</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- derived instance. To accomplish this, the list of @cons@ (in this example,</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- @cons@ would be @[Left a, Right b]@) is used as follows:</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- 1. For each @con@ in @cons@, find the types of each of its fields</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--    (call these @field_tys@), perhaps after renaming the type variables of</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--    @field_tys@.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- 2. For each @field_ty@ in @field_tys@, apply @cls@ to @field_ty@ to obtain</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--    a constraint.</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- 3. The final instance context is the set of all such constraints obtained</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--    in step 2.</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- To complete the running example, this algorithm would produce the instance</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- context @(Ord a, Ord b)@, since @Left a@ has one field of type @a@, and</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- @Right b@ has one field of type @b@.</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- This algorithm is a crude approximation of what GHC actually does when</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- deriving instances. It is crude in the sense that one can end up with</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- redundant constraints. For instance, if the data type for which an 'Ord'</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- instance is being derived is @data Foo = MkFoo Bool Foo@, then the</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- inferred constraints would be @(Ord Bool, Ord Foo)@. Technically, neither</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- constraint is necessary, but it is not simple in general to eliminate</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- redundant constraints like these, so we do not attept to do so. (This is</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- one reason why @singletons@ requires the use of the @UndecidableInstances@</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- GHC extension.)</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- Observant readers will notice that the phrase \&quot;perhaps afer renaming the</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- type variables\&quot; was casually dropped in step 1 of the above algorithm.</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- For more information on what this means, refer to the documentation for</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- infer_ct below.</span><span>
+</span><span id="line-63"></span><span class="annot"><a href="Data.Singletons.Deriving.Infer.html#inferConstraints"><span class="hs-identifier hs-type">inferConstraints</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621681358962"><span class="annot"><a href="#local-6989586621681358962"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358962"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358962"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>
+</span><span id="line-64"></span><span id="inferConstraints"><span class="annot"><span class="annottext">inferConstraints :: DPred -&gt; DPred -&gt; [DCon] -&gt; q DCxt
+</span><a href="Data.Singletons.Deriving.Infer.html#inferConstraints"><span class="hs-identifier hs-var hs-var">inferConstraints</span></a></span></span><span> </span><span id="local-6989586621681358958"><span class="annot"><span class="annottext">pr :: DPred
+</span><a href="#local-6989586621681358958"><span class="hs-identifier hs-var">pr</span></a></span></span><span> </span><span id="local-6989586621681358957"><span class="annot"><span class="annottext">inst_ty :: DPred
+</span><a href="#local-6989586621681358957"><span class="hs-identifier hs-var">inst_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; DCxt) -&gt; q DCxt -&gt; q DCxt
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DCxt
+forall a. Eq a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">nub</span></span><span> </span><span class="annot"><span class="annottext">(q DCxt -&gt; q DCxt) -&gt; ([DCon] -&gt; q DCxt) -&gt; [DCon] -&gt; q DCxt
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(DCon -&gt; q DCxt) -&gt; [DCon] -&gt; q DCxt
+forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Data.Singletons.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="annot"><span class="annottext">DCon -&gt; q DCxt
+</span><a href="#local-6989586621681358953"><span class="hs-identifier hs-var">infer_ct</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-comment">-- A thorny situation arises when attempting to infer an instance context</span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-comment">-- for a GADT. Consider the following example:</span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-comment">--   newtype Bar a where</span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-comment">--     MkBar :: b -&gt; Bar b</span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-comment">--   deriving Show</span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-comment">-- If we blindly apply 'Show' to the field type of @MkBar@, we will end up</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- with a derived instance of:</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-comment">--   instance Show b =&gt; Show (Bar a)</span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-comment">-- This is completely wrong, since the type variable @b@ is never used in</span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-comment">-- the instance head! This reveals that we need a slightly more nuanced</span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-comment">-- strategy for gathering constraints for GADT constructors. To account</span><span>
+</span><span id="line-81"></span><span>    </span><span class="hs-comment">-- for this, when gathering @field_tys@ (from step 1 in the above algorithm)</span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-comment">-- we perform the following extra steps:</span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-comment">-- 1(a). Take the return type of @con@ and match it with @inst_ty@ (e.g.,</span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-comment">--       match @Bar b@ with @Bar a@). Doing so will produce a substitution</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-comment">--       that maps the universally quantified type variables in the GADT</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-comment">--       (i.e., @b@) to the corresponding type variables in the data type</span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-comment">--       constructor (i.e., @a@).</span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-comment">-- 1(b). Use the resulting substitution to rename the universally</span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-comment">--       quantified type variables of @con@ as necessary.</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-comment">-- After this renaming, the algorithm will produce an instance context of</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-comment">-- @Show a@ (since @b@ was renamed to @a@), as expected.</span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><a href="#local-6989586621681358953"><span class="hs-identifier hs-type">infer_ct</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358962"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621681358953"><span class="annot"><span class="annottext">infer_ct :: DCon -&gt; q DCxt
+</span><a href="#local-6989586621681358953"><span class="hs-identifier hs-var hs-var">infer_ct</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621681358951"><span class="annot"><span class="annottext">fields :: DConFields
+</span><a href="#local-6989586621681358951"><span class="hs-identifier hs-var">fields</span></a></span></span><span> </span><span id="local-6989586621681358950"><span class="annot"><span class="annottext">res_ty :: DPred
+</span><a href="#local-6989586621681358950"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681358949"><span class="annot"><span class="annottext">field_tys :: DCxt
+</span><a href="#local-6989586621681358949"><span class="hs-identifier hs-var hs-var">field_tys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DConFields -&gt; DCxt
+</span><a href="Data.Singletons.Util.html#tysOfConFields"><span class="hs-identifier hs-var">tysOfConFields</span></a></span><span> </span><span class="annot"><span class="annottext">DConFields
+</span><a href="#local-6989586621681358951"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-97"></span><span>          </span><span class="hs-comment">-- We need to match the constructor's result type with the type given</span><span>
+</span><span id="line-98"></span><span>          </span><span class="hs-comment">-- in the generated instance. But if we have:</span><span>
+</span><span id="line-99"></span><span>          </span><span class="hs-comment">--</span><span>
+</span><span id="line-100"></span><span>          </span><span class="hs-comment">--   data Foo a where</span><span>
+</span><span id="line-101"></span><span>          </span><span class="hs-comment">--     MkFoo :: a -&gt; Foo a</span><span>
+</span><span id="line-102"></span><span>          </span><span class="hs-comment">--     deriving Functor</span><span>
+</span><span id="line-103"></span><span>          </span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span>          </span><span class="hs-comment">-- Then the generated instance will be:</span><span>
+</span><span id="line-105"></span><span>          </span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span>          </span><span class="hs-comment">--   instance Functor Foo where ...</span><span>
+</span><span id="line-107"></span><span>          </span><span class="hs-comment">--</span><span>
+</span><span id="line-108"></span><span>          </span><span class="hs-comment">-- Which means that if we're not careful, we might try to match the</span><span>
+</span><span id="line-109"></span><span>          </span><span class="hs-comment">-- types (Foo a) and (Foo), which will fail.</span><span>
+</span><span id="line-110"></span><span>          </span><span class="hs-comment">--</span><span>
+</span><span id="line-111"></span><span>          </span><span class="hs-comment">-- To avoid this, we employ a grimy hack where we pad the instance</span><span>
+</span><span id="line-112"></span><span>          </span><span class="hs-comment">-- type with an extra (dummy) type variable. It doesn't matter what</span><span>
+</span><span id="line-113"></span><span>          </span><span class="hs-comment">-- we name it, since none of the inferred constraints will mention</span><span>
+</span><span id="line-114"></span><span>          </span><span class="hs-comment">-- it anyway.</span><span>
+</span><span id="line-115"></span><span>          </span><span id="local-6989586621681358947"><span class="annot"><span class="annottext">eta_expanded_inst_ty :: DPred
+</span><a href="#local-6989586621681358947"><span class="hs-identifier hs-var hs-var">eta_expanded_inst_ty</span></a></span></span><span>
+</span><span id="line-116"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358946"><span class="hs-identifier hs-var">is_functor_like</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358957"><span class="hs-identifier hs-var">inst_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DPred -&gt; DPred -&gt; DPred
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DPred
+</span><span class="hs-identifier hs-var">DVarT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Name
+</span><span class="hs-identifier hs-var">mkName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;dummy&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358957"><span class="hs-identifier hs-var">inst_ty</span></a></span><span>
+</span><span id="line-118"></span><span>      </span><span id="local-6989586621681358943"><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358943"><span class="hs-identifier hs-var">res_ty'</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DPred -&gt; q DPred
+forall (q :: * -&gt; *). DsMonad q =&gt; DPred -&gt; q DPred
+</span><span class="hs-identifier hs-var">expandType</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358950"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><span id="line-119"></span><span>      </span><span id="local-6989586621681358941"><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358941"><span class="hs-identifier hs-var">inst_ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DPred -&gt; q DPred
+forall (q :: * -&gt; *). DsMonad q =&gt; DPred -&gt; q DPred
+</span><span class="hs-identifier hs-var">expandType</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358947"><span class="hs-identifier hs-var">eta_expanded_inst_ty</span></a></span><span>
+</span><span id="line-120"></span><span>      </span><span id="local-6989586621681358940"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358940"><span class="hs-identifier hs-var">field_tys'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">IgnoreKinds -&gt; DPred -&gt; DPred -&gt; Maybe DSubst
+</span><span class="hs-identifier hs-var">matchTy</span></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><span class="hs-identifier hs-var">YesIgnore</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358943"><span class="hs-identifier hs-var">res_ty'</span></a></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358941"><span class="hs-identifier hs-var">inst_ty'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-121"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; q DCxt
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; q DCxt) -&gt; String -&gt; q DCxt
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Unable to match type &quot;</span></span><span>
+</span><span id="line-122"></span><span>                                      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; DPred -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358943"><span class="hs-identifier hs-var">res_ty'</span></a></span><span>
+</span><span id="line-123"></span><span>                                      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot; with &quot;</span></span><span>
+</span><span id="line-124"></span><span>                                      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; DPred -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358941"><span class="hs-identifier hs-var">inst_ty'</span></a></span><span>
+</span><span id="line-125"></span><span>                                      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-126"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681358935"><span class="annot"><span class="annottext">subst :: DSubst
+</span><a href="#local-6989586621681358935"><span class="hs-identifier hs-var">subst</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(DPred -&gt; q DPred) -&gt; DCxt -&gt; q DCxt
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DSubst -&gt; DPred -&gt; q DPred
+forall (q :: * -&gt; *). Quasi q =&gt; DSubst -&gt; DPred -&gt; q DPred
+</span><span class="hs-identifier hs-var">substTy</span></span><span> </span><span class="annot"><span class="annottext">DSubst
+</span><a href="#local-6989586621681358935"><span class="hs-identifier hs-var">subst</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358949"><span class="hs-identifier hs-var">field_tys</span></a></span><span>
+</span><span id="line-127"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621681358946"><span class="hs-identifier hs-var">is_functor_like</span></a></span><span>
+</span><span id="line-128"></span><span>         </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; DPred -&gt; q DCxt
+</span><a href="#local-6989586621681358932"><span class="hs-identifier hs-var">mk_functor_like_constraints</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358940"><span class="hs-identifier hs-var">field_tys'</span></a></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358943"><span class="hs-identifier hs-var">res_ty'</span></a></span><span>
+</span><span id="line-129"></span><span>         </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; q DCxt
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; q DCxt) -&gt; DCxt -&gt; q DCxt
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(DPred -&gt; DPred) -&gt; DCxt -&gt; DCxt
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358958"><span class="hs-identifier hs-var">pr</span></a></span><span> </span><span class="annot"><span class="annottext">DPred -&gt; DPred -&gt; DPred
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358940"><span class="hs-identifier hs-var">field_tys'</span></a></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-comment">-- If we derive a Functor-like class, e.g.,</span><span>
+</span><span id="line-132"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-comment">--   data Foo f g h a = MkFoo (f a) (g (h a)) deriving Functor</span><span>
+</span><span id="line-134"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-comment">-- Then we infer constraints by sticking Functor on the subtypes of kind</span><span>
+</span><span id="line-136"></span><span>    </span><span class="hs-comment">-- (Type -&gt; Type). In the example above, that would give us</span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-comment">-- (Functor f, Functor g, Functor h).</span><span>
+</span><span id="line-138"></span><span>    </span><span class="annot"><a href="#local-6989586621681358932"><span class="hs-identifier hs-type">mk_functor_like_constraints</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358962"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>
+</span><span id="line-139"></span><span>    </span><span id="local-6989586621681358932"><span class="annot"><span class="annottext">mk_functor_like_constraints :: DCxt -&gt; DPred -&gt; q DCxt
+</span><a href="#local-6989586621681358932"><span class="hs-identifier hs-var hs-var">mk_functor_like_constraints</span></a></span></span><span> </span><span id="local-6989586621681358931"><span class="annot"><span class="annottext">fields :: DCxt
+</span><a href="#local-6989586621681358931"><span class="hs-identifier hs-var">fields</span></a></span></span><span> </span><span id="local-6989586621681358930"><span class="annot"><span class="annottext">res_ty :: DPred
+</span><a href="#local-6989586621681358930"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-140"></span><span>      </span><span class="hs-comment">-- This function is partial. But that's OK, because</span><span>
+</span><span id="line-141"></span><span>      </span><span class="hs-comment">-- functorLikeValidityChecks ensures that this is total by the time</span><span>
+</span><span id="line-142"></span><span>      </span><span class="hs-comment">-- we invoke this.</span><span>
+</span><span id="line-143"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358929"><span class="annot"><span class="annottext">res_ty_args :: [DTypeArg]
+</span><a href="#local-6989586621681358929"><span class="hs-identifier hs-var">res_ty_args</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPred -&gt; (DPred, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358930"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><span id="line-144"></span><span>          </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681358927"><span class="annot"><span class="annottext">last_res_ty_arg :: DPred
+</span><a href="#local-6989586621681358927"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; (DCxt, DPred)
+forall a. [a] -&gt; ([a], a)
+</span><a href="Data.Singletons.Util.html#snocView"><span class="hs-identifier hs-var">snocView</span></a></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; (DCxt, DPred)) -&gt; DCxt -&gt; (DCxt, DPred)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><span class="hs-identifier hs-var">filterDTANormals</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621681358929"><span class="hs-identifier hs-var">res_ty_args</span></a></span><span>
+</span><span id="line-145"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681358924"><span class="annot"><span class="annottext">last_tv :: Name
+</span><a href="#local-6989586621681358924"><span class="hs-identifier hs-var">last_tv</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPred -&gt; Maybe Name
+</span><a href="Data.Singletons.Deriving.Util.html#getDVarTName_maybe"><span class="hs-identifier hs-var">getDVarTName_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358927"><span class="hs-identifier hs-var">last_res_ty_arg</span></a></span><span>
+</span><span id="line-146"></span><span>      </span><span id="local-6989586621681358922"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358922"><span class="hs-identifier hs-var">deep_subtypes</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DPred -&gt; q DCxt) -&gt; DCxt -&gt; q DCxt
+forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Data.Singletons.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DPred -&gt; q DCxt
+forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; DPred -&gt; q DCxt
+</span><a href="Data.Singletons.Deriving.Util.html#deepSubtypesContaining"><span class="hs-identifier hs-var">deepSubtypesContaining</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358924"><span class="hs-identifier hs-var">last_tv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358931"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-147"></span><span>      </span><span class="annot"><span class="annottext">DCxt -&gt; q DCxt
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(DCxt -&gt; q DCxt) -&gt; DCxt -&gt; q DCxt
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(DPred -&gt; DPred) -&gt; DCxt -&gt; DCxt
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358958"><span class="hs-identifier hs-var">pr</span></a></span><span> </span><span class="annot"><span class="annottext">DPred -&gt; DPred -&gt; DPred
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621681358922"><span class="hs-identifier hs-var">deep_subtypes</span></a></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><a href="#local-6989586621681358946"><span class="hs-identifier hs-type">is_functor_like</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621681358946"><span class="annot"><span class="annottext">is_functor_like :: Bool
+</span><a href="#local-6989586621681358946"><span class="hs-identifier hs-var hs-var">is_functor_like</span></a></span></span><span>
+</span><span id="line-151"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621681358919"><span class="annot"><span class="annottext">pr_class_name :: Name
+</span><a href="#local-6989586621681358919"><span class="hs-identifier hs-var">pr_class_name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DPred -&gt; (DPred, [DTypeArg])
+</span><span class="hs-identifier hs-var">unfoldDType</span></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358958"><span class="hs-identifier hs-var">pr</span></a></span><span>
+</span><span id="line-152"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Bool
+</span><a href="Data.Singletons.Deriving.Util.html#isFunctorLikeClassName"><span class="hs-identifier hs-var">isFunctorLikeClassName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681358919"><span class="hs-identifier hs-var">pr_class_name</span></a></span><span>
+</span><span id="line-153"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-154"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- For @inferConstraintsDef mb_cxt@, if @mb_cxt@ is 'Just' a context, then it will</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- simply return that context. Otherwise, if @mb_cxt@ is 'Nothing', then</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- 'inferConstraintsDef' will infer an instance context (using 'inferConstraints').</span><span>
+</span><span id="line-159"></span><span id="local-6989586621681358917"><span class="annot"><a href="Data.Singletons.Deriving.Infer.html#inferConstraintsDef"><span class="hs-identifier hs-type">inferConstraintsDef</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621681358917"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DCon</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681358917"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span></span><span>
+</span><span id="line-160"></span><span id="inferConstraintsDef"><span class="annot"><span class="annottext">inferConstraintsDef :: Maybe DCxt -&gt; DPred -&gt; DPred -&gt; [DCon] -&gt; q DCxt
+</span><a href="Data.Singletons.Deriving.Infer.html#inferConstraintsDef"><span class="hs-identifier hs-var hs-var">inferConstraintsDef</span></a></span></span><span> </span><span id="local-6989586621681358916"><span class="annot"><span class="annottext">mb_ctxt :: Maybe DCxt
+</span><a href="#local-6989586621681358916"><span class="hs-identifier hs-var">mb_ctxt</span></a></span></span><span> </span><span id="local-6989586621681358915"><span class="annot"><span class="annottext">pr :: DPred
+</span><a href="#local-6989586621681358915"><span class="hs-identifier hs-var">pr</span></a></span></span><span> </span><span id="local-6989586621681358914"><span class="annot"><span class="annottext">inst_ty :: DPred
+</span><a href="#local-6989586621681358914"><span class="hs-identifier hs-var">inst_ty</span></a></span></span><span> </span><span id="local-6989586621681358913"><span class="annot"><span class="annottext">cons :: [DCon]
+</span><a href="#local-6989586621681358913"><span class="hs-identifier hs-var">cons</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-161"></span><span>  </span><span class="annot"><span class="annottext">q DCxt -&gt; (DCxt -&gt; q DCxt) -&gt; Maybe DCxt -&gt; q DCxt
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DPred -&gt; DPred -&gt; [DCon] -&gt; q DCxt
+forall (q :: * -&gt; *).
+DsMonad q =&gt;
+DPred -&gt; DPred -&gt; [DCon] -&gt; q DCxt
+</span><a href="Data.Singletons.Deriving.Infer.html#inferConstraints"><span class="hs-identifier hs-var">inferConstraints</span></a></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358915"><span class="hs-identifier hs-var">pr</span></a></span><span> </span><span class="annot"><span class="annottext">DPred
+</span><a href="#local-6989586621681358914"><span class="hs-identifier hs-var">inst_ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621681358913"><span class="hs-identifier hs-var">cons</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; q DCxt
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe DCxt
+</span><a href="#local-6989586621681358916"><span class="hs-identifier hs-var">mb_ctxt</span></a></span><span>
+</span><span id="line-162"></span></pre></body></html>

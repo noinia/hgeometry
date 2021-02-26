@@ -1,0 +1,787 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveFoldable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveFunctor #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE DeriveTraversable #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE StandaloneDeriving #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Module      :  Language.Haskell.TH.Desugar.OMap</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Copyright   :  (C) 2016-2018 Daniel Wagner, 2019 Ryan Scott</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- An 'OMap' behaves much like a 'M.Map', with all the same asymptotics, but</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- also remembers the order that keys were inserted.</span><span>
+</span><span id="line-23"></span><span class="hs-comment">--</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- This module offers a simplified version of the &quot;Data.Map.Ordered&quot; API</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- that assumes left-biased indices everywhere and uses a different 'Semigroup'</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- instance (the one in this module uses @('&lt;&gt;') = 'union'@) and 'Monoid'</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- instance (the one in this module uses @'mappend' = 'union'@).</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap</span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier">OMap</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Trivial maps</span></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#empty"><span class="hs-identifier">empty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#singleton"><span class="hs-identifier">singleton</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Insertion</span></span><span>
+</span><span id="line-35"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#insertPre"><span class="hs-identifier">insertPre</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#insertPost"><span class="hs-identifier">insertPost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#union"><span class="hs-identifier">union</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#unionWithKey"><span class="hs-identifier">unionWithKey</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Deletion</span></span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#delete"><span class="hs-identifier">delete</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#filterWithKey"><span class="hs-identifier">filterWithKey</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#%5C%5C"><span class="hs-operator">(\\)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#intersection"><span class="hs-identifier">intersection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#intersectionWithKey"><span class="hs-identifier">intersectionWithKey</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Query</span></span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#null"><span class="hs-identifier">null</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#size"><span class="hs-identifier">size</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#member"><span class="hs-identifier">member</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#notMember"><span class="hs-identifier">notMember</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookup"><span class="hs-identifier">lookup</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Indexing</span></span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Index</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookupIndex"><span class="hs-identifier">lookupIndex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookupAt"><span class="hs-identifier">lookupAt</span></a></span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-comment">-- * List conversions</span></span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#fromList"><span class="hs-identifier">fromList</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#assocs"><span class="hs-identifier">assocs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#toAscList"><span class="hs-identifier">toAscList</span></a></span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><span class="hs-comment">-- * 'M.Map' conversion</span></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#toMap"><span class="hs-identifier">toMap</span></a></span><span>
+</span><span id="line-46"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Ordered</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bias</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Index</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Ordered</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OM</span></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">filter</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">lookup</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">null</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4,8,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Foldable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Foldable</span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Monoid</span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Traversable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Traversable</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Semigroup</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Semigroup</span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &lt; 710
+</span><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier">Typeable</span><span> </span><span class="hs-identifier">L</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | An ordered map whose 'insertPre', 'insertPost', 'intersection',</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- 'intersectionWithKey', 'union', and 'unionWithKey' operations are biased</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- towards leftmost indices when when breaking ties between keys.</span><span>
+</span><span id="line-72"></span><span class="hs-keyword">newtype</span><span> </span><span id="OMap"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-var">OMap</span></a></span></span><span> </span><span id="local-6989586621679409937"><span class="annot"><a href="#local-6989586621679409937"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409936"><span class="annot"><a href="#local-6989586621679409936"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OMap"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-var">OMap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bias</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">L</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409937"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409936"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="%24cOMap"><span id="%24tOMap"><span id="local-6989586621679409906"><span id="local-6989586621679409908"><span id="local-6989586621679409910"><span id="local-6989586621679409912"><span id="local-6989586621679409914"><span id="local-6989586621679409916"><span id="local-6989586621679409918"><span id="local-6989586621679409920"><span id="local-6989586621679409922"><span id="local-6989586621679409924"><span id="local-6989586621679409926"><span id="local-6989586621679409928"><span id="local-6989586621679409930"><span id="local-6989586621679409932"><span class="annot"><span class="annottext">Typeable (OMap k v)
+DataType
+Constr
+Typeable (OMap k v) =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v))
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v))
+-&gt; (OMap k v -&gt; Constr)
+-&gt; (OMap k v -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OMap k v)))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c (OMap k v)))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; OMap k v -&gt; OMap k v)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v))
+-&gt; Data (OMap k v)
+OMap k v -&gt; DataType
+OMap k v -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b) -&gt; OMap k v -&gt; OMap k v
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v)
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v)
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OMap k v))
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; [u]
+forall k v. (Data k, Data v, Ord k) =&gt; Typeable (OMap k v)
+forall k v. (Data k, Data v, Ord k) =&gt; OMap k v -&gt; DataType
+forall k v. (Data k, Data v, Ord k) =&gt; OMap k v -&gt; Constr
+forall k v.
+(Data k, Data v, Ord k) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; OMap k v -&gt; OMap k v
+forall k v u.
+(Data k, Data v, Ord k) =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; u
+forall k v u.
+(Data k, Data v, Ord k) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; [u]
+forall k v r r'.
+(Data k, Data v, Ord k) =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+forall k v r r'.
+(Data k, Data v, Ord k) =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+forall k v (m :: * -&gt; *).
+(Data k, Data v, Ord k, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+forall k v (m :: * -&gt; *).
+(Data k, Data v, Ord k, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+forall k v (c :: * -&gt; *).
+(Data k, Data v, Ord k) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v)
+forall k v (c :: * -&gt; *).
+(Data k, Data v, Ord k) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v)
+forall k v (t :: * -&gt; *) (c :: * -&gt; *).
+(Data k, Data v, Ord k, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OMap k v))
+forall k v (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data k, Data v, Ord k, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OMap k v))
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v)
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v)
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OMap k v))
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OMap k v))
+$cOMap :: Constr
+$tOMap :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+$cgmapMo :: forall k v (m :: * -&gt; *).
+(Data k, Data v, Ord k, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+$cgmapMp :: forall k v (m :: * -&gt; *).
+(Data k, Data v, Ord k, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+gmapM :: (forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+$cgmapM :: forall k v (m :: * -&gt; *).
+(Data k, Data v, Ord k, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OMap k v -&gt; m (OMap k v)
+gmapQi :: Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; u
+$cgmapQi :: forall k v u.
+(Data k, Data v, Ord k) =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; [u]
+$cgmapQ :: forall k v u.
+(Data k, Data v, Ord k) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; OMap k v -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+$cgmapQr :: forall k v r r'.
+(Data k, Data v, Ord k) =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+$cgmapQl :: forall k v r r'.
+(Data k, Data v, Ord k) =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OMap k v -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; OMap k v -&gt; OMap k v
+$cgmapT :: forall k v.
+(Data k, Data v, Ord k) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; OMap k v -&gt; OMap k v
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OMap k v))
+$cdataCast2 :: forall k v (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data k, Data v, Ord k, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OMap k v))
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OMap k v))
+$cdataCast1 :: forall k v (t :: * -&gt; *) (c :: * -&gt; *).
+(Data k, Data v, Ord k, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OMap k v))
+dataTypeOf :: OMap k v -&gt; DataType
+$cdataTypeOf :: forall k v. (Data k, Data v, Ord k) =&gt; OMap k v -&gt; DataType
+toConstr :: OMap k v -&gt; Constr
+$ctoConstr :: forall k v. (Data k, Data v, Ord k) =&gt; OMap k v -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v)
+$cgunfold :: forall k v (c :: * -&gt; *).
+(Data k, Data v, Ord k) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OMap k v)
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v)
+$cgfoldl :: forall k v (c :: * -&gt; *).
+(Data k, Data v, Ord k) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OMap k v -&gt; c (OMap k v)
+$cp1Data :: forall k v. (Data k, Data v, Ord k) =&gt; Typeable (OMap k v)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409869"><span id="local-6989586621679409871"><span id="local-6989586621679409873"><span id="local-6989586621679409875"><span id="local-6989586621679409877"><span id="local-6989586621679409879"><span id="local-6989586621679409881"><span id="local-6989586621679409883"><span id="local-6989586621679409885"><span id="local-6989586621679409887"><span id="local-6989586621679409889"><span id="local-6989586621679409891"><span id="local-6989586621679409893"><span id="local-6989586621679409895"><span id="local-6989586621679409897"><span id="local-6989586621679409899"><span id="local-6989586621679409901"><span class="annot"><span class="annottext">OMap k a -&gt; Bool
+(a -&gt; m) -&gt; OMap k a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+(forall m. Monoid m =&gt; OMap k m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a)
+-&gt; (forall a. OMap k a -&gt; [a])
+-&gt; (forall a. OMap k a -&gt; Bool)
+-&gt; (forall a. OMap k a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; OMap k a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; OMap k a -&gt; a)
+-&gt; (forall a. Ord a =&gt; OMap k a -&gt; a)
+-&gt; (forall a. Num a =&gt; OMap k a -&gt; a)
+-&gt; (forall a. Num a =&gt; OMap k a -&gt; a)
+-&gt; Foldable (OMap k)
+forall a. Eq a =&gt; a -&gt; OMap k a -&gt; Bool
+forall a. Num a =&gt; OMap k a -&gt; a
+forall a. Ord a =&gt; OMap k a -&gt; a
+forall m. Monoid m =&gt; OMap k m -&gt; m
+forall a. OMap k a -&gt; Bool
+forall a. OMap k a -&gt; Int
+forall a. OMap k a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+forall k a. Eq a =&gt; a -&gt; OMap k a -&gt; Bool
+forall k a. Num a =&gt; OMap k a -&gt; a
+forall k a. Ord a =&gt; OMap k a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m
+forall k m. Monoid m =&gt; OMap k m -&gt; m
+forall k a. OMap k a -&gt; Bool
+forall k a. OMap k a -&gt; Int
+forall k a. OMap k a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+forall k a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m
+forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: OMap k a -&gt; a
+$cproduct :: forall k a. Num a =&gt; OMap k a -&gt; a
+sum :: OMap k a -&gt; a
+$csum :: forall k a. Num a =&gt; OMap k a -&gt; a
+minimum :: OMap k a -&gt; a
+$cminimum :: forall k a. Ord a =&gt; OMap k a -&gt; a
+maximum :: OMap k a -&gt; a
+$cmaximum :: forall k a. Ord a =&gt; OMap k a -&gt; a
+elem :: a -&gt; OMap k a -&gt; Bool
+$celem :: forall k a. Eq a =&gt; a -&gt; OMap k a -&gt; Bool
+length :: OMap k a -&gt; Int
+$clength :: forall k a. OMap k a -&gt; Int
+null :: OMap k a -&gt; Bool
+$cnull :: forall k a. OMap k a -&gt; Bool
+toList :: OMap k a -&gt; [a]
+$ctoList :: forall k a. OMap k a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+$cfoldl1 :: forall k a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+$cfoldr1 :: forall k a. (a -&gt; a -&gt; a) -&gt; OMap k a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+$cfoldl' :: forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+$cfoldl :: forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+$cfoldr' :: forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+$cfoldr :: forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OMap k a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; OMap k a -&gt; m
+$cfoldMap' :: forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m
+foldMap :: (a -&gt; m) -&gt; OMap k a -&gt; m
+$cfoldMap :: forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; OMap k a -&gt; m
+fold :: OMap k m -&gt; m
+$cfold :: forall k m. Monoid m =&gt; OMap k m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409864"><span id="local-6989586621679409866"><span class="annot"><span class="annottext">a -&gt; OMap k b -&gt; OMap k a
+(a -&gt; b) -&gt; OMap k a -&gt; OMap k b
+(forall a b. (a -&gt; b) -&gt; OMap k a -&gt; OMap k b)
+-&gt; (forall a b. a -&gt; OMap k b -&gt; OMap k a) -&gt; Functor (OMap k)
+forall a b. a -&gt; OMap k b -&gt; OMap k a
+forall a b. (a -&gt; b) -&gt; OMap k a -&gt; OMap k b
+forall k a b. a -&gt; OMap k b -&gt; OMap k a
+forall k a b. (a -&gt; b) -&gt; OMap k a -&gt; OMap k b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; OMap k b -&gt; OMap k a
+$c&lt;$ :: forall k a b. a -&gt; OMap k b -&gt; OMap k a
+fmap :: (a -&gt; b) -&gt; OMap k a -&gt; OMap k b
+$cfmap :: forall k a b. (a -&gt; b) -&gt; OMap k a -&gt; OMap k b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409859"><span id="local-6989586621679409861"><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v -&gt; Bool
+(OMap k v -&gt; OMap k v -&gt; Bool)
+-&gt; (OMap k v -&gt; OMap k v -&gt; Bool) -&gt; Eq (OMap k v)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k v. (Eq k, Eq v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+/= :: OMap k v -&gt; OMap k v -&gt; Bool
+$c/= :: forall k v. (Eq k, Eq v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+== :: OMap k v -&gt; OMap k v -&gt; Bool
+$c== :: forall k v. (Eq k, Eq v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409843"><span id="local-6989586621679409845"><span id="local-6989586621679409847"><span id="local-6989586621679409849"><span id="local-6989586621679409851"><span id="local-6989586621679409853"><span id="local-6989586621679409855"><span class="annot"><span class="annottext">Eq (OMap k v)
+Eq (OMap k v) =&gt;
+(OMap k v -&gt; OMap k v -&gt; Ordering)
+-&gt; (OMap k v -&gt; OMap k v -&gt; Bool)
+-&gt; (OMap k v -&gt; OMap k v -&gt; Bool)
+-&gt; (OMap k v -&gt; OMap k v -&gt; Bool)
+-&gt; (OMap k v -&gt; OMap k v -&gt; Bool)
+-&gt; (OMap k v -&gt; OMap k v -&gt; OMap k v)
+-&gt; (OMap k v -&gt; OMap k v -&gt; OMap k v)
+-&gt; Ord (OMap k v)
+OMap k v -&gt; OMap k v -&gt; Bool
+OMap k v -&gt; OMap k v -&gt; Ordering
+OMap k v -&gt; OMap k v -&gt; OMap k v
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k v. (Ord k, Ord v) =&gt; Eq (OMap k v)
+forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Ordering
+forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+min :: OMap k v -&gt; OMap k v -&gt; OMap k v
+$cmin :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+max :: OMap k v -&gt; OMap k v -&gt; OMap k v
+$cmax :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+&gt;= :: OMap k v -&gt; OMap k v -&gt; Bool
+$c&gt;= :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+&gt; :: OMap k v -&gt; OMap k v -&gt; Bool
+$c&gt; :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+&lt;= :: OMap k v -&gt; OMap k v -&gt; Bool
+$c&lt;= :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+&lt; :: OMap k v -&gt; OMap k v -&gt; Bool
+$c&lt; :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Bool
+compare :: OMap k v -&gt; OMap k v -&gt; Ordering
+$ccompare :: forall k v. (Ord k, Ord v) =&gt; OMap k v -&gt; OMap k v -&gt; Ordering
+$cp1Ord :: forall k v. (Ord k, Ord v) =&gt; Eq (OMap k v)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409834"><span id="local-6989586621679409836"><span id="local-6989586621679409838"><span id="local-6989586621679409840"><span class="annot"><span class="annottext">ReadPrec [OMap k v]
+ReadPrec (OMap k v)
+Int -&gt; ReadS (OMap k v)
+ReadS [OMap k v]
+(Int -&gt; ReadS (OMap k v))
+-&gt; ReadS [OMap k v]
+-&gt; ReadPrec (OMap k v)
+-&gt; ReadPrec [OMap k v]
+-&gt; Read (OMap k v)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall k v. (Ord k, Read k, Read v) =&gt; ReadPrec [OMap k v]
+forall k v. (Ord k, Read k, Read v) =&gt; ReadPrec (OMap k v)
+forall k v. (Ord k, Read k, Read v) =&gt; Int -&gt; ReadS (OMap k v)
+forall k v. (Ord k, Read k, Read v) =&gt; ReadS [OMap k v]
+readListPrec :: ReadPrec [OMap k v]
+$creadListPrec :: forall k v. (Ord k, Read k, Read v) =&gt; ReadPrec [OMap k v]
+readPrec :: ReadPrec (OMap k v)
+$creadPrec :: forall k v. (Ord k, Read k, Read v) =&gt; ReadPrec (OMap k v)
+readList :: ReadS [OMap k v]
+$creadList :: forall k v. (Ord k, Read k, Read v) =&gt; ReadS [OMap k v]
+readsPrec :: Int -&gt; ReadS (OMap k v)
+$creadsPrec :: forall k v. (Ord k, Read k, Read v) =&gt; Int -&gt; ReadS (OMap k v)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409827"><span id="local-6989586621679409829"><span id="local-6989586621679409831"><span class="annot"><span class="annottext">Int -&gt; OMap k v -&gt; ShowS
+[OMap k v] -&gt; ShowS
+OMap k v -&gt; String
+(Int -&gt; OMap k v -&gt; ShowS)
+-&gt; (OMap k v -&gt; String) -&gt; ([OMap k v] -&gt; ShowS) -&gt; Show (OMap k v)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k v. (Show k, Show v) =&gt; Int -&gt; OMap k v -&gt; ShowS
+forall k v. (Show k, Show v) =&gt; [OMap k v] -&gt; ShowS
+forall k v. (Show k, Show v) =&gt; OMap k v -&gt; String
+showList :: [OMap k v] -&gt; ShowS
+$cshowList :: forall k v. (Show k, Show v) =&gt; [OMap k v] -&gt; ShowS
+show :: OMap k v -&gt; String
+$cshow :: forall k v. (Show k, Show v) =&gt; OMap k v -&gt; String
+showsPrec :: Int -&gt; OMap k v -&gt; ShowS
+$cshowsPrec :: forall k v. (Show k, Show v) =&gt; Int -&gt; OMap k v -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679409816"><span id="local-6989586621679409818"><span id="local-6989586621679409820"><span id="local-6989586621679409822"><span class="annot"><span class="annottext">Functor (OMap k)
+Foldable (OMap k)
+(Functor (OMap k), Foldable (OMap k)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    OMap k (f a) -&gt; f (OMap k a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; OMap k a -&gt; m (OMap k b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    OMap k (m a) -&gt; m (OMap k a))
+-&gt; Traversable (OMap k)
+(a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b)
+forall k. Ord k =&gt; Functor (OMap k)
+forall k. Ord k =&gt; Foldable (OMap k)
+forall k (m :: * -&gt; *) a.
+(Ord k, Monad m) =&gt;
+OMap k (m a) -&gt; m (OMap k a)
+forall k (f :: * -&gt; *) a.
+(Ord k, Applicative f) =&gt;
+OMap k (f a) -&gt; f (OMap k a)
+forall k (m :: * -&gt; *) a b.
+(Ord k, Monad m) =&gt;
+(a -&gt; m b) -&gt; OMap k a -&gt; m (OMap k b)
+forall k (f :: * -&gt; *) a b.
+(Ord k, Applicative f) =&gt;
+(a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; OMap k (m a) -&gt; m (OMap k a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+OMap k (f a) -&gt; f (OMap k a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; OMap k a -&gt; m (OMap k b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b)
+sequence :: OMap k (m a) -&gt; m (OMap k a)
+$csequence :: forall k (m :: * -&gt; *) a.
+(Ord k, Monad m) =&gt;
+OMap k (m a) -&gt; m (OMap k a)
+mapM :: (a -&gt; m b) -&gt; OMap k a -&gt; m (OMap k b)
+$cmapM :: forall k (m :: * -&gt; *) a b.
+(Ord k, Monad m) =&gt;
+(a -&gt; m b) -&gt; OMap k a -&gt; m (OMap k b)
+sequenceA :: OMap k (f a) -&gt; f (OMap k a)
+$csequenceA :: forall k (f :: * -&gt; *) a.
+(Ord k, Applicative f) =&gt;
+OMap k (f a) -&gt; f (OMap k a)
+traverse :: (a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b)
+$ctraverse :: forall k (f :: * -&gt; *) a b.
+(Ord k, Applicative f) =&gt;
+(a -&gt; f b) -&gt; OMap k a -&gt; f (OMap k b)
+$cp2Traversable :: forall k. Ord k =&gt; Foldable (OMap k)
+$cp1Traversable :: forall k. Ord k =&gt; Functor (OMap k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span id="local-6989586621679409813"><span id="local-6989586621679409814"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679409808"><span id="local-6989586621679409810"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409814"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409814"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409813"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679409806"><span class="annot"><span class="annottext">&lt;&gt; :: OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v -&gt; OMap k v
+forall k v. Ord k =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#union"><span class="hs-identifier hs-var">union</span></a></span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679409804"><span id="local-6989586621679409805"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679409798"><span id="local-6989586621679409800"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409805"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409805"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409804"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679409796"><span class="annot"><span class="annottext">mempty :: OMap k v
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v
+forall k v. OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#empty"><span class="hs-identifier hs-var">empty</span></a></span></span></span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span>  </span><span class="hs-identifier">mappend</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-operator">&lt;&gt;</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-83"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#empty"><span class="hs-identifier hs-type">empty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679410059"><span class="annot"><a href="#local-6989586621679410059"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679410058"><span class="annot"><a href="#local-6989586621679410058"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679410059"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679410058"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-84"></span><span id="empty"><span class="annot"><span class="annottext">empty :: OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#empty"><span class="hs-identifier hs-var hs-var">empty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v
+forall k v. OMap k v
+</span><span class="hs-identifier hs-var">OM.empty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679410059"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679410058"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span id="local-6989586621679409793"><span id="local-6989586621679409794"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#singleton"><span class="hs-identifier hs-type">singleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409794"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409793"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409794"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409793"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-87"></span><span id="singleton"><span class="annot"><span class="annottext">singleton :: k -&gt; v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#singleton"><span class="hs-identifier hs-var hs-var">singleton</span></a></span></span><span> </span><span id="local-6989586621679409792"><span class="annot"><span class="annottext">k :: k
+</span><a href="#local-6989586621679409792"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679409791"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679409791"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(k, v) -&gt; OMap k v
+forall k v. (k, v) -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OM.singleton</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679409792"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679409791"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | The value's index will be lower than the indices of the values in the</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- 'OSet'.</span><span>
+</span><span id="line-91"></span><span id="local-6989586621679409788"><span id="local-6989586621679409789"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#insertPre"><span class="hs-identifier hs-type">insertPre</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409788"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409788"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409788"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-92"></span><span id="insertPre"><span class="annot"><span class="annottext">insertPre :: k -&gt; v -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#insertPre"><span class="hs-identifier hs-var hs-var">insertPre</span></a></span></span><span> </span><span id="local-6989586621679409787"><span class="annot"><span class="annottext">k :: k
+</span><a href="#local-6989586621679409787"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679409786"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679409786"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v) -&gt; OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679409787"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679409786"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(k, v) -&gt; OMap k v -&gt; OMap k v
+forall k v. Ord k =&gt; (k, v) -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var">OM.|&lt;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- | The value's index will be higher than the indices of the values in the</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- 'OSet'.</span><span>
+</span><span id="line-96"></span><span id="local-6989586621679409783"><span id="local-6989586621679409784"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#insertPost"><span class="hs-identifier hs-type">insertPost</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409784"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409784"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409783"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409784"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409783"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409784"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409783"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-97"></span><span id="insertPost"><span class="annot"><span class="annottext">insertPost :: OMap k v -&gt; k -&gt; v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#insertPost"><span class="hs-identifier hs-var hs-var">insertPost</span></a></span></span><span> </span><span id="local-6989586621679409782"><span class="annot"><span class="annottext">m :: OMap k v
+</span><a href="#local-6989586621679409782"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679409781"><span class="annot"><span class="annottext">k :: k
+</span><a href="#local-6989586621679409781"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679409780"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679409780"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">OMap k v
+</span><a href="#local-6989586621679409782"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; (k, v) -&gt; OMap k v
+forall k v. Ord k =&gt; OMap k v -&gt; (k, v) -&gt; OMap k v
+</span><span class="hs-operator hs-var">OM.|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679409781"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679409780"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#union"><span class="hs-identifier hs-type">union</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409778"><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409777"><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-100"></span><span id="union"><span class="annot"><span class="annottext">union :: OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#union"><span class="hs-identifier hs-var hs-var">union</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v -&gt; OMap k v)
+-&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v -&gt; OMap k v
+forall k v. Ord k =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var">(OM.|&lt;&gt;)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409778"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409777"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span id="local-6989586621679409774"><span id="local-6989586621679409775"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#unionWithKey"><span class="hs-identifier hs-type">unionWithKey</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409775"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409775"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409775"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409775"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409775"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409774"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-103"></span><span id="unionWithKey"><span class="annot"><span class="annottext">unionWithKey :: (k -&gt; v -&gt; v -&gt; v) -&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#unionWithKey"><span class="hs-identifier hs-var hs-var">unionWithKey</span></a></span></span><span> </span><span id="local-6989586621679409773"><span class="annot"><span class="annottext">f :: k -&gt; v -&gt; v -&gt; v
+</span><a href="#local-6989586621679409773"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v -&gt; OMap k v)
+-&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(k -&gt; v -&gt; v -&gt; v) -&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+forall k v.
+Ord k =&gt;
+(k -&gt; v -&gt; v -&gt; v) -&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OM.unionWithL</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; v -&gt; v -&gt; v
+</span><a href="#local-6989586621679409773"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#delete"><span class="hs-identifier hs-type">delete</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409771"><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409770"><span class="annot"><a href="#local-6989586621679409770"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409770"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409770"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-106"></span><span id="delete"><span class="annot"><span class="annottext">delete :: k -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#delete"><span class="hs-identifier hs-var hs-var">delete</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; OMap k v -&gt; OMap k v) -&gt; k -&gt; OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; OMap k v -&gt; OMap k v
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OM.delete</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409770"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409770"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679409767"><span id="local-6989586621679409768"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#filterWithKey"><span class="hs-identifier hs-type">filterWithKey</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409768"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409768"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409767"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409768"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409767"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409768"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409767"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-109"></span><span id="filterWithKey"><span class="annot"><span class="annottext">filterWithKey :: (k -&gt; v -&gt; Bool) -&gt; OMap k v -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#filterWithKey"><span class="hs-identifier hs-var hs-var">filterWithKey</span></a></span></span><span> </span><span id="local-6989586621679409766"><span class="annot"><span class="annottext">f :: k -&gt; v -&gt; Bool
+</span><a href="#local-6989586621679409766"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v) -&gt; OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(k -&gt; v -&gt; Bool) -&gt; OMap k v -&gt; OMap k v
+forall k v. Ord k =&gt; (k -&gt; v -&gt; Bool) -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OM.filter</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; v -&gt; Bool
+</span><a href="#local-6989586621679409766"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#%5C%5C"><span class="hs-operator hs-type">(\\)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409764"><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409763"><span class="annot"><a href="#local-6989586621679409763"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679409762"><span class="annot"><a href="#local-6989586621679409762"><span class="hs-identifier hs-type">v'</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409763"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409762"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409763"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-112"></span><span id="%5C%5C"><span class="annot"><span class="annottext">\\ :: OMap k v -&gt; OMap k v' -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#%5C%5C"><span class="hs-operator hs-var hs-var">(\\)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v' -&gt; OMap k v)
+-&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v' -&gt; OMap k v
+forall k v v'. Ord k =&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v
+</span><span class="hs-operator hs-var">(OM.\\)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409763"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409762"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409764"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409763"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#intersection"><span class="hs-identifier hs-type">intersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409760"><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409759"><span class="annot"><a href="#local-6989586621679409759"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679409758"><span class="annot"><a href="#local-6989586621679409758"><span class="hs-identifier hs-type">v'</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409759"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409758"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409759"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-115"></span><span id="intersection"><span class="annot"><span class="annottext">intersection :: OMap k v -&gt; OMap k v' -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#intersection"><span class="hs-identifier hs-var hs-var">intersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v' -&gt; OMap k v)
+-&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v' -&gt; OMap k v
+forall k v v'. Ord k =&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v
+</span><span class="hs-operator hs-var">(OM.|/\)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409759"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409758"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409760"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409759"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span id="local-6989586621679409753"><span id="local-6989586621679409754"><span id="local-6989586621679409755"><span id="local-6989586621679409756"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#intersectionWithKey"><span class="hs-identifier hs-type">intersectionWithKey</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409756"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409756"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409755"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409754"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409753"><span class="hs-identifier hs-type">v''</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409756"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409755"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409756"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409754"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409756"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409753"><span class="hs-identifier hs-type">v''</span></a></span></span></span></span></span><span>
+</span><span id="line-118"></span><span id="intersectionWithKey"><span class="annot"><span class="annottext">intersectionWithKey :: (k -&gt; v -&gt; v' -&gt; v'') -&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v''
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#intersectionWithKey"><span class="hs-identifier hs-var hs-var">intersectionWithKey</span></a></span></span><span> </span><span id="local-6989586621679409752"><span class="annot"><span class="annottext">f :: k -&gt; v -&gt; v' -&gt; v''
+</span><a href="#local-6989586621679409752"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; OMap k v' -&gt; OMap k v'')
+-&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v''
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(k -&gt; v -&gt; v' -&gt; v'') -&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v''
+forall k v v' v''.
+Ord k =&gt;
+(k -&gt; v -&gt; v' -&gt; v'') -&gt; OMap k v -&gt; OMap k v' -&gt; OMap k v''
+</span><span class="hs-identifier hs-var">OM.intersectionWith</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; v -&gt; v' -&gt; v''
+</span><a href="#local-6989586621679409752"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#null"><span class="hs-identifier hs-type">null</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409750"><span class="annot"><a href="#local-6989586621679409750"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409749"><span class="annot"><a href="#local-6989586621679409749"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409750"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409749"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-121"></span><span id="null"><span class="annot"><span class="annottext">null :: OMap k v -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#null"><span class="hs-identifier hs-var hs-var">null</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; Bool) -&gt; OMap k v -&gt; Bool
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; Bool
+forall k v. OMap k v -&gt; Bool
+</span><span class="hs-identifier hs-var">OM.null</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409750"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409749"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#size"><span class="hs-identifier hs-type">size</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409747"><span class="annot"><a href="#local-6989586621679409747"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409746"><span class="annot"><a href="#local-6989586621679409746"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409747"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409746"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-124"></span><span id="size"><span class="annot"><span class="annottext">size :: OMap k v -&gt; Int
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#size"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; Int) -&gt; OMap k v -&gt; Int
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; Int
+forall k v. OMap k v -&gt; Int
+</span><span class="hs-identifier hs-var">OM.size</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409747"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409746"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#member"><span class="hs-identifier hs-type">member</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409744"><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409743"><span class="annot"><a href="#local-6989586621679409743"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409743"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-127"></span><span id="member"><span class="annot"><span class="annottext">member :: k -&gt; OMap k v -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#member"><span class="hs-identifier hs-var hs-var">member</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; OMap k v -&gt; Bool) -&gt; k -&gt; OMap k v -&gt; Bool
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; OMap k v -&gt; Bool
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Bool
+</span><span class="hs-identifier hs-var">OM.member</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409744"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409743"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#notMember"><span class="hs-identifier hs-type">notMember</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409741"><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409740"><span class="annot"><a href="#local-6989586621679409740"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409740"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-130"></span><span id="notMember"><span class="annot"><span class="annottext">notMember :: k -&gt; OMap k v -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#notMember"><span class="hs-identifier hs-var hs-var">notMember</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; OMap k v -&gt; Bool) -&gt; k -&gt; OMap k v -&gt; Bool
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; OMap k v -&gt; Bool
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Bool
+</span><span class="hs-identifier hs-var">OM.notMember</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409741"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409740"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookup"><span class="hs-identifier hs-type">lookup</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409738"><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409737"><span class="annot"><a href="#local-6989586621679409737"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409737"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679409737"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-133"></span><span id="lookup"><span class="annot"><span class="annottext">lookup :: k -&gt; OMap k v -&gt; Maybe v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#lookup"><span class="hs-identifier hs-var hs-var">lookup</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; OMap k v -&gt; Maybe v) -&gt; k -&gt; OMap k v -&gt; Maybe v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; OMap k v -&gt; Maybe v
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Maybe v
+</span><span class="hs-identifier hs-var">OM.lookup</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409738"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409737"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679409737"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookupIndex"><span class="hs-identifier hs-type">lookupIndex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409735"><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409734"><span class="annot"><a href="#local-6989586621679409734"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409734"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Index</span></span><span>
+</span><span id="line-136"></span><span id="lookupIndex"><span class="annot"><span class="annottext">lookupIndex :: k -&gt; OMap k v -&gt; Maybe Int
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#lookupIndex"><span class="hs-identifier hs-var hs-var">lookupIndex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; OMap k v -&gt; Maybe Int) -&gt; k -&gt; OMap k v -&gt; Maybe Int
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; OMap k v -&gt; Maybe Int
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Maybe Int
+</span><span class="hs-identifier hs-var">OM.findIndex</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409735"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409734"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Index</span></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#lookupAt"><span class="hs-identifier hs-type">lookupAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409732"><span class="annot"><a href="#local-6989586621679409732"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409731"><span class="annot"><a href="#local-6989586621679409731"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Index</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409732"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409731"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409732"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409731"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span id="lookupAt"><span class="annot"><span class="annottext">lookupAt :: Int -&gt; OMap k v -&gt; Maybe (k, v)
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#lookupAt"><span class="hs-identifier hs-var hs-var">lookupAt</span></a></span></span><span> </span><span id="local-6989586621679409730"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679409730"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679409729"><span class="annot"><span class="annottext">m :: OMap k v
+</span><a href="#local-6989586621679409729"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (k, v) -&gt; Maybe (k, v)
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; Int -&gt; Maybe (k, v)
+forall k v. OMap k v -&gt; Int -&gt; Maybe (k, v)
+</span><span class="hs-identifier hs-var">OM.elemAt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">OMap k v
+</span><a href="#local-6989586621679409729"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679409730"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409732"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409731"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679409726"><span id="local-6989586621679409727"><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#fromList"><span class="hs-identifier hs-type">fromList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679409727"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409727"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409726"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409727"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409726"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-142"></span><span id="fromList"><span class="annot"><span class="annottext">fromList :: [(k, v)] -&gt; OMap k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#fromList"><span class="hs-identifier hs-var hs-var">fromList</span></a></span></span><span> </span><span id="local-6989586621679409725"><span class="annot"><span class="annottext">l :: [(k, v)]
+</span><a href="#local-6989586621679409725"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap k v -&gt; OMap k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(k, v)] -&gt; OMap k v
+forall k v. Ord k =&gt; [(k, v)] -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OM.fromList</span></span><span> </span><span class="annot"><span class="annottext">[(k, v)]
+</span><a href="#local-6989586621679409725"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#assocs"><span class="hs-identifier hs-type">assocs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409723"><span class="annot"><a href="#local-6989586621679409723"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409722"><span class="annot"><a href="#local-6989586621679409722"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409723"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409722"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409723"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409722"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-145"></span><span id="assocs"><span class="annot"><span class="annottext">assocs :: OMap k v -&gt; [(k, v)]
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#assocs"><span class="hs-identifier hs-var hs-var">assocs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; [(k, v)]) -&gt; OMap k v -&gt; [(k, v)]
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; [(k, v)]
+forall k v. OMap k v -&gt; [(k, v)]
+</span><span class="hs-identifier hs-var">OM.assocs</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409723"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409722"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409723"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409722"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#toAscList"><span class="hs-identifier hs-type">toAscList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409720"><span class="annot"><a href="#local-6989586621679409720"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409719"><span class="annot"><a href="#local-6989586621679409719"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409720"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409719"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409720"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409719"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-148"></span><span id="toAscList"><span class="annot"><span class="annottext">toAscList :: OMap k v -&gt; [(k, v)]
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#toAscList"><span class="hs-identifier hs-var hs-var">toAscList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; [(k, v)]) -&gt; OMap k v -&gt; [(k, v)]
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; [(k, v)]
+forall k v. OMap k v -&gt; [(k, v)]
+</span><span class="hs-identifier hs-var">OM.toAscList</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409720"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409719"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679409720"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679409719"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#toMap"><span class="hs-identifier hs-type">toMap</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679409717"><span class="annot"><a href="#local-6989586621679409717"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679409716"><span class="annot"><a href="#local-6989586621679409716"><span class="hs-identifier hs-type">v</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html#OMap"><span class="hs-identifier hs-type">OMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409717"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409716"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="annot"><a href="#local-6989586621679409717"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409716"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-151"></span><span id="toMap"><span class="annot"><span class="annottext">toMap :: OMap k v -&gt; Map k v
+</span><a href="Language.Haskell.TH.Desugar.OMap.html#toMap"><span class="hs-identifier hs-var hs-var">toMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OMap k v -&gt; Map k v) -&gt; OMap k v -&gt; Map k v
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap k v -&gt; Map k v
+forall k v. OMap k v -&gt; Map k v
+</span><span class="hs-identifier hs-var">OM.toMap</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OM.OMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679409717"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409716"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="annot"><a href="#local-6989586621679409717"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679409716"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span></pre></body></html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- hexpat, a Haskell wrapper for expat</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- Copyright (C) 2008 Evan Martin &lt;martine@danga.com&gt;</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Copyright (C) 2009 Stephen Blackheath &lt;http://blacksapphire.com/antispam&gt;</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- | In the default representation, qualified tag and attribute names such as</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- \&lt;abc:hello\&gt; are represented just as a string containing a colon, e.g.</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- \&quot;abc:hello\&quot;.</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- This module provides functionality to handle these more intelligently, splitting</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- all tag and attribute names into their Prefix and LocalPart components.</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Text.XML.Expat.Internal.Qualified</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier">QName</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QAttributes"><span class="hs-identifier">QAttributes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#mkQName"><span class="hs-identifier">mkQName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#mkAnQName"><span class="hs-identifier">mkAnQName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#toQualified"><span class="hs-identifier">toQualified</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>        </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#fromQualified"><span class="hs-identifier">fromQualified</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html"><span class="hs-identifier">Text.XML.Expat.Internal.NodeClass</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html"><span class="hs-identifier">Text.XML.Expat.SAX</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | A qualified name.</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- Qualified names have two parts, a prefix and a local part. The local part</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- is the name of the tag. The prefix scopes that name to a particular</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- group of legal tags.</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- The prefix will usually be associated with a namespace URI. This is usually</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- achieved by using xmlns attributes to bind prefixes to URIs.</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">data</span><span> </span><span id="QName"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span></span><span> </span><span id="local-6989586621679113201"><span class="annot"><a href="#local-6989586621679113201"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>    </span><span id="QName"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-36"></span><span>        </span><span id="qnPrefix"><span class="annot"><span class="annottext">QName text -&gt; Maybe text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#qnPrefix"><span class="hs-identifier hs-var hs-var">qnPrefix</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679113201"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>        </span><span id="qnLocalPart"><span class="annot"><span class="annottext">QName text -&gt; text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#qnLocalPart"><span class="hs-identifier hs-var hs-var">qnLocalPart</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679113201"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113170"><span id="local-6989586621679113172"><span class="annot"><span class="annottext">QName text -&gt; QName text -&gt; Bool
+(QName text -&gt; QName text -&gt; Bool)
+-&gt; (QName text -&gt; QName text -&gt; Bool) -&gt; Eq (QName text)
+forall text. Eq text =&gt; QName text -&gt; QName text -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: QName text -&gt; QName text -&gt; Bool
+$c/= :: forall text. Eq text =&gt; QName text -&gt; QName text -&gt; Bool
+== :: QName text -&gt; QName text -&gt; Bool
+$c== :: forall text. Eq text =&gt; QName text -&gt; QName text -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679113163"><span id="local-6989586621679113165"><span id="local-6989586621679113167"><span class="annot"><span class="annottext">Int -&gt; QName text -&gt; ShowS
+[QName text] -&gt; ShowS
+QName text -&gt; String
+(Int -&gt; QName text -&gt; ShowS)
+-&gt; (QName text -&gt; String)
+-&gt; ([QName text] -&gt; ShowS)
+-&gt; Show (QName text)
+forall text. Show text =&gt; Int -&gt; QName text -&gt; ShowS
+forall text. Show text =&gt; [QName text] -&gt; ShowS
+forall text. Show text =&gt; QName text -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [QName text] -&gt; ShowS
+$cshowList :: forall text. Show text =&gt; [QName text] -&gt; ShowS
+show :: QName text -&gt; String
+$cshow :: forall text. Show text =&gt; QName text -&gt; String
+showsPrec :: Int -&gt; QName text -&gt; ShowS
+$cshowsPrec :: forall text. Show text =&gt; Int -&gt; QName text -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679113161"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679113161"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113161"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621679113158"><span class="annot"><span class="annottext">rnf :: QName text -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span id="local-6989586621679113156"><span class="annot"><span class="annottext">pre :: Maybe text
+</span><a href="#local-6989586621679113156"><span class="hs-identifier hs-var">pre</span></a></span></span><span> </span><span id="local-6989586621679113155"><span class="annot"><span class="annottext">loc :: text
+</span><a href="#local-6989586621679113155"><span class="hs-identifier hs-var">loc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Maybe text, text) -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe text
+</span><a href="#local-6989586621679113156"><span class="hs-identifier hs-var">pre</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113155"><span class="hs-identifier hs-var">loc</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | Type shortcut for attributes with qualified names</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">type</span><span> </span><span id="QAttributes"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QAttributes"><span class="hs-identifier hs-var">QAttributes</span></a></span></span><span> </span><span id="local-6989586621679113154"><span class="annot"><a href="#local-6989586621679113154"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#Attributes"><span class="hs-identifier hs-type">Attributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113154"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679113154"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | Make a new QName from a prefix and localPart.</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679113152"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#mkQName"><span class="hs-identifier hs-type">mkQName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113152"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113152"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113152"><span class="hs-identifier hs-type">text</span></a></span></span><span>
+</span><span id="line-49"></span><span id="mkQName"><span class="annot"><span class="annottext">mkQName :: text -&gt; text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#mkQName"><span class="hs-identifier hs-var hs-var">mkQName</span></a></span></span><span> </span><span id="local-6989586621679113151"><span class="annot"><span class="annottext">prefix :: text
+</span><a href="#local-6989586621679113151"><span class="hs-identifier hs-var">prefix</span></a></span></span><span> </span><span id="local-6989586621679113150"><span class="annot"><span class="annottext">localPart :: text
+</span><a href="#local-6989586621679113150"><span class="hs-identifier hs-var">localPart</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe text -&gt; text -&gt; QName text
+forall text. Maybe text -&gt; text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text -&gt; Maybe text
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113151"><span class="hs-identifier hs-var">prefix</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113150"><span class="hs-identifier hs-var">localPart</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Make a new QName with no prefix.</span><span>
+</span><span id="line-52"></span><span id="local-6989586621679113149"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#mkAnQName"><span class="hs-identifier hs-type">mkAnQName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679113149"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113149"><span class="hs-identifier hs-type">text</span></a></span></span><span>
+</span><span id="line-53"></span><span id="mkAnQName"><span class="annot"><span class="annottext">mkAnQName :: text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#mkAnQName"><span class="hs-identifier hs-var hs-var">mkAnQName</span></a></span></span><span> </span><span id="local-6989586621679113148"><span class="annot"><span class="annottext">localPart :: text
+</span><a href="#local-6989586621679113148"><span class="hs-identifier hs-var">localPart</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe text -&gt; text -&gt; QName text
+forall text. Maybe text -&gt; text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe text
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113148"><span class="hs-identifier hs-var">localPart</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679113145"><span id="local-6989586621679113146"><span id="local-6989586621679113147"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#toQualified"><span class="hs-identifier hs-type">toQualified</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#NodeClass"><span class="hs-identifier hs-type">NodeClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113147"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113146"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113145"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113147"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113146"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113145"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113145"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113147"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113146"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113145"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679113145"><span class="hs-identifier hs-type">text</span></a></span></span></span></span><span>
+</span><span id="line-56"></span><span id="toQualified"><span class="annot"><span class="annottext">toQualified :: n c text text -&gt; n c (QName text) text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#toQualified"><span class="hs-identifier hs-var hs-var">toQualified</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(text -&gt; QName text) -&gt; n c text text -&gt; n c (QName text) text
+forall (n :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag tag' text.
+NodeClass n c =&gt;
+(tag -&gt; tag') -&gt; n c tag text -&gt; n c tag' text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapAllTags"><span class="hs-identifier hs-var">mapAllTags</span></a></span><span> </span><span class="annot"><span class="annottext">text -&gt; QName text
+forall text. GenericXMLString text =&gt; text -&gt; QName text
+</span><a href="#local-6989586621679113143"><span class="hs-identifier hs-var">qual</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679113143"><span class="annot"><span class="annottext">qual :: text -&gt; QName text
+</span><a href="#local-6989586621679113143"><span class="hs-identifier hs-var hs-var">qual</span></a></span></span><span> </span><span id="local-6989586621679113142"><span class="annot"><span class="annottext">ident :: text
+</span><a href="#local-6989586621679113142"><span class="hs-identifier hs-var">ident</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-59"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Char -&gt; text -&gt; (text, text)
+forall s. GenericXMLString s =&gt; Char -&gt; s -&gt; (s, s)
+</span><a href="Text.XML.Expat.SAX.html#gxBreakOn"><span class="hs-identifier hs-var">gxBreakOn</span></a></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113142"><span class="hs-identifier hs-var">ident</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-60"></span><span>             </span><span class="hs-special">(</span><span id="local-6989586621679113140"><span class="annot"><span class="annottext">prefix :: text
+</span><a href="#local-6989586621679113140"><span class="hs-identifier hs-var">prefix</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679113139"><span class="annot"><span class="annottext">_local :: text
+</span><a href="#local-6989586621679113139"><span class="hs-identifier hs-var">_local</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text -&gt; Bool
+forall s. GenericXMLString s =&gt; s -&gt; Bool
+</span><a href="Text.XML.Expat.SAX.html#gxNullString"><span class="hs-identifier hs-var">gxNullString</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113139"><span class="hs-identifier hs-var">_local</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>                              </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">text -&gt; Char
+forall s. GenericXMLString s =&gt; s -&gt; Char
+</span><a href="Text.XML.Expat.SAX.html#gxHead"><span class="hs-identifier hs-var">gxHead</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113139"><span class="hs-identifier hs-var">_local</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span>
+</span><span id="line-62"></span><span>                                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe text -&gt; text -&gt; QName text
+forall text. Maybe text -&gt; text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text -&gt; Maybe text
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113140"><span class="hs-identifier hs-var">prefix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text -&gt; text
+forall s. GenericXMLString s =&gt; s -&gt; s
+</span><a href="Text.XML.Expat.SAX.html#gxTail"><span class="hs-identifier hs-var">gxTail</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113139"><span class="hs-identifier hs-var">_local</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>             </span><span class="hs-identifier">_</span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe text -&gt; text -&gt; QName text
+forall text. Maybe text -&gt; text -&gt; QName text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-var">QName</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe text
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679113142"><span class="hs-identifier hs-var">ident</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span id="local-6989586621679113131"><span id="local-6989586621679113132"><span id="local-6989586621679113133"><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#fromQualified"><span class="hs-identifier hs-type">fromQualified</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#NodeClass"><span class="hs-identifier hs-type">NodeClass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113133"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113132"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113131"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113133"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113132"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113131"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679113131"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679113133"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113132"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113131"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679113131"><span class="hs-identifier hs-type">text</span></a></span></span></span></span><span>
+</span><span id="line-66"></span><span id="fromQualified"><span class="annot"><span class="annottext">fromQualified :: n c (QName text) text -&gt; n c text text
+</span><a href="Text.XML.Expat.Internal.Qualified.html#fromQualified"><span class="hs-identifier hs-var hs-var">fromQualified</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(QName text -&gt; text) -&gt; n c (QName text) text -&gt; n c text text
+forall (n :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag tag' text.
+NodeClass n c =&gt;
+(tag -&gt; tag') -&gt; n c tag text -&gt; n c tag' text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapAllTags"><span class="hs-identifier hs-var">mapAllTags</span></a></span><span> </span><span class="annot"><span class="annottext">QName text -&gt; text
+forall p. GenericXMLString p =&gt; QName p -&gt; p
+</span><a href="#local-6989586621679113130"><span class="hs-identifier hs-var">tag</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679113130"><span class="annot"><span class="annottext">tag :: QName p -&gt; p
+</span><a href="#local-6989586621679113130"><span class="hs-identifier hs-var hs-var">tag</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679113129"><span class="annot"><span class="annottext">prefix :: p
+</span><a href="#local-6989586621679113129"><span class="hs-identifier hs-var">prefix</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679113128"><span class="annot"><span class="annottext">local :: p
+</span><a href="#local-6989586621679113128"><span class="hs-identifier hs-var">local</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679113129"><span class="hs-identifier hs-var">prefix</span></a></span><span> </span><span class="annot"><span class="annottext">p -&gt; p -&gt; p
+forall a. Monoid a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; p
+forall s. GenericXMLString s =&gt; Char -&gt; s
+</span><a href="Text.XML.Expat.SAX.html#gxFromChar"><span class="hs-identifier hs-var">gxFromChar</span></a></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span> </span><span class="annot"><span class="annottext">p -&gt; p -&gt; p
+forall a. Monoid a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679113128"><span class="hs-identifier hs-var">local</span></a></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><a href="#local-6989586621679113130"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>       </span><span id="local-6989586621679113126"><span class="annot"><span class="annottext">local :: p
+</span><a href="#local-6989586621679113126"><span class="hs-identifier hs-var">local</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679113126"><span class="hs-identifier hs-var">local</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span></pre></body></html>

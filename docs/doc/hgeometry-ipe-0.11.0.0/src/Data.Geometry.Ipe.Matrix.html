@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.Matrix</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">rmap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html"><span class="hs-identifier">Data.Geometry.Ipe.Attributes</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">AT</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html"><span class="hs-identifier">Data.Geometry.Ipe.Attributes</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html#Matrix"><span class="hs-identifier">Matrix</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html"><span class="hs-identifier">Data.Geometry.Ipe.Types</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Properties</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Transformation</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Label</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- | Takes and applies the ipe Matrix attribute of this item.</span><span>
+</span><span id="line-16"></span><span id="local-6989586621679534855"><span id="local-6989586621679534856"><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-type">applyMatrix'</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsTransformable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html#Matrix"><span class="hs-identifier hs-type">AT.Matrix</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&#8712;</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#AttributesOf"><span class="hs-identifier hs-type">AttributesOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span>
+</span><span id="line-18"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534856"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534855"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-20"></span><span id="applyMatrix%27"><span class="annot"><span class="annottext">applyMatrix' :: IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var hs-var">applyMatrix'</span></a></span></span><span> </span><span id="local-6989586621679534812"><span class="annot"><span class="annottext">o :: IpeObject' i r
+</span><a href="#local-6989586621679534812"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679534811"><span class="annot"><span class="annottext">i :: i r
+</span><a href="#local-6989586621679534811"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679534809"><span class="annot"><span class="annottext">ats :: IpeAttributes i r
+</span><a href="#local-6989586621679534809"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' i r
+-&gt; (Matrix 3 3 r -&gt; IpeObject' i r)
+-&gt; Maybe (Matrix 3 3 r)
+-&gt; IpeObject' i r
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' i r
+</span><a href="#local-6989586621679534812"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679534807"><span class="annot"><span class="annottext">m :: Matrix 3 3 r
+</span><a href="#local-6989586621679534807"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Transformation (Dimension (i r)) (NumType (i r)) -&gt; i r -&gt; i r
+forall g.
+IsTransformable g =&gt;
+Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
+</span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Matrix (2 + 1) (2 + 1) r -&gt; Transformation 2 r
+forall (d :: Nat) r. Matrix (d + 1) (d + 1) r -&gt; Transformation d r
+</span><span class="hs-identifier hs-var">Transformation</span></span><span> </span><span class="annot"><span class="annottext">Matrix 3 3 r
+Matrix (2 + 1) (2 + 1) r
+</span><a href="#local-6989586621679534807"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">i r
+</span><a href="#local-6989586621679534811"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">IpeAttributes i r
+</span><a href="#local-6989586621679534804"><span class="hs-identifier hs-var">ats'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Matrix 3 3 r)
+</span><a href="#local-6989586621679534803"><span class="hs-identifier hs-var">mm</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679534803"><span class="annot"><span class="annottext">mm :: Maybe (Matrix 3 3 r)
+</span><a href="#local-6989586621679534803"><span class="hs-identifier hs-var">mm</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679534804"><span class="annot"><span class="annottext">ats' :: IpeAttributes i r
+</span><a href="#local-6989586621679534804"><span class="hs-identifier hs-var">ats'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy 'Matrix
+-&gt; IpeAttributes i r
+-&gt; (Maybe (Apply (AttrMapSym1 r) 'Matrix), IpeAttributes i r)
+forall u (proxy :: u -&gt; *) (at :: u) (ats :: [u])
+       (f :: TyFun u * -&gt; *).
+(at &#8712; ats) =&gt;
+proxy at
+-&gt; Attributes f ats -&gt; (Maybe (Apply f at), Attributes f ats)
+</span><a href="Data.Geometry.Ipe.Attributes.html#takeAttr"><span class="hs-identifier hs-var">takeAttr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy 'Matrix
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html#Matrix"><span class="hs-identifier hs-type">AT.Matrix</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IpeAttributes i r
+</span><a href="#local-6989586621679534809"><span class="hs-identifier hs-var">ats</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Applies the matrix to an ipe object if it has one.</span><span>
+</span><span id="line-25"></span><span id="local-6989586621679534832"><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-type">applyMatrix</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679534832"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534832"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534832"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-26"></span><span id="applyMatrix"><span class="annot"><span class="annottext">applyMatrix :: IpeObject r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var hs-var">applyMatrix</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeGroup"><span class="hs-identifier hs-type">IpeGroup</span></a></span><span> </span><span id="local-6989586621679534798"><span class="annot"><span class="annottext">i :: IpeObject' Group r
+</span><a href="#local-6989586621679534798"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Group r
+ :+ Attributes
+      (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; IpeObject r
+forall r. IpeObject' Group r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpeGroup"><span class="hs-identifier hs-var">IpeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">((Group r
+  :+ Attributes
+       (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+ -&gt; IpeObject r)
+-&gt; ((Group r
+     :+ Attributes
+          (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+    -&gt; Group r
+       :+ Attributes
+            (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; IpeObject r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Group r
+ :+ Attributes
+      (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span>
+</span><span id="line-27"></span><span>                             </span><span class="annot"><span class="annottext">((Group r
+  :+ Attributes
+       (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+ -&gt; IpeObject r)
+-&gt; (Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Group r
+:+ Attributes
+     (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+IpeObject' Group r
+</span><a href="#local-6989586621679534798"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">(Group r
+ :+ Attributes
+      (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; ((Group r
+     :+ Attributes
+          (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+    -&gt; Group r
+       :+ Attributes
+            (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Group r -&gt; Identity (Group r))
+-&gt; (Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; Identity
+     (Group r
+      :+ Attributes
+           (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Group r -&gt; Identity (Group r))
+ -&gt; (Group r
+     :+ Attributes
+          (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+ -&gt; Identity
+      (Group r
+       :+ Attributes
+            (AttrMapSym1 r)
+            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]))
+-&gt; ((IpeObject r -&gt; Identity (IpeObject r))
+    -&gt; Group r -&gt; Identity (Group r))
+-&gt; (IpeObject r -&gt; Identity (IpeObject r))
+-&gt; (Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; Identity
+     (Group r
+      :+ Attributes
+           (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">([IpeObject r] -&gt; Identity [IpeObject r])
+-&gt; Group r -&gt; Identity (Group r)
+forall r s. Lens (Group r) (Group s) [IpeObject r] [IpeObject s]
+</span><a href="Data.Geometry.Ipe.Content.html#groupItems"><span class="hs-identifier hs-var">groupItems</span></a></span><span class="annot"><span class="annottext">(([IpeObject r] -&gt; Identity [IpeObject r])
+ -&gt; Group r -&gt; Identity (Group r))
+-&gt; ((IpeObject r -&gt; Identity (IpeObject r))
+    -&gt; [IpeObject r] -&gt; Identity [IpeObject r])
+-&gt; (IpeObject r -&gt; Identity (IpeObject r))
+-&gt; Group r
+-&gt; Identity (Group r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r -&gt; Identity (IpeObject r))
+-&gt; [IpeObject r] -&gt; Identity [IpeObject r]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">((IpeObject r -&gt; Identity (IpeObject r))
+ -&gt; (Group r
+     :+ Attributes
+          (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+ -&gt; Identity
+      (Group r
+       :+ Attributes
+            (AttrMapSym1 r)
+            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]))
+-&gt; (IpeObject r -&gt; IpeObject r)
+-&gt; (Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">IpeObject r -&gt; IpeObject r
+forall r. Fractional r =&gt; IpeObject r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span>
+</span><span id="line-28"></span><span>                             </span><span class="hs-comment">-- note that for a group we first (recursively)</span><span>
+</span><span id="line-29"></span><span>                             </span><span class="hs-comment">-- apply the matrices, and then apply</span><span>
+</span><span id="line-30"></span><span>                             </span><span class="hs-comment">-- the matrix of the group to its members.</span><span>
+</span><span id="line-31"></span><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeImage"><span class="hs-identifier hs-type">IpeImage</span></a></span><span> </span><span id="local-6989586621679534790"><span class="annot"><span class="annottext">i :: IpeObject' Image r
+</span><a href="#local-6989586621679534790"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' Image r -&gt; IpeObject r
+forall r. IpeObject' Image r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpeImage"><span class="hs-identifier hs-var">IpeImage</span></a></span><span>     </span><span class="annot"><span class="annottext">(IpeObject' Image r -&gt; IpeObject r)
+-&gt; IpeObject' Image r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' Image r -&gt; IpeObject' Image r
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' Image r
+</span><a href="#local-6989586621679534790"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeTextLabel"><span class="hs-identifier hs-type">IpeTextLabel</span></a></span><span> </span><span id="local-6989586621679534788"><span class="annot"><span class="annottext">i :: IpeObject' TextLabel r
+</span><a href="#local-6989586621679534788"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' TextLabel r -&gt; IpeObject r
+forall r. IpeObject' TextLabel r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpeTextLabel"><span class="hs-identifier hs-var">IpeTextLabel</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' TextLabel r -&gt; IpeObject r)
+-&gt; IpeObject' TextLabel r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' TextLabel r -&gt; IpeObject' TextLabel r
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' TextLabel r
+</span><a href="#local-6989586621679534788"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-33"></span><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeMiniPage"><span class="hs-identifier hs-type">IpeMiniPage</span></a></span><span> </span><span id="local-6989586621679534786"><span class="annot"><span class="annottext">i :: IpeObject' MiniPage r
+</span><a href="#local-6989586621679534786"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' MiniPage r -&gt; IpeObject r
+forall r. IpeObject' MiniPage r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpeMiniPage"><span class="hs-identifier hs-var">IpeMiniPage</span></a></span><span>  </span><span class="annot"><span class="annottext">(IpeObject' MiniPage r -&gt; IpeObject r)
+-&gt; IpeObject' MiniPage r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' MiniPage r -&gt; IpeObject' MiniPage r
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' MiniPage r
+</span><a href="#local-6989586621679534786"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-34"></span><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeUse"><span class="hs-identifier hs-type">IpeUse</span></a></span><span> </span><span id="local-6989586621679534784"><span class="annot"><span class="annottext">i :: IpeObject' IpeSymbol r
+</span><a href="#local-6989586621679534784"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' IpeSymbol r -&gt; IpeObject r
+forall r. IpeObject' IpeSymbol r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpeUse"><span class="hs-identifier hs-var">IpeUse</span></a></span><span>       </span><span class="annot"><span class="annottext">(IpeObject' IpeSymbol r -&gt; IpeObject r)
+-&gt; IpeObject' IpeSymbol r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' IpeSymbol r -&gt; IpeObject' IpeSymbol r
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' IpeSymbol r
+</span><a href="#local-6989586621679534784"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpePath"><span class="hs-identifier hs-type">IpePath</span></a></span><span> </span><span id="local-6989586621679534782"><span class="annot"><span class="annottext">i :: IpeObject' Path r
+</span><a href="#local-6989586621679534782"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject r
+forall r. IpeObject' Path r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Content.html#IpePath"><span class="hs-identifier hs-var">IpePath</span></a></span><span>      </span><span class="annot"><span class="annottext">(IpeObject' Path r -&gt; IpeObject r)
+-&gt; IpeObject' Path r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject' Path r
+forall (i :: * -&gt; *) r.
+(IsTransformable (i r), 'Matrix &#8712; AttributesOf i,
+ Dimension (i r) ~ 2, r ~ NumType (i r)) =&gt;
+IpeObject' i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix%27"><span class="hs-identifier hs-var">applyMatrix'</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r
+</span><a href="#local-6989586621679534782"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span id="local-6989586621679534781"><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatrices"><span class="hs-identifier hs-type">applyMatrices</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679534781"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-type">IpeFile</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534781"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpeFile"><span class="hs-identifier hs-type">IpeFile</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534781"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-38"></span><span id="applyMatrices"><span class="annot"><span class="annottext">applyMatrices :: IpeFile r -&gt; IpeFile r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrices"><span class="hs-identifier hs-var hs-var">applyMatrices</span></a></span></span><span> </span><span id="local-6989586621679534779"><span class="annot"><span class="annottext">f :: IpeFile r
+</span><a href="#local-6989586621679534779"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeFile r
+</span><a href="#local-6989586621679534779"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">IpeFile r -&gt; (IpeFile r -&gt; IpeFile r) -&gt; IpeFile r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(NonEmpty (IpePage r) -&gt; Identity (NonEmpty (IpePage r)))
+-&gt; IpeFile r -&gt; Identity (IpeFile r)
+forall r1 r2.
+Lens
+  (IpeFile r1)
+  (IpeFile r2)
+  (NonEmpty (IpePage r1))
+  (NonEmpty (IpePage r2))
+</span><a href="Data.Geometry.Ipe.Types.html#pages"><span class="hs-identifier hs-var">pages</span></a></span><span class="annot"><span class="annottext">((NonEmpty (IpePage r) -&gt; Identity (NonEmpty (IpePage r)))
+ -&gt; IpeFile r -&gt; Identity (IpeFile r))
+-&gt; ((IpePage r -&gt; Identity (IpePage r))
+    -&gt; NonEmpty (IpePage r) -&gt; Identity (NonEmpty (IpePage r)))
+-&gt; (IpePage r -&gt; Identity (IpePage r))
+-&gt; IpeFile r
+-&gt; Identity (IpeFile r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpePage r -&gt; Identity (IpePage r))
+-&gt; NonEmpty (IpePage r) -&gt; Identity (NonEmpty (IpePage r))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">((IpePage r -&gt; Identity (IpePage r))
+ -&gt; IpeFile r -&gt; Identity (IpeFile r))
+-&gt; (IpePage r -&gt; IpePage r) -&gt; IpeFile r -&gt; IpeFile r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; IpePage r
+forall r. Fractional r =&gt; IpePage r -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatricesPage"><span class="hs-identifier hs-var">applyMatricesPage</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679534820"><span class="annot"><a href="Data.Geometry.Ipe.Matrix.html#applyMatricesPage"><span class="hs-identifier hs-type">applyMatricesPage</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679534820"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534820"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679534820"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-41"></span><span id="applyMatricesPage"><span class="annot"><span class="annottext">applyMatricesPage :: IpePage r -&gt; IpePage r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatricesPage"><span class="hs-identifier hs-var hs-var">applyMatricesPage</span></a></span></span><span> </span><span id="local-6989586621679534776"><span class="annot"><span class="annottext">p :: IpePage r
+</span><a href="#local-6989586621679534776"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679534776"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r -&gt; (IpePage r -&gt; IpePage r) -&gt; IpePage r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">([IpeObject r] -&gt; Identity [IpeObject r])
+-&gt; IpePage r -&gt; Identity (IpePage r)
+forall r1 r2.
+Lens (IpePage r1) (IpePage r2) [IpeObject r1] [IpeObject r2]
+</span><a href="Data.Geometry.Ipe.Types.html#content"><span class="hs-identifier hs-var">content</span></a></span><span class="annot"><span class="annottext">(([IpeObject r] -&gt; Identity [IpeObject r])
+ -&gt; IpePage r -&gt; Identity (IpePage r))
+-&gt; ((IpeObject r -&gt; Identity (IpeObject r))
+    -&gt; [IpeObject r] -&gt; Identity [IpeObject r])
+-&gt; (IpeObject r -&gt; Identity (IpeObject r))
+-&gt; IpePage r
+-&gt; Identity (IpePage r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r -&gt; Identity (IpeObject r))
+-&gt; [IpeObject r] -&gt; Identity [IpeObject r]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">((IpeObject r -&gt; Identity (IpeObject r))
+ -&gt; IpePage r -&gt; Identity (IpePage r))
+-&gt; (IpeObject r -&gt; IpeObject r) -&gt; IpePage r -&gt; IpePage r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">IpeObject r -&gt; IpeObject r
+forall r. Fractional r =&gt; IpeObject r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.Matrix.html#applyMatrix"><span class="hs-identifier hs-var">applyMatrix</span></a></span><span>
+</span><span id="line-42"></span></pre></body></html>

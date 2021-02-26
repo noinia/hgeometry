@@ -1,0 +1,583 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ConstraintKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE ExplicitNamespaces #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE MagicHash #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE PatternSynonyms #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE QuantifiedConstraints #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE StandaloneDeriving #-}</span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-13"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-14"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-15"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-16"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-17"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Module      :  Data.Singletons</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- Copyright   :  (C) 2013 Richard Eisenberg</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- This module exports the basic definitions to use singletons. For routine</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- use, consider importing 'Data.Singletons.Prelude', which exports constructors</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- for singletons based on types in the @Prelude@.</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- You may also want to read</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- the original papers presenting this library, available at</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &lt;http://cs.brynmawr.edu/~rae/papers/2012/singletons/paper.pdf&gt;</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- and &lt;http://cs.brynmawr.edu/~rae/papers/2014/promotion/promotion.pdf&gt;.</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--</span><span>
+</span><span id="line-37"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Main singleton definitions</span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier">Sing</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda"><span class="hs-identifier">SLambda</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#%40%40"><span class="hs-operator">(@@)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SingI"><span class="hs-identifier">SingI</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingKind"><span class="hs-identifier">SingKind</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Working with singletons</span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#KindOf"><span class="hs-identifier">KindOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SameKind"><span class="hs-identifier">SameKind</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SingInstance"><span class="hs-identifier">SingInstance</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier">SomeSing</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#singInstance"><span class="hs-identifier">singInstance</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier">Sing</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#withSingI"><span class="hs-identifier">withSingI</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#withSomeSing"><span class="hs-identifier">withSomeSing</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#FromSing"><span class="hs-identifier">FromSing</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#singByProxy"><span class="hs-identifier">singByProxy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#demote"><span class="hs-identifier">demote</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#singByProxy%23"><span class="hs-identifier">singByProxy#</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#withSing"><span class="hs-identifier">withSing</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singThat"><span class="hs-identifier">singThat</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** @WrappedSing@</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#WrappedSing"><span class="hs-identifier">WrappedSing</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SWrappedSing"><span class="hs-identifier">SWrappedSing</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#UnwrapSing"><span class="hs-identifier">UnwrapSing</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-comment">-- $SingletonsOfSingletons</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Defunctionalization</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#TyFun"><span class="hs-identifier">TyFun</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#~%3E"><span class="hs-operator">(~&gt;)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon1"><span class="hs-identifier">TyCon1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon2"><span class="hs-identifier">TyCon2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon3"><span class="hs-identifier">TyCon3</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon4"><span class="hs-identifier">TyCon4</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon5"><span class="hs-identifier">TyCon5</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon6"><span class="hs-identifier">TyCon6</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon7"><span class="hs-identifier">TyCon7</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon8"><span class="hs-identifier">TyCon8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#TyCon"><span class="hs-identifier">TyCon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#Apply"><span class="hs-identifier">Apply</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#%40%40"><span class="hs-operator">(@@)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Defunctionalized singletons</span></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- | When calling a higher-order singleton function, you need to use a</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- @singFun...@ function to wrap it. See 'singFun1'.</span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun1"><span class="hs-identifier">singFun1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun2"><span class="hs-identifier">singFun2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun3"><span class="hs-identifier">singFun3</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun4"><span class="hs-identifier">singFun4</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun5"><span class="hs-identifier">singFun5</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun6"><span class="hs-identifier">singFun6</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun7"><span class="hs-identifier">singFun7</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#singFun8"><span class="hs-identifier">singFun8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun1"><span class="hs-identifier">unSingFun1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun2"><span class="hs-identifier">unSingFun2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun3"><span class="hs-identifier">unSingFun3</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun4"><span class="hs-identifier">unSingFun4</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun5"><span class="hs-identifier">unSingFun5</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun6"><span class="hs-identifier">unSingFun6</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun7"><span class="hs-identifier">unSingFun7</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#unSingFun8"><span class="hs-identifier">unSingFun8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-comment">-- $SLambdaPatternSynonyms</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda2"><span class="hs-identifier">SLambda2</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda3"><span class="hs-identifier">SLambda3</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda4"><span class="hs-identifier">SLambda4</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda5"><span class="hs-identifier">SLambda5</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda6"><span class="hs-identifier">SLambda6</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda7"><span class="hs-identifier">SLambda7</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SLambda8"><span class="hs-identifier">SLambda8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- | These type synonyms are exported only to improve error messages; users</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">-- should not have to mention them.</span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction1"><span class="hs-identifier">SingFunction1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction2"><span class="hs-identifier">SingFunction2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction3"><span class="hs-identifier">SingFunction3</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction4"><span class="hs-identifier">SingFunction4</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction5"><span class="hs-identifier">SingFunction5</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction6"><span class="hs-identifier">SingFunction6</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction7"><span class="hs-identifier">SingFunction7</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingFunction8"><span class="hs-identifier">SingFunction8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Auxiliary functions</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier">Proxy</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Defunctionalization symbols</span></span><span>
+</span><span id="line-85"></span><span>  </span><span class="annot"><a href="Data.Singletons.html#DemoteSym0"><span class="hs-identifier">DemoteSym0</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#DemoteSym1"><span class="hs-identifier">DemoteSym1</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><a href="Data.Singletons.html#SameKindSym0"><span class="hs-identifier">SameKindSym0</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#SameKindSym1"><span class="hs-identifier">SameKindSym1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#SameKindSym2"><span class="hs-identifier">SameKindSym2</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><a href="Data.Singletons.html#KindOfSym0"><span class="hs-identifier">KindOfSym0</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#KindOfSym1"><span class="hs-identifier">KindOfSym1</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#~%3E%40%23%40%24"><span class="hs-operator">(~&gt;@#@$)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#~%3E%40%23%40%24%24"><span class="hs-operator">(~&gt;@#@$$)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#~%3E%40%23%40%24%24%24"><span class="hs-operator">(~&gt;@#@$$$)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><a href="Data.Singletons.html#ApplySym0"><span class="hs-identifier">ApplySym0</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#ApplySym1"><span class="hs-identifier">ApplySym1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.html#ApplySym2"><span class="hs-identifier">ApplySym2</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#%40%40%40%23%40%24"><span class="hs-operator">(@@@#@$)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#%40%40%40%23%40%24%24"><span class="hs-operator">(@@@#@$$)</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Data.Singletons.html#%40%40%40%23%40%24%24%24"><span class="hs-operator">(@@@#@$$$)</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html"><span class="hs-identifier">Data.Singletons.Internal</span></a></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Enum.html"><span class="hs-identifier">Data.Singletons.Prelude.Enum</span></a></span><span>
+</span><span id="line-95"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Eq.html"><span class="hs-identifier">Data.Singletons.Prelude.Eq</span></a></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html"><span class="hs-identifier">Data.Singletons.Prelude.Instances</span></a></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.IsString.html"><span class="hs-identifier">Data.Singletons.Prelude.IsString</span></a></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Monoid.html"><span class="hs-identifier">Data.Singletons.Prelude.Monoid</span></a></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Num.html"><span class="hs-identifier">Data.Singletons.Prelude.Num</span></a></span><span>
+</span><span id="line-100"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Ord.html"><span class="hs-identifier">Data.Singletons.Prelude.Ord</span></a></span><span>
+</span><span id="line-101"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Semigroup.html"><span class="hs-identifier">Data.Singletons.Prelude.Semigroup</span></a></span><span>
+</span><span id="line-102"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.html"><span class="hs-identifier">Data.Singletons.Promote</span></a></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html"><span class="hs-identifier">Data.Singletons.ShowSing</span></a></span><span>
+</span><span id="line-104"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Single.html"><span class="hs-identifier">Data.Singletons.Single</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Single.html#singITyConInstances"><span class="hs-identifier">singITyConInstances</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String</span></span><span>
+</span><span id="line-106"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">pack</span></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-109"></span><span class="hs-comment">---- SingI TyCon{N} instances ----------------------------------------</span><span>
+</span><span id="line-110"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">{-
+Generates SingI instances for TyCon1 through TyCon8:
+
+  instance (forall a.    SingI a           =&gt; SingI (f a),   ...) =&gt; SingI (TyCon1 f)
+  instance (forall a b. (SingI a, SingI b) =&gt; SingI (f a b), ...) =&gt; SingI (TyCon2 f)
+  ...
+-}</span><span>
+</span><span id="line-119"></span><span class="hs-special">$(</span><span id="local-6989586621681443545"><span id="local-6989586621681443547"><span id="local-6989586621681443549"><span id="local-6989586621681443551"><span id="local-6989586621681443553"><span id="local-6989586621681443555"><span id="local-6989586621681443557"><span id="local-6989586621681443559"><span id="local-6989586621681443561"><span id="local-6989586621681443562"><span id="local-6989586621681443563"><span id="local-6989586621681443564"><span id="local-6989586621681443565"><span id="local-6989586621681443566"><span id="local-6989586621681443567"><span id="local-6989586621681443568"><span id="local-6989586621681443569"><span id="local-6989586621681443570"><span id="local-6989586621681443571"><span id="local-6989586621681443572"><span id="local-6989586621681443573"><span id="local-6989586621681443574"><span id="local-6989586621681443575"><span id="local-6989586621681443576"><span id="local-6989586621681443577"><span id="local-6989586621681443578"><span id="local-6989586621681443579"><span id="local-6989586621681443580"><span id="local-6989586621681443581"><span id="local-6989586621681443582"><span id="local-6989586621681443583"><span id="local-6989586621681443584"><span id="local-6989586621681443585"><span id="local-6989586621681443586"><span id="local-6989586621681443587"><span id="local-6989586621681443588"><span id="local-6989586621681443589"><span id="local-6989586621681443590"><span id="local-6989586621681443591"><span id="local-6989586621681443592"><span id="local-6989586621681443593"><span id="local-6989586621681443594"><span id="local-6989586621681443595"><span id="local-6989586621681443596"><span id="local-6989586621681443597"><span id="local-6989586621681443598"><span id="local-6989586621681443599"><span id="local-6989586621681443600"><span id="local-6989586621681443601"><span id="local-6989586621681443602"><span id="local-6989586621681443603"><span id="local-6989586621681443604"><span id="local-6989586621681443605"><span id="local-6989586621681443606"><span id="local-6989586621681443607"><span id="local-6989586621681443608"><span id="local-6989586621681443609"><span id="local-6989586621681443610"><span id="local-6989586621681443611"><span id="local-6989586621681443612"><span id="local-6989586621681443893"><span id="local-6989586621681443894"><span id="local-6989586621681443895"><span id="local-6989586621681443896"><span id="local-6989586621681443897"><span id="local-6989586621681443898"><span id="local-6989586621681443899"><span id="local-6989586621681443900"><span id="local-6989586621681443901"><span id="local-6989586621681443902"><span id="local-6989586621681443903"><span id="local-6989586621681443904"><span id="local-6989586621681443905"><span id="local-6989586621681443906"><span id="local-6989586621681443907"><span id="local-6989586621681443908"><span id="local-6989586621681443909"><span id="local-6989586621681443910"><span id="local-6989586621681443911"><span id="local-6989586621681443912"><span id="local-6989586621681443913"><span id="local-6989586621681443914"><span id="local-6989586621681443915"><span id="local-6989586621681443916"><span id="local-6989586621681443917"><span id="local-6989586621681443918"><span id="local-6989586621681443919"><span id="local-6989586621681443920"><span id="local-6989586621681443923"><span id="local-6989586621681443924"><span id="local-6989586621681443925"><span id="local-6989586621681443926"><span id="local-6989586621681443927"><span id="local-6989586621681443928"><span id="local-6989586621681443929"><span id="local-6989586621681443930"><span class="hs-identifier">singITyConInstances</span><span> </span><span class="hs-special">[</span><span class="hs-number">1</span><span class="hs-glyph">..</span><span class="hs-number">8</span><span class="hs-special">]</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-122"></span><span class="hs-comment">---- SomeSing instances ----------------------------------------------</span><span>
+</span><span id="line-123"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span id="local-6989586621681443542"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Eq.html#SEq"><span class="hs-identifier hs-type">SEq</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443542"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443542"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-126"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443537"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443537"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443536"><span class="annot"><span class="annottext">== :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443535"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443535"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a == a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443537"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (a == a)
+forall k (a :: k) (b :: k).
+SEq k =&gt;
+Sing a -&gt; Sing b -&gt; Sing (a == b)
+</span><a href="Data.Singletons.Prelude.Eq.html#%25%3D%3D"><span class="hs-operator hs-var">%==</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443535"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443532"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443532"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443531"><span class="annot"><span class="annottext">/= :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">/=</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443529"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443529"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a /= a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443532"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (a /= a)
+forall k (a :: k) (b :: k).
+SEq k =&gt;
+Sing a -&gt; Sing b -&gt; Sing (a /= b)
+</span><a href="Data.Singletons.Prelude.Eq.html#%25%2F%3D"><span class="hs-operator hs-var">%/=</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443529"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span id="local-6989586621681443527"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681443517"><span id="local-6989586621681443519"><span class="annot"><a href="Data.Singletons.Prelude.Ord.html#SOrd"><span class="hs-identifier hs-type">SOrd</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443527"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443527"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-130"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443515"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443515"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443514"><span class="annot"><span class="annottext">compare :: SomeSing k -&gt; SomeSing k -&gt; Ordering
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443512"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443512"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Compare a a) -&gt; Demote Ordering
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443515"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply CompareSym0 a) a)
+forall a (t :: a) (t :: a).
+SOrd a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply CompareSym0 t) t)
+</span><a href="Data.Singletons.Prelude.Ord.html#sCompare"><span class="hs-operator hs-var">`sCompare`</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443512"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443510"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443510"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443509"><span class="annot"><span class="annottext">&lt; :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;</span></span></span><span>         </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443507"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443507"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a &lt; a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443510"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (&lt;@#@$) a) a)
+forall a (t :: a) (t :: a).
+SOrd a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (&lt;@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Ord.html#%25%3C"><span class="hs-operator hs-var">%&lt;</span></a></span><span>  </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443507"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443505"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443505"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443504"><span class="annot"><span class="annottext">&lt;= :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;=</span></span></span><span>        </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443502"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443502"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a &lt;= a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443505"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (&lt;=@#@$) a) a)
+forall a (t :: a) (t :: a).
+SOrd a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (&lt;=@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Ord.html#%25%3C%3D"><span class="hs-operator hs-var">%&lt;=</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443502"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443500"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443500"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443499"><span class="annot"><span class="annottext">&gt; :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&gt;</span></span></span><span>         </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443497"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443497"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a &gt; a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443500"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (&gt;@#@$) a) a)
+forall a (t :: a) (t :: a).
+SOrd a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (&gt;@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Ord.html#%25%3E"><span class="hs-operator hs-var">%&gt;</span></a></span><span>  </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443497"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443495"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443495"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443494"><span class="annot"><span class="annottext">&gt;= :: SomeSing k -&gt; SomeSing k -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&gt;=</span></span></span><span>        </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443493"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443493"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a &gt;= a) -&gt; Demote Bool
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443495"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (&gt;=@#@$) a) a)
+forall a (t :: a) (t :: a).
+SOrd a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (&gt;=@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Ord.html#%25%3E%3D"><span class="hs-operator hs-var">%&gt;=</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443493"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621681443491"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Enum.html#SBounded"><span class="hs-identifier hs-type">SBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443491"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bounded</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443491"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-137"></span><span>  </span><span id="local-6989586621681443487"><span class="annot"><span class="annottext">minBound :: SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing MinBound -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">Sing MinBound
+forall a. SBounded a =&gt; Sing MinBoundSym0
+</span><a href="Data.Singletons.Prelude.Enum.html#sMinBound"><span class="hs-identifier hs-var">sMinBound</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621681443484"><span class="annot"><span class="annottext">maxBound :: SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing MaxBound -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">Sing MaxBound
+forall a. SBounded a =&gt; Sing MaxBoundSym0
+</span><a href="Data.Singletons.Prelude.Enum.html#sMaxBound"><span class="hs-identifier hs-var">sMaxBound</span></a></span></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span id="local-6989586621681443481"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681443473"><span id="local-6989586621681443475"><span class="annot"><a href="Data.Singletons.Prelude.Enum.html#SEnum"><span class="hs-identifier hs-type">SEnum</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443481"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443481"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-141"></span><span>  </span><span id="local-6989586621681443469"><span class="annot"><span class="annottext">succ :: SomeSing k -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443467"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443467"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Succ a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply SuccSym0 a)
+forall a (t :: a). SEnum a =&gt; Sing t -&gt; Sing (Apply SuccSym0 t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sSucc"><span class="hs-identifier hs-var">sSucc</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443467"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>  </span><span id="local-6989586621681443465"><span class="annot"><span class="annottext">pred :: SomeSing k -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443463"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443463"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Pred a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply PredSym0 a)
+forall a (t :: a). SEnum a =&gt; Sing t -&gt; Sing (Apply PredSym0 t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sPred"><span class="hs-identifier hs-var">sPred</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443463"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>  </span><span id="local-6989586621681443461"><span class="annot"><span class="annottext">toEnum :: Int -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621681443459"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621681443459"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Demote Nat
+-&gt; (forall (a :: Nat). Sing a -&gt; SomeSing k) -&gt; SomeSing k
+forall k r.
+SingKind k =&gt;
+Demote k -&gt; (forall (a :: k). Sing a -&gt; r) -&gt; r
+</span><a href="Data.Singletons.Internal.html#withSomeSing"><span class="hs-identifier hs-var">withSomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Demote Nat
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681443459"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing (ToEnum a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">(Sing (ToEnum a) -&gt; SomeSing k)
+-&gt; (SNat a -&gt; Sing (ToEnum a)) -&gt; SNat a -&gt; SomeSing k
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SNat a -&gt; Sing (ToEnum a)
+forall a (t :: Nat). SEnum a =&gt; Sing t -&gt; Sing (Apply ToEnumSym0 t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sToEnum"><span class="hs-identifier hs-var">sToEnum</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>  </span><span id="local-6989586621681443456"><span class="annot"><span class="annottext">fromEnum :: SomeSing k -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443454"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443454"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Natural -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing (FromEnum a) -&gt; Demote Nat
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var">fromSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply FromEnumSym0 a)
+forall a (t :: a). SEnum a =&gt; Sing t -&gt; Sing (Apply FromEnumSym0 t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sFromEnum"><span class="hs-identifier hs-var">sFromEnum</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443454"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>  </span><span id="local-6989586621681443452"><span class="annot"><span class="annottext">enumFromTo :: SomeSing k -&gt; SomeSing k -&gt; [SomeSing k]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443451"><span class="annot"><span class="annottext">from :: Sing a
+</span><a href="#local-6989586621681443451"><span class="hs-identifier hs-var">from</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443450"><span class="annot"><span class="annottext">to :: Sing a
+</span><a href="#local-6989586621681443450"><span class="hs-identifier hs-var">to</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-146"></span><span>    </span><span class="annot"><span class="annottext">SList (EnumFromTo a a) -&gt; [SomeSing k]
+forall a (x :: [a]). SList x -&gt; [SomeSing a]
+</span><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-var">listFromSingShallow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply EnumFromToSym0 a) a)
+forall a (t :: a) (t :: a).
+SEnum a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply EnumFromToSym0 t) t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sEnumFromTo"><span class="hs-identifier hs-var">sEnumFromTo</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443451"><span class="hs-identifier hs-var">from</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443450"><span class="hs-identifier hs-var">to</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>  </span><span id="local-6989586621681443447"><span class="annot"><span class="annottext">enumFromThenTo :: SomeSing k -&gt; SomeSing k -&gt; SomeSing k -&gt; [SomeSing k]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443446"><span class="annot"><span class="annottext">from :: Sing a
+</span><a href="#local-6989586621681443446"><span class="hs-identifier hs-var">from</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443445"><span class="annot"><span class="annottext">then_ :: Sing a
+</span><a href="#local-6989586621681443445"><span class="hs-identifier hs-var">then_</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443444"><span class="annot"><span class="annottext">to :: Sing a
+</span><a href="#local-6989586621681443444"><span class="hs-identifier hs-var">to</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-148"></span><span>    </span><span class="annot"><span class="annottext">SList (EnumFromThenTo a a a) -&gt; [SomeSing k]
+forall a (x :: [a]). SList x -&gt; [SomeSing a]
+</span><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-var">listFromSingShallow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+-&gt; Sing a
+-&gt; Sing a
+-&gt; Sing (Apply (Apply (Apply EnumFromThenToSym0 a) a) a)
+forall a (t :: a) (t :: a) (t :: a).
+SEnum a =&gt;
+Sing t
+-&gt; Sing t
+-&gt; Sing t
+-&gt; Sing (Apply (Apply (Apply EnumFromThenToSym0 t) t) t)
+</span><a href="Data.Singletons.Prelude.Enum.html#sEnumFromThenTo"><span class="hs-identifier hs-var">sEnumFromThenTo</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443446"><span class="hs-identifier hs-var">from</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443445"><span class="hs-identifier hs-var">then_</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443444"><span class="hs-identifier hs-var">to</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- Like the 'fromSing' implementation for lists, but bottoms out at</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- 'SomeSing' instead of recursively invoking 'fromSing'.</span><span>
+</span><span id="line-152"></span><span id="local-6989586621681443794"><span id="local-6989586621681443795"><span class="annot"><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-type">listFromSingShallow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html#SList"><span class="hs-identifier hs-type">SList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681443794"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621681443795"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443795"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-153"></span><span id="listFromSingShallow"><span class="annot"><span class="annottext">listFromSingShallow :: SList x -&gt; [SomeSing a]
+</span><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-var hs-var">listFromSingShallow</span></a></span></span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html#SNil"><span class="hs-identifier hs-type">SNil</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-154"></span><span class="annot"><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-var">listFromSingShallow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html#SCons"><span class="hs-identifier hs-type">SCons</span></a></span><span> </span><span id="local-6989586621681443440"><span class="annot"><span class="annottext">x :: Sing n
+</span><a href="#local-6989586621681443440"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621681443439"><span class="annot"><span class="annottext">xs :: Sing n
+</span><a href="#local-6989586621681443439"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing n -&gt; SomeSing a
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">Sing n
+</span><a href="#local-6989586621681443440"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">SomeSing a -&gt; [SomeSing a] -&gt; [SomeSing a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">SList n -&gt; [SomeSing a]
+forall a (x :: [a]). SList x -&gt; [SomeSing a]
+</span><a href="Data.Singletons.html#listFromSingShallow"><span class="hs-identifier hs-var">listFromSingShallow</span></a></span><span> </span><span class="annot"><span class="annottext">Sing n
+SList n
+</span><a href="#local-6989586621681443439"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span id="local-6989586621681443438"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Num.html#SNum"><span class="hs-identifier hs-type">SNum</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443438"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443438"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-157"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443429"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443429"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443428"><span class="annot"><span class="annottext">+ :: SomeSing k -&gt; SomeSing k -&gt; SomeSing k
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">+</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443426"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443426"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a + a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443429"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (+@#@$) a) a)
+forall a (t :: a) (t :: a).
+SNum a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (+@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Num.html#%25%2B"><span class="hs-operator hs-var">%+</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443426"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443424"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443424"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443423"><span class="annot"><span class="annottext">- :: SomeSing k -&gt; SomeSing k -&gt; SomeSing k
+</span><span class="hs-glyph hs-var hs-var hs-var hs-var">-</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443422"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443422"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a - a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443424"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (-@#@$) a) a)
+forall a (t :: a) (t :: a).
+SNum a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (-@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Num.html#%25-"><span class="hs-operator hs-var">%-</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443422"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443420"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443420"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443419"><span class="annot"><span class="annottext">* :: SomeSing k -&gt; SomeSing k -&gt; SomeSing k
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">*</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443417"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443417"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a * a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443420"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (*@#@$) a) a)
+forall a (t :: a) (t :: a).
+SNum a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (*@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Num.html#%25%2A"><span class="hs-operator hs-var">%*</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443417"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621681443415"><span class="annot"><span class="annottext">negate :: SomeSing k -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443414"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443414"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Negate a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply NegateSym0 a)
+forall a (t :: a). SNum a =&gt; Sing t -&gt; Sing (Apply NegateSym0 t)
+</span><a href="Data.Singletons.Prelude.Num.html#sNegate"><span class="hs-identifier hs-var">sNegate</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443414"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621681443412"><span class="annot"><span class="annottext">abs :: SomeSing k -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">abs</span></span></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443410"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443410"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Abs a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply AbsSym0 a)
+forall a (t :: a). SNum a =&gt; Sing t -&gt; Sing (Apply AbsSym0 t)
+</span><a href="Data.Singletons.Prelude.Num.html#sAbs"><span class="hs-identifier hs-var">sAbs</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443410"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>  </span><span id="local-6989586621681443408"><span class="annot"><span class="annottext">signum :: SomeSing k -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">signum</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443406"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443406"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (Signum a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a -&gt; Sing (Apply SignumSym0 a)
+forall a (t :: a). SNum a =&gt; Sing t -&gt; Sing (Apply SignumSym0 t)
+</span><a href="Data.Singletons.Prelude.Num.html#sSignum"><span class="hs-identifier hs-var">sSignum</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443406"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-163"></span><span>  </span><span id="local-6989586621681443404"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span id="local-6989586621681443403"><span class="annot"><span class="annottext">n :: Integer
+</span><a href="#local-6989586621681443403"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Demote Nat
+-&gt; (forall (a :: Nat). Sing a -&gt; SomeSing k) -&gt; SomeSing k
+forall k r.
+SingKind k =&gt;
+Demote k -&gt; (forall (a :: k). Sing a -&gt; r) -&gt; r
+</span><a href="Data.Singletons.Internal.html#withSomeSing"><span class="hs-identifier hs-var">withSomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Demote Nat
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621681443403"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing (FromInteger a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">(Sing (FromInteger a) -&gt; SomeSing k)
+-&gt; (SNat a -&gt; Sing (FromInteger a)) -&gt; SNat a -&gt; SomeSing k
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SNat a -&gt; Sing (FromInteger a)
+forall a (t :: Nat).
+SNum a =&gt;
+Sing t -&gt; Sing (Apply FromIntegerSym0 t)
+</span><a href="Data.Singletons.Prelude.Num.html#sFromInteger"><span class="hs-identifier hs-var">sFromInteger</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span id="local-6989586621681443401"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681443396"><span id="local-6989586621681443398"><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing"><span class="hs-identifier hs-type">ShowSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443401"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443401"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-166"></span><span>  </span><span id="local-6989586621681443394"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; SomeSing k -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621681443392"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681443392"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621681443391"><span id="local-6989586621681443390"><span class="annot"><a href="#local-6989586621681443390"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier hs-type">Sing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443391"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-167"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681443392"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;SomeSing &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Sing a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443390"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-168"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.ShowSing.html#ShowSing%27"><span class="hs-identifier hs-type">ShowSing'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443391"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span id="local-6989586621681443387"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681443382"><span id="local-6989586621681443384"><span class="annot"><a href="Data.Singletons.Prelude.Semigroup.Internal.html#SSemigroup"><span class="hs-identifier hs-type">SSemigroup</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443387"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443387"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-171"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443380"><span class="annot"><span class="annottext">a :: Sing a
+</span><a href="#local-6989586621681443380"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681443379"><span class="annot"><span class="annottext">&lt;&gt; :: SomeSing k -&gt; SomeSing k -&gt; SomeSing k
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span id="local-6989586621681443378"><span class="annot"><span class="annottext">b :: Sing a
+</span><a href="#local-6989586621681443378"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing (a &lt;&gt; a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443380"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Sing a -&gt; Sing (Apply (Apply (&lt;&gt;@#@$) a) a)
+forall a (t :: a) (t :: a).
+SSemigroup a =&gt;
+Sing t -&gt; Sing t -&gt; Sing (Apply (Apply (&lt;&gt;@#@$) t) t)
+</span><a href="Data.Singletons.Prelude.Semigroup.Internal.html#%25%3C%3E"><span class="hs-operator hs-var">%&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Sing a
+</span><a href="#local-6989586621681443378"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span id="local-6989586621681443376"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681443370"><span id="local-6989586621681443372"><span class="annot"><a href="Data.Singletons.Prelude.Monoid.html#SMonoid"><span class="hs-identifier hs-type">SMonoid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443376"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443376"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-174"></span><span>  </span><span id="local-6989586621681443368"><span class="annot"><span class="annottext">mempty :: SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing Mempty -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">Sing Mempty
+forall a. SMonoid a =&gt; Sing MemptySym0
+</span><a href="Data.Singletons.Prelude.Monoid.html#sMempty"><span class="hs-identifier hs-var">sMempty</span></a></span></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span id="local-6989586621681443366"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.IsString.html#SIsString"><span class="hs-identifier hs-type">SIsString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443366"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-type">SomeSing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681443366"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-177"></span><span>  </span><span id="local-6989586621681443363"><span class="annot"><span class="annottext">fromString :: String -&gt; SomeSing k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromString</span></span></span><span> </span><span id="local-6989586621681443362"><span class="annot"><span class="annottext">s :: String
+</span><a href="#local-6989586621681443362"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Demote Symbol
+-&gt; (forall (a :: Symbol). Sing a -&gt; SomeSing k) -&gt; SomeSing k
+forall k r.
+SingKind k =&gt;
+Demote k -&gt; (forall (a :: k). Sing a -&gt; r) -&gt; r
+</span><a href="Data.Singletons.Internal.html#withSomeSing"><span class="hs-identifier hs-var">withSomeSing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621681443362"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sing (FromString a) -&gt; SomeSing k
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">(Sing (FromString a) -&gt; SomeSing k)
+-&gt; (SSymbol a -&gt; Sing (FromString a)) -&gt; SSymbol a -&gt; SomeSing k
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SSymbol a -&gt; Sing (FromString a)
+forall a (t :: Symbol).
+SIsString a =&gt;
+Sing t -&gt; Sing (Apply FromStringSym0 t)
+</span><a href="Data.Singletons.Prelude.IsString.html#sFromString"><span class="hs-identifier hs-var">sFromString</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-180"></span><span class="hs-comment">---- Defunctionalization symbols -------------------------------------</span><span>
+</span><span id="line-181"></span><span class="hs-comment">----------------------------------------------------------------------</span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span class="hs-special">$(</span><span id="DemoteSym0KindInference"><span id="SameKindSym1KindInference"><span id="SameKindSym0KindInference"><span id="KindOfSym0KindInference"><span id="%3A~%3E%40%23%40%24%24%23%23%23"><span id="%3A~%3E%40%23%40%24%23%23%23"><span id="ApplySym1KindInference"><span id="ApplySym0KindInference"><span id="%3A%40%40%40%23%40%24%24%23%23%23"><span id="%3A%40%40%40%23%40%24%23%23%23"><span id="local-6989586621681443265"><span id="local-6989586621681443267"><span id="local-6989586621681443269"><span id="local-6989586621681443271"><span id="local-6989586621681443273"><span id="local-6989586621681443275"><span id="local-6989586621681443277"><span id="local-6989586621681443279"><span id="local-6989586621681443281"><span id="local-6989586621681443283"><span id="local-6989586621681443285"><span id="local-6989586621681443286"><span id="local-6989586621681443287"><span id="local-6989586621681443288"><span id="local-6989586621681443289"><span id="local-6989586621681443290"><span id="local-6989586621681443291"><span id="local-6989586621681443292"><span id="local-6989586621681443293"><span id="local-6989586621681443294"><span id="local-6989586621681443295"><span id="local-6989586621681443296"><span id="local-6989586621681443297"><span id="local-6989586621681443298"><span id="local-6989586621681443299"><span id="local-6989586621681443300"><span id="local-6989586621681443301"><span id="local-6989586621681443302"><span id="local-6989586621681443303"><span id="local-6989586621681443304"><span id="local-6989586621681443305"><span id="local-6989586621681443306"><span id="local-6989586621681443307"><span id="local-6989586621681443308"><span id="local-6989586621681443309"><span id="local-6989586621681443310"><span id="local-6989586621681443311"><span id="local-6989586621681443312"><span id="local-6989586621681443313"><span id="local-6989586621681443314"><span id="local-6989586621681443315"><span id="local-6989586621681443316"><span id="local-6989586621681443317"><span id="local-6989586621681443318"><span id="local-6989586621681443319"><span id="local-6989586621681443320"><span id="local-6989586621681443321"><span id="local-6989586621681443322"><span id="local-6989586621681443323"><span id="local-6989586621681443324"><span id="local-6989586621681443325"><span id="local-6989586621681443326"><span id="local-6989586621681443327"><span id="local-6989586621681443328"><span id="local-6989586621681443329"><span id="local-6989586621681443330"><span id="local-6989586621681443331"><span id="local-6989586621681443332"><span id="local-6989586621681443333"><span id="local-6989586621681443334"><span id="local-6989586621681443335"><span id="local-6989586621681443336"><span id="local-6989586621681443337"><span id="local-6989586621681443338"><span id="local-6989586621681443339"><span id="local-6989586621681443340"><span id="local-6989586621681443341"><span id="local-6989586621681443342"><span id="local-6989586621681443343"><span id="local-6989586621681443344"><span id="local-6989586621681443345"><span id="local-6989586621681443346"><span id="local-6989586621681443347"><span id="local-6989586621681443348"><span id="local-6989586621681443349"><span id="local-6989586621681443350"><span id="local-6989586621681443351"><span id="local-6989586621681443352"><span id="local-6989586621681443353"><span id="local-6989586621681443354"><span id="local-6989586621681443355"><span id="local-6989586621681443356"><span id="local-6989586621681443357"><span id="local-6989586621681443358"><span id="local-6989586621681443359"><span id="local-6989586621681443360"><span id="%40%40%40%23%40%24%24%24"><span id="ApplySym2"><span id="~%3E%40%23%40%24%24%24"><span id="KindOfSym1"><span id="SameKindSym2"><span id="DemoteSym1"><span id="ApplySym0"><span id="%40%40%40%23%40%24"><span id="~%3E%40%23%40%24"><span id="DemoteSym0"><span id="~%3E%40%23%40%24%24"><span id="SameKindSym1"><span id="SameKindSym0"><span id="KindOfSym0"><span id="ApplySym1"><span id="%40%40%40%23%40%24%24"><span id="Apply"><span class="hs-identifier">genDefunSymbols</span><span> </span><span class="hs-special">[</span><span class="hs-special">''</span><span class="hs-identifier">Demote</span><span class="hs-special">,</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">SameKind</span><span class="hs-special">,</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">KindOf</span><span class="hs-special">,</span><span> </span><span class="hs-special">''</span><span class="hs-special">(</span><span class="hs-operator">~&gt;</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Apply</span><span class="hs-special">,</span><span> </span><span class="hs-special">''</span><span class="hs-special">(</span><span class="hs-operator">@@</span><span class="hs-special">)</span><span class="hs-special">]</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- WrapSing, UnwrapSing, and SingFunction1 et al. are not defunctionalizable</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- at the moment due to Trac #9269</span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">{- $SingletonsOfSingletons
+
+Aside from being a data type to hang instances off of, 'WrappedSing' has
+another purpose as a general-purpose mechanism for allowing one to write
+code that uses singletons of other singletons. For instance, suppose you
+had the following data type:
+
+@
+data T :: Type -&gt; Type where
+  MkT :: forall a (x :: a). 'Sing' x -&gt; F a -&gt; T a
+@
+
+A na&#239;ve attempt at defining a singleton for @T@ would look something like
+this:
+
+@
+data ST :: forall a. T a -&gt; Type where
+  SMkT :: forall a (x :: a) (sx :: 'Sing' x) (f :: F a).
+          'Sing' sx -&gt; 'Sing' f -&gt; ST (MkT sx f)
+@
+
+But there is a problem here: what exactly /is/ @'Sing' sx@? If @x@ were 'True',
+for instance, then @sx@ would be 'STrue', but it's not clear what
+@'Sing' 'STrue'@ should be. One could define @SSBool@ to be the singleton of
+'SBool's, but in order to be thorough, one would have to generate a singleton
+for /every/ singleton type out there. Plus, it's not clear when to stop. Should
+we also generate @SSSBool@, @SSSSBool@, etc.?
+
+Instead, 'WrappedSing' and its singleton 'SWrappedSing' provide a way to talk
+about singletons of other arbitrary singletons without the need to generate a
+bazillion instances. For reference, here is the definition of 'SWrappedSing':
+
+@
+newtype 'SWrappedSing' :: forall k (a :: k). 'WrappedSing' a -&gt; Type where
+  'SWrapSing' :: forall k (a :: k) (ws :: 'WrappedSing' a).
+                 { 'sUnwrapSing' :: 'Sing' a } -&gt; 'SWrappedSing' ws
+type instance 'Sing' \@('WrappedSing' a) = 'SWrappedSing'
+@
+
+'SWrappedSing' is a bit of an unusual singleton in that its field is a
+singleton for @'Sing' \@k@, not @'WrappedSing' \@k@. But that's exactly the
+point&#8212;a singleton of a singleton contains as much type information as the
+underlying singleton itself, so we can get away with just @'Sing' \@k@.
+
+As an example of this in action, here is how you would define the singleton
+for the earlier @T@ type:
+
+@
+data ST :: forall a. T a -&gt; Type where
+  SMkT :: forall a (x :: a) (sx :: 'Sing' x) (f :: F a).
+          'Sing' ('WrapSing' sx) -&gt; 'Sing' f -&gt; ST (MkT sx f)
+@
+
+With this technique, we won't need anything like @SSBool@ in order to
+instantiate @x@ with 'True'. Instead, the field of type
+@'Sing' ('WrapSing' sx)@ will simply be a newtype around 'SBool'. In general,
+you'll need /n/ layers of 'WrapSing' if you wish to single a singleton /n/
+times.
+
+Note that this is not the only possible way to define a singleton for @T@.
+An alternative approach that does not make use of singletons-of-singletons is
+discussed at some length
+&lt;https://github.com/goldfirere/singletons/issues/366#issuecomment-489469086 here&gt;.
+Due to the technical limitations of this approach, however, we do not use it
+in @singletons@ at the moment, instead favoring the
+slightly-clunkier-but-more-reliable 'WrappedSing' approach.
+-}</span><span>
+</span><span id="line-254"></span><span>
+</span><span id="line-255"></span><span class="hs-comment">{- $SLambdaPatternSynonyms
+
+@SLambda{2...8}@ are explicitly bidirectional pattern synonyms for
+defunctionalized singletons (@'Sing' (f :: k '~&gt;' k' '~&gt;' k'')@).
+
+As __constructors__: Same as @singFun{2..8}@. For example, one can turn a
+binary function on singletons @sTake :: 'SingFunction2' TakeSym0@ into a
+defunctionalized singleton @'Sing' (TakeSym :: Nat '~&gt;' [a] '~&gt;' [a])@:
+
+@
+&gt;&gt;&gt; import Data.Singletons.Prelude.List
+&gt;&gt;&gt; :set -XTypeApplications
+&gt;&gt;&gt;
+&gt;&gt;&gt; :t 'SLambda2'
+'SLambda2' :: 'SingFunction2' f -&gt; 'Sing' f
+&gt;&gt;&gt; :t 'SLambda2' \@TakeSym0
+'SLambda2' :: 'SingFunction2' TakeSym0 -&gt; 'Sing' TakeSym0
+&gt;&gt;&gt; :t 'SLambda2' \@TakeSym0 sTake
+'SLambda2' :: 'Sing' TakeSym0
+@
+
+This is useful for functions on singletons that expect a defunctionalized
+singleton as an argument, such as @sZipWith :: 'SingFunction3' ZipWithSym0@:
+
+@
+sZipWith :: Sing (f :: a '~&gt;' b '~&gt;' c) -&gt; Sing (xs :: [a]) -&gt; Sing (ys :: [b]) -&gt; Sing (ZipWith f xs ys :: [c])
+sZipWith ('SLambda2' \@TakeSym0 sTake) :: Sing (xs :: [Nat]) -&gt; Sing (ys :: [[a]]) -&gt; Sing (ZipWith TakeSym0 xs ys :: [[a]])
+@
+
+As __patterns__: Same as @unSingFun{2..8}@. Gets a binary term-level
+Haskell function on singletons
+@'Sing' (x :: k) -&gt; 'Sing' (y :: k') -&gt; 'Sing' (f \@\@ x \@\@ y)@
+from a defunctionalised @'Sing' f@. Alternatively, as a record field accessor:
+
+@
+applySing2 :: 'Sing' (f :: k '~&gt;' k' '~&gt;' k'') -&gt; 'SingFunction2' f
+@
+-}</span><span>
+</span><span id="line-293"></span></pre></body></html>

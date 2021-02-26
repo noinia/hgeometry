@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE RankNTypes, TypeFamilies, FlexibleInstances,
+             GADTs, UndecidableInstances, ScopedTypeVariables,
+             MagicHash, TypeOperators, PolyKinds, TypeApplications #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Module      :  Data.Singletons.TypeRepTYPE</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Copyright   :  (C) 2013 Richard Eisenberg</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- This module defines singleton instances making 'TypeRep' the singleton for</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- the kind @'TYPE' rep@ (for some 'RuntimeRep' @rep@), an instantiation of</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- which is the famous kind 'Type'. The definitions don't fully line up with</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- what is expected within the singletons library, so expect unusual results!</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--</span><span>
+</span><span id="line-20"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.TypeRepTYPE</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier">Sing</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-comment">-- | Here is the definition of the singleton for @'TYPE' rep@:</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-comment">-- &gt; type instance Sing \@(TYPE rep) = TypeRep</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-comment">-- Instances for 'SingI', 'SingKind', 'SEq', 'SDecide', and</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-comment">-- 'TestCoercion' are also supplied.</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier">SomeTypeRepTYPE</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Instances.html"><span class="hs-identifier">Data.Singletons.Prelude.Instances</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html"><span class="hs-identifier">Data.Singletons.Internal</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Eq.html"><span class="hs-identifier">Data.Singletons.Prelude.Eq</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Decide.html"><span class="hs-identifier">Data.Singletons.Decide</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RuntimeRep</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">TYPE</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Type.Reflection</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Type.Reflection.Unsafe</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Unsafe.Coerce</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | A choice of singleton for the kind @'TYPE' rep@ (for some 'RuntimeRep'</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- @rep@), an instantiation of which is the famous kind 'Type'.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- Conceivably, one could generalize this instance to `Sing \@k` for</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- /any/ kind @k@, and remove all other 'Sing' instances. We don't adopt this</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- design, however, since it is far more convenient in practice to work with</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- explicit singleton values than 'TypeRep's (for instance, 'TypeRep's are</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- more difficult to pattern match on, and require extra runtime checks).</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- We cannot produce explicit singleton values for everything in @'TYPE' rep@,</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- however, since it is an open kind, so we reach for 'TypeRep' in this one</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- particular case.</span><span>
+</span><span id="line-56"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Sing"><span class="annot"><a href="Data.Singletons.Internal.html#Sing"><span class="hs-identifier hs-var">Sing</span></a></span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span id="local-6989586621681365640"><span class="annot"><a href="#local-6989586621681365640"><span class="hs-identifier hs-type hs-type">rep</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TypeRep</span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | A variant of 'SomeTypeRep' whose underlying 'TypeRep' is restricted to</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- kind @'TYPE' rep@ (for some 'RuntimeRep' @rep@).</span><span>
+</span><span id="line-60"></span><span class="hs-keyword">data</span><span> </span><span id="SomeTypeRepTYPE"><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-var">SomeTypeRepTYPE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RuntimeRep</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="SomeTypeRepTYPE"><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-var">SomeTypeRepTYPE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681365682"><span class="annot"><a href="#local-6989586621681365682"><span class="hs-identifier hs-type">rep</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RuntimeRep</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681365638"><span class="annot"><a href="#local-6989586621681365638"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365682"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span><span class="hs-operator">.</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TypeRep</span></span><span> </span><span class="annot"><a href="#local-6989586621681365638"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681365682"><span class="hs-identifier hs-type">rep</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span id="local-6989586621681365637"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681365634"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681365637"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365632"><span class="annot"><span class="annottext">a :: TypeRep a
+</span><a href="#local-6989586621681365632"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681365631"><span class="annot"><span class="annottext">== :: SomeTypeRepTYPE rep -&gt; SomeTypeRepTYPE rep -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365630"><span class="annot"><span class="annottext">b :: TypeRep a
+</span><a href="#local-6989586621681365630"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TypeRep a -&gt; TypeRep a -&gt; Maybe (a :~~: a)
+forall k1 k2 (a :: k1) (b :: k2).
+TypeRep a -&gt; TypeRep b -&gt; Maybe (a :~~: b)
+</span><span class="hs-identifier hs-var">eqTypeRep</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+</span><a href="#local-6989586621681365632"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+</span><a href="#local-6989586621681365630"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">HRefl</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-67"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621681365627"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681365613"><span id="local-6989586621681365615"><span id="local-6989586621681365617"><span id="local-6989586621681365619"><span id="local-6989586621681365621"><span id="local-6989586621681365623"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681365627"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365611"><span class="annot"><span class="annottext">a :: TypeRep a
+</span><a href="#local-6989586621681365611"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681365610"><span class="annot"><span class="annottext">compare :: SomeTypeRepTYPE rep -&gt; SomeTypeRepTYPE rep -&gt; Ordering
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365608"><span class="annot"><span class="annottext">b :: TypeRep a
+</span><a href="#local-6989586621681365608"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">TypeRep a -&gt; Fingerprint
+forall k (a :: k). TypeRep a -&gt; Fingerprint
+</span><span class="hs-identifier hs-var">typeRepFingerprint</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+</span><a href="#local-6989586621681365611"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Fingerprint -&gt; Fingerprint -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a -&gt; Fingerprint
+forall k (a :: k). TypeRep a -&gt; Fingerprint
+</span><span class="hs-identifier hs-var">typeRepFingerprint</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+</span><a href="#local-6989586621681365608"><span class="hs-identifier hs-var">b</span></a></span></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="local-6989586621681365606"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681365601"><span id="local-6989586621681365603"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681365606"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621681365599"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; SomeTypeRepTYPE rep -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621681365597"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621681365597"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365596"><span class="annot"><span class="annottext">ty :: TypeRep a
+</span><a href="#local-6989586621681365596"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; TypeRep a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621681365597"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+</span><a href="#local-6989586621681365596"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span id="local-6989586621681365594"><span id="local-6989586621681365595"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span> </span><span class="annot"><a href="#local-6989586621681365594"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingI"><span class="hs-identifier hs-type">SingI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681365594"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365595"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621681365591"><span class="annot"><span class="annottext">sing :: Sing a
+</span><a href="Data.Singletons.Internal.html#sing"><span class="hs-identifier hs-var hs-var hs-var hs-var">sing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing a
+forall k (a :: k). Typeable a =&gt; TypeRep a
+</span><span class="hs-identifier hs-var">typeRep</span></span></span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621681365588"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Internal.html#SingKind"><span class="hs-identifier hs-type">SingKind</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365588"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Demote"><span class="annot"><a href="Data.Singletons.Internal.html#Demote"><span class="hs-identifier hs-var">Demote</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365588"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681365588"><span class="hs-identifier hs-type">rep</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621681365584"><span class="annot"><span class="annottext">fromSing :: Sing a -&gt; Demote (TYPE rep)
+</span><a href="Data.Singletons.Internal.html#fromSing"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromSing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; Demote (TYPE rep)
+forall a. TypeRep a -&gt; SomeTypeRepTYPE 'LiftedRep
+</span><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-var">SomeTypeRepTYPE</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621681365582"><span class="annot"><span class="annottext">toSing :: Demote (TYPE rep) -&gt; SomeSing (TYPE rep)
+</span><a href="Data.Singletons.Internal.html#toSing"><span class="hs-identifier hs-var hs-var hs-var hs-var">toSing</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TypeRepTYPE.html#SomeTypeRepTYPE"><span class="hs-identifier hs-type">SomeTypeRepTYPE</span></a></span><span> </span><span id="local-6989586621681365580"><span class="annot"><a href="#local-6989586621681365580"><span class="hs-identifier hs-var">tr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing a -&gt; SomeSing (TYPE rep)
+forall k (a :: k). Sing a -&gt; SomeSing k
+</span><a href="Data.Singletons.Internal.html#SomeSing"><span class="hs-identifier hs-var">SomeSing</span></a></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+Sing a
+</span><a href="#local-6989586621681365580"><span class="hs-identifier hs-var">tr</span></a></span></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span id="local-6989586621681365578"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Prelude.Eq.html#PEq"><span class="hs-identifier hs-type">PEq</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365578"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-84"></span><span id="local-6989586621681365576"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681365573"><span class="annot"><a href="Data.Singletons.Prelude.Eq.html#SEq"><span class="hs-identifier hs-type">SEq</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365576"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621681365571"><span class="annot"><span class="annottext">tra :: Sing a
+</span><a href="#local-6989586621681365571"><span class="hs-identifier hs-var">tra</span></a></span></span><span> </span><span id="local-6989586621681365570"><span class="annot"><span class="annottext">%== :: Sing a -&gt; Sing b -&gt; Sing (a == b)
+</span><a href="Data.Singletons.Prelude.Eq.html#%25%3D%3D"><span class="hs-operator hs-var hs-var hs-var hs-var">%==</span></a></span></span><span> </span><span id="local-6989586621681365568"><span class="annot"><span class="annottext">trb :: Sing b
+</span><a href="#local-6989586621681365568"><span class="hs-identifier hs-var">trb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TypeRep a -&gt; TypeRep b -&gt; Maybe (a :~~: b)
+forall k1 k2 (a :: k1) (b :: k2).
+TypeRep a -&gt; TypeRep b -&gt; Maybe (a :~~: b)
+</span><span class="hs-identifier hs-var">eqTypeRep</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+Sing a
+</span><a href="#local-6989586621681365571"><span class="hs-identifier hs-var">tra</span></a></span><span> </span><span class="annot"><span class="annottext">TypeRep b
+Sing b
+</span><a href="#local-6989586621681365568"><span class="hs-identifier hs-var">trb</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-87"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">HRefl</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sing (a == b)
+SBool 'True
+</span><a href="Data.Singletons.Prelude.Instances.html#STrue"><span class="hs-identifier hs-var">STrue</span></a></span><span>
+</span><span id="line-88"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SBool 'False -&gt; SBool (DefaultEq a b)
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce</span></span><span> </span><span class="annot"><span class="annottext">SBool 'False
+</span><a href="Data.Singletons.Prelude.Instances.html#SFalse"><span class="hs-identifier hs-var">SFalse</span></a></span></span><span>
+</span><span id="line-89"></span><span>                    </span><span class="hs-comment">-- the Data.Typeable interface isn't strong enough</span><span>
+</span><span id="line-90"></span><span>                    </span><span class="hs-comment">-- to enable us to define this without unsafeCoerce</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span id="local-6989586621681365564"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.Decide.html#SDecide"><span class="hs-identifier hs-type">SDecide</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TYPE</span></span><span> </span><span class="annot"><a href="#local-6989586621681365564"><span class="hs-identifier hs-type">rep</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621681365561"><span class="annot"><span class="annottext">tra :: Sing a
+</span><a href="#local-6989586621681365561"><span class="hs-identifier hs-var">tra</span></a></span></span><span> </span><span id="local-6989586621681365560"><span class="annot"><span class="annottext">%~ :: Sing a -&gt; Sing b -&gt; Decision (a :~: b)
+</span><a href="Data.Singletons.Decide.html#%25~"><span class="hs-operator hs-var hs-var hs-var hs-var">%~</span></a></span></span><span> </span><span id="local-6989586621681365558"><span class="annot"><span class="annottext">trb :: Sing b
+</span><a href="#local-6989586621681365558"><span class="hs-identifier hs-var">trb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TypeRep a -&gt; TypeRep b -&gt; Maybe (a :~~: b)
+forall k1 k2 (a :: k1) (b :: k2).
+TypeRep a -&gt; TypeRep b -&gt; Maybe (a :~~: b)
+</span><span class="hs-identifier hs-var">eqTypeRep</span></span><span> </span><span class="annot"><span class="annottext">TypeRep a
+Sing a
+</span><a href="#local-6989586621681365561"><span class="hs-identifier hs-var">tra</span></a></span><span> </span><span class="annot"><span class="annottext">TypeRep b
+Sing b
+</span><a href="#local-6989586621681365558"><span class="hs-identifier hs-var">trb</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">HRefl</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a :~: a) -&gt; Decision (a :~: a)
+forall a. a -&gt; Decision a
+</span><a href="Data.Singletons.Decide.html#Proved"><span class="hs-identifier hs-var">Proved</span></a></span><span> </span><span class="annot"><span class="annottext">a :~: a
+forall k (a :: k). a :~: a
+</span><span class="hs-identifier hs-var">Refl</span></span><span>
+</span><span id="line-96"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Refuted (a :~: b) -&gt; Decision (a :~: b)
+forall a. Refuted a -&gt; Decision a
+</span><a href="Data.Singletons.Decide.html#Disproved"><span class="hs-identifier hs-var">Disproved</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier hs-type">Refl</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Void
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Type.Reflection.eqTypeRep failed&quot;</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-97"></span></pre></body></html>

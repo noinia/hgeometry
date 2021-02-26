@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UnicodeSyntax #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.QuadTree.Draw</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Attributes.html"><span class="hs-identifier">Data.Geometry.Ipe.Attributes</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html"><span class="hs-identifier">Data.Geometry.Ipe.IpeOut</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html"><span class="hs-identifier">Data.Geometry.Ipe.Types</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.QuadTree</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.QuadTree.Cell</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Tree.Util</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TreeNode</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span id="local-6989586621679537959"><span class="annot"><a href="Data.Geometry.QuadTree.Draw.html#drawCell"><span class="hs-identifier hs-type">drawCell</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679537959"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Cell</span></span><span> </span><span class="annot"><a href="#local-6989586621679537959"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537959"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-17"></span><span id="drawCell"><span class="annot"><span class="annottext">drawCell :: IpeOut (Cell r) Path r
+</span><a href="Data.Geometry.QuadTree.Draw.html#drawCell"><span class="hs-identifier hs-var hs-var">drawCell</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679537885"><span class="annot"><span class="annottext">c :: Cell r
+</span><a href="#local-6989586621679537885"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut (Rectangle () r) Path r
+forall r p. Num r =&gt; IpeOut (Rectangle p r) Path r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeRectangle"><span class="hs-identifier hs-var">ipeRectangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cell r -&gt; Rectangle () r
+forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><span class="hs-identifier hs-var">toBox</span></span><span> </span><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621679537885"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span id="local-6989586621679537880"><span id="local-6989586621679537881"><span id="local-6989586621679537882"><span class="annot"><a href="Data.Geometry.QuadTree.Draw.html#drawQuadTree"><span class="hs-identifier hs-type">drawQuadTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679537882"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679537882"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">QuadTree</span></span><span> </span><span class="annot"><a href="#local-6989586621679537881"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537880"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537882"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537882"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-20"></span><span id="drawQuadTree"><span class="annot"><span class="annottext">drawQuadTree :: IpeOut (QuadTree v p r) Group r
+</span><a href="Data.Geometry.QuadTree.Draw.html#drawQuadTree"><span class="hs-identifier hs-var hs-var">drawQuadTree</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut (p :+ Cell r) Path r -&gt; IpeOut (QuadTree v p r) Group r
+forall (i :: * -&gt; *) r p v.
+(ToObject i, Fractional r, Ord r) =&gt;
+IpeOut (p :+ Cell r) i r -&gt; IpeOut (QuadTree v p r) Group r
+</span><a href="Data.Geometry.QuadTree.Draw.html#drawQuadTreeWith"><span class="hs-identifier hs-var">drawQuadTreeWith</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679537876"><span class="annot"><span class="annottext">c :: Cell r
+</span><a href="#local-6989586621679537876"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut (Cell r) Path r
+forall r. Fractional r =&gt; IpeOut (Cell r) Path r
+</span><a href="Data.Geometry.QuadTree.Draw.html#drawCell"><span class="hs-identifier hs-var">drawCell</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621679537876"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span id="local-6989586621679537961"><span id="local-6989586621679537962"><span id="local-6989586621679537963"><span id="local-6989586621679537965"><span class="annot"><a href="Data.Geometry.QuadTree.Draw.html#drawQuadTreeWith"><span class="hs-identifier hs-type">drawQuadTreeWith</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537965"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679537962"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Cell</span></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679537965"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">QuadTree</span></span><span> </span><span class="annot"><a href="#local-6989586621679537961"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537962"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537963"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span><span>
+</span><span id="line-24"></span><span id="drawQuadTreeWith"><span class="annot"><span class="annottext">drawQuadTreeWith :: IpeOut (p :+ Cell r) i r -&gt; IpeOut (QuadTree v p r) Group r
+</span><a href="Data.Geometry.QuadTree.Draw.html#drawQuadTreeWith"><span class="hs-identifier hs-var hs-var">drawQuadTreeWith</span></a></span></span><span> </span><span id="local-6989586621679537875"><span class="annot"><span class="annottext">drawCell' :: IpeOut (p :+ Cell r) i r
+</span><a href="#local-6989586621679537875"><span class="hs-identifier hs-var">drawCell'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (IpeObject r)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (IpeObject r)
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (QuadTree v p r -&gt; NonEmpty (IpeObject r))
+-&gt; QuadTree v p r
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((p :+ Cell r) -&gt; IpeObject r)
+-&gt; NonEmpty (p :+ Cell r) -&gt; NonEmpty (IpeObject r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeObject' i r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' i r -&gt; IpeObject r)
+-&gt; IpeOut (p :+ Cell r) i r -&gt; (p :+ Cell r) -&gt; IpeObject r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpeOut (p :+ Cell r) i r
+</span><a href="#local-6989586621679537875"><span class="hs-identifier hs-var">drawCell'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (p :+ Cell r) -&gt; NonEmpty (IpeObject r))
+-&gt; (QuadTree v p r -&gt; NonEmpty (p :+ Cell r))
+-&gt; QuadTree v p r
+-&gt; NonEmpty (IpeObject r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">QuadTree (v :+ Cell r) (p :+ Cell r) r -&gt; NonEmpty (p :+ Cell r)
+forall v p r. QuadTree v p r -&gt; NonEmpty p
+</span><span class="hs-identifier hs-var">leaves</span></span><span> </span><span class="annot"><span class="annottext">(QuadTree (v :+ Cell r) (p :+ Cell r) r -&gt; NonEmpty (p :+ Cell r))
+-&gt; (QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r)
+-&gt; QuadTree v p r
+-&gt; NonEmpty (p :+ Cell r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r
+forall r v p.
+(Fractional r, Ord r) =&gt;
+QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r
+</span><span class="hs-identifier hs-var">withCells</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Data.Geometry.QuadTree.Draw.html#quadTreeLevels"><span class="hs-identifier hs-type">quadTreeLevels</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679537868"><span class="annot"><a href="#local-6989586621679537868"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679537867"><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679537866"><span class="annot"><a href="#local-6989586621679537866"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679537865"><span class="annot"><a href="#local-6989586621679537865"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537868"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-27"></span><span>                                            </span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TreeNode</span></span><span> </span><span class="annot"><a href="#local-6989586621679537866"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537865"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Cell</span></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679537868"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">QuadTree</span></span><span> </span><span class="annot"><a href="#local-6989586621679537866"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537865"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679537867"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-29"></span><span id="quadTreeLevels"><span class="annot"><span class="annottext">quadTreeLevels :: IpeOut (TreeNode v p :+ Cell r) i r
+-&gt; IpeOut (QuadTree v p r) Group r
+</span><a href="Data.Geometry.QuadTree.Draw.html#quadTreeLevels"><span class="hs-identifier hs-var hs-var">quadTreeLevels</span></a></span></span><span> </span><span id="local-6989586621679537864"><span class="annot"><span class="annottext">drawCell' :: IpeOut (TreeNode v p :+ Cell r) i r
+</span><a href="#local-6989586621679537864"><span class="hs-identifier hs-var">drawCell'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679537863"><span class="annot"><span class="annottext">qt :: QuadTree v p r
+</span><a href="#local-6989586621679537863"><span class="hs-identifier hs-var">qt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679537862"><span class="annot"><span class="annottext">lvls :: NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+</span><a href="#local-6989586621679537862"><span class="hs-identifier hs-var hs-var">lvls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r))
+ -&gt; NonEmpty (TreeNode v p :+ Cell r))
+-&gt; NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r)))
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TreeNode (v :+ Cell r) (p :+ Cell r) -&gt; TreeNode v p :+ Cell r)
+-&gt; NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r))
+-&gt; NonEmpty (TreeNode v p :+ Cell r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">TreeNode (v :+ Cell r) (p :+ Cell r) -&gt; TreeNode v p :+ Cell r
+forall v extra a.
+TreeNode (v :+ extra) (a :+ extra) -&gt; TreeNode v a :+ extra
+</span><a href="#local-6989586621679537861"><span class="hs-identifier hs-var">flip'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r)))
+ -&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r)))
+-&gt; (QuadTree v p r
+    -&gt; NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r))))
+-&gt; QuadTree v p r
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">QuadTree (v :+ Cell r) (p :+ Cell r) r
+-&gt; NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r)))
+forall v p r. QuadTree v p r -&gt; NonEmpty (NonEmpty (TreeNode v p))
+</span><span class="hs-identifier hs-var">perLevel</span></span><span> </span><span class="annot"><span class="annottext">(QuadTree (v :+ Cell r) (p :+ Cell r) r
+ -&gt; NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r))))
+-&gt; (QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r)
+-&gt; QuadTree v p r
+-&gt; NonEmpty (NonEmpty (TreeNode (v :+ Cell r) (p :+ Cell r)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r
+forall r v p.
+(Fractional r, Ord r) =&gt;
+QuadTree v p r -&gt; QuadTree (v :+ Cell r) (p :+ Cell r) r
+</span><span class="hs-identifier hs-var">withCells</span></span><span> </span><span class="annot"><span class="annottext">(QuadTree v p r -&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r)))
+-&gt; QuadTree v p r -&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">QuadTree v p r
+</span><a href="#local-6989586621679537863"><span class="hs-identifier hs-var">qt</span></a></span><span>
+</span><span id="line-30"></span><span>                                  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">([IpeObject r]
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (NonEmpty (NonEmpty (TreeNode v p :+ Cell r)) -&gt; [IpeObject r])
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Group r
+  :+ Attributes
+       (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+ -&gt; IpeObject r)
+-&gt; [Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]]
+-&gt; [IpeObject r]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Group r
+ :+ Attributes
+      (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">([Group r
+  :+ Attributes
+       (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]]
+ -&gt; [IpeObject r])
+-&gt; (NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+    -&gt; [Group r
+        :+ Attributes
+             (AttrMapSym1 r)
+             '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]])
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+-&gt; [IpeObject r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int
+ -&gt; NonEmpty (TreeNode v p :+ Cell r)
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; [Int]
+-&gt; [NonEmpty (TreeNode v p :+ Cell r)]
+-&gt; [Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Int
+-&gt; NonEmpty (TreeNode v p :+ Cell r)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+</span><a href="#local-6989586621679537858"><span class="hs-identifier hs-var">drawLevel</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">([NonEmpty (TreeNode v p :+ Cell r)]
+ -&gt; [Group r
+     :+ Attributes
+          (AttrMapSym1 r)
+          '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]])
+-&gt; (NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+    -&gt; [NonEmpty (TreeNode v p :+ Cell r)])
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+-&gt; [Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+-&gt; [NonEmpty (TreeNode v p :+ Cell r)]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+ -&gt; Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group))
+-&gt; NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+-&gt; Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty (TreeNode v p :+ Cell r))
+</span><a href="#local-6989586621679537862"><span class="hs-identifier hs-var">lvls</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621679537861"><span class="annot"><span class="annottext">flip' :: TreeNode (v :+ extra) (a :+ extra) -&gt; TreeNode v a :+ extra
+</span><a href="#local-6989586621679537861"><span class="hs-identifier hs-var hs-var">flip'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">InternalNode</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537855"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679537855"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679537854"><span class="annot"><span class="annottext">c :: extra
+</span><a href="#local-6989586621679537854"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">v -&gt; TreeNode v a
+forall v a. v -&gt; TreeNode v a
+</span><span class="hs-identifier hs-var">InternalNode</span></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679537855"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">TreeNode v a -&gt; extra -&gt; TreeNode v a :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679537854"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-34"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">LeafNode</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537852"><span class="annot"><span class="annottext">l :: a
+</span><a href="#local-6989586621679537852"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679537851"><span class="annot"><span class="annottext">c :: extra
+</span><a href="#local-6989586621679537851"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; TreeNode v a
+forall v a. a -&gt; TreeNode v a
+</span><span class="hs-identifier hs-var">LeafNode</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679537852"><span class="hs-identifier hs-var">l</span></a></span><span>     </span><span class="annot"><span class="annottext">TreeNode v a -&gt; extra -&gt; TreeNode v a :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679537851"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-comment">-- drawLevel   :: Int -&gt; IpeOut (NonEmpty (TreeNode v p :+ Cell r)) Group r</span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679537858"><span class="annot"><span class="annottext">drawLevel :: Int
+-&gt; NonEmpty (TreeNode v p :+ Cell r)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+</span><a href="#local-6989586621679537858"><span class="hs-identifier hs-var hs-var">drawLevel</span></a></span></span><span> </span><span id="local-6989586621679537850"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679537850"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (IpeObject r)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (IpeObject r)
+ -&gt; Group r
+    :+ Attributes
+         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
+-&gt; (NonEmpty (TreeNode v p :+ Cell r) -&gt; NonEmpty (IpeObject r))
+-&gt; NonEmpty (TreeNode v p :+ Cell r)
+-&gt; Group r
+   :+ Attributes
+        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((TreeNode v p :+ Cell r) -&gt; IpeObject r)
+-&gt; NonEmpty (TreeNode v p :+ Cell r) -&gt; NonEmpty (IpeObject r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679537849"><span class="annot"><span class="annottext">n :: TreeNode v p :+ Cell r
+</span><a href="#local-6989586621679537849"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group))
+-&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">((Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group))
+ -&gt; IpeObject r)
+-&gt; (Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group))
+-&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeObject' i r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' i r -&gt; IpeObject r) -&gt; IpeObject' i r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeOut (TreeNode v p :+ Cell r) i r
+</span><a href="#local-6989586621679537864"><span class="hs-identifier hs-var">drawCell'</span></a></span><span> </span><span class="annot"><span class="annottext">TreeNode v p :+ Cell r
+</span><a href="#local-6989586621679537849"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">(Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group))
+-&gt; Attributes (AttrMapSym1 r) (AttributesOf Group)
+-&gt; Group r :+ Attributes (AttrMapSym1 r) (AttributesOf Group)
+forall (i :: * -&gt; *) r.
+IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#%21"><span class="hs-glyph hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+-&gt; Apply (AttrMapSym1 r) 'Layer
+-&gt; Attributes
+     (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall u (at :: u) (ats :: [u]) (proxy :: u -&gt; *) (f :: u ~&gt; *).
+(at &#8712; ats, RecApplicative ats) =&gt;
+proxy at -&gt; Apply f at -&gt; Attributes f ats
+</span><a href="Data.Geometry.Ipe.Attributes.html#attr"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Layer
+</span><a href="Data.Geometry.Ipe.Attributes.html#SLayer"><span class="hs-identifier hs-var">SLayer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; LayerName
+</span><a href="#local-6989586621679537845"><span class="hs-identifier hs-var">layer</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679537850"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>    </span><span class="annot"><a href="#local-6989586621679537845"><span class="hs-identifier hs-type">layer</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679537845"><span class="annot"><span class="annottext">layer :: Int -&gt; LayerName
+</span><a href="#local-6989586621679537845"><span class="hs-identifier hs-var hs-var">layer</span></a></span></span><span> </span><span id="local-6989586621679537844"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679537844"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; LayerName
+</span><a href="Data.Geometry.Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; LayerName) -&gt; Text -&gt; LayerName
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;level_&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Text) -&gt; String -&gt; Text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679537844"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span></pre></body></html>

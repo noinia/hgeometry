@@ -1,0 +1,735 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# Language OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# Language DefaultSignatures #-}</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.PathParser</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isSpace</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ext</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Box</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.ParserPrimitives.html"><span class="hs-identifier">Data.Geometry.Ipe.ParserPrimitives</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html"><span class="hs-identifier">Data.Geometry.Ipe.Path</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Operation"><span class="hs-identifier">Operation</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Matrix</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Point</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Vector</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ratio</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.RealNumber.Rational</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Text.Parsec.Error</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">messageString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">errorMessages</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-----------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- | Represent stuff that can be used as a coordinate in ipe. (similar to show/read)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">class</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="Coordinate"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-var">Coordinate</span></a></span></span><span> </span><span id="local-6989586621679531300"><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-comment">-- reads a coordinate. The input is an integer representing the</span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-comment">-- part before the decimal point, and a length and an integer</span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-comment">-- representing the part after the decimal point</span><span>
+</span><span id="line-28"></span><span>    </span><span id="fromSeq"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#fromSeq"><span class="hs-identifier hs-type">fromSeq</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-keyword">default</span><span> </span><span id="fromSeq"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#fromSeq"><span class="hs-identifier hs-type">fromSeq</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531300"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679531154"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#fromSeq"><span class="hs-identifier hs-var hs-var">fromSeq</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Maybe (Int, Integer) -&gt; r
+forall r.
+(Ord r, Fractional r) =&gt;
+Integer -&gt; Maybe (Int, Integer) -&gt; r
+</span><a href="Data.Geometry.Ipe.PathParser.html#defaultFromSeq"><span class="hs-identifier hs-var">defaultFromSeq</span></a></span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679531299"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#defaultFromSeq"><span class="hs-identifier hs-type">defaultFromSeq</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679531299"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679531299"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531299"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-34"></span><span id="defaultFromSeq"><span class="annot"><span class="annottext">defaultFromSeq :: Integer -&gt; Maybe (Int, Integer) -&gt; r
+</span><a href="Data.Geometry.Ipe.PathParser.html#defaultFromSeq"><span class="hs-identifier hs-var hs-var">defaultFromSeq</span></a></span></span><span> </span><span id="local-6989586621679531152"><span class="annot"><span class="annottext">x :: Integer
+</span><a href="#local-6989586621679531152"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; r
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679531152"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#defaultFromSeq"><span class="hs-identifier hs-var">defaultFromSeq</span></a></span><span> </span><span id="local-6989586621679531151"><span class="annot"><span class="annottext">x :: Integer
+</span><a href="#local-6989586621679531151"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679531150"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679531150"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679531149"><span class="annot"><span class="annottext">y :: Integer
+</span><a href="#local-6989586621679531149"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679531148"><span class="annot"><span class="annottext">x' :: r
+</span><a href="#local-6989586621679531148"><span class="hs-identifier hs-var hs-var">x'</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; r
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679531151"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-36"></span><span>                                    </span><span id="local-6989586621679531147"><span class="annot"><span class="annottext">y' :: r
+</span><a href="#local-6989586621679531147"><span class="hs-identifier hs-var hs-var">y'</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; r
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679531149"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-37"></span><span>                                    </span><span id="local-6989586621679531146"><span class="annot"><span class="annottext">asDecimal :: r -&gt; r
+</span><a href="#local-6989586621679531146"><span class="hs-identifier hs-var hs-var">asDecimal</span></a></span></span><span> </span><span id="local-6989586621679531145"><span class="annot"><span class="annottext">a :: r
+</span><a href="#local-6989586621679531145"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531145"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0.1</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Int -&gt; r
+forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679531150"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>                                    </span><span id="local-6989586621679531142"><span class="annot"><span class="annottext">z :: r
+</span><a href="#local-6989586621679531142"><span class="hs-identifier hs-var hs-var">z</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531148"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-39"></span><span>                                </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531142"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531148"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+</span><a href="#local-6989586621679531146"><span class="hs-identifier hs-var">asDecimal</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531147"><span class="hs-identifier hs-var">y'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531136"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531132"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531129"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ratio</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679531128"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531125"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealNumber</span></span><span> </span><span class="annot"><a href="#local-6989586621679531128"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-----------------------------------------------------------------------</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | Running the parsers</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679531124"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#readCoordinate"><span class="hs-identifier hs-type">readCoordinate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531124"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679531124"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-50"></span><span id="readCoordinate"><span class="annot"><span class="annottext">readCoordinate :: Text -&gt; Either Text r
+</span><a href="Data.Geometry.Ipe.PathParser.html#readCoordinate"><span class="hs-identifier hs-var hs-var">readCoordinate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser r -&gt; Text -&gt; Either Text r
+forall a. Parser a -&gt; Text -&gt; Either Text a
+</span><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-var">runParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parser r
+forall r. Coordinate r =&gt; Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var">pCoordinate</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679531120"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#readPoint"><span class="hs-identifier hs-type">readPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531120"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679531120"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-53"></span><span id="readPoint"><span class="annot"><span class="annottext">readPoint :: Text -&gt; Either Text (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#readPoint"><span class="hs-identifier hs-var hs-var">readPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser (Point 2 r) -&gt; Text -&gt; Either Text (Point 2 r)
+forall a. Parser a -&gt; Text -&gt; Either Text a
+</span><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-var">runParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679531287"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-type">runParser</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="#local-6989586621679531287"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679531287"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-56"></span><span id="runParser"><span class="annot"><span class="annottext">runParser :: Parser a -&gt; Text -&gt; Either Text a
+</span><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-var hs-var">runParser</span></a></span></span><span> </span><span id="local-6989586621679531117"><span class="annot"><span class="annottext">p :: Parser a
+</span><a href="#local-6989586621679531117"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ParseError -&gt; Text)
+-&gt; ((a, Text) -&gt; a) -&gt; Either ParseError (a, Text) -&gt; Either Text a
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">ParseError -&gt; Text
+</span><a href="Data.Geometry.Ipe.PathParser.html#errorText"><span class="hs-identifier hs-var">errorText</span></a></span><span> </span><span class="annot"><span class="annottext">(a, Text) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(Either ParseError (a, Text) -&gt; Either Text a)
+-&gt; (Text -&gt; Either ParseError (a, Text)) -&gt; Text -&gt; Either Text a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Parser a -&gt; Text -&gt; Either ParseError (a, Text)
+forall a. Parser a -&gt; Text -&gt; Either ParseError (a, Text)
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#runP"><span class="hs-identifier hs-var">runP</span></a></span><span> </span><span class="annot"><span class="annottext">Parser a
+</span><a href="#local-6989586621679531117"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- Collect errors</span><span>
+</span><span id="line-59"></span><span class="hs-keyword">data</span><span> </span><span id="Either%27"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Either%27"><span class="hs-identifier hs-var">Either'</span></a></span></span><span> </span><span id="local-6989586621679531253"><span class="annot"><a href="#local-6989586621679531253"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span id="local-6989586621679531252"><span class="annot"><a href="#local-6989586621679531252"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Left%27"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-var">Left'</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679531253"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Right%27"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-var">Right'</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679531252"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679531105"><span id="local-6989586621679531107"><span id="local-6989586621679531109"><span class="annot"><span class="annottext">Int -&gt; Either' l r -&gt; ShowS
+[Either' l r] -&gt; ShowS
+Either' l r -&gt; String
+(Int -&gt; Either' l r -&gt; ShowS)
+-&gt; (Either' l r -&gt; String)
+-&gt; ([Either' l r] -&gt; ShowS)
+-&gt; Show (Either' l r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall l r. (Show l, Show r) =&gt; Int -&gt; Either' l r -&gt; ShowS
+forall l r. (Show l, Show r) =&gt; [Either' l r] -&gt; ShowS
+forall l r. (Show l, Show r) =&gt; Either' l r -&gt; String
+showList :: [Either' l r] -&gt; ShowS
+$cshowList :: forall l r. (Show l, Show r) =&gt; [Either' l r] -&gt; ShowS
+show :: Either' l r -&gt; String
+$cshow :: forall l r. (Show l, Show r) =&gt; Either' l r -&gt; String
+showsPrec :: Int -&gt; Either' l r -&gt; ShowS
+$cshowsPrec :: forall l r. (Show l, Show r) =&gt; Int -&gt; Either' l r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679531100"><span id="local-6989586621679531102"><span class="annot"><span class="annottext">Either' l r -&gt; Either' l r -&gt; Bool
+(Either' l r -&gt; Either' l r -&gt; Bool)
+-&gt; (Either' l r -&gt; Either' l r -&gt; Bool) -&gt; Eq (Either' l r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall l r. (Eq l, Eq r) =&gt; Either' l r -&gt; Either' l r -&gt; Bool
+/= :: Either' l r -&gt; Either' l r -&gt; Bool
+$c/= :: forall l r. (Eq l, Eq r) =&gt; Either' l r -&gt; Either' l r -&gt; Bool
+== :: Either' l r -&gt; Either' l r -&gt; Bool
+$c== :: forall l r. (Eq l, Eq r) =&gt; Either' l r -&gt; Either' l r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679531097"><span id="local-6989586621679531098"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531092"><span id="local-6989586621679531094"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679531098"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679531097"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Either%27"><span class="hs-identifier hs-type">Either'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531098"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531097"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-type">Left'</span></a></span><span> </span><span id="local-6989586621679531090"><span class="annot"><span class="annottext">l :: l
+</span><a href="#local-6989586621679531090"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span>  </span><span id="local-6989586621679531089"><span class="annot"><span class="annottext">&lt;&gt; :: Either' l r -&gt; Either' l r -&gt; Either' l r
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-type">Left'</span></a></span><span> </span><span id="local-6989586621679531088"><span class="annot"><span class="annottext">l' :: l
+</span><a href="#local-6989586621679531088"><span class="hs-identifier hs-var">l'</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l -&gt; Either' l r
+forall l r. l -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-var">Left'</span></a></span><span> </span><span class="annot"><span class="annottext">(l -&gt; Either' l r) -&gt; l -&gt; Either' l r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">l
+</span><a href="#local-6989586621679531090"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">l -&gt; l -&gt; l
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">l
+</span><a href="#local-6989586621679531088"><span class="hs-identifier hs-var">l'</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-type">Left'</span></a></span><span> </span><span id="local-6989586621679531087"><span class="annot"><span class="annottext">l :: l
+</span><a href="#local-6989586621679531087"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l -&gt; Either' l r
+forall l r. l -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-var">Left'</span></a></span><span> </span><span class="annot"><span class="annottext">l
+</span><a href="#local-6989586621679531087"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-identifier">_</span><span>          </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-type">Left'</span></a></span><span> </span><span id="local-6989586621679531086"><span class="annot"><span class="annottext">l' :: l
+</span><a href="#local-6989586621679531086"><span class="hs-identifier hs-var">l'</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l -&gt; Either' l r
+forall l r. l -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-var">Left'</span></a></span><span> </span><span class="annot"><span class="annottext">l
+</span><a href="#local-6989586621679531086"><span class="hs-identifier hs-var">l'</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-type">Right'</span></a></span><span> </span><span id="local-6989586621679531085"><span class="annot"><span class="annottext">r :: r
+</span><a href="#local-6989586621679531085"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-type">Right'</span></a></span><span> </span><span id="local-6989586621679531084"><span class="annot"><span class="annottext">r' :: r
+</span><a href="#local-6989586621679531084"><span class="hs-identifier hs-var">r'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Either' l r
+forall l r. r -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-var">Right'</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Either' l r) -&gt; r -&gt; Either' l r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531085"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531084"><span class="hs-identifier hs-var">r'</span></a></span></span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679531082"><span id="local-6989586621679531083"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679531077"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679531083"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679531082"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679531082"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Either%27"><span class="hs-identifier hs-type">Either'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531083"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531082"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679531075"><span class="annot"><span class="annottext">mempty :: Either' l r
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Either' l r
+forall l r. r -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-var">Right'</span></a></span><span> </span><span class="annot"><span class="annottext">r
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679531074"><span class="annot"><span class="annottext">mappend :: Either' l r -&gt; Either' l r -&gt; Either' l r
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either' l r -&gt; Either' l r -&gt; Either' l r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span></span></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679531231"><span id="local-6989586621679531232"><span id="local-6989586621679531233"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#either%27"><span class="hs-identifier hs-type">either'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679531233"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531232"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679531231"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531232"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Either%27"><span class="hs-identifier hs-type">Either'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531233"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531231"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679531232"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-71"></span><span id="either%27"><span class="annot"><span class="annottext">either' :: (l -&gt; a) -&gt; (r -&gt; a) -&gt; Either' l r -&gt; a
+</span><a href="Data.Geometry.Ipe.PathParser.html#either%27"><span class="hs-identifier hs-var hs-var">either'</span></a></span></span><span> </span><span id="local-6989586621679531072"><span class="annot"><span class="annottext">lf :: l -&gt; a
+</span><a href="#local-6989586621679531072"><span class="hs-identifier hs-var">lf</span></a></span></span><span> </span><span class="hs-identifier">_</span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-type">Left'</span></a></span><span> </span><span id="local-6989586621679531071"><span class="annot"><span class="annottext">l :: l
+</span><a href="#local-6989586621679531071"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l -&gt; a
+</span><a href="#local-6989586621679531072"><span class="hs-identifier hs-var">lf</span></a></span><span> </span><span class="annot"><span class="annottext">l
+</span><a href="#local-6989586621679531071"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#either%27"><span class="hs-identifier hs-var">either'</span></a></span><span> </span><span class="hs-identifier">_</span><span>  </span><span id="local-6989586621679531070"><span class="annot"><span class="annottext">rf :: r -&gt; a
+</span><a href="#local-6989586621679531070"><span class="hs-identifier hs-var">rf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-type">Right'</span></a></span><span> </span><span id="local-6989586621679531069"><span class="annot"><span class="annottext">r :: r
+</span><a href="#local-6989586621679531069"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; a
+</span><a href="#local-6989586621679531070"><span class="hs-identifier hs-var">rf</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531069"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- TODO: Use Validation instead of this home-brew one</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span id="local-6989586621679531068"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#readPathOperations"><span class="hs-identifier hs-type">readPathOperations</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531068"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Operation"><span class="hs-identifier hs-type">Operation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531068"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-76"></span><span id="readPathOperations"><span class="annot"><span class="annottext">readPathOperations :: Text -&gt; Either Text [Operation r]
+</span><a href="Data.Geometry.Ipe.PathParser.html#readPathOperations"><span class="hs-identifier hs-var hs-var">readPathOperations</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either' [ParseError] [Operation r] -&gt; Either Text [Operation r]
+forall b. Either' [ParseError] b -&gt; Either Text b
+</span><a href="#local-6989586621679531066"><span class="hs-identifier hs-var">unWrap</span></a></span><span> </span><span class="annot"><span class="annottext">(Either' [ParseError] [Operation r] -&gt; Either Text [Operation r])
+-&gt; (Text -&gt; Either' [ParseError] [Operation r])
+-&gt; Text
+-&gt; Either Text [Operation r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Either' [ParseError] [Operation r]]
+-&gt; Either' [ParseError] [Operation r]
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span> </span><span class="annot"><span class="annottext">([Either' [ParseError] [Operation r]]
+ -&gt; Either' [ParseError] [Operation r])
+-&gt; (Text -&gt; [Either' [ParseError] [Operation r]])
+-&gt; Text
+-&gt; Either' [ParseError] [Operation r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Either' [ParseError] [Operation r])
+-&gt; [Text] -&gt; [Either' [ParseError] [Operation r]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either ParseError (Operation r, Text)
+-&gt; Either' [ParseError] [Operation r]
+forall a a b. Either a (a, b) -&gt; Either' [a] [a]
+</span><a href="#local-6989586621679531065"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">(Either ParseError (Operation r, Text)
+ -&gt; Either' [ParseError] [Operation r])
+-&gt; (Text -&gt; Either ParseError (Operation r, Text))
+-&gt; Text
+-&gt; Either' [ParseError] [Operation r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Parser (Operation r)
+-&gt; Text -&gt; Either ParseError (Operation r, Text)
+forall a. Parser a -&gt; Text -&gt; Either ParseError (a, Text)
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#runP"><span class="hs-identifier hs-var">runP</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Operation r)
+forall r. Coordinate r =&gt; Parser (Operation r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pOperation"><span class="hs-identifier hs-var">pOperation</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>                   </span><span class="annot"><span class="annottext">([Text] -&gt; [Either' [ParseError] [Operation r]])
+-&gt; (Text -&gt; [Text]) -&gt; Text -&gt; [Either' [ParseError] [Operation r]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [Text]
+</span><a href="#local-6989586621679531063"><span class="hs-identifier hs-var">clean</span></a></span><span> </span><span class="annot"><span class="annottext">([Text] -&gt; [Text]) -&gt; (Text -&gt; [Text]) -&gt; Text -&gt; [Text]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text -&gt; [Text]
+</span><a href="Data.Geometry.Ipe.PathParser.html#splitKeepDelims"><span class="hs-identifier hs-var">splitKeepDelims</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;mlcqeasuh&quot;</span></span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>      </span><span class="hs-comment">-- Unwrap the Either'. If it is a Left containing all our errors,</span><span>
+</span><span id="line-80"></span><span>      </span><span class="hs-comment">-- combine them into one error. Otherwise just ReWrap it in an proper Either</span><span>
+</span><span id="line-81"></span><span>      </span><span id="local-6989586621679531066"><span class="annot"><span class="annottext">unWrap :: Either' [ParseError] b -&gt; Either Text b
+</span><a href="#local-6989586621679531066"><span class="hs-identifier hs-var hs-var">unWrap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([ParseError] -&gt; Either Text b)
+-&gt; (b -&gt; Either Text b) -&gt; Either' [ParseError] b -&gt; Either Text b
+forall l a r. (l -&gt; a) -&gt; (r -&gt; a) -&gt; Either' l r -&gt; a
+</span><a href="Data.Geometry.Ipe.PathParser.html#either%27"><span class="hs-identifier hs-var">either'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Either Text b
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Either Text b)
+-&gt; ([ParseError] -&gt; Text) -&gt; [ParseError] -&gt; Either Text b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[ParseError] -&gt; Text
+</span><a href="Data.Geometry.Ipe.PathParser.html#combineErrors"><span class="hs-identifier hs-var">combineErrors</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b -&gt; Either Text b
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-comment">-- for the lefts: wrap the error in a list, for the rights: we only care</span><span>
+</span><span id="line-83"></span><span>      </span><span class="hs-comment">-- about the result, so wrap that in a list as well. Collecting the</span><span>
+</span><span id="line-84"></span><span>      </span><span class="hs-comment">-- results is done using the Semigroup instance of Either'</span><span>
+</span><span id="line-85"></span><span>      </span><span id="local-6989586621679531065"><span class="annot"><span class="annottext">wrap :: Either a (a, b) -&gt; Either' [a] [a]
+</span><a href="#local-6989586621679531065"><span class="hs-identifier hs-var hs-var">wrap</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Either' [a] [a])
+-&gt; ((a, b) -&gt; Either' [a] [a])
+-&gt; Either a (a, b)
+-&gt; Either' [a] [a]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; Either' [a] [a]
+forall l r. l -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Left%27"><span class="hs-identifier hs-var">Left'</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Either' [a] [a]) -&gt; (a -&gt; [a]) -&gt; a -&gt; Either' [a] [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; Either' [a] [a]
+forall l r. r -&gt; Either' l r
+</span><a href="Data.Geometry.Ipe.PathParser.html#Right%27"><span class="hs-identifier hs-var">Right'</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Either' [a] [a])
+-&gt; ((a, b) -&gt; [a]) -&gt; (a, b) -&gt; Either' [a] [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; ((a, b) -&gt; a) -&gt; (a, b) -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-comment">-- Split the input string in pieces, each piece represents one operation</span><span>
+</span><span id="line-87"></span><span>      </span><span id="local-6989586621679531059"><span class="annot"><span class="annottext">trim :: Text -&gt; Text
+</span><a href="#local-6989586621679531059"><span class="hs-identifier hs-var hs-var">trim</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Text -&gt; Text
+</span><span class="hs-identifier hs-var">T.dropWhile</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isSpace</span></span><span>
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621679531063"><span class="annot"><span class="annottext">clean :: [Text] -&gt; [Text]
+</span><a href="#local-6989586621679531063"><span class="hs-identifier hs-var hs-var">clean</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Bool) -&gt; [Text] -&gt; [Text]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; (Text -&gt; Bool) -&gt; Text -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool
+</span><span class="hs-identifier hs-var">T.null</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Text] -&gt; [Text]) -&gt; ([Text] -&gt; [Text]) -&gt; [Text] -&gt; [Text]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text) -&gt; [Text] -&gt; [Text]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text
+</span><a href="#local-6989586621679531059"><span class="hs-identifier hs-var">trim</span></a></span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-comment">-- TODO: Do the splitting on the Text rather than unpacking and packing</span><span>
+</span><span id="line-90"></span><span>      </span><span class="hs-comment">-- the thing</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#errorText"><span class="hs-identifier hs-type">errorText</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParseError</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-93"></span><span id="errorText"><span class="annot"><span class="annottext">errorText :: ParseError -&gt; Text
+</span><a href="Data.Geometry.Ipe.PathParser.html#errorText"><span class="hs-identifier hs-var hs-var">errorText</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Text) -&gt; (ParseError -&gt; String) -&gt; ParseError -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
+</span><span class="hs-identifier hs-var">unlines</span></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; String)
+-&gt; (ParseError -&gt; [String]) -&gt; ParseError -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Message -&gt; String) -&gt; [Message] -&gt; [String]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Message -&gt; String
+</span><span class="hs-identifier hs-var">messageString</span></span><span> </span><span class="annot"><span class="annottext">([Message] -&gt; [String])
+-&gt; (ParseError -&gt; [Message]) -&gt; ParseError -&gt; [String]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ParseError -&gt; [Message]
+</span><span class="hs-identifier hs-var">errorMessages</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#combineErrors"><span class="hs-identifier hs-type">combineErrors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">ParseError</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-96"></span><span id="combineErrors"><span class="annot"><span class="annottext">combineErrors :: [ParseError] -&gt; Text
+</span><a href="Data.Geometry.Ipe.PathParser.html#combineErrors"><span class="hs-identifier hs-var hs-var">combineErrors</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; Text
+</span><span class="hs-identifier hs-var">T.unlines</span></span><span> </span><span class="annot"><span class="annottext">([Text] -&gt; Text)
+-&gt; ([ParseError] -&gt; [Text]) -&gt; [ParseError] -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(ParseError -&gt; Text) -&gt; [ParseError] -&gt; [Text]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">ParseError -&gt; Text
+</span><a href="Data.Geometry.Ipe.PathParser.html#errorText"><span class="hs-identifier hs-var">errorText</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#splitKeepDelims"><span class="hs-identifier hs-type">splitKeepDelims</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">]</span><span>
+</span><span id="line-100"></span><span id="splitKeepDelims"><span class="annot"><span class="annottext">splitKeepDelims :: String -&gt; Text -&gt; [Text]
+</span><a href="Data.Geometry.Ipe.PathParser.html#splitKeepDelims"><span class="hs-identifier hs-var hs-var">splitKeepDelims</span></a></span></span><span> </span><span id="local-6989586621679531052"><span class="annot"><span class="annottext">delims :: String
+</span><a href="#local-6989586621679531052"><span class="hs-identifier hs-var">delims</span></a></span></span><span> </span><span id="local-6989586621679531051"><span class="annot"><span class="annottext">t :: Text
+</span><a href="#local-6989586621679531051"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; ((Char, Text) -&gt; [Text]) -&gt; Maybe (Char, Text) -&gt; [Text]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679531049"><span class="hs-identifier hs-var">mPref</span></a></span><span> </span><span class="annot"><span class="annottext">(Char, Text) -&gt; [Text]
+</span><a href="#local-6989586621679531048"><span class="hs-identifier hs-var">continue</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Char, Text) -&gt; [Text]) -&gt; Maybe (Char, Text) -&gt; [Text]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Maybe (Char, Text)
+</span><span class="hs-identifier hs-var">T.uncons</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531046"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679531049"><span class="annot"><span class="annottext">mPref :: [Text]
+</span><a href="#local-6989586621679531049"><span class="hs-identifier hs-var hs-var">mPref</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool
+</span><span class="hs-identifier hs-var">T.null</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531045"><span class="hs-identifier hs-var">pref</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531045"><span class="hs-identifier hs-var">pref</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679531045"><span class="annot"><span class="annottext">pref :: Text
+</span><a href="#local-6989586621679531045"><span class="hs-identifier hs-var">pref</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679531046"><span class="annot"><span class="annottext">rest :: Text
+</span><a href="#local-6989586621679531046"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Text -&gt; (Text, Text)
+</span><span class="hs-identifier hs-var">T.break</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; String -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679531052"><span class="hs-identifier hs-var">delims</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531051"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679531048"><span class="annot"><span class="annottext">continue :: (Char, Text) -&gt; [Text]
+</span><a href="#local-6989586621679531048"><span class="hs-identifier hs-var hs-var">continue</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679531042"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679531042"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679531041"><span class="annot"><span class="annottext">t' :: Text
+</span><a href="#local-6989586621679531041"><span class="hs-identifier hs-var">t'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531045"><span class="hs-identifier hs-var">pref</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Char -&gt; Text
+</span><span class="hs-operator hs-var">`T.snoc`</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679531042"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; [Text] -&gt; [Text]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text -&gt; [Text]
+</span><a href="Data.Geometry.Ipe.PathParser.html#splitKeepDelims"><span class="hs-identifier hs-var">splitKeepDelims</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679531052"><span class="hs-identifier hs-var">delims</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679531041"><span class="hs-identifier hs-var">t'</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679531039"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#readMatrix"><span class="hs-identifier hs-type">readMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531039"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679531039"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-108"></span><span id="readMatrix"><span class="annot"><span class="annottext">readMatrix :: Text -&gt; Either Text (Matrix 3 3 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#readMatrix"><span class="hs-identifier hs-var hs-var">readMatrix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser (Matrix 3 3 r) -&gt; Text -&gt; Either Text (Matrix 3 3 r)
+forall a. Parser a -&gt; Text -&gt; Either Text a
+</span><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-var">runParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Matrix 3 3 r)
+forall r. Coordinate r =&gt; Parser (Matrix 3 3 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pMatrix"><span class="hs-identifier hs-var">pMatrix</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679531036"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#readRectangle"><span class="hs-identifier hs-type">readRectangle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679531036"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-112"></span><span id="readRectangle"><span class="annot"><span class="annottext">readRectangle :: Text -&gt; Either Text (Rectangle () r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#readRectangle"><span class="hs-identifier hs-var hs-var">readRectangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser (Rectangle () r) -&gt; Text -&gt; Either Text (Rectangle () r)
+forall a. Parser a -&gt; Text -&gt; Either Text a
+</span><a href="Data.Geometry.Ipe.PathParser.html#runParser"><span class="hs-identifier hs-var">runParser</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Rectangle () r)
+forall r. Coordinate r =&gt; Parser (Rectangle () r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pRectangle"><span class="hs-identifier hs-var">pRectangle</span></a></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="hs-comment">-----------------------------------------------------------------------</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- | The parsers themselves</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#pOperation"><span class="hs-identifier hs-type">pOperation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679531234"><span class="annot"><a href="#local-6989586621679531234"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531234"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Operation"><span class="hs-identifier hs-type">Operation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531234"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span id="pOperation"><span class="annot"><span class="annottext">pOperation :: Parser (Operation r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pOperation"><span class="hs-identifier hs-var hs-var">pOperation</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Parser (Operation r)] -&gt; Parser (Operation r)
+forall a. [Parser a] -&gt; Parser a
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pChoice"><span class="hs-identifier hs-var">pChoice</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Operation r
+forall r. Point 2 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#MoveTo"><span class="hs-identifier hs-var">MoveTo</span></a></span><span>       </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>                         </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Point 2 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'m'</span></span><span>
+</span><span id="line-120"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Operation r
+forall r. Point 2 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#LineTo"><span class="hs-identifier hs-var">LineTo</span></a></span><span>       </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>                         </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Point 2 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'l'</span></span><span>
+</span><span id="line-121"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Operation r
+forall r. Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#CurveTo"><span class="hs-identifier hs-var">CurveTo</span></a></span><span>      </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r)
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Point 2 r -&gt; Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r)
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+</span><a href="#local-6989586621679531027"><span class="hs-identifier hs-var">pPoint'</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+</span><a href="#local-6989586621679531027"><span class="hs-identifier hs-var">pPoint'</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Point 2 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'c'</span></span><span>
+</span><span id="line-122"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Operation r
+forall r. Point 2 r -&gt; Point 2 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#QCurveTo"><span class="hs-identifier hs-var">QCurveTo</span></a></span><span>     </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r)
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+</span><a href="#local-6989586621679531027"><span class="hs-identifier hs-var">pPoint'</span></a></span><span>             </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Point 2 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'q'</span></span><span>
+</span><span id="line-123"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Matrix 3 3 r -&gt; Operation r
+forall r. Matrix 3 3 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#Ellipse"><span class="hs-identifier hs-var">Ellipse</span></a></span><span>      </span><span class="annot"><span class="annottext">(Matrix 3 3 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Matrix 3 3 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Matrix 3 3 r)
+forall r. Coordinate r =&gt; Parser (Matrix 3 3 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pMatrix"><span class="hs-identifier hs-var">pMatrix</span></a></span><span>                        </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Matrix 3 3 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Matrix 3 3 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'e'</span></span><span>
+</span><span id="line-124"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Matrix 3 3 r -&gt; Point 2 r -&gt; Operation r
+forall r. Matrix 3 3 r -&gt; Point 2 r -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#ArcTo"><span class="hs-identifier hs-var">ArcTo</span></a></span><span>        </span><span class="annot"><span class="annottext">(Matrix 3 3 r -&gt; Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Matrix 3 3 r)
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Matrix 3 3 r)
+forall r. Coordinate r =&gt; Parser (Matrix 3 3 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pMatrix"><span class="hs-identifier hs-var">pMatrix</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Operation r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+</span><a href="#local-6989586621679531027"><span class="hs-identifier hs-var">pPoint'</span></a></span><span>            </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Char -&gt; ParsecT Text () Identity (Point 2 r)
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'a'</span></span><span>
+</span><span id="line-125"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; Operation r
+forall r. [Point 2 r] -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#Spline"><span class="hs-identifier hs-var">Spline</span></a></span><span>       </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; Operation r)
+-&gt; ParsecT Text () Identity [Point 2 r] -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Parser String -&gt; ParsecT Text () Identity [Point 2 r]
+forall a b. Parser a -&gt; Parser b -&gt; Parser [a]
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pSepBy"><span class="hs-operator hs-var">`pSepBy`</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span>    </span><span class="annot"><span class="annottext">ParsecT Text () Identity [Point 2 r]
+-&gt; Char -&gt; ParsecT Text () Identity [Point 2 r]
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'s'</span></span><span>
+</span><span id="line-126"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; Operation r
+forall r. [Point 2 r] -&gt; Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#ClosedSpline"><span class="hs-identifier hs-var">ClosedSpline</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; Operation r)
+-&gt; ParsecT Text () Identity [Point 2 r] -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+-&gt; Parser String -&gt; ParsecT Text () Identity [Point 2 r]
+forall a b. Parser a -&gt; Parser b -&gt; Parser [a]
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pSepBy"><span class="hs-operator hs-var">`pSepBy`</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span>    </span><span class="annot"><span class="annottext">ParsecT Text () Identity [Point 2 r]
+-&gt; Char -&gt; ParsecT Text () Identity [Point 2 r]
+forall b.
+ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var">*&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="hs-char">'u'</span></span><span>
+</span><span id="line-127"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Parser Char
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pChar"><span class="hs-identifier hs-var">pChar</span></a></span><span> </span><span class="annot"><span class="hs-char">'h'</span></span><span>  </span><span class="annot"><span class="annottext">Parser Char -&gt; Parser (Operation r) -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Operation r -&gt; Parser (Operation r)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Operation r
+forall r. Operation r
+</span><a href="Data.Geometry.Ipe.Path.html#ClosePath"><span class="hs-identifier hs-var">ClosePath</span></a></span><span>
+</span><span id="line-128"></span><span>                     </span><span class="hs-special">]</span><span>
+</span><span id="line-129"></span><span>             </span><span class="hs-keyword">where</span><span>
+</span><span id="line-130"></span><span>               </span><span id="local-6989586621679531027"><span class="annot"><span class="annottext">pPoint' :: ParsecT Text () Identity (Point 2 r)
+</span><a href="#local-6989586621679531027"><span class="hs-identifier hs-var hs-var">pPoint'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String
+-&gt; ParsecT Text () Identity (Point 2 r)
+-&gt; ParsecT Text () Identity (Point 2 r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>
+</span><span id="line-131"></span><span>               </span><span id="local-6989586621679531017"><span class="annot"><span class="annottext">p :: ParsecT Text () Identity b
+</span><a href="#local-6989586621679531017"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679531030"><span class="annot"><span class="annottext">*&gt;&gt; :: ParsecT Text () Identity b -&gt; Char -&gt; ParsecT Text () Identity b
+</span><a href="#local-6989586621679531030"><span class="hs-operator hs-var hs-var">*&gt;&gt;</span></a></span></span><span> </span><span id="local-6989586621679531016"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679531016"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity b
+</span><a href="#local-6989586621679531017"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity b
+-&gt; Parser Char -&gt; ParsecT Text () Identity b
+forall s (m :: * -&gt; *) t u b a.
+(Stream s m t, Reversable s) =&gt;
+ParsecT s u m b -&gt; ParsecT s u m a -&gt; ParsecT s u m b
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#%3C%2A%3E%3C"><span class="hs-operator hs-var">&lt;*&gt;&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String -&gt; Parser Char -&gt; Parser Char
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#%2A%2A%2A%3E"><span class="hs-operator hs-var">***&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Parser Char
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pChar"><span class="hs-identifier hs-var">pChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679531016"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span id="local-6989586621679531283"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-type">pPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531283"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679531283"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-136"></span><span id="pPoint"><span class="annot"><span class="annottext">pPoint :: Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var hs-var">pPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+forall r. r -&gt; r -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r -&gt; Point 2 r)
+-&gt; ParsecT Text () Identity r
+-&gt; ParsecT Text () Identity (r -&gt; Point 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity r
+forall r. Coordinate r =&gt; Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var">pCoordinate</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (r -&gt; Point 2 r)
+-&gt; Parser String -&gt; ParsecT Text () Identity (r -&gt; Point 2 r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;*</span></span><span> </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (r -&gt; Point 2 r)
+-&gt; ParsecT Text () Identity r -&gt; Parser (Point 2 r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity r
+forall r. Coordinate r =&gt; Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var">pCoordinate</span></a></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span id="local-6989586621679531286"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-type">pCoordinate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531286"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="#local-6989586621679531286"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-140"></span><span id="pCoordinate"><span class="annot"><span class="annottext">pCoordinate :: Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var hs-var">pCoordinate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Maybe (Int, Integer) -&gt; r
+forall r. Coordinate r =&gt; Integer -&gt; Maybe (Int, Integer) -&gt; r
+</span><a href="Data.Geometry.Ipe.PathParser.html#fromSeq"><span class="hs-identifier hs-var">fromSeq</span></a></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Maybe (Int, Integer) -&gt; r)
+-&gt; ParsecT Text () Identity Integer
+-&gt; ParsecT Text () Identity (Maybe (Int, Integer) -&gt; r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity Integer
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pInteger"><span class="hs-identifier hs-var">pInteger</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Maybe (Int, Integer) -&gt; r)
+-&gt; ParsecT Text () Identity (Maybe (Int, Integer)) -&gt; Parser r
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Maybe (Int, Integer))
+</span><a href="#local-6989586621679531010"><span class="hs-identifier hs-var">pDecimal</span></a></span><span>
+</span><span id="line-141"></span><span>              </span><span class="hs-keyword">where</span><span>
+</span><span id="line-142"></span><span>                </span><span id="local-6989586621679531010"><span class="annot"><span class="annottext">pDecimal :: ParsecT Text () Identity (Maybe (Int, Integer))
+</span><a href="#local-6989586621679531010"><span class="hs-identifier hs-var hs-var">pDecimal</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser (Int, Integer)
+-&gt; ParsecT Text () Identity (Maybe (Int, Integer))
+forall a. Parser a -&gt; Parser (Maybe a)
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pMaybe"><span class="hs-identifier hs-var">pMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Parser Char
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pChar"><span class="hs-identifier hs-var">pChar</span></a></span><span> </span><span class="annot"><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="annottext">Parser Char -&gt; Parser (Int, Integer) -&gt; Parser (Int, Integer)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser (Int, Integer)
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pPaddedNatural"><span class="hs-identifier hs-var">pPaddedNatural</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span id="local-6989586621679531213"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#pRectangle"><span class="hs-identifier hs-type">pRectangle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531213"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679531213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-146"></span><span id="pRectangle"><span class="annot"><span class="annottext">pRectangle :: Parser (Rectangle () r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pRectangle"><span class="hs-identifier hs-var hs-var">pRectangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679531007"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679531007"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679531006"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621679531006"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Rectangle () r
+forall (d :: Nat) r p.
+(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Box d p r
+</span><span class="hs-identifier hs-var">box</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679531007"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679531006"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; Rectangle () r)
+-&gt; ParsecT Text () Identity (Point 2 r)
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Rectangle () r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>
+</span><span id="line-147"></span><span>                                           </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Rectangle () r)
+-&gt; Parser String
+-&gt; ParsecT Text () Identity (Point 2 r -&gt; Rectangle () r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;*</span></span><span>  </span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span>
+</span><span id="line-148"></span><span>                                           </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r -&gt; Rectangle () r)
+-&gt; ParsecT Text () Identity (Point 2 r) -&gt; Parser (Rectangle () r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity (Point 2 r)
+forall r. Coordinate r =&gt; Parser (Point 2 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pPoint"><span class="hs-identifier hs-var">pPoint</span></a></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span id="local-6989586621679531216"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#pMatrix"><span class="hs-identifier hs-type">pMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531216"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679531216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-151"></span><span id="pMatrix"><span class="annot"><span class="annottext">pMatrix :: Parser (Matrix 3 3 r)
+</span><a href="Data.Geometry.Ipe.PathParser.html#pMatrix"><span class="hs-identifier hs-var hs-var">pMatrix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679531004"><span class="annot"><span class="annottext">a :: r
+</span><a href="#local-6989586621679531004"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679531003"><span class="annot"><span class="annottext">b :: [r]
+</span><a href="#local-6989586621679531003"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[r] -&gt; Matrix 3 3 r
+forall r. Coordinate r =&gt; [r] -&gt; Matrix 3 3 r
+</span><a href="Data.Geometry.Ipe.PathParser.html#mkMatrix"><span class="hs-identifier hs-var">mkMatrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531004"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; [r] -&gt; [r]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679531003"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(r -&gt; [r] -&gt; Matrix 3 3 r)
+-&gt; ParsecT Text () Identity r
+-&gt; ParsecT Text () Identity ([r] -&gt; Matrix 3 3 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity r
+forall r. Coordinate r =&gt; Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var">pCoordinate</span></a></span><span>
+</span><span id="line-152"></span><span>                                   </span><span class="annot"><span class="annottext">ParsecT Text () Identity ([r] -&gt; Matrix 3 3 r)
+-&gt; ParsecT Text () Identity [r] -&gt; Parser (Matrix 3 3 r)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; ParsecT Text () Identity r -&gt; ParsecT Text () Identity [r]
+forall a. Int -&gt; Parser a -&gt; Parser [a]
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pCount"><span class="hs-identifier hs-var">pCount</span></a></span><span> </span><span class="annot"><span class="hs-number">5</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser String
+</span><a href="Data.Geometry.Ipe.ParserPrimitives.html#pWhiteSpace"><span class="hs-identifier hs-var">pWhiteSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Parser String
+-&gt; ParsecT Text () Identity r -&gt; ParsecT Text () Identity r
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Text () Identity r
+forall r. Coordinate r =&gt; Parser r
+</span><a href="Data.Geometry.Ipe.PathParser.html#pCoordinate"><span class="hs-identifier hs-var">pCoordinate</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- | Generate a matrix from a list of 6 coordinates.</span><span>
+</span><span id="line-156"></span><span id="local-6989586621679531170"><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#mkMatrix"><span class="hs-identifier hs-type">mkMatrix</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679531170"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679531170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679531170"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-157"></span><span id="mkMatrix"><span class="annot"><span class="annottext">mkMatrix :: [r] -&gt; Matrix 3 3 r
+</span><a href="Data.Geometry.Ipe.PathParser.html#mkMatrix"><span class="hs-identifier hs-var hs-var">mkMatrix</span></a></span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679531000"><span class="annot"><span class="annottext">a :: r
+</span><a href="#local-6989586621679531000"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679530999"><span class="annot"><span class="annottext">b :: r
+</span><a href="#local-6989586621679530999"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679530998"><span class="annot"><span class="annottext">c :: r
+</span><a href="#local-6989586621679530998"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679530997"><span class="annot"><span class="annottext">d :: r
+</span><a href="#local-6989586621679530997"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679530996"><span class="annot"><span class="annottext">e :: r
+</span><a href="#local-6989586621679530996"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679530995"><span class="annot"><span class="annottext">f :: r
+</span><a href="#local-6989586621679530995"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 (Vector 3 r) -&gt; Matrix 3 3 r
+forall (n :: Nat) (m :: Nat) r.
+Vector n (Vector m r) -&gt; Matrix n m r
+</span><span class="hs-identifier hs-var">Matrix</span></span><span> </span><span class="annot"><span class="annottext">(Vector 3 (Vector 3 r) -&gt; Matrix 3 3 r)
+-&gt; Vector 3 (Vector 3 r) -&gt; Matrix 3 3 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 (Vector 3 r)
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><span class="hs-identifier hs-var">Vector3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><span class="hs-identifier hs-var">Vector3</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679531000"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679530998"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679530996"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>                                          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><span class="hs-identifier hs-var">Vector3</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679530999"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679530997"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679530995"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>                                          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><span class="hs-identifier hs-var">Vector3</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>                           </span><span class="hs-comment">-- We need the matrix in the following order:</span><span>
+</span><span id="line-161"></span><span>                         </span><span class="hs-comment">-- 012</span><span>
+</span><span id="line-162"></span><span>                         </span><span class="hs-comment">-- 345</span><span>
+</span><span id="line-163"></span><span>                         </span><span class="hs-comment">--</span><span>
+</span><span id="line-164"></span><span>                         </span><span class="hs-comment">-- But ipe uses the following order:</span><span>
+</span><span id="line-165"></span><span>                         </span><span class="hs-comment">-- 024</span><span>
+</span><span id="line-166"></span><span>                         </span><span class="hs-comment">-- 135</span><span>
+</span><span id="line-167"></span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#mkMatrix"><span class="hs-identifier hs-var">mkMatrix</span></a></span><span> </span><span class="hs-identifier">_</span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Matrix 3 3 r
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;mkMatrix: need exactly 6 arguments&quot;</span></span><span>
+</span><span id="line-168"></span></pre></body></html>

@@ -1,0 +1,1380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Geometry.Ipe.FromIpe</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Functions that help reading geometric values from ipe images.</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Ipe.FromIpe</span><span class="hs-special">(</span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Individual readers</span></span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asPoint"><span class="hs-identifier">_asPoint</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier">_asLineSegment</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asRectangle"><span class="hs-identifier">_asRectangle</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asTriangle"><span class="hs-identifier">_asTriangle</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier">_asPolyLine</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asSomePolygon"><span class="hs-identifier">_asSomePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier">_asSimplePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asMultiPolygon"><span class="hs-identifier">_asMultiPolygon</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Dealing with Attributes</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier">_withAttrs</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Default readers</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier">HasDefaultFromIpe</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Reading all elements of a particular type</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#readAll"><span class="hs-identifier">readAll</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#readAllFrom"><span class="hs-identifier">readAllFrom</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Simple</span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Ball</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Box</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Ellipse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Ellipse</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_EllipseCircle</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html"><span class="hs-identifier">Data.Geometry.Ipe.Path</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Reader.html"><span class="hs-identifier">Data.Geometry.Ipe.Reader</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html"><span class="hs-identifier">Data.Geometry.Ipe.Types</span></a></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.LineSegment</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Point</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Geometry.PolyLine</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PolyLine</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Polygon</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Properties</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Triangle</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LSeq</span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XOverloadedStrings</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Geometry.Ipe.Attributes</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Geometry.Ipe.Color(IpeColor(..))</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Geometry.Point</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- let testPath :: Path Int</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--     testPath = Path . fromSingleton  . PolyLineSegment</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--              . PolyLine.fromPoints . map ext</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--              $ [ origin, Point2 10 10, Point2 200 100 ]</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--     testPathAttrs :: IpeAttributes Path Int</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--     testPathAttrs = attr SStroke (IpeColor &quot;red&quot;)</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--     testObject :: IpeObject Int</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--     testObject = IpePath (testPath :+ testPathAttrs)</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Extracts the point from a Symbol. When creating a symbol this</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- creates a disk that supports a stroke color.</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679535776"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asPoint"><span class="hs-identifier hs-type">_asPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535776"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679535776"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-72"></span><span id="_asPoint"><span class="annot"><span class="annottext">_asPoint :: p (Point 2 r) (f (Point 2 r)) -&gt; p (IpeSymbol r) (f (IpeSymbol r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPoint"><span class="hs-identifier hs-var hs-var">_asPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; IpeSymbol r)
+-&gt; (IpeSymbol r -&gt; Maybe (Point 2 r))
+-&gt; Prism (IpeSymbol r) (IpeSymbol r) (Point 2 r) (Point 2 r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r -&gt; Text -&gt; IpeSymbol r)
+-&gt; Text -&gt; Point 2 r -&gt; IpeSymbol r
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Text -&gt; IpeSymbol r
+forall r1. Point 2 r1 -&gt; Text -&gt; IpeSymbol r1
+</span><a href="Data.Geometry.Ipe.Content.html#Symbol"><span class="hs-identifier hs-var">Symbol</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;mark/disk(sx)&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Maybe (Point 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Maybe (Point 2 r))
+-&gt; (IpeSymbol r -&gt; Point 2 r) -&gt; IpeSymbol r -&gt; Maybe (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (IpeSymbol r) (Point 2 r)
+-&gt; IpeSymbol r -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (IpeSymbol r) (Point 2 r)
+forall r1 r2.
+Lens (IpeSymbol r1) (IpeSymbol r2) (Point 2 r1) (Point 2 r2)
+</span><a href="Data.Geometry.Ipe.Content.html#symbolPoint"><span class="hs-identifier hs-var">symbolPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | Try to convert a path into a line segment, fails if the path is not a line</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- segment or a polyline with more than two points.</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span id="local-6989586621679535771"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier hs-type">_asLineSegment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535771"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535771"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-79"></span><span id="_asLineSegment"><span class="annot"><span class="annottext">_asLineSegment :: p (LineSegment 2 () r) (f (LineSegment 2 () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier hs-var hs-var">_asLineSegment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (LineSegment 2 () r))
+-&gt; Prism
+     (Path r) (Path r) (LineSegment 2 () r) (LineSegment 2 () r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r -&gt; Path r
+forall r. LineSegment 2 () r -&gt; Path r
+</span><a href="#local-6989586621679535709"><span class="hs-identifier hs-var">seg2path</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (LineSegment 2 () r)
+forall r. Path r -&gt; Maybe (LineSegment 2 () r)
+</span><a href="#local-6989586621679535708"><span class="hs-identifier hs-var">path2seg</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679535709"><span class="annot"><span class="annottext">seg2path :: LineSegment 2 () r -&gt; Path r
+</span><a href="#local-6989586621679535709"><span class="hs-identifier hs-var hs-var">seg2path</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine 2 () r) -&gt; PolyLine 2 () r -&gt; Path r
+forall b (m :: * -&gt; *) t. MonadReader b m =&gt; AReview t b -&gt; m t
+</span><span class="hs-identifier hs-var">review</span></span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine 2 () r)
+forall r. Prism' (Path r) (PolyLine 2 () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier hs-var">_asPolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(PolyLine 2 () r -&gt; Path r)
+-&gt; (LineSegment 2 () r -&gt; PolyLine 2 () r)
+-&gt; LineSegment 2 () r
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r -&gt; PolyLine 2 () r
+forall (d :: Nat) p r. LineSegment d p r -&gt; PolyLine d p r
+</span><span class="hs-identifier hs-var">PolyLine.fromLineSegment</span></span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621679535708"><span class="annot"><span class="annottext">path2seg :: Path r -&gt; Maybe (LineSegment 2 () r)
+</span><a href="#local-6989586621679535708"><span class="hs-identifier hs-var hs-var">path2seg</span></a></span></span><span> </span><span id="local-6989586621679535705"><span class="annot"><span class="annottext">p :: Path r
+</span><a href="#local-6989586621679535705"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r -&gt; Maybe (LineSegment 2 () r)
+forall (d :: Nat) p r. PolyLine d p r -&gt; Maybe (LineSegment d p r)
+</span><span class="hs-identifier hs-var">PolyLine.asLineSegment'</span></span><span> </span><span class="annot"><span class="annottext">(PolyLine 2 () r -&gt; Maybe (LineSegment 2 () r))
+-&gt; Maybe (PolyLine 2 () r) -&gt; Maybe (LineSegment 2 () r)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Getting (First (PolyLine 2 () r)) (Path r) (PolyLine 2 () r)
+-&gt; Path r -&gt; Maybe (PolyLine 2 () r)
+forall s (m :: * -&gt; *) a.
+MonadReader s m =&gt;
+Getting (First a) s a -&gt; m (Maybe a)
+</span><span class="hs-identifier hs-var">preview</span></span><span> </span><span class="annot"><span class="annottext">Getting (First (PolyLine 2 () r)) (Path r) (PolyLine 2 () r)
+forall r. Prism' (Path r) (PolyLine 2 () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier hs-var">_asPolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">Path r
+</span><a href="#local-6989586621679535705"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | Convert to a polyline. Ignores all non-polyline parts</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; testPath ^? _asPolyLine</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])})</span><span>
+</span><span id="line-88"></span><span id="local-6989586621679536004"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier hs-type">_asPolyLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679536004"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine.PolyLine</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679536004"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-89"></span><span id="_asPolyLine"><span class="annot"><span class="annottext">_asPolyLine :: p (PolyLine 2 () r) (f (PolyLine 2 () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier hs-var hs-var">_asPolyLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PolyLine 2 () r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (PolyLine 2 () r))
+-&gt; Prism (Path r) (Path r) (PolyLine 2 () r) (PolyLine 2 () r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r -&gt; Path r
+forall r. PolyLine 2 () r -&gt; Path r
+</span><a href="#local-6989586621679535701"><span class="hs-identifier hs-var">poly2path</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (PolyLine 2 () r)
+</span><a href="#local-6989586621679535700"><span class="hs-identifier hs-var">path2poly</span></a></span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679535701"><span class="annot"><span class="annottext">poly2path :: PolyLine 2 () r -&gt; Path r
+</span><a href="#local-6989586621679535701"><span class="hs-identifier hs-var hs-var">poly2path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r) -&gt; Path r
+forall r1. LSeq 1 (PathSegment r1) -&gt; Path r1
+</span><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r) -&gt; Path r)
+-&gt; (PolyLine 2 () r -&gt; LSeq 1 (PathSegment r))
+-&gt; PolyLine 2 () r
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PathSegment r -&gt; LSeq 1 (PathSegment r)
+forall a. a -&gt; LSeq 1 a
+</span><a href="Data.Geometry.Ipe.FromIpe.html#fromSingleton"><span class="hs-identifier hs-var">fromSingleton</span></a></span><span>  </span><span class="annot"><span class="annottext">(PathSegment r -&gt; LSeq 1 (PathSegment r))
+-&gt; (PolyLine 2 () r -&gt; PathSegment r)
+-&gt; PolyLine 2 () r
+-&gt; LSeq 1 (PathSegment r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r -&gt; PathSegment r
+forall r. PolyLine 2 () r -&gt; PathSegment r
+</span><a href="Data.Geometry.Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621679535700"><span class="annot"><span class="annottext">path2poly :: Path r -&gt; Maybe (PolyLine 2 () r)
+</span><a href="#local-6989586621679535700"><span class="hs-identifier hs-var hs-var">path2poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (First (PolyLine 2 () r)) (Path r) (PolyLine 2 () r)
+-&gt; Path r -&gt; Maybe (PolyLine 2 () r)
+forall s (m :: * -&gt; *) a.
+MonadReader s m =&gt;
+Getting (First a) s a -&gt; m (Maybe a)
+</span><span class="hs-identifier hs-var">preview</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r)
+ -&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r)))
+-&gt; Path r -&gt; Const (First (PolyLine 2 () r)) (Path r)
+forall r1 r2.
+Iso
+  (Path r1)
+  (Path r2)
+  (LSeq 1 (PathSegment r1))
+  (LSeq 1 (PathSegment r2))
+</span><a href="Data.Geometry.Ipe.Path.html#pathSegments"><span class="hs-identifier hs-var">pathSegments</span></a></span><span class="annot"><span class="annottext">((LSeq 1 (PathSegment r)
+  -&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r)))
+ -&gt; Path r -&gt; Const (First (PolyLine 2 () r)) (Path r))
+-&gt; ((PolyLine 2 () r
+     -&gt; Const (First (PolyLine 2 () r)) (PolyLine 2 () r))
+    -&gt; LSeq 1 (PathSegment r)
+    -&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r)))
+-&gt; Getting (First (PolyLine 2 () r)) (Path r) (PolyLine 2 () r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PathSegment r -&gt; Const (First (PolyLine 2 () r)) (PathSegment r))
+-&gt; LSeq 1 (PathSegment r)
+-&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">((PathSegment r -&gt; Const (First (PolyLine 2 () r)) (PathSegment r))
+ -&gt; LSeq 1 (PathSegment r)
+ -&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r)))
+-&gt; ((PolyLine 2 () r
+     -&gt; Const (First (PolyLine 2 () r)) (PolyLine 2 () r))
+    -&gt; PathSegment r
+    -&gt; Const (First (PolyLine 2 () r)) (PathSegment r))
+-&gt; (PolyLine 2 () r
+    -&gt; Const (First (PolyLine 2 () r)) (PolyLine 2 () r))
+-&gt; LSeq 1 (PathSegment r)
+-&gt; Const (First (PolyLine 2 () r)) (LSeq 1 (PathSegment r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PolyLine 2 () r
+ -&gt; Const (First (PolyLine 2 () r)) (PolyLine 2 () r))
+-&gt; PathSegment r -&gt; Const (First (PolyLine 2 () r)) (PathSegment r)
+forall r. Prism' (PathSegment r) (PolyLine 2 () r)
+</span><a href="Data.Geometry.Ipe.Path.html#_PolyLineSegment"><span class="hs-identifier hs-var">_PolyLineSegment</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-comment">-- TODO: Check that the path actually is a polyline, rather</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-comment">-- than ignoring everything that does not fit</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- | Convert to a simple polygon</span><span>
+</span><span id="line-97"></span><span id="local-6989586621679535953"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier hs-type">_asSimplePolygon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535953"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Polygon</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Simple</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535953"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-98"></span><span id="_asSimplePolygon"><span class="annot"><span class="annottext">_asSimplePolygon :: p (Polygon 'Simple () r) (f (Polygon 'Simple () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier hs-var hs-var">_asSimplePolygon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (SomePolygon () r) (f (SomePolygon () r))
+-&gt; p (Path r) (f (Path r))
+forall r. Prism' (Path r) (SomePolygon () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSomePolygon"><span class="hs-identifier hs-var">_asSomePolygon</span></a></span><span class="annot"><span class="annottext">(p (SomePolygon () r) (f (SomePolygon () r))
+ -&gt; p (Path r) (f (Path r)))
+-&gt; (p (Polygon 'Simple () r) (f (Polygon 'Simple () r))
+    -&gt; p (SomePolygon () r) (f (SomePolygon () r)))
+-&gt; p (Polygon 'Simple () r) (f (Polygon 'Simple () r))
+-&gt; p (Path r) (f (Path r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">p (Polygon 'Simple () r) (f (Polygon 'Simple () r))
+-&gt; p (SomePolygon () r) (f (SomePolygon () r))
+forall a c b. Prism (Either a c) (Either b c) a b
+</span><span class="hs-identifier hs-var">_Left</span></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | Tries to convert a path into a rectangle.</span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asRectangle"><span class="hs-identifier hs-type">_asRectangle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679535692"><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span id="_asRectangle"><span class="annot"><span class="annottext">_asRectangle :: Prism' (Path r) (Rectangle () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asRectangle"><span class="hs-identifier hs-var hs-var">_asRectangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rectangle () r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (Rectangle () r))
+-&gt; Prism' (Path r) (Rectangle () r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">Rectangle () r -&gt; Path r
+forall r. (Num r, Eq r) =&gt; Rectangle () r -&gt; Path r
+</span><a href="#local-6989586621679535691"><span class="hs-identifier hs-var">rectToPath</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (Rectangle () r)
+</span><a href="#local-6989586621679535690"><span class="hs-identifier hs-var">pathToRect</span></a></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679535691"><span class="annot"><span class="annottext">rectToPath :: Rectangle () r -&gt; Path r
+</span><a href="#local-6989586621679535691"><span class="hs-identifier hs-var hs-var">rectToPath</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle () r -&gt; Corners (Point 2 r :+ ())
+forall r p. Num r =&gt; Rectangle p r -&gt; Corners (Point 2 r :+ p)
+</span><span class="hs-identifier hs-var">corners</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Corners</span></span><span> </span><span id="local-6989586621679535687"><span class="annot"><span class="annottext">a :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535687"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679535686"><span class="annot"><span class="annottext">b :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535686"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679535685"><span class="annot"><span class="annottext">c :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535685"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679535684"><span class="annot"><span class="annottext">d :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535684"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (SimplePolygon () r)
+-&gt; SimplePolygon () r -&gt; Path r
+forall b (m :: * -&gt; *) t. MonadReader b m =&gt; AReview t b -&gt; m t
+</span><span class="hs-identifier hs-var">review</span></span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (SimplePolygon () r)
+forall r. Prism' (Path r) (Polygon 'Simple () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier hs-var">_asSimplePolygon</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () r -&gt; Path r)
+-&gt; ([Point 2 r :+ ()] -&gt; SimplePolygon () r)
+-&gt; [Point 2 r :+ ()]
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; SimplePolygon () r
+forall p r. (Eq r, Num r) =&gt; [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><span class="hs-identifier hs-var">fromPoints</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ ()] -&gt; Path r) -&gt; [Point 2 r :+ ()] -&gt; Path r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535687"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535686"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535685"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535684"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679535690"><span class="annot"><span class="annottext">pathToRect :: Path r -&gt; Maybe (Rectangle () r)
+</span><a href="#local-6989586621679535690"><span class="hs-identifier hs-var hs-var">pathToRect</span></a></span></span><span> </span><span id="local-6989586621679535682"><span class="annot"><span class="annottext">p :: Path r
+</span><a href="#local-6989586621679535682"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Path r
+</span><a href="#local-6989586621679535682"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Path r
+-&gt; Getting
+     (First (SimplePolygon () r)) (Path r) (SimplePolygon () r)
+-&gt; Maybe (SimplePolygon () r)
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><span class="hs-operator hs-var">^?</span></span><span class="annot"><span class="annottext">Getting (First (SimplePolygon () r)) (Path r) (SimplePolygon () r)
+forall r. Prism' (Path r) (Polygon 'Simple () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier hs-var">_asSimplePolygon</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (SimplePolygon () r)
+-&gt; (SimplePolygon () r -&gt; Maybe (Rectangle () r))
+-&gt; Maybe (Rectangle () r)
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; Maybe (Rectangle () r)
+</span><a href="#local-6989586621679535680"><span class="hs-identifier hs-var">asRect</span></a></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><a href="#local-6989586621679535680"><span class="hs-identifier hs-type">asRect</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621679535680"><span class="annot"><span class="annottext">asRect :: SimplePolygon () r -&gt; Maybe (Rectangle () r)
+</span><a href="#local-6989586621679535680"><span class="hs-identifier hs-var hs-var">asRect</span></a></span></span><span> </span><span id="local-6989586621679535679"><span class="annot"><span class="annottext">pg :: SimplePolygon () r
+</span><a href="#local-6989586621679535679"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679535679"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon () r
+-&gt; Getting
+     (Endo [Point 2 r :+ ()]) (SimplePolygon () r) (Point 2 r :+ ())
+-&gt; [Point 2 r :+ ()]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">(CircularVector (Point 2 r :+ ())
+ -&gt; Const
+      (Endo [Point 2 r :+ ()]) (CircularVector (Point 2 r :+ ())))
+-&gt; SimplePolygon () r
+-&gt; Const (Endo [Point 2 r :+ ()]) (SimplePolygon () r)
+forall (t :: PolygonType) p r.
+Getter (Polygon t p r) (CircularVector (Point 2 r :+ p))
+</span><span class="hs-identifier hs-var">outerBoundaryVector</span></span><span class="annot"><span class="annottext">((CircularVector (Point 2 r :+ ())
+  -&gt; Const
+       (Endo [Point 2 r :+ ()]) (CircularVector (Point 2 r :+ ())))
+ -&gt; SimplePolygon () r
+ -&gt; Const (Endo [Point 2 r :+ ()]) (SimplePolygon () r))
+-&gt; (((Point 2 r :+ ())
+     -&gt; Const (Endo [Point 2 r :+ ()]) (Point 2 r :+ ()))
+    -&gt; CircularVector (Point 2 r :+ ())
+    -&gt; Const
+         (Endo [Point 2 r :+ ()]) (CircularVector (Point 2 r :+ ())))
+-&gt; Getting
+     (Endo [Point 2 r :+ ()]) (SimplePolygon () r) (Point 2 r :+ ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ ())
+ -&gt; Const (Endo [Point 2 r :+ ()]) (Point 2 r :+ ()))
+-&gt; CircularVector (Point 2 r :+ ())
+-&gt; Const
+     (Endo [Point 2 r :+ ()]) (CircularVector (Point 2 r :+ ()))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-110"></span><span>        </span><span class="hs-special">[</span><span id="local-6989586621679535676"><span class="annot"><span class="annottext">a :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535676"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535675"><span class="annot"><span class="annottext">b :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535675"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535674"><span class="annot"><span class="annottext">c :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535674"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535673"><span class="annot"><span class="annottext">d :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535673"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (1 &lt;=? d) ~ 'True, (1 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535672"><span class="hs-identifier hs-var">isH</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535676"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535675"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (2 &lt;=? d) ~ 'True, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535670"><span class="hs-identifier hs-var">isV</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535675"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535674"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (1 &lt;=? d) ~ 'True, (1 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535672"><span class="hs-identifier hs-var">isH</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535674"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535673"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (2 &lt;=? d) ~ 'True, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535670"><span class="hs-identifier hs-var">isV</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535673"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535676"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rectangle () r -&gt; Maybe (Rectangle () r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+-&gt; Box (Dimension (Point 2 r :+ ())) () (NumType (Point 2 r :+ ()))
+forall g (c :: * -&gt; *).
+(IsBoxable g, Foldable c, Ord (NumType g), Arity (Dimension g)) =&gt;
+c g -&gt; Box (Dimension g) () (NumType g)
+</span><span class="hs-identifier hs-var">boundingBoxList'</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535676"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535674"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>        </span><span class="hs-special">[</span><span id="local-6989586621679535668"><span class="annot"><span class="annottext">a :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535668"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535667"><span class="annot"><span class="annottext">b :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535667"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535666"><span class="annot"><span class="annottext">c :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535666"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535665"><span class="annot"><span class="annottext">d :: Point 2 r :+ ()
+</span><a href="#local-6989586621679535665"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (2 &lt;=? d) ~ 'True, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535670"><span class="hs-identifier hs-var">isV</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535668"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535667"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (1 &lt;=? d) ~ 'True, (1 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535672"><span class="hs-identifier hs-var">isH</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535667"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535666"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (2 &lt;=? d) ~ 'True, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535670"><span class="hs-identifier hs-var">isV</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535666"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535665"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall (d :: Nat) (d :: Nat) a (point :: Nat -&gt; * -&gt; *)
+       (point :: Nat -&gt; * -&gt; *) extra extra.
+(ImplicitPeano (Peano d), ImplicitPeano (Peano d), Eq a,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ ArityPeano (Peano (FromPeano (Peano d))), KnownNat d,
+ KnownNat (FromPeano (Peano d)), KnownNat (FromPeano (Peano d)),
+ KnownNat d, AsAPoint point, AsAPoint point,
+ Peano (FromPeano (Peano d) + 1) ~ 'S (Peano (FromPeano (Peano d))),
+ (1 &lt;=? d) ~ 'True, (1 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535672"><span class="hs-identifier hs-var">isH</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535665"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535668"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rectangle () r -&gt; Maybe (Rectangle () r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+-&gt; Box (Dimension (Point 2 r :+ ())) () (NumType (Point 2 r :+ ()))
+forall g (c :: * -&gt; *).
+(IsBoxable g, Foldable c, Ord (NumType g), Arity (Dimension g)) =&gt;
+c g -&gt; Box (Dimension g) () (NumType g)
+</span><span class="hs-identifier hs-var">boundingBoxList'</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535668"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679535666"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>        </span><span class="hs-identifier">_</span><span>                                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Rectangle () r)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679535672"><span class="annot"><span class="annottext">isH :: (point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535672"><span class="hs-identifier hs-var hs-var">isH</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679535664"><span class="annot"><span class="annottext">p :: point d a
+</span><a href="#local-6989586621679535664"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679535662"><span class="annot"><span class="annottext">q :: point d a
+</span><a href="#local-6989586621679535662"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point d a
+</span><a href="#local-6989586621679535664"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point d a -&gt; Getting a (point d a) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (point d a) a
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">point d a
+</span><a href="#local-6989586621679535662"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point d a -&gt; Getting a (point d a) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (point d a) a
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679535670"><span class="annot"><span class="annottext">isV :: (point d a :+ extra) -&gt; (point d a :+ extra) -&gt; Bool
+</span><a href="#local-6989586621679535670"><span class="hs-identifier hs-var hs-var">isV</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679535659"><span class="annot"><span class="annottext">p :: point d a
+</span><a href="#local-6989586621679535659"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679535658"><span class="annot"><span class="annottext">q :: point d a
+</span><a href="#local-6989586621679535658"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point d a
+</span><a href="#local-6989586621679535659"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point d a -&gt; Getting a (point d a) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (point d a) a
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">point d a
+</span><a href="#local-6989586621679535658"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point d a -&gt; Getting a (point d a) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (point d a) a
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- | Convert to a triangle</span><span>
+</span><span id="line-119"></span><span id="local-6989586621679535656"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asTriangle"><span class="hs-identifier hs-type">_asTriangle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535656"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535656"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-120"></span><span id="_asTriangle"><span class="annot"><span class="annottext">_asTriangle :: p (Triangle 2 () r) (f (Triangle 2 () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asTriangle"><span class="hs-identifier hs-var hs-var">_asTriangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Triangle 2 () r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (Triangle 2 () r))
+-&gt; Prism (Path r) (Path r) (Triangle 2 () r) (Triangle 2 () r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">Triangle 2 () r -&gt; Path r
+forall a r. Triangle 2 a r -&gt; Path r
+</span><a href="#local-6989586621679535655"><span class="hs-identifier hs-var">triToPath</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (Triangle 2 () r)
+forall r1. Path r1 -&gt; Maybe (Triangle 2 () r1)
+</span><a href="#local-6989586621679535654"><span class="hs-identifier hs-var">path2tri</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679535655"><span class="annot"><span class="annottext">triToPath :: Triangle 2 a r -&gt; Path r
+</span><a href="#local-6989586621679535655"><span class="hs-identifier hs-var hs-var">triToPath</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span id="local-6989586621679535652"><span class="annot"><span class="annottext">p :: Point 2 r :+ a
+</span><a href="#local-6989586621679535652"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679535651"><span class="annot"><span class="annottext">q :: Point 2 r :+ a
+</span><a href="#local-6989586621679535651"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679535650"><span class="annot"><span class="annottext">r :: Point 2 r :+ a
+</span><a href="#local-6989586621679535650"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r -&gt; Path r
+forall (t :: PolygonType) r. Polygon t () r -&gt; Path r
+</span><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-var">polygonToPath</span></a></span><span> </span><span class="annot"><span class="annottext">(Polygon 'Simple () r -&gt; Path r)
+-&gt; ([Point 2 r :+ a] -&gt; Polygon 'Simple () r)
+-&gt; [Point 2 r :+ a]
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; Polygon 'Simple () r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><span class="hs-identifier hs-var">unsafeFromPoints</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ ()] -&gt; Polygon 'Simple () r)
+-&gt; ([Point 2 r :+ a] -&gt; [Point 2 r :+ ()])
+-&gt; [Point 2 r :+ a]
+-&gt; Polygon 'Simple () r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ a) -&gt; Point 2 r :+ ())
+-&gt; [Point 2 r :+ a] -&gt; [Point 2 r :+ ()]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ a)
+-&gt; ((Point 2 r :+ a) -&gt; Point 2 r :+ ()) -&gt; Point 2 r :+ ()
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(a -&gt; Identity ())
+-&gt; (Point 2 r :+ a) -&gt; Identity (Point 2 r :+ ())
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">((a -&gt; Identity ())
+ -&gt; (Point 2 r :+ a) -&gt; Identity (Point 2 r :+ ()))
+-&gt; () -&gt; (Point 2 r :+ a) -&gt; Point 2 r :+ ()
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ a] -&gt; Path r) -&gt; [Point 2 r :+ a] -&gt; Path r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679535652"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679535651"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679535650"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621679535654"><span class="annot"><span class="annottext">path2tri :: Path r1 -&gt; Maybe (Triangle 2 () r1)
+</span><a href="#local-6989586621679535654"><span class="hs-identifier hs-var hs-var">path2tri</span></a></span></span><span> </span><span id="local-6989586621679535644"><span class="annot"><span class="annottext">p :: Path r1
+</span><a href="#local-6989586621679535644"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Path r1
+</span><a href="#local-6989586621679535644"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Path r1
+-&gt; Getting
+     (Endo [Polygon 'Simple () r1]) (Path r1) (Polygon 'Simple () r1)
+-&gt; [Polygon 'Simple () r1]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r1)
+ -&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1)))
+-&gt; Path r1 -&gt; Const (Endo [Polygon 'Simple () r1]) (Path r1)
+forall r1 r2.
+Iso
+  (Path r1)
+  (Path r2)
+  (LSeq 1 (PathSegment r1))
+  (LSeq 1 (PathSegment r2))
+</span><a href="Data.Geometry.Ipe.Path.html#pathSegments"><span class="hs-identifier hs-var">pathSegments</span></a></span><span class="annot"><span class="annottext">((LSeq 1 (PathSegment r1)
+  -&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1)))
+ -&gt; Path r1 -&gt; Const (Endo [Polygon 'Simple () r1]) (Path r1))
+-&gt; ((Polygon 'Simple () r1
+     -&gt; Const (Endo [Polygon 'Simple () r1]) (Polygon 'Simple () r1))
+    -&gt; LSeq 1 (PathSegment r1)
+    -&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1)))
+-&gt; Getting
+     (Endo [Polygon 'Simple () r1]) (Path r1) (Polygon 'Simple () r1)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PathSegment r1
+ -&gt; Const (Endo [Polygon 'Simple () r1]) (PathSegment r1))
+-&gt; LSeq 1 (PathSegment r1)
+-&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">((PathSegment r1
+  -&gt; Const (Endo [Polygon 'Simple () r1]) (PathSegment r1))
+ -&gt; LSeq 1 (PathSegment r1)
+ -&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1)))
+-&gt; ((Polygon 'Simple () r1
+     -&gt; Const (Endo [Polygon 'Simple () r1]) (Polygon 'Simple () r1))
+    -&gt; PathSegment r1
+    -&gt; Const (Endo [Polygon 'Simple () r1]) (PathSegment r1))
+-&gt; (Polygon 'Simple () r1
+    -&gt; Const (Endo [Polygon 'Simple () r1]) (Polygon 'Simple () r1))
+-&gt; LSeq 1 (PathSegment r1)
+-&gt; Const (Endo [Polygon 'Simple () r1]) (LSeq 1 (PathSegment r1))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Polygon 'Simple () r1
+ -&gt; Const (Endo [Polygon 'Simple () r1]) (Polygon 'Simple () r1))
+-&gt; PathSegment r1
+-&gt; Const (Endo [Polygon 'Simple () r1]) (PathSegment r1)
+forall r. Prism' (PathSegment r) (SimplePolygon () r)
+</span><a href="Data.Geometry.Ipe.Path.html#_PolygonPath"><span class="hs-identifier hs-var">_PolygonPath</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-124"></span><span>                    </span><span class="hs-special">[</span><span class="hs-special">]</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Triangle 2 () r1)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-125"></span><span>                    </span><span class="hs-special">[</span><span id="local-6989586621679535642"><span class="annot"><span class="annottext">pg :: Polygon 'Simple () r1
+</span><a href="#local-6989586621679535642"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r1 -&gt; NonEmpty (Point 2 r1 :+ ())
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; NonEmpty (Point 2 r :+ p)
+</span><span class="hs-identifier hs-var">polygonVertices</span></span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r1
+</span><a href="#local-6989586621679535642"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-126"></span><span>                              </span><span class="hs-special">(</span><span id="local-6989586621679535640"><span class="annot"><span class="annottext">a :: Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535640"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679535638"><span class="annot"><span class="annottext">b :: Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535638"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679535637"><span class="annot"><span class="annottext">c :: Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535637"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Triangle 2 () r1 -&gt; Maybe (Triangle 2 () r1)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Triangle 2 () r1 -&gt; Maybe (Triangle 2 () r1))
+-&gt; Triangle 2 () r1 -&gt; Maybe (Triangle 2 () r1)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r1 :+ ())
+-&gt; (Point 2 r1 :+ ()) -&gt; (Point 2 r1 :+ ()) -&gt; Triangle 2 () r1
+forall (d :: Nat) p r.
+(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+</span><span class="hs-identifier hs-var">Triangle</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535640"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535638"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r1 :+ ()
+</span><a href="#local-6989586621679535637"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-127"></span><span>                              </span><span class="hs-identifier">_</span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Triangle 2 () r1)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-128"></span><span>                    </span><span class="hs-identifier">_</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Triangle 2 () r1)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-comment">-- an ellipse is an affine transformation of the unit disk</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- (Disk origin 1) (Vector2 1 1)</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621679535853"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asEllipse"><span class="hs-identifier hs-type">_asEllipse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535853"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ellipse</span></span><span> </span><span class="annot"><a href="#local-6989586621679535853"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-137"></span><span id="_asEllipse"><span class="annot"><span class="annottext">_asEllipse :: p (Ellipse r) (f (Ellipse r)) -&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asEllipse"><span class="hs-identifier hs-var hs-var">_asEllipse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Ellipse r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (Ellipse r))
+-&gt; Prism (Path r) (Path r) (Ellipse r) (Ellipse r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">Ellipse r -&gt; Path r
+forall r. Ellipse r -&gt; Path r
+</span><a href="#local-6989586621679535635"><span class="hs-identifier hs-var">toPath</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (Ellipse r)
+forall r1. Path r1 -&gt; Maybe (Ellipse r1)
+</span><a href="#local-6989586621679535634"><span class="hs-identifier hs-var">toEllipse</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-139"></span><span>    </span><span id="local-6989586621679535635"><span class="annot"><span class="annottext">toPath :: Ellipse r -&gt; Path r
+</span><a href="#local-6989586621679535635"><span class="hs-identifier hs-var hs-var">toPath</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r) -&gt; Path r
+forall r1. LSeq 1 (PathSegment r1) -&gt; Path r1
+</span><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r) -&gt; Path r)
+-&gt; (Ellipse r -&gt; LSeq 1 (PathSegment r)) -&gt; Ellipse r -&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PathSegment r -&gt; LSeq 1 (PathSegment r)
+forall a. a -&gt; LSeq 1 a
+</span><a href="Data.Geometry.Ipe.FromIpe.html#fromSingleton"><span class="hs-identifier hs-var">fromSingleton</span></a></span><span>  </span><span class="annot"><span class="annottext">(PathSegment r -&gt; LSeq 1 (PathSegment r))
+-&gt; (Ellipse r -&gt; PathSegment r)
+-&gt; Ellipse r
+-&gt; LSeq 1 (PathSegment r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ellipse r -&gt; PathSegment r
+forall r. Ellipse r -&gt; PathSegment r
+</span><a href="Data.Geometry.Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span><span>
+</span><span id="line-140"></span><span>    </span><span id="local-6989586621679535634"><span class="annot"><span class="annottext">toEllipse :: Path r1 -&gt; Maybe (Ellipse r1)
+</span><a href="#local-6989586621679535634"><span class="hs-identifier hs-var hs-var">toEllipse</span></a></span></span><span> </span><span id="local-6989586621679535632"><span class="annot"><span class="annottext">p :: Path r1
+</span><a href="#local-6989586621679535632"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Path r1
+</span><a href="#local-6989586621679535632"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Path r1
+-&gt; Getting (Endo [Ellipse r1]) (Path r1) (Ellipse r1)
+-&gt; [Ellipse r1]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r1)
+ -&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1)))
+-&gt; Path r1 -&gt; Const (Endo [Ellipse r1]) (Path r1)
+forall r1 r2.
+Iso
+  (Path r1)
+  (Path r2)
+  (LSeq 1 (PathSegment r1))
+  (LSeq 1 (PathSegment r2))
+</span><a href="Data.Geometry.Ipe.Path.html#pathSegments"><span class="hs-identifier hs-var">pathSegments</span></a></span><span class="annot"><span class="annottext">((LSeq 1 (PathSegment r1)
+  -&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1)))
+ -&gt; Path r1 -&gt; Const (Endo [Ellipse r1]) (Path r1))
+-&gt; ((Ellipse r1 -&gt; Const (Endo [Ellipse r1]) (Ellipse r1))
+    -&gt; LSeq 1 (PathSegment r1)
+    -&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1)))
+-&gt; Getting (Endo [Ellipse r1]) (Path r1) (Ellipse r1)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PathSegment r1 -&gt; Const (Endo [Ellipse r1]) (PathSegment r1))
+-&gt; LSeq 1 (PathSegment r1)
+-&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">((PathSegment r1 -&gt; Const (Endo [Ellipse r1]) (PathSegment r1))
+ -&gt; LSeq 1 (PathSegment r1)
+ -&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1)))
+-&gt; ((Ellipse r1 -&gt; Const (Endo [Ellipse r1]) (Ellipse r1))
+    -&gt; PathSegment r1 -&gt; Const (Endo [Ellipse r1]) (PathSegment r1))
+-&gt; (Ellipse r1 -&gt; Const (Endo [Ellipse r1]) (Ellipse r1))
+-&gt; LSeq 1 (PathSegment r1)
+-&gt; Const (Endo [Ellipse r1]) (LSeq 1 (PathSegment r1))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Ellipse r1 -&gt; Const (Endo [Ellipse r1]) (Ellipse r1))
+-&gt; PathSegment r1 -&gt; Const (Endo [Ellipse r1]) (PathSegment r1)
+forall r. Prism' (PathSegment r) (Ellipse r)
+</span><a href="Data.Geometry.Ipe.Path.html#_EllipseSegment"><span class="hs-identifier hs-var">_EllipseSegment</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-141"></span><span>                    </span><span class="hs-special">[</span><span id="local-6989586621679535630"><span class="annot"><span class="annottext">e :: Ellipse r1
+</span><a href="#local-6989586621679535630"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ellipse r1 -&gt; Maybe (Ellipse r1)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Ellipse r1
+</span><a href="#local-6989586621679535630"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-142"></span><span>                    </span><span class="hs-identifier">_</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Ellipse r1)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span id="local-6989586621679535847"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asCircle"><span class="hs-identifier hs-type">_asCircle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679535847"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679535847"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535847"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Circle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535847"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-145"></span><span id="_asCircle"><span class="annot"><span class="annottext">_asCircle :: Prism' (Path r) (Circle () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asCircle"><span class="hs-identifier hs-var hs-var">_asCircle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (Ellipse r) (f (Ellipse r)) -&gt; p (Path r) (f (Path r))
+forall r. Prism' (Path r) (Ellipse r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asEllipse"><span class="hs-identifier hs-var">_asEllipse</span></a></span><span class="annot"><span class="annottext">(p (Ellipse r) (f (Ellipse r)) -&gt; p (Path r) (f (Path r)))
+-&gt; (p (Circle () r) (f (Circle () r))
+    -&gt; p (Ellipse r) (f (Ellipse r)))
+-&gt; p (Circle () r) (f (Circle () r))
+-&gt; p (Path r) (f (Path r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">p (Circle () r) (f (Circle () r)) -&gt; p (Ellipse r) (f (Ellipse r))
+forall r. (Floating r, Eq r) =&gt; Prism' (Ellipse r) (Circle () r)
+</span><span class="hs-identifier hs-var">_EllipseCircle</span></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- FIXME: For reading we should not need the floating constraint!</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span id="local-6989586621679535758"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asDisk"><span class="hs-identifier hs-type">_asDisk</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679535758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679535758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Disk</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-149"></span><span id="_asDisk"><span class="annot"><span class="annottext">_asDisk :: Prism' (Path r) (Disk () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asDisk"><span class="hs-identifier hs-var hs-var">_asDisk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (Circle () r) (f (Circle () r)) -&gt; p (Path r) (f (Path r))
+forall r. (Floating r, Eq r) =&gt; Prism' (Path r) (Circle () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asCircle"><span class="hs-identifier hs-var">_asCircle</span></a></span><span class="annot"><span class="annottext">(p (Circle () r) (f (Circle () r)) -&gt; p (Path r) (f (Path r)))
+-&gt; (p (Disk () r) (f (Disk () r))
+    -&gt; p (Circle () r) (f (Circle () r)))
+-&gt; p (Disk () r) (f (Disk () r))
+-&gt; p (Path r) (f (Path r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">AnIso (Disk () r) (Disk () r) (Circle () r) (Circle () r)
+-&gt; Iso (Circle () r) (Circle () r) (Disk () r) (Disk () r)
+forall s t a b. AnIso s t a b -&gt; Iso b a t s
+</span><span class="hs-identifier hs-var">from</span></span><span> </span><span class="annot"><span class="annottext">AnIso (Disk () r) (Disk () r) (Circle () r) (Circle () r)
+forall p r s. Iso (Disk p r) (Disk p s) (Circle p r) (Circle p s)
+</span><span class="hs-identifier hs-var">_DiskCircle</span></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- | Convert to a multipolygon</span><span>
+</span><span id="line-153"></span><span id="local-6989586621679535745"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asMultiPolygon"><span class="hs-identifier hs-type">_asMultiPolygon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-154"></span><span id="_asMultiPolygon"><span class="annot"><span class="annottext">_asMultiPolygon :: p (MultiPolygon () r) (f (MultiPolygon () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asMultiPolygon"><span class="hs-identifier hs-var hs-var">_asMultiPolygon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (SomePolygon () r) (f (SomePolygon () r))
+-&gt; p (Path r) (f (Path r))
+forall r. Prism' (Path r) (SomePolygon () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSomePolygon"><span class="hs-identifier hs-var">_asSomePolygon</span></a></span><span class="annot"><span class="annottext">(p (SomePolygon () r) (f (SomePolygon () r))
+ -&gt; p (Path r) (f (Path r)))
+-&gt; (p (MultiPolygon () r) (f (MultiPolygon () r))
+    -&gt; p (SomePolygon () r) (f (SomePolygon () r)))
+-&gt; p (MultiPolygon () r) (f (MultiPolygon () r))
+-&gt; p (Path r) (f (Path r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">p (MultiPolygon () r) (f (MultiPolygon () r))
+-&gt; p (SomePolygon () r) (f (SomePolygon () r))
+forall c a b. Prism (Either c a) (Either c b) a b
+</span><span class="hs-identifier hs-var">_Right</span></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- _asPolygon :: Prism' (Path r) (forall t. Polygon t () r)</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- _asPolygon = prism' polygonToPath (fmap (either id id) . pathToPolygon)</span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span id="local-6989586621679535967"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_asSomePolygon"><span class="hs-identifier hs-type">_asSomePolygon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535967"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SomePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535967"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-160"></span><span id="_asSomePolygon"><span class="annot"><span class="annottext">_asSomePolygon :: p (SomePolygon () r) (f (SomePolygon () r))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSomePolygon"><span class="hs-identifier hs-var hs-var">_asSomePolygon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SomePolygon () r -&gt; Path r)
+-&gt; (Path r -&gt; Maybe (SomePolygon () r))
+-&gt; Prism (Path r) (Path r) (SomePolygon () r) (SomePolygon () r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">SomePolygon () r -&gt; Path r
+forall (t :: PolygonType) r (t :: PolygonType).
+Either (Polygon t () r) (Polygon t () r) -&gt; Path r
+</span><a href="#local-6989586621679535624"><span class="hs-identifier hs-var">embed</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (SomePolygon () r)
+forall r.
+Path r -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#pathToPolygon"><span class="hs-identifier hs-var">pathToPolygon</span></a></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-162"></span><span>    </span><span id="local-6989586621679535624"><span class="annot"><span class="annottext">embed :: Either (Polygon t () r) (Polygon t () r) -&gt; Path r
+</span><a href="#local-6989586621679535624"><span class="hs-identifier hs-var hs-var">embed</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Polygon t () r -&gt; Path r)
+-&gt; (Polygon t () r -&gt; Path r)
+-&gt; Either (Polygon t () r) (Polygon t () r)
+-&gt; Path r
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="annot"><span class="annottext">Polygon t () r -&gt; Path r
+forall (t :: PolygonType) r. Polygon t () r -&gt; Path r
+</span><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-var">polygonToPath</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t () r -&gt; Path r
+forall (t :: PolygonType) r. Polygon t () r -&gt; Path r
+</span><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-var">polygonToPath</span></a></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span id="local-6989586621679535886"><span id="local-6989586621679535887"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-type">polygonToPath</span></a></span><span>                      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Polygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679535887"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535886"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535886"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-166"></span><span id="polygonToPath"><span class="annot"><span class="annottext">polygonToPath :: Polygon t () r -&gt; Path r
+</span><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-var hs-var">polygonToPath</span></a></span></span><span> </span><span id="local-6989586621679535621"><span class="annot"><span class="annottext">pg :: Polygon t () r
+</span><a href="#local-6989586621679535621"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r) -&gt; Path r
+forall r1. LSeq 1 (PathSegment r1) -&gt; Path r1
+</span><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r) -&gt; Path r)
+-&gt; (SimplePolygon () r -&gt; LSeq 1 (PathSegment r))
+-&gt; SimplePolygon () r
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PathSegment r -&gt; LSeq 1 (PathSegment r)
+forall a. a -&gt; LSeq 1 a
+</span><a href="Data.Geometry.Ipe.FromIpe.html#fromSingleton"><span class="hs-identifier hs-var">fromSingleton</span></a></span><span> </span><span class="annot"><span class="annottext">(PathSegment r -&gt; LSeq 1 (PathSegment r))
+-&gt; (SimplePolygon () r -&gt; PathSegment r)
+-&gt; SimplePolygon () r
+-&gt; LSeq 1 (PathSegment r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; PathSegment r
+forall r. SimplePolygon () r -&gt; PathSegment r
+</span><a href="Data.Geometry.Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () r -&gt; Path r) -&gt; SimplePolygon () r -&gt; Path r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Polygon t () r
+SimplePolygon () r
+</span><a href="#local-6989586621679535621"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-167"></span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#polygonToPath"><span class="hs-identifier hs-var">polygonToPath</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span id="local-6989586621679535617"><span class="annot"><span class="annottext">vs :: SimplePolygon () r
+</span><a href="#local-6989586621679535617"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679535616"><span class="annot"><span class="annottext">hs :: [SimplePolygon () r]
+</span><a href="#local-6989586621679535616"><span class="hs-identifier hs-var">hs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r) -&gt; Path r
+forall r1. LSeq 1 (PathSegment r1) -&gt; Path r1
+</span><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r) -&gt; Path r)
+-&gt; (NonEmpty (SimplePolygon () r) -&gt; LSeq 1 (PathSegment r))
+-&gt; NonEmpty (SimplePolygon () r)
+-&gt; Path r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (PathSegment r) -&gt; LSeq 1 (PathSegment r)
+forall a. NonEmpty a -&gt; LSeq 1 a
+</span><span class="hs-identifier hs-var">LSeq.fromNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (PathSegment r) -&gt; LSeq 1 (PathSegment r))
+-&gt; (NonEmpty (SimplePolygon () r) -&gt; NonEmpty (PathSegment r))
+-&gt; NonEmpty (SimplePolygon () r)
+-&gt; LSeq 1 (PathSegment r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () r -&gt; PathSegment r)
+-&gt; NonEmpty (SimplePolygon () r) -&gt; NonEmpty (PathSegment r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; PathSegment r
+forall r. SimplePolygon () r -&gt; PathSegment r
+</span><a href="Data.Geometry.Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span>
+</span><span id="line-168"></span><span>                                   </span><span class="annot"><span class="annottext">(NonEmpty (SimplePolygon () r) -&gt; Path r)
+-&gt; NonEmpty (SimplePolygon () r) -&gt; Path r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679535617"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+-&gt; [SimplePolygon () r] -&gt; NonEmpty (SimplePolygon () r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon () r]
+</span><a href="#local-6989586621679535616"><span class="hs-identifier hs-var">hs</span></a></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span id="local-6989586621679535825"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#pathToPolygon"><span class="hs-identifier hs-type">pathToPolygon</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535825"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-172"></span><span id="pathToPolygon"><span class="annot"><span class="annottext">pathToPolygon :: Path r -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+</span><a href="Data.Geometry.Ipe.FromIpe.html#pathToPolygon"><span class="hs-identifier hs-var hs-var">pathToPolygon</span></a></span></span><span> </span><span id="local-6989586621679535614"><span class="annot"><span class="annottext">p :: Path r
+</span><a href="#local-6989586621679535614"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Path r
+</span><a href="#local-6989586621679535614"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Path r
+-&gt; Getting
+     (Endo [SimplePolygon () r]) (Path r) (SimplePolygon () r)
+-&gt; [SimplePolygon () r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r)
+ -&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r)))
+-&gt; Path r -&gt; Const (Endo [SimplePolygon () r]) (Path r)
+forall r1 r2.
+Iso
+  (Path r1)
+  (Path r2)
+  (LSeq 1 (PathSegment r1))
+  (LSeq 1 (PathSegment r2))
+</span><a href="Data.Geometry.Ipe.Path.html#pathSegments"><span class="hs-identifier hs-var">pathSegments</span></a></span><span class="annot"><span class="annottext">((LSeq 1 (PathSegment r)
+  -&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r)))
+ -&gt; Path r -&gt; Const (Endo [SimplePolygon () r]) (Path r))
+-&gt; ((SimplePolygon () r
+     -&gt; Const (Endo [SimplePolygon () r]) (SimplePolygon () r))
+    -&gt; LSeq 1 (PathSegment r)
+    -&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r)))
+-&gt; Getting
+     (Endo [SimplePolygon () r]) (Path r) (SimplePolygon () r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PathSegment r
+ -&gt; Const (Endo [SimplePolygon () r]) (PathSegment r))
+-&gt; LSeq 1 (PathSegment r)
+-&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">((PathSegment r
+  -&gt; Const (Endo [SimplePolygon () r]) (PathSegment r))
+ -&gt; LSeq 1 (PathSegment r)
+ -&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r)))
+-&gt; ((SimplePolygon () r
+     -&gt; Const (Endo [SimplePolygon () r]) (SimplePolygon () r))
+    -&gt; PathSegment r
+    -&gt; Const (Endo [SimplePolygon () r]) (PathSegment r))
+-&gt; (SimplePolygon () r
+    -&gt; Const (Endo [SimplePolygon () r]) (SimplePolygon () r))
+-&gt; LSeq 1 (PathSegment r)
+-&gt; Const (Endo [SimplePolygon () r]) (LSeq 1 (PathSegment r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(SimplePolygon () r
+ -&gt; Const (Endo [SimplePolygon () r]) (SimplePolygon () r))
+-&gt; PathSegment r
+-&gt; Const (Endo [SimplePolygon () r]) (PathSegment r)
+forall r. Prism' (PathSegment r) (SimplePolygon () r)
+</span><a href="Data.Geometry.Ipe.Path.html#_PolygonPath"><span class="hs-identifier hs-var">_PolygonPath</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-173"></span><span>                    </span><span class="hs-special">[</span><span class="hs-special">]</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-174"></span><span>                    </span><span class="hs-special">[</span><span id="local-6989586621679535613"><span class="annot"><span class="annottext">pg :: SimplePolygon () r
+</span><a href="#local-6989586621679535613"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (SimplePolygon () r) (MultiPolygon () r)
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Either (SimplePolygon () r) (MultiPolygon () r)
+ -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r)))
+-&gt; (SimplePolygon () r
+    -&gt; Either (SimplePolygon () r) (MultiPolygon () r))
+-&gt; SimplePolygon () r
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+-&gt; Either (SimplePolygon () r) (MultiPolygon () r)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span>  </span><span class="annot"><span class="annottext">(SimplePolygon () r
+ -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r)))
+-&gt; SimplePolygon () r
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679535613"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-175"></span><span>                    </span><span id="local-6989586621679535612"><span class="annot"><span class="annottext">vs :: SimplePolygon () r
+</span><a href="#local-6989586621679535612"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679535611"><span class="annot"><span class="annottext">hs :: [SimplePolygon () r]
+</span><a href="#local-6989586621679535611"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (SimplePolygon () r) (MultiPolygon () r)
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Either (SimplePolygon () r) (MultiPolygon () r)
+ -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r)))
+-&gt; (MultiPolygon () r
+    -&gt; Either (SimplePolygon () r) (MultiPolygon () r))
+-&gt; MultiPolygon () r
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MultiPolygon () r
+-&gt; Either (SimplePolygon () r) (MultiPolygon () r)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(MultiPolygon () r
+ -&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r)))
+-&gt; MultiPolygon () r
+-&gt; Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; [SimplePolygon () r] -&gt; MultiPolygon () r
+forall p r.
+SimplePolygon p r -&gt; [SimplePolygon p r] -&gt; Polygon 'Multi p r
+</span><span class="hs-identifier hs-var">MultiPolygon</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679535612"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon () r]
+</span><a href="#local-6989586621679535611"><span class="hs-identifier hs-var">hs</span></a></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- | Use the first prism to select the ipe object to depicle with, and the second</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- how to select the geometry object from there on. Then we can select the geometry</span><span>
+</span><span id="line-186"></span><span class="hs-comment">-- object, directly with its attributes here.</span><span>
+</span><span id="line-187"></span><span class="hs-comment">--</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- &gt;&gt;&gt; testObject ^? _withAttrs _IpePath _asPolyLine</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named &quot;red&quot;), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})</span><span>
+</span><span id="line-190"></span><span id="local-6989586621679535779"><span id="local-6989586621679535780"><span id="local-6989586621679535781"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-type">_withAttrs</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679535780"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535780"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679535780"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535779"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-191"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679535779"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535780"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-192"></span><span id="_withAttrs"><span class="annot"><span class="annottext">_withAttrs :: Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var hs-var">_withAttrs</span></a></span></span><span> </span><span id="local-6989586621679535610"><span class="annot"><span class="annottext">po :: Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+</span><a href="#local-6989586621679535610"><span class="hs-identifier hs-var">po</span></a></span></span><span> </span><span id="local-6989586621679535609"><span class="annot"><span class="annottext">pg :: Prism' (i r) g
+</span><a href="#local-6989586621679535609"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((g :+ IpeAttributes i r) -&gt; IpeObject r)
+-&gt; (IpeObject r -&gt; Maybe (g :+ IpeAttributes i r))
+-&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="annot"><span class="annottext">(g :+ IpeAttributes i r) -&gt; IpeObject r
+</span><a href="#local-6989586621679535608"><span class="hs-identifier hs-var">g2o</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject r -&gt; Maybe (g :+ IpeAttributes i r)
+</span><a href="#local-6989586621679535607"><span class="hs-identifier hs-var">o2g</span></a></span><span>
+</span><span id="line-193"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-194"></span><span>    </span><span id="local-6989586621679535608"><span class="annot"><span class="annottext">g2o :: (g :+ IpeAttributes i r) -&gt; IpeObject r
+</span><a href="#local-6989586621679535608"><span class="hs-identifier hs-var hs-var">g2o</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AReview (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; (i r :+ IpeAttributes i r) -&gt; IpeObject r
+forall b (m :: * -&gt; *) t. MonadReader b m =&gt; AReview t b -&gt; m t
+</span><span class="hs-identifier hs-var">review</span></span><span> </span><span class="annot"><span class="annottext">AReview (IpeObject r) (i r :+ IpeAttributes i r)
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+</span><a href="#local-6989586621679535610"><span class="hs-identifier hs-var">po</span></a></span><span> </span><span class="annot"><span class="annottext">((i r :+ IpeAttributes i r) -&gt; IpeObject r)
+-&gt; ((g :+ IpeAttributes i r) -&gt; i r :+ IpeAttributes i r)
+-&gt; (g :+ IpeAttributes i r)
+-&gt; IpeObject r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ASetter (g :+ IpeAttributes i r) (i r :+ IpeAttributes i r) g (i r)
+-&gt; (g -&gt; i r)
+-&gt; (g :+ IpeAttributes i r)
+-&gt; i r :+ IpeAttributes i r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-identifier hs-var">over</span></span><span> </span><span class="annot"><span class="annottext">ASetter (g :+ IpeAttributes i r) (i r :+ IpeAttributes i r) g (i r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AReview (i r) g -&gt; g -&gt; i r
+forall b (m :: * -&gt; *) t. MonadReader b m =&gt; AReview t b -&gt; m t
+</span><span class="hs-identifier hs-var">review</span></span><span> </span><span class="annot"><span class="annottext">AReview (i r) g
+Prism' (i r) g
+</span><a href="#local-6989586621679535609"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-195"></span><span>    </span><span id="local-6989586621679535607"><span class="annot"><span class="annottext">o2g :: IpeObject r -&gt; Maybe (g :+ IpeAttributes i r)
+</span><a href="#local-6989586621679535607"><span class="hs-identifier hs-var hs-var">o2g</span></a></span></span><span> </span><span id="local-6989586621679535604"><span class="annot"><span class="annottext">o :: IpeObject r
+</span><a href="#local-6989586621679535604"><span class="hs-identifier hs-var">o</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+  (First (i r :+ IpeAttributes i r))
+  (IpeObject r)
+  (i r :+ IpeAttributes i r)
+-&gt; IpeObject r -&gt; Maybe (i r :+ IpeAttributes i r)
+forall s (m :: * -&gt; *) a.
+MonadReader s m =&gt;
+Getting (First a) s a -&gt; m (Maybe a)
+</span><span class="hs-identifier hs-var">preview</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (First (i r :+ IpeAttributes i r))
+  (IpeObject r)
+  (i r :+ IpeAttributes i r)
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+</span><a href="#local-6989586621679535610"><span class="hs-identifier hs-var">po</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject r
+</span><a href="#local-6989586621679535604"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (i r :+ IpeAttributes i r)
+-&gt; ((i r :+ IpeAttributes i r) -&gt; Maybe (g :+ IpeAttributes i r))
+-&gt; Maybe (g :+ IpeAttributes i r)
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679535603"><span class="annot"><span class="annottext">i :: i r
+</span><a href="#local-6989586621679535603"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679535602"><span class="annot"><span class="annottext">ats :: IpeAttributes i r
+</span><a href="#local-6989586621679535602"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">g -&gt; IpeAttributes i r -&gt; g :+ IpeAttributes i r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">IpeAttributes i r
+</span><a href="#local-6989586621679535602"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(g -&gt; g :+ IpeAttributes i r)
+-&gt; Maybe g -&gt; Maybe (g :+ IpeAttributes i r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Getting (First g) (i r) g -&gt; i r -&gt; Maybe g
+forall s (m :: * -&gt; *) a.
+MonadReader s m =&gt;
+Getting (First a) s a -&gt; m (Maybe a)
+</span><span class="hs-identifier hs-var">preview</span></span><span> </span><span class="annot"><span class="annottext">Getting (First g) (i r) g
+Prism' (i r) g
+</span><a href="#local-6989586621679535609"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">i r
+</span><a href="#local-6989586621679535603"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span>
+</span><span id="line-200"></span><span>
+</span><span id="line-201"></span><span class="hs-comment">-- instance HasDefaultIpeObject Path where</span><span>
+</span><span id="line-202"></span><span class="hs-comment">--   defaultIpeObject' = _IpePath</span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span class="hs-comment">-- class HasDefaultFromIpe g where</span><span>
+</span><span id="line-206"></span><span class="hs-comment">--   type DefaultFromIpe g :: * -&gt; *</span><span>
+</span><span id="line-207"></span><span class="hs-comment">--   defaultIpeObject :: proxy g -&gt; Prism' (IpeObject r) (DefaultFromIpe g r :+ IpeAttributes (DefaultFromIpe g) r)</span><span>
+</span><span id="line-208"></span><span class="hs-comment">--   defaultFromIpe   :: proxy g -&gt; Prism' (DefaultFromIpe g (NumType g)) g</span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span>
+</span><span id="line-211"></span><span class="hs-keyword">class</span><span> </span><span id="HasDefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-var">HasDefaultFromIpe</span></a></span></span><span> </span><span id="local-6989586621679535785"><span class="annot"><a href="#local-6989586621679535785"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-212"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span id="local-6989586621679535785"><span class="annot"><a href="#local-6989586621679535785"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-operator">*</span></span><span>
+</span><span id="line-213"></span><span>  </span><span id="local-6989586621679535789"><span id="defaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#defaultFromIpe"><span class="hs-identifier hs-type">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679535789"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679535785"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-214"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535789"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679535785"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-type">DefaultFromIpe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535785"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535789"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-215"></span><span>
+</span><span id="line-216"></span><span id="local-6989586621679535599"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679535599"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-217"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679535599"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span>
+</span><span id="line-218"></span><span>  </span><span id="local-6989586621679535596"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (Point 2 r :+ IpeAttributes (DefaultFromIpe (Point 2 r)) r)
+</span><a href="#local-6989586621679535596"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (IpeSymbol r :+ IpeAttributes IpeSymbol r)
+-&gt; Prism' (IpeSymbol r) (Point 2 r)
+-&gt; Prism' (IpeObject r) (Point 2 r :+ IpeAttributes IpeSymbol r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' IpeSymbol r)
+Prism' (IpeObject r) (IpeSymbol r :+ IpeAttributes IpeSymbol r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpeUse"><span class="hs-identifier hs-var">_IpeUse</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeSymbol r) (Point 2 r)
+Prism' (IpeSymbol r) (Point 2 r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPoint"><span class="hs-identifier hs-var">_asPoint</span></a></span><span>
+</span><span id="line-219"></span><span>    </span><span class="hs-keyword">where</span></span><span>
+</span><span id="line-220"></span><span>
+</span><span id="line-221"></span><span>
+</span><span id="line-222"></span><span id="local-6989586621679535594"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-223"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-224"></span><span>  </span><span id="local-6989586621679535592"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (LineSegment 2 () r
+   :+ IpeAttributes (DefaultFromIpe (LineSegment 2 () r)) r)
+</span><a href="#local-6989586621679535592"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (LineSegment 2 () r)
+-&gt; Prism'
+     (IpeObject r) (LineSegment 2 () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (Path r) (LineSegment 2 () r)
+Prism' (Path r) (LineSegment 2 () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier hs-var">_asLineSegment</span></a></span></span><span>
+</span><span id="line-225"></span><span>
+</span><span id="line-226"></span><span id="local-6989586621679535590"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ellipse</span></span><span> </span><span class="annot"><a href="#local-6989586621679535590"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-227"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ellipse</span></span><span> </span><span class="annot"><a href="#local-6989586621679535590"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-228"></span><span>  </span><span id="local-6989586621679535588"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (Ellipse r :+ IpeAttributes (DefaultFromIpe (Ellipse r)) r)
+</span><a href="#local-6989586621679535588"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (Ellipse r)
+-&gt; Prism' (IpeObject r) (Ellipse r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (Path r) (Ellipse r)
+Prism' (Path r) (Ellipse r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asEllipse"><span class="hs-identifier hs-var">_asEllipse</span></a></span></span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span id="local-6989586621679535587"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679535587"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679535587"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Circle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535587"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-231"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Circle</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535587"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-232"></span><span>  </span><span id="local-6989586621679535585"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (Circle () r :+ IpeAttributes (DefaultFromIpe (Circle () r)) r)
+</span><a href="#local-6989586621679535585"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (Circle () r)
+-&gt; Prism' (IpeObject r) (Circle () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. (Floating r, Eq r) =&gt; Prism' (Path r) (Circle () r)
+Prism' (Path r) (Circle () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asCircle"><span class="hs-identifier hs-var">_asCircle</span></a></span></span><span>
+</span><span id="line-233"></span><span>
+</span><span id="line-234"></span><span id="local-6989586621679535584"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679535584"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679535584"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Disk</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535584"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-235"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Disk</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535584"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-236"></span><span>  </span><span id="local-6989586621679535582"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (Disk () r :+ IpeAttributes (DefaultFromIpe (Disk () r)) r)
+</span><a href="#local-6989586621679535582"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (Disk () r)
+-&gt; Prism' (IpeObject r) (Disk () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. (Floating r, Eq r) =&gt; Prism' (Path r) (Disk () r)
+Prism' (Path r) (Disk () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asDisk"><span class="hs-identifier hs-var">_asDisk</span></a></span></span><span>
+</span><span id="line-237"></span><span>
+</span><span id="line-238"></span><span id="local-6989586621679535581"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine.PolyLine</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535581"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-239"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine.PolyLine</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535581"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-240"></span><span>  </span><span id="local-6989586621679535579"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (PolyLine 2 () r
+   :+ IpeAttributes (DefaultFromIpe (PolyLine 2 () r)) r)
+</span><a href="#local-6989586621679535579"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (PolyLine 2 () r)
+-&gt; Prism' (IpeObject r) (PolyLine 2 () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (Path r) (PolyLine 2 () r)
+Prism' (Path r) (PolyLine 2 () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier hs-var">_asPolyLine</span></a></span></span><span>
+</span><span id="line-241"></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span id="local-6989586621679535578"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535578"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-244"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535578"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-245"></span><span>  </span><span id="local-6989586621679535576"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (SimplePolygon () r
+   :+ IpeAttributes (DefaultFromIpe (SimplePolygon () r)) r)
+</span><a href="#local-6989586621679535576"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (SimplePolygon () r)
+-&gt; Prism'
+     (IpeObject r) (SimplePolygon () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (Path r) (Polygon 'Simple () r)
+Prism' (Path r) (SimplePolygon () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier hs-var">_asSimplePolygon</span></a></span></span><span>
+</span><span id="line-246"></span><span>
+</span><span id="line-247"></span><span id="local-6989586621679535575"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535575"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-248"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535575"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-249"></span><span>  </span><span id="local-6989586621679535573"><span class="annot"><span class="annottext">defaultFromIpe :: Prism'
+  (IpeObject r)
+  (MultiPolygon () r
+   :+ IpeAttributes (DefaultFromIpe (MultiPolygon () r)) r)
+</span><a href="#local-6989586621679535573"><span class="hs-identifier hs-var hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+-&gt; Prism' (Path r) (MultiPolygon () r)
+-&gt; Prism' (IpeObject r) (MultiPolygon () r :+ IpeAttributes Path r)
+forall r (i :: * -&gt; *) g.
+Prism' (IpeObject r) (i r :+ IpeAttributes i r)
+-&gt; Prism' (i r) g -&gt; Prism' (IpeObject r) (g :+ IpeAttributes i r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier hs-var">_withAttrs</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (IpeObject r) (IpeObject' Path r)
+Prism' (IpeObject r) (Path r :+ IpeAttributes Path r)
+</span><a href="Data.Geometry.Ipe.Content.html#_IpePath"><span class="hs-identifier hs-var">_IpePath</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Prism' (Path r) (MultiPolygon () r)
+Prism' (Path r) (MultiPolygon () r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#_asMultiPolygon"><span class="hs-identifier hs-var">_asMultiPolygon</span></a></span></span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span>
+</span><span id="line-252"></span><span class="hs-comment">-- | Read all g's from some ipe page(s).</span><span>
+</span><span id="line-253"></span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#readAll"><span class="hs-identifier hs-type">readAll</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679535733"><span class="annot"><a href="#local-6989586621679535733"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span id="local-6989586621679535732"><span class="annot"><a href="#local-6989586621679535732"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535733"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679535732"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679535733"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-254"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Types.html#IpePage"><span class="hs-identifier hs-type">IpePage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535732"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679535733"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-type">DefaultFromIpe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535733"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-255"></span><span id="readAll"><span class="annot"><span class="annottext">readAll :: IpePage r -&gt; [g :+ IpeAttributes (DefaultFromIpe g) r]
+</span><a href="Data.Geometry.Ipe.FromIpe.html#readAll"><span class="hs-identifier hs-var hs-var">readAll</span></a></span></span><span> </span><span id="local-6989586621679535572"><span class="annot"><span class="annottext">p :: IpePage r
+</span><a href="#local-6989586621679535572"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpePage r
+</span><a href="#local-6989586621679535572"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">IpePage r
+-&gt; Getting
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+     (IpePage r)
+     (g :+ IpeAttributes (DefaultFromIpe g) r)
+-&gt; [g :+ IpeAttributes (DefaultFromIpe g) r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">([IpeObject r]
+ -&gt; Const
+      (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r])
+-&gt; IpePage r
+-&gt; Const
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpePage r)
+forall r1 r2.
+Lens (IpePage r1) (IpePage r2) [IpeObject r1] [IpeObject r2]
+</span><a href="Data.Geometry.Ipe.Types.html#content"><span class="hs-identifier hs-var">content</span></a></span><span class="annot"><span class="annottext">(([IpeObject r]
+  -&gt; Const
+       (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r])
+ -&gt; IpePage r
+ -&gt; Const
+      (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpePage r))
+-&gt; (((g :+ IpeAttributes (DefaultFromIpe g) r)
+     -&gt; Const
+          (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+          (g :+ IpeAttributes (DefaultFromIpe g) r))
+    -&gt; [IpeObject r]
+    -&gt; Const
+         (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r])
+-&gt; Getting
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+     (IpePage r)
+     (g :+ IpeAttributes (DefaultFromIpe g) r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(IpeObject r
+ -&gt; Const
+      (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpeObject r))
+-&gt; [IpeObject r]
+-&gt; Const
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">((IpeObject r
+  -&gt; Const
+       (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpeObject r))
+ -&gt; [IpeObject r]
+ -&gt; Const
+      (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r])
+-&gt; (((g :+ IpeAttributes (DefaultFromIpe g) r)
+     -&gt; Const
+          (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+          (g :+ IpeAttributes (DefaultFromIpe g) r))
+    -&gt; IpeObject r
+    -&gt; Const
+         (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpeObject r))
+-&gt; ((g :+ IpeAttributes (DefaultFromIpe g) r)
+    -&gt; Const
+         (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+         (g :+ IpeAttributes (DefaultFromIpe g) r))
+-&gt; [IpeObject r]
+-&gt; Const
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) [IpeObject r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((g :+ IpeAttributes (DefaultFromIpe g) r)
+ -&gt; Const
+      (Endo [g :+ IpeAttributes (DefaultFromIpe g) r])
+      (g :+ IpeAttributes (DefaultFromIpe g) r))
+-&gt; IpeObject r
+-&gt; Const
+     (Endo [g :+ IpeAttributes (DefaultFromIpe g) r]) (IpeObject r)
+forall g r.
+(HasDefaultFromIpe g, r ~ NumType g) =&gt;
+Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
+</span><a href="Data.Geometry.Ipe.FromIpe.html#defaultFromIpe"><span class="hs-identifier hs-var">defaultFromIpe</span></a></span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span class="hs-comment">-- | Convenience function from reading all g's from an ipe file. If there</span><span>
+</span><span id="line-258"></span><span class="hs-comment">-- is an error reading or parsing the file the error is &quot;thrown away&quot;.</span><span>
+</span><span id="line-259"></span><span id="local-6989586621679535569"><span id="local-6989586621679535570"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#readAllFrom"><span class="hs-identifier hs-type">readAllFrom</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535570"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679535569"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679535570"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.PathParser.html#Coordinate"><span class="hs-identifier hs-type">Coordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679535569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-260"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679535570"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-type">DefaultFromIpe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679535570"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679535569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-261"></span><span id="readAllFrom"><span class="annot"><span class="annottext">readAllFrom :: FilePath -&gt; IO [g :+ IpeAttributes (DefaultFromIpe g) r]
+</span><a href="Data.Geometry.Ipe.FromIpe.html#readAllFrom"><span class="hs-identifier hs-var hs-var">readAllFrom</span></a></span></span><span> </span><span id="local-6989586621679535568"><span class="annot"><span class="annottext">fp :: FilePath
+</span><a href="#local-6989586621679535568"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IpePage r -&gt; [g :+ IpeAttributes (DefaultFromIpe g) r])
+-&gt; Either Text (IpePage r)
+-&gt; [g :+ IpeAttributes (DefaultFromIpe g) r]
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">IpePage r -&gt; [g :+ IpeAttributes (DefaultFromIpe g) r]
+forall g r.
+(HasDefaultFromIpe g, r ~ NumType g) =&gt;
+IpePage r -&gt; [g :+ IpeAttributes (DefaultFromIpe g) r]
+</span><a href="Data.Geometry.Ipe.FromIpe.html#readAll"><span class="hs-identifier hs-var">readAll</span></a></span><span> </span><span class="annot"><span class="annottext">(Either Text (IpePage r)
+ -&gt; [g :+ IpeAttributes (DefaultFromIpe g) r])
+-&gt; IO (Either Text (IpePage r))
+-&gt; IO [g :+ IpeAttributes (DefaultFromIpe g) r]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO (Either Text (IpePage r))
+forall r.
+(Coordinate r, Eq r) =&gt;
+FilePath -&gt; IO (Either Text (IpePage r))
+</span><a href="Data.Geometry.Ipe.Reader.html#readSinglePageFile"><span class="hs-identifier hs-var">readSinglePageFile</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679535568"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-262"></span><span>
+</span><span id="line-263"></span><span id="local-6989586621679535982"><span class="annot"><a href="Data.Geometry.Ipe.FromIpe.html#fromSingleton"><span class="hs-identifier hs-type">fromSingleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679535982"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><a href="#local-6989586621679535982"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-264"></span><span id="fromSingleton"><span class="annot"><span class="annottext">fromSingleton :: a -&gt; LSeq 1 a
+</span><a href="Data.Geometry.Ipe.FromIpe.html#fromSingleton"><span class="hs-identifier hs-var hs-var">fromSingleton</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; LSeq 1 a
+forall a. NonEmpty a -&gt; LSeq 1 a
+</span><span class="hs-identifier hs-var">LSeq.fromNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; LSeq 1 a) -&gt; (a -&gt; NonEmpty a) -&gt; a -&gt; LSeq 1 a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-265"></span></pre></body></html>

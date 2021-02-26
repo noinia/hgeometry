@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlaneGraph.Draw</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ipe.html"><span class="hs-identifier">Data.Geometry.Ipe</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Properties</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.LineSegment</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Point</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Polygon</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.PlaneGraph</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- | Draws a planegraph using Marks, LineSegments, and simple polygons for</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- vertices, edges, and faces, respectively. Uses the default IpeOuts to draw</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- these elements.</span><span>
+</span><span id="line-19"></span><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-type">drawPlaneGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679538080"><span class="annot"><a href="#local-6989586621679538080"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679538079"><span class="annot"><a href="#local-6989586621679538079"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679538078"><span class="annot"><a href="#local-6989586621679538078"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679538077"><span class="annot"><a href="#local-6989586621679538077"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679538076"><span class="annot"><a href="#local-6989586621679538076"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679538080"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538079"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538078"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538077"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538076"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538076"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-20"></span><span id="drawPlaneGraph"><span class="annot"><span class="annottext">drawPlaneGraph :: IpeOut (PlaneGraph s v e f r) Group r
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-var hs-var">drawPlaneGraph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; v -&gt; Maybe (IpeObject r))
+-&gt; (LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r))
+-&gt; (SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r))
+-&gt; IpeOut (PlaneGraph s v e f r) Group r
+forall k r v e f (s :: k).
+(Point 2 r -&gt; v -&gt; Maybe (IpeObject r))
+-&gt; (LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r))
+-&gt; (SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r))
+-&gt; IpeOut (PlaneGraph s v e f r) Group r
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var">drawPlaneGraphWith</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; v -&gt; Maybe (IpeObject r)
+forall g _x.
+(HasDefaultIpeOut g, NumType g ~ r) =&gt;
+g -&gt; _x -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538074"><span class="hs-identifier hs-var">defIO'</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r)
+forall g _x.
+(HasDefaultIpeOut g, NumType g ~ r) =&gt;
+g -&gt; _x -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538074"><span class="hs-identifier hs-var">defIO'</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r)
+forall g _x.
+(HasDefaultIpeOut g, NumType g ~ r) =&gt;
+g -&gt; _x -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538074"><span class="hs-identifier hs-var">defIO'</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>    </span><span id="local-6989586621679538163"><span id="local-6989586621679538166"><span class="annot"><a href="#local-6989586621679538074"><span class="hs-identifier hs-type">defIO'</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538166"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679538166"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679538076"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679538166"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679538163"><span class="hs-identifier hs-type">_x</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538076"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-23"></span><span>    </span><span id="local-6989586621679538074"><span class="annot"><span class="annottext">defIO' :: g -&gt; _x -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538074"><span class="hs-identifier hs-var hs-var">defIO'</span></a></span></span><span> </span><span id="local-6989586621679538073"><span class="annot"><span class="annottext">p :: g
+</span><a href="#local-6989586621679538073"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeObject r -&gt; Maybe (IpeObject r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(IpeObject r -&gt; Maybe (IpeObject r))
+-&gt; ((DefaultIpeOut g r
+     :+ Attributes' r (AttributesOf (DefaultIpeOut g)))
+    -&gt; IpeObject r)
+-&gt; (DefaultIpeOut g r
+    :+ Attributes' r (AttributesOf (DefaultIpeOut g)))
+-&gt; Maybe (IpeObject r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(DefaultIpeOut g r
+ :+ Attributes' r (AttributesOf (DefaultIpeOut g)))
+-&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">((DefaultIpeOut g r
+  :+ Attributes' r (AttributesOf (DefaultIpeOut g)))
+ -&gt; Maybe (IpeObject r))
+-&gt; (DefaultIpeOut g r
+    :+ Attributes' r (AttributesOf (DefaultIpeOut g)))
+-&gt; Maybe (IpeObject r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeOut g (DefaultIpeOut g) (NumType g)
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="Data.Geometry.Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621679538073"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | Draws a planegraph using Marks, LineSegments, and simple polygons for</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- vertices, edges, and faces, respectively.</span><span>
+</span><span id="line-27"></span><span id="local-6989586621679538167"><span id="local-6989586621679538168"><span id="local-6989586621679538169"><span id="local-6989586621679538170"><span id="local-6989586621679538171"><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-type">drawPlaneGraphWith</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679538170"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679538170"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679538169"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679538170"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679538168"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679538167"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538170"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538169"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538168"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538171"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-31"></span><span id="drawPlaneGraphWith"><span class="annot"><span class="annottext">drawPlaneGraphWith :: (Point 2 r -&gt; v -&gt; Maybe (IpeObject r))
+-&gt; (LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r))
+-&gt; (SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r))
+-&gt; IpeOut (PlaneGraph s v e f r) Group r
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var hs-var">drawPlaneGraphWith</span></a></span></span><span> </span><span id="local-6989586621679538069"><span class="annot"><span class="annottext">vF :: Point 2 r -&gt; v -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538069"><span class="hs-identifier hs-var">vF</span></a></span></span><span> </span><span id="local-6989586621679538068"><span class="annot"><span class="annottext">eF :: LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">eF</span></a></span></span><span> </span><span id="local-6989586621679538067"><span class="annot"><span class="annottext">fF :: SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538067"><span class="hs-identifier hs-var">fF</span></a></span></span><span> </span><span id="local-6989586621679538066"><span class="annot"><span class="annottext">g :: PlaneGraph s v e f r
+</span><a href="#local-6989586621679538066"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r -&gt; IpeOut [IpeObject r] Group r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Maybe (IpeObject r)) -&gt; [IpeObject r])
+-&gt; [Vector (Maybe (IpeObject r))] -&gt; [IpeObject r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Maybe (IpeObject r)] -&gt; [IpeObject r]
+forall a. [Maybe a] -&gt; [a]
+</span><span class="hs-identifier hs-var">catMaybes</span></span><span> </span><span class="annot"><span class="annottext">([Maybe (IpeObject r)] -&gt; [IpeObject r])
+-&gt; (Vector (Maybe (IpeObject r)) -&gt; [Maybe (IpeObject r)])
+-&gt; Vector (Maybe (IpeObject r))
+-&gt; [IpeObject r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Maybe (IpeObject r)) -&gt; [Maybe (IpeObject r)]
+forall a. Vector a -&gt; [a]
+</span><span class="hs-identifier hs-var">V.toList</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538061"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538060"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>    </span><span id="local-6989586621679538062"><span class="annot"><span class="annottext">vs :: Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span id="local-6989586621679538058"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679538058"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679538057"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679538057"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; v -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538069"><span class="hs-identifier hs-var">vF</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679538058"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679538057"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((VertexId' s, VertexData r v) -&gt; Maybe (IpeObject r))
+-&gt; Vector (VertexId' s, VertexData r v)
+-&gt; Vector (Maybe (IpeObject r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
+</span><span class="hs-identifier hs-var">vertices</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538066"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span id="local-6989586621679538061"><span class="annot"><span class="annottext">es :: Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538061"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679538054"><span class="annot"><span class="annottext">s :: LineSegment 2 v r
+</span><a href="#local-6989586621679538054"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679538052"><span class="annot"><span class="annottext">e :: e
+</span><a href="#local-6989586621679538052"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 v r -&gt; e -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">eF</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 v r
+</span><a href="#local-6989586621679538054"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621679538052"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Dart s, LineSegment 2 v r :+ e) -&gt; Maybe (IpeObject r))
+-&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+-&gt; Vector (Maybe (IpeObject r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+</span><span class="hs-identifier hs-var">edgeSegments</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538066"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679538060"><span class="annot"><span class="annottext">fs :: Vector (Maybe (IpeObject r))
+</span><a href="#local-6989586621679538060"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679538050"><span class="annot"><span class="annottext">p :: SimplePolygon v r
+</span><a href="#local-6989586621679538050"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679538049"><span class="annot"><span class="annottext">f :: f
+</span><a href="#local-6989586621679538049"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SimplePolygon v r -&gt; f -&gt; Maybe (IpeObject r)
+</span><a href="#local-6989586621679538067"><span class="hs-identifier hs-var">fF</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon v r
+</span><a href="#local-6989586621679538050"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679538049"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((FaceId' s, SimplePolygon v r :+ f) -&gt; Maybe (IpeObject r))
+-&gt; Vector (FaceId' s, SimplePolygon v r :+ f)
+-&gt; Vector (Maybe (IpeObject r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (FaceId' s, SimplePolygon v r :+ f)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (FaceId' s, SimplePolygon v r :+ f)
+</span><span class="hs-identifier hs-var">rawFacePolygons</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538066"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | Draw a planegraph using the given functions. Fully generic in how we draw</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- the objects.</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679538043"><span id="local-6989586621679538044"><span id="local-6989586621679538045"><span id="local-6989586621679538046"><span id="local-6989586621679538047"><span class="annot"><a href="Data.PlaneGraph.Draw.html#genericDrawPlaneGraphWith"><span class="hs-identifier hs-type">genericDrawPlaneGraphWith</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679538047"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679538046"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538045"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679538047"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679538044"><span class="hs-identifier hs-type">e</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538045"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679538047"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679538043"><span class="hs-identifier hs-type">f</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538045"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679538047"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538046"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538044"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538043"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538045"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679538045"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-44"></span><span id="genericDrawPlaneGraphWith"><span class="annot"><span class="annottext">genericDrawPlaneGraphWith :: ((VertexId' s :+ v) -&gt; IpeObject r)
+-&gt; ((Dart s :+ e) -&gt; IpeObject r)
+-&gt; ((FaceId' s :+ f) -&gt; IpeObject r)
+-&gt; IpeOut (PlaneGraph s v e f r) Group r
+</span><a href="Data.PlaneGraph.Draw.html#genericDrawPlaneGraphWith"><span class="hs-identifier hs-var hs-var">genericDrawPlaneGraphWith</span></a></span></span><span> </span><span id="local-6989586621679538041"><span class="annot"><span class="annottext">vF :: (VertexId' s :+ v) -&gt; IpeObject r
+</span><a href="#local-6989586621679538041"><span class="hs-identifier hs-var">vF</span></a></span></span><span> </span><span id="local-6989586621679538040"><span class="annot"><span class="annottext">eF :: (Dart s :+ e) -&gt; IpeObject r
+</span><a href="#local-6989586621679538040"><span class="hs-identifier hs-var">eF</span></a></span></span><span> </span><span id="local-6989586621679538039"><span class="annot"><span class="annottext">fF :: (FaceId' s :+ f) -&gt; IpeObject r
+</span><a href="#local-6989586621679538039"><span class="hs-identifier hs-var">fF</span></a></span></span><span> </span><span id="local-6989586621679538038"><span class="annot"><span class="annottext">g :: PlaneGraph s v e f r
+</span><a href="#local-6989586621679538038"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="Data.Geometry.Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r -&gt; IpeOut [IpeObject r] Group r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Vector (IpeObject r) -&gt; [IpeObject r])
+-&gt; [Vector (IpeObject r)] -&gt; [IpeObject r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Vector (IpeObject r) -&gt; [IpeObject r]
+forall a. Vector a -&gt; [a]
+</span><span class="hs-identifier hs-var">V.toList</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Vector (IpeObject r)
+</span><a href="#local-6989586621679538037"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (IpeObject r)
+</span><a href="#local-6989586621679538036"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (IpeObject r)
+</span><a href="#local-6989586621679538035"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679538037"><span class="annot"><span class="annottext">vs :: Vector (IpeObject r)
+</span><a href="#local-6989586621679538037"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679538034"><span class="annot"><span class="annottext">v :: VertexId' s
+</span><a href="#local-6989586621679538034"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679538033"><span class="annot"><span class="annottext">x :: v
+</span><a href="#local-6989586621679538033"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(VertexId' s :+ v) -&gt; IpeObject r
+</span><a href="#local-6989586621679538041"><span class="hs-identifier hs-var">vF</span></a></span><span> </span><span class="annot"><span class="annottext">((VertexId' s :+ v) -&gt; IpeObject r)
+-&gt; (VertexId' s :+ v) -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">VertexId' s
+</span><a href="#local-6989586621679538034"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId' s -&gt; v -&gt; VertexId' s :+ v
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679538033"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((VertexId' s, VertexData r v) -&gt; IpeObject r)
+-&gt; Vector (VertexId' s, VertexData r v) -&gt; Vector (IpeObject r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
+</span><span class="hs-identifier hs-var">vertices</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538038"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679538036"><span class="annot"><span class="annottext">es :: Vector (IpeObject r)
+</span><a href="#local-6989586621679538036"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Dart s :+ e) -&gt; IpeObject r) -&gt; (Dart s, e) -&gt; IpeObject r
+forall core extra t. ((core :+ extra) -&gt; t) -&gt; (core, extra) -&gt; t
+</span><a href="#local-6989586621679538032"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">(Dart s :+ e) -&gt; IpeObject r
+</span><a href="#local-6989586621679538040"><span class="hs-identifier hs-var">eF</span></a></span><span> </span><span class="annot"><span class="annottext">((Dart s, e) -&gt; IpeObject r)
+-&gt; Vector (Dart s, e) -&gt; Vector (IpeObject r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (Dart s, e)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (Dart s, e)
+</span><span class="hs-identifier hs-var">edges</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538038"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679538035"><span class="annot"><span class="annottext">fs :: Vector (IpeObject r)
+</span><a href="#local-6989586621679538035"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((FaceId' s :+ f) -&gt; IpeObject r) -&gt; (FaceId' s, f) -&gt; IpeObject r
+forall core extra t. ((core :+ extra) -&gt; t) -&gt; (core, extra) -&gt; t
+</span><a href="#local-6989586621679538032"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">(FaceId' s :+ f) -&gt; IpeObject r
+</span><a href="#local-6989586621679538039"><span class="hs-identifier hs-var">fF</span></a></span><span> </span><span class="annot"><span class="annottext">((FaceId' s, f) -&gt; IpeObject r)
+-&gt; Vector (FaceId' s, f) -&gt; Vector (IpeObject r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (FaceId' s, f)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Vector (FaceId' s, f)
+</span><span class="hs-identifier hs-var">faces</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679538038"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679538032"><span class="annot"><span class="annottext">wrap :: ((core :+ extra) -&gt; t) -&gt; (core, extra) -&gt; t
+</span><a href="#local-6989586621679538032"><span class="hs-identifier hs-var hs-var">wrap</span></a></span></span><span> </span><span id="local-6989586621679538029"><span class="annot"><span class="annottext">f :: (core :+ extra) -&gt; t
+</span><a href="#local-6989586621679538029"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679538028"><span class="annot"><span class="annottext">a :: core
+</span><a href="#local-6989586621679538028"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679538027"><span class="annot"><span class="annottext">b :: extra
+</span><a href="#local-6989586621679538027"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(core :+ extra) -&gt; t
+</span><a href="#local-6989586621679538029"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">((core :+ extra) -&gt; t) -&gt; (core :+ extra) -&gt; t
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679538028"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; extra -&gt; core :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679538027"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-51"></span></pre></body></html>

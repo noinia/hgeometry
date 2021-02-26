@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveFoldable #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE DeriveFunctor #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE DeriveTraversable #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE KindSignatures #-}</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Map.Util</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-comment">-- so that the docs for Monoid link to the right place</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4,8,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Foldable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Foldable</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Traversable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Traversable</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- | An internal index used to track ordering only -- its magnitude doesn't</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- matter. If you manage to see this documentation, the library author has made</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- a mistake!</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">type</span><span> </span><span id="Tag"><span class="annot"><a href="Data.Map.Util.html#Tag"><span class="hs-identifier hs-var">Tag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | A 0-based index, much like the indices used by lists' '!!' operation. All</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- indices are with respect to insertion order.</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">type</span><span> </span><span id="Index"><span class="annot"><a href="Data.Map.Util.html#Index"><span class="hs-identifier hs-var">Index</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span id="local-6989586621679062597"><span class="annot"><a href="Data.Map.Util.html#nextLowerTag"><span class="hs-identifier hs-type">nextLowerTag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Map.Util.html#nextHigherTag"><span class="hs-identifier hs-type">nextHigherTag</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Data.Map.Util.html#Tag"><span class="hs-identifier hs-type">Tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679062597"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Map.Util.html#Tag"><span class="hs-identifier hs-type">Tag</span></a></span></span><span>
+</span><span id="line-31"></span><span id="nextLowerTag"><span class="annot"><span class="annottext">nextLowerTag :: Map Tag a -&gt; Tag
+</span><a href="Data.Map.Util.html#nextLowerTag"><span class="hs-identifier hs-var hs-var">nextLowerTag</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Tag -&gt; (Tag -&gt; Tag) -&gt; Maybe Tag -&gt; Tag
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Tag -&gt; Tag
+forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Tag -&gt; Tag) -&gt; (Map Tag a -&gt; Maybe Tag) -&gt; Map Tag a -&gt; Tag
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map Tag a -&gt; Maybe Tag
+forall a. Map Tag a -&gt; Maybe Tag
+</span><a href="Data.Map.Util.html#minTag"><span class="hs-identifier hs-var">minTag</span></a></span><span>
+</span><span id="line-32"></span><span id="nextHigherTag"><span class="annot"><span class="annottext">nextHigherTag :: Map Tag a -&gt; Tag
+</span><a href="Data.Map.Util.html#nextHigherTag"><span class="hs-identifier hs-var hs-var">nextHigherTag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Tag -&gt; (Tag -&gt; Tag) -&gt; Maybe Tag -&gt; Tag
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Tag -&gt; Tag
+forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Tag -&gt; Tag) -&gt; (Map Tag a -&gt; Maybe Tag) -&gt; Map Tag a -&gt; Tag
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map Tag a -&gt; Maybe Tag
+forall a. Map Tag a -&gt; Maybe Tag
+</span><a href="Data.Map.Util.html#maxTag"><span class="hs-identifier hs-var">maxTag</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span id="local-6989586621679062761"><span class="annot"><a href="Data.Map.Util.html#minTag"><span class="hs-identifier hs-type">minTag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Map.Util.html#maxTag"><span class="hs-identifier hs-type">maxTag</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Data.Map.Util.html#Tag"><span class="hs-identifier hs-type">Tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679062761"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.Map.Util.html#Tag"><span class="hs-identifier hs-type">Tag</span></a></span></span><span>
+</span><span id="line-35"></span><span id="minTag"><span class="annot"><span class="annottext">minTag :: Map Tag a -&gt; Maybe Tag
+</span><a href="Data.Map.Util.html#minTag"><span class="hs-identifier hs-var hs-var">minTag</span></a></span></span><span> </span><span id="local-6989586621679062588"><span class="annot"><span class="annottext">m :: Map Tag a
+</span><a href="#local-6989586621679062588"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Tag, a), Map Tag a) -&gt; Tag)
+-&gt; Maybe ((Tag, a), Map Tag a) -&gt; Maybe Tag
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Tag, a) -&gt; Tag
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Tag, a) -&gt; Tag)
+-&gt; (((Tag, a), Map Tag a) -&gt; (Tag, a))
+-&gt; ((Tag, a), Map Tag a)
+-&gt; Tag
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Tag, a), Map Tag a) -&gt; (Tag, a)
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Tag a -&gt; Maybe ((Tag, a), Map Tag a)
+forall k a. Map k a -&gt; Maybe ((k, a), Map k a)
+</span><span class="hs-identifier hs-var">M.minViewWithKey</span></span><span> </span><span class="annot"><span class="annottext">Map Tag a
+</span><a href="#local-6989586621679062588"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span id="maxTag"><span class="annot"><span class="annottext">maxTag :: Map Tag a -&gt; Maybe Tag
+</span><a href="Data.Map.Util.html#maxTag"><span class="hs-identifier hs-var hs-var">maxTag</span></a></span></span><span> </span><span id="local-6989586621679062586"><span class="annot"><span class="annottext">m :: Map Tag a
+</span><a href="#local-6989586621679062586"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Tag, a), Map Tag a) -&gt; Tag)
+-&gt; Maybe ((Tag, a), Map Tag a) -&gt; Maybe Tag
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Tag, a) -&gt; Tag
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Tag, a) -&gt; Tag)
+-&gt; (((Tag, a), Map Tag a) -&gt; (Tag, a))
+-&gt; ((Tag, a), Map Tag a)
+-&gt; Tag
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Tag, a), Map Tag a) -&gt; (Tag, a)
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Tag a -&gt; Maybe ((Tag, a), Map Tag a)
+forall k a. Map k a -&gt; Maybe ((k, a), Map k a)
+</span><span class="hs-identifier hs-var">M.maxViewWithKey</span></span><span> </span><span class="annot"><span class="annottext">Map Tag a
+</span><a href="#local-6989586621679062586"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679062583"><span id="local-6989586621679062584"><span class="annot"><a href="Data.Map.Util.html#showsPrecList"><span class="hs-identifier hs-type">showsPrecList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679062584"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679062583"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679062584"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679062583"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span></span></span><span>
+</span><span id="line-39"></span><span id="showsPrecList"><span class="annot"><span class="annottext">showsPrecList :: (b -&gt; [a]) -&gt; Tag -&gt; b -&gt; ShowS
+</span><a href="Data.Map.Util.html#showsPrecList"><span class="hs-identifier hs-var hs-var">showsPrecList</span></a></span></span><span> </span><span id="local-6989586621679062581"><span class="annot"><span class="annottext">toList :: b -&gt; [a]
+</span><a href="#local-6989586621679062581"><span class="hs-identifier hs-var">toList</span></a></span></span><span> </span><span id="local-6989586621679062580"><span class="annot"><span class="annottext">d :: Tag
+</span><a href="#local-6989586621679062580"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679062579"><span class="annot"><span class="annottext">o :: b
+</span><a href="#local-6989586621679062579"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Tag
+</span><a href="#local-6989586621679062580"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Tag -&gt; Tag -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-40"></span><span>	</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="hs-string">&quot;fromList &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ShowS
+forall a. Show a =&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">shows</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; [a]
+</span><a href="#local-6989586621679062581"><span class="hs-identifier hs-var">toList</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679062579"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span id="local-6989586621679062573"><span id="local-6989586621679062574"><span class="annot"><a href="Data.Map.Util.html#readsPrecList"><span class="hs-identifier hs-type">readsPrecList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679062574"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679062574"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679062573"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ReadS</span></span><span> </span><span class="annot"><a href="#local-6989586621679062573"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-43"></span><span id="readsPrecList"><span class="annot"><span class="annottext">readsPrecList :: ([a] -&gt; b) -&gt; Tag -&gt; ReadS b
+</span><a href="Data.Map.Util.html#readsPrecList"><span class="hs-identifier hs-var hs-var">readsPrecList</span></a></span></span><span> </span><span id="local-6989586621679062571"><span class="annot"><span class="annottext">fromList :: [a] -&gt; b
+</span><a href="#local-6989586621679062571"><span class="hs-identifier hs-var">fromList</span></a></span></span><span> </span><span id="local-6989586621679062570"><span class="annot"><span class="annottext">d :: Tag
+</span><a href="#local-6989586621679062570"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ReadS b -&gt; ReadS b
+forall a. Bool -&gt; ReadS a -&gt; ReadS a
+</span><span class="hs-identifier hs-var">readParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Tag
+</span><a href="#local-6989586621679062570"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Tag -&gt; Tag -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ReadS b -&gt; ReadS b) -&gt; ReadS b -&gt; ReadS b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679062568"><span class="annot"><span class="annottext">r :: String
+</span><a href="#local-6989586621679062568"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-44"></span><span>	</span><span class="hs-special">(</span><span class="hs-string">&quot;fromList&quot;</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062567"><span class="annot"><span class="annottext">s :: String
+</span><a href="#local-6989586621679062567"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS String
+</span><span class="hs-identifier hs-var">lex</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679062568"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-45"></span><span>	</span><span class="hs-special">(</span><span id="local-6989586621679062565"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679062565"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062564"><span class="annot"><span class="annottext">t :: String
+</span><a href="#local-6989586621679062564"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS [a]
+forall a. Read a =&gt; ReadS a
+</span><span class="hs-identifier hs-var">reads</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679062567"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-46"></span><span>	</span><span class="annot"><span class="annottext">(b, String) -&gt; [(b, String)]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; b
+</span><a href="#local-6989586621679062571"><span class="hs-identifier hs-var">fromList</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679062565"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679062564"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | A newtype to hand a 'Monoid' instance on. The phantom first parameter</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- tells whether 'mappend' will prefer the indices of its first or second</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- argument if there are shared elements in both.</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">newtype</span><span> </span><span id="Bias"><span class="annot"><a href="Data.Map.Util.html#Bias"><span class="hs-identifier hs-var">Bias</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679062562"><span class="annot"><a href="#local-6989586621679062562"><span class="hs-identifier hs-type">dir</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Map.Util.html#IndexPreference"><span class="hs-identifier hs-type">IndexPreference</span></a></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679062561"><span class="annot"><a href="#local-6989586621679062561"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Bias"><span class="annot"><a href="Data.Map.Util.html#Bias"><span class="hs-identifier hs-var">Bias</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="unbiased"><span class="annot"><span class="annottext">Bias dir a -&gt; a
+</span><a href="Data.Map.Util.html#unbiased"><span class="hs-identifier hs-var hs-var">unbiased</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679062561"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-52"></span><span>	</span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="%24cBias"><span id="%24tBias"><span id="local-6989586621679062530"><span id="local-6989586621679062532"><span id="local-6989586621679062534"><span id="local-6989586621679062536"><span id="local-6989586621679062538"><span id="local-6989586621679062540"><span id="local-6989586621679062542"><span id="local-6989586621679062544"><span id="local-6989586621679062546"><span id="local-6989586621679062548"><span id="local-6989586621679062550"><span id="local-6989586621679062552"><span id="local-6989586621679062554"><span id="local-6989586621679062556"><span class="annot"><span class="annottext">Typeable (Bias dir a)
+DataType
+Constr
+Typeable (Bias dir a) =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a))
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a))
+-&gt; (Bias dir a -&gt; Constr)
+-&gt; (Bias dir a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Bias dir a)))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c (Bias dir a)))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; Bias dir a -&gt; Bias dir a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; [u])
+-&gt; (forall u.
+    Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a))
+-&gt; Data (Bias dir a)
+Bias dir a -&gt; DataType
+Bias dir a -&gt; Constr
+(forall b. Data b =&gt; b -&gt; b) -&gt; Bias dir a -&gt; Bias dir a
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a)
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a)
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Typeable (Bias dir a)
+forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Bias dir a -&gt; DataType
+forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Bias dir a -&gt; Constr
+forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; Bias dir a -&gt; Bias dir a
+forall (dir :: IndexPreference) a u.
+(Typeable dir, Data a) =&gt;
+Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; u
+forall (dir :: IndexPreference) a u.
+(Typeable dir, Data a) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; [u]
+forall (dir :: IndexPreference) a r r'.
+(Typeable dir, Data a) =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+forall (dir :: IndexPreference) a r r'.
+(Typeable dir, Data a) =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+forall (dir :: IndexPreference) a (m :: * -&gt; *).
+(Typeable dir, Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+forall (dir :: IndexPreference) a (m :: * -&gt; *).
+(Typeable dir, Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+forall (dir :: IndexPreference) a (c :: * -&gt; *).
+(Typeable dir, Data a) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a)
+forall (dir :: IndexPreference) a (c :: * -&gt; *).
+(Typeable dir, Data a) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a)
+forall (dir :: IndexPreference) a (t :: * -&gt; *) (c :: * -&gt; *).
+(Typeable dir, Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Bias dir a))
+forall (dir :: IndexPreference) a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Typeable dir, Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Bias dir a))
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a)
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a)
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Bias dir a))
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Bias dir a))
+$cBias :: Constr
+$tBias :: DataType
+gmapMo :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+$cgmapMo :: forall (dir :: IndexPreference) a (m :: * -&gt; *).
+(Typeable dir, Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+gmapMp :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+$cgmapMp :: forall (dir :: IndexPreference) a (m :: * -&gt; *).
+(Typeable dir, Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+gmapM :: (forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+$cgmapM :: forall (dir :: IndexPreference) a (m :: * -&gt; *).
+(Typeable dir, Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; Bias dir a -&gt; m (Bias dir a)
+gmapQi :: Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; u
+$cgmapQi :: forall (dir :: IndexPreference) a u.
+(Typeable dir, Data a) =&gt;
+Tag -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; u
+gmapQ :: (forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; [u]
+$cgmapQ :: forall (dir :: IndexPreference) a u.
+(Typeable dir, Data a) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; Bias dir a -&gt; [u]
+gmapQr :: (r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+$cgmapQr :: forall (dir :: IndexPreference) a r r'.
+(Typeable dir, Data a) =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+gmapQl :: (r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+$cgmapQl :: forall (dir :: IndexPreference) a r r'.
+(Typeable dir, Data a) =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; Bias dir a -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; Bias dir a -&gt; Bias dir a
+$cgmapT :: forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; Bias dir a -&gt; Bias dir a
+dataCast2 :: (forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Bias dir a))
+$cdataCast2 :: forall (dir :: IndexPreference) a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Typeable dir, Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (Bias dir a))
+dataCast1 :: (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Bias dir a))
+$cdataCast1 :: forall (dir :: IndexPreference) a (t :: * -&gt; *) (c :: * -&gt; *).
+(Typeable dir, Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (Bias dir a))
+dataTypeOf :: Bias dir a -&gt; DataType
+$cdataTypeOf :: forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Bias dir a -&gt; DataType
+toConstr :: Bias dir a -&gt; Constr
+$ctoConstr :: forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Bias dir a -&gt; Constr
+gunfold :: (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a)
+$cgunfold :: forall (dir :: IndexPreference) a (c :: * -&gt; *).
+(Typeable dir, Data a) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (Bias dir a)
+gfoldl :: (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a)
+$cgfoldl :: forall (dir :: IndexPreference) a (c :: * -&gt; *).
+(Typeable dir, Data a) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; Bias dir a -&gt; c (Bias dir a)
+$cp1Data :: forall (dir :: IndexPreference) a.
+(Typeable dir, Data a) =&gt;
+Typeable (Bias dir a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062523"><span id="local-6989586621679062525"><span class="annot"><span class="annottext">Bias dir a -&gt; Bias dir a -&gt; Bool
+(Bias dir a -&gt; Bias dir a -&gt; Bool)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bool) -&gt; Eq (Bias dir a)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall (dir :: IndexPreference) a.
+Eq a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+/= :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c/= :: forall (dir :: IndexPreference) a.
+Eq a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+== :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c== :: forall (dir :: IndexPreference) a.
+Eq a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062488"><span id="local-6989586621679062490"><span id="local-6989586621679062492"><span id="local-6989586621679062494"><span id="local-6989586621679062496"><span id="local-6989586621679062498"><span id="local-6989586621679062500"><span id="local-6989586621679062502"><span id="local-6989586621679062504"><span id="local-6989586621679062506"><span id="local-6989586621679062508"><span id="local-6989586621679062510"><span id="local-6989586621679062512"><span id="local-6989586621679062514"><span id="local-6989586621679062516"><span id="local-6989586621679062518"><span id="local-6989586621679062520"><span class="annot"><span class="annottext">Bias dir a -&gt; Bool
+(a -&gt; m) -&gt; Bias dir a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+(forall m. Monoid m =&gt; Bias dir m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bias dir a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bias dir a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a)
+-&gt; (forall a. Bias dir a -&gt; [a])
+-&gt; (forall a. Bias dir a -&gt; Bool)
+-&gt; (forall a. Bias dir a -&gt; Tag)
+-&gt; (forall a. Eq a =&gt; a -&gt; Bias dir a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Bias dir a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Bias dir a -&gt; a)
+-&gt; (forall a. Num a =&gt; Bias dir a -&gt; a)
+-&gt; (forall a. Num a =&gt; Bias dir a -&gt; a)
+-&gt; Foldable (Bias dir)
+forall a. Eq a =&gt; a -&gt; Bias dir a -&gt; Bool
+forall a. Num a =&gt; Bias dir a -&gt; a
+forall a. Ord a =&gt; Bias dir a -&gt; a
+forall m. Monoid m =&gt; Bias dir m -&gt; m
+forall a. Bias dir a -&gt; Bool
+forall a. Bias dir a -&gt; Tag
+forall a. Bias dir a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bias dir a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+forall (dir :: IndexPreference) a. Eq a =&gt; a -&gt; Bias dir a -&gt; Bool
+forall (dir :: IndexPreference) a. Num a =&gt; Bias dir a -&gt; a
+forall (dir :: IndexPreference) a. Ord a =&gt; Bias dir a -&gt; a
+forall (dir :: IndexPreference) m. Monoid m =&gt; Bias dir m -&gt; m
+forall (dir :: IndexPreference) a. Bias dir a -&gt; Bool
+forall (dir :: IndexPreference) a. Bias dir a -&gt; Tag
+forall (dir :: IndexPreference) a. Bias dir a -&gt; [a]
+forall (dir :: IndexPreference) a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+forall (dir :: IndexPreference) m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Bias dir a -&gt; m
+forall (dir :: IndexPreference) b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+forall (dir :: IndexPreference) a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Tag)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Bias dir a -&gt; a
+$cproduct :: forall (dir :: IndexPreference) a. Num a =&gt; Bias dir a -&gt; a
+sum :: Bias dir a -&gt; a
+$csum :: forall (dir :: IndexPreference) a. Num a =&gt; Bias dir a -&gt; a
+minimum :: Bias dir a -&gt; a
+$cminimum :: forall (dir :: IndexPreference) a. Ord a =&gt; Bias dir a -&gt; a
+maximum :: Bias dir a -&gt; a
+$cmaximum :: forall (dir :: IndexPreference) a. Ord a =&gt; Bias dir a -&gt; a
+elem :: a -&gt; Bias dir a -&gt; Bool
+$celem :: forall (dir :: IndexPreference) a. Eq a =&gt; a -&gt; Bias dir a -&gt; Bool
+length :: Bias dir a -&gt; Tag
+$clength :: forall (dir :: IndexPreference) a. Bias dir a -&gt; Tag
+null :: Bias dir a -&gt; Bool
+$cnull :: forall (dir :: IndexPreference) a. Bias dir a -&gt; Bool
+toList :: Bias dir a -&gt; [a]
+$ctoList :: forall (dir :: IndexPreference) a. Bias dir a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+$cfoldl1 :: forall (dir :: IndexPreference) a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+$cfoldr1 :: forall (dir :: IndexPreference) a. (a -&gt; a -&gt; a) -&gt; Bias dir a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+$cfoldl' :: forall (dir :: IndexPreference) b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+$cfoldl :: forall (dir :: IndexPreference) b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+$cfoldr' :: forall (dir :: IndexPreference) a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+$cfoldr :: forall (dir :: IndexPreference) a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bias dir a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Bias dir a -&gt; m
+$cfoldMap' :: forall (dir :: IndexPreference) m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Bias dir a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Bias dir a -&gt; m
+$cfoldMap :: forall (dir :: IndexPreference) m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Bias dir a -&gt; m
+fold :: Bias dir m -&gt; m
+$cfold :: forall (dir :: IndexPreference) m. Monoid m =&gt; Bias dir m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062483"><span id="local-6989586621679062485"><span class="annot"><span class="annottext">a -&gt; Bias dir b -&gt; Bias dir a
+(a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b
+(forall a b. (a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b)
+-&gt; (forall a b. a -&gt; Bias dir b -&gt; Bias dir a)
+-&gt; Functor (Bias dir)
+forall a b. a -&gt; Bias dir b -&gt; Bias dir a
+forall a b. (a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b
+forall (dir :: IndexPreference) a b. a -&gt; Bias dir b -&gt; Bias dir a
+forall (dir :: IndexPreference) a b.
+(a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Bias dir b -&gt; Bias dir a
+$c&lt;$ :: forall (dir :: IndexPreference) a b. a -&gt; Bias dir b -&gt; Bias dir a
+fmap :: (a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b
+$cfmap :: forall (dir :: IndexPreference) a b.
+(a -&gt; b) -&gt; Bias dir a -&gt; Bias dir b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062467"><span id="local-6989586621679062469"><span id="local-6989586621679062471"><span id="local-6989586621679062473"><span id="local-6989586621679062475"><span id="local-6989586621679062477"><span id="local-6989586621679062479"><span class="annot"><span class="annottext">Eq (Bias dir a)
+Eq (Bias dir a) =&gt;
+(Bias dir a -&gt; Bias dir a -&gt; Ordering)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bool)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bool)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bool)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bool)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bias dir a)
+-&gt; (Bias dir a -&gt; Bias dir a -&gt; Bias dir a)
+-&gt; Ord (Bias dir a)
+Bias dir a -&gt; Bias dir a -&gt; Bool
+Bias dir a -&gt; Bias dir a -&gt; Ordering
+Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall (dir :: IndexPreference) a. Ord a =&gt; Eq (Bias dir a)
+forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Ordering
+forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+min :: Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+$cmin :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+max :: Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+$cmax :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bias dir a
+&gt;= :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c&gt;= :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+&gt; :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c&gt; :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+&lt;= :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c&lt;= :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+&lt; :: Bias dir a -&gt; Bias dir a -&gt; Bool
+$c&lt; :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Bool
+compare :: Bias dir a -&gt; Bias dir a -&gt; Ordering
+$ccompare :: forall (dir :: IndexPreference) a.
+Ord a =&gt;
+Bias dir a -&gt; Bias dir a -&gt; Ordering
+$cp1Ord :: forall (dir :: IndexPreference) a. Ord a =&gt; Eq (Bias dir a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062458"><span id="local-6989586621679062460"><span id="local-6989586621679062462"><span id="local-6989586621679062464"><span class="annot"><span class="annottext">ReadPrec [Bias dir a]
+ReadPrec (Bias dir a)
+Tag -&gt; ReadS (Bias dir a)
+ReadS [Bias dir a]
+(Tag -&gt; ReadS (Bias dir a))
+-&gt; ReadS [Bias dir a]
+-&gt; ReadPrec (Bias dir a)
+-&gt; ReadPrec [Bias dir a]
+-&gt; Read (Bias dir a)
+forall a.
+(Tag -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall (dir :: IndexPreference) a. Read a =&gt; ReadPrec [Bias dir a]
+forall (dir :: IndexPreference) a. Read a =&gt; ReadPrec (Bias dir a)
+forall (dir :: IndexPreference) a.
+Read a =&gt;
+Tag -&gt; ReadS (Bias dir a)
+forall (dir :: IndexPreference) a. Read a =&gt; ReadS [Bias dir a]
+readListPrec :: ReadPrec [Bias dir a]
+$creadListPrec :: forall (dir :: IndexPreference) a. Read a =&gt; ReadPrec [Bias dir a]
+readPrec :: ReadPrec (Bias dir a)
+$creadPrec :: forall (dir :: IndexPreference) a. Read a =&gt; ReadPrec (Bias dir a)
+readList :: ReadS [Bias dir a]
+$creadList :: forall (dir :: IndexPreference) a. Read a =&gt; ReadS [Bias dir a]
+readsPrec :: Tag -&gt; ReadS (Bias dir a)
+$creadsPrec :: forall (dir :: IndexPreference) a.
+Read a =&gt;
+Tag -&gt; ReadS (Bias dir a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062451"><span id="local-6989586621679062453"><span id="local-6989586621679062455"><span class="annot"><span class="annottext">Tag -&gt; Bias dir a -&gt; ShowS
+[Bias dir a] -&gt; ShowS
+Bias dir a -&gt; String
+(Tag -&gt; Bias dir a -&gt; ShowS)
+-&gt; (Bias dir a -&gt; String)
+-&gt; ([Bias dir a] -&gt; ShowS)
+-&gt; Show (Bias dir a)
+forall a.
+(Tag -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall (dir :: IndexPreference) a.
+Show a =&gt;
+Tag -&gt; Bias dir a -&gt; ShowS
+forall (dir :: IndexPreference) a. Show a =&gt; [Bias dir a] -&gt; ShowS
+forall (dir :: IndexPreference) a. Show a =&gt; Bias dir a -&gt; String
+showList :: [Bias dir a] -&gt; ShowS
+$cshowList :: forall (dir :: IndexPreference) a. Show a =&gt; [Bias dir a] -&gt; ShowS
+show :: Bias dir a -&gt; String
+$cshow :: forall (dir :: IndexPreference) a. Show a =&gt; Bias dir a -&gt; String
+showsPrec :: Tag -&gt; Bias dir a -&gt; ShowS
+$cshowsPrec :: forall (dir :: IndexPreference) a.
+Show a =&gt;
+Tag -&gt; Bias dir a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679062440"><span id="local-6989586621679062442"><span id="local-6989586621679062444"><span id="local-6989586621679062446"><span class="annot"><span class="annottext">Functor (Bias dir)
+Foldable (Bias dir)
+(Functor (Bias dir), Foldable (Bias dir)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Bias dir (f a) -&gt; f (Bias dir a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Bias dir a -&gt; m (Bias dir b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Bias dir (m a) -&gt; m (Bias dir a))
+-&gt; Traversable (Bias dir)
+(a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b)
+forall (dir :: IndexPreference). Functor (Bias dir)
+forall (dir :: IndexPreference). Foldable (Bias dir)
+forall (dir :: IndexPreference) (m :: * -&gt; *) a.
+Monad m =&gt;
+Bias dir (m a) -&gt; m (Bias dir a)
+forall (dir :: IndexPreference) (f :: * -&gt; *) a.
+Applicative f =&gt;
+Bias dir (f a) -&gt; f (Bias dir a)
+forall (dir :: IndexPreference) (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Bias dir a -&gt; m (Bias dir b)
+forall (dir :: IndexPreference) (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Bias dir (m a) -&gt; m (Bias dir a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Bias dir (f a) -&gt; f (Bias dir a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Bias dir a -&gt; m (Bias dir b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b)
+sequence :: Bias dir (m a) -&gt; m (Bias dir a)
+$csequence :: forall (dir :: IndexPreference) (m :: * -&gt; *) a.
+Monad m =&gt;
+Bias dir (m a) -&gt; m (Bias dir a)
+mapM :: (a -&gt; m b) -&gt; Bias dir a -&gt; m (Bias dir b)
+$cmapM :: forall (dir :: IndexPreference) (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Bias dir a -&gt; m (Bias dir b)
+sequenceA :: Bias dir (f a) -&gt; f (Bias dir a)
+$csequenceA :: forall (dir :: IndexPreference) (f :: * -&gt; *) a.
+Applicative f =&gt;
+Bias dir (f a) -&gt; f (Bias dir a)
+traverse :: (a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b)
+$ctraverse :: forall (dir :: IndexPreference) (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Bias dir a -&gt; f (Bias dir b)
+$cp2Traversable :: forall (dir :: IndexPreference). Foldable (Bias dir)
+$cp1Traversable :: forall (dir :: IndexPreference). Functor (Bias dir)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">data</span><span> </span><span id="IndexPreference"><span class="annot"><a href="Data.Map.Util.html#IndexPreference"><span class="hs-identifier hs-var">IndexPreference</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="L"><span class="annot"><a href="Data.Map.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="R"><span class="annot"><a href="Data.Map.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span>
+</span><span id="line-54"></span><span>	</span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span id="L"><span class="annot"><a href="Data.Map.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Data.Map.Util.html#L"><span class="hs-identifier hs-type">L</span></a></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">type</span><span> </span><span id="R"><span class="annot"><a href="Data.Map.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="annot"><a href="Data.Map.Util.html#R"><span class="hs-identifier hs-type">R</span></a></span><span>
+</span><span id="line-57"></span></pre></body></html>

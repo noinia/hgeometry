@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Language/Haskell/TH/Desugar/FV.hs
+
+(c) Ryan Scott 2018
+
+Compute free variables of programs.
+-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Language.Haskell.TH.Desugar.FV</span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#fvDType"><span class="hs-identifier">fvDType</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#extractBoundNamesDPat"><span class="hs-identifier">extractBoundNamesDPat</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
+
+#if __GLASGOW_HASKELL__ &lt; 710
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Foldable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">foldMap</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">#if __GLASGOW_HASKELL__ &lt; 804
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator">&lt;&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.AST</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OS</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier">OSet</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | Compute the free variables of a 'DType'.</span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#fvDType"><span class="hs-identifier hs-type">fvDType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-27"></span><span id="fvDType"><span class="annot"><span class="annottext">fvDType :: DType -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fvDType"><span class="hs-identifier hs-var hs-var">fvDType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679410796"><span class="annot"><span class="annottext">go :: DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-type">DForallT</span></a></span><span> </span><span id="local-6989586621679410794"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621679410794"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621679410793"><span class="annot"><span class="annottext">ctxt :: DCxt
+</span><a href="#local-6989586621679410793"><span class="hs-identifier hs-var">ctxt</span></a></span></span><span> </span><span id="local-6989586621679410792"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679410792"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr] -&gt; OSet Name -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvbs"><span class="hs-identifier hs-var">fv_dtvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621679410794"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(DType -&gt; OSet Name) -&gt; DCxt -&gt; OSet Name
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fvDType"><span class="hs-identifier hs-var">fvDType</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679410793"><span class="hs-identifier hs-var">ctxt</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410792"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppT"><span class="hs-identifier hs-type">DAppT</span></a></span><span> </span><span id="local-6989586621679410788"><span class="annot"><span class="annottext">t1 :: DType
+</span><a href="#local-6989586621679410788"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621679410787"><span class="annot"><span class="annottext">t2 :: DType
+</span><a href="#local-6989586621679410787"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410788"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410787"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppKindT"><span class="hs-identifier hs-type">DAppKindT</span></a></span><span> </span><span id="local-6989586621679410785"><span class="annot"><span class="annottext">t :: DType
+</span><a href="#local-6989586621679410785"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679410784"><span class="annot"><span class="annottext">k :: DType
+</span><a href="#local-6989586621679410784"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410785"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410784"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigT"><span class="hs-identifier hs-type">DSigT</span></a></span><span> </span><span id="local-6989586621679410782"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679410782"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621679410781"><span class="annot"><span class="annottext">ki :: DType
+</span><a href="#local-6989586621679410781"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410782"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410781"><span class="hs-identifier hs-var">ki</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarT"><span class="hs-identifier hs-type">DVarT</span></a></span><span> </span><span id="local-6989586621679410779"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621679410779"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name
+forall a. a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#singleton"><span class="hs-identifier hs-var">OS.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679410779"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConT"><span class="hs-identifier hs-type">DConT</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DArrowT"><span class="hs-identifier hs-type">DArrowT</span></a></span><span>                 </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLitT"><span class="hs-identifier hs-type">DLitT</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><a href="#local-6989586621679410796"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DWildCardT"><span class="hs-identifier hs-type">DWildCardT</span></a></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- Extracting bound term names</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | Extract the term variables bound by a 'DPat'.</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- This does /not/ extract any type variables bound by pattern signatures.</span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#extractBoundNamesDPat"><span class="hs-identifier hs-type">extractBoundNamesDPat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPat"><span class="hs-identifier hs-type">DPat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-48"></span><span id="extractBoundNamesDPat"><span class="annot"><span class="annottext">extractBoundNamesDPat :: DPat -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#extractBoundNamesDPat"><span class="hs-identifier hs-var hs-var">extractBoundNamesDPat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPat"><span class="hs-identifier hs-type">DPat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679410772"><span class="annot"><span class="annottext">go :: DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLitP"><span class="hs-identifier hs-type">DLitP</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-type">DVarP</span></a></span><span> </span><span id="local-6989586621679410769"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621679410769"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name
+forall a. a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#singleton"><span class="hs-identifier hs-var">OS.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679410769"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConP"><span class="hs-identifier hs-type">DConP</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679410767"><span class="annot"><span class="annottext">pats :: [DPat]
+</span><a href="#local-6989586621679410767"><span class="hs-identifier hs-var">pats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DPat -&gt; OSet Name) -&gt; [DPat] -&gt; OSet Name
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[DPat]
+</span><a href="#local-6989586621679410767"><span class="hs-identifier hs-var">pats</span></a></span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTildeP"><span class="hs-identifier hs-type">DTildeP</span></a></span><span> </span><span id="local-6989586621679410765"><span class="annot"><span class="annottext">p :: DPat
+</span><a href="#local-6989586621679410765"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679410765"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DBangP"><span class="hs-identifier hs-type">DBangP</span></a></span><span> </span><span id="local-6989586621679410763"><span class="annot"><span class="annottext">p :: DPat
+</span><a href="#local-6989586621679410763"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679410763"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigP"><span class="hs-identifier hs-type">DSigP</span></a></span><span> </span><span id="local-6989586621679410761"><span class="annot"><span class="annottext">p :: DPat
+</span><a href="#local-6989586621679410761"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679410761"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><a href="#local-6989586621679410772"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-type">DWildP</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var">OS.empty</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- Binding forms</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-----</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- | Adjust the free variables of something following 'DTyVarBndr's.</span><span>
+</span><span id="line-64"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvbs"><span class="hs-identifier hs-type">fv_dtvbs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-65"></span><span id="fv_dtvbs"><span class="annot"><span class="annottext">fv_dtvbs :: [DTyVarBndr] -&gt; OSet Name -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvbs"><span class="hs-identifier hs-var hs-var">fv_dtvbs</span></a></span></span><span> </span><span id="local-6989586621679410759"><span class="annot"><span class="annottext">tvbs :: [DTyVarBndr]
+</span><a href="#local-6989586621679410759"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621679410758"><span class="annot"><span class="annottext">fvs :: OSet Name
+</span><a href="#local-6989586621679410758"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DTyVarBndr -&gt; OSet Name -&gt; OSet Name)
+-&gt; OSet Name -&gt; [DTyVarBndr] -&gt; OSet Name
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr -&gt; OSet Name -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvb"><span class="hs-identifier hs-var">fv_dtvb</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679410758"><span class="hs-identifier hs-var">fvs</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndr]
+</span><a href="#local-6989586621679410759"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- | Adjust the free variables of something following a 'DTyVarBndr'.</span><span>
+</span><span id="line-68"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvb"><span class="hs-identifier hs-type">fv_dtvb</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-69"></span><span id="fv_dtvb"><span class="annot"><span class="annottext">fv_dtvb :: DTyVarBndr -&gt; OSet Name -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvb"><span class="hs-identifier hs-var hs-var">fv_dtvb</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPlainTV"><span class="hs-identifier hs-type">DPlainTV</span></a></span><span> </span><span id="local-6989586621679410754"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621679410754"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span>    </span><span id="local-6989586621679410753"><span class="annot"><span class="annottext">fvs :: OSet Name
+</span><a href="#local-6989586621679410753"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name -&gt; OSet Name
+forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#delete"><span class="hs-identifier hs-var">OS.delete</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679410754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679410753"><span class="hs-identifier hs-var">fvs</span></a></span><span>
+</span><span id="line-70"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html#fv_dtvb"><span class="hs-identifier hs-var">fv_dtvb</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DKindedTV"><span class="hs-identifier hs-type">DKindedTV</span></a></span><span> </span><span id="local-6989586621679410750"><span class="annot"><span class="annottext">n :: Name
+</span><a href="#local-6989586621679410750"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679410749"><span class="annot"><span class="annottext">k :: DType
+</span><a href="#local-6989586621679410749"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679410748"><span class="annot"><span class="annottext">fvs :: OSet Name
+</span><a href="#local-6989586621679410748"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OSet Name -&gt; OSet Name
+forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#delete"><span class="hs-identifier hs-var">OS.delete</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679410750"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679410748"><span class="hs-identifier hs-var">fvs</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#fvDType"><span class="hs-identifier hs-var">fvDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679410749"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-71"></span></pre></body></html>

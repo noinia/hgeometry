@@ -1,0 +1,993 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable, TypeSynonymInstances, FlexibleInstances,
+        MultiParamTypeClasses, TypeFamilies, ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- hexpat, a Haskell wrapper for expat</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright (C) 2008 Evan Martin &lt;martine@danga.com&gt;</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright (C) 2009 Stephen Blackheath &lt;http://blacksapphire.com/antispam&gt;</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- | This module provides functions to parse an XML document to a tree structure,</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- either strictly or lazily.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- The 'GenericXMLString' type class allows you to use any string type. Three</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- string types are provided for here: 'String', 'ByteString' and 'Text'.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Here is a complete example to get you started:</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- &gt; -- | A &quot;hello world&quot; example of hexpat that lazily parses a document, printing</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- &gt; -- it to standard out.</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt; import Text.XML.Expat.Tree</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- &gt; import Text.XML.Expat.Format</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- &gt; import System.Environment</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- &gt; import System.Exit</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- &gt; import System.IO</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- &gt; import qualified Data.ByteString.Lazy as L</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- &gt; main = do</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- &gt;     args &lt;- getArgs</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- &gt;     case args of</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- &gt;         [filename] -&gt; process filename</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- &gt;         otherwise  -&gt; do</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- &gt;             hPutStrLn stderr &quot;Usage: helloworld &lt;file.xml&gt;&quot;</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &gt;             exitWith $ ExitFailure 1</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt; process :: String -&gt; IO ()</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- &gt; process filename = do</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- &gt;     inputText &lt;- L.readFile filename</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- &gt;     -- Note: Because we're not using the tree, Haskell can't infer the type of</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- &gt;     -- strings we're using so we need to tell it explicitly with a type signature.</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- &gt;     let (xml, mErr) = parse defaultParseOptions inputText :: (UNode String, Maybe XMLParseError)</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- &gt;     -- Process document before handling error, so we get lazy processing.</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- &gt;     L.hPutStr stdout $ format xml</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- &gt;     putStrLn &quot;&quot;</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- &gt;     case mErr of</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- &gt;         Nothing -&gt; return ()</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- &gt;         Just err -&gt; do</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- &gt;             hPutStrLn stderr $ &quot;XML parse failed: &quot;++show err</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- &gt;             exitWith $ ExitFailure 2</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- Error handling in strict parses is very straightforward - just check the</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- 'Either' return value.  Lazy parses are not so simple.  Here are two working</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- examples that illustrate the ways to handle errors.  Here they are:</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- Way no. 1 - Using a Maybe value</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- &gt; import Text.XML.Expat.Tree</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- &gt; import qualified Data.ByteString.Lazy as L</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- &gt; import Data.ByteString.Internal (c2w)</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- &gt; -- This is the recommended way to handle errors in lazy parses</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- &gt; main = do</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- &gt;     let (tree, mError) = parse defaultParseOptions</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- &gt;                    (L.pack $ map c2w $ &quot;&lt;top&gt;&lt;banana&gt;&lt;/apple&gt;&lt;/top&gt;&quot;)</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- &gt;     print (tree :: UNode String)</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- &gt;     -- Note: We check the error _after_ we have finished our processing</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- &gt;     -- on the tree.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- &gt;     case mError of</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- &gt;         Just err -&gt; putStrLn $ &quot;It failed : &quot;++show err</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &gt;         Nothing -&gt; putStrLn &quot;Success!&quot;</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- Way no. 2 - Using exceptions</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- 'parseThrowing' can throw an exception from pure code, which is generally a bad</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- way to handle errors, because Haskell\'s lazy evaluation means it\'s hard to</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- predict where it will be thrown from.  However, it may be acceptable in</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- situations where it's not expected during normal operation, depending on the</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- design of your program.</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- &gt; ...</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt; import Control.Exception.Extensible as E</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- &gt; -- This is not the recommended way to handle errors.</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- &gt; main = do</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- &gt;     do</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- &gt;         let tree = parseThrowing defaultParseOptions</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;                        (L.pack $ map c2w $ &quot;&lt;top&gt;&lt;banana&gt;&lt;/apple&gt;&lt;/top&gt;&quot;)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- &gt;         print (tree :: UNode String)</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- &gt;         -- Because of lazy evaluation, you should not process the tree outside</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- &gt;         -- the 'do' block, or exceptions could be thrown that won't get caught.</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- &gt;     `E.catch` (\exc -&gt;</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;         case E.fromException exc of</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- &gt;             Just (XMLParseException err) -&gt; putStrLn $ &quot;It failed : &quot;++show err</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- &gt;             Nothing -&gt; E.throwIO exc)</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Text.XML.Expat.Tree</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Tree structure</span></span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier">Node</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier">NodeG</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#UNode"><span class="hs-identifier">UNode</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Generic node manipulation</span></span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html"><span class="hs-identifier">Text.XML.Expat.Internal.NodeClass</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Qualified nodes</span></span><span>
+</span><span id="line-105"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#QNode"><span class="hs-identifier">QNode</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html"><span class="hs-identifier">Text.XML.Expat.Internal.Qualified</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Namespaced nodes</span></span><span>
+</span><span id="line-109"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#NNode"><span class="hs-identifier">NNode</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Namespaced.html"><span class="hs-identifier">Text.XML.Expat.Internal.Namespaced</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Parse to tree</span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier">ParseOptions</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-114"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.SAX.html#defaultParseOptions"><span class="hs-identifier">defaultParseOptions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier">Encoding</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-116"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#parse"><span class="hs-identifier">parse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#parse%27"><span class="hs-identifier">parse'</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-118"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#parseG"><span class="hs-identifier">parseG</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-119"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier">XMLParseError</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier">XMLParseLocation</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Variant that throws exceptions</span></span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#parseThrowing"><span class="hs-identifier">parseThrowing</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-124"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.SAX.html#XMLParseException"><span class="hs-identifier">XMLParseException</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Convert from SAX</span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#saxToTree"><span class="hs-identifier">saxToTree</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-128"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.Tree.html#saxToTreeG"><span class="hs-identifier">saxToTreeG</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Abstraction of string types</span></span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier">GenericXMLString</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html"><span class="hs-identifier">Text.XML.Expat.SAX</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier">Encoding</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier">GenericXMLString</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier">ParseOptions</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#defaultParseOptions"><span class="hs-identifier">defaultParseOptions</span></a></span><span>
+</span><span id="line-138"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier">SAXEvent</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier">XMLParseError</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#XMLParseException"><span class="hs-identifier">XMLParseException</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier">XMLParseLocation</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html"><span class="hs-identifier">Text.XML.Expat.SAX</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">SAX</span></span><span>
+</span><span id="line-143"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Namespaced.html"><span class="hs-identifier">Text.XML.Expat.Internal.Namespaced</span></a></span><span>
+</span><span id="line-144"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html"><span class="hs-identifier">Text.XML.Expat.Internal.NodeClass</span></a></span><span>
+</span><span id="line-145"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html"><span class="hs-identifier">Text.XML.Expat.Internal.Qualified</span></a></span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span>
+</span><span id="line-148"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mplus</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mzero</span></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-151"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.Class</span></span><span>
+</span><span id="line-152"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Monoid</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">mempty</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">mappend</span></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- | The tree representation of the XML document.</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- @c@ is the container type for the element's children, which would normally be [],</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- but could potentially be a monadic list type to allow for chunked I/O.</span><span>
+</span><span id="line-160"></span><span class="hs-comment">--</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- @tag@ is the tag type, which can either be one of several string types,</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- or a special type from the @Text.XML.Expat.Namespaced@ or</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- @Text.XML.Expat.Qualified@ modules.</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- @text@ is the string type for text content.</span><span>
+</span><span id="line-166"></span><span class="hs-keyword">data</span><span> </span><span id="NodeG"><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-var">NodeG</span></a></span></span><span> </span><span id="local-6989586621679115501"><span class="annot"><a href="#local-6989586621679115501"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span id="local-6989586621679115503"><span class="annot"><a href="#local-6989586621679115503"><span class="hs-identifier hs-type">tag</span></a></span></span><span> </span><span id="local-6989586621679115502"><span class="annot"><a href="#local-6989586621679115502"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-167"></span><span>    </span><span id="Element"><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-168"></span><span>        </span><span id="eName"><span class="annot"><span class="annottext">NodeG c tag text -&gt; tag
+</span><a href="Text.XML.Expat.Tree.html#eName"><span class="hs-identifier hs-var hs-var">eName</span></a></span></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679115503"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-169"></span><span>        </span><span id="eAttributes"><span class="annot"><span class="annottext">NodeG c tag text -&gt; [(tag, text)]
+</span><a href="Text.XML.Expat.Tree.html#eAttributes"><span class="hs-identifier hs-var hs-var">eAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679115503"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679115502"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><span id="line-170"></span><span>        </span><span id="eChildren"><span class="annot"><span class="annottext">NodeG c tag text -&gt; c (NodeG c tag text)
+</span><a href="Text.XML.Expat.Tree.html#eChildren"><span class="hs-identifier hs-var hs-var">eChildren</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679115501"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115501"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115503"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115502"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-172"></span><span>    </span><span id="Text"><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679115502"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="ListOf"><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#ListOf"><span class="hs-identifier hs-var">ListOf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span id="local-6989586621679115391"><span class="annot"><a href="#local-6989586621679115391"><span class="hs-identifier hs-type hs-type">c</span></a></span></span><span> </span><span id="local-6989586621679115390"><span class="annot"><a href="#local-6989586621679115390"><span class="hs-identifier hs-type hs-type">tag</span></a></span></span><span> </span><span id="local-6989586621679115389"><span class="annot"><a href="#local-6989586621679115389"><span class="hs-identifier hs-type hs-type">text</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679115391"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115391"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115390"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115389"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span id="local-6989586621679115387"><span id="local-6989586621679115388"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679115382"><span id="local-6989586621679115384"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679115388"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679115387"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679115388"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115387"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-177"></span><span>    </span><span id="local-6989586621679115380"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; NodeG [] tag text -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679115378"><span class="annot"><span class="annottext">d :: Int
+</span><a href="#local-6989586621679115378"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115377"><span class="annot"><span class="annottext">na :: tag
+</span><a href="#local-6989586621679115377"><span class="hs-identifier hs-var">na</span></a></span></span><span> </span><span id="local-6989586621679115376"><span class="annot"><span class="annottext">at :: [(tag, text)]
+</span><a href="#local-6989586621679115376"><span class="hs-identifier hs-var">at</span></a></span></span><span> </span><span id="local-6989586621679115375"><span class="annot"><span class="annottext">ch :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115375"><span class="hs-identifier hs-var">ch</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115378"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-178"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Element &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; tag -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115377"><span class="hs-identifier hs-var">na</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot; &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-179"></span><span>                         </span><span class="annot"><span class="annottext">Int -&gt; [(tag, text)] -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115376"><span class="hs-identifier hs-var">at</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot; &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-180"></span><span>                         </span><span class="annot"><span class="annottext">Int -&gt; [NodeG [] tag text] -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115375"><span class="hs-identifier hs-var">ch</span></a></span><span>
+</span><span id="line-181"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span id="local-6989586621679115371"><span class="annot"><span class="annottext">d :: Int
+</span><a href="#local-6989586621679115371"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115370"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679115370"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115371"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Text &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; text -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="hs-number">11</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115370"><span class="hs-identifier hs-var">t</span></a></span></span></span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span id="local-6989586621679115368"><span id="local-6989586621679115369"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679115365"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679115369"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679115368"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679115369"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115368"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-184"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115363"><span class="annot"><span class="annottext">na1 :: tag
+</span><a href="#local-6989586621679115363"><span class="hs-identifier hs-var">na1</span></a></span></span><span> </span><span id="local-6989586621679115362"><span class="annot"><span class="annottext">at1 :: [(tag, text)]
+</span><a href="#local-6989586621679115362"><span class="hs-identifier hs-var">at1</span></a></span></span><span> </span><span id="local-6989586621679115361"><span class="annot"><span class="annottext">ch1 :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115361"><span class="hs-identifier hs-var">ch1</span></a></span></span><span> </span><span id="local-6989586621679115360"><span class="annot"><span class="annottext">== :: NodeG [] tag text -&gt; NodeG [] tag text -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115359"><span class="annot"><span class="annottext">na2 :: tag
+</span><a href="#local-6989586621679115359"><span class="hs-identifier hs-var">na2</span></a></span></span><span> </span><span id="local-6989586621679115358"><span class="annot"><span class="annottext">at2 :: [(tag, text)]
+</span><a href="#local-6989586621679115358"><span class="hs-identifier hs-var">at2</span></a></span></span><span> </span><span id="local-6989586621679115357"><span class="annot"><span class="annottext">ch2 :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115357"><span class="hs-identifier hs-var">ch2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-185"></span><span>        </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115363"><span class="hs-identifier hs-var">na1</span></a></span><span> </span><span class="annot"><span class="annottext">tag -&gt; tag -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115359"><span class="hs-identifier hs-var">na2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-186"></span><span>        </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115362"><span class="hs-identifier hs-var">at1</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)] -&gt; [(tag, text)] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115358"><span class="hs-identifier hs-var">at2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-187"></span><span>        </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115361"><span class="hs-identifier hs-var">ch1</span></a></span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text] -&gt; [NodeG [] tag text] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115357"><span class="hs-identifier hs-var">ch2</span></a></span><span>
+</span><span id="line-188"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115355"><span class="annot"><span class="annottext">t1 :: text
+</span><a href="#local-6989586621679115355"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115354"><span class="annot"><span class="annottext">t2 :: text
+</span><a href="#local-6989586621679115354"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115355"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">text -&gt; text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115354"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-189"></span><span>    </span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span></span></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- | A pure tree representation that uses a list as its container type.</span><span>
+</span><span id="line-192"></span><span class="hs-comment">--</span><span>
+</span><span id="line-193"></span><span class="hs-comment">-- In the @hexpat@ package, a list of nodes has the type @[Node tag text]@, but note</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- that you can also use the more general type function 'ListOf' to give a list of</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- any node type, using that node's associated list type, e.g.</span><span>
+</span><span id="line-196"></span><span class="hs-comment">-- @ListOf (UNode Text)@.</span><span>
+</span><span id="line-197"></span><span class="hs-keyword">type</span><span> </span><span id="Node"><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span></span><span> </span><span id="local-6989586621679115353"><span class="annot"><a href="#local-6989586621679115353"><span class="hs-identifier hs-type">tag</span></a></span></span><span> </span><span id="local-6989586621679115352"><span class="annot"><a href="#local-6989586621679115352"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679115353"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115352"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span id="local-6989586621679115350"><span id="local-6989586621679115351"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679115351"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679115350"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679115351"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115350"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-200"></span><span>    </span><span id="local-6989586621679115347"><span class="annot"><span class="annottext">rnf :: NodeG [] tag text -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115345"><span class="annot"><span class="annottext">nam :: tag
+</span><a href="#local-6989586621679115345"><span class="hs-identifier hs-var">nam</span></a></span></span><span> </span><span id="local-6989586621679115344"><span class="annot"><span class="annottext">att :: [(tag, text)]
+</span><a href="#local-6989586621679115344"><span class="hs-identifier hs-var">att</span></a></span></span><span> </span><span id="local-6989586621679115343"><span class="annot"><span class="annottext">chi :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115343"><span class="hs-identifier hs-var">chi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(tag, [(tag, text)], [NodeG [] tag text]) -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115345"><span class="hs-identifier hs-var">nam</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115344"><span class="hs-identifier hs-var">att</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115343"><span class="hs-identifier hs-var">chi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115342"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679115342"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115342"><span class="hs-identifier hs-var">txt</span></a></span></span></span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span class="hs-comment">-- | Type alias for a node with unqualified tag names where tag and</span><span>
+</span><span id="line-204"></span><span class="hs-comment">-- text are the same string type.</span><span>
+</span><span id="line-205"></span><span class="hs-keyword">type</span><span> </span><span id="UNode"><span class="annot"><a href="Text.XML.Expat.Tree.html#UNode"><span class="hs-identifier hs-var">UNode</span></a></span></span><span> </span><span id="local-6989586621679115341"><span class="annot"><a href="#local-6989586621679115341"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115341"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115341"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-206"></span><span>
+</span><span id="line-207"></span><span class="hs-comment">-- | Type alias for a node where qualified names are used for tags</span><span>
+</span><span id="line-208"></span><span class="hs-keyword">type</span><span> </span><span id="QNode"><span class="annot"><a href="Text.XML.Expat.Tree.html#QNode"><span class="hs-identifier hs-var">QNode</span></a></span></span><span> </span><span id="local-6989586621679115340"><span class="annot"><a href="#local-6989586621679115340"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Qualified.html#QName"><span class="hs-identifier hs-type">QName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115340"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679115340"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span class="hs-comment">-- | Type alias for a node where namespaced names are used for tags</span><span>
+</span><span id="line-211"></span><span class="hs-keyword">type</span><span> </span><span id="NNode"><span class="annot"><a href="Text.XML.Expat.Tree.html#NNode"><span class="hs-identifier hs-var">NNode</span></a></span></span><span> </span><span id="local-6989586621679115338"><span class="annot"><a href="#local-6989586621679115338"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.Namespaced.html#NName"><span class="hs-identifier hs-type">NName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115338"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679115338"><span class="hs-identifier hs-type">text</span></a></span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span id="local-6989586621679115336"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679115336"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">List</span></span><span> </span><span class="annot"><a href="#local-6989586621679115336"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#NodeClass"><span class="hs-identifier hs-type">NodeClass</span></a></span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115336"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-214"></span><span>    </span><span id="local-6989586621679115312"><span class="annot"><span class="annottext">textContentM :: NodeG c tag text -&gt; ItemM c text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#textContentM"><span class="hs-identifier hs-var hs-var hs-var hs-var">textContentM</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115310"><span class="annot"><span class="annottext">children :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115310"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(text -&gt; text -&gt; text) -&gt; text -&gt; c text -&gt; ItemM c text
+forall (l :: * -&gt; *) a b.
+List l =&gt;
+(a -&gt; b -&gt; a) -&gt; a -&gt; l b -&gt; ItemM l a
+</span><span class="hs-identifier hs-var">foldlL</span></span><span> </span><span class="annot"><span class="annottext">text -&gt; text -&gt; text
+forall a. Monoid a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">mappend</span></span><span> </span><span class="annot"><span class="annottext">text
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">(c text -&gt; ItemM c text) -&gt; c text -&gt; ItemM c text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">c (ItemM c text) -&gt; c text
+forall (l :: * -&gt; *) a. List l =&gt; l (ItemM l a) -&gt; l a
+</span><span class="hs-identifier hs-var">joinM</span></span><span> </span><span class="annot"><span class="annottext">(c (ItemM c text) -&gt; c text) -&gt; c (ItemM c text) -&gt; c text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(NodeG c tag text -&gt; ItemM c text)
+-&gt; c (NodeG c tag text) -&gt; c (ItemM c text)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">NodeG c tag text -&gt; ItemM c text
+forall (n :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) text tag.
+(NodeClass n c, Monoid text) =&gt;
+n c tag text -&gt; ItemM c text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#textContentM"><span class="hs-identifier hs-var">textContentM</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115310"><span class="hs-identifier hs-var">children</span></a></span><span>
+</span><span id="line-215"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#textContentM"><span class="hs-identifier hs-var">textContentM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115307"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679115307"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; ItemM c text
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115307"><span class="hs-identifier hs-var">txt</span></a></span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span>    </span><span id="local-6989586621679115306"><span class="annot"><span class="annottext">isElement :: NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isElement"><span class="hs-identifier hs-var hs-var hs-var hs-var">isElement</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-218"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#isElement"><span class="hs-identifier hs-var">isElement</span></a></span><span> </span><span class="hs-identifier">_</span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-219"></span><span>    </span><span>
+</span><span id="line-220"></span><span>    </span><span id="local-6989586621679115304"><span class="annot"><span class="annottext">isText :: NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isText"><span class="hs-identifier hs-var hs-var hs-var hs-var">isText</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-221"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#isText"><span class="hs-identifier hs-var">isText</span></a></span><span> </span><span class="hs-identifier">_</span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-222"></span><span>
+</span><span id="line-223"></span><span>    </span><span id="local-6989586621679115302"><span class="annot"><span class="annottext">isCData :: NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isCData"><span class="hs-identifier hs-var hs-var hs-var hs-var">isCData</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-224"></span><span>    </span><span id="local-6989586621679115300"><span class="annot"><span class="annottext">isProcessingInstruction :: NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isProcessingInstruction"><span class="hs-identifier hs-var hs-var hs-var hs-var">isProcessingInstruction</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-225"></span><span>    </span><span id="local-6989586621679115298"><span class="annot"><span class="annottext">isComment :: NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isComment"><span class="hs-identifier hs-var hs-var hs-var hs-var">isComment</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-226"></span><span>
+</span><span id="line-227"></span><span>    </span><span id="local-6989586621679115296"><span class="annot"><span class="annottext">isNamed :: tag -&gt; NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#isNamed"><span class="hs-identifier hs-var hs-var hs-var hs-var">isNamed</span></a></span></span><span> </span><span class="hs-identifier">_</span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-228"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#isNamed"><span class="hs-identifier hs-var">isNamed</span></a></span><span> </span><span id="local-6989586621679115294"><span class="annot"><span class="annottext">nm :: tag
+</span><a href="#local-6989586621679115294"><span class="hs-identifier hs-var">nm</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115293"><span class="annot"><span class="annottext">nm' :: tag
+</span><a href="#local-6989586621679115293"><span class="hs-identifier hs-var">nm'</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115294"><span class="hs-identifier hs-var">nm</span></a></span><span> </span><span class="annot"><span class="annottext">tag -&gt; tag -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115293"><span class="hs-identifier hs-var">nm'</span></a></span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span>    </span><span id="local-6989586621679115292"><span class="annot"><span class="annottext">getName :: NodeG c tag text -&gt; tag
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#getName"><span class="hs-identifier hs-var hs-var hs-var hs-var">getName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-231"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115290"><span class="annot"><span class="annottext">name :: tag
+</span><a href="#local-6989586621679115290"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115290"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-232"></span><span>
+</span><span id="line-233"></span><span>    </span><span id="local-6989586621679115289"><span class="annot"><span class="annottext">hasTarget :: text -&gt; NodeG c tag text -&gt; Bool
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#hasTarget"><span class="hs-identifier hs-var hs-var hs-var hs-var">hasTarget</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-234"></span><span>    </span><span id="local-6989586621679115287"><span class="annot"><span class="annottext">getTarget :: NodeG c tag text -&gt; text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#getTarget"><span class="hs-identifier hs-var hs-var hs-var hs-var">getTarget</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-235"></span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621679115285"><span class="annot"><span class="annottext">getAttributes :: NodeG c tag text -&gt; [(tag, text)]
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#getAttributes"><span class="hs-identifier hs-var hs-var hs-var hs-var">getAttributes</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-237"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#getAttributes"><span class="hs-identifier hs-var">getAttributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115283"><span class="annot"><span class="annottext">attrs :: [(tag, text)]
+</span><a href="#local-6989586621679115283"><span class="hs-identifier hs-var">attrs</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115283"><span class="hs-identifier hs-var">attrs</span></a></span><span>
+</span><span id="line-238"></span><span>
+</span><span id="line-239"></span><span>    </span><span id="local-6989586621679115282"><span class="annot"><span class="annottext">getChildren :: NodeG c tag text -&gt; c (NodeG c tag text)
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#getChildren"><span class="hs-identifier hs-var hs-var hs-var hs-var">getChildren</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-240"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#getChildren"><span class="hs-identifier hs-var">getChildren</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115280"><span class="annot"><span class="annottext">ch :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115280"><span class="hs-identifier hs-var">ch</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115280"><span class="hs-identifier hs-var">ch</span></a></span><span>
+</span><span id="line-241"></span><span>    </span><span>
+</span><span id="line-242"></span><span>    </span><span id="local-6989586621679115279"><span class="annot"><span class="annottext">getText :: NodeG c tag text -&gt; text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#getText"><span class="hs-identifier hs-var hs-var hs-var hs-var">getText</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115277"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679115277"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115277"><span class="hs-identifier hs-var">txt</span></a></span><span>
+</span><span id="line-243"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#getText"><span class="hs-identifier hs-var">getText</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-244"></span><span>
+</span><span id="line-245"></span><span>    </span><span id="local-6989586621679115276"><span class="annot"><span class="annottext">modifyName :: (tag -&gt; tag) -&gt; NodeG c tag text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#modifyName"><span class="hs-identifier hs-var hs-var hs-var hs-var">modifyName</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115274"><span class="annot"><span class="annottext">node :: NodeG c tag text
+</span><a href="#local-6989586621679115274"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeG c tag text
+</span><a href="#local-6989586621679115274"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><span id="line-246"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#modifyName"><span class="hs-identifier hs-var">modifyName</span></a></span><span> </span><span id="local-6989586621679115273"><span class="annot"><span class="annottext">f :: tag -&gt; tag
+</span><a href="#local-6989586621679115273"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115272"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115272"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115271"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115271"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115270"><span class="annot"><span class="annottext">c :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115270"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">tag -&gt; tag
+</span><a href="#local-6989586621679115273"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115272"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115271"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115270"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-247"></span><span>
+</span><span id="line-248"></span><span>    </span><span id="local-6989586621679115269"><span class="annot"><span class="annottext">modifyAttributes :: ([(tag, text)] -&gt; [(tag, text)])
+-&gt; NodeG c tag text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#modifyAttributes"><span class="hs-identifier hs-var hs-var hs-var hs-var">modifyAttributes</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115267"><span class="annot"><span class="annottext">node :: NodeG c tag text
+</span><a href="#local-6989586621679115267"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeG c tag text
+</span><a href="#local-6989586621679115267"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><span id="line-249"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#modifyAttributes"><span class="hs-identifier hs-var">modifyAttributes</span></a></span><span> </span><span id="local-6989586621679115266"><span class="annot"><span class="annottext">f :: [(tag, text)] -&gt; [(tag, text)]
+</span><a href="#local-6989586621679115266"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115265"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115265"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115264"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115264"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115263"><span class="annot"><span class="annottext">c :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115263"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115265"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(tag, text)] -&gt; [(tag, text)]
+</span><a href="#local-6989586621679115266"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115264"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115263"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span>    </span><span id="local-6989586621679115262"><span class="annot"><span class="annottext">modifyChildren :: (c (NodeG c tag text) -&gt; c (NodeG c tag text))
+-&gt; NodeG c tag text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#modifyChildren"><span class="hs-identifier hs-var hs-var hs-var hs-var">modifyChildren</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115260"><span class="annot"><span class="annottext">node :: NodeG c tag text
+</span><a href="#local-6989586621679115260"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeG c tag text
+</span><a href="#local-6989586621679115260"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><span id="line-252"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#modifyChildren"><span class="hs-identifier hs-var">modifyChildren</span></a></span><span> </span><span id="local-6989586621679115259"><span class="annot"><span class="annottext">f :: c (NodeG c tag text) -&gt; c (NodeG c tag text)
+</span><a href="#local-6989586621679115259"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115258"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115258"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115257"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115257"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115256"><span class="annot"><span class="annottext">c :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115256"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115258"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115257"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c (NodeG c tag text) -&gt; c (NodeG c tag text)
+</span><a href="#local-6989586621679115259"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115256"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-253"></span><span>
+</span><span id="line-254"></span><span>    </span><span id="local-6989586621679115255"><span class="annot"><span class="annottext">mapAllTags :: (tag -&gt; tag') -&gt; NodeG c tag text -&gt; NodeG c tag' text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapAllTags"><span class="hs-identifier hs-var hs-var hs-var hs-var">mapAllTags</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115253"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679115253"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; NodeG c tag' text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115253"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-255"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#mapAllTags"><span class="hs-identifier hs-var">mapAllTags</span></a></span><span> </span><span id="local-6989586621679115252"><span class="annot"><span class="annottext">f :: tag -&gt; tag'
+</span><a href="#local-6989586621679115252"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115251"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115251"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115250"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115250"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115249"><span class="annot"><span class="annottext">c :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag'
+-&gt; [(tag', text)] -&gt; c (NodeG c tag' text) -&gt; NodeG c tag' text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">tag -&gt; tag'
+</span><a href="#local-6989586621679115252"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115251"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((tag, text) -&gt; (tag', text)) -&gt; [(tag, text)] -&gt; [(tag', text)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(tag -&gt; tag') -&gt; (tag, text) -&gt; (tag', text)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (b, d) (c, d)
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">tag -&gt; tag'
+</span><a href="#local-6989586621679115252"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115250"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(NodeG c tag text -&gt; NodeG c tag' text)
+-&gt; c (NodeG c tag text) -&gt; c (NodeG c tag' text)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(tag -&gt; tag') -&gt; NodeG c tag text -&gt; NodeG c tag' text
+forall (n :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) tag tag' text.
+NodeClass n c =&gt;
+(tag -&gt; tag') -&gt; n c tag text -&gt; n c tag' text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapAllTags"><span class="hs-identifier hs-var">mapAllTags</span></a></span><span> </span><span class="annot"><span class="annottext">tag -&gt; tag'
+</span><a href="#local-6989586621679115252"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span>    </span><span id="local-6989586621679115248"><span class="annot"><span class="annottext">modifyElement :: ((tag, [(tag, text)], c (NodeG c tag text))
+ -&gt; (tag', [(tag', text)], c (NodeG c tag' text)))
+-&gt; NodeG c tag text -&gt; NodeG c tag' text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#modifyElement"><span class="hs-identifier hs-var hs-var hs-var hs-var">modifyElement</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115246"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679115246"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; NodeG c tag' text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115246"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-258"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#modifyElement"><span class="hs-identifier hs-var">modifyElement</span></a></span><span> </span><span id="local-6989586621679115245"><span class="annot"><span class="annottext">f :: (tag, [(tag, text)], c (NodeG c tag text))
+-&gt; (tag', [(tag', text)], c (NodeG c tag' text))
+</span><a href="#local-6989586621679115245"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115244"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115244"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115243"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115243"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115242"><span class="annot"><span class="annottext">c :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115242"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-259"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115241"><span class="annot"><span class="annottext">n' :: tag'
+</span><a href="#local-6989586621679115241"><span class="hs-identifier hs-var">n'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115240"><span class="annot"><span class="annottext">a' :: [(tag', text)]
+</span><a href="#local-6989586621679115240"><span class="hs-identifier hs-var">a'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115239"><span class="annot"><span class="annottext">c' :: c (NodeG c tag' text)
+</span><a href="#local-6989586621679115239"><span class="hs-identifier hs-var">c'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(tag, [(tag, text)], c (NodeG c tag text))
+-&gt; (tag', [(tag', text)], c (NodeG c tag' text))
+</span><a href="#local-6989586621679115245"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115244"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115243"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115242"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-260"></span><span>        </span><span class="hs-keyword">in</span><span>  </span><span class="annot"><span class="annottext">tag'
+-&gt; [(tag', text)] -&gt; c (NodeG c tag' text) -&gt; NodeG c tag' text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag'
+</span><a href="#local-6989586621679115241"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag', text)]
+</span><a href="#local-6989586621679115240"><span class="hs-identifier hs-var">a'</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag' text)
+</span><a href="#local-6989586621679115239"><span class="hs-identifier hs-var">c'</span></a></span><span>
+</span><span id="line-261"></span><span>
+</span><span id="line-262"></span><span>    </span><span id="local-6989586621679115238"><span class="annot"><span class="annottext">mapNodeContainer :: (forall a. c a -&gt; ItemM c (c' a))
+-&gt; NodeG c tag text -&gt; ItemM c (NodeG c' tag text)
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapNodeContainer"><span class="hs-identifier hs-var hs-var hs-var hs-var">mapNodeContainer</span></a></span></span><span> </span><span id="local-6989586621679115236"><span class="annot"><span class="annottext">f :: forall a. c a -&gt; ItemM c (c' a)
+</span><a href="#local-6989586621679115236"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span id="local-6989586621679115235"><span class="annot"><span class="annottext">n :: tag
+</span><a href="#local-6989586621679115235"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679115234"><span class="annot"><span class="annottext">a :: [(tag, text)]
+</span><a href="#local-6989586621679115234"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679115233"><span class="annot"><span class="annottext">ch :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115233"><span class="hs-identifier hs-var">ch</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-263"></span><span>        </span><span id="local-6989586621679115232"><span class="annot"><span class="annottext">c' (NodeG c' tag text)
+</span><a href="#local-6989586621679115232"><span class="hs-identifier hs-var">ch'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(forall a. c a -&gt; ItemM c (c' a))
+-&gt; c (NodeG c tag text) -&gt; ItemM c (c' (NodeG c' tag text))
+forall (n :: (* -&gt; *) -&gt; * -&gt; * -&gt; *) (c :: * -&gt; *) (c' :: * -&gt; *)
+       tag text.
+(NodeClass n c, List c') =&gt;
+(forall a. c a -&gt; ItemM c (c' a))
+-&gt; c (n c tag text) -&gt; ItemM c (c' (n c' tag text))
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mapNodeListContainer"><span class="hs-identifier hs-var">mapNodeListContainer</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. c a -&gt; ItemM c (c' a)
+</span><a href="#local-6989586621679115236"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115233"><span class="hs-identifier hs-var">ch</span></a></span><span>
+</span><span id="line-264"></span><span>        </span><span class="annot"><span class="annottext">NodeG c' tag text -&gt; ItemM c (NodeG c' tag text)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(NodeG c' tag text -&gt; ItemM c (NodeG c' tag text))
+-&gt; NodeG c' tag text -&gt; ItemM c (NodeG c' tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; c' (NodeG c' tag text) -&gt; NodeG c' tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115235"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115234"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">c' (NodeG c' tag text)
+</span><a href="#local-6989586621679115232"><span class="hs-identifier hs-var">ch'</span></a></span><span>
+</span><span id="line-265"></span><span>    </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#mapNodeContainer"><span class="hs-identifier hs-var">mapNodeContainer</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-type">Text</span></a></span><span> </span><span id="local-6989586621679115230"><span class="annot"><span class="annottext">t :: text
+</span><a href="#local-6989586621679115230"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeG c' tag text -&gt; ItemM c (NodeG c' tag text)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(NodeG c' tag text -&gt; ItemM c (NodeG c' tag text))
+-&gt; NodeG c' tag text -&gt; ItemM c (NodeG c' tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">text -&gt; NodeG c' tag text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115230"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-266"></span><span>
+</span><span id="line-267"></span><span>    </span><span id="local-6989586621679115229"><span class="annot"><span class="annottext">mkText :: text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mkText"><span class="hs-identifier hs-var hs-var hs-var hs-var">mkText</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">text -&gt; NodeG c tag text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span></span><span>
+</span><span id="line-268"></span><span>    </span><span>
+</span><span id="line-269"></span><span id="local-6989586621679115227"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679115227"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">List</span></span><span> </span><span class="annot"><a href="#local-6989586621679115227"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.NodeClass.html#MkElementClass"><span class="hs-identifier hs-type">MkElementClass</span></a></span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115227"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-270"></span><span>    </span><span id="local-6989586621679115223"><span class="annot"><span class="annottext">mkElement :: tag
+-&gt; Attributes tag text -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Internal.NodeClass.html#mkElement"><span class="hs-identifier hs-var hs-var hs-var hs-var">mkElement</span></a></span></span><span> </span><span id="local-6989586621679115221"><span class="annot"><span class="annottext">name :: tag
+</span><a href="#local-6989586621679115221"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679115220"><span class="annot"><span class="annottext">attrs :: Attributes tag text
+</span><a href="#local-6989586621679115220"><span class="hs-identifier hs-var">attrs</span></a></span></span><span> </span><span id="local-6989586621679115219"><span class="annot"><span class="annottext">children :: c (NodeG c tag text)
+</span><a href="#local-6989586621679115219"><span class="hs-identifier hs-var">children</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag
+-&gt; Attributes tag text -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115221"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes tag text
+</span><a href="#local-6989586621679115220"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="annot"><span class="annottext">c (NodeG c tag text)
+</span><a href="#local-6989586621679115219"><span class="hs-identifier hs-var">children</span></a></span></span><span>
+</span><span id="line-271"></span><span>
+</span><span id="line-272"></span><span class="hs-comment">-- | Strictly parse XML to tree. Returns error message or valid parsed tree.</span><span>
+</span><span id="line-273"></span><span id="local-6989586621679115217"><span id="local-6989586621679115218"><span class="annot"><a href="Text.XML.Expat.Tree.html#parse%27"><span class="hs-identifier hs-type">parse'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115218"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115217"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-274"></span><span>          </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier hs-type">ParseOptions</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115218"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115217"><span class="hs-identifier hs-type">text</span></a></span><span>  </span><span class="hs-comment">-- ^ Parse options</span><span>
+</span><span id="line-275"></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span>              </span><span class="hs-comment">-- ^ Input text (a strict ByteString)</span><span>
+</span><span id="line-276"></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115218"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115217"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-277"></span><span id="parse%27"><span class="annot"><span class="annottext">parse' :: ParseOptions tag text
+-&gt; ByteString -&gt; Either XMLParseError (Node tag text)
+</span><a href="Text.XML.Expat.Tree.html#parse%27"><span class="hs-identifier hs-var hs-var">parse'</span></a></span></span><span> </span><span id="local-6989586621679115216"><span class="annot"><span class="annottext">opts :: ParseOptions tag text
+</span><a href="#local-6989586621679115216"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span id="local-6989586621679115215"><span class="annot"><span class="annottext">doc :: ByteString
+</span><a href="#local-6989586621679115215"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text
+-&gt; ByteString -&gt; (Node tag text, Maybe XMLParseError)
+forall tag text.
+(GenericXMLString tag, GenericXMLString text) =&gt;
+ParseOptions tag text
+-&gt; ByteString -&gt; (Node tag text, Maybe XMLParseError)
+</span><a href="Text.XML.Expat.Tree.html#parse"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text
+</span><a href="#local-6989586621679115216"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[ByteString] -&gt; ByteString
+</span><span class="hs-identifier hs-var">L.fromChunks</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679115215"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-278"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679115213"><span class="annot"><span class="annottext">xml :: Node tag text
+</span><a href="#local-6989586621679115213"><span class="hs-identifier hs-var">xml</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Node tag text -&gt; Either XMLParseError (Node tag text)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">Node tag text
+</span><a href="#local-6989586621679115213"><span class="hs-identifier hs-var">xml</span></a></span><span>
+</span><span id="line-279"></span><span>    </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679115212"><span class="annot"><span class="annottext">err :: XMLParseError
+</span><a href="#local-6989586621679115212"><span class="hs-identifier hs-var">err</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">XMLParseError -&gt; Either XMLParseError (Node tag text)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">XMLParseError
+</span><a href="#local-6989586621679115212"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-280"></span><span>
+</span><span id="line-281"></span><span class="hs-comment">-- | A lower level function that lazily converts a SAX stream into a tree structure.</span><span>
+</span><span id="line-282"></span><span id="local-6989586621679115428"><span id="local-6989586621679115429"><span class="annot"><a href="Text.XML.Expat.Tree.html#saxToTree"><span class="hs-identifier hs-type">saxToTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115429"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-283"></span><span>             </span><span class="hs-special">[</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115429"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115428"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-284"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115429"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115428"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-285"></span><span id="saxToTree"><span class="annot"><span class="annottext">saxToTree :: [SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+</span><a href="Text.XML.Expat.Tree.html#saxToTree"><span class="hs-identifier hs-var hs-var">saxToTree</span></a></span></span><span> </span><span id="local-6989586621679115211"><span class="annot"><span class="annottext">events :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115211"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-286"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115210"><span class="annot"><span class="annottext">nodes :: [Node tag text]
+</span><a href="#local-6989586621679115210"><span class="hs-identifier hs-var">nodes</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115209"><span class="annot"><span class="annottext">mError :: Maybe XMLParseError
+</span><a href="#local-6989586621679115209"><span class="hs-identifier hs-var">mError</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+-&gt; ([Node tag text], Maybe XMLParseError, [SAXEvent tag text])
+forall tag text.
+[SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115211"><span class="hs-identifier hs-var">events</span></a></span><span>
+</span><span id="line-287"></span><span>    </span><span class="hs-keyword">in</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Node tag text] -&gt; Node tag text
+forall tag text.
+GenericXMLString tag =&gt;
+[NodeG [] tag text] -&gt; NodeG [] tag text
+</span><a href="#local-6989586621679115207"><span class="hs-identifier hs-var">findRoot</span></a></span><span> </span><span class="annot"><span class="annottext">[Node tag text]
+</span><a href="#local-6989586621679115210"><span class="hs-identifier hs-var">nodes</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679115209"><span class="hs-identifier hs-var">mError</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-288"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-289"></span><span>    </span><span id="local-6989586621679115207"><span class="annot"><span class="annottext">findRoot :: [NodeG [] tag text] -&gt; NodeG [] tag text
+</span><a href="#local-6989586621679115207"><span class="hs-identifier hs-var hs-var">findRoot</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115206"><span class="annot"><span class="annottext">elt :: NodeG [] tag text
+</span><a href="#local-6989586621679115206"><span class="hs-identifier hs-var">elt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeG [] tag text
+</span><a href="#local-6989586621679115206"><span class="hs-identifier hs-var">elt</span></a></span><span>
+</span><span id="line-290"></span><span>    </span><span class="annot"><a href="#local-6989586621679115207"><span class="hs-identifier hs-var">findRoot</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679115205"><span class="annot"><span class="annottext">nodes :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115205"><span class="hs-identifier hs-var">nodes</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text] -&gt; NodeG [] tag text
+</span><a href="#local-6989586621679115207"><span class="hs-identifier hs-var">findRoot</span></a></span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115205"><span class="hs-identifier hs-var">nodes</span></a></span><span>
+</span><span id="line-291"></span><span>    </span><span class="annot"><a href="#local-6989586621679115207"><span class="hs-identifier hs-var">findRoot</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; [NodeG [] tag text] -&gt; NodeG [] tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; tag
+forall s. GenericXMLString s =&gt; String -&gt; s
+</span><a href="Text.XML.Expat.SAX.html#gxFromString"><span class="hs-identifier hs-var">gxFromString</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-292"></span><span>    </span><span id="local-6989586621679115208"><span class="annot"><span class="annottext">ptl :: [SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var hs-var">ptl</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#StartElement"><span class="hs-identifier hs-type">StartElement</span></a></span><span> </span><span id="local-6989586621679115202"><span class="annot"><span class="annottext">name :: tag
+</span><a href="#local-6989586621679115202"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679115201"><span class="annot"><span class="annottext">attrs :: [(tag, text)]
+</span><a href="#local-6989586621679115201"><span class="hs-identifier hs-var">attrs</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679115200"><span class="annot"><span class="annottext">rema :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115200"><span class="hs-identifier hs-var">rema</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-293"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115199"><span class="annot"><span class="annottext">children :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115199"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115198"><span class="annot"><span class="annottext">err1 :: Maybe XMLParseError
+</span><a href="#local-6989586621679115198"><span class="hs-identifier hs-var">err1</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115197"><span class="annot"><span class="annottext">rema' :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115197"><span class="hs-identifier hs-var">rema'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115200"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-294"></span><span>            </span><span id="local-6989586621679115196"><span class="annot"><span class="annottext">elt :: NodeG [] tag text
+</span><a href="#local-6989586621679115196"><span class="hs-identifier hs-var hs-var">elt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; [NodeG [] tag text] -&gt; NodeG [] tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115202"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115201"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115199"><span class="hs-identifier hs-var">children</span></a></span><span>
+</span><span id="line-295"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621679115195"><span class="annot"><span class="annottext">out :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115195"><span class="hs-identifier hs-var">out</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115194"><span class="annot"><span class="annottext">err2 :: Maybe XMLParseError
+</span><a href="#local-6989586621679115194"><span class="hs-identifier hs-var">err2</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115193"><span class="annot"><span class="annottext">rema'' :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115193"><span class="hs-identifier hs-var">rema''</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115197"><span class="hs-identifier hs-var">rema'</span></a></span><span>
+</span><span id="line-296"></span><span>        </span><span class="hs-keyword">in</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeG [] tag text
+</span><a href="#local-6989586621679115196"><span class="hs-identifier hs-var">elt</span></a></span><span class="annot"><span class="annottext">NodeG [] tag text -&gt; [NodeG [] tag text] -&gt; [NodeG [] tag text]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115195"><span class="hs-identifier hs-var">out</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679115198"><span class="hs-identifier hs-var">err1</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError -&gt; Maybe XMLParseError -&gt; Maybe XMLParseError
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-operator hs-var">`mplus`</span></span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679115194"><span class="hs-identifier hs-var">err2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115193"><span class="hs-identifier hs-var">rema''</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-297"></span><span>    </span><span class="annot"><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#EndElement"><span class="hs-identifier hs-type">EndElement</span></a></span><span> </span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679115191"><span class="annot"><span class="annottext">rema :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115191"><span class="hs-identifier hs-var">rema</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115191"><span class="hs-identifier hs-var">rema</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-298"></span><span>    </span><span class="annot"><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#CharacterData"><span class="hs-identifier hs-type">CharacterData</span></a></span><span> </span><span id="local-6989586621679115189"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679115189"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679115188"><span class="annot"><span class="annottext">rema :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115188"><span class="hs-identifier hs-var">rema</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-299"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115187"><span class="annot"><span class="annottext">out :: [NodeG [] tag text]
+</span><a href="#local-6989586621679115187"><span class="hs-identifier hs-var">out</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115186"><span class="annot"><span class="annottext">err :: Maybe XMLParseError
+</span><a href="#local-6989586621679115186"><span class="hs-identifier hs-var">err</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115185"><span class="annot"><span class="annottext">rema' :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115185"><span class="hs-identifier hs-var">rema'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115188"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-300"></span><span>        </span><span class="hs-keyword">in</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">text -&gt; NodeG [] tag text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115189"><span class="hs-identifier hs-var">txt</span></a></span><span class="annot"><span class="annottext">NodeG [] tag text -&gt; [NodeG [] tag text] -&gt; [NodeG [] tag text]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[NodeG [] tag text]
+</span><a href="#local-6989586621679115187"><span class="hs-identifier hs-var">out</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679115186"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115185"><span class="hs-identifier hs-var">rema'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-301"></span><span>    </span><span class="annot"><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#FailDocument"><span class="hs-identifier hs-type">FailDocument</span></a></span><span> </span><span id="local-6989586621679115183"><span class="annot"><span class="annottext">err :: XMLParseError
+</span><a href="#local-6989586621679115183"><span class="hs-identifier hs-var">err</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">XMLParseError -&gt; Maybe XMLParseError
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">XMLParseError
+</span><a href="#local-6989586621679115183"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-302"></span><span>    </span><span class="annot"><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679115182"><span class="annot"><span class="annottext">rema :: [SAXEvent tag text]
+</span><a href="#local-6989586621679115182"><span class="hs-identifier hs-var">rema</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+-&gt; ([NodeG [] tag text], Maybe XMLParseError, [SAXEvent tag text])
+</span><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text]
+</span><a href="#local-6989586621679115182"><span class="hs-identifier hs-var">rema</span></a></span><span>  </span><span class="hs-comment">-- extended node types not supported in this tree type</span><span>
+</span><span id="line-303"></span><span>    </span><span class="annot"><a href="#local-6989586621679115208"><span class="hs-identifier hs-var">ptl</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-304"></span><span>
+</span><span id="line-305"></span><span class="hs-comment">-- | A lower level function that converts a generalized SAX stream into a tree structure.</span><span>
+</span><span id="line-306"></span><span class="hs-comment">-- Ignores parse errors.</span><span>
+</span><span id="line-307"></span><span class="annot"><a href="Text.XML.Expat.Tree.html#saxToTreeG"><span class="hs-identifier hs-type">saxToTreeG</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679115422"><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span></span><span> </span><span id="local-6989586621679115420"><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span></span><span> </span><span id="local-6989586621679115421"><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">List</span></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-308"></span><span>              </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-309"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ItemM</span></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-310"></span><span id="saxToTreeG"><span class="annot"><span class="annottext">saxToTreeG :: l (SAXEvent tag text) -&gt; ItemM l (NodeG l tag text)
+</span><a href="Text.XML.Expat.Tree.html#saxToTreeG"><span class="hs-identifier hs-var hs-var">saxToTreeG</span></a></span></span><span> </span><span id="local-6989586621679115181"><span class="annot"><span class="annottext">events :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115181"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-311"></span><span>    </span><span id="local-6989586621679115180"><span class="annot"><span class="annottext">ListItem l (NodeG l tag text)
+</span><a href="#local-6989586621679115180"><span class="hs-identifier hs-var">li</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text) -&gt; ItemM l (ListItem l (NodeG l tag text))
+forall (l :: * -&gt; *) a. List l =&gt; l a -&gt; ItemM l (ListItem l a)
+</span><span class="hs-identifier hs-var">runList</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; l (NodeG l tag text)
+</span><a href="#local-6989586621679115178"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115181"><span class="hs-identifier hs-var">events</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-312"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ListItem l (NodeG l tag text)
+</span><a href="#local-6989586621679115180"><span class="hs-identifier hs-var">li</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-313"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span id="local-6989586621679115176"><span class="annot"><span class="annottext">elt :: NodeG l tag text
+</span><a href="#local-6989586621679115176"><span class="hs-identifier hs-var">elt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NodeG l tag text -&gt; ItemM l (NodeG l tag text)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">NodeG l tag text
+</span><a href="#local-6989586621679115176"><span class="hs-identifier hs-var">elt</span></a></span><span>
+</span><span id="line-314"></span><span>        </span><span class="hs-identifier">_</span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NodeG l tag text -&gt; ItemM l (NodeG l tag text)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(NodeG l tag text -&gt; ItemM l (NodeG l tag text))
+-&gt; NodeG l tag text -&gt; ItemM l (NodeG l tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; l (NodeG l tag text) -&gt; NodeG l tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; tag
+forall s. GenericXMLString s =&gt; String -&gt; s
+</span><a href="Text.XML.Expat.SAX.html#gxFromString"><span class="hs-identifier hs-var">gxFromString</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-315"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-316"></span><span>    </span><span class="annot"><a href="#local-6989586621679115178"><span class="hs-identifier hs-type">process</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-317"></span><span>    </span><span id="local-6989586621679115178"><span class="annot"><span class="annottext">process :: l (SAXEvent tag text) -&gt; l (NodeG l tag text)
+</span><a href="#local-6989586621679115178"><span class="hs-identifier hs-var hs-var">process</span></a></span></span><span> </span><span id="local-6989586621679115175"><span class="annot"><span class="annottext">events :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115175"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ItemM l (l (NodeG l tag text)) -&gt; l (NodeG l tag text)
+forall (l :: * -&gt; *) a. List l =&gt; ItemM l (l a) -&gt; l a
+</span><span class="hs-identifier hs-var">joinL</span></span><span> </span><span class="annot"><span class="annottext">(ItemM l (l (NodeG l tag text)) -&gt; l (NodeG l tag text))
+-&gt; ItemM l (l (NodeG l tag text)) -&gt; l (NodeG l tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (l (NodeG l tag text))
+</span><a href="#local-6989586621679115173"><span class="hs-identifier hs-var">process_</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115175"><span class="hs-identifier hs-var">events</span></a></span><span>
+</span><span id="line-318"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-319"></span><span>        </span><span class="annot"><a href="#local-6989586621679115173"><span class="hs-identifier hs-type">process_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ItemM</span></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-320"></span><span>        </span><span id="local-6989586621679115173"><span class="annot"><span class="annottext">process_ :: l (SAXEvent tag text) -&gt; ItemM l (l (NodeG l tag text))
+</span><a href="#local-6989586621679115173"><span class="hs-identifier hs-var hs-var">process_</span></a></span></span><span> </span><span id="local-6989586621679115172"><span class="annot"><span class="annottext">events :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115172"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-321"></span><span>            </span><span id="local-6989586621679115171"><span class="annot"><span class="annottext">ListItem l (SAXEvent tag text)
+</span><a href="#local-6989586621679115171"><span class="hs-identifier hs-var">li</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (ListItem l (SAXEvent tag text))
+forall (l :: * -&gt; *) a. List l =&gt; l a -&gt; ItemM l (ListItem l a)
+</span><span class="hs-identifier hs-var">runList</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115172"><span class="hs-identifier hs-var">events</span></a></span><span>
+</span><span id="line-322"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ListItem l (SAXEvent tag text)
+</span><a href="#local-6989586621679115171"><span class="hs-identifier hs-var">li</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-323"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-324"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#StartElement"><span class="hs-identifier hs-type">StartElement</span></a></span><span> </span><span id="local-6989586621679115169"><span class="annot"><span class="annottext">name :: tag
+</span><a href="#local-6989586621679115169"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679115168"><span class="annot"><span class="annottext">attrs :: [(tag, text)]
+</span><a href="#local-6989586621679115168"><span class="hs-identifier hs-var">attrs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679115167"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115167"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-325"></span><span>                    </span><span class="annot"><span class="annottext">l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text)))
+-&gt; l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">tag -&gt; [(tag, text)] -&gt; l (NodeG l tag text) -&gt; NodeG l tag text
+forall (c :: * -&gt; *) tag text.
+tag -&gt; [(tag, text)] -&gt; c (NodeG c tag text) -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Element"><span class="hs-identifier hs-var">Element</span></a></span><span> </span><span class="annot"><span class="annottext">tag
+</span><a href="#local-6989586621679115169"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[(tag, text)]
+</span><a href="#local-6989586621679115168"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; l (NodeG l tag text)
+</span><a href="#local-6989586621679115178"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115167"><span class="hs-identifier hs-var">rema</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeG l tag text -&gt; l (NodeG l tag text) -&gt; l (NodeG l tag text)
+forall (l :: * -&gt; *) a. List l =&gt; a -&gt; l a -&gt; l a
+</span><span class="hs-operator hs-var">`cons`</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; l (NodeG l tag text)
+</span><a href="#local-6989586621679115178"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; l (SAXEvent tag text)
+</span><a href="#local-6989586621679115165"><span class="hs-identifier hs-var">stripElement</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115167"><span class="hs-identifier hs-var">rema</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-326"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#EndElement"><span class="hs-identifier hs-type">EndElement</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-327"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#CharacterData"><span class="hs-identifier hs-type">CharacterData</span></a></span><span> </span><span id="local-6989586621679115164"><span class="annot"><span class="annottext">txt :: text
+</span><a href="#local-6989586621679115164"><span class="hs-identifier hs-var">txt</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679115163"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115163"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text)))
+-&gt; l (NodeG l tag text) -&gt; ItemM l (l (NodeG l tag text))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">text -&gt; NodeG l tag text
+forall (c :: * -&gt; *) tag text. text -&gt; NodeG c tag text
+</span><a href="Text.XML.Expat.Tree.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="annot"><span class="annottext">text
+</span><a href="#local-6989586621679115164"><span class="hs-identifier hs-var">txt</span></a></span><span> </span><span class="annot"><span class="annottext">NodeG l tag text -&gt; l (NodeG l tag text) -&gt; l (NodeG l tag text)
+forall (l :: * -&gt; *) a. List l =&gt; a -&gt; l a -&gt; l a
+</span><span class="hs-operator hs-var">`cons`</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; l (NodeG l tag text)
+</span><a href="#local-6989586621679115178"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115163"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-328"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115162"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115162"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (l (NodeG l tag text))
+</span><a href="#local-6989586621679115173"><span class="hs-identifier hs-var">process_</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115162"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-329"></span><span>
+</span><span id="line-330"></span><span>    </span><span class="annot"><a href="#local-6989586621679115165"><span class="hs-identifier hs-type">stripElement</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-331"></span><span>    </span><span id="local-6989586621679115165"><span class="annot"><span class="annottext">stripElement :: l (SAXEvent tag text) -&gt; l (SAXEvent tag text)
+</span><a href="#local-6989586621679115165"><span class="hs-identifier hs-var hs-var">stripElement</span></a></span></span><span> </span><span id="local-6989586621679115161"><span class="annot"><span class="annottext">events :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115161"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ItemM l (l (SAXEvent tag text)) -&gt; l (SAXEvent tag text)
+forall (l :: * -&gt; *) a. List l =&gt; ItemM l (l a) -&gt; l a
+</span><span class="hs-identifier hs-var">joinL</span></span><span> </span><span class="annot"><span class="annottext">(ItemM l (l (SAXEvent tag text)) -&gt; l (SAXEvent tag text))
+-&gt; ItemM l (l (SAXEvent tag text)) -&gt; l (SAXEvent tag text)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">stripElement_</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115161"><span class="hs-identifier hs-var">events</span></a></span><span>
+</span><span id="line-332"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-333"></span><span>        </span><span class="annot"><a href="#local-6989586621679115160"><span class="hs-identifier hs-type">stripElement_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ItemM</span></span><span> </span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679115421"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#SAXEvent"><span class="hs-identifier hs-type">SAXEvent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115422"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115420"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-334"></span><span>        </span><span id="local-6989586621679115160"><span class="annot"><span class="annottext">stripElement_ :: Int -&gt; l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var hs-var">stripElement_</span></a></span></span><span> </span><span id="local-6989586621679115159"><span class="annot"><span class="annottext">level :: Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span></span><span> </span><span id="local-6989586621679115158"><span class="annot"><span class="annottext">events :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">events</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+-&gt; ItemM l (l (SAXEvent tag text))
+-&gt; ItemM l (l (SAXEvent tag text))
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-335"></span><span>            </span><span id="local-6989586621679115157"><span class="annot"><span class="annottext">ListItem l (SAXEvent tag text)
+</span><a href="#local-6989586621679115157"><span class="hs-identifier hs-var">li</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (ListItem l (SAXEvent tag text))
+forall (l :: * -&gt; *) a. List l =&gt; l a -&gt; ItemM l (ListItem l a)
+</span><span class="hs-identifier hs-var">runList</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">events</span></a></span><span>
+</span><span id="line-336"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ListItem l (SAXEvent tag text)
+</span><a href="#local-6989586621679115157"><span class="hs-identifier hs-var">li</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-337"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a
+</span><span class="hs-identifier hs-var">mzero</span></span><span>
+</span><span id="line-338"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#StartElement"><span class="hs-identifier hs-type">StartElement</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679115156"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115156"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">stripElement_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115156"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-339"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#EndElement"><span class="hs-identifier hs-type">EndElement</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679115154"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115154"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115154"><span class="hs-identifier hs-var">rema</span></a></span><span> </span><span>
+</span><span id="line-340"></span><span>                                                          </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">stripElement_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115154"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-341"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Cons</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679115153"><span class="annot"><span class="annottext">rema :: l (SAXEvent tag text)
+</span><a href="#local-6989586621679115153"><span class="hs-identifier hs-var">rema</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; l (SAXEvent tag text) -&gt; ItemM l (l (SAXEvent tag text))
+</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">stripElement_</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">level</span></a></span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text)
+</span><a href="#local-6989586621679115153"><span class="hs-identifier hs-var">rema</span></a></span><span>
+</span><span id="line-342"></span><span>
+</span><span id="line-343"></span><span class="hs-comment">-- | Lazily parse XML to tree. Note that forcing the XMLParseError return value</span><span>
+</span><span id="line-344"></span><span class="hs-comment">-- will force the entire parse.  Therefore, to ensure lazy operation, don't</span><span>
+</span><span id="line-345"></span><span class="hs-comment">-- check the error status until you have processed the tree.</span><span>
+</span><span id="line-346"></span><span id="local-6989586621679115454"><span id="local-6989586621679115456"><span class="annot"><a href="Text.XML.Expat.Tree.html#parse"><span class="hs-identifier hs-type">parse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115456"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115454"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-347"></span><span>         </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier hs-type">ParseOptions</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115456"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115454"><span class="hs-identifier hs-type">text</span></a></span><span>    </span><span class="hs-comment">-- ^ Parse options</span><span>
+</span><span id="line-348"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">L.ByteString</span></span><span>             </span><span class="hs-comment">-- ^ Input text (a lazy ByteString)</span><span>
+</span><span id="line-349"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115456"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115454"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-350"></span><span id="parse"><span class="annot"><span class="annottext">parse :: ParseOptions tag text
+-&gt; ByteString -&gt; (Node tag text, Maybe XMLParseError)
+</span><a href="Text.XML.Expat.Tree.html#parse"><span class="hs-identifier hs-var hs-var">parse</span></a></span></span><span> </span><span id="local-6989586621679115152"><span class="annot"><span class="annottext">opts :: ParseOptions tag text
+</span><a href="#local-6989586621679115152"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span id="local-6989586621679115151"><span class="annot"><span class="annottext">bs :: ByteString
+</span><a href="#local-6989586621679115151"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+forall tag text.
+GenericXMLString tag =&gt;
+[SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+</span><a href="Text.XML.Expat.Tree.html#saxToTree"><span class="hs-identifier hs-var">saxToTree</span></a></span><span> </span><span class="annot"><span class="annottext">([SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError))
+-&gt; [SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text -&gt; ByteString -&gt; [SAXEvent tag text]
+forall tag text.
+(GenericXMLString tag, GenericXMLString text) =&gt;
+ParseOptions tag text -&gt; ByteString -&gt; [SAXEvent tag text]
+</span><a href="Text.XML.Expat.SAX.html#parse"><span class="hs-identifier hs-var">SAX.parse</span></a></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text
+</span><a href="#local-6989586621679115152"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679115151"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-351"></span><span>
+</span><span id="line-352"></span><span class="hs-comment">-- | Parse a generalized list to a tree, ignoring parse errors.</span><span>
+</span><span id="line-353"></span><span class="hs-comment">-- This function allows for a parse from an enumerator/iteratee to a &quot;lazy&quot;</span><span>
+</span><span id="line-354"></span><span class="hs-comment">-- tree structure using the @List-enumerator@ package.</span><span>
+</span><span id="line-355"></span><span id="local-6989586621679115147"><span id="local-6989586621679115148"><span id="local-6989586621679115149"><span class="annot"><a href="Text.XML.Expat.Tree.html#parseG"><span class="hs-identifier hs-type">parseG</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115149"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115148"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">List</span></span><span> </span><span class="annot"><a href="#local-6989586621679115147"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-356"></span><span>          </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier hs-type">ParseOptions</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115149"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115148"><span class="hs-identifier hs-type">text</span></a></span><span>  </span><span class="hs-comment">-- ^ Parse options</span><span>
+</span><span id="line-357"></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115147"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span>           </span><span class="hs-comment">-- ^ Input text as a generalized list of blocks</span><span>
+</span><span id="line-358"></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ItemM</span></span><span> </span><span class="annot"><a href="#local-6989586621679115147"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Tree.html#NodeG"><span class="hs-identifier hs-type">NodeG</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115147"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115149"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115148"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-359"></span><span id="parseG"><span class="annot"><span class="annottext">parseG :: ParseOptions tag text -&gt; l ByteString -&gt; ItemM l (NodeG l tag text)
+</span><a href="Text.XML.Expat.Tree.html#parseG"><span class="hs-identifier hs-var hs-var">parseG</span></a></span></span><span> </span><span id="local-6989586621679115146"><span class="annot"><span class="annottext">opts :: ParseOptions tag text
+</span><a href="#local-6989586621679115146"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l (SAXEvent tag text) -&gt; ItemM l (NodeG l tag text)
+forall tag text (l :: * -&gt; *).
+(GenericXMLString tag, List l) =&gt;
+l (SAXEvent tag text) -&gt; ItemM l (NodeG l tag text)
+</span><a href="Text.XML.Expat.Tree.html#saxToTreeG"><span class="hs-identifier hs-var">saxToTreeG</span></a></span><span> </span><span class="annot"><span class="annottext">(l (SAXEvent tag text) -&gt; ItemM l (NodeG l tag text))
+-&gt; (l ByteString -&gt; l (SAXEvent tag text))
+-&gt; l ByteString
+-&gt; ItemM l (NodeG l tag text)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text -&gt; l ByteString -&gt; l (SAXEvent tag text)
+forall tag text (l :: * -&gt; *).
+(GenericXMLString tag, GenericXMLString text, List l) =&gt;
+ParseOptions tag text -&gt; l ByteString -&gt; l (SAXEvent tag text)
+</span><a href="Text.XML.Expat.SAX.html#parseG"><span class="hs-identifier hs-var">SAX.parseG</span></a></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text
+</span><a href="#local-6989586621679115146"><span class="hs-identifier hs-var">opts</span></a></span><span>
+</span><span id="line-360"></span><span>
+</span><span id="line-361"></span><span class="hs-comment">-- | Lazily parse XML to tree. In the event of an error, throw 'XMLParseException'.</span><span>
+</span><span id="line-362"></span><span class="hs-comment">--</span><span>
+</span><span id="line-363"></span><span class="hs-comment">-- @parseThrowing@ can throw an exception from pure code, which is generally a bad</span><span>
+</span><span id="line-364"></span><span class="hs-comment">-- way to handle errors, because Haskell\'s lazy evaluation means it\'s hard to</span><span>
+</span><span id="line-365"></span><span class="hs-comment">-- predict where it will be thrown from.  However, it may be acceptable in</span><span>
+</span><span id="line-366"></span><span class="hs-comment">-- situations where it's not expected during normal operation, depending on the</span><span>
+</span><span id="line-367"></span><span class="hs-comment">-- design of your program.</span><span>
+</span><span id="line-368"></span><span id="local-6989586621679115143"><span id="local-6989586621679115144"><span class="annot"><a href="Text.XML.Expat.Tree.html#parseThrowing"><span class="hs-identifier hs-type">parseThrowing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115144"><span class="hs-identifier hs-type">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Text.XML.Expat.SAX.html#GenericXMLString"><span class="hs-identifier hs-type">GenericXMLString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115143"><span class="hs-identifier hs-type">text</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-369"></span><span>         </span><span class="annot"><a href="Text.XML.Expat.SAX.html#ParseOptions"><span class="hs-identifier hs-type">ParseOptions</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115144"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115143"><span class="hs-identifier hs-type">text</span></a></span><span> </span><span class="hs-comment">-- ^ Parse options</span><span>
+</span><span id="line-370"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">L.ByteString</span></span><span>           </span><span class="hs-comment">-- ^ Input text (a lazy ByteString)</span><span>
+</span><span id="line-371"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115144"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115143"><span class="hs-identifier hs-type">text</span></a></span></span></span><span>
+</span><span id="line-372"></span><span id="parseThrowing"><span class="annot"><span class="annottext">parseThrowing :: ParseOptions tag text -&gt; ByteString -&gt; Node tag text
+</span><a href="Text.XML.Expat.Tree.html#parseThrowing"><span class="hs-identifier hs-var hs-var">parseThrowing</span></a></span></span><span> </span><span id="local-6989586621679115142"><span class="annot"><span class="annottext">opts :: ParseOptions tag text
+</span><a href="#local-6989586621679115142"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span id="local-6989586621679115141"><span class="annot"><span class="annottext">bs :: ByteString
+</span><a href="#local-6989586621679115141"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Node tag text, Maybe XMLParseError) -&gt; Node tag text
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Node tag text, Maybe XMLParseError) -&gt; Node tag text)
+-&gt; (Node tag text, Maybe XMLParseError) -&gt; Node tag text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+forall tag text.
+GenericXMLString tag =&gt;
+[SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+</span><a href="Text.XML.Expat.Tree.html#saxToTree"><span class="hs-identifier hs-var">saxToTree</span></a></span><span> </span><span class="annot"><span class="annottext">([SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError))
+-&gt; [SAXEvent tag text] -&gt; (Node tag text, Maybe XMLParseError)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text -&gt; ByteString -&gt; [SAXEvent tag text]
+forall tag text.
+(GenericXMLString tag, GenericXMLString text) =&gt;
+ParseOptions tag text -&gt; ByteString -&gt; [SAXEvent tag text]
+</span><a href="Text.XML.Expat.SAX.html#parseThrowing"><span class="hs-identifier hs-var">SAX.parseThrowing</span></a></span><span> </span><span class="annot"><span class="annottext">ParseOptions tag text
+</span><a href="#local-6989586621679115142"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679115141"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-373"></span></pre></body></html>
