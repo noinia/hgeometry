@@ -184,6 +184,8 @@ ipeDiskMark = ipeMark "mark/disk(sx)"
 --------------------------------------------------------------------------------
 -- * Path Converters
 
+-- | Size of the default bounding box used to clip lines and
+-- half-lines in the default IpeOuts.
 defaultBox :: Num r => Rectangle () r
 defaultBox = let z  = 1000
                  z' = negate z
@@ -204,10 +206,14 @@ ipeLineIn bBox l = match (l `intersect` bBox) $
   :& H ipeLineSegment
   :& RNil
 
+-- | Renders an Halfine.
+--
+--
+-- pre: the intersection of the box with the line is non-empty
 ipeHalfLine :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
 ipeHalfLine = ipeHalfLineIn defaultBox
 
-  -- | Renders the HalfLine in the given box.
+-- | Renders the HalfLine in the given box.
 --
 -- pre: the intersection of the box with the line is non-empty
 ipeHalfLineIn        :: forall p r. (Ord r, Fractional r)
