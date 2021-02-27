@@ -45,6 +45,7 @@ library
                     -- * Algorithmic Strategies
                     Algorithms.DivideAndConquer
                     Algorithms.BinarySearch
+                    Algorithms.LogarithmicMethod
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
@@ -53,6 +54,9 @@ library
 
 
                     Algorithms.StringSearch.KMP
+
+
+
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
@@ -220,6 +224,7 @@ test-suite hspec
 
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
+                 Algorithms.LogarithmicMethodSpec
                  Algorithms.Graph.DFSSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
@@ -251,6 +256,7 @@ test-suite hspec
                       , directory
                       , yaml
                       , MonadRandom
+                      , semigroupoids
 
   default-extensions: TypeFamilies
                     , GADTs

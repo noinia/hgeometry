@@ -1,4 +1,11 @@
 {-# LANGUAGE DefaultSignatures #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.LogarithmicMethod
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.LogarithmicMethod
   ( InsertionOnly(..)
   , empty
@@ -8,12 +15,9 @@ module Algorithms.LogarithmicMethod
   )
   where
 
-
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe)
-import           Data.Semigroup
-import           Data.Semigroup.Foldable
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe (mapMaybe)
+import Data.Semigroup.Foldable
 
 --------------------------------------------------------------------------------
 
@@ -85,40 +89,19 @@ runMerge ds1 i j = \case
   dss@(Nothing  : dss') | i == j    -> Just ds1 : dss' -- replace
                         | otherwise -> Just ds1 : dss  -- cons
   dss@(Just ds2 : dss') | i == j    -> Nothing : runMerge (ds1 `merge` ds2) (i+1) (j+1) dss'
-                        | otherwise -> Just ds1 : dss -- cons
+                        | otherwise -> Just ds1 : dss -- cons -- I don't think insert can ever
+                                                              -- trigger this scenario.
 
--- | Given a query algorithm for the static structure, lift it to a
--- query algorithm on the insertion only structure.
+
+-- | Given a decomposable query algorithm for the static structure,
+-- lift it to a query algorithm on the insertion only structure.
+--
+-- pre: (As indicated by the Monoid constraint), the query answer
+-- should be decomposable. I.e. we should be able to anser the query
+-- on a set \(A \cup B\) by answering the query on \(A\) and \(B\)
+-- separately, and combining their results.
 --
 -- running time: \(O(Q(n)\log n)\), where \(Q(n)\) is the query time
 -- on the static structure.
 queryWith                           :: Monoid m => (static a -> m) -> InsertionOnly static a -> m
 queryWith query (InsertionOnly dss) = foldMap (foldMap query) dss
-
---------------------------------------------------------------------------------
--- * Example
-
-newtype DummySucc a = Dummy (NonEmpty a)
-  deriving (Show,Eq,Functor,Foldable,Foldable1,Traversable)
-
-instance Ord a => LogarithmicMethodDS DummySucc a where
-  build = Dummy . NonEmpty.sort
-
-successor'              :: Ord a => a -> DummySucc a -> Option (Min a)
-successor' q (Dummy xs) = case NonEmpty.dropWhile (< q) xs of
-                            []    -> Option Nothing
-                            (s:_) -> Option (Just (Min s))
-
-
-
-
-
-successor   :: Ord a => a -> InsertionOnly DummySucc a -> Maybe a
-successor q = fmap getMin . getOption . queryWith (successor' q)
-
-
-
-fromList :: Ord a => [a] -> InsertionOnly DummySucc a
-fromList = foldr insert empty
-
-test = fromList [1,2,3,40,10,4]
