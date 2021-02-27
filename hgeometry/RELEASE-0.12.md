@@ -40,6 +40,9 @@ Contributors:
  - Hunter DeMeyer, @1ndy
 
 Website: https://hgeometry.org
+
 GitHub:  https://github.com/nionia/hgeometry
+
 Hackage: https://hackage.haskell.org/package/hgeometry
+
 Discord: https://discord.gg/HQwbD9jWqg
