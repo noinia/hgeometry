@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
 module Data.Geometry.Ipe.Content(
     Image(Image), imageData, rect
   , TextLabel(..)

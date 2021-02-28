@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Ipe.Attributes
