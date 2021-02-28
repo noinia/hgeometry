@@ -1,4 +1,4 @@
-It is my great pleasure to announce version 0.12 of HGeometry!
+It is our great pleasure to announce version 0.12 of HGeometry!
 
 HGeometry is a swiss army knife for computation geometry. Wondering if a point
 is inside a polygon? HGeometry will tell you. Looking for the shortest path
@@ -35,7 +35,7 @@ Future developments:
  - Benchmarks to show the relative performance of HGeometry's many algorithms.
 
 Contributors:
- - Frank Staals, @noita
+ - Frank Staals, @noinia
  - David Himmelstrup, @Lemmih
  - Hunter DeMeyer, @1ndy
 
