@@ -1,6 +1,6 @@
 It is our great pleasure to announce version 0.12 of HGeometry!
 
-HGeometry is a swiss army knife for computation geometry. Wondering if a point
+HGeometry is a swiss army knife for computational geometry. Wondering if a point
 is inside a polygon? HGeometry will tell you. Looking for the shortest path
 inside a maze? HGeometry will light your way. Planning a museum heist? HGeometry
 will show you the camera blindspots in O(n log n) time!
