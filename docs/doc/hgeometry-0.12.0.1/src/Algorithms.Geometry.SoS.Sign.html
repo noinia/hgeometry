@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24maxtag_JY3XXtGKpKZ2jnuiAZnrEE"><span id="%24tag2con_JY3XXtGKpKZ2jnuiAZnrEE"><span id="%24con2tag_JY3XXtGKpKZ2jnuiAZnrEE"></span></span></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.SoS.Sign</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- | The sign of an expression</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">data</span><span> </span><span id="Sign"><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Sign"><span class="hs-identifier hs-var">Sign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Negative"><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Positive"><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680010080"><span id="local-6989586621680010082"><span id="local-6989586621680010084"><span class="annot"><span class="annottext">Int -&gt; Sign -&gt; ShowS
+[Sign] -&gt; ShowS
+Sign -&gt; String
+(Int -&gt; Sign -&gt; ShowS)
+-&gt; (Sign -&gt; String) -&gt; ([Sign] -&gt; ShowS) -&gt; Show Sign
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Sign] -&gt; ShowS
+$cshowList :: [Sign] -&gt; ShowS
+show :: Sign -&gt; String
+$cshow :: Sign -&gt; String
+showsPrec :: Int -&gt; Sign -&gt; ShowS
+$cshowsPrec :: Int -&gt; Sign -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680010075"><span id="local-6989586621680010077"><span class="annot"><span class="annottext">Sign -&gt; Sign -&gt; Bool
+(Sign -&gt; Sign -&gt; Bool) -&gt; (Sign -&gt; Sign -&gt; Bool) -&gt; Eq Sign
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Sign -&gt; Sign -&gt; Bool
+$c/= :: Sign -&gt; Sign -&gt; Bool
+== :: Sign -&gt; Sign -&gt; Bool
+$c== :: Sign -&gt; Sign -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680010059"><span id="local-6989586621680010061"><span id="local-6989586621680010063"><span id="local-6989586621680010065"><span id="local-6989586621680010067"><span id="local-6989586621680010069"><span id="local-6989586621680010071"><span class="annot"><span class="annottext">Eq Sign
+Eq Sign =&gt;
+(Sign -&gt; Sign -&gt; Ordering)
+-&gt; (Sign -&gt; Sign -&gt; Bool)
+-&gt; (Sign -&gt; Sign -&gt; Bool)
+-&gt; (Sign -&gt; Sign -&gt; Bool)
+-&gt; (Sign -&gt; Sign -&gt; Bool)
+-&gt; (Sign -&gt; Sign -&gt; Sign)
+-&gt; (Sign -&gt; Sign -&gt; Sign)
+-&gt; Ord Sign
+Sign -&gt; Sign -&gt; Bool
+Sign -&gt; Sign -&gt; Ordering
+Sign -&gt; Sign -&gt; Sign
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: Sign -&gt; Sign -&gt; Sign
+$cmin :: Sign -&gt; Sign -&gt; Sign
+max :: Sign -&gt; Sign -&gt; Sign
+$cmax :: Sign -&gt; Sign -&gt; Sign
+&gt;= :: Sign -&gt; Sign -&gt; Bool
+$c&gt;= :: Sign -&gt; Sign -&gt; Bool
+&gt; :: Sign -&gt; Sign -&gt; Bool
+$c&gt; :: Sign -&gt; Sign -&gt; Bool
+&lt;= :: Sign -&gt; Sign -&gt; Bool
+$c&lt;= :: Sign -&gt; Sign -&gt; Bool
+&lt; :: Sign -&gt; Sign -&gt; Bool
+$c&lt; :: Sign -&gt; Sign -&gt; Bool
+compare :: Sign -&gt; Sign -&gt; Ordering
+$ccompare :: Sign -&gt; Sign -&gt; Ordering
+$cp1Ord :: Eq Sign
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680010042"><span id="local-6989586621680010044"><span id="local-6989586621680010046"><span id="local-6989586621680010048"><span id="local-6989586621680010050"><span id="local-6989586621680010052"><span id="local-6989586621680010054"><span id="local-6989586621680010056"><span class="annot"><span class="annottext">Int -&gt; Sign
+Sign -&gt; Int
+Sign -&gt; [Sign]
+Sign -&gt; Sign
+Sign -&gt; Sign -&gt; [Sign]
+Sign -&gt; Sign -&gt; Sign -&gt; [Sign]
+(Sign -&gt; Sign)
+-&gt; (Sign -&gt; Sign)
+-&gt; (Int -&gt; Sign)
+-&gt; (Sign -&gt; Int)
+-&gt; (Sign -&gt; [Sign])
+-&gt; (Sign -&gt; Sign -&gt; [Sign])
+-&gt; (Sign -&gt; Sign -&gt; [Sign])
+-&gt; (Sign -&gt; Sign -&gt; Sign -&gt; [Sign])
+-&gt; Enum Sign
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+enumFromThenTo :: Sign -&gt; Sign -&gt; Sign -&gt; [Sign]
+$cenumFromThenTo :: Sign -&gt; Sign -&gt; Sign -&gt; [Sign]
+enumFromTo :: Sign -&gt; Sign -&gt; [Sign]
+$cenumFromTo :: Sign -&gt; Sign -&gt; [Sign]
+enumFromThen :: Sign -&gt; Sign -&gt; [Sign]
+$cenumFromThen :: Sign -&gt; Sign -&gt; [Sign]
+enumFrom :: Sign -&gt; [Sign]
+$cenumFrom :: Sign -&gt; [Sign]
+fromEnum :: Sign -&gt; Int
+$cfromEnum :: Sign -&gt; Int
+toEnum :: Int -&gt; Sign
+$ctoEnum :: Int -&gt; Sign
+pred :: Sign -&gt; Sign
+$cpred :: Sign -&gt; Sign
+succ :: Sign -&gt; Sign
+$csucc :: Sign -&gt; Sign
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680010037"><span id="local-6989586621680010039"><span class="annot"><span class="annottext">Sign
+Sign -&gt; Sign -&gt; Bounded Sign
+forall a. a -&gt; a -&gt; Bounded a
+maxBound :: Sign
+$cmaxBound :: Sign
+minBound :: Sign
+$cminBound :: Sign
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- | Flip Positive &lt;=&gt; Negative.</span><span>
+</span><span id="line-12"></span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#flipSign"><span class="hs-identifier hs-type">flipSign</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Sign"><span class="hs-identifier hs-type">Sign</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Sign"><span class="hs-identifier hs-type">Sign</span></a></span><span>
+</span><span id="line-13"></span><span id="flipSign"><span class="annot"><span class="annottext">flipSign :: Sign -&gt; Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#flipSign"><span class="hs-identifier hs-var hs-var">flipSign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Negative"><span class="hs-identifier hs-type">Negative</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- | Given the terms, in decreasing order of significance, computes the sign</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- i.e. expects a list of terms, we base the sign on the sign of the first non-zero term.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- pre: the list contains at least one such a term.</span><span>
+</span><span id="line-24"></span><span id="local-6989586621680010034"><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#signFromTerms"><span class="hs-identifier hs-type">signFromTerms</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680010034"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621680010034"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621680010034"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SoS.Sign.html#Sign"><span class="hs-identifier hs-type">Sign</span></a></span></span><span>
+</span><span id="line-25"></span><span id="signFromTerms"><span class="annot"><span class="annottext">signFromTerms :: [r] -&gt; Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#signFromTerms"><span class="hs-identifier hs-var hs-var">signFromTerms</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Sign] -&gt; Sign
+forall a. [a] -&gt; a
+</span><span class="hs-identifier hs-var">List.head</span></span><span> </span><span class="annot"><span class="annottext">([Sign] -&gt; Sign) -&gt; ([r] -&gt; [Sign]) -&gt; [r] -&gt; Sign
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Maybe Sign) -&gt; [r] -&gt; [Sign]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Maybe Sign
+forall a. (Num a, Eq a) =&gt; a -&gt; Maybe Sign
+</span><a href="#local-6989586621680010029"><span class="hs-identifier hs-var">signum'</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>    </span><span id="local-6989586621680010029"><span class="annot"><span class="annottext">signum' :: a -&gt; Maybe Sign
+</span><a href="#local-6989586621680010029"><span class="hs-identifier hs-var hs-var">signum'</span></a></span></span><span> </span><span id="local-6989586621680010028"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621680010028"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680010028"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-28"></span><span>                  </span><span class="hs-glyph">-</span><span class="hs-number">1</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; Maybe Sign
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span>
+</span><span id="line-29"></span><span>                  </span><span class="hs-number">0</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Sign
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-30"></span><span>                  </span><span class="hs-number">1</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; Maybe Sign
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="Algorithms.Geometry.SoS.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-31"></span><span>                  </span><span class="hs-identifier">_</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Sign
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;signum': absurd&quot;</span></span><span>
+</span><span id="line-32"></span></pre></body></html>

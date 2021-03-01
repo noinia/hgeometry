@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24maxtag_83iupF2hW2H3Z1wiItAFY0"><span id="%24tag2con_83iupF2hW2H3Z1wiItAFY0"><span id="%24con2tag_83iupF2hW2H3Z1wiItAFY0"></span></span></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.PlanarGraph.Dart</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Data type for representing Darts (edges) in a planar graph.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlanarGraph.Dart</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">suchThat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- let dart i s = Dart (Arc i) (read s)</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | An Arc is a directed edge in a planar graph. The type s is used to tie</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- this arc to a particular graph.</span><span>
+</span><span id="line-27"></span><span id="local-6989586621679347020"><span id="local-6989586621679347021"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="Arc"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span></span><span> </span><span id="local-6989586621679347019"><span class="annot"><a href="#local-6989586621679347019"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Arc"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unArc"><span class="annot"><span class="annottext">Arc s -&gt; Int
+</span><a href="Data.PlanarGraph.Dart.html#_unArc"><span class="hs-identifier hs-var hs-var">_unArc</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679347013"><span id="local-6989586621679347015"><span class="annot"><span class="annottext">Arc s -&gt; Arc s -&gt; Bool
+(Arc s -&gt; Arc s -&gt; Bool) -&gt; (Arc s -&gt; Arc s -&gt; Bool) -&gt; Eq (Arc s)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+/= :: Arc s -&gt; Arc s -&gt; Bool
+$c/= :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+== :: Arc s -&gt; Arc s -&gt; Bool
+$c== :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346997"><span id="local-6989586621679346999"><span id="local-6989586621679347001"><span id="local-6989586621679347003"><span id="local-6989586621679347005"><span id="local-6989586621679347007"><span id="local-6989586621679347009"><span class="annot"><span class="annottext">Eq (Arc s)
+Eq (Arc s) =&gt;
+(Arc s -&gt; Arc s -&gt; Ordering)
+-&gt; (Arc s -&gt; Arc s -&gt; Bool)
+-&gt; (Arc s -&gt; Arc s -&gt; Bool)
+-&gt; (Arc s -&gt; Arc s -&gt; Bool)
+-&gt; (Arc s -&gt; Arc s -&gt; Bool)
+-&gt; (Arc s -&gt; Arc s -&gt; Arc s)
+-&gt; (Arc s -&gt; Arc s -&gt; Arc s)
+-&gt; Ord (Arc s)
+Arc s -&gt; Arc s -&gt; Bool
+Arc s -&gt; Arc s -&gt; Ordering
+Arc s -&gt; Arc s -&gt; Arc s
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (s :: k). Eq (Arc s)
+forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+forall k (s :: k). Arc s -&gt; Arc s -&gt; Ordering
+forall k (s :: k). Arc s -&gt; Arc s -&gt; Arc s
+min :: Arc s -&gt; Arc s -&gt; Arc s
+$cmin :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Arc s
+max :: Arc s -&gt; Arc s -&gt; Arc s
+$cmax :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Arc s
+&gt;= :: Arc s -&gt; Arc s -&gt; Bool
+$c&gt;= :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+&gt; :: Arc s -&gt; Arc s -&gt; Bool
+$c&gt; :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+&lt;= :: Arc s -&gt; Arc s -&gt; Bool
+$c&lt;= :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+&lt; :: Arc s -&gt; Arc s -&gt; Bool
+$c&lt; :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Bool
+compare :: Arc s -&gt; Arc s -&gt; Ordering
+$ccompare :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Ordering
+$cp1Ord :: forall k (s :: k). Eq (Arc s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346980"><span id="local-6989586621679346982"><span id="local-6989586621679346984"><span id="local-6989586621679346986"><span id="local-6989586621679346988"><span id="local-6989586621679346990"><span id="local-6989586621679346992"><span id="local-6989586621679346994"><span class="annot"><span class="annottext">Int -&gt; Arc s
+Arc s -&gt; Int
+Arc s -&gt; [Arc s]
+Arc s -&gt; Arc s
+Arc s -&gt; Arc s -&gt; [Arc s]
+Arc s -&gt; Arc s -&gt; Arc s -&gt; [Arc s]
+(Arc s -&gt; Arc s)
+-&gt; (Arc s -&gt; Arc s)
+-&gt; (Int -&gt; Arc s)
+-&gt; (Arc s -&gt; Int)
+-&gt; (Arc s -&gt; [Arc s])
+-&gt; (Arc s -&gt; Arc s -&gt; [Arc s])
+-&gt; (Arc s -&gt; Arc s -&gt; [Arc s])
+-&gt; (Arc s -&gt; Arc s -&gt; Arc s -&gt; [Arc s])
+-&gt; Enum (Arc s)
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+forall k (s :: k). Int -&gt; Arc s
+forall k (s :: k). Arc s -&gt; Int
+forall k (s :: k). Arc s -&gt; [Arc s]
+forall k (s :: k). Arc s -&gt; Arc s
+forall k (s :: k). Arc s -&gt; Arc s -&gt; [Arc s]
+forall k (s :: k). Arc s -&gt; Arc s -&gt; Arc s -&gt; [Arc s]
+enumFromThenTo :: Arc s -&gt; Arc s -&gt; Arc s -&gt; [Arc s]
+$cenumFromThenTo :: forall k (s :: k). Arc s -&gt; Arc s -&gt; Arc s -&gt; [Arc s]
+enumFromTo :: Arc s -&gt; Arc s -&gt; [Arc s]
+$cenumFromTo :: forall k (s :: k). Arc s -&gt; Arc s -&gt; [Arc s]
+enumFromThen :: Arc s -&gt; Arc s -&gt; [Arc s]
+$cenumFromThen :: forall k (s :: k). Arc s -&gt; Arc s -&gt; [Arc s]
+enumFrom :: Arc s -&gt; [Arc s]
+$cenumFrom :: forall k (s :: k). Arc s -&gt; [Arc s]
+fromEnum :: Arc s -&gt; Int
+$cfromEnum :: forall k (s :: k). Arc s -&gt; Int
+toEnum :: Int -&gt; Arc s
+$ctoEnum :: forall k (s :: k). Int -&gt; Arc s
+pred :: Arc s -&gt; Arc s
+$cpred :: forall k (s :: k). Arc s -&gt; Arc s
+succ :: Arc s -&gt; Arc s
+$csucc :: forall k (s :: k). Arc s -&gt; Arc s
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346975"><span id="local-6989586621679346977"><span class="annot"><span class="annottext">Arc s
+Arc s -&gt; Arc s -&gt; Bounded (Arc s)
+forall a. a -&gt; a -&gt; Bounded a
+forall k (s :: k). Arc s
+maxBound :: Arc s
+$cmaxBound :: forall k (s :: k). Arc s
+minBound :: Arc s
+$cminBound :: forall k (s :: k). Arc s
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. Arc s -&gt; Rep (Arc s) x)
+-&gt; (forall x. Rep (Arc s) x -&gt; Arc s) -&gt; Generic (Arc s)
+forall x. Rep (Arc s) x -&gt; Arc s
+forall x. Arc s -&gt; Rep (Arc s) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (s :: k) x. Rep (Arc s) x -&gt; Arc s
+forall k (s :: k) x. Arc s -&gt; Rep (Arc s) x
+$cto :: forall k (s :: k) x. Rep (Arc s) x -&gt; Arc s
+$cfrom :: forall k (s :: k) x. Arc s -&gt; Rep (Arc s) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679346969"><span class="annot"><span class="annottext">Arc s -&gt; ()
+(Arc s -&gt; ()) -&gt; NFData (Arc s)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall k (s :: k). Arc s -&gt; ()
+rnf :: Arc s -&gt; ()
+$crnf :: forall k (s :: k). Arc s -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679346967"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346962"><span id="local-6989586621679346965"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346967"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679346960"><span class="annot"><span class="annottext">show :: Arc s -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span id="local-6989586621679346958"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679346958"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Arc &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346958"><span class="hs-identifier hs-var">i</span></a></span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679346957"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346954"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346957"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679346952"><span class="annot"><span class="annottext">arbitrary :: Gen (Arc s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Arc s
+forall k (s :: k). Int -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Arc s) -&gt; Gen Int -&gt; Gen (Arc s)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Gen Int
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen Int -&gt; (Int -&gt; Bool) -&gt; Gen Int
+forall a. Gen a -&gt; (a -&gt; Bool) -&gt; Gen a
+</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Darts have a direction which is either Positive or Negative (shown as +1</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- or -1, respectively).</span><span>
+</span><span id="line-38"></span><span id="local-6989586621679346948"><span id="local-6989586621679346949"></span></span><span class="hs-keyword">data</span><span> </span><span id="Direction"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-var">Direction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Negative"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Positive"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679346942"><span id="local-6989586621679346944"><span class="annot"><span class="annottext">Direction -&gt; Direction -&gt; Bool
+(Direction -&gt; Direction -&gt; Bool)
+-&gt; (Direction -&gt; Direction -&gt; Bool) -&gt; Eq Direction
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Direction -&gt; Direction -&gt; Bool
+$c/= :: Direction -&gt; Direction -&gt; Bool
+== :: Direction -&gt; Direction -&gt; Bool
+$c== :: Direction -&gt; Direction -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346927"><span id="local-6989586621679346929"><span id="local-6989586621679346931"><span id="local-6989586621679346933"><span id="local-6989586621679346935"><span id="local-6989586621679346937"><span id="local-6989586621679346939"><span class="annot"><span class="annottext">Eq Direction
+Eq Direction =&gt;
+(Direction -&gt; Direction -&gt; Ordering)
+-&gt; (Direction -&gt; Direction -&gt; Bool)
+-&gt; (Direction -&gt; Direction -&gt; Bool)
+-&gt; (Direction -&gt; Direction -&gt; Bool)
+-&gt; (Direction -&gt; Direction -&gt; Bool)
+-&gt; (Direction -&gt; Direction -&gt; Direction)
+-&gt; (Direction -&gt; Direction -&gt; Direction)
+-&gt; Ord Direction
+Direction -&gt; Direction -&gt; Bool
+Direction -&gt; Direction -&gt; Ordering
+Direction -&gt; Direction -&gt; Direction
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: Direction -&gt; Direction -&gt; Direction
+$cmin :: Direction -&gt; Direction -&gt; Direction
+max :: Direction -&gt; Direction -&gt; Direction
+$cmax :: Direction -&gt; Direction -&gt; Direction
+&gt;= :: Direction -&gt; Direction -&gt; Bool
+$c&gt;= :: Direction -&gt; Direction -&gt; Bool
+&gt; :: Direction -&gt; Direction -&gt; Bool
+$c&gt; :: Direction -&gt; Direction -&gt; Bool
+&lt;= :: Direction -&gt; Direction -&gt; Bool
+$c&lt;= :: Direction -&gt; Direction -&gt; Bool
+&lt; :: Direction -&gt; Direction -&gt; Bool
+$c&lt; :: Direction -&gt; Direction -&gt; Bool
+compare :: Direction -&gt; Direction -&gt; Ordering
+$ccompare :: Direction -&gt; Direction -&gt; Ordering
+$cp1Ord :: Eq Direction
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346923"><span id="local-6989586621679346925"><span class="annot"><span class="annottext">Direction
+Direction -&gt; Direction -&gt; Bounded Direction
+forall a. a -&gt; a -&gt; Bounded a
+maxBound :: Direction
+$cmaxBound :: Direction
+minBound :: Direction
+$cminBound :: Direction
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346907"><span id="local-6989586621679346909"><span id="local-6989586621679346911"><span id="local-6989586621679346913"><span id="local-6989586621679346915"><span id="local-6989586621679346917"><span id="local-6989586621679346919"><span id="local-6989586621679346921"><span class="annot"><span class="annottext">Int -&gt; Direction
+Direction -&gt; Int
+Direction -&gt; [Direction]
+Direction -&gt; Direction
+Direction -&gt; Direction -&gt; [Direction]
+Direction -&gt; Direction -&gt; Direction -&gt; [Direction]
+(Direction -&gt; Direction)
+-&gt; (Direction -&gt; Direction)
+-&gt; (Int -&gt; Direction)
+-&gt; (Direction -&gt; Int)
+-&gt; (Direction -&gt; [Direction])
+-&gt; (Direction -&gt; Direction -&gt; [Direction])
+-&gt; (Direction -&gt; Direction -&gt; [Direction])
+-&gt; (Direction -&gt; Direction -&gt; Direction -&gt; [Direction])
+-&gt; Enum Direction
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+enumFromThenTo :: Direction -&gt; Direction -&gt; Direction -&gt; [Direction]
+$cenumFromThenTo :: Direction -&gt; Direction -&gt; Direction -&gt; [Direction]
+enumFromTo :: Direction -&gt; Direction -&gt; [Direction]
+$cenumFromTo :: Direction -&gt; Direction -&gt; [Direction]
+enumFromThen :: Direction -&gt; Direction -&gt; [Direction]
+$cenumFromThen :: Direction -&gt; Direction -&gt; [Direction]
+enumFrom :: Direction -&gt; [Direction]
+$cenumFrom :: Direction -&gt; [Direction]
+fromEnum :: Direction -&gt; Int
+$cfromEnum :: Direction -&gt; Int
+toEnum :: Int -&gt; Direction
+$ctoEnum :: Int -&gt; Direction
+pred :: Direction -&gt; Direction
+$cpred :: Direction -&gt; Direction
+succ :: Direction -&gt; Direction
+$csucc :: Direction -&gt; Direction
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. Direction -&gt; Rep Direction x)
+-&gt; (forall x. Rep Direction x -&gt; Direction) -&gt; Generic Direction
+forall x. Rep Direction x -&gt; Direction
+forall x. Direction -&gt; Rep Direction x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cto :: forall x. Rep Direction x -&gt; Direction
+$cfrom :: forall x. Direction -&gt; Rep Direction x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346903"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346898"><span id="local-6989586621679346901"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679346897"><span class="annot"><span class="annottext">show :: Direction -&gt; String
+</span><a href="#local-6989586621679346897"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;+1&quot;</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-type">Negative</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;-1&quot;</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346890"><span id="local-6989586621679346892"><span id="local-6989586621679346894"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621679346888"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS Direction
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-string">&quot;-1&quot;</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-string">&quot;+1&quot;</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346884"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679346883"><span class="annot"><span class="annottext">arbitrary :: Gen Direction
+</span><a href="#local-6989586621679346883"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679346882"><span class="annot"><span class="annottext">b :: Bool
+</span><a href="#local-6989586621679346882"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679346882"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Direction) -&gt; Gen Bool -&gt; Gen Direction
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen Bool
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- | Reverse the direcion</span><span>
+</span><span id="line-55"></span><span class="annot"><a href="Data.PlanarGraph.Dart.html#rev"><span class="hs-identifier hs-type">rev</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span><span>
+</span><span id="line-56"></span><span id="rev"><span class="annot"><span class="annottext">rev :: Direction -&gt; Direction
+</span><a href="Data.PlanarGraph.Dart.html#rev"><span class="hs-identifier hs-var hs-var">rev</span></a></span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-type">Negative</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Data.PlanarGraph.Dart.html#rev"><span class="hs-identifier hs-var">rev</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | A dart represents a bi-directed edge. I.e. a dart has a direction, however</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- the dart of the oposite direction is always present in the planar graph as</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- well.</span><span>
+</span><span id="line-62"></span><span id="local-6989586621679346879"><span id="local-6989586621679346880"></span></span><span class="hs-keyword">data</span><span> </span><span id="Dart"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span></span><span> </span><span id="local-6989586621679347062"><span class="annot"><a href="#local-6989586621679347062"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Dart"><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_arc"><span class="annot"><span class="annottext">Dart s -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#_arc"><span class="hs-identifier hs-var hs-var">_arc</span></a></span></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347062"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="_direction"><span class="annot"><span class="annottext">Dart s -&gt; Direction
+</span><a href="Data.PlanarGraph.Dart.html#_direction"><span class="hs-identifier hs-var hs-var">_direction</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span><span>
+</span><span id="line-64"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679346872"><span id="local-6989586621679346874"><span class="annot"><span class="annottext">Dart s -&gt; Dart s -&gt; Bool
+(Dart s -&gt; Dart s -&gt; Bool)
+-&gt; (Dart s -&gt; Dart s -&gt; Bool) -&gt; Eq (Dart s)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+/= :: Dart s -&gt; Dart s -&gt; Bool
+$c/= :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+== :: Dart s -&gt; Dart s -&gt; Bool
+$c== :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679346857"><span id="local-6989586621679346859"><span id="local-6989586621679346861"><span id="local-6989586621679346863"><span id="local-6989586621679346865"><span id="local-6989586621679346867"><span id="local-6989586621679346869"><span class="annot"><span class="annottext">Eq (Dart s)
+Eq (Dart s) =&gt;
+(Dart s -&gt; Dart s -&gt; Ordering)
+-&gt; (Dart s -&gt; Dart s -&gt; Bool)
+-&gt; (Dart s -&gt; Dart s -&gt; Bool)
+-&gt; (Dart s -&gt; Dart s -&gt; Bool)
+-&gt; (Dart s -&gt; Dart s -&gt; Bool)
+-&gt; (Dart s -&gt; Dart s -&gt; Dart s)
+-&gt; (Dart s -&gt; Dart s -&gt; Dart s)
+-&gt; Ord (Dart s)
+Dart s -&gt; Dart s -&gt; Bool
+Dart s -&gt; Dart s -&gt; Ordering
+Dart s -&gt; Dart s -&gt; Dart s
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (s :: k). Eq (Dart s)
+forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+forall k (s :: k). Dart s -&gt; Dart s -&gt; Ordering
+forall k (s :: k). Dart s -&gt; Dart s -&gt; Dart s
+min :: Dart s -&gt; Dart s -&gt; Dart s
+$cmin :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Dart s
+max :: Dart s -&gt; Dart s -&gt; Dart s
+$cmax :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Dart s
+&gt;= :: Dart s -&gt; Dart s -&gt; Bool
+$c&gt;= :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+&gt; :: Dart s -&gt; Dart s -&gt; Bool
+$c&gt; :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+&lt;= :: Dart s -&gt; Dart s -&gt; Bool
+$c&lt;= :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+&lt; :: Dart s -&gt; Dart s -&gt; Bool
+$c&lt; :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Bool
+compare :: Dart s -&gt; Dart s -&gt; Ordering
+$ccompare :: forall k (s :: k). Dart s -&gt; Dart s -&gt; Ordering
+$cp1Ord :: forall k (s :: k). Eq (Dart s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. Dart s -&gt; Rep (Dart s) x)
+-&gt; (forall x. Rep (Dart s) x -&gt; Dart s) -&gt; Generic (Dart s)
+forall x. Rep (Dart s) x -&gt; Dart s
+forall x. Dart s -&gt; Rep (Dart s) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (s :: k) x. Rep (Dart s) x -&gt; Dart s
+forall k (s :: k) x. Dart s -&gt; Rep (Dart s) x
+$cto :: forall k (s :: k) x. Rep (Dart s) x -&gt; Dart s
+$cfrom :: forall k (s :: k) x. Dart s -&gt; Rep (Dart s) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Arc lens.</span><span>
+</span><span id="line-67"></span><span id="local-6989586621679346854"><span class="annot"><a href="Data.PlanarGraph.Dart.html#arc"><span class="hs-identifier hs-type">arc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346854"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346854"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-68"></span><span id="arc"><span class="annot"><span class="annottext">arc :: (Arc s -&gt; f (Arc s)) -&gt; Dart s -&gt; f (Dart s)
+</span><a href="Data.PlanarGraph.Dart.html#arc"><span class="hs-identifier hs-var hs-var">arc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; Arc s)
+-&gt; (Dart s -&gt; Arc s -&gt; Dart s)
+-&gt; Lens (Dart s) (Dart s) (Arc s) (Arc s)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; Arc s
+forall k (s :: k). Dart s -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#_arc"><span class="hs-identifier hs-var hs-var">_arc</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679346851"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621679346851"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679346850"><span class="annot"><span class="annottext">a :: Arc s
+</span><a href="#local-6989586621679346850"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621679346851"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_arc :: Arc s
+</span><a href="Data.PlanarGraph.Dart.html#_arc"><span class="hs-identifier hs-var">_arc</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arc s
+</span><a href="#local-6989586621679346850"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- | Direction lens.</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679347041"><span class="annot"><a href="Data.PlanarGraph.Dart.html#direction"><span class="hs-identifier hs-type">direction</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347041"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier hs-type">Direction</span></a></span></span><span>
+</span><span id="line-72"></span><span id="direction"><span class="annot"><span class="annottext">direction :: (Direction -&gt; f Direction) -&gt; Dart s -&gt; f (Dart s)
+</span><a href="Data.PlanarGraph.Dart.html#direction"><span class="hs-identifier hs-var hs-var">direction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; Direction)
+-&gt; (Dart s -&gt; Direction -&gt; Dart s)
+-&gt; Lens (Dart s) (Dart s) Direction Direction
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; Direction
+forall k (s :: k). Dart s -&gt; Direction
+</span><a href="Data.PlanarGraph.Dart.html#_direction"><span class="hs-identifier hs-var hs-var">_direction</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679346848"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621679346848"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679346847"><span class="annot"><span class="annottext">dir :: Direction
+</span><a href="#local-6989586621679346847"><span class="hs-identifier hs-var">dir</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621679346848"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_direction :: Direction
+</span><a href="Data.PlanarGraph.Dart.html#_direction"><span class="hs-identifier hs-var">_direction</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="#local-6989586621679346847"><span class="hs-identifier hs-var">dir</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- makeLenses ''Dart</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679346846"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346844"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346846"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679346843"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346838"><span id="local-6989586621679346841"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346843"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679346837"><span class="annot"><span class="annottext">show :: Dart s -&gt; String
+</span><a href="#local-6989586621679346837"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span id="local-6989586621679346836"><span class="annot"><span class="annottext">a :: Arc s
+</span><a href="#local-6989586621679346836"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679346835"><span class="annot"><span class="annottext">d :: Direction
+</span><a href="#local-6989586621679346835"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Dart (&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Arc s
+</span><a href="#local-6989586621679346836"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot;) &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Direction -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="#local-6989586621679346835"><span class="hs-identifier hs-var">d</span></a></span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679346834"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346831"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346834"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679346830"><span class="annot"><span class="annottext">arbitrary :: Gen (Dart s)
+</span><a href="#local-6989586621679346830"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="annot"><span class="annottext">(Arc s -&gt; Direction -&gt; Dart s)
+-&gt; Gen (Arc s) -&gt; Gen (Direction -&gt; Dart s)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (Arc s)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen (Direction -&gt; Dart s) -&gt; Gen Direction -&gt; Gen (Dart s)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen Direction
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | Get the twin of this dart (edge)</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; twin (dart 0 &quot;+1&quot;)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- Dart (Arc 0) -1</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- &gt;&gt;&gt; twin (dart 0 &quot;-1&quot;)</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- Dart (Arc 0) +1</span><span>
+</span><span id="line-90"></span><span id="local-6989586621679346829"><span class="annot"><a href="Data.PlanarGraph.Dart.html#twin"><span class="hs-identifier hs-type">twin</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346829"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346829"><span class="hs-identifier hs-type">s</span></a></span></span><span>
+</span><span id="line-91"></span><span id="twin"><span class="annot"><span class="annottext">twin :: Dart s -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#twin"><span class="hs-identifier hs-var hs-var">twin</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span id="local-6989586621679346827"><span class="annot"><span class="annottext">a :: Arc s
+</span><a href="#local-6989586621679346827"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679346826"><span class="annot"><span class="annottext">d :: Direction
+</span><a href="#local-6989586621679346826"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="annot"><span class="annottext">Arc s
+</span><a href="#local-6989586621679346827"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Direction -&gt; Direction
+</span><a href="Data.PlanarGraph.Dart.html#rev"><span class="hs-identifier hs-var">rev</span></a></span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="#local-6989586621679346826"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- | test if a dart is Positive</span><span>
+</span><span id="line-94"></span><span id="local-6989586621679346825"><span class="annot"><a href="Data.PlanarGraph.Dart.html#isPositive"><span class="hs-identifier hs-type">isPositive</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346825"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-95"></span><span id="isPositive"><span class="annot"><span class="annottext">isPositive :: Dart s -&gt; Bool
+</span><a href="Data.PlanarGraph.Dart.html#isPositive"><span class="hs-identifier hs-var hs-var">isPositive</span></a></span></span><span> </span><span id="local-6989586621679346823"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621679346823"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621679346823"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">Dart s -&gt; Getting Direction (Dart s) Direction -&gt; Direction
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting Direction (Dart s) Direction
+forall k (s :: k). Lens' (Dart s) Direction
+</span><a href="Data.PlanarGraph.Dart.html#direction"><span class="hs-identifier hs-var">direction</span></a></span><span> </span><span class="annot"><span class="annottext">Direction -&gt; Direction -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span id="local-6989586621679346821"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679346807"><span id="local-6989586621679346809"><span id="local-6989586621679346811"><span id="local-6989586621679346813"><span id="local-6989586621679346817"><span id="local-6989586621679346819"><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346821"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621679346806"><span class="annot"><span class="annottext">toEnum :: Int -&gt; Dart s
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621679346804"><span class="annot"><span class="annottext">x :: Int
+</span><a href="#local-6989586621679346804"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool
+forall a. Integral a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">even</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346804"><span class="hs-identifier hs-var">x</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Arc s
+forall k (s :: k). Int -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Arc s) -&gt; Int -&gt; Arc s
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346804"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Integral a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`div`</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Arc s
+forall k (s :: k). Int -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Arc s) -&gt; Int -&gt; Arc s
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346804"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Integral a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`div`</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-comment">-- get the back edge by adding one</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621679346801"><span class="annot"><span class="annottext">fromEnum :: Dart s -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-type">Arc</span></a></span><span> </span><span id="local-6989586621679346799"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679346799"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679346798"><span class="annot"><span class="annottext">d :: Direction
+</span><a href="#local-6989586621679346798"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="#local-6989586621679346798"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-105"></span><span>                                </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346799"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-106"></span><span>                                </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-type">Negative</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679346799"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- | Enumerates all darts such that</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- allDarts !! i = d   &lt;=&gt; i == fromEnum d</span><span>
+</span><span id="line-111"></span><span id="local-6989586621679346795"><span class="annot"><a href="Data.PlanarGraph.Dart.html#allDarts"><span class="hs-identifier hs-type">allDarts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679346795"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-112"></span><span id="allDarts"><span class="annot"><span class="annottext">allDarts :: [Dart s]
+</span><a href="Data.PlanarGraph.Dart.html#allDarts"><span class="hs-identifier hs-var hs-var">allDarts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Arc s -&gt; [Dart s]) -&gt; [Arc s] -&gt; [Dart s]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679346792"><span class="annot"><span class="annottext">a :: Arc s
+</span><a href="#local-6989586621679346792"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="annot"><span class="annottext">Arc s
+</span><a href="#local-6989586621679346792"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Arc s -&gt; Direction -&gt; Dart s
+forall k (s :: k). Arc s -&gt; Direction -&gt; Dart s
+</span><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-var">Dart</span></a></span><span> </span><span class="annot"><span class="annottext">Arc s
+</span><a href="#local-6989586621679346792"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Direction
+</span><a href="Data.PlanarGraph.Dart.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; Arc s
+forall k (s :: k). Int -&gt; Arc s
+</span><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier hs-var">Arc</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
+</span><span id="line-113"></span></pre></body></html>

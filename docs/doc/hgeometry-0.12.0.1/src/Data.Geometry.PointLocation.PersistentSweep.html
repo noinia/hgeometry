@@ -1,0 +1,1012 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_CgDWRzxXwsEYywi4fGPd3"></span><span class="hs-pragma">{-# Language TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# Language TypeApplications #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Geometry.PointLocation.PersistentSweep</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.PointLocation.PersistentSweep</span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier">PointLocationDS</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier">PointLocationDS</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#verticalRayShootingStructure"><span class="hs-identifier">verticalRayShootingStructure</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier">subdivision</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#outerFace"><span class="hs-identifier">outerFace</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Building the Data Structure</span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointLocationDS"><span class="hs-identifier">pointLocationDS</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Querying the Data Structure</span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAbove"><span class="hs-identifier">dartAbove</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAboveOrOn"><span class="hs-identifier">dartAboveOrOn</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceContaining"><span class="hs-identifier">faceContaining</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining"><span class="hs-identifier">faceIdContaining</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InPolygonDS"><span class="hs-identifier">InPolygonDS</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#inPolygonDS"><span class="hs-identifier">inPolygonDS</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InOut"><span class="hs-identifier">InOut</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointInPolygon"><span class="hs-identifier">pointInPolygon</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#edgeOnOrAbove"><span class="hs-identifier">edgeOnOrAbove</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html"><span class="hs-identifier">Data.Geometry.VerticalRayShooting.PersistentSweep</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">VRS</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">contains</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">below</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">SP</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | Planar Point Location Data structure</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="PointLocationDS"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-var">PointLocationDS</span></a></span></span><span> </span><span id="local-6989586621680046133"><span class="annot"><a href="#local-6989586621680046133"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621680046134"><span class="annot"><a href="#local-6989586621680046134"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680046131"><span class="annot"><a href="#local-6989586621680046131"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680046130"><span class="annot"><a href="#local-6989586621680046130"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680046132"><span class="annot"><a href="#local-6989586621680046132"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PointLocationDS"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-var">PointLocationDS</span></a></span></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-43"></span><span>        </span><span id="_verticalRayShootingStructure"><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; VerticalRayShootingStructure v (Dart s) r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#_verticalRayShootingStructure"><span class="hs-identifier hs-var hs-var">_verticalRayShootingStructure</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html#VerticalRayShootingStructure"><span class="hs-identifier hs-type">VRS.VerticalRayShootingStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046134"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680046133"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680046132"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="_subdivision"><span class="annot"><span class="annottext">PointLocationDS s v e f r -&gt; PlanarSubdivision s v e f r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#_subdivision"><span class="hs-identifier hs-var hs-var">_subdivision</span></a></span></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046133"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046134"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046131"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046130"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046132"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-45"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="_outerFace"><span class="annot"><span class="annottext">PointLocationDS s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#_outerFace"><span class="hs-identifier hs-var hs-var">_outerFace</span></a></span></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621680046133"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-46"></span><span>      </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045820"><span id="local-6989586621680045822"><span id="local-6989586621680045824"><span class="annot"><span class="annottext">Int -&gt; PointLocationDS s v e f r -&gt; ShowS
+[PointLocationDS s v e f r] -&gt; ShowS
+PointLocationDS s v e f r -&gt; String
+(Int -&gt; PointLocationDS s v e f r -&gt; ShowS)
+-&gt; (PointLocationDS s v e f r -&gt; String)
+-&gt; ([PointLocationDS s v e f r] -&gt; ShowS)
+-&gt; Show (PointLocationDS s v e f r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+Int -&gt; PointLocationDS s v e f r -&gt; ShowS
+forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+[PointLocationDS s v e f r] -&gt; ShowS
+forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+PointLocationDS s v e f r -&gt; String
+showList :: [PointLocationDS s v e f r] -&gt; ShowS
+$cshowList :: forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+[PointLocationDS s v e f r] -&gt; ShowS
+show :: PointLocationDS s v e f r -&gt; String
+$cshow :: forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+PointLocationDS s v e f r -&gt; String
+showsPrec :: Int -&gt; PointLocationDS s v e f r -&gt; ShowS
+$cshowsPrec :: forall k (s :: k) v e f r.
+(Show r, Show v, Show e, Show f) =&gt;
+Int -&gt; PointLocationDS s v e f r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045815"><span id="local-6989586621680045817"><span class="annot"><span class="annottext">PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+(PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool)
+-&gt; (PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool)
+-&gt; Eq (PointLocationDS s v e f r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k) v e f r.
+(Eq r, Eq v, Eq e, Eq f) =&gt;
+PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+/= :: PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+$c/= :: forall k (s :: k) v e f r.
+(Eq r, Eq v, Eq e, Eq f) =&gt;
+PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+== :: PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+$c== :: forall k (s :: k) v e f r.
+(Eq r, Eq v, Eq e, Eq f) =&gt;
+PointLocationDS s v e f r -&gt; PointLocationDS s v e f r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="outerFace"><span id="subdivision"><span id="verticalRayShootingStructure"><span id="local-6989586621680046130"><span id="local-6989586621680046131"><span id="local-6989586621680046132"><span id="local-6989586621680046133"><span id="local-6989586621680046134"><span class="hs-identifier">makeLensesWith</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">lensRules</span><span class="hs-operator">&amp;</span><span class="hs-identifier">generateUpdateableOptics</span><span> </span><span class="hs-operator">.~</span><span> </span><span class="hs-identifier">False</span><span class="hs-special">)</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PointLocationDS</span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- * Buidlding the Point location Data structure</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Builds a pointlocation data structure on the planar subdivision with \(n\)</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- vertices.</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- running time: \(O(n\log n)\).</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- space: \(O(n\log n)\).</span><span>
+</span><span id="line-58"></span><span id="local-6989586621680045883"><span id="local-6989586621680045884"><span id="local-6989586621680045885"><span id="local-6989586621680045886"><span id="local-6989586621680045887"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointLocationDS"><span class="hs-identifier hs-type">pointLocationDS</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045887"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045887"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045886"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045885"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045884"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045883"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045887"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045886"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045885"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045884"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045883"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045887"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-60"></span><span id="pointLocationDS"><span class="annot"><span class="annottext">pointLocationDS :: PlanarSubdivision s v e f r -&gt; PointLocationDS s v e f r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointLocationDS"><span class="hs-identifier hs-var hs-var">pointLocationDS</span></a></span></span><span> </span><span id="local-6989586621680045813"><span class="annot"><span class="annottext">ps :: PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045813"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VerticalRayShootingStructure v (Dart s) r
+-&gt; PlanarSubdivision s v e f r
+-&gt; FaceId' s
+-&gt; PointLocationDS s v e f r
+forall k (s :: k) v e f r.
+VerticalRayShootingStructure v (Dart s) r
+-&gt; PlanarSubdivision s v e f r
+-&gt; FaceId' s
+-&gt; PointLocationDS s v e f r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-var">PointLocationDS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 v r :+ Dart s)
+-&gt; VerticalRayShootingStructure v (Dart s) r
+forall r (t :: * -&gt; *) p e.
+(Ord r, Fractional r, Foldable1 t) =&gt;
+t (LineSegment 2 p r :+ e) -&gt; VerticalRayShootingStructure p e r
+</span><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html#verticalRayShootingStructure"><span class="hs-identifier hs-var">VRS.verticalRayShootingStructure</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 v r :+ Dart s)
+</span><a href="#local-6989586621680045811"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045813"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r. PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#outerFaceId"><span class="hs-identifier hs-var">outerFaceId</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045813"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621680045811"><span class="annot"><span class="annottext">es :: NonEmpty (LineSegment 2 v r :+ Dart s)
+</span><a href="#local-6989586621680045811"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 v r :+ Dart s]
+-&gt; NonEmpty (LineSegment 2 v r :+ Dart s)
+forall a. [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 v r :+ Dart s]
+ -&gt; NonEmpty (LineSegment 2 v r :+ Dart s))
+-&gt; (PlanarSubdivision s v e f r -&gt; [LineSegment 2 v r :+ Dart s])
+-&gt; PlanarSubdivision s v e f r
+-&gt; NonEmpty (LineSegment 2 v r :+ Dart s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (LineSegment 2 v r :+ Dart s)
+-&gt; [LineSegment 2 v r :+ Dart s]
+forall a. Vector a -&gt; [a]
+</span><span class="hs-identifier hs-var">V.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (LineSegment 2 v r :+ Dart s)
+ -&gt; [LineSegment 2 v r :+ Dart s])
+-&gt; (PlanarSubdivision s v e f r
+    -&gt; Vector (LineSegment 2 v r :+ Dart s))
+-&gt; PlanarSubdivision s v e f r
+-&gt; [LineSegment 2 v r :+ Dart s]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Dart s, LineSegment 2 v r :+ e) -&gt; LineSegment 2 v r :+ Dart s)
+-&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+-&gt; Vector (LineSegment 2 v r :+ Dart s)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680045806"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621680045806"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680045805"><span class="annot"><span class="annottext">s :: LineSegment 2 v r :+ e
+</span><a href="#local-6989586621680045805"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 v r :+ e
+</span><a href="#local-6989586621680045805"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">(LineSegment 2 v r :+ e)
+-&gt; ((LineSegment 2 v r :+ e) -&gt; LineSegment 2 v r :+ Dart s)
+-&gt; LineSegment 2 v r :+ Dart s
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(e -&gt; Identity (Dart s))
+-&gt; (LineSegment 2 v r :+ e)
+-&gt; Identity (LineSegment 2 v r :+ Dart s)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">((e -&gt; Identity (Dart s))
+ -&gt; (LineSegment 2 v r :+ e)
+ -&gt; Identity (LineSegment 2 v r :+ Dart s))
+-&gt; Dart s
+-&gt; (LineSegment 2 v r :+ e)
+-&gt; LineSegment 2 v r :+ Dart s
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045806"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector (Dart s, LineSegment 2 v r :+ e)
+ -&gt; Vector (LineSegment 2 v r :+ Dart s))
+-&gt; (PlanarSubdivision s v e f r
+    -&gt; Vector (Dart s, LineSegment 2 v r :+ e))
+-&gt; PlanarSubdivision s v e f r
+-&gt; Vector (LineSegment 2 v r :+ Dart s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+-&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+forall k (s :: k) v e f r.
+PlanarSubdivision s v e f r
+-&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#edgeSegments"><span class="hs-identifier hs-var">edgeSegments</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision s v e f r
+ -&gt; NonEmpty (LineSegment 2 v r :+ Dart s))
+-&gt; PlanarSubdivision s v e f r
+-&gt; NonEmpty (LineSegment 2 v r :+ Dart s)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045813"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-comment">-- the VRS structure will throw away vertical edges. So there is no need to</span><span>
+</span><span id="line-64"></span><span>      </span><span class="hs-comment">-- explicitly filter them yet at this point</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- * Querying the Structure</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Locates the first edge (dart) strictly above the query point.</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- returns Nothing if the query point lies in the outer face and there is no dart</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- above it.</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-74"></span><span id="local-6989586621680046011"><span id="local-6989586621680046012"><span id="local-6989586621680046013"><span id="local-6989586621680046014"><span id="local-6989586621680046015"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAbove"><span class="hs-identifier hs-type">dartAbove</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680046015"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680046015"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680046015"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046014"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046013"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046012"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046011"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046015"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680046014"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-76"></span><span id="dartAbove"><span class="annot"><span class="annottext">dartAbove :: Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAbove"><span class="hs-identifier hs-var hs-var">dartAbove</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryAlgorithm v (Dart s) r
+-&gt; Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+forall k r v (s :: k) e f.
+(Ord r, Fractional r) =&gt;
+QueryAlgorithm v (Dart s) r
+-&gt; Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#queryWith"><span class="hs-identifier hs-var">queryWith</span></a></span><span> </span><span class="annot"><span class="annottext">QueryAlgorithm v (Dart s) r
+forall r p e.
+(Ord r, Num r) =&gt;
+Point 2 r
+-&gt; VerticalRayShootingStructure p e r
+-&gt; Maybe (LineSegment 2 p r :+ e)
+</span><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html#segmentAbove"><span class="hs-identifier hs-var">VRS.segmentAbove</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621680045794"><span id="local-6989586621680045795"><span id="local-6989586621680045796"><span id="local-6989586621680045797"><span id="local-6989586621680045798"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAboveOrOn"><span class="hs-identifier hs-type">dartAboveOrOn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045798"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045798"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045798"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045797"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045796"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045795"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045794"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045798"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680045797"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-80"></span><span id="dartAboveOrOn"><span class="annot"><span class="annottext">dartAboveOrOn :: Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAboveOrOn"><span class="hs-identifier hs-var hs-var">dartAboveOrOn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryAlgorithm v (Dart s) r
+-&gt; Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+forall k r v (s :: k) e f.
+(Ord r, Fractional r) =&gt;
+QueryAlgorithm v (Dart s) r
+-&gt; Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#queryWith"><span class="hs-identifier hs-var">queryWith</span></a></span><span> </span><span class="annot"><span class="annottext">QueryAlgorithm v (Dart s) r
+forall r p e.
+(Ord r, Num r) =&gt;
+Point 2 r
+-&gt; VerticalRayShootingStructure p e r
+-&gt; Maybe (LineSegment 2 p r :+ e)
+</span><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html#segmentAboveOrOn"><span class="hs-identifier hs-var">VRS.segmentAboveOrOn</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">type</span><span> </span><span id="QueryAlgorithm"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#QueryAlgorithm"><span class="hs-identifier hs-var">QueryAlgorithm</span></a></span></span><span> </span><span id="local-6989586621680045792"><span class="annot"><a href="#local-6989586621680045792"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680045791"><span class="annot"><a href="#local-6989586621680045791"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680045790"><span class="annot"><a href="#local-6989586621680045790"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045790"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.VerticalRayShooting.PersistentSweep.html#VerticalRayShootingStructure"><span class="hs-identifier hs-type">VRS.VerticalRayShootingStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045792"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045791"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045790"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045792"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045790"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680045791"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621680046072"><span id="local-6989586621680046073"><span id="local-6989586621680046074"><span id="local-6989586621680046075"><span id="local-6989586621680046076"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#queryWith"><span class="hs-identifier hs-type">queryWith</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680046076"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680046076"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#QueryAlgorithm"><span class="hs-identifier hs-type">QueryAlgorithm</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046075"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680046074"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680046076"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-87"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680046076"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046074"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046075"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046073"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046072"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046076"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680046074"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-88"></span><span id="queryWith"><span class="annot"><span class="annottext">queryWith :: QueryAlgorithm v (Dart s) r
+-&gt; Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#queryWith"><span class="hs-identifier hs-var hs-var">queryWith</span></a></span></span><span> </span><span id="local-6989586621680045789"><span class="annot"><span class="annottext">query :: QueryAlgorithm v (Dart s) r
+</span><a href="#local-6989586621680045789"><span class="hs-identifier hs-var">query</span></a></span></span><span> </span><span id="local-6989586621680045788"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045788"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((LineSegment 2 v r :+ Dart s) -&gt; Dart s)
+-&gt; Maybe (LineSegment 2 v r :+ Dart s) -&gt; Maybe (Dart s)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Dart s) (LineSegment 2 v r :+ Dart s) (Dart s)
+-&gt; (LineSegment 2 v r :+ Dart s) -&gt; Dart s
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting (Dart s) (LineSegment 2 v r :+ Dart s) (Dart s)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (LineSegment 2 v r :+ Dart s) -&gt; Maybe (Dart s))
+-&gt; (PointLocationDS s v e f r
+    -&gt; Maybe (LineSegment 2 v r :+ Dart s))
+-&gt; PointLocationDS s v e f r
+-&gt; Maybe (Dart s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">QueryAlgorithm v (Dart s) r
+</span><a href="#local-6989586621680045789"><span class="hs-identifier hs-var">query</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045788"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">(VerticalRayShootingStructure v (Dart s) r
+ -&gt; Maybe (LineSegment 2 v r :+ Dart s))
+-&gt; (PointLocationDS s v e f r
+    -&gt; VerticalRayShootingStructure v (Dart s) r)
+-&gt; PointLocationDS s v e f r
+-&gt; Maybe (LineSegment 2 v r :+ Dart s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (VerticalRayShootingStructure v (Dart s) r)
+  (PointLocationDS s v e f r)
+  (VerticalRayShootingStructure v (Dart s) r)
+-&gt; PointLocationDS s v e f r
+-&gt; VerticalRayShootingStructure v (Dart s) r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (VerticalRayShootingStructure v (Dart s) r)
+  (PointLocationDS s v e f r)
+  (VerticalRayShootingStructure v (Dart s) r)
+forall k (s :: k) v e f r.
+Getter
+  (PointLocationDS s v e f r)
+  (VerticalRayShootingStructure v (Dart s) r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#verticalRayShootingStructure"><span class="hs-identifier hs-var">verticalRayShootingStructure</span></a></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | Locates the face containing the query point.</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-93"></span><span id="local-6989586621680045782"><span id="local-6989586621680045783"><span id="local-6989586621680045784"><span id="local-6989586621680045785"><span id="local-6989586621680045786"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceContaining"><span class="hs-identifier hs-type">faceContaining</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045786"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045786"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045786"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045785"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045784"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045783"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045782"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045786"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680045782"><span class="hs-identifier hs-type">f</span></a></span></span></span></span></span></span><span>
+</span><span id="line-95"></span><span id="faceContaining"><span class="annot"><span class="annottext">faceContaining :: Point 2 r -&gt; PointLocationDS s v e f r -&gt; f
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceContaining"><span class="hs-identifier hs-var hs-var">faceContaining</span></a></span></span><span> </span><span id="local-6989586621680045781"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045781"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680045780"><span class="annot"><span class="annottext">ds :: PointLocationDS s v e f r
+</span><a href="#local-6989586621680045780"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045780"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; Getting f (PointLocationDS s v e f r) f -&gt; f
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(PlanarSubdivision s v e f r
+ -&gt; Const f (PlanarSubdivision s v e f r))
+-&gt; PointLocationDS s v e f r -&gt; Const f (PointLocationDS s v e f r)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span class="annot"><span class="annottext">((PlanarSubdivision s v e f r
+  -&gt; Const f (PlanarSubdivision s v e f r))
+ -&gt; PointLocationDS s v e f r
+ -&gt; Const f (PointLocationDS s v e f r))
+-&gt; ((f -&gt; Const f f)
+    -&gt; PlanarSubdivision s v e f r
+    -&gt; Const f (PlanarSubdivision s v e f r))
+-&gt; Getting f (PointLocationDS s v e f r) f
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">FaceId' s
+-&gt; Lens'
+     (PlanarSubdivision s v e f r)
+     (DataOf (PlanarSubdivision s v e f r) (FaceId' s))
+forall g i. HasDataOf g i =&gt; i -&gt; Lens' g (DataOf g i)
+</span><span class="hs-identifier hs-var">dataOf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; PointLocationDS s v e f r -&gt; FaceId' s
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; PointLocationDS s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining"><span class="hs-identifier hs-var">faceIdContaining</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045781"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045780"><span class="hs-identifier hs-var">ds</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- | Locates the faceId of the face containing the query point.</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- If the query point lies *on* an edge, an arbitrary face incident to</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- the edge is returned.</span><span>
+</span><span id="line-101"></span><span class="hs-comment">--</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-103"></span><span id="local-6989586621680046029"><span id="local-6989586621680046030"><span id="local-6989586621680046031"><span id="local-6989586621680046032"><span id="local-6989586621680046033"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining"><span class="hs-identifier hs-type">faceIdContaining</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680046033"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680046033"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680046033"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046032"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046031"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046030"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046029"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046033"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621680046032"><span class="hs-identifier hs-type">s</span></a></span></span></span></span></span></span><span>
+</span><span id="line-105"></span><span id="faceIdContaining"><span class="annot"><span class="annottext">faceIdContaining :: Point 2 r -&gt; PointLocationDS s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining"><span class="hs-identifier hs-var hs-var">faceIdContaining</span></a></span></span><span> </span><span id="local-6989586621680045777"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045777"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680045776"><span class="annot"><span class="annottext">ds :: PointLocationDS s v e f r
+</span><a href="#local-6989586621680045776"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r -&gt; Maybe (Dart s) -&gt; FaceId' s
+forall k r (s :: k) v e f.
+Ord r =&gt;
+PointLocationDS s v e f r -&gt; Maybe (Dart s) -&gt; FaceId' s
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartToFace"><span class="hs-identifier hs-var">dartToFace</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045776"><span class="hs-identifier hs-var">ds</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Dart s) -&gt; FaceId' s) -&gt; Maybe (Dart s) -&gt; FaceId' s
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAbove"><span class="hs-identifier hs-var">dartAbove</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045777"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045776"><span class="hs-identifier hs-var">ds</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Given the dart determine the faceId correspondig to it (depending</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- on the orientation of the dart that is returned.)</span><span>
+</span><span id="line-109"></span><span id="local-6989586621680046017"><span id="local-6989586621680046018"><span id="local-6989586621680046019"><span id="local-6989586621680046020"><span id="local-6989586621680046021"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartToFace"><span class="hs-identifier hs-type">dartToFace</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680046021"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046020"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046019"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046018"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046017"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680046021"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621680046020"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621680046020"><span class="hs-identifier hs-type">s</span></a></span></span></span></span></span></span><span>
+</span><span id="line-110"></span><span id="dartToFace"><span class="annot"><span class="annottext">dartToFace :: PointLocationDS s v e f r -&gt; Maybe (Dart s) -&gt; FaceId' s
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartToFace"><span class="hs-identifier hs-var hs-var">dartToFace</span></a></span></span><span> </span><span id="local-6989586621680045774"><span class="annot"><span class="annottext">ds :: PointLocationDS s v e f r
+</span><a href="#local-6989586621680045774"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FaceId' s -&gt; (Dart s -&gt; FaceId' s) -&gt; Maybe (Dart s) -&gt; FaceId' s
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045774"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; Getting (FaceId' s) (PointLocationDS s v e f r) (FaceId' s)
+-&gt; FaceId' s
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (FaceId' s) (PointLocationDS s v e f r) (FaceId' s)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (FaceId' s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#outerFace"><span class="hs-identifier hs-var">outerFace</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; FaceId' s
+</span><a href="#local-6989586621680045772"><span class="hs-identifier hs-var">getFace</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621680045771"><span class="annot"><span class="annottext">ps :: PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045771"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045774"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; Getting
+     (PlanarSubdivision s v e f r)
+     (PointLocationDS s v e f r)
+     (PlanarSubdivision s v e f r)
+-&gt; PlanarSubdivision s v e f r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e f r)
+  (PointLocationDS s v e f r)
+  (PlanarSubdivision s v e f r)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span id="local-6989586621680045772"><span class="annot"><span class="annottext">getFace :: Dart s -&gt; FaceId' s
+</span><a href="#local-6989586621680045772"><span class="hs-identifier hs-var hs-var">getFace</span></a></span></span><span> </span><span id="local-6989586621680045770"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621680045770"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045769"><span class="annot"><span class="annottext">u :: Point 2 r
+</span><a href="#local-6989586621680045769"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680045768"><span class="annot"><span class="annottext">v :: Point 2 r
+</span><a href="#local-6989586621680045768"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(VertexData r v -&gt; Point 2 r)
+-&gt; (VertexData r v -&gt; Point 2 r)
+-&gt; (VertexData r v, VertexData r v)
+-&gt; (Point 2 r, Point 2 r)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexData r v
+-&gt; Getting (Point 2 r) (VertexData r v) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (VertexData r v) (Point 2 r)
+forall r1 v r2.
+Lens (VertexData r1 v) (VertexData r2 v) (Point 2 r1) (Point 2 r2)
+</span><a href="Data.PlaneGraph.Core.html#location"><span class="hs-identifier hs-var">location</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexData r v
+-&gt; Getting (Point 2 r) (VertexData r v) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (VertexData r v) (Point 2 r)
+forall r1 v r2.
+Lens (VertexData r1 v) (VertexData r2 v) (Point 2 r1) (Point 2 r2)
+</span><a href="Data.PlaneGraph.Core.html#location"><span class="hs-identifier hs-var">location</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((VertexData r v, VertexData r v) -&gt; (Point 2 r, Point 2 r))
+-&gt; (VertexData r v, VertexData r v) -&gt; (Point 2 r, Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Dart s
+-&gt; PlanarSubdivision s v e f r -&gt; (VertexData r v, VertexData r v)
+forall k (s :: k) v e f r.
+Dart s
+-&gt; PlanarSubdivision s v e f r -&gt; (VertexData r v, VertexData r v)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#endPointData"><span class="hs-identifier hs-var">endPointData</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045770"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045771"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-114"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045769"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045768"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#rightFace"><span class="hs-identifier hs-var">rightFace</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045770"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045771"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-115"></span><span>                             </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#leftFace"><span class="hs-identifier hs-var">leftFace</span></a></span><span>  </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045770"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045771"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-keyword">data</span><span> </span><span id="OneOrTwo"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#OneOrTwo"><span class="hs-identifier hs-var">OneOrTwo</span></a></span></span><span> </span><span id="local-6989586621680045900"><span class="annot"><a href="#local-6989586621680045900"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="One"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#One"><span class="hs-identifier hs-var">One</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680045900"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Two"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Two"><span class="hs-identifier hs-var">Two</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680045900"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680045900"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045754"><span id="local-6989586621680045756"><span id="local-6989586621680045758"><span class="annot"><span class="annottext">Int -&gt; OneOrTwo a -&gt; ShowS
+[OneOrTwo a] -&gt; ShowS
+OneOrTwo a -&gt; String
+(Int -&gt; OneOrTwo a -&gt; ShowS)
+-&gt; (OneOrTwo a -&gt; String)
+-&gt; ([OneOrTwo a] -&gt; ShowS)
+-&gt; Show (OneOrTwo a)
+forall a. Show a =&gt; Int -&gt; OneOrTwo a -&gt; ShowS
+forall a. Show a =&gt; [OneOrTwo a] -&gt; ShowS
+forall a. Show a =&gt; OneOrTwo a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [OneOrTwo a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [OneOrTwo a] -&gt; ShowS
+show :: OneOrTwo a -&gt; String
+$cshow :: forall a. Show a =&gt; OneOrTwo a -&gt; String
+showsPrec :: Int -&gt; OneOrTwo a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; OneOrTwo a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045746"><span id="local-6989586621680045748"><span id="local-6989586621680045750"><span id="local-6989586621680045752"><span class="annot"><span class="annottext">ReadPrec [OneOrTwo a]
+ReadPrec (OneOrTwo a)
+Int -&gt; ReadS (OneOrTwo a)
+ReadS [OneOrTwo a]
+(Int -&gt; ReadS (OneOrTwo a))
+-&gt; ReadS [OneOrTwo a]
+-&gt; ReadPrec (OneOrTwo a)
+-&gt; ReadPrec [OneOrTwo a]
+-&gt; Read (OneOrTwo a)
+forall a. Read a =&gt; ReadPrec [OneOrTwo a]
+forall a. Read a =&gt; ReadPrec (OneOrTwo a)
+forall a. Read a =&gt; Int -&gt; ReadS (OneOrTwo a)
+forall a. Read a =&gt; ReadS [OneOrTwo a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [OneOrTwo a]
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [OneOrTwo a]
+readPrec :: ReadPrec (OneOrTwo a)
+$creadPrec :: forall a. Read a =&gt; ReadPrec (OneOrTwo a)
+readList :: ReadS [OneOrTwo a]
+$creadList :: forall a. Read a =&gt; ReadS [OneOrTwo a]
+readsPrec :: Int -&gt; ReadS (OneOrTwo a)
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (OneOrTwo a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045741"><span id="local-6989586621680045743"><span class="annot"><span class="annottext">OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+(OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool) -&gt; Eq (OneOrTwo a)
+forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+== :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c== :: forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045726"><span id="local-6989586621680045728"><span id="local-6989586621680045730"><span id="local-6989586621680045732"><span id="local-6989586621680045734"><span id="local-6989586621680045736"><span id="local-6989586621680045738"><span class="annot"><span class="annottext">Eq (OneOrTwo a)
+Eq (OneOrTwo a) =&gt;
+(OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a)
+-&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a)
+-&gt; Ord (OneOrTwo a)
+OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering
+OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (OneOrTwo a)
+forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering
+forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+min :: OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+$cmin :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+max :: OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+$cmax :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
+&gt;= :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+&gt; :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+&lt;= :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+&lt; :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+compare :: OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (OneOrTwo a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045721"><span id="local-6989586621680045723"><span class="annot"><span class="annottext">a -&gt; OneOrTwo b -&gt; OneOrTwo a
+(a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
+(forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b)
+-&gt; (forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a) -&gt; Functor OneOrTwo
+forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a
+forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; OneOrTwo b -&gt; OneOrTwo a
+$c&lt;$ :: forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a
+fmap :: (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
+$cfmap :: forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045686"><span id="local-6989586621680045688"><span id="local-6989586621680045690"><span id="local-6989586621680045692"><span id="local-6989586621680045694"><span id="local-6989586621680045696"><span id="local-6989586621680045698"><span id="local-6989586621680045700"><span id="local-6989586621680045702"><span id="local-6989586621680045704"><span id="local-6989586621680045706"><span id="local-6989586621680045708"><span id="local-6989586621680045710"><span id="local-6989586621680045712"><span id="local-6989586621680045714"><span id="local-6989586621680045716"><span id="local-6989586621680045718"><span class="annot"><span class="annottext">OneOrTwo a -&gt; Bool
+(a -&gt; m) -&gt; OneOrTwo a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+(forall m. Monoid m =&gt; OneOrTwo m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a)
+-&gt; (forall a. OneOrTwo a -&gt; [a])
+-&gt; (forall a. OneOrTwo a -&gt; Bool)
+-&gt; (forall a. OneOrTwo a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; OneOrTwo a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; OneOrTwo a -&gt; a)
+-&gt; (forall a. Ord a =&gt; OneOrTwo a -&gt; a)
+-&gt; (forall a. Num a =&gt; OneOrTwo a -&gt; a)
+-&gt; (forall a. Num a =&gt; OneOrTwo a -&gt; a)
+-&gt; Foldable OneOrTwo
+forall a. Eq a =&gt; a -&gt; OneOrTwo a -&gt; Bool
+forall a. Num a =&gt; OneOrTwo a -&gt; a
+forall a. Ord a =&gt; OneOrTwo a -&gt; a
+forall m. Monoid m =&gt; OneOrTwo m -&gt; m
+forall a. OneOrTwo a -&gt; Bool
+forall a. OneOrTwo a -&gt; Int
+forall a. OneOrTwo a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: OneOrTwo a -&gt; a
+$cproduct :: forall a. Num a =&gt; OneOrTwo a -&gt; a
+sum :: OneOrTwo a -&gt; a
+$csum :: forall a. Num a =&gt; OneOrTwo a -&gt; a
+minimum :: OneOrTwo a -&gt; a
+$cminimum :: forall a. Ord a =&gt; OneOrTwo a -&gt; a
+maximum :: OneOrTwo a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; OneOrTwo a -&gt; a
+elem :: a -&gt; OneOrTwo a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; OneOrTwo a -&gt; Bool
+length :: OneOrTwo a -&gt; Int
+$clength :: forall a. OneOrTwo a -&gt; Int
+null :: OneOrTwo a -&gt; Bool
+$cnull :: forall a. OneOrTwo a -&gt; Bool
+toList :: OneOrTwo a -&gt; [a]
+$ctoList :: forall a. OneOrTwo a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; OneOrTwo a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+foldMap :: (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+fold :: OneOrTwo m -&gt; m
+$cfold :: forall m. Monoid m =&gt; OneOrTwo m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045675"><span id="local-6989586621680045677"><span id="local-6989586621680045679"><span id="local-6989586621680045681"><span class="annot"><span class="annottext">Functor OneOrTwo
+Foldable OneOrTwo
+(Functor OneOrTwo, Foldable OneOrTwo) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    OneOrTwo (f a) -&gt; f (OneOrTwo a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; OneOrTwo a -&gt; m (OneOrTwo b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    OneOrTwo (m a) -&gt; m (OneOrTwo a))
+-&gt; Traversable OneOrTwo
+(a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; OneOrTwo (m a) -&gt; m (OneOrTwo a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+OneOrTwo (f a) -&gt; f (OneOrTwo a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; OneOrTwo a -&gt; m (OneOrTwo b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b)
+sequence :: OneOrTwo (m a) -&gt; m (OneOrTwo a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; OneOrTwo (m a) -&gt; m (OneOrTwo a)
+mapM :: (a -&gt; m b) -&gt; OneOrTwo a -&gt; m (OneOrTwo b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; OneOrTwo a -&gt; m (OneOrTwo b)
+sequenceA :: OneOrTwo (f a) -&gt; f (OneOrTwo a)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+OneOrTwo (f a) -&gt; f (OneOrTwo a)
+traverse :: (a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b)
+$cp2Traversable :: Foldable OneOrTwo
+$cp1Traversable :: Functor OneOrTwo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | Locates the faceId of the face containing the query point. If the</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- query point lies on an edge, it returns both faces incident to the</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- edge; first the one below the edge then the one above the edge.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-125"></span><span id="local-6989586621680045844"><span id="local-6989586621680045845"><span id="local-6989586621680045846"><span id="local-6989586621680045847"><span id="local-6989586621680045848"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining%27"><span class="hs-identifier hs-type">faceIdContaining'</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045848"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045848"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045848"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045847"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045846"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045845"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045844"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045848"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621680045847"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-127"></span><span id="faceIdContaining%27"><span class="annot"><span class="annottext">faceIdContaining' :: Point 2 r -&gt; PointLocationDS s v e f r -&gt; OneOrTwo (FaceId' s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining%27"><span class="hs-identifier hs-var hs-var">faceIdContaining'</span></a></span></span><span> </span><span id="local-6989586621680045672"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045672"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680045671"><span class="annot"><span class="annottext">ds :: PointLocationDS s v e f r
+</span><a href="#local-6989586621680045671"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OneOrTwo (FaceId' s)
+-&gt; (Dart s -&gt; OneOrTwo (FaceId' s))
+-&gt; Maybe (Dart s)
+-&gt; OneOrTwo (FaceId' s)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FaceId' s -&gt; OneOrTwo (FaceId' s)
+forall a. a -&gt; OneOrTwo a
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#One"><span class="hs-identifier hs-var">One</span></a></span><span> </span><span class="annot"><span class="annottext">(FaceId' s -&gt; OneOrTwo (FaceId' s))
+-&gt; FaceId' s -&gt; OneOrTwo (FaceId' s)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045671"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; Getting (FaceId' s) (PointLocationDS s v e f r) (FaceId' s)
+-&gt; FaceId' s
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (FaceId' s) (PointLocationDS s v e f r) (FaceId' s)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (FaceId' s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#outerFace"><span class="hs-identifier hs-var">outerFace</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; OneOrTwo (FaceId' s)
+</span><a href="#local-6989586621680045670"><span class="hs-identifier hs-var">getFace</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Dart s) -&gt; OneOrTwo (FaceId' s))
+-&gt; Maybe (Dart s) -&gt; OneOrTwo (FaceId' s)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAboveOrOn"><span class="hs-identifier hs-var">dartAboveOrOn</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045672"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045671"><span class="hs-identifier hs-var">ds</span></a></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621680045669"><span class="annot"><span class="annottext">ps :: PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045669"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+</span><a href="#local-6989586621680045671"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS s v e f r
+-&gt; Getting
+     (PlanarSubdivision s v e f r)
+     (PointLocationDS s v e f r)
+     (PlanarSubdivision s v e f r)
+-&gt; PlanarSubdivision s v e f r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision s v e f r)
+  (PointLocationDS s v e f r)
+  (PlanarSubdivision s v e f r)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621680045670"><span class="annot"><span class="annottext">getFace :: Dart s -&gt; OneOrTwo (FaceId' s)
+</span><a href="#local-6989586621680045670"><span class="hs-identifier hs-var hs-var">getFace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s, Point 2 r, Point 2 r) -&gt; OneOrTwo (FaceId' s)
+</span><a href="#local-6989586621680045668"><span class="hs-identifier hs-var">getFace'</span></a></span><span> </span><span class="annot"><span class="annottext">((Dart s, Point 2 r, Point 2 r) -&gt; OneOrTwo (FaceId' s))
+-&gt; (Dart s -&gt; (Dart s, Point 2 r, Point 2 r))
+-&gt; Dart s
+-&gt; OneOrTwo (FaceId' s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; (Dart s, Point 2 r, Point 2 r)
+</span><a href="#local-6989586621680045667"><span class="hs-identifier hs-var">orient</span></a></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>    </span><span id="local-6989586621680045667"><span class="annot"><span class="annottext">orient :: Dart s -&gt; (Dart s, Point 2 r, Point 2 r)
+</span><a href="#local-6989586621680045667"><span class="hs-identifier hs-var hs-var">orient</span></a></span></span><span> </span><span id="local-6989586621680045666"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621680045666"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045665"><span class="annot"><span class="annottext">u :: Point 2 r
+</span><a href="#local-6989586621680045665"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680045664"><span class="annot"><span class="annottext">v :: Point 2 r
+</span><a href="#local-6989586621680045664"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(VertexData r v -&gt; Point 2 r)
+-&gt; (VertexData r v -&gt; Point 2 r)
+-&gt; (VertexData r v, VertexData r v)
+-&gt; (Point 2 r, Point 2 r)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexData r v
+-&gt; Getting (Point 2 r) (VertexData r v) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (VertexData r v) (Point 2 r)
+forall r1 v r2.
+Lens (VertexData r1 v) (VertexData r2 v) (Point 2 r1) (Point 2 r2)
+</span><a href="Data.PlaneGraph.Core.html#location"><span class="hs-identifier hs-var">location</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexData r v
+-&gt; Getting (Point 2 r) (VertexData r v) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (VertexData r v) (Point 2 r)
+forall r1 v r2.
+Lens (VertexData r1 v) (VertexData r2 v) (Point 2 r1) (Point 2 r2)
+</span><a href="Data.PlaneGraph.Core.html#location"><span class="hs-identifier hs-var">location</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((VertexData r v, VertexData r v) -&gt; (Point 2 r, Point 2 r))
+-&gt; (VertexData r v, VertexData r v) -&gt; (Point 2 r, Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Dart s
+-&gt; PlanarSubdivision s v e f r -&gt; (VertexData r v, VertexData r v)
+forall k (s :: k) v e f r.
+Dart s
+-&gt; PlanarSubdivision s v e f r -&gt; (VertexData r v, VertexData r v)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#endPointData"><span class="hs-identifier hs-var">endPointData</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045666"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045669"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-134"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045665"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045664"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045666"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045665"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045664"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; Dart s
+forall k (s :: k). Dart s -&gt; Dart s
+</span><span class="hs-identifier hs-var">twin</span></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045666"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045664"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045665"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621680045668"><span class="annot"><span class="annottext">getFace' :: (Dart s, Point 2 r, Point 2 r) -&gt; OneOrTwo (FaceId' s)
+</span><a href="#local-6989586621680045668"><span class="hs-identifier hs-var hs-var">getFace'</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045662"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621680045662"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680045661"><span class="annot"><span class="annottext">u :: Point 2 r
+</span><a href="#local-6989586621680045661"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680045660"><span class="annot"><span class="annottext">v :: Point 2 r
+</span><a href="#local-6989586621680045660"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045661"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045672"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045660"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-138"></span><span>                         </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FaceId' s -&gt; FaceId' s -&gt; OneOrTwo (FaceId' s)
+forall a. a -&gt; a -&gt; OneOrTwo a
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#Two"><span class="hs-identifier hs-var">Two</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#rightFace"><span class="hs-identifier hs-var">rightFace</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045662"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045669"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#leftFace"><span class="hs-identifier hs-var">leftFace</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045662"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045669"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>                         </span><span class="hs-identifier">_</span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FaceId' s -&gt; OneOrTwo (FaceId' s)
+forall a. a -&gt; OneOrTwo a
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#One"><span class="hs-identifier hs-var">One</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; FaceId' s
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#rightFace"><span class="hs-identifier hs-var">rightFace</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
+</span><a href="#local-6989586621680045662"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
+</span><a href="#local-6989586621680045669"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- | Data structure for fast InPolygon Queries</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- newtype InPolygonDS v r = InPolygonDS (VRS.VerticalRayShootingStructure (Vertex v r) () r)</span><span>
+</span><span id="line-145"></span><span class="hs-comment">--   deriving (Show,Eq)</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">data</span><span> </span><span id="InOut"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InOut"><span class="hs-identifier hs-var">InOut</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="In"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#In"><span class="hs-identifier hs-var">In</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Out"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Out"><span class="hs-identifier hs-var">Out</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680045650"><span id="local-6989586621680045652"><span id="local-6989586621680045654"><span class="annot"><span class="annottext">Int -&gt; InOut -&gt; ShowS
+[InOut] -&gt; ShowS
+InOut -&gt; String
+(Int -&gt; InOut -&gt; ShowS)
+-&gt; (InOut -&gt; String) -&gt; ([InOut] -&gt; ShowS) -&gt; Show InOut
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [InOut] -&gt; ShowS
+$cshowList :: [InOut] -&gt; ShowS
+show :: InOut -&gt; String
+$cshow :: InOut -&gt; String
+showsPrec :: Int -&gt; InOut -&gt; ShowS
+$cshowsPrec :: Int -&gt; InOut -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680045646"><span id="local-6989586621680045648"><span class="annot"><span class="annottext">InOut -&gt; InOut -&gt; Bool
+(InOut -&gt; InOut -&gt; Bool) -&gt; (InOut -&gt; InOut -&gt; Bool) -&gt; Eq InOut
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: InOut -&gt; InOut -&gt; Bool
+$c/= :: InOut -&gt; InOut -&gt; Bool
+== :: InOut -&gt; InOut -&gt; Bool
+$c== :: InOut -&gt; InOut -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-keyword">data</span><span> </span><span id="Dummy"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Dummy"><span class="hs-identifier hs-var">Dummy</span></a></span></span><span>
+</span><span id="line-150"></span><span class="hs-keyword">type</span><span> </span><span id="InPolygonDS"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InPolygonDS"><span class="hs-identifier hs-var">InPolygonDS</span></a></span></span><span> </span><span id="local-6989586621680045645"><span class="annot"><a href="#local-6989586621680045645"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680045644"><span class="annot"><a href="#local-6989586621680045644"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Dummy"><span class="hs-identifier hs-type">Dummy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><a href="#local-6989586621680045645"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InOut"><span class="hs-identifier hs-type">InOut</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621680045644"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- type Vertex v r = Int :+ (Point 2 r :+ v)</span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span id="local-6989586621680045642"><span id="local-6989586621680045643"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#inPolygonDS"><span class="hs-identifier hs-type">inPolygonDS</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045643"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045643"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045642"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045643"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InPolygonDS"><span class="hs-identifier hs-type">InPolygonDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045642"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045643"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-156"></span><span id="inPolygonDS"><span class="annot"><span class="annottext">inPolygonDS :: SimplePolygon v r -&gt; InPolygonDS v r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#inPolygonDS"><span class="hs-identifier hs-var hs-var">inPolygonDS</span></a></span></span><span> </span><span id="local-6989586621680045641"><span class="annot"><span class="annottext">pg :: SimplePolygon v r
+</span><a href="#local-6989586621680045641"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision Dummy (SP Int v) () InOut r -&gt; InPolygonDS v r
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+PlanarSubdivision s v e f r -&gt; PointLocationDS s v e f r
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointLocationDS"><span class="hs-identifier hs-var">pointLocationDS</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision Dummy (SP Int v) () InOut r -&gt; InPolygonDS v r)
+-&gt; PlanarSubdivision Dummy (SP Int v) () InOut r -&gt; InPolygonDS v r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Proxy Dummy
+-&gt; SimplePolygon (SP Int v) r
+-&gt; InOut
+-&gt; InOut
+-&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+forall k r (proxy :: k -&gt; *) (s :: k) p f.
+(Ord r, Fractional r) =&gt;
+proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#fromSimplePolygon"><span class="hs-identifier hs-var">fromSimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy Dummy
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Dummy"><span class="hs-identifier hs-type">Dummy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon v r -&gt; SimplePolygon (SP Int v) r
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; Polygon t (SP Int p) r
+</span><a href="Data.Geometry.Polygon.Core.html#numberVertices"><span class="hs-identifier hs-var">numberVertices</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon v r
+</span><a href="#local-6989586621680045641"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">InOut
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#In"><span class="hs-identifier hs-var">In</span></a></span><span> </span><span class="annot"><span class="annottext">InOut
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#Out"><span class="hs-identifier hs-var">Out</span></a></span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- | Finds the edge on or above the query point, if it exists</span><span>
+</span><span id="line-159"></span><span class="hs-comment">--</span><span>
+</span><span id="line-160"></span><span class="hs-comment">--</span><span>
+</span><span id="line-161"></span><span id="local-6989586621680045636"><span id="local-6989586621680045637"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#edgeOnOrAbove"><span class="hs-identifier hs-type">edgeOnOrAbove</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045637"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InPolygonDS"><span class="hs-identifier hs-type">InPolygonDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045636"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045637"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><a href="#local-6989586621680045636"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680045637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-163"></span><span id="edgeOnOrAbove"><span class="annot"><span class="annottext">edgeOnOrAbove :: Point 2 r -&gt; InPolygonDS v r -&gt; Maybe (LineSegment 2 (SP Int v) r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#edgeOnOrAbove"><span class="hs-identifier hs-var hs-var">edgeOnOrAbove</span></a></span></span><span> </span><span id="local-6989586621680045635"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045635"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680045634"><span class="annot"><span class="annottext">ds :: InPolygonDS v r
+</span><a href="#local-6989586621680045634"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+  (LineSegment 2 (SP Int v) r)
+  (LineSegment 2 (SP Int v) r :+ ())
+  (LineSegment 2 (SP Int v) r)
+-&gt; (LineSegment 2 (SP Int v) r :+ ()) -&gt; LineSegment 2 (SP Int v) r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (LineSegment 2 (SP Int v) r)
+  (LineSegment 2 (SP Int v) r :+ ())
+  (LineSegment 2 (SP Int v) r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">((LineSegment 2 (SP Int v) r :+ ()) -&gt; LineSegment 2 (SP Int v) r)
+-&gt; (Dart Dummy -&gt; LineSegment 2 (SP Int v) r :+ ())
+-&gt; Dart Dummy
+-&gt; LineSegment 2 (SP Int v) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Dart Dummy
+ -&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+ -&gt; LineSegment 2 (SP Int v) r :+ ())
+-&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+-&gt; Dart Dummy
+-&gt; LineSegment 2 (SP Int v) r :+ ()
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">Dart Dummy
+-&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+-&gt; LineSegment 2 (SP Int v) r :+ ()
+forall k (s :: k) v e f r.
+Dart s -&gt; PlanarSubdivision s v e f r -&gt; LineSegment 2 v r :+ e
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#edgeSegment"><span class="hs-identifier hs-var">edgeSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InPolygonDS v r
+</span><a href="#local-6989586621680045634"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">InPolygonDS v r
+-&gt; Getting
+     (PlanarSubdivision Dummy (SP Int v) () InOut r)
+     (InPolygonDS v r)
+     (PlanarSubdivision Dummy (SP Int v) () InOut r)
+-&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (PlanarSubdivision Dummy (SP Int v) () InOut r)
+  (InPolygonDS v r)
+  (PlanarSubdivision Dummy (SP Int v) () InOut r)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Dart Dummy -&gt; LineSegment 2 (SP Int v) r)
+-&gt; Maybe (Dart Dummy) -&gt; Maybe (LineSegment 2 (SP Int v) r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; InPolygonDS v r -&gt; Maybe (Dart Dummy)
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; PointLocationDS s v e f r -&gt; Maybe (Dart s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#dartAboveOrOn"><span class="hs-identifier hs-var">dartAboveOrOn</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045635"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">InPolygonDS v r
+</span><a href="#local-6989586621680045634"><span class="hs-identifier hs-var">ds</span></a></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- | Returns if a query point lies in (or on the boundary of) the polygon.</span><span>
+</span><span id="line-167"></span><span class="hs-comment">--</span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- \(O(\log n)\)</span><span>
+</span><span id="line-169"></span><span id="local-6989586621680045628"><span id="local-6989586621680045629"><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointInPolygon"><span class="hs-identifier hs-type">pointInPolygon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680045629"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680045629"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680045629"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InPolygonDS"><span class="hs-identifier hs-type">InPolygonDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045628"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680045629"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#InOut"><span class="hs-identifier hs-type">InOut</span></a></span></span></span><span>
+</span><span id="line-170"></span><span id="pointInPolygon"><span class="annot"><span class="annottext">pointInPolygon :: Point 2 r -&gt; InPolygonDS v r -&gt; InOut
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#pointInPolygon"><span class="hs-identifier hs-var hs-var">pointInPolygon</span></a></span></span><span> </span><span id="local-6989586621680045627"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680045627"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680045626"><span class="annot"><span class="annottext">ds :: InPolygonDS v r
+</span><a href="#local-6989586621680045626"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; InPolygonDS v r -&gt; OneOrTwo (FaceId' Dummy)
+forall k r (s :: k) v e f.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; PointLocationDS s v e f r -&gt; OneOrTwo (FaceId' s)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#faceIdContaining%27"><span class="hs-identifier hs-var">faceIdContaining'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680045627"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">InPolygonDS v r
+</span><a href="#local-6989586621680045626"><span class="hs-identifier hs-var">ds</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-171"></span><span>                        </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621680045625"><span class="annot"><span class="annottext">i :: FaceId' Dummy
+</span><a href="#local-6989586621680045625"><span class="hs-identifier hs-var">i</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InPolygonDS v r
+</span><a href="#local-6989586621680045626"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">InPolygonDS v r -&gt; Getting InOut (InPolygonDS v r) InOut -&gt; InOut
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(PlanarSubdivision Dummy (SP Int v) () InOut r
+ -&gt; Const InOut (PlanarSubdivision Dummy (SP Int v) () InOut r))
+-&gt; InPolygonDS v r -&gt; Const InOut (InPolygonDS v r)
+forall k (s :: k) v e f r.
+Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span class="annot"><span class="annottext">((PlanarSubdivision Dummy (SP Int v) () InOut r
+  -&gt; Const InOut (PlanarSubdivision Dummy (SP Int v) () InOut r))
+ -&gt; InPolygonDS v r -&gt; Const InOut (InPolygonDS v r))
+-&gt; ((InOut -&gt; Const InOut InOut)
+    -&gt; PlanarSubdivision Dummy (SP Int v) () InOut r
+    -&gt; Const InOut (PlanarSubdivision Dummy (SP Int v) () InOut r))
+-&gt; Getting InOut (InPolygonDS v r) InOut
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">FaceId' Dummy
+-&gt; Lens'
+     (PlanarSubdivision Dummy (SP Int v) () InOut r)
+     (DataOf
+        (PlanarSubdivision Dummy (SP Int v) () InOut r) (FaceId' Dummy))
+forall g i. HasDataOf g i =&gt; i -&gt; Lens' g (DataOf g i)
+</span><span class="hs-identifier hs-var">dataOf</span></span><span> </span><span class="annot"><span class="annottext">FaceId' Dummy
+</span><a href="#local-6989586621680045625"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-172"></span><span>                        </span><span class="annot"><a href="Data.Geometry.PointLocation.PersistentSweep.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InOut
+</span><a href="Data.Geometry.PointLocation.PersistentSweep.html#In"><span class="hs-identifier hs-var">In</span></a></span><span> </span><span class="hs-comment">-- on an edge, so inside.</span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span>  </span><span class="hs-comment">-- FIXME: Make sure to also test the edge &quot;below&quot; q, i.e. if q is on</span><span>
+</span><span id="line-175"></span><span>  </span><span class="hs-comment">-- some edge we should return that edge.</span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-comment">-- FIXME: Figure out if this works ok for vertical edges as well</span><span>
+</span><span id="line-178"></span></pre></body></html>
