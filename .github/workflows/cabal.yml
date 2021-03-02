@@ -46,6 +46,9 @@ jobs:
         cabal v2-build hgeometry-svg
         cabal v2-build hgeometry-examples
         cabal v2-build pkg:hgeometry:benchmarks
+    - name: Build shocase
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
+      run: |
         cabal v2-build hgeometry-showcase:showcase
     - name: Test hgeometry
       if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
