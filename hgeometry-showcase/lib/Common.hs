@@ -33,10 +33,10 @@ import Data.Geometry.Vector
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
 pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
   where
-    Point2 maxX _ :+ _ = maximumBy (comparing (view (core.xCoord))) p
-    Point2 minX _ :+ _ = minimumBy (comparing (view (core.xCoord))) p
-    Point2 _ maxY :+ _ = maximumBy (comparing (view (core.yCoord))) p
-    Point2 _ minY :+ _ = minimumBy (comparing (view (core.yCoord))) p
+    Point2 maxX _ :+ _ = maximumVertexBy (comparing (view (core.xCoord))) p
+    Point2 minX _ :+ _ = minimumVertexBy (comparing (view (core.xCoord))) p
+    Point2 _ maxY :+ _ = maximumVertexBy (comparing (view (core.yCoord))) p
+    Point2 _ minY :+ _ = minimumVertexBy (comparing (view (core.yCoord))) p
 
 pAtCenter :: (Fractional r, Ord r) => SimplePolygon p r -> SimplePolygon p r
 pAtCenter p = translateBy (neg $ toVec $ pCenter p) p
