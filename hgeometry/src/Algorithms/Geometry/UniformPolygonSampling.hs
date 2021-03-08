@@ -5,8 +5,8 @@ import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
-import           Data.Geometry.Triangle
+import           Data.Geometry.Polygon.Core                           as Polygon
+import           Data.Geometry.Triangle                               as Triangle
 import qualified Data.List.NonEmpty                                   as NonEmpty
 import           Data.PlaneGraph
 import           Data.Proxy
@@ -14,11 +14,15 @@ import qualified Data.Vector                                          as V
 import           Linear.Affine                                        hiding (Point)
 import           Linear.Vector
 
--- | O(n log n)
-samplePolygon :: (RandomGen g, Random r, Fractional r) => Polygon t p r -> Rand g (Point 2 r)
-samplePolygon = error "not implemented yet"
+-- | Uniformly samples a polygon in \(O(n \log n)\).
+samplePolygon :: (RandomGen g, Random r, Fractional r, Ord r, Real r) => Polygon t p r -> Rand g (Point 2 r)
+samplePolygon p = do
+   randTri <- fromList $ map (\tri -> (tri, toRational $ areaRatio tri)) $ toTriangles p
+   sampleTriangle randTri
+   where
+      areaRatio tri = Triangle.area tri / Polygon.area p
 
--- | O(1)
+-- | Uniformly samples a triangle in \(O(1)\).
 sampleTriangle :: (RandomGen g, Random r, Fractional r, Ord r) => Triangle 2 p r -> Rand g (Point 2 r)
 sampleTriangle (Triangle v1 v2 v3) = do
   a' <- getRandomR (0, 1)
@@ -29,7 +33,7 @@ sampleTriangle (Triangle v1 v2 v3) = do
     u = v2^.core .-. v1^.core
     v = v3^.core .-. v1^.core
 
--- | O(n log n)
+-- | Triangulates a polygon \(O(n \log n)\).
 toTriangles :: (Fractional r, Ord r) => Polygon t p r -> [Triangle 2 p r]
 toTriangles p =
     map (polygonToTriangle . view core . (`rawFacePolygon` g) . fst) $
