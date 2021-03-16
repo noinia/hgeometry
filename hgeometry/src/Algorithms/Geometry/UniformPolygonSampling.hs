@@ -4,6 +4,7 @@ import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
+import           Data.Geometry.PlanarSubdivision (PolygonFaceData(..))
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core                           as Polygon
 import           Data.Geometry.Triangle                               as Triangle
@@ -36,8 +37,8 @@ sampleTriangle (Triangle v1 v2 v3) = do
 -- | Triangulates a polygon \(O(n \log n)\).
 toTriangles :: (Fractional r, Ord r) => Polygon t p r -> [Triangle 2 p r]
 toTriangles p =
-    map (polygonToTriangle . view core . (`rawFacePolygon` g) . fst) $
-    V.toList (internalFaces g)
+    [ (polygonToTriangle . view core . (`rawFacePolygon` g)) f
+    | (f, Inside) <- V.toList (faces g) ]
   where
     g = triangulate' Proxy p
     polygonToTriangle poly = case NonEmpty.toList $ polygonVertices poly of

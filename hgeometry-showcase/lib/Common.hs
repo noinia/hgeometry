@@ -2,6 +2,7 @@
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE PatternSynonyms #-}
 module Common where
 
 import           Codec.Picture             (PixelRGBA8 (..))
@@ -27,7 +28,7 @@ import Data.Ext
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon.Bezier
-import Data.Geometry.BezierSpline
+import Data.Geometry.BezierSpline (pattern Bezier3, pattern Bezier2, quadToCubic)
 import Data.Geometry.Polygon
 import Data.Geometry.Box (Rectangle, box, minPoint, maxPoint)
 import Data.Geometry.Transformation
@@ -263,6 +264,12 @@ type SomeBezierPolygon r = SomePolygon (PathJoin r) r
 
 svgToPolygons :: SVG -> [SomeBezierPolygon Double]
 svgToPolygons = plGroupShapes . cmdsToBezier . toLineCommands . extractPath
+-- svgToPolygons svg =
+--   [ case cmdsToBezier $ toLineCommands $ extractPath (ctx glyph) of
+--       [] -> error "No polygon in glyph."
+--       [x] -> Left x
+--       (x:hs) -> Right (MultiPolygon x hs)
+--   | (ctx, _attr, glyph) <- svgGlyphs svg ]
 
 cmdsToBezier :: [LineCommand] -> [SimpleBezierPolygon Double]
 cmdsToBezier [] = []
@@ -320,7 +327,9 @@ plGroupShapes = worker
     -- This is super fragile. I wish there was a way to check for bezier-line intersections without using sqrt.
     isInsideOf :: SimpleBezierPolygon Double -> SimpleBezierPolygon Double -> Bool
     isInsideOf a b =
-      _core (CV.head (a^.outerBoundaryVector)) `insidePolygon` b
+      CV.all (\elt -> _core elt `insidePolygon` approximate eps b) ((approximate eps a)^.outerBoundaryVector)
+    eps = 0.001
+      -- _core (CV.head (a^.outerBoundaryVector)) `insidePolygon` b
 
 ------------------------------------------------------------------
 -- Random data

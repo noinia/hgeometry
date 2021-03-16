@@ -12,7 +12,7 @@ import FastVisibility
 import SSSP
 import RandomMonotone
 import ZHashing
--- import UniformSampling
+import UniformSampling
 import SvgPolygons
 
 import Reanimate
@@ -28,7 +28,7 @@ main = do
     "fast_visibility":rest -> withArgs rest $ runReanimate fastVisibilityShowcase
     "random_monotone":rest -> withArgs rest $ runReanimate randomMonotoneShowcase
     "zhashing":rest        -> withArgs rest $ runReanimate zHashingShowcase
-    -- "sampling":rest        -> withArgs rest $ runReanimate uniformSamplingShowcase
+    "sampling":rest        -> withArgs rest $ runReanimate uniformSamplingShowcase
     "svg":rest             -> withArgs rest $ runReanimate svgPolygonsShowcase
     _                      -> printUsage
 
