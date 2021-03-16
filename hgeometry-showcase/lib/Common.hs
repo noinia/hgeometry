@@ -8,7 +8,7 @@ import           Codec.Picture             (PixelRGBA8 (..))
 import           Control.Lens
 import           Control.Monad.Random
 import qualified Data.Foldable             as F
-import           Data.List                 (nub, transpose)
+import           Data.List                 (nub, transpose, partition)
 import           Data.Ord
 import           Data.Ratio
 import qualified Data.Vector               as V
@@ -19,12 +19,15 @@ import           Graphics.SvgTree          (LineJoin (..))
 import           Linear.V2                 (V2 (V2))
 import           Linear.Vector             (Additive (lerp))
 import           Reanimate
+import           Graphics.SvgTree (PathCommand(..), Origin(..))
 import           Reanimate.Animation       (Sync (SyncFreeze))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
+import Data.Geometry.Polygon.Bezier
+import Data.Geometry.BezierSpline
 import Data.Geometry.Polygon
 import Data.Geometry.Box (Rectangle, box, minPoint, maxPoint)
 import Data.Geometry.Transformation
@@ -131,6 +134,37 @@ ppPolygonBody color p = withFillOpacity 1 $
   | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
+ppPolygonOutline' :: Real r => PixelRGBA8 -> Polygon t p r -> SVG
+ppPolygonOutline' color p = withFillOpacity 0 $
+  withStrokeColorPixel color $
+  withStrokeLineJoin JoinRound $
+  withStrokeWidth (defaultStrokeWidth*3) $
+  mkPath $ mkPolygonPath p
+
+ppPolygonBody' :: Real r => PixelRGBA8 -> Polygon t p r -> SVG
+ppPolygonBody' color p = withFillOpacity 1 $
+  withFillColorPixel color $
+  withStrokeLineJoin JoinRound $
+  mkPath $ mkPolygonPath p
+
+overAny :: (forall t. Polygon t p r -> a) -> (SomePolygon p r -> a)
+overAny fn (Left p)  = fn p
+overAny fn (Right p) = fn p
+
+mkPolygonPath :: Real r => Polygon t p r -> [PathCommand]
+mkPolygonPath p =
+    toCommands (map (fmap realToFrac) . map _core $ CV.toList vs) ++
+    concatMap (toCommands . reverse . map (fmap realToFrac) . map _core . CV.toList . view outerBoundaryVector)
+    holes
+  where
+    vs = p^.outerBoundaryVector
+    holes = p^.polygonHoles'
+    toCommands (Point2 x y:rest) =
+      [ MoveTo OriginAbsolute [ V2 x y ]
+      , LineTo OriginAbsolute [ V2 x' y' | Point2 x' y' <- rest ]
+      , EndPath
+      ]
+
 ppPolygonNodes :: (Real r) => PixelRGBA8 -> SimplePolygon p r -> SVG
 ppPolygonNodes color p = mkGroup $
   map (ppPolygonNode color p) [0 .. size p-1]
@@ -223,6 +257,70 @@ lerpPoint' t (a :+ p) (b :+ _) = lerpPoint t a b :+ p
 
 lerpRectangle :: Fractional r => Double -> Rectangle p r -> Rectangle p r -> Rectangle p r
 lerpRectangle t a b = box (lerpPoint' t (minPoint a) (minPoint b)) (lerpPoint' t (maxPoint a) (maxPoint b))
+
+type SimpleBezierPolygon r = SimplePolygon (PathJoin r) r
+type SomeBezierPolygon r = SomePolygon (PathJoin r) r
+
+svgToPolygons :: SVG -> [SomeBezierPolygon Double]
+svgToPolygons = plGroupShapes . cmdsToBezier . toLineCommands . extractPath
+
+cmdsToBezier :: [LineCommand] -> [SimpleBezierPolygon Double]
+cmdsToBezier [] = []
+cmdsToBezier cmds =
+    case cmds of
+      (LineMove dst:cont) -> worker dst [] cont
+      _                   -> bad
+  where
+    bad = error $ "Common.svgToPolygons: Invalid commands: " ++ show cmds
+    finalize [] rest  = rest
+    finalize acc rest = fromBeziers (reverse acc) : rest
+    bezier1 from to = Bezier3 (fromRPoint from) (fromRPoint to) (fromRPoint to) (fromRPoint to)
+    worker _from acc [] = finalize acc []
+    worker _from acc (LineMove newStart : xs) =
+      finalize acc $
+      worker newStart [] xs
+    worker from acc (LineEnd orig:LineMove dst:xs) | from /= orig =
+      finalize (bezier1 from orig:acc) $
+      worker dst [] xs
+    worker _from acc (LineEnd{}:LineMove dst:xs) =
+      finalize acc $
+      worker dst [] xs
+    worker from acc [LineEnd orig] | from /= orig =
+      finalize (bezier1 from orig:acc) []
+    worker _from acc [LineEnd{}] =
+      finalize acc []
+    worker from acc (LineBezier [x]:xs) =
+      worker x (bezier1 from x : acc) xs
+    worker from acc (LineBezier [a,b]:xs) =
+      let quad = Bezier2 (fromRPoint from) (fromRPoint a) (fromRPoint b)
+      in worker b (quadToCubic quad : acc) xs
+    worker from acc (LineBezier [a,b,c]:xs) =
+      worker c (Bezier3 (fromRPoint from) (fromRPoint a) (fromRPoint b) (fromRPoint c): acc) xs
+    worker _ _ _ = bad
+    fromRPoint (V2 a b) = Point2 a b
+    toRPoint (Point2 a b) = V2 a b
+
+plGroupShapes :: [SimpleBezierPolygon Double] -> [SomeBezierPolygon Double]
+plGroupShapes = worker
+  where
+    worker (s:rest)
+      | null (parents s rest) =
+        let isOnlyChild x = parents x (s:rest) == [s]
+            (holes, nonHoles) = partition isOnlyChild rest
+            prime = case holes of
+              [] -> Left s
+              _  -> Right $ MultiPolygon s holes
+        in prime : worker nonHoles
+      | otherwise = worker (rest ++ [s])
+    worker [] = []
+
+    parents :: SimpleBezierPolygon Double -> [SimpleBezierPolygon Double] -> [SimpleBezierPolygon Double]
+    parents self = filter (self `isInsideOf`) . filter (/=self)
+
+    -- This is super fragile. I wish there was a way to check for bezier-line intersections without using sqrt.
+    isInsideOf :: SimpleBezierPolygon Double -> SimpleBezierPolygon Double -> Bool
+    isInsideOf a b =
+      _core (CV.head (a^.outerBoundaryVector)) `insidePolygon` b
 
 ------------------------------------------------------------------
 -- Random data
