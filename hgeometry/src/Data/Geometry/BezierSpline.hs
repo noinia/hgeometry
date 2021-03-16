@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns         #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -20,21 +21,26 @@ module Data.Geometry.BezierSpline(
   , snap
 
   , pattern Bezier2, pattern Bezier3
+
+  , colinear
+  , lineApproximate
+  , quadToCubic
   ) where
 
-import           Control.Lens hiding (Empty)
-import qualified Data.Foldable as F
+import           Control.Lens                 hiding (Empty)
+import qualified Data.Foldable                as F
+import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.LSeq (LSeq)
-import qualified Data.LSeq as LSeq
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
-import           Data.Traversable (fmapDefault,foldMapDefault)
+import           Data.LSeq                    (LSeq)
+import qualified Data.LSeq                    as LSeq
+import           Data.Sequence                (Seq (..))
+import qualified Data.Sequence                as Seq
+import           Data.Traversable             (fmapDefault, foldMapDefault)
 import           GHC.TypeNats
-import qualified Test.QuickCheck as QC
+import qualified Test.QuickCheck              as QC
 
 --------------------------------------------------------------------------------
 
@@ -177,3 +183,41 @@ derivative f x = (f (x + delta) - f x) / delta
 -- | Snap a point close to a Bezier curve to the curve.
 snap   :: (Arity d, Ord r, Fractional r) => BezierSpline n d r -> Point d r -> Point d r
 snap b = evaluate b . parameterOf b
+
+-- If both control points are on the same side of the straight line from the start and end
+-- points then the curve is guaranteed to be within 3/4 of the distance from the straight line
+-- to the furthest control point.
+-- Otherwise, if the control points are on either side of the straight line, the curve is
+-- guaranteed to be within 4/9 of the maximum distance from the straight line to a control
+-- point.
+-- Also: 3/4 * sqrt(v) = sqrt (9/16 * v)
+--       4/9 * sqrt(v) = sqrt (16/81 * v)
+-- So: 3/4 * sqrt(v) < eps =>
+--     sqrt(9/16 * v) < eps =>
+--     9/16*v < eps*eps
+-- | Return True if the curve is definitely completely covered by a line of thickness
+--   twice the given tolerance. May return false negatives but not false positives.
+colinear :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> Bool
+colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
+  where ld = flip sqDistanceTo (lineThrough a d)
+        sameSide = ccw a d b == ccw a d c
+        maxDist = max (ld b) (ld c)
+        sqBound
+          | sameSide  = 9/16  * maxDist
+          | otherwise = 16/81 * maxDist
+
+-- | Approximate curve as line segments where no point on the curve is further away
+--   from the nearest line segment than the given tolerance.
+lineApproximate :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> [Point 2 r]
+lineApproximate eps bezier
+  | colinear eps bezier =
+    [ bezier^.controlPoints.to LSeq.head
+    , bezier^.controlPoints.to LSeq.last ]
+  | otherwise =
+    let (b1, b2) = split 0.5 bezier
+    in lineApproximate eps b1 ++ tail (lineApproximate eps b2)
+
+-- | Convert a quadratic bezier to a cubic bezier.
+quadToCubic :: (Fractional r) => BezierSpline 2 2 r -> BezierSpline 3 2 r
+quadToCubic (Bezier2 a b c) =
+  Bezier3 a ((1/3)*^(Point (toVec a ^+^ 2*^toVec b))) ((1/3)*^(Point (2*^ toVec b ^+^ toVec c))) c
