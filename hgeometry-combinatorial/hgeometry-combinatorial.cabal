@@ -251,12 +251,12 @@ test-suite hspec
                       , directory
                       , yaml
                       , MonadRandom
-  -- Such a mess:
-  if impl(ghc == 9.*)
-    build-depends:      singletons              == 3.*
-                      , singletons-th           == 3.*
-  else
-    build-depends:      singletons              == 2.*
+  -- -- Such a mess:
+  -- if impl(ghc == 9.*)
+  --   build-depends:      singletons              == 3.*
+  --                     , singletons-th           == 3.*
+  -- else
+  --   build-depends:      singletons              == 2.*
 
   default-extensions: TypeFamilies
                     , GADTs

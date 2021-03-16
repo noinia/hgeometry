@@ -83,7 +83,6 @@ library
               , linear           >= 1.10
               , semigroupoids    >= 5
               , semigroups       >= 0.18
-              , singletons       >= 2.0
               , text             >= 1.1.1.0
               , vinyl            >= 0.10
               , deepseq          >= 1.1
@@ -117,6 +116,11 @@ library
 
               -- , hslua
 
+  if impl(ghc == 9.*)
+    build-depends:      singletons              == 3.*
+                      , singletons-th           == 3.*
+  else
+    build-depends:      singletons              == 2.*
 
   hs-source-dirs: src
                   -- examples/demo
@@ -184,12 +188,17 @@ test-suite hspec
                       , vector
                       , containers
                       , random
-                      , singletons
                       , colour
                       , filepath
                       , directory
                       , yaml
                       , MonadRandom
+
+  if impl(ghc == 9.*)
+    build-depends:      singletons              == 3.*
+                      , singletons-th           == 3.*
+  else
+    build-depends:      singletons              == 2.*
 
   default-extensions: TypeFamilies
                     , GADTs
