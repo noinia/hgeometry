@@ -44,6 +44,10 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+flag planargraph
+  default: False
+  manual: True
+
 executable fromgeojson
   main-is: FromGeoJSON.hs
   hs-source-dirs: src
@@ -250,3 +254,25 @@ test-suite hspec
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+
+
+executable planargraph
+  main-is: planargraph.hs
+  if flag(planargraph)
+    buildable: True
+  else
+    buildable: False
+  default-language:     Haskell2010
+  build-depends:  base,
+                  vector,
+                  vector-circular,
+                  linear,
+                  text,
+                  hashable,
+                  lens,
+                  directory,
+                  filepath,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  reanimate,
+                  reanimate-svg
