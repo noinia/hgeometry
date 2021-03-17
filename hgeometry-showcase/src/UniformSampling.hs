@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module UniformSampling (uniformSamplingShowcase) where
 
-import           Algorithms.Geometry.UniformPolygonSampling
+import           Data.Geometry.Polygon.Sample
 import           Common
 import           Control.Monad.Random                       (evalRand, forM_, mkStdGen, replicateM)
 import           Data.Geometry.Point                        (Point (Point2))

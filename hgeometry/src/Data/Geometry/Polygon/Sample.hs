@@ -1,4 +1,4 @@
-module Algorithms.Geometry.UniformPolygonSampling where
+module Data.Geometry.Polygon.Sample where
 
 import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Control.Lens
