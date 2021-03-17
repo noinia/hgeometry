@@ -4,7 +4,7 @@ import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
-import           Data.Geometry.PlanarSubdivision (PolygonFaceData(..))
+import           Data.Geometry.PlanarSubdivision                      (PolygonFaceData (..))
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core                           as Polygon
 import           Data.Geometry.Triangle                               as Triangle
@@ -15,13 +15,17 @@ import qualified Data.Vector                                          as V
 import           Linear.Affine                                        hiding (Point)
 import           Linear.Vector
 
--- | Uniformly samples a polygon in \(O(n \log n)\).
-samplePolygon :: (RandomGen g, Random r, Fractional r, Ord r, Real r) => Polygon t p r -> Rand g (Point 2 r)
-samplePolygon p = do
-   randTri <- fromList $ map (\tri -> (tri, toRational $ areaRatio tri)) $ toTriangles p
+-- | Uniformly samples from a set of polygon in \(O(n \log n)\) triangles.
+samplePolygons :: (RandomGen g, Random r, Fractional r, Ord r, Real r) => NonEmpty.NonEmpty (Polygon t p r) -> Rand g (Point 2 r)
+samplePolygons ps = do
+   randTri <- fromList $ map (\tri -> (tri, toRational $ areaRatio tri)) $ concatMap toTriangles ps
    sampleTriangle randTri
    where
-      areaRatio tri = Triangle.area tri / Polygon.area p
+      areaRatio tri = Triangle.area tri / sum (fmap Polygon.area ps)
+
+-- | Uniformly samples a polygon in \(O(n \log n)\).
+samplePolygon :: (RandomGen g, Random r, Fractional r, Ord r, Real r) => Polygon t p r -> Rand g (Point 2 r)
+samplePolygon p = samplePolygons $ p NonEmpty.:| []
 
 -- | Uniformly samples a triangle in \(O(1)\).
 sampleTriangle :: (RandomGen g, Random r, Fractional r, Ord r) => Triangle 2 p r -> Rand g (Point 2 r)
