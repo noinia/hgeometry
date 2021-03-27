@@ -20,6 +20,12 @@ spec = describe "Logarithmic method successor test" $ do
              `shouldBe`
              minimum1 [ x | x <- xs, x >= q]
 
+         it "merge test" $ property $
+           \q (xs :: [Int]) (ys :: [Int]) ->
+             successor q ((fromList xs) <> (fromList ys))
+             `shouldBe`
+             successor q (fromList $ xs <> ys)
+
 
 newtype DummySucc a = Dummy (NonEmpty a)
   deriving (Show,Eq,Functor,Foldable,Foldable1,Traversable)

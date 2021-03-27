@@ -43,6 +43,13 @@ instance Foldable static => Foldable (InsertionOnly static) where
   foldMap f = queryWith (foldMap f)
   length = sum . mapMaybe (uncurry (<$)) . withSizes
 
+instance LogarithmicMethodDS static a => Semigroup (InsertionOnly static a) where
+  (InsertionOnly ds1) <> (InsertionOnly ds2) = InsertionOnly $ runMergeWith Nothing ds1 0 ds2 0
+
+instance LogarithmicMethodDS static a => Monoid (InsertionOnly static a) where
+  mempty = empty
+
+
 class LogarithmicMethodDS static a where
   {-# MINIMAL build #-}
   -- | Create a new static data structure storing only one value.
@@ -92,6 +99,43 @@ runMerge ds1 i j = \case
                         | otherwise -> Just ds1 : dss -- cons -- I don't think insert can ever
                                                               -- trigger this scenario.
 
+-- | merges two structures (potentially with a carry)
+--
+-- invariant: size carry == size ds1 <= size ds2
+runMergeWith                ::  LogarithmicMethodDS static a
+                            => Maybe (static a) -- ^ carry, if it exists
+                            -> [Maybe (static a)] -> Power
+                            -- ^ size of the first ds
+                            -> [Maybe (static a)] -> Power
+                            -- ^ size of the second ds
+                            -> [Maybe (static a)]
+runMergeWith mc ds1 i ds2 j = case (ds1,ds2) of
+  ([],_)            -> case mc of
+                         Nothing  -> ds2
+                         Just c   -> runMerge c i j ds2
+  (_,[])            -> case mc of
+                         Nothing  -> ds1
+                         Just c   -> runMerge c i i ds1
+  (m1:ds1',m2:ds2') -> case (m1,m2) of
+    (Nothing,Nothing) -> mc : runMergeWith Nothing ds1' (i+1) ds2' (j+1)
+    (Nothing,Just d2) -> case mc of
+         Nothing | i == j    -> m2 : runMergeWith Nothing ds1' (i+1) ds2' (j+1)
+                 | otherwise -> m1 : runMergeWith Nothing ds1' (i+1) ds2 j
+         Just c  | i == j    -> Nothing : runMergeWith (Just $ c `merge` d2) ds1' (i+1) ds2' (j+1)
+                 | otherwise -> mc : runMergeWith Nothing ds1' (i+1) ds2 j
+                   -- i < j, so invariant (i+1) <= j again holds holds
+
+    (Just d1,Nothing) -> case mc of
+                           Nothing -> m1 : runMergeWith Nothing ds1' (i+1) ds2' (j+1)
+                           Just c  -> Nothing : runMergeWith (Just $ c `merge` d1) ds1' (i+1) ds2' (j+1)
+
+    (Just d1,Just d2) -> case mc of
+         Nothing | i == j    -> Nothing : runMergeWith (Just $ d1 `merge` d2) ds1' (i+1) ds2' (j+1)
+                 | otherwise -> m1      : runMergeWith Nothing ds1' (i+1) ds2 j
+
+         Just c  | i == j    -> mc : runMergeWith (Just $ d1 `merge` d2) ds1' (i+1) ds2' (j+1)
+                 | otherwise -> Nothing : runMergeWith (Just $ c `merge` d1) ds1' (i+1) ds2 j
+                       -- i < j, so invariant holds
 
 -- | Given a decomposable query algorithm for the static structure,
 -- lift it to a query algorithm on the insertion only structure.
