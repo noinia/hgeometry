@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry-combinatorial
-version:             0.11.0.0
+version:             0.12.0.1
 synopsis:            Data structures, and Data types.
 description:
     The Non-geometric data types and algorithms used in HGeometry.
@@ -24,6 +24,7 @@ data-files:          test/Data/PlanarGraph/myGraph.yaml
                      -- examples/**/*.out
 
 extra-source-files:  README.md
+                     changelog
                      changelog.org
 
 Extra-doc-files:     docs/Data/PlanarGraph/testG.png
@@ -148,7 +149,7 @@ library
               , linear                  >= 1.20.8
               , hashable                >= 1.2
 
-              , vector                  >= 0.11 && < 0.12.2.0
+              , vector                  >= 0.11
               , data-clist              >= 0.1.2.3
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
@@ -251,12 +252,17 @@ test-suite hspec
                       , vector
                       , containers
                       , random
-                      , singletons
                       , filepath
                       , directory
                       , yaml
                       , MonadRandom
                       , semigroupoids
+  -- -- Such a mess:
+  -- if impl(ghc == 9.*)
+  --   build-depends:      singletons              == 3.*
+  --                     , singletons-th           == 3.*
+  -- else
+  --   build-depends:      singletons              == 2.*
 
   default-extensions: TypeFamilies
                     , GADTs

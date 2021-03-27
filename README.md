@@ -35,21 +35,23 @@ HGeometry Packages
 
 HGeometry is split into a few smaller packages. In particular:
 
-- hgeometry-combinatorial : defines some non-geometric
+- hgeometry : defines the actual geometric data types, data
+  structures, and algorithms,
+- hgeometry-combinatorial : defines the non-geometric
   (i.e. combinatorial) data types, data structures, and algorithms.
+
 - hgeometry-ipe : defines functions for working with [ipe](http://ipe.otfried.org) files.
 - hgeometry-svg : defines functions for working with svg files.
 - hgeometry-web : defines functions for building an
   interactive viewer using [miso](https://haskell-miso.org).
 - hgeometry-interactive : defines functions for building an
-  interactive viewer using [reflex-sdl2](https://hackage.haskell.org/package/reflex-sdl2).
-- hgeometry : defines the actual geometric data types, data
-  structures, and algorithms.
+  interactive viewer using
+  [reflex-sdl2](https://hackage.haskell.org/package/reflex-sdl2).
 
-In addition there is a [hgeometry-examples](hgeometry-examples)
-package that defines some example applications, and a hgometry-test
-package that contains all testcases. The latter is to work around a
-bug in cabal.
+In addition there are [hgeometry-examples](hgeometry-examples) and
+[hgeometry-showcase](hgeometry-showcase) packages that define some
+example applications, and a hgometry-test package that contains all
+testcases. The latter is to work around a bug in cabal.
 
 Available Geometric Algorithms
 ------------------------------
@@ -79,7 +81,7 @@ polygons,
   distance of two sequences of points (curves) of length *n* and
   *m*, respectively.
 * an *O(n)* time single-source shortest path algorithm on triangulated polygons.
-* an *O(n log n)* time algorithm for generating uniformly random convex polygons.
+* an *O(n log n)* time algorithm for generating random convex polygons.
 * an *O(n)* time algorithm for finding the convex hull of a simple polygon.
 
 Available Geometric Data Structures
@@ -91,11 +93,13 @@ structures. In particular,
 * A one dimensional Segment Tree. The base tree is static.
 * A one dimensional Interval Tree. The base tree is static.
 * A KD-Tree. The base tree is static.
+* An *O(n log n)* size planar point location data structure supporting
+  *O(log n)* queries.
 
 There is also support for working with planar subdivisions. As a
 result, [hgeometry-combinatorial] also includes a data structure for
 working with planar graphs. In particular, it has an `EdgeOracle` data
-structure, that can be built in \(O(n)\) time that can test if the
+structure, that can be built in *O(n)* time that can test if the
 planar graph contains an edge in constant time.
 
 
@@ -125,14 +129,11 @@ can give us. Hence, we choose to work with concrete types.
 
 To still allow for some extensibility our types will use the Ext (:+)
 type, as defined in the hgeometry-combinatorial package. For example,
-our `Polygon` data type, has an extra type parameter `p` that allows
-the vertices of the polygon to cary some extra information of type `p`
-(for example a color, a size, or whatever).
+our `LineSegment` data type, has an extra type parameter `p` that
+allows the vertices of the line segment to carry some extra
+information of type `p` (for example a color, a size, or
+whatever). Polylines, Polylygons, Boxes, etc have similar such
+parameters.
 
-```haskell
-data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
-```
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.

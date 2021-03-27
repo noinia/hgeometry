@@ -1,5 +1,5 @@
 name:                hgeometry
-version:             0.11.0.0
+version:             0.12.0.1
 synopsis:            Geometric Algorithms, Data structures, and Data types.
 description:
   HGeometry provides some basic geometry types, and geometric algorithms and
@@ -20,6 +20,7 @@ category:            Geometry
 build-type:          Simple
 
 extra-source-files:  README.md
+                     changelog
                      changelog.org
 
 Extra-doc-files:     docs/Data/PlaneGraph/small.png
@@ -29,10 +30,6 @@ cabal-version:       2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
-
-flag planargraph
-  default: False
-  manual: True
 
 library
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
@@ -84,6 +81,7 @@ library
                     Data.Geometry.Ellipse
 
                     Data.Geometry.Polygon
+                    Data.Geometry.Polygon.Bezier
                     Data.Geometry.Polygon.Inflate
                     Data.Geometry.Polygon.Convex
                     Data.Geometry.Polygon.Monotone
@@ -227,7 +225,7 @@ library
   -- other-extensions:
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.11.0.0
+              , hgeometry-combinatorial >= 0.12.0.0
 
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
@@ -256,7 +254,7 @@ library
               -- , ghc-typelits-natnormalise >= 0.6
               -- , ghc-typelits-knownnat     >= 0.6
 
-              , vector                  >= 0.11 && < 0.12.2.0
+              , vector                  >= 0.11
               , data-clist              >= 0.1.2.3
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
@@ -399,24 +397,3 @@ benchmark benchmarks
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
-
-executable planargraph
-  main-is: planargraph.hs
-  if flag(planargraph)
-    buildable: True
-  else
-    buildable: False
-  default-language:     Haskell2010
-  build-depends:  base,
-                  vector,
-                  vector-circular,
-                  linear,
-                  text,
-                  hashable,
-                  lens,
-                  directory,
-                  filepath,
-                  hgeometry,
-                  hgeometry-combinatorial,
-                  reanimate,
-                  reanimate-svg

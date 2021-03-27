@@ -72,8 +72,8 @@ randomMonotoneSingle p' dir = scene $ do
       | iPt <- intersectionsAt p' dir atP ]
   where
     pts = map _core $ toPoints p
-    minP = P.minimumBy (cmpExtreme dir) p'
-    maxP = P.maximumBy (cmpExtreme dir) p'
+    minP = P.minimumVertexBy (cmpExtreme dir) p'
+    maxP = P.maximumVertexBy (cmpExtreme dir) p'
     Just p = P.findRotateTo (==minP) p'
 
 intersectionsAt :: SimplePolygon () R -> Vector 2 R -> Point 2 R -> [Point 2 R]
