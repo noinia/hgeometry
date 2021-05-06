@@ -49,6 +49,7 @@ library
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
+                    Algorithms.Graph.BFS
                     Algorithms.Graph.MST
                     Algorithms.FloydWarshall
 
@@ -144,6 +145,7 @@ library
               , primitive               >= 0.6.3.0
               , linear                  >= 1.20.8
               , hashable                >= 1.2
+              , witherable              >= 0.4
 
               , vector                  >= 0.11
               , data-clist              >= 0.1.2.3
@@ -222,6 +224,7 @@ test-suite hspec
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
                  Algorithms.Graph.DFSSpec
+                 Algorithms.Graph.BFSSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
