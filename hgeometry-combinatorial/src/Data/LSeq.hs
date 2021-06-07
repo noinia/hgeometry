@@ -18,7 +18,7 @@ module Data.LSeq( LSeq( EmptyL, (:<|), (:<<), (:|>) )
 
                 , (<|), (|>)
                 , (><)
-                , eval
+                , eval, eval'
 
                 , index
                 , adjust
@@ -133,28 +133,28 @@ infix 5 ><
 
 -- | \( O(1) \) Prove a sequence has at least @n@ elements.
 --
--- >>> eval (Proxy :: Proxy 3) (fromList [1,2,3])
+-- >>> eval @3 (fromList [1,2,3])
 -- Just (LSeq (fromList [1,2,3]))
--- >>> eval (Proxy :: Proxy 3) (fromList [1,2])
+-- >>> eval @3 (fromList [1,2])
 -- Nothing
--- >>> eval (Proxy :: Proxy 3) (fromList [1..10])
+-- >>> eval @3 (fromList [1..10])
 -- Just (LSeq (fromList [1,2,3,4,5,6,7,8,9,10]))
-eval :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
-eval n (LSeq xs)
+eval :: forall n m a. KnownNat n => LSeq m a -> Maybe (LSeq n a)
+eval = eval' (Proxy @n)
+
+-- | Implementatio nof eval' that takes an explicit proxy.
+eval' :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
+eval' n (LSeq xs)
   | toInteger (S.length xs) >= natVal n = Just $ LSeq xs
   | otherwise                           = Nothing
-
-
-
 
 
 -- | Promises that the length of this LSeq is actually n. This is not
 -- checked.
 --
 -- This function should be a noop
-promise :: forall m n a. LSeq m a -> LSeq n a
+promise :: forall n m a. LSeq m a -> LSeq n a
 promise = coerce
-
 
 -- | Forces the first n elements of the LSeq
 forceLSeq   :: KnownNat n => proxy n -> LSeq m a -> LSeq n a
@@ -232,7 +232,7 @@ wrapUnsafe f = LSeq . f . toSeq
 
 --------------------------------------------------------------------------------
 
--- | \( O(n) \). Create an l-sequence from a sequence of elements.
+-- | \( O(1) \). Create an l-sequence from a sequence of elements.
 fromSeq :: S.Seq a -> LSeq 0 a
 fromSeq = LSeq
 
@@ -269,7 +269,7 @@ instance (1 <= n) => Traversable1 (ViewL n) where
     where
       go x = \case
         S.Empty       -> (:< empty) <$> f x
-        (y S.:<| ys) -> (\x' (y' :< ys') -> x' :< promise @1 @0 (y' :<| ys'))
+        (y S.:<| ys) -> (\x' (y' :< ys') -> x' :< promise @0 (y' :<| ys'))
                         <$> f x <.> go y ys
 
 instance Eq a => Eq (ViewL n a) where

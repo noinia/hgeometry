@@ -90,7 +90,7 @@ instance HasEnd (PolyLine d p r) where
 
 -- | Builds a Polyline from a list of points, if there are sufficiently many points
 fromPoints :: [Point d r :+ p] -> Maybe (PolyLine d p r)
-fromPoints = fmap PolyLine . LSeq.eval (C @ 2) . LSeq.fromList
+fromPoints = fmap PolyLine . LSeq.eval @2 . LSeq.fromList
 
 -- | pre: The input list contains at least two points
 fromPointsUnsafe :: [Point d r :+ p] -> PolyLine d p r

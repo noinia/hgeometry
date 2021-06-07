@@ -21,11 +21,11 @@ import           Data.Ord (comparing)
 --------------------------------------------------------------------------------
 
 -- | Line simplification with the well-known Douglas Peucker alogrithm. Given a distance
--- value eps adn a polyline pl, constructs a simplification of pl (i.e. with
+-- value eps and a polyline pl, constructs a simplification of pl (i.e. with
 -- vertices from pl) s.t. all other vertices are within dist eps to the
 -- original polyline.
 --
--- Running time: \( O(n^2) \) worst case, \( O(n log n) \) expected.
+-- Running time: \( O(n^2) \) worst case, \( O(n log n) \) on average.
 douglasPeucker         :: (Ord r, Fractional r, Arity d)
                        => r -> PolyLine d p r -> PolyLine d p r
 douglasPeucker eps pl
