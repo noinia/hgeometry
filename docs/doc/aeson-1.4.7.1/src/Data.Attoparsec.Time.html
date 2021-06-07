@@ -41,8 +41,8 @@
 </span><span id="line-41"></span><span class="annot"><a href="Data.Attoparsec.Time.html#day"><span class="hs-identifier hs-type">day</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Day</span></span><span>
 </span><span id="line-42"></span><span id="day"><span class="annot"><span class="annottext">day :: Parser Day
 </span><a href="Data.Attoparsec.Time.html#day"><span class="hs-identifier hs-var hs-var">day</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-43"></span><span>  </span><span id="local-6989586621679183198"><span class="annot"><span class="annottext">Integer -&gt; Integer
-</span><a href="#local-6989586621679183198"><span class="hs-identifier hs-var">absOrNeg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679183267"><span class="annot"><span class="annottext">Integer -&gt; Integer
+</span><a href="#local-6989586621679183267"><span class="hs-identifier hs-var">absOrNeg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer)
 -&gt; Parser Text Char -&gt; Parser Text (Integer -&gt; Integer)
@@ -67,8 +67,8 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621679183194"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679183194"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Integer
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621679183263"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679183263"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Integer
 forall a. Integral a =&gt; Parser a
 </span><span class="hs-identifier hs-var">decimal</span></span><span> </span><span class="annot"><span class="annottext">Parser Integer -&gt; Parser Text Char -&gt; Parser Integer
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
@@ -78,8 +78,8 @@ forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser Integer
 forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 </span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;date must be of form [+,-]YYYY-MM-DD&quot;</span></span><span>
-</span><span id="line-45"></span><span>  </span><span id="local-6989586621679183191"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183191"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Int
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679183260"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183260"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span> </span><span class="annot"><span class="annottext">Parser Int -&gt; Parser Text Char -&gt; Parser Int
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
 </span><span class="hs-operator hs-var">&lt;*</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Parser Text Char
@@ -88,8 +88,8 @@ forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser Int
 forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 </span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;date must be of form [+,-]YYYY-MM-DD&quot;</span></span><span>
-</span><span id="line-46"></span><span>  </span><span id="local-6989586621679183189"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183189"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679183258"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183258"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span> </span><span class="annot"><span class="annottext">Parser Int -&gt; Parser Int -&gt; Parser Int
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser Int
@@ -103,26 +103,26 @@ forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Int -&gt; Maybe Day
 </span><span class="hs-identifier hs-var">fromGregorianValid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Integer
-</span><a href="#local-6989586621679183198"><span class="hs-identifier hs-var">absOrNeg</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679183194"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183191"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183189"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679183267"><span class="hs-identifier hs-var">absOrNeg</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679183263"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183260"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183258"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-48"></span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- | Parse a two-digit integer (e.g. day of month, hour).</span><span>
 </span><span id="line-50"></span><span class="annot"><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-type">twoDigits</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-51"></span><span id="twoDigits"><span class="annot"><span class="annottext">twoDigits :: Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var hs-var">twoDigits</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-52"></span><span>  </span><span id="local-6989586621679183187"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183187"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679183256"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183256"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">digit</span></span><span>
-</span><span id="line-53"></span><span>  </span><span id="local-6989586621679183185"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183185"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679183254"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183254"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">digit</span></span><span>
-</span><span id="line-54"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183184"><span class="annot"><span class="annottext">c2d :: Char -&gt; Int
-</span><a href="#local-6989586621679183184"><span class="hs-identifier hs-var hs-var">c2d</span></a></span></span><span> </span><span id="local-6989586621679183183"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679183183"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
+</span><span id="line-54"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183253"><span class="annot"><span class="annottext">c2d :: Char -&gt; Int
+</span><a href="#local-6989586621679183253"><span class="hs-identifier hs-var hs-var">c2d</span></a></span></span><span> </span><span id="local-6989586621679183252"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679183252"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183183"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679183252"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="hs-number">15</span></span><span>
 </span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Int -&gt; Parser Int
@@ -130,30 +130,30 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Parser Int) -&gt; Int -&gt; Parser Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
-</span><a href="#local-6989586621679183184"><span class="hs-identifier hs-var">c2d</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183187"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679183253"><span class="hs-identifier hs-var">c2d</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183256"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
-</span><a href="#local-6989586621679183184"><span class="hs-identifier hs-var">c2d</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183185"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679183253"><span class="hs-identifier hs-var">c2d</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183254"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-56"></span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- | Parse a time of the form @HH:MM[:SS[.SSS]]@.</span><span>
 </span><span id="line-58"></span><span class="annot"><a href="Data.Attoparsec.Time.html#timeOfDay"><span class="hs-identifier hs-type">timeOfDay</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Local.TimeOfDay</span></span><span>
 </span><span id="line-59"></span><span id="timeOfDay"><span class="annot"><span class="annottext">timeOfDay :: Parser TimeOfDay
 </span><a href="Data.Attoparsec.Time.html#timeOfDay"><span class="hs-identifier hs-var hs-var">timeOfDay</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-60"></span><span>  </span><span id="local-6989586621679183179"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183179"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679183248"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183248"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
-</span><span id="line-61"></span><span>  </span><span id="local-6989586621679183178"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183178"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Parser Text Char
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679183247"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183247"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Parser Text Char
 </span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Int -&gt; Parser Int
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
-</span><span id="line-62"></span><span>  </span><span id="local-6989586621679183177"><span class="annot"><span class="annottext">Pico
-</span><a href="#local-6989586621679183177"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Pico -&gt; Parser Text Pico -&gt; Parser Text Pico
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679183246"><span class="annot"><span class="annottext">Pico
+</span><a href="#local-6989586621679183246"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Pico -&gt; Parser Text Pico -&gt; Parser Text Pico
 forall (f :: * -&gt; *) a. Alternative f =&gt; a -&gt; f a -&gt; f a
 </span><span class="hs-identifier hs-var">option</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Parser Text Char
 </span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Text Pico -&gt; Parser Text Pico
@@ -161,24 +161,24 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Pico
 </span><a href="Data.Attoparsec.Time.html#seconds"><span class="hs-identifier hs-var">seconds</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-63"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183179"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183248"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">24</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183178"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183247"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">60</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Pico
-</span><a href="#local-6989586621679183177"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Pico -&gt; Pico -&gt; Bool
+</span><a href="#local-6989586621679183246"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Pico -&gt; Pico -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="hs-number">61</span></span><span>
 </span><span id="line-64"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">TimeOfDay -&gt; Parser TimeOfDay
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Pico -&gt; TimeOfDay
 </span><span class="hs-identifier hs-var">Local.TimeOfDay</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183179"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183178"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Pico
-</span><a href="#local-6989586621679183177"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679183248"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183247"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Pico
+</span><a href="#local-6989586621679183246"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">String -&gt; Parser TimeOfDay
 forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 </span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;invalid time&quot;</span></span><span>
@@ -190,17 +190,17 @@ forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 </span><span id="line-71"></span><span class="annot"><a href="Data.Attoparsec.Time.html#seconds"><span class="hs-identifier hs-type">seconds</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pico</span></span><span>
 </span><span id="line-72"></span><span id="seconds"><span class="annot"><span class="annottext">seconds :: Parser Text Pico
 </span><a href="Data.Attoparsec.Time.html#seconds"><span class="hs-identifier hs-var hs-var">seconds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679183170"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183170"><span class="hs-identifier hs-var">real</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679183239"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183239"><span class="hs-identifier hs-var">real</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
-</span><span id="line-74"></span><span>  </span><span id="local-6989586621679183169"><span class="annot"><span class="annottext">Maybe Char
-</span><a href="#local-6989586621679183169"><span class="hs-identifier hs-var">mc</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe Char)
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679183238"><span class="annot"><span class="annottext">Maybe Char
+</span><a href="#local-6989586621679183238"><span class="hs-identifier hs-var">mc</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe Char)
 </span><span class="hs-identifier hs-var">peekChar</span></span><span>
 </span><span id="line-75"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Char
-</span><a href="#local-6989586621679183169"><span class="hs-identifier hs-var">mc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679183238"><span class="hs-identifier hs-var">mc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-76"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-char">'.'</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-77"></span><span>      </span><span id="local-6989586621679183167"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679183167"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
+</span><span id="line-77"></span><span>      </span><span id="local-6989586621679183236"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679183236"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">anyChar</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Text Text -&gt; Parser Text Text
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Parser Text Text
@@ -212,9 +212,9 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Text -&gt; Pico
 forall a. Integral a =&gt; a -&gt; Text -&gt; Pico
-</span><a href="#local-6989586621679183164"><span class="hs-identifier hs-var">parsePicos</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183170"><span class="hs-identifier hs-var">real</span></a></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679183167"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679183233"><span class="hs-identifier hs-var">parsePicos</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183239"><span class="hs-identifier hs-var">real</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679183236"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-79"></span><span>    </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Pico -&gt; Parser Text Pico
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Pico -&gt; Parser Text Pico) -&gt; Pico -&gt; Parser Text Pico
@@ -222,58 +222,58 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Pico
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183170"><span class="hs-identifier hs-var">real</span></a></span><span>
+</span><a href="#local-6989586621679183239"><span class="hs-identifier hs-var">real</span></a></span><span>
 </span><span id="line-80"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-81"></span><span>  </span><span id="local-6989586621679183164"><span class="annot"><span class="annottext">parsePicos :: a -&gt; Text -&gt; Pico
-</span><a href="#local-6989586621679183164"><span class="hs-identifier hs-var hs-var">parsePicos</span></a></span></span><span> </span><span id="local-6989586621679183163"><span class="annot"><span class="annottext">a0 :: a
-</span><a href="#local-6989586621679183163"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span id="local-6989586621679183162"><span class="annot"><span class="annottext">t :: Text
-</span><a href="#local-6989586621679183162"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Pico
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621679183233"><span class="annot"><span class="annottext">parsePicos :: a -&gt; Text -&gt; Pico
+</span><a href="#local-6989586621679183233"><span class="hs-identifier hs-var hs-var">parsePicos</span></a></span></span><span> </span><span id="local-6989586621679183232"><span class="annot"><span class="annottext">a0 :: a
+</span><a href="#local-6989586621679183232"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span id="local-6989586621679183231"><span class="annot"><span class="annottext">t :: Text
+</span><a href="#local-6989586621679183231"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Pico
 </span><a href="Data.Attoparsec.Time.Internal.html#toPico"><span class="hs-identifier hs-var">toPico</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64 -&gt; Integer
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679183161"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
+</span><a href="#local-6989586621679183230"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span class="annot"><span class="annottext">Int64 -&gt; Int -&gt; Int64
 forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><span class="hs-operator hs-var">^</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183159"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-82"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span class="annot"><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span id="local-6989586621679183159"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679183159"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679183161"><span class="annot"><span class="annottext">t' :: Int64
-</span><a href="#local-6989586621679183161"><span class="hs-identifier hs-var">t'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(T -&gt; Char -&gt; T) -&gt; T -&gt; Text -&gt; T
+</span><a href="#local-6989586621679183228"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span class="annot"><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span id="local-6989586621679183228"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679183228"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679183230"><span class="annot"><span class="annottext">t' :: Int64
+</span><a href="#local-6989586621679183230"><span class="hs-identifier hs-var">t'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(T -&gt; Char -&gt; T) -&gt; T -&gt; Text -&gt; T
 forall a. (a -&gt; Char -&gt; a) -&gt; a -&gt; Text -&gt; a
 </span><span class="hs-identifier hs-var">T.foldl'</span></span><span> </span><span class="annot"><span class="annottext">T -&gt; Char -&gt; T
-</span><a href="#local-6989586621679183157"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int64 -&gt; T
+</span><a href="#local-6989586621679183226"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int64 -&gt; T
 </span><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-var">T</span></a></span><span> </span><span class="annot"><span class="hs-number">12</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679183163"><span class="hs-identifier hs-var">a0</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679183162"><span class="hs-identifier hs-var">t</span></a></span><span>
-</span><span id="line-83"></span><span>          </span><span id="local-6989586621679183157"><span class="annot"><span class="annottext">step :: T -&gt; Char -&gt; T
-</span><a href="#local-6989586621679183157"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span id="local-6989586621679183156"><span class="annot"><span class="annottext">ma :: T
-</span><a href="#local-6989586621679183156"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span id="local-6989586621679183155"><span class="annot"><span class="annottext">m :: Int
-</span><a href="#local-6989586621679183155"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679183154"><span class="annot"><span class="annottext">a :: Int64
-</span><a href="#local-6989586621679183154"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679183153"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679183153"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="#local-6989586621679183232"><span class="hs-identifier hs-var">a0</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679183231"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-83"></span><span>          </span><span id="local-6989586621679183226"><span class="annot"><span class="annottext">step :: T -&gt; Char -&gt; T
+</span><a href="#local-6989586621679183226"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span id="local-6989586621679183225"><span class="annot"><span class="annottext">ma :: T
+</span><a href="#local-6989586621679183225"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span id="local-6989586621679183224"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679183224"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679183223"><span class="annot"><span class="annottext">a :: Int64
+</span><a href="#local-6989586621679183223"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679183222"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679183222"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-84"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183155"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183224"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">T
-</span><a href="#local-6989586621679183156"><span class="hs-identifier hs-var">ma</span></a></span><span>
+</span><a href="#local-6989586621679183225"><span class="hs-identifier hs-var">ma</span></a></span><span>
 </span><span id="line-85"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int64 -&gt; T
 </span><a href="Data.Attoparsec.Time.html#T"><span class="hs-identifier hs-var">T</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183155"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679183224"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679183154"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
+</span><a href="#local-6989586621679183223"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183153"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
+</span><a href="#local-6989586621679183222"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64 -&gt; Int64
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="hs-number">15</span></span><span class="hs-special">)</span><span>
 </span><span id="line-86"></span><span>
@@ -282,42 +282,42 @@ forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span id="line-89"></span><span class="annot"><a href="Data.Attoparsec.Time.html#timeZone"><span class="hs-identifier hs-type">timeZone</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Local.TimeZone</span></span><span class="hs-special">)</span><span>
 </span><span id="line-90"></span><span id="timeZone"><span class="annot"><span class="annottext">timeZone :: Parser (Maybe TimeZone)
 </span><a href="Data.Attoparsec.Time.html#timeZone"><span class="hs-identifier hs-var hs-var">timeZone</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-91"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183151"><span class="annot"><span class="annottext">maybeSkip :: Char -&gt; Parser Text ()
-</span><a href="#local-6989586621679183151"><span class="hs-identifier hs-var hs-var">maybeSkip</span></a></span></span><span> </span><span id="local-6989586621679183150"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679183150"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679183149"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183149"><span class="hs-identifier hs-var">ch</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
+</span><span id="line-91"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183220"><span class="annot"><span class="annottext">maybeSkip :: Char -&gt; Parser Text ()
+</span><a href="#local-6989586621679183220"><span class="hs-identifier hs-var hs-var">maybeSkip</span></a></span></span><span> </span><span id="local-6989586621679183219"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679183219"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679183218"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183218"><span class="hs-identifier hs-var">ch</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">peekChar'</span></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Parser Text () -&gt; Parser Text ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183149"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679183218"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183150"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Text ()
+</span><a href="#local-6989586621679183219"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Text ()
 forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
 </span><span class="hs-identifier hs-var">void</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">anyChar</span></span><span class="hs-special">)</span><span>
 </span><span id="line-92"></span><span>  </span><span class="annot"><span class="annottext">Char -&gt; Parser Text ()
-</span><a href="#local-6989586621679183151"><span class="hs-identifier hs-var">maybeSkip</span></a></span><span> </span><span class="annot"><span class="hs-char">' '</span></span><span>
-</span><span id="line-93"></span><span>  </span><span id="local-6989586621679183147"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183147"><span class="hs-identifier hs-var">ch</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Parser Text Char
+</span><a href="#local-6989586621679183220"><span class="hs-identifier hs-var">maybeSkip</span></a></span><span> </span><span class="annot"><span class="hs-char">' '</span></span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679183216"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183216"><span class="hs-identifier hs-var">ch</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Parser Text Char
 </span><span class="hs-identifier hs-var">satisfy</span></span><span> </span><span class="annot"><span class="annottext">((Char -&gt; Bool) -&gt; Parser Text Char)
 -&gt; (Char -&gt; Bool) -&gt; Parser Text Char
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679183145"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679183145"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183145"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679183214"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679183214"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183214"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'Z'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183145"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679183214"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'+'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183145"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679183214"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'-'</span></span><span>
 </span><span id="line-94"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183147"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679183216"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'Z'</span></span><span>
 </span><span id="line-95"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe TimeZone -&gt; Parser (Maybe TimeZone)
@@ -326,52 +326,52 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-96"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-97"></span><span>      </span><span id="local-6989586621679183143"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183143"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
+</span><span id="line-97"></span><span>      </span><span id="local-6989586621679183212"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183212"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
-</span><span id="line-98"></span><span>      </span><span id="local-6989586621679183142"><span class="annot"><span class="annottext">Maybe Char
-</span><a href="#local-6989586621679183142"><span class="hs-identifier hs-var">mm</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe Char)
+</span><span id="line-98"></span><span>      </span><span id="local-6989586621679183211"><span class="annot"><span class="annottext">Maybe Char
+</span><a href="#local-6989586621679183211"><span class="hs-identifier hs-var">mm</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe Char)
 </span><span class="hs-identifier hs-var">peekChar</span></span><span>
-</span><span id="line-99"></span><span>      </span><span id="local-6989586621679183141"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183141"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Char
-</span><a href="#local-6989586621679183142"><span class="hs-identifier hs-var">mm</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-99"></span><span>      </span><span id="local-6989586621679183210"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183210"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Char
+</span><a href="#local-6989586621679183211"><span class="hs-identifier hs-var">mm</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-100"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-char">':'</span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Parser Text Char
 </span><span class="hs-identifier hs-var">anyChar</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char -&gt; Parser Int -&gt; Parser Int
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
-</span><span id="line-101"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679183140"><span class="annot"><span class="annottext">d :: Char
-</span><a href="#local-6989586621679183140"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span id="line-101"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679183209"><span class="annot"><span class="annottext">d :: Char
+</span><a href="#local-6989586621679183209"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isDigit</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183140"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Parser Int
+</span><a href="#local-6989586621679183209"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Parser Int
 </span><a href="Data.Attoparsec.Time.html#twoDigits"><span class="hs-identifier hs-var">twoDigits</span></a></span><span>
 </span><span id="line-102"></span><span>             </span><span class="hs-identifier">_</span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Parser Int
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
-</span><span id="line-103"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183139"><span class="annot"><span class="annottext">off :: Int
-</span><a href="#local-6989586621679183139"><span class="hs-identifier hs-var hs-var">off</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183147"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><span id="line-103"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679183208"><span class="annot"><span class="annottext">off :: Int
+</span><a href="#local-6989586621679183208"><span class="hs-identifier hs-var hs-var">off</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183216"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'-'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183138"><span class="hs-identifier hs-var">off0</span></a></span><span>
+</span><a href="#local-6989586621679183207"><span class="hs-identifier hs-var">off0</span></a></span><span>
 </span><span id="line-104"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183138"><span class="hs-identifier hs-var">off0</span></a></span><span>
-</span><span id="line-105"></span><span>          </span><span id="local-6989586621679183138"><span class="annot"><span class="annottext">off0 :: Int
-</span><a href="#local-6989586621679183138"><span class="hs-identifier hs-var hs-var">off0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183143"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679183207"><span class="hs-identifier hs-var">off0</span></a></span><span>
+</span><span id="line-105"></span><span>          </span><span id="local-6989586621679183207"><span class="annot"><span class="annottext">off0 :: Int
+</span><a href="#local-6989586621679183207"><span class="hs-identifier hs-var hs-var">off0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679183212"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="hs-number">60</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183141"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><a href="#local-6989586621679183210"><span class="hs-identifier hs-var">m</span></a></span><span>
 </span><span id="line-106"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Any
 forall a. HasCallStack =&gt; a
 </span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-107"></span><span>        </span><span class="hs-identifier">_</span><span>   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183139"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183208"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-108"></span><span>              </span><span class="annot"><span class="annottext">Maybe TimeZone -&gt; Parser (Maybe TimeZone)
@@ -380,15 +380,15 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-109"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183139"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183208"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">720</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183139"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183208"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">840</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183141"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679183210"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="hs-number">59</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-110"></span><span>              </span><span class="annot"><span class="annottext">String -&gt; Parser (Maybe TimeZone)
@@ -396,16 +396,16 @@ forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
 </span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;invalid time zone offset&quot;</span></span><span>
 </span><span id="line-111"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-112"></span><span>              </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679183135"><span class="annot"><span class="annottext">tz :: TimeZone
-</span><a href="#local-6989586621679183135"><span class="hs-identifier hs-var hs-var">tz</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; TimeZone
+</span><span id="line-112"></span><span>              </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679183204"><span class="annot"><span class="annottext">tz :: TimeZone
+</span><a href="#local-6989586621679183204"><span class="hs-identifier hs-var hs-var">tz</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; TimeZone
 </span><span class="hs-identifier hs-var">Local.minutesToTimeZone</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679183139"><span class="hs-identifier hs-var">off</span></a></span><span>
+</span><a href="#local-6989586621679183208"><span class="hs-identifier hs-var">off</span></a></span><span>
 </span><span id="line-113"></span><span>              </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Maybe TimeZone -&gt; Parser (Maybe TimeZone)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimeZone -&gt; Maybe TimeZone
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">TimeZone
-</span><a href="#local-6989586621679183135"><span class="hs-identifier hs-var">tz</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679183204"><span class="hs-identifier hs-var">tz</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-114"></span><span>
 </span><span id="line-115"></span><span class="hs-comment">-- | Parse a date and time, of the form @YYYY-MM-DD HH:MM[:SS[.SSS]]@.</span><span>
 </span><span id="line-116"></span><span class="hs-comment">-- The space may be replaced with a @T@.  The number of seconds is optional</span><span>
@@ -421,20 +421,20 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; Parser Text Char -&gt; Parser Text (TimeOfDay -&gt; LocalTime)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
 </span><span class="hs-operator hs-var">&lt;*</span></span><span> </span><span class="annot"><span class="annottext">Parser Text Char
-</span><a href="#local-6989586621679183131"><span class="hs-identifier hs-var">daySep</span></a></span><span> </span><span class="annot"><span class="annottext">Parser Text (TimeOfDay -&gt; LocalTime)
+</span><a href="#local-6989586621679183200"><span class="hs-identifier hs-var">daySep</span></a></span><span> </span><span class="annot"><span class="annottext">Parser Text (TimeOfDay -&gt; LocalTime)
 -&gt; Parser TimeOfDay -&gt; Parser LocalTime
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser TimeOfDay
 </span><a href="Data.Attoparsec.Time.html#timeOfDay"><span class="hs-identifier hs-var">timeOfDay</span></a></span><span>
-</span><span id="line-120"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679183131"><span class="annot"><span class="annottext">daySep :: Parser Text Char
-</span><a href="#local-6989586621679183131"><span class="hs-identifier hs-var hs-var">daySep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Parser Text Char
-</span><span class="hs-identifier hs-var">satisfy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679183130"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679183130"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183130"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><span id="line-120"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679183200"><span class="annot"><span class="annottext">daySep :: Parser Text Char
+</span><a href="#local-6989586621679183200"><span class="hs-identifier hs-var hs-var">daySep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; Parser Text Char
+</span><span class="hs-identifier hs-var">satisfy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679183199"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679183199"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679183199"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">'T'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679183130"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679183199"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-char">' '</span></span><span class="hs-special">)</span><span>
 </span><span id="line-121"></span><span>
@@ -443,35 +443,35 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-124"></span><span class="annot"><a href="Data.Attoparsec.Time.html#utcTime"><span class="hs-identifier hs-type">utcTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span>
 </span><span id="line-125"></span><span id="utcTime"><span class="annot"><span class="annottext">utcTime :: Parser UTCTime
 </span><a href="Data.Attoparsec.Time.html#utcTime"><span class="hs-identifier hs-var hs-var">utcTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-126"></span><span>  </span><span id="local-6989586621679183129"><span class="annot"><span class="annottext">lt :: LocalTime
-</span><a href="#local-6989586621679183129"><span class="hs-identifier hs-var">lt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Local.LocalTime</span></span><span> </span><span id="local-6989586621679183128"><span class="annot"><span class="annottext">d :: Day
-</span><a href="#local-6989586621679183128"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679183127"><span class="annot"><span class="annottext">t :: TimeOfDay
-</span><a href="#local-6989586621679183127"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser LocalTime
+</span><span id="line-126"></span><span>  </span><span id="local-6989586621679183198"><span class="annot"><span class="annottext">lt :: LocalTime
+</span><a href="#local-6989586621679183198"><span class="hs-identifier hs-var">lt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Local.LocalTime</span></span><span> </span><span id="local-6989586621679183197"><span class="annot"><span class="annottext">d :: Day
+</span><a href="#local-6989586621679183197"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679183196"><span class="annot"><span class="annottext">t :: TimeOfDay
+</span><a href="#local-6989586621679183196"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser LocalTime
 </span><a href="Data.Attoparsec.Time.html#localTime"><span class="hs-identifier hs-var">localTime</span></a></span><span>
-</span><span id="line-127"></span><span>  </span><span id="local-6989586621679183126"><span class="annot"><span class="annottext">Maybe TimeZone
-</span><a href="#local-6989586621679183126"><span class="hs-identifier hs-var">mtz</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe TimeZone)
+</span><span id="line-127"></span><span>  </span><span id="local-6989586621679183195"><span class="annot"><span class="annottext">Maybe TimeZone
+</span><a href="#local-6989586621679183195"><span class="hs-identifier hs-var">mtz</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser (Maybe TimeZone)
 </span><a href="Data.Attoparsec.Time.html#timeZone"><span class="hs-identifier hs-var">timeZone</span></a></span><span>
 </span><span id="line-128"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe TimeZone
-</span><a href="#local-6989586621679183126"><span class="hs-identifier hs-var">mtz</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-129"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679183125"><span class="annot"><span class="annottext">tt :: DiffTime
-</span><a href="#local-6989586621679183125"><span class="hs-identifier hs-var hs-var">tt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TimeOfDay -&gt; DiffTime
+</span><a href="#local-6989586621679183195"><span class="hs-identifier hs-var">mtz</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-129"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679183194"><span class="annot"><span class="annottext">tt :: DiffTime
+</span><a href="#local-6989586621679183194"><span class="hs-identifier hs-var hs-var">tt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TimeOfDay -&gt; DiffTime
 </span><span class="hs-identifier hs-var">Local.timeOfDayToTime</span></span><span> </span><span class="annot"><span class="annottext">TimeOfDay
-</span><a href="#local-6989586621679183127"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679183196"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-130"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">UTCTime -&gt; Parser UTCTime
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Day -&gt; DiffTime -&gt; UTCTime
 </span><span class="hs-identifier hs-var">UTCTime</span></span><span> </span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679183128"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679183125"><span class="hs-identifier hs-var">tt</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-131"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679183122"><span class="annot"><span class="annottext">tz :: TimeZone
-</span><a href="#local-6989586621679183122"><span class="hs-identifier hs-var">tz</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UTCTime -&gt; Parser UTCTime
+</span><a href="#local-6989586621679183197"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679183194"><span class="hs-identifier hs-var">tt</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679183191"><span class="annot"><span class="annottext">tz :: TimeZone
+</span><a href="#local-6989586621679183191"><span class="hs-identifier hs-var">tz</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UTCTime -&gt; Parser UTCTime
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(UTCTime -&gt; Parser UTCTime) -&gt; UTCTime -&gt; Parser UTCTime
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">TimeZone -&gt; LocalTime -&gt; UTCTime
 </span><span class="hs-identifier hs-var">Local.localTimeToUTC</span></span><span> </span><span class="annot"><span class="annottext">TimeZone
-</span><a href="#local-6989586621679183122"><span class="hs-identifier hs-var">tz</span></a></span><span> </span><span class="annot"><span class="annottext">LocalTime
-</span><a href="#local-6989586621679183129"><span class="hs-identifier hs-var">lt</span></a></span><span>
+</span><a href="#local-6989586621679183191"><span class="hs-identifier hs-var">tz</span></a></span><span> </span><span class="annot"><span class="annottext">LocalTime
+</span><a href="#local-6989586621679183198"><span class="hs-identifier hs-var">lt</span></a></span><span>
 </span><span id="line-132"></span><span>
 </span><span id="line-133"></span><span class="hs-comment">-- | Parse a date with time zone info. Acceptable formats:</span><span>
 </span><span id="line-134"></span><span class="hs-comment">--</span><span>

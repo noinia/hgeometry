@@ -15,14 +15,14 @@
 </span><span id="line-15"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Scientific.Scientific</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-18"></span><span>    </span><span id="local-6989586621679110337"><span class="annot"><span class="annottext">arbitrary :: Gen Scientific
+</span><span id="line-18"></span><span>    </span><span id="local-6989586621679110396"><span class="annot"><span class="annottext">arbitrary :: Gen Scientific
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-19"></span><span>        </span><span id="local-6989586621679110335"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679110335"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
+</span><span id="line-19"></span><span>        </span><span id="local-6989586621679110394"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110394"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
 forall a. Arbitrary a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrary</span></span><span>
-</span><span id="line-20"></span><span>        </span><span id="local-6989586621679110334"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110334"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Int
+</span><span id="line-20"></span><span>        </span><span id="local-6989586621679110393"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110393"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Int
 forall a. Arbitrary a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrary</span></span><span>
 </span><span id="line-21"></span><span>        </span><span class="annot"><span class="annottext">Scientific -&gt; Gen Scientific
@@ -31,11 +31,11 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Scientific
 </span><span class="hs-identifier hs-var">Scientific.scientific</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679110335"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110334"><span class="hs-identifier hs-var">e</span></a></span><span>
-</span><span id="line-22"></span><span>    </span><span id="local-6989586621679110332"><span class="annot"><span class="annottext">shrink :: Scientific -&gt; [Scientific]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></span></span><span> </span><span id="local-6989586621679110330"><span class="annot"><span class="annottext">s :: Scientific
-</span><a href="#local-6989586621679110330"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Integer, Int) -&gt; Scientific) -&gt; [(Integer, Int)] -&gt; [Scientific]
+</span><a href="#local-6989586621679110394"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110393"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-22"></span><span>    </span><span id="local-6989586621679110391"><span class="annot"><span class="annottext">shrink :: Scientific -&gt; [Scientific]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></span></span><span> </span><span id="local-6989586621679110389"><span class="annot"><span class="annottext">s :: Scientific
+</span><a href="#local-6989586621679110389"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Integer, Int) -&gt; Scientific) -&gt; [(Integer, Int)] -&gt; [Scientific]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Integer -&gt; Int -&gt; Scientific) -&gt; (Integer, Int) -&gt; Scientific
 forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
@@ -48,23 +48,23 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. Arbitrary a =&gt; a -&gt; [a]
 </span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scientific -&gt; Integer
 </span><span class="hs-identifier hs-var hs-var">Scientific.coefficient</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110330"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
+</span><a href="#local-6989586621679110389"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
 </span><span class="hs-identifier hs-var hs-var">Scientific.base10Exponent</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110330"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679110389"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Scientific.Scientific</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>    </span><span id="local-6989586621679110324"><span class="annot"><span class="annottext">coarbitrary :: Scientific -&gt; Gen b -&gt; Gen b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span id="local-6989586621679110322"><span class="annot"><span class="annottext">s :: Scientific
-</span><a href="#local-6989586621679110322"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer, Int) -&gt; Gen b -&gt; Gen b
+</span><span id="line-26"></span><span>    </span><span id="local-6989586621679110383"><span class="annot"><span class="annottext">coarbitrary :: Scientific -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span id="local-6989586621679110381"><span class="annot"><span class="annottext">s :: Scientific
+</span><a href="#local-6989586621679110381"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer, Int) -&gt; Gen b -&gt; Gen b
 forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
 </span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scientific -&gt; Integer
 </span><span class="hs-identifier hs-var hs-var">Scientific.coefficient</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110322"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
+</span><a href="#local-6989586621679110381"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
 </span><span class="hs-identifier hs-var hs-var">Scientific.base10Exponent</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110322"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679110381"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-27"></span><span>
 </span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Scientific.Scientific</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-29"></span><span>    </span><span id="local-6989586621679110319"><span class="annot"><span class="annottext">function :: (Scientific -&gt; b) -&gt; Scientific :-&gt; b
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679110378"><span class="annot"><span class="annottext">function :: (Scientific -&gt; b) -&gt; Scientific :-&gt; b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Scientific -&gt; (Integer, Int))
 -&gt; ((Integer, Int) -&gt; Scientific)
 -&gt; (Scientific -&gt; b)
@@ -73,12 +73,12 @@ forall b a c.
 Function b =&gt;
 (a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
 </span><span class="hs-identifier hs-var">functionMap</span></span><span>
-</span><span id="line-30"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679110316"><span class="annot"><span class="annottext">s :: Scientific
-</span><a href="#local-6989586621679110316"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scientific -&gt; Integer
+</span><span id="line-30"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679110375"><span class="annot"><span class="annottext">s :: Scientific
+</span><a href="#local-6989586621679110375"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scientific -&gt; Integer
 </span><span class="hs-identifier hs-var hs-var">Scientific.coefficient</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110316"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
+</span><a href="#local-6989586621679110375"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Int
 </span><span class="hs-identifier hs-var hs-var">Scientific.base10Exponent</span></span><span> </span><span class="annot"><span class="annottext">Scientific
-</span><a href="#local-6989586621679110316"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679110375"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-31"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Integer -&gt; Int -&gt; Scientific) -&gt; (Integer, Int) -&gt; Scientific
 forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
 </span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Scientific

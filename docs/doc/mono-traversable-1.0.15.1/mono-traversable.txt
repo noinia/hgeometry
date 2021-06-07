@@ -455,9 +455,9 @@ instance Data.MonoTraversable.GrowingAppend Data.Text.Internal.Text
 instance Data.MonoTraversable.GrowingAppend Data.Text.Internal.Lazy.Text
 instance Data.MonoTraversable.GrowingAppend (GHC.Base.NonEmpty a)
 instance GHC.Classes.Ord k => Data.MonoTraversable.GrowingAppend (Data.Map.Internal.Map k v)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Data.MonoTraversable.GrowingAppend (Data.HashMap.Base.HashMap k v)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Data.MonoTraversable.GrowingAppend (Data.HashMap.Internal.HashMap k v)
 instance GHC.Classes.Ord v => Data.MonoTraversable.GrowingAppend (Data.Set.Internal.Set v)
-instance (GHC.Classes.Eq v, Data.Hashable.Class.Hashable v) => Data.MonoTraversable.GrowingAppend (Data.HashSet.Base.HashSet v)
+instance (GHC.Classes.Eq v, Data.Hashable.Class.Hashable v) => Data.MonoTraversable.GrowingAppend (Data.HashSet.Internal.HashSet v)
 instance Data.MonoTraversable.GrowingAppend Data.IntSet.Internal.IntSet
 instance Data.MonoTraversable.GrowingAppend (Data.IntMap.Internal.IntMap v)
 instance Data.MonoTraversable.MonoComonad (Data.Sequence.Internal.ViewL a)
@@ -500,7 +500,7 @@ instance Foreign.Storable.Storable a => Data.MonoTraversable.MonoPointed (Data.V
 instance Data.MonoTraversable.MonoPointed (Data.Either.Either a b)
 instance Data.MonoTraversable.MonoPointed Data.IntSet.Internal.IntSet
 instance Data.MonoTraversable.MonoPointed (Data.Set.Internal.Set a)
-instance Data.Hashable.Class.Hashable a => Data.MonoTraversable.MonoPointed (Data.HashSet.Base.HashSet a)
+instance Data.Hashable.Class.Hashable a => Data.MonoTraversable.MonoPointed (Data.HashSet.Internal.HashSet a)
 instance GHC.Base.Applicative f => Data.MonoTraversable.MonoPointed (Control.Monad.Trans.Maybe.MaybeT f a)
 instance (GHC.Base.Monoid w, GHC.Base.Applicative m) => Data.MonoTraversable.MonoPointed (Control.Monad.Trans.RWS.Lazy.RWST r w s m a)
 instance (GHC.Base.Monoid w, GHC.Base.Applicative m) => Data.MonoTraversable.MonoPointed (Control.Monad.Trans.RWS.Strict.RWST r w s m a)
@@ -525,7 +525,7 @@ instance Data.MonoTraversable.MonoTraversable (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoTraversable (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoTraversable (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoTraversable (Data.Map.Internal.Map k v)
-instance Data.MonoTraversable.MonoTraversable (Data.HashMap.Base.HashMap k v)
+instance Data.MonoTraversable.MonoTraversable (Data.HashMap.Internal.HashMap k v)
 instance Data.MonoTraversable.MonoTraversable (Data.Vector.Vector a)
 instance Data.Vector.Unboxed.Base.Unbox a => Data.MonoTraversable.MonoTraversable (Data.Vector.Unboxed.Base.Vector a)
 instance Foreign.Storable.Storable a => Data.MonoTraversable.MonoTraversable (Data.Vector.Storable.Vector a)
@@ -565,10 +565,10 @@ instance Data.MonoTraversable.MonoFoldable (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoFoldable (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoFoldable (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoFoldable (Data.Map.Internal.Map k v)
-instance Data.MonoTraversable.MonoFoldable (Data.HashMap.Base.HashMap k v)
+instance Data.MonoTraversable.MonoFoldable (Data.HashMap.Internal.HashMap k v)
 instance Data.MonoTraversable.MonoFoldable (Data.Vector.Vector a)
 instance GHC.Classes.Ord e => Data.MonoTraversable.MonoFoldable (Data.Set.Internal.Set e)
-instance Data.MonoTraversable.MonoFoldable (Data.HashSet.Base.HashSet e)
+instance Data.MonoTraversable.MonoFoldable (Data.HashSet.Internal.HashSet e)
 instance Data.Vector.Unboxed.Base.Unbox a => Data.MonoTraversable.MonoFoldable (Data.Vector.Unboxed.Base.Vector a)
 instance Foreign.Storable.Storable a => Data.MonoTraversable.MonoFoldable (Data.Vector.Storable.Vector a)
 instance Data.MonoTraversable.MonoFoldable (Data.Either.Either a b)
@@ -613,7 +613,7 @@ instance Data.MonoTraversable.MonoFunctor (a, b)
 instance Data.MonoTraversable.MonoFunctor (Data.Functor.Const.Const m a)
 instance GHC.Base.Monad m => Data.MonoTraversable.MonoFunctor (Control.Applicative.WrappedMonad m a)
 instance Data.MonoTraversable.MonoFunctor (Data.Map.Internal.Map k v)
-instance Data.MonoTraversable.MonoFunctor (Data.HashMap.Base.HashMap k v)
+instance Data.MonoTraversable.MonoFunctor (Data.HashMap.Internal.HashMap k v)
 instance Data.MonoTraversable.MonoFunctor (Data.Vector.Vector a)
 instance Data.MonoTraversable.MonoFunctor (Data.Semigroup.Arg a b)
 instance Control.Arrow.Arrow a => Data.MonoTraversable.MonoFunctor (Control.Applicative.WrappedArrow a b c)
@@ -860,29 +860,29 @@ class SetContainer set => HasKeysSet set where {
 keysSet :: HasKeysSet set => set -> KeySet set
 instance GHC.Classes.Ord k => Data.Containers.HasKeysSet (Data.Map.Internal.Map k v)
 instance Data.Containers.HasKeysSet (Data.IntMap.Internal.IntMap v)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Containers.HasKeysSet (Data.HashMap.Base.HashMap k v)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Containers.HasKeysSet (Data.HashMap.Internal.HashMap k v)
 instance Data.Containers.MonoZip Data.ByteString.Internal.ByteString
 instance Data.Containers.MonoZip Data.ByteString.Lazy.Internal.ByteString
 instance Data.Containers.MonoZip Data.Text.Internal.Text
 instance Data.Containers.MonoZip Data.Text.Internal.Lazy.Text
 instance GHC.Classes.Ord element => Data.Containers.IsSet (Data.Set.Internal.Set element)
-instance (GHC.Classes.Eq element, Data.Hashable.Class.Hashable element) => Data.Containers.IsSet (Data.HashSet.Base.HashSet element)
+instance (GHC.Classes.Eq element, Data.Hashable.Class.Hashable element) => Data.Containers.IsSet (Data.HashSet.Internal.HashSet element)
 instance Data.Containers.IsSet Data.IntSet.Internal.IntSet
 instance GHC.Classes.Eq key => Data.Containers.SetContainer [(key, value)]
-instance Data.Containers.BiPolyMap Data.HashMap.Base.HashMap
+instance Data.Containers.BiPolyMap Data.HashMap.Internal.HashMap
 instance GHC.Classes.Ord key => Data.Containers.IsMap (Data.Map.Internal.Map key value)
-instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.IsMap (Data.HashMap.Base.HashMap key value)
+instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.IsMap (Data.HashMap.Internal.HashMap key value)
 instance Data.Containers.IsMap (Data.IntMap.Internal.IntMap value)
 instance GHC.Classes.Eq key => Data.Containers.IsMap [(key, value)]
 instance Data.Containers.BiPolyMap Data.Map.Internal.Map
 instance GHC.Classes.Ord key => Data.Containers.PolyMap (Data.Map.Internal.Map key)
-instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.PolyMap (Data.HashMap.Base.HashMap key)
+instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.PolyMap (Data.HashMap.Internal.HashMap key)
 instance Data.Containers.PolyMap Data.IntMap.Internal.IntMap
 instance GHC.Classes.Ord k => Data.Containers.SetContainer (Data.Map.Internal.Map k v)
-instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.SetContainer (Data.HashMap.Base.HashMap key value)
+instance (GHC.Classes.Eq key, Data.Hashable.Class.Hashable key) => Data.Containers.SetContainer (Data.HashMap.Internal.HashMap key value)
 instance Data.Containers.SetContainer (Data.IntMap.Internal.IntMap value)
 instance GHC.Classes.Ord element => Data.Containers.SetContainer (Data.Set.Internal.Set element)
-instance (GHC.Classes.Eq element, Data.Hashable.Class.Hashable element) => Data.Containers.SetContainer (Data.HashSet.Base.HashSet element)
+instance (GHC.Classes.Eq element, Data.Hashable.Class.Hashable element) => Data.Containers.SetContainer (Data.HashSet.Internal.HashSet element)
 instance Data.Containers.SetContainer Data.IntSet.Internal.IntSet
 
 

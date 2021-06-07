@@ -180,13 +180,13 @@ instance Test.QuickCheck.Arbitrary.CoArbitrary Data.UUID.Types.Internal.UUID
 instance Test.QuickCheck.Function.Function Data.UUID.Types.Internal.UUID
 
 module Test.QuickCheck.Instances.UnorderedContainers
-instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a, Test.QuickCheck.Arbitrary.Arbitrary a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.HashSet.Base.HashSet a)
-instance Test.QuickCheck.Arbitrary.CoArbitrary a => Test.QuickCheck.Arbitrary.CoArbitrary (Data.HashSet.Base.HashSet a)
-instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a, Test.QuickCheck.Function.Function a) => Test.QuickCheck.Function.Function (Data.HashSet.Base.HashSet a)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Arbitrary.Arbitrary k) => Test.QuickCheck.Arbitrary.Arbitrary1 (Data.HashMap.Base.HashMap k)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Arbitrary.Arbitrary k, Test.QuickCheck.Arbitrary.Arbitrary v) => Test.QuickCheck.Arbitrary.Arbitrary (Data.HashMap.Base.HashMap k v)
-instance (Test.QuickCheck.Arbitrary.CoArbitrary k, Test.QuickCheck.Arbitrary.CoArbitrary v) => Test.QuickCheck.Arbitrary.CoArbitrary (Data.HashMap.Base.HashMap k v)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Function.Function k, Test.QuickCheck.Function.Function v) => Test.QuickCheck.Function.Function (Data.HashMap.Base.HashMap k v)
+instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a, Test.QuickCheck.Arbitrary.Arbitrary a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.HashSet.Internal.HashSet a)
+instance Test.QuickCheck.Arbitrary.CoArbitrary a => Test.QuickCheck.Arbitrary.CoArbitrary (Data.HashSet.Internal.HashSet a)
+instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a, Test.QuickCheck.Function.Function a) => Test.QuickCheck.Function.Function (Data.HashSet.Internal.HashSet a)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Arbitrary.Arbitrary k) => Test.QuickCheck.Arbitrary.Arbitrary1 (Data.HashMap.Internal.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Arbitrary.Arbitrary k, Test.QuickCheck.Arbitrary.Arbitrary v) => Test.QuickCheck.Arbitrary.Arbitrary (Data.HashMap.Internal.HashMap k v)
+instance (Test.QuickCheck.Arbitrary.CoArbitrary k, Test.QuickCheck.Arbitrary.CoArbitrary v) => Test.QuickCheck.Arbitrary.CoArbitrary (Data.HashMap.Internal.HashMap k v)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Test.QuickCheck.Function.Function k, Test.QuickCheck.Function.Function v) => Test.QuickCheck.Function.Function (Data.HashMap.Internal.HashMap k v)
 
 module Test.QuickCheck.Instances.Vector
 instance Test.QuickCheck.Arbitrary.Arbitrary1 Data.Vector.Vector

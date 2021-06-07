@@ -139,6 +139,21 @@ mkGraph :: (Unbox a, Num a) => Int -> a -> [(Int, Int, a)] -> ST s (MVector s (a
 floydWarshall :: (Unbox a, Fractional a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
 
 
+module Algorithms.Graph.BFS
+
+-- | Runs a BFS from the first vertex in the graph. The graph is given in
+--   adjacency list representation.
+--   
+--   running time: &lt;math&gt;
+bfs :: Foldable f => Int -> Vector (v, f Int) -> Tree v
+
+-- | Runs a BFS from the first vertex in the graph. The graph is given in
+--   adjacency list representation.
+--   
+--   running time: &lt;math&gt;
+bfs' :: Foldable f => Int -> Vector (f Int) -> Tree Int
+
+
 -- | Implementation of Knuth-Morris-Pratt String-searching algorithm. The
 --   exposition is based on that of Goodrich and Tamassia in "Data
 --   Structures and Algorithms in Java 2nd Edition".
@@ -957,16 +972,19 @@ infix 5 ><
 -- | &lt;math&gt; Prove a sequence has at least <tt>n</tt> elements.
 --   
 --   <pre>
---   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1,2,3])
+--   &gt;&gt;&gt; eval @3 (fromList [1,2,3])
 --   Just (LSeq (fromList [1,2,3]))
 --   
---   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1,2])
+--   &gt;&gt;&gt; eval @3 (fromList [1,2])
 --   Nothing
 --   
---   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1..10])
+--   &gt;&gt;&gt; eval @3 (fromList [1..10])
 --   Just (LSeq (fromList [1,2,3,4,5,6,7,8,9,10]))
 --   </pre>
-eval :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
+eval :: forall n m a. KnownNat n => LSeq m a -> Maybe (LSeq n a)
+
+-- | Implementatio nof eval' that takes an explicit proxy.
+eval' :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
 
 -- | &lt;math&gt; Get the element with index i, counting from the left and
 --   starting at 0.
@@ -1066,7 +1084,7 @@ zipWith :: (a -> b -> c) -> LSeq n a -> LSeq n b -> LSeq n c
 --   checked.
 --   
 --   This function should be a noop
-promise :: forall m n a. LSeq m a -> LSeq n a
+promise :: forall n m a. LSeq m a -> LSeq n a
 
 -- | Forces the first n elements of the LSeq
 forceLSeq :: KnownNat n => proxy n -> LSeq m a -> LSeq n a
@@ -1561,8 +1579,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aL5S a_aLoH. Lens (Permutation a_aL5S) (Permutation a_aLoH) (Vector (Orbit a_aL5S)) (Vector (Orbit a_aLoH))
-indexes :: forall a_aL5S. Lens' (Permutation a_aL5S) (Vector (Int, Int))
+orbits :: forall a_aLyQ a_aLRF. Lens (Permutation a_aLyQ) (Permutation a_aLRF) (Vector (Orbit a_aLyQ)) (Vector (Orbit a_aLRF))
+indexes :: forall a_aLyQ. Lens' (Permutation a_aLyQ) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -4198,7 +4216,7 @@ clampTo :: Ord r => Range r -> r -> r
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint
 --   is indeed smaller than the right endpoint. Note that we treat empty
 --   open-ranges as invalid as well.
-isValid :: Ord a => Range a -> Bool
+isValidRange :: Ord a => Range a -> Bool
 
 -- | Wether or not the first range completely covers the second one
 covers :: forall a. Ord a => Range a -> Range a -> Bool

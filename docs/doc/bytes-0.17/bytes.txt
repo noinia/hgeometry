@@ -447,7 +447,7 @@ instance (Data.Bytes.Serial.Serial a, Data.Bytes.Serial.Serial b, Data.Bytes.Ser
 instance (Data.Bytes.Serial.Serial a, Data.Bytes.Serial.Serial b, Data.Bytes.Serial.Serial c, Data.Bytes.Serial.Serial d) => Data.Bytes.Serial.Serial1 ((,,,,) a b c d)
 instance Data.Bytes.Serial.Serial1 Data.IntMap.Internal.IntMap
 instance (GHC.Classes.Ord k, Data.Bytes.Serial.Serial k) => Data.Bytes.Serial.Serial1 (Data.Map.Internal.Map k)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Data.Bytes.Serial.Serial k) => Data.Bytes.Serial.Serial1 (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k, Data.Bytes.Serial.Serial k) => Data.Bytes.Serial.Serial1 (Data.HashMap.Internal.HashMap k)
 instance Data.Bytes.Serial.Serial2 Data.Either.Either
 instance Data.Bytes.Serial.Serial2 (,)
 instance Data.Bytes.Serial.Serial a => Data.Bytes.Serial.Serial2 ((,,) a)
@@ -457,7 +457,7 @@ instance Data.Bytes.Serial.Serial a => Data.Bytes.Serial.Serial (Data.Sequence.I
 instance Data.Bytes.Serial.Serial a => Data.Bytes.Serial.Serial (GHC.Base.NonEmpty a)
 instance Data.Bytes.Serial.Serial v => Data.Bytes.Serial.Serial (Data.IntMap.Internal.IntMap v)
 instance (Data.Bytes.Serial.Serial k, Data.Bytes.Serial.Serial v, GHC.Classes.Ord k) => Data.Bytes.Serial.Serial (Data.Map.Internal.Map k v)
-instance (Data.Bytes.Serial.Serial k, Data.Bytes.Serial.Serial v, Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Bytes.Serial.Serial (Data.HashMap.Base.HashMap k v)
+instance (Data.Bytes.Serial.Serial k, Data.Bytes.Serial.Serial v, Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Bytes.Serial.Serial (Data.HashMap.Internal.HashMap k v)
 instance Data.Bytes.Serial.Serial1 []
 instance Data.Bytes.Serial.Serial1 GHC.Maybe.Maybe
 instance Data.Bytes.Serial.Serial1 Data.Sequence.Internal.Seq
@@ -511,7 +511,7 @@ instance Data.Bytes.Serial.Serial Data.Scientific.Scientific
 instance Data.Bytes.Serial.Serial Data.Void.Void
 instance Data.Bytes.Serial.Serial Data.IntSet.Internal.IntSet
 instance (Data.Bytes.Serial.Serial a, GHC.Classes.Ord a) => Data.Bytes.Serial.Serial (Data.Set.Internal.Set a)
-instance (Data.Bytes.Serial.Serial v, Data.Hashable.Class.Hashable v, GHC.Classes.Eq v) => Data.Bytes.Serial.Serial (Data.HashSet.Base.HashSet v)
+instance (Data.Bytes.Serial.Serial v, Data.Hashable.Class.Hashable v, GHC.Classes.Eq v) => Data.Bytes.Serial.Serial (Data.HashSet.Internal.HashSet v)
 instance (Data.Bits.Bits n, GHC.Real.Integral n, Data.Bits.Bits (Data.Bytes.Signed.Unsigned n), GHC.Real.Integral (Data.Bytes.Signed.Unsigned n)) => Data.Bytes.Serial.Serial (Data.Bytes.VarInt.VarInt n)
 instance Data.Bytes.Serial.Serial GHC.Integer.Type.Integer
 instance Data.Bytes.Serial.Serial GHC.Natural.Natural

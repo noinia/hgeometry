@@ -11339,9 +11339,9 @@ instance Control.Lens.Indexed.TraversableWithIndex GHC.Types.Int Data.IntMap.Int
 instance Control.Lens.Indexed.FunctorWithIndex k (Data.Map.Internal.Map k)
 instance Control.Lens.Indexed.FoldableWithIndex k (Data.Map.Internal.Map k)
 instance Control.Lens.Indexed.TraversableWithIndex k (Data.Map.Internal.Map k)
-instance Control.Lens.Indexed.FunctorWithIndex k (Data.HashMap.Base.HashMap k)
-instance Control.Lens.Indexed.FoldableWithIndex k (Data.HashMap.Base.HashMap k)
-instance Control.Lens.Indexed.TraversableWithIndex k (Data.HashMap.Base.HashMap k)
+instance Control.Lens.Indexed.FunctorWithIndex k (Data.HashMap.Internal.HashMap k)
+instance Control.Lens.Indexed.FoldableWithIndex k (Data.HashMap.Internal.HashMap k)
+instance Control.Lens.Indexed.TraversableWithIndex k (Data.HashMap.Internal.HashMap k)
 instance Control.Lens.Indexed.FunctorWithIndex r ((->) r)
 instance Control.Lens.Indexed.FunctorWithIndex i (Control.Lens.Internal.Level.Level i)
 instance Control.Lens.Indexed.FoldableWithIndex i (Control.Lens.Internal.Level.Level i)
@@ -12117,10 +12117,10 @@ instance (Control.Lens.Empty.AsEmpty a, Control.Lens.Empty.AsEmpty b, Control.Le
 instance Control.Lens.Empty.AsEmpty [a]
 instance Control.Lens.Empty.AsEmpty (Control.Applicative.ZipList a)
 instance Control.Lens.Empty.AsEmpty (Data.Map.Internal.Map k a)
-instance Control.Lens.Empty.AsEmpty (Data.HashMap.Base.HashMap k a)
+instance Control.Lens.Empty.AsEmpty (Data.HashMap.Internal.HashMap k a)
 instance Control.Lens.Empty.AsEmpty (Data.IntMap.Internal.IntMap a)
 instance Control.Lens.Empty.AsEmpty (Data.Set.Internal.Set a)
-instance Control.Lens.Empty.AsEmpty (Data.HashSet.Base.HashSet a)
+instance Control.Lens.Empty.AsEmpty (Data.HashSet.Internal.HashSet a)
 instance Control.Lens.Empty.AsEmpty Data.IntSet.Internal.IntSet
 instance Control.Lens.Empty.AsEmpty (Data.Vector.Vector a)
 instance Data.Vector.Unboxed.Base.Unbox a => Control.Lens.Empty.AsEmpty (Data.Vector.Unboxed.Base.Vector a)
@@ -12884,8 +12884,8 @@ instance (t GHC.Types.~ Control.Comonad.Trans.Cofree.CofreeT f' w' a') => Contro
 instance (t GHC.Types.~ Control.Comonad.Trans.Coiter.CoiterT w' a') => Control.Lens.Wrapped.Rewrapped (Control.Comonad.Trans.Coiter.CoiterT w a) t
 instance (t GHC.Types.~ Control.Monad.Trans.Free.FreeT f' m' a') => Control.Lens.Wrapped.Rewrapped (Control.Monad.Trans.Free.FreeT f m a) t
 instance (t GHC.Types.~ Control.Monad.Trans.Iter.IterT m' a') => Control.Lens.Wrapped.Rewrapped (Control.Monad.Trans.Iter.IterT m a) t
-instance (t GHC.Types.~ Data.HashMap.Base.HashMap k' a', Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Control.Lens.Wrapped.Rewrapped (Data.HashMap.Base.HashMap k a) t
-instance (t GHC.Types.~ Data.HashSet.Base.HashSet a', Data.Hashable.Class.Hashable a, GHC.Classes.Eq a) => Control.Lens.Wrapped.Rewrapped (Data.HashSet.Base.HashSet a) t
+instance (t GHC.Types.~ Data.HashMap.Internal.HashMap k' a', Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Control.Lens.Wrapped.Rewrapped (Data.HashMap.Internal.HashMap k a) t
+instance (t GHC.Types.~ Data.HashSet.Internal.HashSet a', Data.Hashable.Class.Hashable a, GHC.Classes.Eq a) => Control.Lens.Wrapped.Rewrapped (Data.HashSet.Internal.HashSet a) t
 instance (t GHC.Types.~ Data.IntMap.Internal.IntMap a') => Control.Lens.Wrapped.Rewrapped (Data.IntMap.Internal.IntMap a) t
 instance (t GHC.Types.~ Data.IntSet.Internal.IntSet) => Control.Lens.Wrapped.Rewrapped Data.IntSet.Internal.IntSet t
 instance (t GHC.Types.~ Data.Map.Internal.Map k' a', GHC.Classes.Ord k) => Control.Lens.Wrapped.Rewrapped (Data.Map.Internal.Map k a) t
@@ -13035,8 +13035,8 @@ instance Control.Lens.Wrapped.Wrapped (Control.Comonad.Trans.Cofree.CofreeT f w 
 instance Control.Lens.Wrapped.Wrapped (Control.Comonad.Trans.Coiter.CoiterT w a)
 instance Control.Lens.Wrapped.Wrapped (Control.Monad.Trans.Free.FreeT f m a)
 instance Control.Lens.Wrapped.Wrapped (Control.Monad.Trans.Iter.IterT m a)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Control.Lens.Wrapped.Wrapped (Data.HashMap.Base.HashMap k a)
-instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a) => Control.Lens.Wrapped.Wrapped (Data.HashSet.Base.HashSet a)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Control.Lens.Wrapped.Wrapped (Data.HashMap.Internal.HashMap k a)
+instance (Data.Hashable.Class.Hashable a, GHC.Classes.Eq a) => Control.Lens.Wrapped.Wrapped (Data.HashSet.Internal.HashSet a)
 instance Control.Lens.Wrapped.Wrapped (Data.IntMap.Internal.IntMap a)
 instance Control.Lens.Wrapped.Wrapped Data.IntSet.Internal.IntSet
 instance GHC.Classes.Ord k => Control.Lens.Wrapped.Wrapped (Data.Map.Internal.Map k a)
@@ -14516,7 +14516,7 @@ instance (a GHC.Types.~ a2, a GHC.Types.~ a3, a GHC.Types.~ a4, a GHC.Types.~ a5
 instance Control.Lens.Each.Each (Data.Complex.Complex a) (Data.Complex.Complex b) a b
 instance (c GHC.Types.~ d) => Control.Lens.Each.Each (Data.Map.Internal.Map c a) (Data.Map.Internal.Map d b) a b
 instance Control.Lens.Each.Each (Data.IntMap.Internal.IntMap a) (Data.IntMap.Internal.IntMap b) a b
-instance (c GHC.Types.~ d) => Control.Lens.Each.Each (Data.HashMap.Base.HashMap c a) (Data.HashMap.Base.HashMap d b) a b
+instance (c GHC.Types.~ d) => Control.Lens.Each.Each (Data.HashMap.Internal.HashMap c a) (Data.HashMap.Internal.HashMap d b) a b
 instance Control.Lens.Each.Each [a] [b] a b
 instance Control.Lens.Each.Each (GHC.Base.NonEmpty a) (GHC.Base.NonEmpty b) a b
 instance Control.Lens.Each.Each (Data.Functor.Identity.Identity a) (Data.Functor.Identity.Identity b) a b
@@ -14732,10 +14732,10 @@ instance Control.Lens.At.Ixed (Data.Tree.Tree a)
 instance Control.Lens.At.Ixed (Data.Sequence.Internal.Seq a)
 instance Control.Lens.At.Ixed (Data.IntMap.Internal.IntMap a)
 instance GHC.Classes.Ord k => Control.Lens.At.Ixed (Data.Map.Internal.Map k a)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.Ixed (Data.HashMap.Base.HashMap k a)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.Ixed (Data.HashMap.Internal.HashMap k a)
 instance GHC.Classes.Ord k => Control.Lens.At.Ixed (Data.Set.Internal.Set k)
 instance Control.Lens.At.Ixed Data.IntSet.Internal.IntSet
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.Ixed (Data.HashSet.Base.HashSet k)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.Ixed (Data.HashSet.Internal.HashSet k)
 instance GHC.Arr.Ix i => Control.Lens.At.Ixed (GHC.Arr.Array i e)
 instance (Data.Array.Base.IArray Data.Array.Base.UArray e, GHC.Arr.Ix i) => Control.Lens.At.Ixed (Data.Array.Base.UArray i e)
 instance Control.Lens.At.Ixed (Data.Vector.Vector a)
@@ -14749,10 +14749,10 @@ instance Control.Lens.At.Ixed Data.ByteString.Lazy.Internal.ByteString
 instance Control.Lens.At.At (GHC.Maybe.Maybe a)
 instance Control.Lens.At.At (Data.IntMap.Internal.IntMap a)
 instance GHC.Classes.Ord k => Control.Lens.At.At (Data.Map.Internal.Map k a)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.At (Data.HashMap.Base.HashMap k a)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.At (Data.HashMap.Internal.HashMap k a)
 instance Control.Lens.At.At Data.IntSet.Internal.IntSet
 instance GHC.Classes.Ord k => Control.Lens.At.At (Data.Set.Internal.Set k)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.At (Data.HashSet.Base.HashSet k)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Control.Lens.At.At (Data.HashSet.Internal.HashSet k)
 instance (a GHC.Types.~ a2) => Control.Lens.At.Ixed (a, a2)
 instance (a GHC.Types.~ a2, a GHC.Types.~ a3) => Control.Lens.At.Ixed (a, a2, a3)
 instance (a GHC.Types.~ a2, a GHC.Types.~ a3, a GHC.Types.~ a4) => Control.Lens.At.Ixed (a, a2, a3, a4)
@@ -14763,7 +14763,7 @@ instance (a GHC.Types.~ a2, a GHC.Types.~ a3, a GHC.Types.~ a4, a GHC.Types.~ a5
 instance (a GHC.Types.~ a2, a GHC.Types.~ a3, a GHC.Types.~ a4, a GHC.Types.~ a5, a GHC.Types.~ a6, a GHC.Types.~ a7, a GHC.Types.~ a8, a GHC.Types.~ a9) => Control.Lens.At.Ixed (a, a2, a3, a4, a5, a6, a7, a8, a9)
 instance Control.Lens.At.Contains Data.IntSet.Internal.IntSet
 instance GHC.Classes.Ord a => Control.Lens.At.Contains (Data.Set.Internal.Set a)
-instance (GHC.Classes.Eq a, Data.Hashable.Class.Hashable a) => Control.Lens.At.Contains (Data.HashSet.Base.HashSet a)
+instance (GHC.Classes.Eq a, Data.Hashable.Class.Hashable a) => Control.Lens.At.Contains (Data.HashSet.Internal.HashSet a)
 
 
 -- | Lenses, Prisms, and Traversals for working with Template Haskell.

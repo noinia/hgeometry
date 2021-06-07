@@ -279,7 +279,7 @@ instance Linear.Vector.Additive GHC.Maybe.Maybe
 instance Linear.Vector.Additive []
 instance Linear.Vector.Additive Data.IntMap.Internal.IntMap
 instance GHC.Classes.Ord k => Linear.Vector.Additive (Data.Map.Internal.Map k)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Vector.Additive (Data.HashMap.Base.HashMap k)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Vector.Additive (Data.HashMap.Internal.HashMap k)
 instance Linear.Vector.Additive ((->) b)
 instance Linear.Vector.Additive Data.Complex.Complex
 instance Linear.Vector.Additive Data.Functor.Identity.Identity
@@ -344,7 +344,7 @@ instance Linear.Metric.Metric GHC.Maybe.Maybe
 instance Linear.Metric.Metric Control.Applicative.ZipList
 instance Linear.Metric.Metric Data.IntMap.Internal.IntMap
 instance GHC.Classes.Ord k => Linear.Metric.Metric (Data.Map.Internal.Map k)
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Linear.Metric.Metric (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Linear.Metric.Metric (Data.HashMap.Internal.HashMap k)
 instance Linear.Metric.Metric Data.Vector.Vector
 
 
@@ -1555,7 +1555,7 @@ diagonal :: (Trace m, Monad m) => m (m a) -> m a
 frobenius :: (Num a, Foldable f, Additive f, Additive g, Distributive g, Trace g) => f (g a) -> a
 instance Linear.Trace.Trace Data.IntMap.Internal.IntMap
 instance GHC.Classes.Ord k => Linear.Trace.Trace (Data.Map.Internal.Map k)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Trace.Trace (Data.HashMap.Base.HashMap k)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Trace.Trace (Data.HashMap.Internal.HashMap k)
 instance forall k (n :: k). Linear.V.Dim n => Linear.Trace.Trace (Linear.V.V n)
 instance Linear.Trace.Trace Linear.V0.V0
 instance Linear.Trace.Trace Linear.V1.V1
@@ -2150,7 +2150,7 @@ instance Linear.Affine.Affine Linear.Plucker.Plucker
 instance Linear.Affine.Affine Linear.Quaternion.Quaternion
 instance Linear.Affine.Affine ((->) b)
 instance GHC.Classes.Ord k => Linear.Affine.Affine (Data.Map.Internal.Map k)
-instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Affine.Affine (Data.HashMap.Base.HashMap k)
+instance (GHC.Classes.Eq k, Data.Hashable.Class.Hashable k) => Linear.Affine.Affine (Data.HashMap.Internal.HashMap k)
 instance Linear.V.Dim n => Linear.Affine.Affine (Linear.V.V n)
 
 

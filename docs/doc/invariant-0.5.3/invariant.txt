@@ -274,7 +274,7 @@ instance Data.Functor.Invariant.Invariant m => Data.Functor.Invariant.Invariant 
 instance Data.Functor.Invariant.Invariant m => Data.Functor.Invariant.Invariant (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance Data.Functor.Invariant.Invariant (Data.Functor.Constant.Constant a)
 instance Data.Functor.Invariant.Invariant f => Data.Functor.Invariant.Invariant (Data.Functor.Reverse.Reverse f)
-instance Data.Functor.Invariant.Invariant (Data.HashMap.Base.HashMap k)
+instance Data.Functor.Invariant.Invariant (Data.HashMap.Internal.HashMap k)
 instance Data.Functor.Invariant.Invariant GHC.Generics.V1
 instance Data.Functor.Invariant.Invariant GHC.Generics.U1
 instance (Data.Functor.Invariant.Invariant l, Data.Functor.Invariant.Invariant r) => Data.Functor.Invariant.Invariant (l GHC.Generics.:+: r)

@@ -257,7 +257,7 @@ instance GHC.Classes.Ord k => Data.Functor.Bind.Class.Bind (Data.Map.Internal.Ma
 instance Data.Functor.Bind.Class.Bind Data.IntMap.Internal.IntMap
 instance Data.Functor.Bind.Class.Bind Data.Sequence.Internal.Seq
 instance Data.Functor.Bind.Class.Bind Data.Tree.Tree
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Bind.Class.Bind (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Bind.Class.Bind (Data.HashMap.Internal.HashMap k)
 instance Data.Functor.Bind.Class.Bind Data.Ord.Down
 instance Data.Functor.Bind.Class.Bind Data.Semigroup.Internal.Sum
 instance Data.Functor.Bind.Class.Bind Data.Semigroup.Internal.Product
@@ -307,7 +307,7 @@ instance GHC.Classes.Ord k => Data.Functor.Bind.Class.Apply (Data.Map.Internal.M
 instance Data.Functor.Bind.Class.Apply Data.IntMap.Internal.IntMap
 instance Data.Functor.Bind.Class.Apply Data.Sequence.Internal.Seq
 instance Data.Functor.Bind.Class.Apply Data.Tree.Tree
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Bind.Class.Apply (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Bind.Class.Apply (Data.HashMap.Internal.HashMap k)
 instance (GHC.Base.Functor m, GHC.Base.Monad m) => Data.Functor.Bind.Class.Apply (Control.Monad.Trans.Maybe.MaybeT m)
 instance (GHC.Base.Functor m, GHC.Base.Monad m) => Data.Functor.Bind.Class.Apply (Control.Monad.Trans.Error.ErrorT e m)
 instance (GHC.Base.Functor m, GHC.Base.Monad m) => Data.Functor.Bind.Class.Apply (Control.Monad.Trans.Except.ExceptT e m)
@@ -820,7 +820,7 @@ instance Control.Arrow.ArrowPlus a => Data.Functor.Alt.Alt (Control.Applicative.
 instance GHC.Classes.Ord k => Data.Functor.Alt.Alt (Data.Map.Internal.Map k)
 instance Data.Functor.Alt.Alt Data.IntMap.Internal.IntMap
 instance Data.Functor.Alt.Alt Data.Sequence.Internal.Seq
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Alt.Alt (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Alt.Alt (Data.HashMap.Internal.HashMap k)
 instance Data.Functor.Alt.Alt GHC.Base.NonEmpty
 instance GHC.Base.Alternative f => Data.Functor.Alt.Alt (Data.Functor.Bind.Class.WrappedApplicative f)
 instance Data.Functor.Alt.Alt f => Data.Functor.Alt.Alt (Control.Monad.Trans.Identity.IdentityT f)
@@ -1007,7 +1007,7 @@ instance Control.Arrow.ArrowPlus a => Data.Functor.Plus.Plus (Control.Applicativ
 instance GHC.Classes.Ord k => Data.Functor.Plus.Plus (Data.Map.Internal.Map k)
 instance Data.Functor.Plus.Plus Data.IntMap.Internal.IntMap
 instance Data.Functor.Plus.Plus Data.Sequence.Internal.Seq
-instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Plus.Plus (Data.HashMap.Base.HashMap k)
+instance (Data.Hashable.Class.Hashable k, GHC.Classes.Eq k) => Data.Functor.Plus.Plus (Data.HashMap.Internal.HashMap k)
 instance GHC.Base.Alternative f => Data.Functor.Plus.Plus (Data.Functor.Bind.Class.WrappedApplicative f)
 instance Data.Functor.Plus.Plus f => Data.Functor.Plus.Plus (Control.Monad.Trans.Identity.IdentityT f)
 instance Data.Functor.Plus.Plus f => Data.Functor.Plus.Plus (Control.Monad.Trans.Reader.ReaderT e f)

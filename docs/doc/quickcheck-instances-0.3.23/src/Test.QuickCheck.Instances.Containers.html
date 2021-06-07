@@ -17,43 +17,43 @@
 </span><span id="line-17"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
 </span><span id="line-18"></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree.Tree</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-20"></span><span>    </span><span id="local-6989586621679110068"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Tree a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></span></span><span> </span><span id="local-6989586621679110066"><span class="annot"><span class="annottext">arb :: Gen a
-</span><a href="#local-6989586621679110066"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Tree a)
-</span><a href="#local-6989586621679110065"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span id="local-6989586621679110127"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Tree a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></span></span><span> </span><span id="local-6989586621679110125"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110125"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Tree a)
+</span><a href="#local-6989586621679110124"><span class="hs-identifier hs-var">go</span></a></span><span>
 </span><span id="line-21"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-22"></span><span>        </span><span id="local-6989586621679110065"><span class="annot"><span class="annottext">go :: Gen (Tree a)
-</span><a href="#local-6989586621679110065"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen (Tree a)) -&gt; Gen (Tree a)
+</span><span id="line-22"></span><span>        </span><span id="local-6989586621679110124"><span class="annot"><span class="annottext">go :: Gen (Tree a)
+</span><a href="#local-6989586621679110124"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen (Tree a)) -&gt; Gen (Tree a)
 forall a. (Int -&gt; Gen a) -&gt; Gen a
 </span><span class="hs-identifier hs-var">sized</span></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Gen (Tree a)) -&gt; Gen (Tree a))
 -&gt; (Int -&gt; Gen (Tree a)) -&gt; Gen (Tree a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679110063"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679110063"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-comment">-- Sized is the size of the trees.</span><span>
-</span><span id="line-23"></span><span>            </span><span id="local-6989586621679110062"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110062"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen a
-</span><a href="#local-6989586621679110066"><span class="hs-identifier hs-var">arb</span></a></span><span>
-</span><span id="line-24"></span><span>            </span><span id="local-6989586621679110061"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679110061"><span class="hs-identifier hs-var">pars</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen [Int]
-</span><a href="#local-6989586621679110060"><span class="hs-identifier hs-var">arbPartition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110063"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679110122"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679110122"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-comment">-- Sized is the size of the trees.</span><span>
+</span><span id="line-23"></span><span>            </span><span id="local-6989586621679110121"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110121"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110125"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-24"></span><span>            </span><span id="local-6989586621679110120"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679110120"><span class="hs-identifier hs-var">pars</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen [Int]
+</span><a href="#local-6989586621679110119"><span class="hs-identifier hs-var">arbPartition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110122"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- can go negative!</span><span>
-</span><span id="line-25"></span><span>            </span><span id="local-6989586621679110059"><span class="annot"><span class="annottext">[Tree a]
-</span><a href="#local-6989586621679110059"><span class="hs-identifier hs-var">forest</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; Gen (Tree a)) -&gt; Gen [Tree a]
+</span><span id="line-25"></span><span>            </span><span id="local-6989586621679110118"><span class="annot"><span class="annottext">[Tree a]
+</span><a href="#local-6989586621679110118"><span class="hs-identifier hs-var">forest</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; Gen (Tree a)) -&gt; Gen [Tree a]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 t a -&gt; (a -&gt; f b) -&gt; f (t b)
 </span><span class="hs-identifier hs-var">for</span></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679110061"><span class="hs-identifier hs-var">pars</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Gen (Tree a)) -&gt; Gen [Tree a])
+</span><a href="#local-6989586621679110120"><span class="hs-identifier hs-var">pars</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Gen (Tree a)) -&gt; Gen [Tree a])
 -&gt; (Int -&gt; Gen (Tree a)) -&gt; Gen [Tree a]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679110058"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679110058"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen (Tree a) -&gt; Gen (Tree a)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679110117"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679110117"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen (Tree a) -&gt; Gen (Tree a)
 forall a. Int -&gt; Gen a -&gt; Gen a
 </span><span class="hs-identifier hs-var">resize</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110058"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (Tree a)
-</span><a href="#local-6989586621679110065"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><a href="#local-6989586621679110117"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (Tree a)
+</span><a href="#local-6989586621679110124"><span class="hs-identifier hs-var">go</span></a></span><span>
 </span><span id="line-26"></span><span>            </span><span class="annot"><span class="annottext">Tree a -&gt; Gen (Tree a)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Tree a -&gt; Gen (Tree a)) -&gt; Tree a -&gt; Gen (Tree a)
@@ -61,16 +61,16 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [Tree a] -&gt; Tree a
 forall a. a -&gt; Forest a -&gt; Tree a
 </span><span class="hs-identifier hs-var">Tree.Node</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110062"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a]
-</span><a href="#local-6989586621679110059"><span class="hs-identifier hs-var">forest</span></a></span><span>
+</span><a href="#local-6989586621679110121"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a]
+</span><a href="#local-6989586621679110118"><span class="hs-identifier hs-var">forest</span></a></span><span>
 </span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span>        </span><span class="annot"><a href="#local-6989586621679110060"><span class="hs-identifier hs-type">arbPartition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>
-</span><span id="line-29"></span><span>        </span><span id="local-6989586621679110060"><span class="annot"><span class="annottext">arbPartition :: Int -&gt; Gen [Int]
-</span><a href="#local-6989586621679110060"><span class="hs-identifier hs-var hs-var">arbPartition</span></a></span></span><span> </span><span id="local-6989586621679110055"><span class="annot"><span class="annottext">k :: Int
-</span><a href="#local-6989586621679110055"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Ordering
+</span><span id="line-28"></span><span>        </span><span class="annot"><a href="#local-6989586621679110119"><span class="hs-identifier hs-type">arbPartition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>
+</span><span id="line-29"></span><span>        </span><span id="local-6989586621679110119"><span class="annot"><span class="annottext">arbPartition :: Int -&gt; Gen [Int]
+</span><a href="#local-6989586621679110119"><span class="hs-identifier hs-var hs-var">arbPartition</span></a></span></span><span> </span><span id="local-6989586621679110114"><span class="annot"><span class="annottext">k :: Int
+</span><a href="#local-6989586621679110114"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110055"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679110114"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-30"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Gen [Int]
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
@@ -78,85 +78,85 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-32"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-33"></span><span>                </span><span id="local-6989586621679110053"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110053"><span class="hs-identifier hs-var">first</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Gen Int
+</span><span id="line-33"></span><span>                </span><span id="local-6989586621679110112"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110112"><span class="hs-identifier hs-var">first</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Gen Int
 forall a. [a] -&gt; Gen a
 </span><span class="hs-identifier hs-var">elements</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110055"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-34"></span><span>                </span><span id="local-6989586621679110051"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679110051"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen [Int]
-</span><a href="#local-6989586621679110060"><span class="hs-identifier hs-var">arbPartition</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen [Int]) -&gt; Int -&gt; Gen [Int]
+</span><a href="#local-6989586621679110114"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-34"></span><span>                </span><span id="local-6989586621679110110"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679110110"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen [Int]
+</span><a href="#local-6989586621679110119"><span class="hs-identifier hs-var">arbPartition</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen [Int]) -&gt; Int -&gt; Gen [Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110055"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679110114"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110053"><span class="hs-identifier hs-var">first</span></a></span><span>
+</span><a href="#local-6989586621679110112"><span class="hs-identifier hs-var">first</span></a></span><span>
 </span><span id="line-35"></span><span>                </span><span class="annot"><span class="annottext">[Int] -&gt; Gen [Int]
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Gen [Int]) -&gt; [Int] -&gt; Gen [Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679110053"><span class="hs-identifier hs-var">first</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679110112"><span class="hs-identifier hs-var">first</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679110051"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><a href="#local-6989586621679110110"><span class="hs-identifier hs-var">rest</span></a></span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span>    </span><span id="local-6989586621679110050"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Tree a -&gt; [Tree a]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></span></span><span> </span><span id="local-6989586621679110048"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
-</span><a href="#local-6989586621679110048"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; [Tree a]
-</span><a href="#local-6989586621679110047"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679110109"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Tree a -&gt; [Tree a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></span></span><span> </span><span id="local-6989586621679110107"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110107"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; [Tree a]
+</span><a href="#local-6989586621679110106"><span class="hs-identifier hs-var">go</span></a></span><span>
 </span><span id="line-38"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>        </span><span id="local-6989586621679110047"><span class="annot"><span class="annottext">go :: Tree a -&gt; [Tree a]
-</span><a href="#local-6989586621679110047"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Node</span></span><span> </span><span id="local-6989586621679110046"><span class="annot"><span class="annottext">val :: a
-</span><a href="#local-6989586621679110046"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679110045"><span class="annot"><span class="annottext">forest :: [Tree a]
-</span><a href="#local-6989586621679110045"><span class="hs-identifier hs-var">forest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Tree a]
-</span><a href="#local-6989586621679110045"><span class="hs-identifier hs-var">forest</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a] -&gt; [Tree a] -&gt; [Tree a]
+</span><span id="line-39"></span><span>        </span><span id="local-6989586621679110106"><span class="annot"><span class="annottext">go :: Tree a -&gt; [Tree a]
+</span><a href="#local-6989586621679110106"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Node</span></span><span> </span><span id="local-6989586621679110105"><span class="annot"><span class="annottext">val :: a
+</span><a href="#local-6989586621679110105"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679110104"><span class="annot"><span class="annottext">forest :: [Tree a]
+</span><a href="#local-6989586621679110104"><span class="hs-identifier hs-var">forest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Tree a]
+</span><a href="#local-6989586621679110104"><span class="hs-identifier hs-var">forest</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a] -&gt; [Tree a] -&gt; [Tree a]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span>
 </span><span id="line-40"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">a -&gt; [Tree a] -&gt; Tree a
 forall a. a -&gt; Forest a -&gt; Tree a
 </span><span class="hs-identifier hs-var">Tree.Node</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110044"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a]
-</span><a href="#local-6989586621679110043"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-41"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110044"><span class="annot"><span class="annottext">e :: a
-</span><a href="#local-6989586621679110044"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679110043"><span class="annot"><span class="annottext">fs :: [Tree a]
-</span><a href="#local-6989586621679110043"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a])
+</span><a href="#local-6989586621679110103"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree a]
+</span><a href="#local-6989586621679110102"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-41"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110103"><span class="annot"><span class="annottext">e :: a
+</span><a href="#local-6989586621679110103"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679110102"><span class="annot"><span class="annottext">fs :: [Tree a]
+</span><a href="#local-6989586621679110102"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a])
 -&gt; ([Tree a] -&gt; [[Tree a]]) -&gt; (a, [Tree a]) -&gt; [(a, [Tree a])]
 forall (f :: * -&gt; * -&gt; *) a b.
 Arbitrary2 f =&gt;
 (a -&gt; [a]) -&gt; (b -&gt; [b]) -&gt; f a b -&gt; [f a b]
 </span><span class="hs-identifier hs-var">liftShrink2</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
-</span><a href="#local-6989586621679110048"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Tree a -&gt; [Tree a]) -&gt; [Tree a] -&gt; [[Tree a]]
+</span><a href="#local-6989586621679110107"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Tree a -&gt; [Tree a]) -&gt; [Tree a] -&gt; [[Tree a]]
 forall (f :: * -&gt; *) a. Arbitrary1 f =&gt; (a -&gt; [a]) -&gt; f a -&gt; [f a]
 </span><span class="hs-identifier hs-var">liftShrink</span></span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; [Tree a]
-</span><a href="#local-6989586621679110047"><span class="hs-identifier hs-var">go</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110046"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Tree a]
-</span><a href="#local-6989586621679110045"><span class="hs-identifier hs-var">forest</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679110106"><span class="hs-identifier hs-var">go</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110105"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Tree a]
+</span><a href="#local-6989586621679110104"><span class="hs-identifier hs-var">forest</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>            </span><span class="hs-special">]</span><span>
 </span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span id="local-6989586621679110041"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679110041"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-45"></span><span>    </span><span id="local-6989586621679110037"><span class="annot"><span class="annottext">arbitrary :: Gen (Tree a)
+</span><span id="line-44"></span><span id="local-6989586621679110100"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110100"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679110100"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679110096"><span class="annot"><span class="annottext">arbitrary :: Gen (Tree a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Tree a)
 forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
 </span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
-</span><span id="line-46"></span><span>    </span><span id="local-6989586621679110034"><span class="annot"><span class="annottext">shrink :: Tree a -&gt; [Tree a]
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679110093"><span class="annot"><span class="annottext">shrink :: Tree a -&gt; [Tree a]
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Tree a -&gt; [Tree a]
 forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
 </span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
 </span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span id="local-6989586621679110031"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110031"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679110031"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>    </span><span id="local-6989586621679110028"><span class="annot"><span class="annottext">coarbitrary :: Tree a -&gt; Gen b -&gt; Gen b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Node</span></span><span> </span><span id="local-6989586621679110026"><span class="annot"><span class="annottext">val :: a
-</span><a href="#local-6989586621679110026"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679110025"><span class="annot"><span class="annottext">forest :: Forest a
-</span><a href="#local-6989586621679110025"><span class="hs-identifier hs-var">forest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679110090"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110090"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679110090"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679110087"><span class="annot"><span class="annottext">coarbitrary :: Tree a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree.Node</span></span><span> </span><span id="local-6989586621679110085"><span class="annot"><span class="annottext">val :: a
+</span><a href="#local-6989586621679110085"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679110084"><span class="annot"><span class="annottext">forest :: Forest a
+</span><a href="#local-6989586621679110084"><span class="hs-identifier hs-var">forest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-50"></span><span>        </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
 forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
 </span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110026"><span class="hs-identifier hs-var">val</span></a></span><span> </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110085"><span class="hs-identifier hs-var">val</span></a></span><span> </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Forest a -&gt; Gen b -&gt; Gen b
 forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
 </span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Forest a
-</span><a href="#local-6989586621679110025"><span class="hs-identifier hs-var">forest</span></a></span></span><span>
+</span><a href="#local-6989586621679110084"><span class="hs-identifier hs-var">forest</span></a></span></span><span>
 </span><span id="line-51"></span></pre></body></html>

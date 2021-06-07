@@ -10,14 +10,14 @@
 </span><span id="line-10"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
 </span><span id="line-11"></span><span>
 </span><span id="line-12"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Void</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-13"></span><span>    </span><span id="local-6989586621679111698"><span class="annot"><span class="annottext">coarbitrary :: Void -&gt; Gen b -&gt; Gen b
+</span><span id="line-13"></span><span>    </span><span id="local-6989586621679111757"><span class="annot"><span class="annottext">coarbitrary :: Void -&gt; Gen b -&gt; Gen b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Void -&gt; Gen b -&gt; Gen b
 forall a. Void -&gt; a
 </span><span class="hs-identifier hs-var">absurd</span></span><span>
 </span><span id="line-14"></span><span>
 </span><span id="line-15"></span><span class="hs-comment">-- | All @'Void' -&gt; a@ functions are 'absurd'.</span><span>
 </span><span id="line-16"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Void</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-17"></span><span>    </span><span id="local-6989586621679111694"><span class="annot"><span class="annottext">function :: (Void -&gt; b) -&gt; Void :-&gt; b
+</span><span id="line-17"></span><span>    </span><span id="local-6989586621679111753"><span class="annot"><span class="annottext">function :: (Void -&gt; b) -&gt; Void :-&gt; b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall a. Void -&gt; a) -&gt; Void :-&gt; b
 forall void c. (forall b. void -&gt; b) -&gt; void :-&gt; c
 </span><span class="hs-identifier hs-var">functionVoid</span></span><span> </span><span class="annot"><span class="annottext">forall a. Void -&gt; a
