@@ -56,7 +56,7 @@ specND = describe "BezierSpline" $ do
 
 testApproximate :: R -> BezierSpline 3 2 R -> Bool
 testApproximate treshold curve =
-  let polyline  = approximate treshold curve
+  let Just polyline  = fromPoints $ map (:+ ()) $ approximate treshold curve
       segs      = edgeSegments polyline
       midpoints = map (\seg -> average [view (start . core) seg, view (end . core) seg]) $ F.toList segs
   in all (testSnap treshold curve) midpoints
