@@ -46,7 +46,7 @@ specND = describe "BezierSpline" $ do
                == Maarten.split t (toMaartenBezier b)
            it "approximate" $ property $ \(T r) (b :: BezierSpline 3 2 R) ->
              -- approximate r b == Maarten.approximate r (toMaartenBezier b)
-             testApproximate 0.01 b
+             testApproximate r b
 
              -- note that this currently tests only for some limited range of r (between 0 and 1)
            it "parameterOf" $ property $ \(T t) (b :: BezierSpline 3 2 R) ->
