@@ -243,6 +243,7 @@ merge b1 b2 = let (p1, q1) = endPoints b1
 
 
 -- | Approximate Bezier curve by Polyline with given resolution.
+--   That is, every point on the approximation will have distance at most r to the Bezier curve.
 approximate :: (KnownNat n, Arity d, Ord r, Fractional r, Show r)
             => r -> BezierSpline n d r -> [Point d r]
 approximate r b | flat r b  = [fst $ endPoints b, snd $ endPoints b]
