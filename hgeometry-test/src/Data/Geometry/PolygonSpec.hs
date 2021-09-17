@@ -1,14 +1,15 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Lens                                (over, view, (^.), (^..))
-import           Control.Monad.Random                        (Random, evalRand, mkStdGen)
-import qualified Data.ByteString                             as BS
+import           Control.Lens (over, view, (^.), (^..))
+import           Control.Monad.Random (Random, evalRand, mkStdGen)
+import qualified Data.ByteString as BS
 import           Data.Coerce
 import           Data.Double.Approximate
 import           Data.Ext
-import qualified Data.Foldable                               as F
+import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
@@ -20,34 +21,52 @@ import           Data.Proxy
 import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Serialize
-import qualified Data.Vector                                 as V
-import           Data.Vector.Circular                        (CircularVector)
-import qualified Data.Vector.Circular                        as CV
+import qualified Data.Vector as V
+import           Data.Vector.Circular (CircularVector)
+import qualified Data.Vector.Circular as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.QuickCheck.Instances                   ()
+import           Test.QuickCheck.Instances ()
+
+import           Data.Geometry.Transformation
+import Data.Util
+import Data.Maybe
+import Data.Vinyl
+import Data.Vinyl.CoRec
+import Debug.Trace
 
 type R = RealNumber 5
 
-{-# NOINLINE allSimplePolygons #-}
 allSimplePolygons :: [SimplePolygon () Double]
-allSimplePolygons = unsafePerformIO $ do
+allSimplePolygons = allSimplePolygonsWith id
+
+allSimplePolygons' :: [SimplePolygon () Rational]
+allSimplePolygons' = allSimplePolygonsWith realToFrac
+  -- note: don't use map (realToFrac <$>) allSimplePolygons since that may create
+  -- self-intersecting polygons
+
+{-# NOINLINE allSimplePolygonsWith #-}
+allSimplePolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon () r]
+allSimplePolygonsWith f = unsafePerformIO $ do
   inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ simpleFromPoints [ ext (f <$> Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
-allSimplePolygons' :: [SimplePolygon () Rational]
-allSimplePolygons' = map (realToFrac <$>) allSimplePolygons
-
-{-# NOINLINE allMultiPolygons #-}
 allMultiPolygons :: [MultiPolygon () Double]
-allMultiPolygons = unsafePerformIO $ do
+allMultiPolygons = allMultiPolygonsWith id
+
+allMultiPolygons' :: [MultiPolygon () Rational]
+allMultiPolygons' = allMultiPolygonsWith realToFrac
+
+{-# NOINLINE allMultiPolygonsWith #-}
+allMultiPolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [MultiPolygon () r]
+allMultiPolygonsWith f = unsafePerformIO $ do
   inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
   case decode inp of
     Left msg -> error msg
@@ -56,10 +75,8 @@ allMultiPolygons = unsafePerformIO $ do
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = simpleFromPoints [ ext (f <$> Point2 x y) | (x,y) <- lst ]
 
-allMultiPolygons' :: [MultiPolygon () Rational]
-allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Arbitrary (SimplePolygon () Rational) where
   arbitrary = do
@@ -71,7 +88,7 @@ instance Arbitrary (SimplePolygon () Rational) where
     | otherwise = cutEars p ++ simplifyP p
 
 instance Arbitrary (SimplePolygon () (RealNumber (p::Nat))) where
-  arbitrary = elements (map (fmap realToFrac) allSimplePolygons')
+  arbitrary = fmap realToFrac <$> (arbitrary :: Gen (SimplePolygon () Rational))
   shrink = map (fmap realToFrac) . shrink . trunc
     where
       trunc :: SimplePolygon () (RealNumber (p::Nat)) -> SimplePolygon () Rational
@@ -158,6 +175,22 @@ spec = do
       let simple = unsafeFromCircularVector pts
           p = MultiPolygon simple [simple] in
       read (show p) == p
+  -- it "valid polygons (Simple/Double)" $ do
+  --   forM_ allSimplePolygons $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Simple/Rational)" $ do
+  --   forM_ allSimplePolygons' $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Multi/Double)" $ do
+  --   forM_ allMultiPolygons $ \poly -> do
+  --     ShowPoly poly (hasSelfIntersections poly) `shouldBe` ShowPoly poly False
+  --     isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Multi/Rational)" $ do
+  --   forM_ allMultiPolygons' $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
   -- Hm, is this property always true? What happens when points are all colinear?
   specify "monotone is simple" $
     property $ forAll genMonotone $ \(_dir, mono :: SimplePolygon () R) ->
@@ -166,19 +199,20 @@ spec = do
     property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
       isMonotone dir mono
   numericalSpec
+  it "pickPoint picks point inside polygon (manual)" $
+      (pickPoint myPg `insidePolygon` myPg) `shouldBe` True
+  it "pickPoint picks point inside polygon" $ do
+      property $ \(pg :: SimplePolygon () R) ->
+        pickPoint pg `insidePolygon` pg
+
+myPg :: SimplePolygon () R
+myPg = read "SimplePolygon [Point2 7865790 3349116 :+ (),Point2 6304943 3123049 :+ (),Point2 5770988 3123102 :+ (),Point2 5770988 3123103 :+ (),Point2 5093248 2691560 :+ (),Point2 4456582 2321791 :+ (),Point2 3984237 1931429 :+ (),Point2 3327061 1479350 :+ (),Point2 2423390 1130062 :+ (),Point2 184830 842440 :+ (),Point2 0 410951 :+ (),Point2 1376016 61610 :+ (),Point2 3861016 0 :+ (),Point2 6058502 205475 :+ (),Point2 8030084 452025 :+ (),Point2 9734688 719111 :+ (),Point2 11357118 1047861 :+ (),Point2 11316045 1582088 :+ (),Point2 11192824 2034113 :+ (),Point2 10741016 2671078 :+ (),Point2 9447147 3123049 :+ ()]"
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs
-
-
---   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
---   describe "Point in Polygon tests" $ do
---     it "returns the first element of a list" $ do
---       head [23 ..] `shouldBe` (23 :: Int)
-
 
 data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                            , _inside     :: [Point 2 r]

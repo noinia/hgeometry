@@ -200,7 +200,7 @@ extractContains p ss = (before, F.toList mid1 <> F.toList mid2, after)
   where
     (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
     -- Make sure to also select the horizontal segments containing p
-    (mid2, after) = SS.spanAntitone (\s -> p `onSegment` s) after'
+    (mid2, after) = SS.spanAntitone (intersects p) after'
 
 
 -- | Given a point and the linesegements that contain it. Create a piece of

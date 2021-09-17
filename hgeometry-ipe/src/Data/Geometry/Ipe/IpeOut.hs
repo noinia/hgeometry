@@ -22,10 +22,11 @@ import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
-import           Data.Geometry.Ellipse(Ellipse, circleToEllipse)
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
+import           Data.Geometry.Ellipse (Ellipse, circleToEllipse)
+import           Data.Geometry.HalfLine
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.FromIpe
@@ -42,6 +43,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import           Data.Vinyl (Rec(..))
 import           Data.Vinyl.CoRec
 import           Linear.Affine ((.+^))
 
@@ -137,13 +139,11 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
 
 instance (Fractional r, Ord r) => HasDefaultIpeOut (Line 2 r) where
   type DefaultIpeOut (Line 2 r) = Path
-  defIO = ipeLineSegment . toSeg
-    where
-      b :: Rectangle () r
-      b = box (ext $ Point2 (-200) (-200)) (ext $ Point2 1200 1200)
-      naive (Line p v) = ClosedLineSegment (ext p) (ext $ p .+^ v)
-      toSeg l = fromMaybe (naive l) . asA @(LineSegment 2 () r)
-              $ l `intersect` b
+  defIO = ipeLine
+
+instance (Fractional r, Ord r) => HasDefaultIpeOut (HalfLine 2 r) where
+  type DefaultIpeOut (HalfLine 2 r) = Path
+  defIO = ipeHalfLine
 
 instance HasDefaultIpeOut (Polygon t p r) where
   type DefaultIpeOut (Polygon t p r) = Path
@@ -185,6 +185,46 @@ ipeDiskMark = ipeMark "mark/disk(sx)"
 --------------------------------------------------------------------------------
 -- * Path Converters
 
+-- | Size of the default bounding box used to clip lines and
+-- half-lines in the default IpeOuts.
+defaultBox :: Num r => Rectangle () r
+defaultBox = let z  = 1000
+                 z' = negate z
+             in box (ext $ Point2 z' z') (ext $ Point2 z z)
+
+-- | Renders a line as a Path. The line is clipped to the 'defaultBox'
+ipeLine :: (Ord r, Fractional r) => IpeOut (Line 2 r) Path r
+ipeLine = ipeLineIn defaultBox
+
+-- | Renders the line in the given box.
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeLineIn        :: forall p r. (Ord r, Fractional r)
+                 => Rectangle p r -> IpeOut (Line 2 r) Path r
+ipeLineIn bBox l = match (l `intersect` bBox) $
+     H (\NoIntersection    -> error "ipeLineIn: precondition failed, no intersection")
+  :& H (\(_p :: Point 2 r) -> error "ipeLineIn: precondition failed, single point")
+  :& H ipeLineSegment
+  :& RNil
+
+-- | Renders an Halfine.
+--
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeHalfLine :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
+ipeHalfLine = ipeHalfLineIn defaultBox
+
+-- | Renders the HalfLine in the given box.
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeHalfLineIn        :: forall p r. (Ord r, Fractional r)
+                     => Rectangle p r -> IpeOut (HalfLine 2 r) Path r
+ipeHalfLineIn bBox l = match (l `intersect` bBox) $
+     H (\NoIntersection    -> error "ipeHalfLineIn: precondition failed, no intersection")
+  :& H (\(_p :: Point 2 r) -> error "ipeHalfLineIn: precondition failed, single point")
+  :& H ipeLineSegment
+  :& RNil
+
 ipeLineSegment   :: IpeOut (LineSegment 2 p r) Path r
 ipeLineSegment s = (path . pathSegment $ s) :+ mempty
 
@@ -192,7 +232,7 @@ ipePolyLine   :: IpeOut (PolyLine 2 p r) Path r
 ipePolyLine p = (path . PolyLineSegment . first (const ()) $ p) :+ mempty
 
 ipeEllipse :: IpeOut (Ellipse r) Path r
-ipeEllipse = \e -> (path $ EllipseSegment e) :+ mempty
+ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
 
 ipeCircle :: Floating r => IpeOut (Circle p r) Path r
 ipeCircle = ipeEllipse . circleToEllipse

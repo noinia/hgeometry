@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry-combinatorial
-version:             0.11.0.0
+version:             0.12.0.3
 synopsis:            Data structures, and Data types.
 description:
     The Non-geometric data types and algorithms used in HGeometry.
@@ -13,7 +13,7 @@ author:              Frank Staals
 maintainer:          frank@fstaals.net
 -- copyright:
 
-tested-with:         GHC >= 8.4
+tested-with:         GHC >= 8.8
 
 category:            Geometry
 build-type:          Simple
@@ -24,10 +24,13 @@ data-files:          test/Data/PlanarGraph/myGraph.yaml
                      -- examples/**/*.out
 
 extra-source-files:  README.md
+                     changelog
                      changelog.org
 
 Extra-doc-files:     docs/Data/PlanarGraph/testG.png
                      docs/Data/PlaneGraph/planegraph.png
+                     docs/Data/PlanarGraph/*.svg
+                     docs/Data/PlanarGraph/*.compact.svg
                      -- docs/**/*.png
 
 cabal-version:       2.0
@@ -46,6 +49,7 @@ library
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
+                    Algorithms.Graph.BFS
                     Algorithms.Graph.MST
                     Algorithms.FloydWarshall
 
@@ -55,6 +59,7 @@ library
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
                     Data.Double.Approximate
+                    Data.Double.Shaman
 
                     -- * Measurements
                     Data.Measured
@@ -96,6 +101,9 @@ library
                     -- * Planar Graphs
                     Data.Permutation
                     Data.PlanarGraph
+                    Data.PlanarGraph.Persistent
+                    Data.PlanarGraph.Mutable
+                    Data.PlanarGraph.Immutable
                     Data.PlanarGraph.AdjRep
                     Data.PlanarGraph.IO
                     Data.PlanarGraph.Dart
@@ -112,7 +120,7 @@ library
 
                     Data.Yaml.Util
 
-  other-modules:
+  other-modules:    Data.PlanarGraph.Internal
 
   -- other-extensions:
   build-depends:
@@ -123,7 +131,7 @@ library
               , containers              >= 0.5.9
               , data-default
               , dlist                   >= 0.7
-              , lens                    >= 4.2
+              , lens                    >= 4.18
               , contravariant           >= 1.5
               , semigroupoids           >= 5
               , semigroups              >= 0.18
@@ -136,14 +144,16 @@ library
               , quickcheck-instances    >= 0.3
               , reflection              >= 2.1
               , primitive               >= 0.6.3.0
-              , linear                  >= 1.20.8
+              , linear                  >= 1.21
               , hashable                >= 1.2
+              , witherable              >= 0.4
 
-              , vector                  >= 0.11 && < 0.12.2.0
+              , vector                  >= 0.11
               , data-clist              >= 0.1.2.3
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
               , vector-builder          >= 0.3.7
+              , unordered-containers
 
               , aeson                   >= 1.0
               , yaml                    >= 0.8
@@ -188,6 +198,9 @@ library
                     , FlexibleContexts
                     , MultiParamTypeClasses
 
+  c-sources: cbits/erf.c
+  extra-libraries: m
+
 test-suite doctests
   type:          exitcode-stdio-1.0
   ghc-options:   -threaded
@@ -212,6 +225,7 @@ test-suite hspec
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
                  Algorithms.Graph.DFSSpec
+                 Algorithms.Graph.BFSSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
@@ -237,11 +251,16 @@ test-suite hspec
                       , vector
                       , containers
                       , random
-                      , singletons
                       , filepath
                       , directory
                       , yaml
                       , MonadRandom
+  -- -- Such a mess:
+  -- if impl(ghc == 9.*)
+  --   build-depends:      singletons              == 3.*
+  --                     , singletons-th           == 3.*
+  -- else
+  --   build-depends:      singletons              == 2.*
 
   default-extensions: TypeFamilies
                     , GADTs

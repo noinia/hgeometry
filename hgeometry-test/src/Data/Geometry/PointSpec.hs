@@ -1,6 +1,10 @@
 module Data.Geometry.PointSpec (spec) where
 
+import           Control.Exception
 import qualified Data.CircularList             as C
+import           Data.Coerce
+import           Data.Double.Approximate       (DoubleRelAbs (..), SafeDouble)
+import           Data.Double.Shaman            (SDouble, Shaman)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Point.CmpAround
@@ -10,8 +14,6 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances     ()
 import           Test.Util
-import Data.Double.Approximate (SafeDouble, DoubleRelAbs(..))
-import Data.Coerce
 
 --------------------------------------------------------------------------------
 
@@ -65,6 +67,19 @@ spec = do
     it "1e100" $
       ccw (Point2 0 0) (coerce <$> doubleP1) (coerce <$> doubleP2 :: Point 2 SafeDouble)
         `shouldBe` CoLinear
+
+    it "fails due to inexact numbers" $
+      ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 0.9 :: Point 2 Double)
+        `shouldNotBe` CoLinear
+    it "ignores insigificant digits" $
+      ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 0.9 :: Point 2 Shaman)
+        `shouldBe` CoLinear
+    it "fails due to lack of precision" $
+      evaluate (ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 0.9 :: Point 2 (SDouble 0)))
+        `shouldThrow` anyErrorCall
+    it "passes when comparing within 1 ULP" $
+      evaluate (ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 0.9 :: Point 2 (SDouble 1)))
+        `shouldThrow` anyErrorCall
 
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $

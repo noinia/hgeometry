@@ -1,5 +1,5 @@
 name:                hgeometry-test
-version:             0.9.0.0
+version:             0.12.0.0
 synopsis:            HGeometry testsuite (hack)
 description:
   Extended testsuite for HGeometry
@@ -44,6 +44,10 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+flag planargraph
+  default: False
+  manual: True
+
 executable fromgeojson
   main-is: FromGeoJSON.hs
   hs-source-dirs: src
@@ -57,7 +61,63 @@ executable fromgeojson
                   hgeometry,
                   hgeometry-combinatorial,
                   geojson,
-                  cereal
+                  cereal,
+                  MonadRandom
+                      , QuickCheck           >= 2.5
+                      , approximate-equality >= 1.1.0.2
+                      , base
+                      , bytestring
+                      , cereal
+                      , containers
+                      , data-clist
+                      , directory
+                      , filepath
+                      , hgeometry                >= 0.12.0.0
+                      , hgeometry-combinatorial
+                      , hgeometry-ipe
+                      , hspec                >= 2.1
+                      , lens
+                      , linear
+                      , quickcheck-instances    >= 0.3
+                      , random
+                      , semigroups
+                      , singletons
+                      , singletons
+                      , vector
+                      , vector-circular      >= 0.1.1
+                      , vinyl
+                      , yaml
+                      , hspec
+                      , hgeometry-ipe
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+
+                    , PatternSynonyms
+                    , ViewPatterns
+                    , LambdaCase
+                    , TupleSections
+
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
 
 test-suite hspec
   type:                 exitcode-stdio-1.0
@@ -112,6 +172,7 @@ test-suite hspec
                  Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateSpec
+                 Algorithms.Geometry.PolygonTriangulation.EarClipSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
@@ -122,9 +183,12 @@ test-suite hspec
 
                  Algorithms.Geometry.FrechetDistance.DiscreteSpec
 
+                 Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
                  Algorithms.Geometry.SSSPSpec
+                 Algorithms.Geometry.PolyLineSimplificationSpec
 
-
+                 Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec
+                 Data.Geometry.PointLocation.PointLocationSpec
 
                  Graphics.CameraSpec
 
@@ -137,30 +201,32 @@ test-suite hspec
 
                  Algorithms.Geometry.ConvexHull.OldDivideAndConquer
 
-  build-depends:        base
-                      , hspec                >= 2.1
+  build-depends:        MonadRandom
+                      , hspec                >= 2.2
                       , QuickCheck           >= 2.5
-                      , quickcheck-instances    >= 0.3
                       , approximate-equality >= 1.1.0.2
-                      , hgeometry                >= 0.9.0.0
+                      , base
+                      , bytestring
+                      , cereal
+                      , containers
+                      , data-clist
+                      , directory
+                      , filepath
+                      , hgeometry                >= 0.12.0.0
                       , hgeometry-combinatorial
                       , hgeometry-ipe
+                      , hspec                >= 2.1
                       , lens
-                      , data-clist
-                      , vector-circular      >= 0.1.1
                       , linear
-                      , bytestring
-                      , vinyl
-                      , semigroups
-                      , vector
-                      , containers
+                      , quickcheck-instances    >= 0.3
                       , random
+                      , semigroups
                       , singletons
-                      , filepath
-                      , directory
+                      , vector
+                      , vector-circular      >= 0.1.1
+                      , nonempty-vector
+                      , vinyl
                       , yaml
-                      , MonadRandom
-                      , cereal
 
   default-extensions: TypeFamilies
                     , GADTs
@@ -189,3 +255,25 @@ test-suite hspec
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+
+
+executable planargraph
+  main-is: planargraph.hs
+  if flag(planargraph)
+    buildable: True
+  else
+    buildable: False
+  default-language:     Haskell2010
+  build-depends:  base,
+                  vector,
+                  vector-circular,
+                  linear,
+                  text,
+                  hashable,
+                  lens,
+                  directory,
+                  filepath,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  reanimate,
+                  reanimate-svg

@@ -61,8 +61,8 @@ module Data.Geometry.Polygon
 
   , rotateLeft
   , rotateRight
-  , maximumBy
-  , minimumBy
+  , maximumVertexBy
+  , minimumVertexBy
 
 
    -- * Misc
@@ -77,6 +77,7 @@ module Data.Geometry.Polygon
 
   ) where
 
+import           Algorithms.Geometry.InPolygon
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC
 import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.Lens hiding (Simple)
@@ -85,10 +86,13 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.HalfSpace (rightOf)
 import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Boundary
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Polygon.Extremes
-
+import           Data.Geometry.Properties
+import qualified Data.Sequence as Seq
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -107,3 +111,30 @@ isStarShaped (toClockwiseOrder -> pg) =
     -- the first vertex is the intersection point of the two supporting lines
     -- bounding it, so the first two edges bound the shape in this sirection
     hs = fmap (rightOf . supportingLine) . outerBoundaryEdges $ pg
+
+
+--------------------------------------------------------------------------------
+-- * Instances
+
+type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
+  '[Seq.Seq (Either (Point 2 r) (LineSegment 2 () r))]
+
+type instance IntersectionOf (Point 2 r) (Polygon t p r) = [NoIntersection, Point 2 r]
+
+instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  q `intersects` pg = q `inPolygon` pg /= Outside
+  q `intersect` pg | q `intersects` pg = coRec q
+                   | otherwise         = coRec NoIntersection
+
+-- instance IsIntersectableWith (Line 2 r) (Boundary (Polygon t p r)) where
+--   nonEmptyIntersection _ _ (CoRec xs) = null xs
+--   l `intersect` (Boundary (SimplePolygon vs)) =
+--     undefined
+  -- l `intersect` (Boundary (MultiPolygon vs hs)) = coRec .
+  --    Seq.sortBy f . Seq.fromList
+  --     . concatMap (unpack . (l `intersect`) . Boundary)
+  --     $ SimplePolygon vs : hs
+  --   where
+  --     unpack (CoRec x) = x
+  --     f = undefined

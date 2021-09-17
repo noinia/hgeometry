@@ -647,11 +647,11 @@ outerFaceDart ps = d
 -- | Reports all edges as line segments
 --
 -- >>> mapM_ print $ edgeSegments smallG
--- (Dart (Arc 0) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 2 0 :+ 2)) :+ "0->2")
--- (Dart (Arc 1) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 2 2 :+ 1)) :+ "0->1")
--- (Dart (Arc 2) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 (-1) 4 :+ 3)) :+ "0->3")
--- (Dart (Arc 4) +1,LineSegment (Closed (Point2 2 2 :+ 1)) (Closed (Point2 2 0 :+ 2)) :+ "1->2")
--- (Dart (Arc 3) +1,LineSegment (Closed (Point2 2 2 :+ 1)) (Closed (Point2 (-1) 4 :+ 3)) :+ "1->3")
+-- (Dart (Arc 0) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 2 0 :+ 2) :+ "0->2")
+-- (Dart (Arc 1) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 2 2 :+ 1) :+ "0->1")
+-- (Dart (Arc 2) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 (-1) 4 :+ 3) :+ "0->3")
+-- (Dart (Arc 4) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 2 0 :+ 2) :+ "1->2")
+-- (Dart (Arc 3) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 (-1) 4 :+ 3) :+ "1->3")
 edgeSegments    :: PlaneGraph s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
 edgeSegments ps = fmap withSegment . edges $ ps
   where

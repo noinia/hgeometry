@@ -11,12 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ghc: ['8.4', '8.6', '8.8', '8.10']
+        ghc: ['8.8', '8.10']
         os: [ubuntu-latest, macOS-latest]
     name: GHC ${{ matrix.ghc }} / ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-haskell@v1
+    - uses: haskell/actions/setup@v1
       with:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: 'latest'
@@ -46,6 +46,10 @@ jobs:
         cabal v2-build hgeometry-svg
         cabal v2-build hgeometry-examples
         cabal v2-build pkg:hgeometry:benchmarks
+    - name: Build shocase
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
+      run: |
+        cabal v2-build hgeometry-showcase:showcase
     - name: Test hgeometry
       if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
       run: |

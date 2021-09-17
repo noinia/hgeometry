@@ -4,12 +4,29 @@
 
 ** 0.12
 
+- New website: https://hgeometry.org/
 - Switch polygon implementation from a circular seq to a circular vector.
 - Hide polygon implementation details.
 - Enforce CCW polygon order by default.
-- New algorithm: Single-source shortest path in O(n).
 - Fix bug in Data.Geometry.Polygon.Convex.extremes/maxInDirection.
+- Fix bug in pointInPolygon in case of degenerate situations.
 - Fix Read/Show instances for Point and Polygon such that 'read.show = id'.
+- Improved numerical robustness.
+- Random generation of monotone polygons. Thanks to @1ndy.
+- Random and uniform generation of convex polygons.
+- More IsIntersectableWith instances
+- Updated Show/Read instances for LineSegments
+- New algorithm: Visibility polygon in O(n log n) time.
+- New algorithm: Earclip triangulation in O(n^2) time worst case, O(n)
+  time expected case.
+- New algorithm: Single-source shortest path in O(n) time.
+- New algorithm: Planar point locator in O(log n) time.
+- New algorithm: Point set diameter in O(n log n) time.
+- New algorithm: Convex hull of a polygon in O(n) time.
+- New algorithm: Diameter of a convex polygon in O(n) time.
+- New algorithm: Check if a point lies inside a convex polygon in O(n)
+  time.
+- New algorithm: Discrete Frechet distance in O(n^2) time.
 
 ** 0.11
 

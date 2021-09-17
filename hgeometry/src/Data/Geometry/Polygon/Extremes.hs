@@ -35,4 +35,4 @@ extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
                    -> (Point 2 r :+ p, Point 2 r :+ p)
 extremesLinear u p = let simple = p^.outerBoundary
                          f  = cmpExtreme u
-                     in (P.minimumBy f simple, P.maximumBy f simple)
+                     in (P.minimumVertexBy f simple, P.maximumVertexBy f simple)

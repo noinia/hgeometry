@@ -8,16 +8,16 @@
 module Data.Set.Util where
 
 import           Data.DynamicOrd
-import qualified Data.Set as Set
 import           Data.Set (Set)
+import qualified Data.Set as Set
 import qualified Data.Set.Internal as Internal
 
 
--- import Data.Ord(comparing)
+import           Data.Ord (comparing)
 
--- data S = S String deriving Show
--- cmpS :: S -> S -> Ordering
--- cmpS = comparing (\(S s) -> length s)
+data S = S String deriving Show
+cmpS :: S -> S -> Ordering
+cmpS = comparing (\(S s) -> length s)
 
 
 -- $setup
@@ -97,3 +97,44 @@ insertBy cmp x s = withOrd cmp $ liftOrd1 (Set.insert $ O x) s
 -- running time: \(O(\log n)\)
 deleteAllBy         :: (a -> a -> Ordering) -> a -> Set a -> Set a
 deleteAllBy cmp x s = withOrd cmp $ liftOrd1 (Set.delete $ O x) s
+
+-- | Run a query, eg. lookupGE, on the set with the given ordering.
+--
+-- Note: The 'Algorithms.BinarySearch.binarySearchIn' function may be
+-- a useful alternative to 'queryBy'
+--
+-- >>> queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "bbb")
+-- >>> queryBy cmpS Set.lookupLE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "a")
+-- >>> queryBy cmpS Set.lookupGE (S "333") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "bbb")
+queryBy           :: (a -> a -> Ordering)
+                  -> (forall b. Ord b => b -> Set b -> t b)
+                  -> a -> Set a -> t a
+queryBy cmp fs q s = withOrd cmp $ liftOrd1 (fs $ O q) s
+
+
+
+
+-- queryBy'           :: Ord r
+--                    => (a -> r)
+--                    -> r
+--                   -> (forall b. Ord b => b -> Set b -> t b)
+--                   -> a -> Set a -> t a
+-- queryBy' g fs q s = queryBy
+--   where
+
+
+
+--   withOrd cmp $ liftOrd1 (fs $ O q) s
+
+
+
+  -- withOrd cmp $ liftOrd1 (Set.lookupGE $ O q) s
+
+
+
+
+test = queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- test = succBy cmpS (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]

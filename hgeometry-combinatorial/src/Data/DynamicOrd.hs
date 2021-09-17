@@ -60,8 +60,8 @@ introOrd1 = unsafeCoerce
 
 -- | Lifts a function that works on a container '@f@' of
 -- orderable-things into one that works on dynamically ordered ones.
-liftOrd1   :: (f (O s a) -> f (O s a))
-           -> f a -> O s (f a)
+liftOrd1   :: (f (O s a) -> g (O s a))
+           -> f a -> O s (g a)
 liftOrd1 f = extractOrd1 . f . introOrd1
 
 

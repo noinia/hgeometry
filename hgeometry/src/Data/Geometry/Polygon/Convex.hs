@@ -519,9 +519,9 @@ inConvex :: forall p r. (Fractional r, Ord r)
          => Point 2 r -> ConvexPolygon p r
          -> PointLocationResult
 inConvex p (ConvexPolygon poly)
-  | onSegment p leftEdge  = OnBoundary
-  | onSegment p rightEdge = OnBoundary
-  | otherwise             = worker 1 n
+  | p `intersects` leftEdge  = OnBoundary
+  | p `intersects` rightEdge = OnBoundary
+  | otherwise                = worker 1 n
   where
     p'        = p :+ undefined
     n         = size poly - 1
@@ -530,7 +530,7 @@ inConvex p (ConvexPolygon poly)
     rightEdge = ClosedLineSegment point0 (point 1)
     worker a b
       | a+1 == b                        =
-        if onSegment p (ClosedLineSegment (point a) (point b))
+        if p `intersects` (ClosedLineSegment (point a) (point b))
           then OnBoundary
           else
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside
