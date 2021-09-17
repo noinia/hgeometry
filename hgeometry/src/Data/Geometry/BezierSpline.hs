@@ -55,7 +55,7 @@ import qualified Data.Sequence as Seq
 import           Data.Traversable (fmapDefault,foldMapDefault)
 import           GHC.TypeNats
 import qualified Test.QuickCheck as QC
-import qualified Data.Set as Set
+
 
 import Data.Geometry.LineSegment hiding (endPoints)
 import Data.Geometry.Ball
@@ -65,7 +65,7 @@ import Algorithms.Geometry.ConvexHull.GrahamScan
 import Algorithms.Geometry.SmallestEnclosingBall.RIC
 import Algorithms.Geometry.SmallestEnclosingBall.Types
 
-import Debug.Trace
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -140,14 +140,14 @@ instance PointFunctor (BezierSpline n d) where
   pmap f = over controlPoints (fmap f)
 
 -- | Reverse a BezierSpline
-reverse :: (Arity d, Ord r, Num r, Show r) => BezierSpline n d r -> BezierSpline n d r
+reverse :: (Arity d, Ord r, Num r) => BezierSpline n d r -> BezierSpline n d r
 reverse = controlPoints %~ (LSeq.promise . LSeq.fromSeq . Seq.fromList . Prelude.reverse . F.toList)
 
 
 -- | Evaluate a BezierSpline curve at time t in [0, 1]
 --
 -- pre: \(t \in [0,1]\)
-evaluate    :: (KnownNat n, Arity d, Ord r, Num r, Show r) => BezierSpline n d r -> r -> Point d r
+evaluate    :: (KnownNat n, Arity d, Ord r, Num r) => BezierSpline n d r -> r -> Point d r
 evaluate b 0 = fst $ endPoints b
 evaluate b 1 = snd $ endPoints b
 evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
@@ -163,43 +163,43 @@ tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r
 tangent b = b^?!controlPoints.ix 1 .-. b^?!controlPoints.ix 0
 
 -- | Extract the endpoints.
-endPoints :: forall n d r. (KnownNat n, Arity d, Ord r, Num r, Show r) => BezierSpline n d r -> (Point d r, Point d r)
+endPoints :: forall n d r. (KnownNat n, Arity d, Ord r, Num r) => BezierSpline n d r -> (Point d r, Point d r)
 endPoints b = let n = fromIntegral $ natVal (C @n)
               in (b^?!controlPoints.ix 0, b^?!controlPoints.ix n)
 
 -- | Restrict a Bezier curve to th,e piece between parameters t < u in [0, 1].
-subBezier     :: (KnownNat n, Arity d, Ord r, Num r, Show r)
+subBezier     :: (KnownNat n, Arity d, Ord r, Num r)
               => r -> r -> BezierSpline n d r -> BezierSpline n d r
 subBezier t u = fst . split u . snd . split t
 
 -- | Split a Bezier curve at time t in [0, 1] into two pieces.
-split :: forall n d r. (KnownNat n, Arity d, Ord r, Num r, Show r)
+split :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> (BezierSpline n d r, BezierSpline n d r)
-split t b | t < 0 = error $ "split: " ++ show t ++ " < 0"
-          | t > 1 = error $ "split: " ++ show t ++ " > 1"
+split t b | t < 0 = error $ "split: t < 0" -- ++ show t ++ " < 0"
+          | t > 1 = error $ "split: t > 1" -- ++ show t ++ " > 1"
           | otherwise = rawSplit t b
 
 -- | Extend a Bezier curve to a parameter value t outside the interval [0,1].
 --   For t < 0, returns a Bezier representation of the section of the underlying curve
 --   from parameter value t until paramater value 0. For t > 1, the same from 1 to t.
-extension :: forall n d r. (KnownNat n, Arity d, Ord r, Num r, Show r)
+extension :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> BezierSpline n d r
-extension t b | t > 0 && t < 1 = error $ "extension: 0 < " ++ show t ++ " < 1"
+extension t b | t > 0 && t < 1 = error $ "extension: 0 < t < 1" -- ++ show t ++ " < 1"
               | t <= 0 = fst $ rawSplit t b
               | t >= 1 = snd $ rawSplit t b
 
 -- | Extend a Bezier curve to a parameter value t outside the interval [0,1].
 --   For t < 0, returns a Bezier representation of the section of the underlying curve
 --   from parameter value t until paramater value 1. For t > 1, the same from 0 to t.
-extend :: forall n d r. (KnownNat n, Arity d, Ord r, Num r, Show r)
+extend :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> BezierSpline n d r
-extend t b | t > 0 && t < 1 = error $ "extend: 0 < " ++ show t ++ " < 1"
+extend t b | t > 0 && t < 1 = error $ "extend: 0 < t < 1" -- ++ show t ++ " < 1"
            | t <= 0 = snd $ rawSplit t b
            | t >= 1 = fst $ rawSplit t b
  
 -- | Split without parameter check. If t outside [0,1], will actually extend the curve
 --   rather than split it.
-rawSplit :: forall n d r. (KnownNat n, Arity d, Ord r, Num r, Show r)
+rawSplit :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> (BezierSpline n d r, BezierSpline n d r)
 rawSplit t b = let n  = fromIntegral $ natVal (C @n)
                    ps = collect t $ b^.controlPoints
@@ -220,7 +220,7 @@ collect t = go . LSeq.toSeq
 
 -- | Split a Bezier curve into many pieces. 
 --   Todo: filter out duplicate parameter values!
-splitMany :: forall n d r. (KnownNat n, Arity d, Ord r, Fractional r, Show r) => [r] -> BezierSpline n d r -> [BezierSpline n d r]
+splitMany :: forall n d r. (KnownNat n, Arity d, Ord r, Fractional r) => [r] -> BezierSpline n d r -> [BezierSpline n d r]
 splitMany ts b = splitManySorted (sort $ map (restrict "splitMany" 0 1) ts) b
   where splitManySorted []       b = [b]
         splitManySorted (t : ts) b = (fst $ split t b) : splitManySorted (map (rescale t) ts) (snd $ split t b)
@@ -231,7 +231,7 @@ splitMany ts b = splitManySorted (sort $ map (restrict "splitMany" 0 1) ts) b
 
 -- | Extend a Bezier curve to a point not on the curve, but on / close to the extended
 --   underlying curve.
-growTo :: (KnownNat n, Arity d, Ord r, Fractional r, Show r) => r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
+growTo :: (KnownNat n, Arity d, Ord r, Fractional r) => r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
 growTo treshold p b = 
   let t = extendedParameterOf treshold b p 
       r | t < 0 = extend t b
@@ -253,7 +253,7 @@ fit eps pts
 -- | Merge two Bezier pieces. Assumes they can be merged into a single piece of the same degree
 --   (as would e.g. be the case for the result of a 'split' operation).
 --   Does not test whether this is the case!
-merge :: (KnownNat n, Arity d, Ord r, Fractional r, Show r) => r -> BezierSpline n d r -> BezierSpline n d r -> BezierSpline n d r
+merge :: (KnownNat n, Arity d, Ord r, Fractional r) => r -> BezierSpline n d r -> BezierSpline n d r -> BezierSpline n d r
 merge treshold b1 b2 = let (p1, q1) = endPoints b1
                            (p2, q2) = endPoints b2
                            result | q1 /= p2 = error "merge: something is wrong, maybe need to flip one of the curves?"
@@ -265,7 +265,7 @@ merge treshold b1 b2 = let (p1, q1) = endPoints b1
 
 -- | Approximate Bezier curve by Polyline with given resolution.
 --   That is, every point on the approximation will have distance at most r to the Bezier curve.
-approximate :: (KnownNat n, Arity d, Ord r, Fractional r, Show r)
+approximate :: (KnownNat n, Arity d, Ord r, Fractional r)
             => r -> BezierSpline n d r -> [Point d r]
 approximate r b | flat r b  = [fst $ endPoints b, snd $ endPoints b]
                 | otherwise = let (b1, b2) = split 0.5 b
@@ -273,7 +273,7 @@ approximate r b | flat r b  = [fst $ endPoints b, snd $ endPoints b]
 
 -- | Test whether a Bezier curve can be approximated by a single line segment,
 --   given the resolution parameter.
-flat :: (KnownNat n, Arity d, Ord r, Fractional r, Show r) => r -> BezierSpline n d r -> Bool
+flat :: (KnownNat n, Arity d, Ord r, Fractional r) => r -> BezierSpline n d r -> Bool
 flat r b = let p = fst $ endPoints b
                q = snd $ endPoints b
                s = ClosedLineSegment (p :+ ()) (q :+ ())
@@ -281,12 +281,12 @@ flat r b = let p = fst $ endPoints b
            in qdA p q < r ^ 2 || all e [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 -- general d depends on convex hull
--- parameterOf :: (Arity d, Ord r, Fractional r, Show r) => BezierSpline n d r -> Point d r -> r
+-- parameterOf :: (Arity d, Ord r, Fractional r) => BezierSpline n d r -> Point d r -> r
 -- | Given a point on (or within distance treshold to) a Bezier curve, return the parameter value
 --   of some point on the curve within distance treshold from p.
 --   For points farther than treshold from the curve, the function will attempt to return the
 --   parameter value of an approximate locally closest point to the input point, but no guarantees.
-parameterOf :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> BezierSpline n 2 r -> Point 2 r -> r
+parameterOf :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> Point 2 r -> r
 parameterOf treshold b p | closeEnough treshold p $ fst $ endPoints b = 0
                          | closeEnough treshold p $ snd $ endPoints b = 1
                          | otherwise = parameterInterior treshold b p
@@ -294,7 +294,7 @@ parameterOf treshold b p | closeEnough treshold p $ fst $ endPoints b = 0
 -- parameterInterior is slow, look into algebraic solution?
 
 -- general d depends on convex hull
-parameterInterior :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> BezierSpline n 2 r -> Point 2 r -> r
+parameterInterior :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> Point 2 r -> r
 parameterInterior treshold b p | sqrad (F.toList $ view controlPoints b) < (0.5 * treshold)^2 = 0.5
                                | otherwise =
   let (b1, b2) = split 0.5 b
@@ -319,33 +319,33 @@ parameterInterior treshold b p | sqrad (F.toList $ view controlPoints b) < (0.5 
 --   This implementation is not robust: might return a locally closest point on the curve 
 --   even though the point lies on another part of the curve. For points on the actual
 --   curve, use parameterOf instead.
-extendedParameterOf      :: (Arity d, KnownNat n, Ord r, Fractional r, Show r) => r -> BezierSpline n d r -> Point d r -> r
+extendedParameterOf      :: (Arity d, KnownNat n, Ord r, Fractional r) => r -> BezierSpline n d r -> Point d r -> r
 extendedParameterOf treshold b p | p == fst (endPoints b) = 0
                                  | p == snd (endPoints b) = 1
                                  | otherwise = binarySearch (qdA p . evaluate b) (-100) 100
 
 
-betterFit :: (KnownNat n, Arity d, Ord r, Fractional r, Show r) => BezierSpline n d r -> Point d r -> r -> r -> r
+betterFit :: (KnownNat n, Arity d, Ord r, Fractional r) => BezierSpline n d r -> Point d r -> r -> r -> r
 betterFit b p t u = 
   let q = evaluate b t 
       r = evaluate b u 
   in if qdA q p < qdA r p then t else u
 
-sqDistanceToPolygon :: (Ord r, Fractional r, Show r) => Point 2 r -> SimplePolygon p r -> r
+sqDistanceToPolygon :: (Ord r, Fractional r) => Point 2 r -> SimplePolygon p r -> r
 sqDistanceToPolygon point poly | insidePolygon point poly = 0
                                | otherwise = minimum $ map (sqDistanceToSeg point) $ listEdges poly
 
 -- | This function tests whether a value lies within bounds of a given interval.
 --   If not, graciously continues with value snapped to interval.
 --   This should never happen, but apparently it sometimes does?
-restrict :: (Ord r, Show r) => String -> r -> r -> r -> r
-restrict f l r x | l > r = error $ f ++ ": restrict: [" ++ show l ++ ", " ++ show r ++ "] is not an interval"
-                 | x < l = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") l
-                 | x > r = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") r
+restrict :: (Ord r) => String -> r -> r -> r -> r
+restrict f l r x | l > r = error $ f <> ": restrict [l,r] is not an interval" --error $ f ++ ": restrict: [" ++ show l ++ ", " ++ show r ++ "] is not an interval"
+                 -- | x < l = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") l
+                 -- | x > r = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") r
                  | otherwise = x
 
 
-binarySearch                                    :: (Ord r, Fractional r, Show r) => (r -> r) -> r -> r -> r
+binarySearch                                    :: (Ord r, Fractional r) => (r -> r) -> r -> r -> r
 binarySearch f l r | abs (f l - f r) < treshold = restrict "binarySearch" l r $ m
                    | derivative f m  > 0        = restrict "binarySearch" l r $ binarySearch f l m
                    | otherwise                  = restrict "binarySearch" l r $ binarySearch f m r
@@ -367,7 +367,7 @@ convexHullB b = convexHull $ NonEmpty.fromList $ map (:+ ()) $ F.toList $ _contr
 --   Not exact, since for degree >= 3 there is no closed form.
 --   (In principle, this algorithm works in any dimension
 --   but this requires convexHull, area/volume, and intersect.)
-intersectB :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
+intersectB :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
 intersectB treshold a b 
   | a == b    = [fst $ endPoints b, snd $ endPoints b] -- should really return the whole curve
   | otherwise = let [a1, a2, a3, a4] = F.toList $ _controlPoints a
@@ -384,7 +384,7 @@ closeEnough treshold p q = qdA p q < treshold ^ 2
 intersectPointsPoints :: (Ord r, Fractional r) => r -> [Point 2 r] -> [Point 2 r] -> [Point 2 r]
 intersectPointsPoints treshold ps qs = filter (\q -> any (closeEnough treshold q) ps) qs
   
-intersectPointsInterior :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [Point 2 r]
+intersectPointsInterior :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [Point 2 r]
 intersectPointsInterior treshold ps b = 
   let [b1, b2, b3, b4] = F.toList $ _controlPoints b
       nearc p = closeEnough treshold (snap treshold b p) p
@@ -393,7 +393,7 @@ intersectPointsInterior treshold ps b =
   in filter (\p -> nearc p && not (near1 p) && not (near4 p)) ps
     
 
-intersectInteriorInterior :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> [Point 2 r] -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
+intersectInteriorInterior :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
 intersectInteriorInterior treshold forbidden a b = 
   let cha      = _simplePolygon $ convexHullB a
       chb      = _simplePolygon $ convexHullB b
@@ -414,7 +414,7 @@ intersectInteriorInterior treshold forbidden a b =
              ++ intersectInteriorInterior treshold forbidden a2 b2
   in if done then result else recurse
 
-sqrad :: (Ord r, RealFrac r, Show r) => [Point 2 r] -> r
+sqrad :: (Ord r, RealFrac r) => [Point 2 r] -> r
 sqrad points | length points < 2 = error "sqrad: not enough points"
 sqrad points | otherwise = 
   let rationalPoints :: [Point 2 Rational] -- smallestEnclosingDisk fails on Floats
@@ -472,7 +472,7 @@ extremal pos i b =
 --   Can only be solved exactly for degree 4 or smaller.
 --   Only gives rational result for degree 2 or smaller.
 --   Currentlly implemented for degree 3.
-splitMonotone :: (Arity d, Ord r, Enum r, Floating r, Show r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
+splitMonotone :: (Arity d, Ord r, Enum r, Floating r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
 splitMonotone i b = splitMany (locallyExtremalParameters i b) b
 
 {-
@@ -486,7 +486,7 @@ type family RealTypeConstraint (n :: Nat) (r :: *) :: Constraint where
 -}
 
 -- | Report all parameter values at which the derivative of the $i$th coordinate is 0.
-locallyExtremalParameters :: (Arity d, Ord r, Enum r, Floating r, Show r) => Int -> BezierSpline 3 d r -> [r]
+locallyExtremalParameters :: (Arity d, Ord r, Enum r, Floating r) => Int -> BezierSpline 3 d r -> [r]
 locallyExtremalParameters i curve = 
   let [x1, x2, x3, x4] = map (view $ unsafeCoord i) $ F.toList $ _controlPoints curve
       a = 3 * x4 -  9 * x3 + 9 * x2 - 3 * x1
@@ -498,7 +498,7 @@ locallyExtremalParameters i curve =
 -- | Solve equation of the form ax^2 + bx + c = 0.
 --   If there are multiple solutions, report in ascending order.
 --   Attempt at a somewhat robust implementation.
-solveQuadraticEquation :: (Ord r, Enum r, Floating r, Show r) => r -> r -> r -> [r]
+solveQuadraticEquation :: (Ord r, Enum r, Floating r) => r -> r -> r -> [r]
 solveQuadraticEquation 0 0 0 = [0..] -- error "infinite solutions"
 solveQuadraticEquation a 0 0 = [0]
 solveQuadraticEquation 0 b 0 = [0]
@@ -532,7 +532,7 @@ epsilon = 0.0001
 --   Assumes these points are all supposed to lie on the curve, and
 --   snaps endpoints of pieces to these points.
 --   (higher dimensions would work, but depends on convex hull)
-splitByPoints :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [BezierSpline n 2 r]
+splitByPoints :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [BezierSpline n 2 r]
 splitByPoints treshold points curve = 
   let a      = fst $ endPoints curve
       b      = snd $ endPoints curve
@@ -544,7 +544,7 @@ splitByPoints treshold points curve =
       endpts = map snd tipos ++ [b]
   in zipWith3 snapEndpoints stapts endpts pieces
 
-snapEndpoints :: (KnownNat n, Arity d, Ord r, Fractional r, Show r) => Point d r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
+snapEndpoints :: (KnownNat n, Arity d, Ord r, Fractional r) => Point d r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
 snapEndpoints p q curve = 
   let points = F.toList $ _controlPoints curve
       middle = tail $ init $ points
@@ -553,7 +553,7 @@ snapEndpoints p q curve =
 
 
 -- | Snap a point close to a Bezier curve to the curve.
-snap   :: (KnownNat n, Ord r, RealFrac r, Show r) => r -> BezierSpline n 2 r -> Point 2 r -> Point 2 r
+snap   :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> Point 2 r -> Point 2 r
 snap treshold b = evaluate b . parameterOf treshold b
 
 
@@ -581,7 +581,7 @@ colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
 
 -- | Approximate curve as line segments where no point on the curve is further away
 --   from the nearest line segment than the given tolerance.
-lineApproximate :: (Ord r, Fractional r, Show r) => r -> BezierSpline 3 2 r -> [Point 2 r]
+lineApproximate :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> [Point 2 r]
 lineApproximate eps bezier
   | colinear eps bezier =
     [ bezier^.controlPoints.to LSeq.head

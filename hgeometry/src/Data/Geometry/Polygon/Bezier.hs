@@ -36,7 +36,7 @@ fromBeziers curves
       [ map ext [a, b, c]
       | Bezier3 a b c _d <- curves ]
 
-approximate :: forall t r. (Ord r, Fractional r, Show r) => r -> Polygon t (PathJoin r) r -> Polygon t () r
+approximate :: forall t r. (Ord r, Fractional r) => r -> Polygon t (PathJoin r) r -> Polygon t () r
 approximate eps p =
   case p of
     SimplePolygon{}  ->
@@ -49,6 +49,6 @@ approximate eps p =
     f (a :+ JoinCurve b c, d :+ _) =
       CV.unsafeFromList $ map ext $ init (lineApproximate eps (Bezier3 a b c d))
 
-approximateSome :: (Ord r, Fractional r, Show r) => r -> SomePolygon (PathJoin r) r -> SomePolygon () r
+approximateSome :: (Ord r, Fractional r) => r -> SomePolygon (PathJoin r) r -> SomePolygon () r
 approximateSome eps (Left p)  = Left $ approximate eps p
 approximateSome eps (Right p) = Right $ approximate eps p
