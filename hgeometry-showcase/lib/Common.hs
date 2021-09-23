@@ -27,7 +27,8 @@ import Data.Ext
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon.Bezier
-import Data.Geometry.BezierSpline
+import qualified Data.Geometry.BezierSpline as Bezier
+import Data.Geometry.BezierSpline(BezierSpline(..))
 import Data.Geometry.Polygon
 import Data.Geometry.Box (Rectangle, box, minPoint, maxPoint)
 import Data.Geometry.Transformation
@@ -293,7 +294,7 @@ cmdsToBezier cmds =
       worker x (bezier1 from x : acc) xs
     worker from acc (LineBezier [a,b]:xs) =
       let quad = Bezier2 (fromRPoint from) (fromRPoint a) (fromRPoint b)
-      in worker b (quadToCubic quad : acc) xs
+      in worker b (Bezier.quadToCubic quad : acc) xs
     worker from acc (LineBezier [a,b,c]:xs) =
       worker c (Bezier3 (fromRPoint from) (fromRPoint a) (fromRPoint b) (fromRPoint c): acc) xs
     worker _ _ _ = bad

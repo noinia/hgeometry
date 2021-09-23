@@ -8,7 +8,7 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Data.Geometry.BezierSpline(
-    BezierSpline (BezierSpline)
+    BezierSpline (BezierSpline, Bezier2, Bezier3)
   , controlPoints
   , fromPointSeq
   , endPoints
@@ -29,9 +29,6 @@ module Data.Geometry.BezierSpline(
   , parameterOf
   , snap
   , intersectB
-
-  , pattern Bezier2, pattern Bezier3
-
   , colinear
   , lineApproximate
   , quadToCubic
@@ -184,18 +181,18 @@ split t b | t < 0 = error $ "split: t < 0" -- ++ show t ++ " < 0"
 --   from parameter value t until paramater value 0. For t > 1, the same from 1 to t.
 extension :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> BezierSpline n d r
-extension t b | t > 0 && t < 1 = error $ "extension: 0 < t < 1" -- ++ show t ++ " < 1"
-              | t <= 0 = fst $ rawSplit t b
-              | t >= 1 = snd $ rawSplit t b
+extension t b | t > 0 && t < 1        = error $ "extension: 0 < t < 1" -- ++ show t ++ " < 1"
+              | t <= 0                = fst $ rawSplit t b
+              | otherwise {- t >= 1-} = snd $ rawSplit t b
 
 -- | Extend a Bezier curve to a parameter value t outside the interval [0,1].
 --   For t < 0, returns a Bezier representation of the section of the underlying curve
 --   from parameter value t until paramater value 1. For t > 1, the same from 0 to t.
 extend :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
       => r -> BezierSpline n d r -> BezierSpline n d r
-extend t b | t > 0 && t < 1 = error $ "extend: 0 < t < 1" -- ++ show t ++ " < 1"
-           | t <= 0 = snd $ rawSplit t b
-           | t >= 1 = fst $ rawSplit t b
+extend t b | t > 0 && t < 1         = error $ "extend: 0 < t < 1" -- ++ show t ++ " < 1"
+           | t <= 0                 = snd $ rawSplit t b
+           | otherwise {- t >= 1 -} = fst $ rawSplit t b
  
 -- | Split without parameter check. If t outside [0,1], will actually extend the curve
 --   rather than split it.
@@ -220,12 +217,15 @@ collect t = go . LSeq.toSeq
 
 -- | Split a Bezier curve into many pieces. 
 --   Todo: filter out duplicate parameter values!
-splitMany :: forall n d r. (KnownNat n, Arity d, Ord r, Fractional r) => [r] -> BezierSpline n d r -> [BezierSpline n d r]
-splitMany ts b = splitManySorted (sort $ map (restrict "splitMany" 0 1) ts) b
-  where splitManySorted []       b = [b]
-        splitManySorted (t : ts) b = (fst $ split t b) : splitManySorted (map (rescale t) ts) (snd $ split t b)
+splitMany     :: forall n d r. (KnownNat n, Arity d, Ord r, Fractional r)
+              => [r] -> BezierSpline n d r -> [BezierSpline n d r]
+splitMany ts0 = splitManySorted (sort $ map (restrict "splitMany" 0 1) ts0)
+
+  where splitManySorted []       b' = [b']
+        splitManySorted (t : ts) b' = let (a,c) = split t b'
+                                      in a : splitManySorted (map (rescale t) ts) c
         rescale :: r -> r -> r
-        rescale 1 u = 1
+        rescale 1 _ = 1
         rescale t u = (u - t) / (1 - t)
 
 
@@ -346,7 +346,7 @@ restrict f l r x | l > r = error $ f <> ": restrict [l,r] is not an interval" --
 
 
 binarySearch                                    :: (Ord r, Fractional r) => (r -> r) -> r -> r -> r
-binarySearch f l r | abs (f l - f r) < treshold = restrict "binarySearch" l r $ m
+binarySearch f l r | abs (f l - f r) < treshold = restrict "binarySearch" l r   m
                    | derivative f m  > 0        = restrict "binarySearch" l r $ binarySearch f l m
                    | otherwise                  = restrict "binarySearch" l r $ binarySearch f m r
   where m = (l + r) / 2
@@ -370,8 +370,8 @@ convexHullB b = convexHull $ NonEmpty.fromList $ map (:+ ()) $ F.toList $ _contr
 intersectB :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
 intersectB treshold a b 
   | a == b    = [fst $ endPoints b, snd $ endPoints b] -- should really return the whole curve
-  | otherwise = let [a1, a2, a3, a4] = F.toList $ _controlPoints a
-                    [b1, b2, b3, b4] = F.toList $ _controlPoints b
+  | otherwise = let [a1, _a2, _a3, a4] = F.toList $ _controlPoints a
+                    [b1, _b2, _b3, b4] = F.toList $ _controlPoints b
                 in    intersectPointsPoints     treshold [a1, a4] [b1, b4]
                    ++ intersectPointsInterior   treshold [a1, a4] b
                    ++ intersectPointsInterior   treshold [b1, b4] a
@@ -386,7 +386,7 @@ intersectPointsPoints treshold ps qs = filter (\q -> any (closeEnough treshold q
   
 intersectPointsInterior :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [Point 2 r]
 intersectPointsInterior treshold ps b = 
-  let [b1, b2, b3, b4] = F.toList $ _controlPoints b
+  let [b1, _b2, _b3, b4] = F.toList $ _controlPoints b
       nearc p = closeEnough treshold (snap treshold b p) p
       near1 = closeEnough treshold b1
       near4 = closeEnough treshold b4
@@ -492,7 +492,7 @@ locallyExtremalParameters i curve =
       a = 3 * x4 -  9 * x3 + 9 * x2 - 3 * x1
       b = 6 * x1 - 12 * x2 + 6 * x3
       c = 3 * x2 -  3 * x1
-  in filter (\i -> 0 <= i && i <= 1) $ solveQuadraticEquation a b c
+  in filter (\j -> 0 <= j && j <= 1) $ solveQuadraticEquation a b c
 
 
 -- | Solve equation of the form ax^2 + bx + c = 0.
@@ -500,9 +500,9 @@ locallyExtremalParameters i curve =
 --   Attempt at a somewhat robust implementation.
 solveQuadraticEquation :: (Ord r, Enum r, Floating r) => r -> r -> r -> [r]
 solveQuadraticEquation 0 0 0 = [0..] -- error "infinite solutions"
-solveQuadraticEquation a 0 0 = [0]
-solveQuadraticEquation 0 b 0 = [0]
-solveQuadraticEquation 0 0 c = []
+solveQuadraticEquation _ 0 0 = [0]
+solveQuadraticEquation 0 _ 0 = [0]
+solveQuadraticEquation 0 0 _ = []
 solveQuadraticEquation a b 0 = sort [0, -b / a]
 solveQuadraticEquation a 0 c | (-c / a) <  0 = []
                              | (-c / a) == 0 = [0]
