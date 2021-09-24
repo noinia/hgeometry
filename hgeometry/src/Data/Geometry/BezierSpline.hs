@@ -138,9 +138,8 @@ instance PointFunctor (BezierSpline n d) where
 
 -- | Convert a quadratic bezier to a cubic bezier.
 quadToCubic :: Fractional r => BezierSpline 2 2 r -> BezierSpline 3 2 r
-quadToCubic (Bezier2 a b c) =
-  Bezier3 a ((1/3)*^(Point (toVec a ^+^ 2*^toVec b))) ((1/3)*^(Point (2*^ toVec b ^+^ toVec c))) c
-
+quadToCubic (Bezier2 a (Point b) c) =
+  Bezier3 a (Point $ (1/3)*^ (toVec a ^+^ 2*^b)) (Point $ (1/3)*^ (2*^ b ^+^ toVec c)) c
 
 --------------------------------------------------------------------------------
 
@@ -192,8 +191,8 @@ convexHullB = convexHull . NonEmpty.fromList . fmap ext . F.toList . _controlPoi
 -- | Split a Bezier curve at time t in [0, 1] into two pieces.
 split                 :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
                       => r -> BezierSpline n d r -> (BezierSpline n d r, BezierSpline n d r)
-split t b | t < 0     = error $ "split: t < 0" -- ++ show t ++ " < 0"
-          | t > 1     = error $ "split: t > 1" -- ++ show t ++ " > 1"
+split t b | t < 0     = error "split: t < 0" -- ++ show t ++ " < 0"
+          | t > 1     = error "split: t > 1" -- ++ show t ++ " > 1"
           | otherwise = splitRaw t b
 
 
@@ -367,6 +366,8 @@ flat r b = let p = fst $ endPoints b
            in qdA p q < r ^ 2 || all e [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 -- seems this is now covered by approximate
+--
+--
 -- -- | Approximate curve as line segments where no point on the curve is further away
 -- --   from the nearest line segment than the given tolerance.
 -- lineApproximate :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> [Point 2 r]
@@ -377,6 +378,28 @@ flat r b = let p = fst $ endPoints b
 --   | otherwise =
 --     let (b1, b2) = split 0.5 bezier
 --     in lineApproximate eps b1 ++ tail (lineApproximate eps b2)
+
+-- If both control points are on the same side of the straight line from the start and end
+-- points then the curve is guaranteed to be within 3/4 of the distance from the straight line
+-- to the furthest control point.
+-- Otherwise, if the control points are on either side of the straight line, the curve is
+-- guaranteed to be within 4/9 of the maximum distance from the straight line to a control
+-- point.
+-- Also: 3/4 * sqrt(v) = sqrt (9/16 * v)
+--       4/9 * sqrt(v) = sqrt (16/81 * v)
+-- So: 3/4 * sqrt(v) < eps =>
+--     sqrt(9/16 * v) < eps =>
+--     9/16*v < eps*eps
+-- | Return True if the curve is definitely completely covered by a line of thickness
+--   twice the given tolerance. May return false negatives but not false positives.
+colinear :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> Bool
+colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
+  where ld = flip sqDistanceTo (lineThrough a d)
+        sameSide = ccw a d b == ccw a d c
+        maxDist = max (ld b) (ld c)
+        sqBound
+          | sameSide  = 9/16  * maxDist
+          | otherwise = 16/81 * maxDist
 
 --------------------------------------------------------------------------------
 
@@ -467,7 +490,7 @@ closeEnough :: (Arity d, Ord r, Fractional r) => r -> Point d r -> Point d r -> 
 closeEnough treshold p q = qdA p q < treshold ^ 2
 
 intersectPointsPoints :: (Ord r, Fractional r) => r -> [Point 2 r] -> [Point 2 r] -> [Point 2 r]
-intersectPointsPoints treshold ps qs = filter (\q -> any (closeEnough treshold q) ps) qs
+intersectPointsPoints treshold ps = filter (\q -> any (closeEnough treshold q) ps)
 
 intersectPointsInterior :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> [Point 2 r]
 intersectPointsInterior treshold ps b =
@@ -554,6 +577,20 @@ extremal pos i b =
 -}
 
 
+--------------------------------------------------------------------------------
+
+snapEndpoints           :: (KnownNat n, Arity d, Ord r, Fractional r)
+                        => Point d r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
+snapEndpoints p q curve =
+  let points = F.toList $ _controlPoints curve
+      middle = tail . init $ points
+      new    = [p] ++ middle ++ [q]
+  in  fromPointSeq $ Seq.fromList new
+
+
+-- | Snap a point close to a Bezier curve to the curve.
+snap   :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> Point 2 r -> Point 2 r
+snap treshold b = evaluate b . parameterOf treshold b
 
 --------------------------------------------------------------------------------
 -- * Helper functions
@@ -588,46 +625,6 @@ almostzero x = abs x < epsilon
 --   TODO: Should be different depending on the type.
 epsilon :: Floating r => r
 epsilon = 0.0001
-
-
---------------------------------------------------------------------------------
-
-snapEndpoints           :: (KnownNat n, Arity d, Ord r, Fractional r)
-                        => Point d r -> Point d r -> BezierSpline n d r -> BezierSpline n d r
-snapEndpoints p q curve =
-  let points = F.toList $ _controlPoints curve
-      middle = tail . init $ points
-      new    = [p] ++ middle ++ [q]
-  in  fromPointSeq $ Seq.fromList new
-
-
--- | Snap a point close to a Bezier curve to the curve.
-snap   :: (KnownNat n, Ord r, RealFrac r) => r -> BezierSpline n 2 r -> Point 2 r -> Point 2 r
-snap treshold b = evaluate b . parameterOf treshold b
-
-
--- If both control points are on the same side of the straight line from the start and end
--- points then the curve is guaranteed to be within 3/4 of the distance from the straight line
--- to the furthest control point.
--- Otherwise, if the control points are on either side of the straight line, the curve is
--- guaranteed to be within 4/9 of the maximum distance from the straight line to a control
--- point.
--- Also: 3/4 * sqrt(v) = sqrt (9/16 * v)
---       4/9 * sqrt(v) = sqrt (16/81 * v)
--- So: 3/4 * sqrt(v) < eps =>
---     sqrt(9/16 * v) < eps =>
---     9/16*v < eps*eps
--- | Return True if the curve is definitely completely covered by a line of thickness
---   twice the given tolerance. May return false negatives but not false positives.
-colinear :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> Bool
-colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
-  where ld = flip sqDistanceTo (lineThrough a d)
-        sameSide = ccw a d b == ccw a d c
-        maxDist = max (ld b) (ld c)
-        sqBound
-          | sameSide  = 9/16  * maxDist
-          | otherwise = 16/81 * maxDist
-
 
 
 
