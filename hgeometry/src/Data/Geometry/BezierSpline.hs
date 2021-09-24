@@ -71,7 +71,8 @@ newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq (1+n) (Point 
 -- makeLenses ''BezierSpline
 
 -- | Bezier control points. With n degrees, there are n+1 control points.
-controlPoints :: Iso (BezierSpline n1 d1 r1) (BezierSpline n2 d2 r2) (LSeq (1+n1) (Point d1 r1)) (LSeq (1+n2) (Point d2 r2))
+controlPoints :: Iso (BezierSpline n1 d1 r1)     (BezierSpline n2 d2 r2)
+                     (LSeq (1+n1) (Point d1 r1)) (LSeq (1+n2) (Point d2 r2))
 controlPoints = iso _controlPoints BezierSpline
 
 -- | Quadratic Bezier Spline
@@ -87,6 +88,11 @@ pattern Bezier3 p q r s <- (F.toList . LSeq.take 4 . _controlPoints -> [p,q,r,s]
   where
     Bezier3 p q r s = fromPointSeq . Seq.fromList $ [p,q,r,s]
 {-# COMPLETE Bezier3 #-}
+
+-- | Constructs the Bezier Spline from a given sequence of points.
+fromPointSeq :: Seq (Point d r) -> BezierSpline n d r
+fromPointSeq = BezierSpline . LSeq.promise . LSeq.fromSeq
+
 
 deriving instance (Arity d, Eq r) => Eq (BezierSpline n d r)
 
@@ -110,12 +116,6 @@ allDifferent n = take n . Set.toList . go maxattempts mempty <$> QC.infiniteList
                   | otherwise       = go (t-1) (Set.insert x s) xs
 -}
 
-
--- | Constructs the Bezier Spline from a given sequence of points.
-fromPointSeq :: Seq (Point d r) -> BezierSpline n d r
-fromPointSeq = BezierSpline . LSeq.promise . LSeq.fromSeq
-
-
 instance (Arity d, Show r) => Show (BezierSpline n d r) where
   show (BezierSpline ps) =
     mconcat [ "BezierSpline", show $ length ps - 1, " ", show (F.toList ps) ]
@@ -138,13 +138,13 @@ instance PointFunctor (BezierSpline n d) where
 
 -- | Reverse a BezierSpline
 reverse :: (Arity d, Ord r, Num r) => BezierSpline n d r -> BezierSpline n d r
-reverse = controlPoints %~ (LSeq.promise . LSeq.fromSeq . Seq.fromList . Prelude.reverse . F.toList)
+reverse = controlPoints %~ LSeq.reverse
 
 
 -- | Evaluate a BezierSpline curve at time t in [0, 1]
 --
 -- pre: \(t \in [0,1]\)
-evaluate    :: (KnownNat n, Arity d, Ord r, Num r) => BezierSpline n d r -> r -> Point d r
+evaluate     :: (Arity d, Eq r, Num r) => BezierSpline n d r -> r -> Point d r
 evaluate b 0 = fst $ endPoints b
 evaluate b 1 = snd $ endPoints b
 evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
@@ -159,10 +159,14 @@ evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
 tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r
 tangent b = b^?!controlPoints.ix 1 .-. b^?!controlPoints.ix 0
 
--- | Extract the endpoints.
-endPoints :: forall n d r. (KnownNat n, Arity d, Ord r, Num r) => BezierSpline n d r -> (Point d r, Point d r)
-endPoints b = let n = fromIntegral $ natVal (C @n)
-              in (b^?!controlPoints.ix 0, b^?!controlPoints.ix n)
+-- | Return the endpoints of the Bezier spline.
+endPoints   :: BezierSpline n d r -> (Point d r, Point d r)
+endPoints b = let (p LSeq.:<| _) = b^.controlPoints
+                  (_ LSeq.:|> q) = b^.controlPoints
+              in (p,q)
+
+
+
 
 -- | Restrict a Bezier curve to th,e piece between parameters t < u in [0, 1].
 subBezier     :: (KnownNat n, Arity d, Ord r, Num r)
@@ -214,6 +218,9 @@ collect t = go . LSeq.toSeq
       _                -> error "collect: absurd"
 
     blend p q = p .+^ t *^ (q .-. p)
+
+
+
 
 -- | Split a Bezier curve into many pieces. 
 --   Todo: filter out duplicate parameter values!
@@ -316,10 +323,12 @@ parameterInterior treshold b p | sqrad (F.toList $ view controlPoints b) < (0.5 
 --   parameter value, which might also be smaller than 0 or larger than 1.
 --   (For points far away from the curve, the function will return the parameter value of
 --   an approximate locally closest point to the input point.)
+-- 
 --   This implementation is not robust: might return a locally closest point on the curve 
 --   even though the point lies on another part of the curve. For points on the actual
 --   curve, use parameterOf instead.
-extendedParameterOf      :: (Arity d, KnownNat n, Ord r, Fractional r) => r -> BezierSpline n d r -> Point d r -> r
+extendedParameterOf      :: (Arity d, KnownNat n, Ord r, Fractional r)
+                         => r -> BezierSpline n d r -> Point d r -> r
 extendedParameterOf treshold b p | p == fst (endPoints b) = 0
                                  | p == snd (endPoints b) = 1
                                  | otherwise = binarySearch (qdA p . evaluate b) (-100) 100
@@ -360,8 +369,8 @@ derivative f x = (f (x + delta) - f x) / delta
 
 -- | Compute the convex hull of the control polygon of a 2-dimensional Bezier curve.
 --   Should also work in any dimension, but convex hull is not yet implemented.
-convexHullB :: (KnownNat n, Ord r, Fractional r) => BezierSpline n 2 r -> ConvexPolygon () r
-convexHullB b = convexHull $ NonEmpty.fromList $ map (:+ ()) $ F.toList $ _controlPoints b
+convexHullB :: (Ord r, Fractional r) => BezierSpline n 2 r -> ConvexPolygon () r
+convexHullB = convexHull . NonEmpty.fromList . fmap ext . F.toList . _controlPoints
 
 -- | Given two Bezier curves, list all intersection points.
 --   Not exact, since for degree >= 3 there is no closed form.
