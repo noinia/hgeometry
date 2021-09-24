@@ -30,7 +30,6 @@ module Data.Geometry.BezierSpline(
   , snap
   , intersectB
   , colinear
-  , lineApproximate
   , quadToCubic
   ) where
 
@@ -344,7 +343,7 @@ merge treshold b1 b2 = let (p1, q1) = endPoints b1
 
 
 -- | Approximate Bezier curve by Polyline with given resolution.  That
--- is, every point on the approximation will have distance at most r
+-- is, every point on the approximation will have distance at most res
 -- to the Bezier curve.
 approximate     :: (KnownNat n, Arity d, Ord r, Fractional r)
                 => r -> BezierSpline n d r -> PolyLine d () r
@@ -367,16 +366,17 @@ flat r b = let p = fst $ endPoints b
                e t = sqDistanceToSeg (evaluate b t) s < r ^ 2
            in qdA p q < r ^ 2 || all e [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
--- | Approximate curve as line segments where no point on the curve is further away
---   from the nearest line segment than the given tolerance.
-lineApproximate :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> [Point 2 r]
-lineApproximate eps bezier
-  | colinear eps bezier =
-    [ bezier^.controlPoints.to LSeq.head
-    , bezier^.controlPoints.to LSeq.last ]
-  | otherwise =
-    let (b1, b2) = split 0.5 bezier
-    in lineApproximate eps b1 ++ tail (lineApproximate eps b2)
+-- seems this is now covered by approximate
+-- -- | Approximate curve as line segments where no point on the curve is further away
+-- --   from the nearest line segment than the given tolerance.
+-- lineApproximate :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> [Point 2 r]
+-- lineApproximate eps bezier
+--   | colinear eps bezier =
+--     [ bezier^.controlPoints.to LSeq.head
+--     , bezier^.controlPoints.to LSeq.last ]
+--   | otherwise =
+--     let (b1, b2) = split 0.5 bezier
+--     in lineApproximate eps b1 ++ tail (lineApproximate eps b2)
 
 --------------------------------------------------------------------------------
 
