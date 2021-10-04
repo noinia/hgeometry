@@ -48,13 +48,13 @@ specND = describe "BezierSpline" $ do
              -- approximate r b == Maarten.approximate r (toMaartenBezier b)
              testApproximate treshold b
 
-             -- note that this currently tests only for some limited range of r (between 0 and 1)
-           it "parameterOf" $ property $ \(T treshold) (T t) (randomVector :: Vector 2 R) (b :: BezierSpline 3 2 R) ->
-             let perturbation = makePerturbation treshold randomVector
-                 p  = evaluate b t .+^ perturbation
-                 t' = parameterOf treshold b p
-                 p' = evaluate b t'
-             in squaredEuclideanDist p p' <= (2 * treshold)^2
+           --   -- note that this currently tests only for some limited range of r (between 0 and 1)
+           -- it "parameterOf" $ property $ \(T treshold) (T t) (randomVector :: Vector 2 R) (b :: BezierSpline 3 2 R) ->
+           --   let perturbation = makePerturbation treshold randomVector
+           --       p  = evaluate b t .+^ perturbation
+           --       t' = parameterOf treshold b p
+           --       p' = evaluate b t'
+           --   in squaredEuclideanDist p p' <= (2 * treshold)^2
 
 -- | This function tests whether the result of approximate is indeed within treshold from the curve.
 --   The implementation is not exact: it takes the midpoint of each segment of the approximation and
