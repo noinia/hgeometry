@@ -447,7 +447,7 @@ extendedParameterOf      :: (Arity d, KnownNat n, Ord r, Fractional r)
                          => r -> BezierSpline n d r -> Point d r -> r
 extendedParameterOf treshold b p | p == fst (endPoints b) = 0
                                  | p == snd (endPoints b) = 1
-                                 | otherwise = binarySearch (qdA p . evaluate b) (-100) 100
+                                 | otherwise = binarySearch treshold (qdA p . evaluate b) (-100) 100
 
 ----------------------------------------
 -- * Stuff to implement parameterOf and extendedParameterOf
@@ -638,12 +638,13 @@ restrict f l r x | l > r = error $ f <> ": restrict [l,r] is not an interval" --
                  | otherwise = x
 
 
-binarySearch                                    :: (Ord r, Fractional r) => (r -> r) -> r -> r -> r
-binarySearch f l r | abs (f l - f r) < treshold = restrict "binarySearch" l r   m
-                   | derivative f m  > 0        = restrict "binarySearch" l r $ binarySearch f l m
-                   | otherwise                  = restrict "binarySearch" l r $ binarySearch f m r
+binarySearch                                    :: (Ord r, Fractional r)
+                                                => r -> (r -> r) -> r -> r -> r
+binarySearch treshold f l r
+    | abs (f l - f r) < treshold = restrict "binarySearch" l r   m
+    | derivative f m  > 0        = restrict "binarySearch" l r $ binarySearch treshold f l m
+    | otherwise                  = restrict "binarySearch" l r $ binarySearch treshold f m r
   where m = (l + r) / 2
-        treshold = 0.000001
 
 derivative     :: Fractional r => (r -> r) -> r -> r
 derivative f x = (f (x + delta) - f x) / delta
