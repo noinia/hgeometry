@@ -54,14 +54,14 @@ specND = describe "BezierSpline" $ do
                  p  = evaluate b t .+^ perturbation
                  t' = parameterOf treshold b p
                  p' = evaluate b t'
-             in squaredEuclideanDist p p' < 2 * treshold^2
+             in squaredEuclideanDist p p' <= (2 * treshold)^2
 
 -- | This function tests whether the result of approximate is indeed within treshold from the curve.
 --   The implementation is not exact: it takes the midpoint of each segment of the approximation and
 --   snaps it to the curve. 
 testApproximate :: R -> BezierSpline 3 2 R -> Bool
 testApproximate treshold curve =
-  let Just polyline  = fromPoints $ map (:+ ()) $ approximate treshold curve
+  let polyline  = approximate treshold curve
       segs      = edgeSegments polyline
       midpoints = map (\seg -> average [view (start . core) seg, view (end . core) seg]) $ F.toList segs
   in all (testSnap treshold curve) midpoints
