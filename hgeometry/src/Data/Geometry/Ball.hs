@@ -255,9 +255,12 @@ type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
                                                                 , (Point 2 r, Point 2 r)
                                                                 ]
 
-instance (Ord r, Floating r) => LineSegment 2 p r `HasIntersectionWith` Circle q r
-  -- TODO: This can probably also just be Fractional; only when the supporting line
-  -- touches the circle we shoul decide if this touching point actually lies on the segment.
+instance (Ord r, Floating r) => LineSegment 2 p r `HasIntersectionWith` Circle q r where
+  seg `intersects` (Circle (c :+ _) r) = let closest = pointClosestTo  c  (supportingLine seg)
+                                         in case squaredEuclideanDist c closest `compare` r of
+                                              LT -> True
+                                              EQ -> closest `intersects` seg
+                                              GT -> False
 
 instance (Ord r, Floating r) => LineSegment 2 p r `IsIntersectableWith` Circle q r where
 
