@@ -198,7 +198,7 @@ type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection
                                                        ]
 
 
-instance (Ord r, Fractional r) => Line 2 r `HasIntersectionWith` Circle p r where
+instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Circle p r where
   (Line p' v) `intersects` (Circle (c :+ _) r) = discr >= 0
     where
       (Vector2 vx vy)   = v
