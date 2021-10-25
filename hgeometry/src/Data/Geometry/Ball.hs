@@ -255,7 +255,7 @@ type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
                                                                 , (Point 2 r, Point 2 r)
                                                                 ]
 
-instance (Ord r, Floating r) => LineSegment 2 p r `HasIntersectionWith` Circle q r where
+instance (Ord r, Fractional r) => LineSegment 2 p r `HasIntersectionWith` Circle q r where
   seg `intersects` (Circle (c :+ _) r) = let closest = pointClosestTo  c  (supportingLine seg)
                                          in case squaredEuclideanDist c closest `compare` r of
                                               LT -> True
