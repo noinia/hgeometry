@@ -198,10 +198,26 @@ type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection
                                                        ]
 
 
+instance (Ord r, Fractional r) => Line 2 r `HasIntersectionWith` Circle p r where
+  (Line p' v) `intersects` (Circle (c :+ _) r) = discr >= 0
+    where
+      (Vector2 vx vy)   = v
+      -- (px, py) is the vector/point after translating the circle s.t. it is centered at the
+      -- origin
+      (Vector2 px py) = p' .-. c
+
+      -- let q lambda be the intersection point. We solve the following equation
+      -- solving the equation (q_x)^2 + (q_y)^2 = r^2 then yields the equation
+      -- L^2(vx^2 + vy^2) + L2(px*vx + py*vy) + px^2 + py^2 = 0
+      -- where L = \lambda
+      aa                   = vx^2 + vy^2
+      bb                   = 2 * (px * vx + py * vy)
+      cc                   = px^2 + py^2 - r^2
+      discr                = bb^2 - 4*aa*cc
+
 instance (Ord r, Floating r) => Line 2 r `IsIntersectableWith` Circle p r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
-
   (Line p' v) `intersect` (Circle (c :+ _) r) = case discr `compare` 0 of
                                                 LT -> coRec NoIntersection
                                                 EQ -> coRec . Touching $ q' (lambda (+))
@@ -239,6 +255,9 @@ type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
                                                                 , (Point 2 r, Point 2 r)
                                                                 ]
 
+instance (Ord r, Floating r) => LineSegment 2 p r `HasIntersectionWith` Circle q r
+  -- TODO: This can probably also just be Fractional; only when the supporting line
+  -- touches the circle we shoul decide if this touching point actually lies on the segment.
 
 instance (Ord r, Floating r) => LineSegment 2 p r `IsIntersectableWith` Circle q r where
 

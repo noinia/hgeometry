@@ -129,6 +129,7 @@ type instance NumType   (Interval a r) = r
 
 type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
 
+instance Ord r => Interval a r `HasIntersectionWith` Interval a r
 instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection

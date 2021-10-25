@@ -63,6 +63,8 @@ type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical a r) =
   '[Rectangle (a,a) r]
 
 
+instance Ord r => Slab o a r `HasIntersectionWith` Slab o a r
+
 instance Ord r => Slab o a r `IsIntersectableWith` Slab o a r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -70,6 +72,9 @@ instance Ord r => Slab o a r `IsIntersectableWith` Slab o a r where
         H (\NoIntersection -> coRec NoIntersection)
      :& H (\i''            -> coRec (Slab i'' :: Slab o a r))
      :& RNil
+
+instance Slab Horizontal a r `HasIntersectionWith` Slab Vertical a r where
+  _ `intersects` _ = True
 
 instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical a r where
   nonEmptyIntersection _ _ _ = True
@@ -105,6 +110,9 @@ type instance IntersectionOf (Line 2 r) (Slab o a r) =
   [NoIntersection, Line 2 r, LineSegment 2 a r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
+         Line 2 r `HasIntersectionWith` Slab o a r
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
          Line 2 r `IsIntersectableWith` Slab o a r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -132,6 +140,9 @@ type instance IntersectionOf (SubLine 2 p s r) (Slab o a r) =
   [NoIntersection, SubLine 2 () s r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
+         SubLine 2 a r r `HasIntersectionWith` Slab o a r
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
          SubLine 2 a r r `IsIntersectableWith` Slab o a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -151,6 +162,9 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
 
 type instance IntersectionOf (LineSegment 2 p r) (Slab o a r) =
   [NoIntersection, LineSegment 2 () r]
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
+         LineSegment 2 a r `HasIntersectionWith` Slab o a r
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
          LineSegment 2 a r `IsIntersectableWith` Slab o a r where

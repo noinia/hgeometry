@@ -234,16 +234,23 @@ type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
 
 
 instance {-# OVERLAPPING #-} (Ord r, Num r)
+         => Point 2 r `HasIntersectionWith` LineSegment 2 p r where
+  intersects = onSegment2
+
+instance {-# OVERLAPPING #-} (Ord r, Num r)
          => Point 2 r `IsIntersectableWith` LineSegment 2 p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  intersects = onSegment2
   p `intersect` seg | p `intersects` seg = coRec p
                     | otherwise          = coRec NoIntersection
+
+
+instance {-# OVERLAPPABLE #-} (Ord r, Fractional r, Arity d)
+         => Point d r `HasIntersectionWith` LineSegment d p r where
+  intersects = onSegment
 
 instance {-# OVERLAPPABLE #-} (Ord r, Fractional r, Arity d)
          => Point d r `IsIntersectableWith` LineSegment d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  intersects = onSegment
   p `intersect` seg | p `intersects` seg = coRec p
                     | otherwise          = coRec NoIntersection
 
@@ -265,7 +272,8 @@ p `onSegment` (LineSegment up vp) =
   -- work in higher dimensions that might allow us to drop the
   -- Fractional constraint
 
-
+instance (Ord r, Fractional r) =>
+         LineSegment 2 p r `HasIntersectionWith` LineSegment 2 p r
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` LineSegment 2 p r where
@@ -276,6 +284,9 @@ instance (Ord r, Fractional r) =>
       :& H coRec
       :& H (coRec . subLineToSegment)
       :& RNil
+
+instance (Ord r, Fractional r) =>
+         LineSegment 2 p r `HasIntersectionWith` Line 2 r where
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` Line 2 r where

@@ -171,6 +171,8 @@ type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
                                                      , Line 2 r
                                                      ]
 
+instance (Eq r, Fractional r) => Line 2 r `HasIntersectionWith` Line 2 r
+
 instance (Eq r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
 
 
