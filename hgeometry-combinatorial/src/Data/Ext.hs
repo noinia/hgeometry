@@ -21,7 +21,7 @@ import Data.Biapplicative
 import Data.Bifoldable
 import Data.Bifunctor.Apply
 import Data.Bitraversable
-import Data.Default
+-- import Data.Default
 import Data.Functor.Apply (liftF2)
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
@@ -75,8 +75,8 @@ instance (FromJSON core, FromJSON extra) => FromJSON (core :+ extra) where
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
 
-instance (Default a, Default b) => Default (a :+ b) where
-  def = def :+ def
+-- instance (Default a, Default b) => Default (a :+ b) where
+--   def = def :+ def
 
 -- | Access the core of an extended value.
 _core :: (core :+ extra) -> core
