@@ -886,10 +886,7 @@ type family IntersectionOf g h :: [*]
 
 -- | Helper to produce a corec
 coRec :: a ∈ as => a -> CoRec Identity as
-
--- | Class relationship between intersectable geometric objects.
-class IsIntersectableWith g h
-intersect :: IsIntersectableWith g h => g -> h -> Intersection g h
+class HasIntersectionWith g h
 
 -- | g <a>intersects</a> h <a>=</a> The intersection of g and h is
 --   non-empty.
@@ -897,7 +894,19 @@ intersect :: IsIntersectableWith g h => g -> h -> Intersection g h
 --   The default implementation computes the intersection of g and h, and
 --   uses nonEmptyIntersection to determine if the intersection is
 --   non-empty.
-intersects :: IsIntersectableWith g h => g -> h -> Bool
+intersects :: HasIntersectionWith g h => g -> h -> Bool
+
+-- | g <a>intersects</a> h <a>=</a> The intersection of g and h is
+--   non-empty.
+--   
+--   The default implementation computes the intersection of g and h, and
+--   uses nonEmptyIntersection to determine if the intersection is
+--   non-empty.
+intersects :: (HasIntersectionWith g h, IsIntersectableWith g h) => g -> h -> Bool
+
+-- | Class relationship between intersectable geometric objects.
+class HasIntersectionWith g h => IsIntersectableWith g h
+intersect :: IsIntersectableWith g h => g -> h -> Intersection g h
 
 -- | Helper to implement <a>intersects</a>.
 nonEmptyIntersection :: IsIntersectableWith g h => proxy g -> proxy h -> Intersection g h -> Bool
@@ -1579,8 +1588,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aLyQ a_aLRF. Lens (Permutation a_aLyQ) (Permutation a_aLRF) (Vector (Orbit a_aLyQ)) (Vector (Orbit a_aLRF))
-indexes :: forall a_aLyQ. Lens' (Permutation a_aLyQ) (Vector (Int, Int))
+orbits :: forall a_aLB3 a_aLTS. Lens (Permutation a_aLB3) (Permutation a_aLTS) (Vector (Orbit a_aLB3)) (Vector (Orbit a_aLTS))
+indexes :: forall a_aLB3. Lens' (Permutation a_aLB3) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -4259,6 +4268,7 @@ instance Data.Functor.Classes.Show1 Data.Range.Range
 instance GHC.Read.Read a => GHC.Read.Read (Data.Range.Range a)
 instance Data.Functor.Classes.Read1 Data.Range.Range
 instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.Range r)
+instance GHC.Classes.Ord a => Data.Intersection.HasIntersectionWith (Data.Range.Range a) (Data.Range.Range a)
 instance GHC.Classes.Ord a => Data.Intersection.IsIntersectableWith (Data.Range.Range a) (Data.Range.Range a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Range.EndPoint a)
 instance Data.Functor.Classes.Show1 Data.Range.EndPoint
