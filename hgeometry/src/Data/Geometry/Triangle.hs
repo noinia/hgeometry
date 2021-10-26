@@ -182,6 +182,8 @@ q `onTriangleRelaxed` t = inTriangleRelaxed q t /= Outside
 type instance IntersectionOf (Line 2 r) (Triangle 2 p r) =
   [ NoIntersection, Point 2 r, LineSegment 2 () r ]
 
+instance (Fractional r, Ord r) => Line 2 r `HasIntersectionWith` Triangle 2 p r
+
 instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` Triangle 2 p r where
    nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -206,6 +208,8 @@ instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` Triangle 2 p r 
 
 type instance IntersectionOf (Line 3 r) (Triangle 3 p r) =
   [ NoIntersection, Point 3 r, LineSegment 3 () r ]
+
+instance (Fractional r, Ord r) => Line 3 r `HasIntersectionWith` Triangle 3 p r
 
 {- HLINT ignore "Use const" -}
 instance (Fractional r, Ord r) => Line 3 r `IsIntersectableWith` Triangle 3 p r where

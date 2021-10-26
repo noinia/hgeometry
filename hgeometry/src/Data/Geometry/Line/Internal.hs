@@ -171,6 +171,8 @@ type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
                                                      , Line 2 r
                                                      ]
 
+instance (Eq r, Fractional r) => Line 2 r `HasIntersectionWith` Line 2 r
+
 instance (Eq r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
 
 
@@ -234,6 +236,21 @@ toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine
     :& (H $ \(Point2 _ b)   -> Just (vy / vx,b))
     :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
     :& RNil
+
+-- -- | get values a,b,c s.t. the input line is described by ax + by + c = 0
+-- toLinearFunction' :: Line 2 r -> (r,r,r)
+-- toLinearFunction' ()
+
+-- | Given a point p and a line l, computes the point q on l closest to p.
+pointClosestTo              :: (Fractional r, Arity d) => Point d r -> Line d r -> Point d r
+pointClosestTo p (Line a m) = a .+^ (t0 *^ m)
+  where
+    -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
+    t0 = numerator / divisor
+    numerator = (p .-. a) `dot` m
+    divisor  = m `dot` m
+
+
 
 
 -- | Result of a side test

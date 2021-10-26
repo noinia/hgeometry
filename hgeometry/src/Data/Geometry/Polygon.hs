@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon
@@ -121,9 +122,11 @@ type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
 
 type instance IntersectionOf (Point 2 r) (Polygon t p r) = [NoIntersection, Point 2 r]
 
+instance (Fractional r, Ord r) => Point 2 r `HasIntersectionWith` Polygon t p r where
+  q `intersects` pg = q `inPolygon` pg /= Outside
+
 instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  q `intersects` pg = q `inPolygon` pg /= Outside
   q `intersect` pg | q `intersects` pg = coRec q
                    | otherwise         = coRec NoIntersection
 

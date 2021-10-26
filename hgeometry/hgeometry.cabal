@@ -1,5 +1,5 @@
 name:                hgeometry
-version:             0.12.0.1
+version:             0.12.0.4
 synopsis:            Geometric Algorithms, Data structures, and Data types.
 description:
   HGeometry provides some basic geometry types, and geometric algorithms and
@@ -14,7 +14,7 @@ author:              Frank Staals
 maintainer:          frank@fstaals.net
 -- copyright:
 
-tested-with:         GHC >= 8.2
+tested-with:         GHC >= 8.8
 
 category:            Geometry
 build-type:          Simple
@@ -141,6 +141,7 @@ library
                     Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
                     Algorithms.Geometry.DelaunayTriangulation.Naive
 
+                    Algorithms.Geometry.PolyLineSimplification.ImaiIri
                     Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 
                     Algorithms.Geometry.EuclideanMST
@@ -225,7 +226,7 @@ library
   -- other-extensions:
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.12.0.0
+              , hgeometry-combinatorial >= 0.12.0.3
 
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
@@ -260,6 +261,7 @@ library
               , nonempty-vector         >= 0.2.0.0
               , text                    >= 1.1.1.0
               , vector-algorithms
+              , witherable              >= 0.4
 
               , aeson                   >= 1.0
               , yaml                    >= 0.8

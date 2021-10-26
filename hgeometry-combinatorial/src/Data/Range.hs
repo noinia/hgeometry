@@ -18,7 +18,7 @@ module Data.Range( EndPoint(..)
                  , prettyShow
                  , lower, upper
                  , inRange, width, clipLower, clipUpper, midPoint, clampTo
-                 , isValid, covers
+                 , isValidRange, covers
 
                  , shiftLeft, shiftRight
                  ) where
@@ -208,6 +208,7 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
 
 type instance IntersectionOf (Range a) (Range a) = [ NoIntersection, Range a]
 
+instance Ord a => Range a `HasIntersectionWith` Range a
 instance Ord a => Range a `IsIntersectableWith` Range a where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -215,7 +216,7 @@ instance Ord a => Range a `IsIntersectableWith` Range a where
   -- The intersection is empty, if after clipping, the order of the end points is inverted
   -- or if the endpoints are the same, but both are open.
   (Range l u) `intersect` s = let i = clipLower' l . clipUpper' u $ s
-                              in if isValid i then coRec i else coRec NoIntersection
+                              in if isValidRange i then coRec i else coRec NoIntersection
 
 -- | Get the width of the interval
 --
@@ -257,12 +258,12 @@ clampTo (Range' l u) x = (x `max` l) `min` u
 -- | Clip the interval from below. I.e. intersect with the interval {l,infty),
 -- where { is either open, (, orr closed, [.
 clipLower     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
-clipLower l r = let r' = clipLower' l r in if isValid r' then Just r' else Nothing
+clipLower l r = let r' = clipLower' l r in if isValidRange r' then Just r' else Nothing
 
 -- | Clip the interval from above. I.e. intersect with (-\infty, u}, where } is
 -- either open, ), or closed, ],
 clipUpper     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
-clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothing
+clipUpper u r = let r' = clipUpper' u r in if isValidRange r' then Just r' else Nothing
 
 -- | Wether or not the first range completely covers the second one
 covers       :: forall a. Ord a => Range a -> Range a -> Bool
@@ -272,11 +273,11 @@ x `covers` y = (== Just y) . asA @(Range a) $ x `intersect` y
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is
 -- indeed smaller than the right endpoint. Note that we treat empty open-ranges
 -- as invalid as well.
-isValid             :: Ord a => Range a -> Bool
-isValid (Range l u) = case _unEndPoint l `compare` _unEndPoint u of
-                          LT                            -> True
-                          EQ | isClosed l || isClosed u -> True
-                          _                             -> False
+isValidRange             :: Ord a => Range a -> Bool
+isValidRange (Range l u) = case _unEndPoint l `compare` _unEndPoint u of
+                             LT                            -> True
+                             EQ | isClosed l || isClosed u -> True
+                             _                             -> False
 
 -- operation is unsafe, as it may produce an invalid range (where l > u)
 clipLower'                  :: Ord a => EndPoint a -> Range a -> Range a

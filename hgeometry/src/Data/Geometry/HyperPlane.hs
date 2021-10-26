@@ -48,9 +48,11 @@ instance (Arity d, Arity (d + 1), Fractional r) => IsTransformable (HyperPlane d
 
 type instance IntersectionOf (Point d r) (HyperPlane d r) = [NoIntersection, Point d r]
 
+instance (Num r, Eq r, Arity d) => Point d r `HasIntersectionWith` HyperPlane d r where
+  q `intersects` (HyperPlane p n) = n `dot` (q .-. p) == 0
+
 instance (Num r, Eq r, Arity d) => Point d r `IsIntersectableWith` HyperPlane d r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  q `intersects` (HyperPlane p n) = n `dot` (q .-. p) == 0
 
   q `intersect` h | q `intersects` h = coRec q
                   | otherwise        = coRec NoIntersection
@@ -103,6 +105,8 @@ instance OnSideUpDownTest (Plane r) where
                                    GT -> Above
 
 type instance IntersectionOf (Line 3 r) (Plane r) = [NoIntersection, Point 3 r, Line 3 r]
+
+instance (Eq r, Fractional r) => Line 3 r `HasIntersectionWith` Plane r
 
 instance (Eq r, Fractional r) => Line 3 r `IsIntersectableWith` Plane r where
   nonEmptyIntersection = defaultNonEmptyIntersection
