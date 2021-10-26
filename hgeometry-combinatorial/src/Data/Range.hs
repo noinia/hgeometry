@@ -208,6 +208,7 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
 
 type instance IntersectionOf (Range a) (Range a) = [ NoIntersection, Range a]
 
+instance Ord a => Range a `HasIntersectionWith` Range a
 instance Ord a => Range a `IsIntersectableWith` Range a where
 
   nonEmptyIntersection = defaultNonEmptyIntersection

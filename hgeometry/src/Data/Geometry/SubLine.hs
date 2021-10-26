@@ -141,6 +141,8 @@ type instance IntersectionOf (SubLine 2 p s r) (SubLine 2 q s r) = [ NoIntersect
                                                                    , Point 2 r
                                                                    , SubLine 2 p s r
                                                                    ]
+instance (Ord r, Fractional r) =>
+         SubLine 2 p r r `HasIntersectionWith` SubLine 2 p r r
 
 {- HLINT ignore "Redundant bracket" -}
 instance (Ord r, Fractional r) =>
@@ -164,6 +166,9 @@ instance (Ord r, Fractional r) =>
       s'' = asProperInterval . first (^.extra)
           $ s'&start.core .~ toOffset' (s'^.start.extra.core) l
               &end.core   .~ toOffset' (s'^.end.extra.core)   l
+
+instance (Ord r, Fractional r) =>
+         SubLine 2 p (UnBounded r) r `HasIntersectionWith` SubLine 2 p (UnBounded r) r
 
 instance (Ord r, Fractional r) =>
          SubLine 2 p (UnBounded r) r `IsIntersectableWith` SubLine 2 p (UnBounded r) r where

@@ -98,19 +98,19 @@ below = rightOf
 
 type instance IntersectionOf (Point d r) (HalfSpace d r) = [NoIntersection, Point d r]
 
-instance (Num r, Ord r, Arity d) => Point d r `IsIntersectableWith` HalfSpace d r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
-
+instance (Num r, Ord r, Arity d) => Point d r `HasIntersectionWith` HalfSpace d r where
   q `intersects` h = q `inHalfSpace` h /= Outside
 
+instance (Num r, Ord r, Arity d) => Point d r `IsIntersectableWith` HalfSpace d r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
   q `intersect` h | q `intersects` h = coRec q
                   | otherwise        = coRec NoIntersection
-
 
 
 type instance IntersectionOf (Line d r) (HalfSpace d r) =
     [NoIntersection, HalfLine d r, Line d r]
 
+instance (Fractional r, Ord r) => Line 2 r `HasIntersectionWith` HalfSpace 2 r
 
 instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` HalfSpace 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection

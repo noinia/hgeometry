@@ -48,24 +48,26 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) wh
 type instance IntersectionOf (Point d r) (Line d r) = [NoIntersection, Point d r]
 
 
-instance (Eq r, Fractional r, Arity d) => Point d r `IsIntersectableWith` Line d r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
+instance (Eq r, Fractional r, Arity d)      => Point d r `HasIntersectionWith` Line d r where
   intersects = onLine
-  p `intersect` l | p `intersects` l = coRec p
-                  | otherwise        = coRec NoIntersection
-
-instance {-# OVERLAPPING #-} (Ord r, Num r)
-        => Point 2 r `IsIntersectableWith` Line 2 r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Point 2 r `HasIntersectionWith` Line 2 r where
   intersects = onLine2
+
+instance (Eq r, Fractional r, Arity d)      => Point d r `IsIntersectableWith` Line d r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` l | p `intersects` l = coRec p
                   | otherwise        = coRec NoIntersection
 
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Point 2 r `IsIntersectableWith` Line 2 r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  p `intersect` l | p `intersects` l = coRec p
+                  | otherwise        = coRec NoIntersection
 
 type instance IntersectionOf (Line 2 r) (Boundary (Rectangle p r)) =
   [ NoIntersection, Point 2 r, (Point 2 r, Point 2 r) , LineSegment 2 () r]
 
-
+instance (Ord r, Fractional r)
+         => Line 2 r `HasIntersectionWith` Boundary (Rectangle p r)
 instance (Ord r, Fractional r)
          => Line 2 r `IsIntersectableWith` Boundary (Rectangle p r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -102,7 +104,8 @@ instance (Ord r, Fractional r)
 type instance IntersectionOf (Line 2 r) (Rectangle p r) =
   [ NoIntersection, Point 2 r, LineSegment 2 () r]
 
-
+instance (Ord r, Fractional r)
+         => Line 2 r `HasIntersectionWith` Rectangle p r
 instance (Ord r, Fractional r)
          => Line 2 r `IsIntersectableWith` Rectangle p r where
   nonEmptyIntersection = defaultNonEmptyIntersection

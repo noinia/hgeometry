@@ -106,6 +106,8 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
+instance (Ord r, Arity d) => Box d p r `HasIntersectionWith` Box d q r
+
 instance (Ord r, Arity d) => Box d p r `IsIntersectableWith` Box d q r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -144,6 +146,9 @@ instance Arity d => Bitraversable (Box d) where
 
 
 type instance IntersectionOf (Point d r) (Box d p r) = '[ NoIntersection, Point d r]
+
+instance (Arity d, Ord r) => Point d r `HasIntersectionWith` Box d p r where
+  intersects = inBox
 
 instance (Arity d, Ord r) => Point d r `IsIntersectableWith` Box d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
