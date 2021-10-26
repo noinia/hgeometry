@@ -633,8 +633,8 @@ epsilon = 0.0001
 --   This should never happen, but apparently it sometimes does?
 restrict :: (Ord r) => String -> r -> r -> r -> r
 restrict f l r x | l > r = error $ f <> ": restrict [l,r] is not an interval" --error $ f ++ ": restrict: [" ++ show l ++ ", " ++ show r ++ "] is not an interval"
-                 -- | x < l = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") l
-                 -- | x > r = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") r
+                 --   | x < l = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") l
+                 --   | x > r = trace (f ++ ": restricting " ++ show x ++ " to [" ++ show l ++ ", " ++ show r ++ "]") r
                  | otherwise = x
 
 
