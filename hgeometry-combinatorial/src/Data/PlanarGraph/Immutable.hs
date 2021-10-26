@@ -261,7 +261,8 @@ panic :: String -> String -> a
 panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 
 
--- $setup
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $setup
 --
 -- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
@@ -375,7 +376,8 @@ pgVertices pg =
 -- vertexId :: Vertex -> VertexId
 -- vertexId (Vertex vId) = vId
 
--- $hidden
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $hidden
 --
 -- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
@@ -419,7 +421,8 @@ vertexHalfEdge vertex pg | vertexCheck "vertexHalfEdge" vertex pg False = undefi
 vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 
 
--- $hidden
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $hidden
 --
 -- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
@@ -518,7 +521,8 @@ vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
       | he == first = nil
       | otherwise   = cons he (g (advance he) cons nil)
 
--- $hidden
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $hidden
 --
 -- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
@@ -667,7 +671,8 @@ halfEdgeIsValid (HalfEdge eId) = eId >= 0
 -- halfEdgeId :: HalfEdge -> HalfEdgeId
 -- halfEdgeId (HalfEdge eId) = eId
 
--- $hidden
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $hidden
 --
 -- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
@@ -864,7 +869,8 @@ halfEdgeTailVertex e pg = halfEdgeVertex e pg
 halfEdgeTipVertex  :: HalfEdge -> PlanarGraph -> Vertex
 halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 
--- $hidden
+-- Disabled since hashes are not stable across different versions of hashable.
+-- // $hidden
 --
 -- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618

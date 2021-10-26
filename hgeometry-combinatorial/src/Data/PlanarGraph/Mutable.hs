@@ -159,6 +159,8 @@ new n = pgFromFaces [[0..n-1]]
 -- $setup
 --
 -- >>> import Control.Monad.ST
+
+-- Disabled since hashes are not stable across different versions of hashable.
 -- >>> runST $ pgFromFaces [[0,1,2]] >>= pgHash
 -- 2959979592048325618
 -- >>> runST $ pgFromFaces [[0,1,2,3]] >>= pgHash
