@@ -31,6 +31,7 @@ import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V3 (V3(..))
 
+
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
 
@@ -192,13 +193,17 @@ from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
 newtype Touching p = Touching p deriving (Show,Eq,Ord,Functor,F.Foldable,T.Traversable)
 
 -- | No intersection, one touching point, or two points
-type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection
-                                                       , Touching (Point 2 r)
-                                                       , (Point 2 r, Point 2 r)
-                                                       ]
+type instance IntersectionOf (Line d r) (Sphere d p r) = [ NoIntersection
+                                                         , Touching (Point d r)
+                                                         , (Point d r, Point d r)
+                                                         ]
 
+instance  {-# OVERLAPPABLE #-} (Ord r, Fractional r, Arity d)
+          => Line d r `HasIntersectionWith` Sphere d q r where
+  l `intersects` (Sphere (c :+ _) r) = let closest = pointClosestTo  c l
+                                       in squaredEuclideanDist c closest <= r
 
-instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Circle p r where
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Line 2 r `HasIntersectionWith` Circle p r where
   (Line p' v) `intersects` (Circle (c :+ _) r) = discr >= 0
     where
       (Vector2 vx vy)   = v
@@ -249,14 +254,15 @@ instance (Ord r, Floating r) => Line 2 r `IsIntersectableWith` Circle p r where
 
 -- | A line segment may not intersect a circle, touch it, or intersect it
 -- properly in one or two points.
-type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
-                                                                , Touching (Point 2 r)
-                                                                , Point 2 r
-                                                                , (Point 2 r, Point 2 r)
-                                                                ]
+type instance IntersectionOf (LineSegment d p r) (Sphere d q r) = [ NoIntersection
+                                                                  , Touching (Point d r)
+                                                                  , Point d r
+                                                                  , (Point d r, Point d r)
+                                                                  ]
 
-instance (Ord r, Fractional r) => LineSegment 2 p r `HasIntersectionWith` Circle q r where
-  seg `intersects` (Circle (c :+ _) r) = let closest = pointClosestTo  c  (supportingLine seg)
+instance (Ord r, Fractional r, Arity d)
+          => LineSegment d p r `HasIntersectionWith` Sphere d q r where
+  seg `intersects` (Sphere (c :+ _) r) = let closest = pointClosestTo  c  (supportingLine seg)
                                          in case squaredEuclideanDist c closest `compare` r of
                                               LT -> True
                                               EQ -> closest `intersects` seg
