@@ -1,10 +1,11 @@
 module Algorithms.DivideAndConquerSpec where
 
 import Algorithms.DivideAndConquer
-
 import           Test.Hspec
 import           Test.QuickCheck
 import qualified Data.List as List
+
+--------------------------------------------------------------------------------
 
 spec = describe "divide and conquer strategy tests" $ do
          it "mergeSort" $ property $

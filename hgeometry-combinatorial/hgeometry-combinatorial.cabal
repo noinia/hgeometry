@@ -46,6 +46,7 @@ library
                     -- * Algorithmic Strategies
                     Algorithms.DivideAndConquer
                     Algorithms.BinarySearch
+                    Algorithms.LogarithmicMethod
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
@@ -55,6 +56,9 @@ library
 
 
                     Algorithms.StringSearch.KMP
+
+
+
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
@@ -224,6 +228,7 @@ test-suite hspec
 
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
+                 Algorithms.LogarithmicMethodSpec
                  Algorithms.Graph.DFSSpec
                  Algorithms.Graph.BFSSpec
                  Data.RangeSpec
@@ -255,6 +260,7 @@ test-suite hspec
                       , directory
                       , yaml
                       , MonadRandom
+                      , semigroupoids
   -- -- Such a mess:
   -- if impl(ghc == 9.*)
   --   build-depends:      singletons              == 3.*
