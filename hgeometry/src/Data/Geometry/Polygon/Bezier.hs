@@ -9,10 +9,13 @@ module Data.Geometry.Polygon.Bezier
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.BezierSpline (BezierSpline, lineApproximate, pattern Bezier3)
+import           Data.Geometry.BezierSpline (BezierSpline, pattern Bezier3)
+import qualified Data.Geometry.BezierSpline as Bezier
 import           Data.Geometry.Point
+import           Data.Geometry.PolyLine(points)
 import           Data.Geometry.Polygon
 import qualified Data.Vector.Circular       as CV
+import qualified Data.Foldable as F
 
 data PathJoin r
   = JoinLine
@@ -46,8 +49,8 @@ approximate eps p =
   where
     f :: (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r) -> CV.CircularVector (Point 2 r :+ ())
     f (a :+ JoinLine, _) = CV.singleton (ext a)
-    f (a :+ JoinCurve b c, d :+ _) =
-      CV.unsafeFromList $ map ext $ init (lineApproximate eps (Bezier3 a b c d))
+    f (a :+ JoinCurve b c, d :+ _) = let poly = Bezier.approximate eps (Bezier3 a b c d)
+                                     in CV.unsafeFromList . init . F.toList $ poly^.points
 
 approximateSome :: (Ord r, Fractional r) => r -> SomePolygon (PathJoin r) r -> SomePolygon () r
 approximateSome eps (Left p)  = Left $ approximate eps p

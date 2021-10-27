@@ -101,12 +101,14 @@ instance Fractional r => IsTransformable (Path r) where
 -- | type that represents a path in ipe.
 data Operation r = MoveTo (Point 2 r)
                  | LineTo (Point 2 r)
-                 | CurveTo (Point 2 r) (Point 2 r) (Point 2 r)
-                 | QCurveTo (Point 2 r) (Point 2 r)
                  | Ellipse (Matrix 3 3 r)
                  | ArcTo (Matrix 3 3 r) (Point 2 r)
                  | Spline [Point 2 r]
                  | ClosedSpline [Point 2 r]
                  | ClosePath
+                 -- these should be deprecated
+                 | CurveTo (Point 2 r) (Point 2 r) (Point 2 r)
+                 | QCurveTo (Point 2 r) (Point 2 r)
                  deriving (Eq, Show,Functor,Foldable,Traversable)
 makePrisms ''Operation
+

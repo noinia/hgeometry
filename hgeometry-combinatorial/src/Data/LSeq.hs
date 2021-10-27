@@ -29,6 +29,7 @@ module Data.LSeq( LSeq( EmptyL, (:<|), (:<<), (:|>) )
                 , unstableSort, unstableSortBy
                 , head, tail, last, init
                 , append
+                , reverse
 
                 , ViewL(..)
                 , viewl
@@ -57,7 +58,7 @@ import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           Prelude hiding (drop,take,head,last,tail,init,zipWith)
+import           Prelude hiding (drop,take,head,last,tail,init,zipWith,reverse)
 import           Test.QuickCheck (Arbitrary(..),vector)
 
 --------------------------------------------------------------------------------
@@ -229,6 +230,11 @@ unstableSort = wrapUnsafe S.unstableSort
 
 wrapUnsafe :: (S.Seq a -> S.Seq b) -> LSeq n a -> LSeq m b
 wrapUnsafe f = LSeq . f . toSeq
+
+-- | Reverses the sequence.
+reverse :: LSeq n a -> LSeq n a
+reverse = wrapUnsafe S.reverse
+
 
 --------------------------------------------------------------------------------
 

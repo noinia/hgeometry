@@ -68,6 +68,10 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , dataVal
 
                                             , dartMapping, Raw(..)
+
+                                            , asLocalD, asLocalV, asLocalF
+                                            , Incident (incidences)
+                                            , common, commonVertices, commonDarts, commonFaces
                                             ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -94,6 +98,8 @@ import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+import           Data.Set (Set)
+import qualified Data.Set as Set
 import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
@@ -683,3 +689,60 @@ dartMapping ps = ps^.component (ComponentId 0).PG.dartData
 --          $ trianglePG
 
 -- trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+-- | A class for describing which features (vertex, edge, face) of a planar subdivision
+--   can be incident to each other.
+class Incident s a b where
+  incidences :: PlanarSubdivision s v e f r -> a -> [b]
+
+instance Incident s (VertexId' s) (Dart s) where
+  incidences psd i = V.toList (incidentEdges i psd) ++ map twin (V.toList $ incidentEdges i psd)
+
+instance Incident s (VertexId' s) (FaceId' s) where
+  incidences psd i = map ((flip leftFace) psd) $ V.toList $ incidentEdges i psd
+
+instance Incident s (Dart s) (VertexId' s) where
+  incidences psd i = [headOf i psd, tailOf i psd]
+
+instance Incident s (Dart s) (FaceId' s) where
+  incidences psd i = [leftFace i psd, rightFace i psd]
+
+instance Incident s (FaceId' s) (VertexId' s) where
+  incidences psd i = V.toList $ boundaryVertices i psd
+
+instance Incident s (FaceId' s) (Dart s) where
+  incidences psd i = V.toList (outerBoundaryDarts i psd) ++ map twin (V.toList $ outerBoundaryDarts i psd)
+
+-- | Given two features (vertex, edge, or face) of a subdivision, report all features of a
+--   given type that are incident to both.
+common :: (Incident s a c, Incident s b c, Ord c) => PlanarSubdivision s v e f r -> a -> b -> [c]
+common psd a b = Set.toList $ Set.intersection (Set.fromList $ incidences psd a) (Set.fromList $ incidences psd b)
+
+-- | Given two features (edge or face) of a subdivision, report all vertices that are incident to both.
+commonVertices :: (Incident s a (VertexId' s), Incident s b (VertexId' s)) => PlanarSubdivision s v e f r -> a -> b -> [VertexId' s]
+commonVertices = common
+
+-- | Given two features (vertex or face) of a subdivision, report all edges that are incident to both.
+--   Returns both darts of each qualifying edge.
+commonDarts :: (Incident s a (Dart s), Incident s b (Dart s)) => PlanarSubdivision s v e f r -> a -> b -> [Dart s]
+commonDarts = common
+
+-- | Given two features (vertex or edge) of a subdivision, report all faces that are incident to both.
+commonFaces :: (Incident s a (FaceId' s), Incident s b (FaceId' s)) => PlanarSubdivision s v e f r -> a -> b -> [FaceId' s]
+commonFaces = common

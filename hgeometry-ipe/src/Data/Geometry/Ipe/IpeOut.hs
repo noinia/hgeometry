@@ -22,6 +22,7 @@ import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (Ellipse, circleToEllipse)
@@ -238,6 +239,9 @@ ipeCircle = ipeEllipse . circleToEllipse
 
 ipeDisk   :: Floating r => IpeOut (Disk p r) Path r
 ipeDisk d = ipeCircle (Boundary d) ! attr SFill (IpeColor "0.722 0.145 0.137")
+
+ipeBezier :: IpeOut (BezierSpline 3 2 r) Path r
+ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r

@@ -311,10 +311,11 @@ instance IpeWriteText r => IpeWriteText (BezierSpline 3 2 r) where
   ipeWriteText (Bezier3 p q r s) = unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
-  ipeWriteText (PolyLineSegment p) = ipeWriteText p
-  ipeWriteText (PolygonPath     p) = ipeWriteText p
-  ipeWriteText (EllipseSegment  e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
-  ipeWriteText _                   = error "ipeWriteText: PathSegment, not implemented yet."
+  ipeWriteText (PolyLineSegment    p) = ipeWriteText p
+  ipeWriteText (PolygonPath        p) = ipeWriteText p
+  ipeWriteText (EllipseSegment     e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
+  ipeWriteText (CubicBezierSegment b) = ipeWriteText b 
+  ipeWriteText _                      = error "ipeWriteText: PathSegment, not implemented yet."
 
 instance IpeWriteText r => IpeWrite (Path r) where
   ipeWrite p = (\t -> Element "path" [] [Text t]) <$> ipeWriteText p
