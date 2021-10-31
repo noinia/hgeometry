@@ -43,7 +43,7 @@ import           Data.Geometry.Line.Internal
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
-import           Data.Geometry.Transformation
+import           Data.Geometry.Transformation.Internal
 import           Data.Geometry.Vector
 import           Data.Ord (comparing)
 import           Data.Vinyl
