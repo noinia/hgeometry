@@ -189,16 +189,17 @@ spikeAnswer = [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
 -- flattenGroups' o                            = [o]
 
 
-toGrid :: (Fractional r, Ord r) => [Polygon t p r] -> [Polygon t p r]
-toGrid = zipWith (\pos -> fitToBox (box pos)) (map toCellIdx [0..])
+toGrid     :: (Fractional r, Ord r) => [Polygon t p r] -> [Polygon t p r]
+toGrid pgs = zipWith (fitToBox . box) (map toCellIdx [0..]) pgs
   where
     n = length pgs
+    withBoxes = map (\pg -> pg :+ Box.boundingBox pg) pgs
     c = ceiling $ sqrt (fromIntegral n)
     cellSize = fmap maximum . traverse (Box.size . view extra) $ withBoxes
     cell     = Box.box (ext origin) (ext $ Point cellSize)
 
     box v = translateBy ((*) <$> v <*> cellSize) cell
-    toCellIdx = fmap fromIntegral . uncurry Vector2 . (flip quotRem c)
+    toCellIdx = fmap fromIntegral . uncurry Vector2 . (`quotRem` c)
 
 
 visibilityPg :: Point 2 R -> SimplePolygon () R -> VisibilityPolygon () () R
