@@ -6,7 +6,22 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Data.Geometry.Transformation
-  ( module Data.Geometry.Transformation.Internal
+  ( Transformation(Transformation)
+  , transformationMatrix
+  , (|.|), identity, inverseOf
+
+  , IsTransformable(..)
+  , transformAllBy
+  , transformPointFunctor
+
+  , translation, scaling, uniformScaling
+
+  , translateBy, scaleBy, scaleUniformlyBy
+
+  , rotateTo
+
+  , skewX, rotation, reflection, reflectionV, reflectionH
+
   , fitToBox
   , fitToBoxTransform
   ) where
