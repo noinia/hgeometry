@@ -17,6 +17,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import           Data.Proxy
 import           GHC.TypeLits
+import Data.Geometry.Slab (Orthogonal(Horizontal))
 
 {- $setup
 >>> import Data.Geometry.LineSegment
@@ -206,11 +207,13 @@ rotation a = Transformation . Matrix $ Vector3 (Vector3 (cos a) (- sin a) 0)
 reflection :: Floating r => r -> Transformation 2 r
 reflection a = rotation a |.| reflectionV |.| rotation (-a)
 
+-- | Vertical reflection
 reflectionV :: Num r => Transformation 2 r
 reflectionV = Transformation . Matrix $ Vector3 (Vector3 1   0  0)
                                                 (Vector3 0 (-1) 0)
                                                 (Vector3 0   0  1)
 
+-- | Horizontal reflection
 reflectionH :: Num r => Transformation 2 r
 reflectionH = Transformation . Matrix $ Vector3 (Vector3 (-1) 0  0)
                                                 (Vector3   0  1  0)
