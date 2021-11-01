@@ -190,27 +190,16 @@ spikeAnswer = [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
 
 
 toGrid     :: (Fractional r, Ord r) => [Polygon t p r] -> [Polygon t p r]
-toGrid pgs = zipWith (\pos pg -> fitToBox (box pos) pg) (map toCellIdx [0..]) withBoxes
+toGrid pgs = zipWith (fitToBox . box) (map toCellIdx [0..]) pgs
   where
     n = length pgs
+    withBoxes = map (\pg -> pg :+ Box.boundingBox pg) pgs
     c = ceiling $ sqrt (fromIntegral n)
     cellSize = fmap maximum . traverse (Box.size . view extra) $ withBoxes
     cell     = Box.box (ext origin) (ext $ Point cellSize)
-    withBoxes =  map (\pg -> pg :+ Box.boundingBox pg) pgs
 
     box v = translateBy ((*) <$> v <*> cellSize) cell
-    toCellIdx = fmap fromIntegral . uncurry Vector2 . (flip quotRem c)
-
-
-fitToBox            :: forall g r q z. ( IsTransformable g, NumType g ~ r, Dimension g ~ 2
-                       , Ord r, Fractional r
-                       ) => Rectangle q r -> g :+ Rectangle z r -> g
-fitToBox r (g :+ b) = transformBy (translation v2 |.| uniformScaling lam |.| translation v1) g
-  where
-    v1  :: Vector 2 r
-    v1  = negate <$> b^.to Box.minPoint.core.vector
-    v2  = r^.to Box.minPoint.core.vector
-    lam = minimum $ (\wr wb -> wr / wb) <$> Box.size r <*> Box.size b
+    toCellIdx = fmap fromIntegral . uncurry Vector2 . (`quotRem` c)
 
 
 visibilityPg :: Point 2 R -> SimplePolygon () R -> VisibilityPolygon () () R

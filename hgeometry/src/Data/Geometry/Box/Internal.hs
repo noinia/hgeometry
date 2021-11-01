@@ -22,7 +22,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
+import           Data.Geometry.Transformation.Internal
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
