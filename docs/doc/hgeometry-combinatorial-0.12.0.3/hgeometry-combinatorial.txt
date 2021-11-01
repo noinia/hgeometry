@@ -154,6 +154,61 @@ bfs :: Foldable f => Int -> Vector (v, f Int) -> Tree v
 bfs' :: Foldable f => Int -> Vector (f Int) -> Tree Int
 
 
+module Algorithms.LogarithmicMethod
+
+-- | Represents an insertion-only data structure built from static data
+--   structures.
+--   
+--   In particular, we maintain &lt;math&gt; static data structures of
+--   sizes &lt;math&gt;, for &lt;math&gt;.
+newtype InsertionOnly static a
+InsertionOnly :: [Maybe (static a)] -> InsertionOnly static a
+
+-- | Builds an empty structure
+empty :: InsertionOnly static a
+class LogarithmicMethodDS static a
+
+-- | Create a new static data structure storing only one value.
+singleton :: LogarithmicMethodDS static a => a -> static a
+
+-- | Given a NonEmpty list of a's build a static a.
+build :: LogarithmicMethodDS static a => NonEmpty a -> static a
+
+-- | Merges two structurs of the same size. Has a default implementation
+--   via build in case the static structure is Foldable1.
+merge :: LogarithmicMethodDS static a => static a -> static a -> static a
+
+-- | Merges two structurs of the same size. Has a default implementation
+--   via build in case the static structure is Foldable1.
+merge :: (LogarithmicMethodDS static a, Foldable1 static) => static a -> static a -> static a
+
+-- | Inserts an element into the data structure
+--   
+--   running time: &lt;math&gt;, where &lt;math&gt; is the time required to
+--   merge two data structures of size &lt;math&gt;.
+insert :: LogarithmicMethodDS static a => a -> InsertionOnly static a -> InsertionOnly static a
+
+-- | Given a decomposable query algorithm for the static structure, lift it
+--   to a query algorithm on the insertion only structure.
+--   
+--   pre: (As indicated by the Monoid constraint), the query answer should
+--   be decomposable. I.e. we should be able to anser the query on a set
+--   &lt;math&gt; by answering the query on &lt;math&gt; and &lt;math&gt;
+--   separately, and combining their results.
+--   
+--   running time: &lt;math&gt;, where &lt;math&gt; is the query time on
+--   the static structure.
+queryWith :: Monoid m => (static a -> m) -> InsertionOnly static a -> m
+instance forall k (static :: k -> *) (a :: k). GHC.Classes.Ord (static a) => GHC.Classes.Ord (Algorithms.LogarithmicMethod.InsertionOnly static a)
+instance forall k (static :: k -> *) (a :: k). GHC.Classes.Eq (static a) => GHC.Classes.Eq (Algorithms.LogarithmicMethod.InsertionOnly static a)
+instance forall k (static :: k -> *) (a :: k). GHC.Show.Show (static a) => GHC.Show.Show (Algorithms.LogarithmicMethod.InsertionOnly static a)
+instance Algorithms.LogarithmicMethod.LogarithmicMethodDS static a => GHC.Base.Semigroup (Algorithms.LogarithmicMethod.InsertionOnly static a)
+instance Algorithms.LogarithmicMethod.LogarithmicMethodDS static a => GHC.Base.Monoid (Algorithms.LogarithmicMethod.InsertionOnly static a)
+instance GHC.Base.Functor static => GHC.Base.Functor (Algorithms.LogarithmicMethod.InsertionOnly static)
+instance Data.Traversable.Traversable static => Data.Traversable.Traversable (Algorithms.LogarithmicMethod.InsertionOnly static)
+instance Data.Foldable.Foldable static => Data.Foldable.Foldable (Algorithms.LogarithmicMethod.InsertionOnly static)
+
+
 -- | Implementation of Knuth-Morris-Pratt String-searching algorithm. The
 --   exposition is based on that of Goodrich and Tamassia in "Data
 --   Structures and Algorithms in Java 2nd Edition".
@@ -1591,8 +1646,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aLBr a_aLUg. Lens (Permutation a_aLBr) (Permutation a_aLUg) (Vector (Orbit a_aLBr)) (Vector (Orbit a_aLUg))
-indexes :: forall a_aLBr. Lens' (Permutation a_aLBr) (Vector (Int, Int))
+orbits :: forall a_aM62 a_aMoR. Lens (Permutation a_aM62) (Permutation a_aMoR) (Vector (Orbit a_aM62)) (Vector (Orbit a_aMoR))
+indexes :: forall a_aM62. Lens' (Permutation a_aM62) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
