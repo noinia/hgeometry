@@ -17,7 +17,6 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import           Data.Proxy
 import           GHC.TypeLits
-import Data.Geometry.Slab (Orthogonal(Horizontal))
 
 {- $setup
 >>> import Data.Geometry.LineSegment
