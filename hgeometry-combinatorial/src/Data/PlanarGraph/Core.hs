@@ -427,13 +427,10 @@ endPoints d g = (tailOf d g, headOf d g)
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --
---
---
 -- running time: \(O(k)\), where \(k\) is the output size
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
-incidentEdges (VertexId v) g = g^?!embedding.orbits.ix v
-  -- TODO: The Delaunay triang. stuff seems to produce these in clockwise order instead
+incidentEdges (VertexId v) g = g^?!embedding.orbits.ix v.to V.reverse
 
 -- | All edges incident to vertex v in incoming direction
 -- (i.e. pointing into v) in counterclockwise order around v.

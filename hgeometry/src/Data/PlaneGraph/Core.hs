@@ -494,8 +494,8 @@ prevEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 prevEdge d = PG.prevEdge d . _graph
 
 
--- | The darts bounding this face, for internal faces in clockwise order, for
--- the outer face in counter clockwise order.
+-- | The darts bounding this face, for internal faces in counter clockwise
+-- order, for the outer face in clockwise order.
 --
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
@@ -504,21 +504,24 @@ prevEdge d = PG.prevEdge d . _graph
 boundary   :: FaceId' s -> PlaneGraph s v e f r  -> V.Vector (Dart s)
 boundary f = PG.boundary f . _graph
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Generates the darts incident to a face, starting with the given
+-- dart. For internal faces in counter clockwise order, for the outer
+-- face in clockwise order.
 --
 --
--- \(O(k)\), where \(k\) is the number of darts reported
+-- \(O(k)\), where \(k\) is the number of darts reported. The boundary
+-- is given in counter clockwise order.
 boundary'   :: Dart s -> PlaneGraph s v e f r -> V.Vector (Dart s)
 boundary' d = PG.boundary' d . _graph
 
--- | Gets a dart bounding this face. I.e. a dart d such that the face lies to
--- the right of the dart.
+-- | Gets a dart bounding this face. I.e. a dart d such that the face
+-- lies to the right of the dart. For internal faces in counter
+-- clockwise order, for the outer face in clockwise order.
 boundaryDart   :: FaceId' s -> PlaneGraph s v e f r -> Dart s
 boundaryDart f = PG.boundaryDart f . _graph
 
--- | The vertices bounding this face, for internal faces in clockwise order, for
--- the outer face in counter clockwise order.
---
+-- | The vertices bounding this face, for internal faces in counter
+-- clockwise order, for the outer face in clockwise order.
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices   :: FaceId' s -> PlaneGraph s v e f r

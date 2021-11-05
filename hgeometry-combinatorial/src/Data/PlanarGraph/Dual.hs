@@ -110,8 +110,8 @@ boundaryDart   :: FaceId s w -> PlanarGraph s w v e f -> Dart s
 boundaryDart f = V.head . boundary f
 -- TODO: make sure that this is indeed to the right.
 
--- | The darts bounding this face, for internal faces in clockwise order, for
--- the outer face in counter clockwise order.
+-- | The darts bounding this face, for internal faces in counter
+-- clockwise order, for the outer face in clockwise order.
 --
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
@@ -119,7 +119,9 @@ boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s
 boundary (FaceId v) g = incidentEdges v $ _dual g
 
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Generates the darts incident to a face, starting with the given
+-- dart. for internal faces in counter clockwise order, for the outer
+-- face in clockwise order.
 --
 --
 -- \(O(k)\), where \(k\) is the number of darts reported
@@ -132,8 +134,8 @@ boundary' d g = fromMaybe (error "boundary'")  . rotateTo d $ boundary (rightFac
         f i = let (a,b) = V.splitAt i v  in b <> a
 
 
--- | The vertices bounding this face, for internal faces in clockwise order, for
--- the outer face in counter clockwise order.
+-- | The vertices bounding this face, for internal faces in counter
+-- clockwise order, for the outer face in clockwise order.
 --
 --
 -- running time: \(O(k)\), where \(k\) is the output size.

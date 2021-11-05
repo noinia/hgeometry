@@ -656,7 +656,8 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
                    in ClosedLineSegment p q :+ ps^.dataOf d
 
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Generates the darts incident to a face, starting with the given
+-- dart. The boundary is given in in counter-clockwise order.
 --
 --
 -- \(O(k)\), where \(k\) is the number of darts reported
@@ -676,7 +677,8 @@ rawFaceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
        <$> V.toList (boundary' d ps)
 
 
--- | Constructs the boundary of the given face
+-- | Constructs the boundary of the given face. The boundary is given
+-- in Counter-clockwise order.
 --
 -- \(O(k)\), where \(k\) is the complexity of the face
 rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
