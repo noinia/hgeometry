@@ -98,7 +98,6 @@ import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
-import           Data.Set (Set)
 import qualified Data.Set as Set
 import           GHC.Generics (Generic)
 
