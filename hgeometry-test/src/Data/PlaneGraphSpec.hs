@@ -11,8 +11,11 @@ import           Data.PlaneGraph
 import qualified Data.Vector as V
 import           Data.Yaml.Util
 import           Test.Hspec
+import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 spec :: Spec
 spec = describe "PlaneGraph tests" $ do
@@ -24,6 +27,8 @@ spec = describe "PlaneGraph tests" $ do
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
            outerFaceId simplePgGraph `shouldBe` (FaceId (VertexId 1))
+         -- it "right orienations" $
+         --   allFaceOrientations (realToFrac @Integer @R <$> myGraph) `shouldBe` True
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "src/Data/myPlaneGraph.yaml")
@@ -193,7 +198,23 @@ simplePgGraph :: Num r => PlaneGraph Test1 () () InOrOut r
 simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
   where
     pg = unsafeFromPoints . map ext $ [ Point2 144 160
-                                , Point2 64 96
-                                , Point2 128 32
-                                , Point2 208 96
-                                ]
+                                      , Point2 64 96
+                                      , Point2 128 32
+                                      , Point2 208 96
+                                      ]
+
+
+
+--------------------------------------------------------------------------------
+
+
+-- | Tests if all face orientations are correct
+allFaceOrientations    :: (Fractional r, Ord r) => PlaneGraph s v e f r -> Bool
+allFaceOrientations pg = all (rightOrientation oId) $ rawFacePolygons pg
+  where
+    oId = outerFaceId pg
+
+
+rightOrientation                    :: (Eq r, Num r)
+                                    => FaceId' s -> (FaceId' s, SimplePolygon v r :+ f) -> Bool
+rightOrientation oId (i, poly :+ _) = isCounterClockwise poly == (i /= oId)
