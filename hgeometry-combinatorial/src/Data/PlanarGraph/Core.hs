@@ -18,7 +18,7 @@ import           Data.Aeson
 import qualified Data.Foldable              as F
 import           Data.Permutation
 import           Data.PlanarGraph.Dart
-import           Data.Type.Equality         (gcastWith,(:~:)(Refl))
+import           Data.Type.Equality         (gcastWith)
 import qualified Data.Vector                as V
 import qualified Data.Vector.Mutable        as MV
 import           GHC.Generics               (Generic)
