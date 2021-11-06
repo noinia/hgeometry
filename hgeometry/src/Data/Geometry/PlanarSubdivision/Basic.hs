@@ -1,6 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -42,7 +40,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , headOf, tailOf, twin, endPoints
 
                                             , incidentEdges, incomingEdges, outgoingEdges
-                                            , nextIncidentEdge
+                                            , nextIncidentEdge, prevIncidentEdge
+                                            , nextIncidentEdgeFrom, prevIncidentEdgeFrom
                                             , neighboursOf
 
                                             , leftFace, rightFace
@@ -58,8 +57,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , faceDataOf
 
                                             , edgeSegment, edgeSegments
-                                            , rawFacePolygon, rawFaceBoundary
-                                            , rawFacePolygons
+                                            , faceBoundary
+                                            , internalFacePolygon, internalFacePolygons
 
                                             , VertexId(..), FaceId(..), Dart, World(..)
 
@@ -141,6 +140,7 @@ instance IsBoxable (PlanarSubdivision s v e f r) where
   boundingBox = boundingBoxList' . V.toList . _components
 
 
+-- | Lens to access a particular component of the planar subdivision.
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f r)
                                        (Component s r)
 component ci = components.singular (ix $ unCI ci)
@@ -421,14 +421,48 @@ incidentEdges v ps=  let (_,v',g) = asLocalV v ps
                      in (\d -> g^.dataOf d) <$> ds
 
 
--- | Given a dart d that points into some vertex v, report the next
--- dart e in the cyclic order around v.
+-- | Given a dart d that points into some vertex v, report the next dart in the
+-- cyclic (counterclockwise) order around v.
 --
 -- running time: \(O(1)\)
 nextIncidentEdge      :: Dart s -> PlanarSubdivision s v e f r -> Dart s
 nextIncidentEdge d ps = let (_,d',g) = asLocalD d ps
                             d''      = PG.nextIncidentEdge d' g
                         in g^.dataOf d''
+
+-- | Given a dart d that points into some vertex v, report the
+-- previous dart in the cyclic (counterclockwise) order around v.
+--
+-- running time: \(O(1)\)
+--
+-- >>> prevIncidentEdge (dart 1 "+1") smallG
+-- Dart (Arc 3) +1
+prevIncidentEdge      :: Dart s -> PlanarSubdivision s v e f r -> Dart s
+prevIncidentEdge d ps = let (_,d',g) = asLocalD d ps
+                            d''      = PG.prevIncidentEdge d' g
+                        in g^.dataOf d''
+
+-- | Given a dart d that points away from some vertex v, report the
+-- next dart in the cyclic (counterclockwise) order around v.
+--
+--
+-- running time: \(O(1)\)
+--
+nextIncidentEdgeFrom      :: Dart s -> PlanarSubdivision s v e f r -> Dart s
+nextIncidentEdgeFrom d ps = let (_,d',g) = asLocalD d ps
+                                d''      = PG.nextIncidentEdgeFrom d' g
+                            in g^.dataOf d''
+
+-- | Given a dart d that points into away from vertex v, report the previous dart in the
+-- cyclic (counterclockwise) order around v.
+--
+-- running time: \(O(1)\)
+--
+prevIncidentEdgeFrom      :: Dart s -> PlanarSubdivision s v e f r -> Dart s
+prevIncidentEdgeFrom d ps = let (_,d',g) = asLocalD d ps
+                                d''      = PG.prevIncidentEdgeFrom d' g
+                            in g^.dataOf d''
+
 
 -- | All edges incident to vertex v in incoming direction
 -- (i.e. pointing into v) in counterclockwise order around v.
@@ -472,10 +506,11 @@ rightFace d ps = let (_,d',g) = asLocalD d ps
                      fi       = PG.rightFace d' g
                 in g^.dataOf fi
 
--- | The darts on the outer boundary of the face, for internal faces
--- the darts are in clockwise order. For the outer face the darts are
--- in counterclockwise order, and the darts from various components are in no particular order.
---
+-- | The darts on the outer boundary of this face. The darts are
+-- reported in order along the face. This means that for internal
+-- faces the darts are reported in *clockwise* order along the
+-- boundary, whereas for the outer face the darts are reported in
+-- counter clockwise order.
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 outerBoundaryDarts      :: FaceId' s -> PlanarSubdivision s v e f r  -> V.Vector (Dart s)
@@ -492,8 +527,9 @@ asLocalF (FaceId (VertexId f)) ps = case ps^?!rawFaceData.ix f of
   where
     toLocalF d = let (ci,d',c) = asLocalD d ps in (ci,PG.leftFace d' c,c)
 
--- | The vertices of the outer boundary of the face, for internal faces in
--- clockwise order, for the outer face in counter clockwise order.
+-- | The vertices of the outer boundary of the face, for internal
+-- faces in clockwise order, for the outer face in counter clockwise
+-- order.
 --
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
@@ -531,7 +567,10 @@ asLocalV                 :: VertexId' s -> PlanarSubdivision s v e f r
 asLocalV (VertexId v) ps = let (Raw ci v' _) = ps^?!rawVertexData.ix v
                            in (ci,v',ps^.component ci)
 
--- | Note that using the setting part of this lens may be very expensive!!
+-- | Lens to access the vertex data
+--
+-- Note that using the setting part of this lens may be very
+-- expensive!!  (O(n))
 vertexDataOf               :: VertexId' s
                            -> Lens' (PlanarSubdivision s v e f r ) (VertexData r v)
 vertexDataOf (VertexId vi) = lens get' set''
@@ -543,10 +582,17 @@ vertexDataOf (VertexId vi) = lens get' set''
                  in ps&rawVertexData.ix vi.dataVal                .~ (x^.vData)
                       &component ci.PG.vertexDataOf wvdi.location .~ (x^.location)
 
+
+-- | Get the location of a vertex in the planar subdivision.
+--
+-- Note that the setting part of this lens may be very expensive!
+-- Moreover, use with care (as this may destroy planarity etc.)
 locationOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) (Point 2 r)
 locationOf v = vertexDataOf v.location
 
 
+-- | Lens to get the face data of a particular face. Note that the
+-- setting part of this lens may be very expensive! (O(n))
 faceDataOf    :: FaceId' s -> Lens' (PlanarSubdivision s v e f r)
                                     (FaceData (Dart s) f)
 faceDataOf fi = lens getF setF
@@ -626,7 +672,9 @@ edgeSegments    :: PlanarSubdivision s v e f r -> V.Vector (Dart s, LineSegment 
 edgeSegments ps = (\d -> (d,edgeSegment d ps)) <$> edges' ps
 
 
--- | Given a dart and the subdivision constructs the line segment representing it
+-- | Given a dart and the subdivision constructs the line segment
+-- representing it. The segment \(\overline{uv})\) is has \(u\) as its
+-- tail and \(v\) as its head.
 --
 -- \(O(1)\)
 edgeSegment      :: Dart s -> PlanarSubdivision s v e f r -> LineSegment 2 v r :+ e
@@ -634,8 +682,14 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
                    in ClosedLineSegment p q :+ ps^.dataOf d
 
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Given a dart d, generates the darts on the *outer boundary* of
+-- the the face that is to the right of the given dart. The darts are
+-- reported in order along the face. This means that for internal
+-- faces the darts are reported in *clockwise* order along the
+-- boundary, whereas for the outer face the darts are reported in
+-- counter clockwise order.
 --
+-- note: Darts on holes are not reported!
 --
 -- \(O(k)\), where \(k\) is the number of darts reported
 boundary'     :: Dart s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
@@ -643,36 +697,45 @@ boundary' d ps = let (_,d',g) = asLocalD d ps
                  in (\d'' -> g^.dataOf d'') <$> PG.boundary' d' g
 
 
--- | Constructs the outer boundary of the face
+-- | The outerboundary of the face as a simple polygon. For internal
+-- faces the polygon that is reported has its vertices stored in CCW
+-- order (as expected).
 --
--- \(O(k)\), where \(k\) is the complexity of the outer boundary of the face
-rawFaceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
+-- pre: FaceId refers to an internal face.
+--
+-- For the other face this prodcuces a polygon in CW order (this may
+-- lead to unexpected results.)
+--
+-- \(O(k)\), where \(k\) is the complexity of the outer boundary of
+-- the face
+faceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
+faceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
   where
     d   = V.head $ outerBoundaryDarts i ps
     pts = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
        <$> V.toList (boundary' d ps)
 
 
--- | Constructs the boundary of the given face
+-- | Constructs the boundary of the given face.
 --
 -- \(O(k)\), where \(k\) is the complexity of the face
-rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
-                    -> SomePolygon v r :+ f
-rawFacePolygon i ps = case F.toList $ holesOf i ps of
+internalFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
+                         -> SomePolygon v r :+ f
+internalFacePolygon i ps = case F.toList $ holesOf i ps of
                         [] -> Left  res                               :+ x
                         hs -> Right (MultiPolygon res $ map toHole hs) :+ x
   where
-    res :+ x = rawFaceBoundary i ps
-    toHole d = rawFaceBoundary (leftFace d ps) ps ^. core
+    res :+ x = faceBoundary i ps
+    toHole d = faceBoundary (leftFace d ps) ps ^. core
+-- TODO: Verify that holes are in the right orientation.
 
 -- | Lists all *internal* faces of the planar subdivision.
-rawFacePolygons    :: PlanarSubdivision s v e f r
-                   -> V.Vector (FaceId' s, SomePolygon v r :+ f)
-rawFacePolygons ps = fmap (\(i,_) -> (i,rawFacePolygon i ps)) . internalFaces $ ps
+internalFacePolygons    :: PlanarSubdivision s v e f r
+                        -> V.Vector (FaceId' s, SomePolygon v r :+ f)
+internalFacePolygons ps = fmap (\(i,_) -> (i,internalFacePolygon i ps)) . internalFaces $ ps
 
 
-
+-- | Mapping between the internal and extenral darts
 dartMapping    :: PlanarSubdivision s v e f r -> V.Vector (Dart (Wrap s), Dart s)
 dartMapping ps = ps^.component (ComponentId 0).PG.dartData
 
@@ -728,20 +791,23 @@ instance Incident s (FaceId' s) (VertexId' s) where
 instance Incident s (FaceId' s) (Dart s) where
   incidences psd i = V.toList (outerBoundaryDarts i psd) ++ map twin (V.toList $ outerBoundaryDarts i psd)
 
--- | Given two features (vertex, edge, or face) of a subdivision, report all features of a
---   given type that are incident to both.
+-- | Given two features (vertex, edge, or face) of a subdivision,
+--   report all features of a given type that are incident to both.
 common :: (Incident s a c, Incident s b c, Ord c) => PlanarSubdivision s v e f r -> a -> b -> [c]
 common psd a b = Set.toList $ Set.intersection (Set.fromList $ incidences psd a) (Set.fromList $ incidences psd b)
 
--- | Given two features (edge or face) of a subdivision, report all vertices that are incident to both.
+-- | Given two features (edge or face) of a subdivision, report all
+-- vertices that are incident to both.
 commonVertices :: (Incident s a (VertexId' s), Incident s b (VertexId' s)) => PlanarSubdivision s v e f r -> a -> b -> [VertexId' s]
 commonVertices = common
 
--- | Given two features (vertex or face) of a subdivision, report all edges that are incident to both.
---   Returns both darts of each qualifying edge.
+-- | Given two features (vertex or face) of a subdivision, report all
+--   edges that are incident to both.  Returns both darts of each
+--   qualifying edge.
 commonDarts :: (Incident s a (Dart s), Incident s b (Dart s)) => PlanarSubdivision s v e f r -> a -> b -> [Dart s]
 commonDarts = common
 
--- | Given two features (vertex or edge) of a subdivision, report all faces that are incident to both.
+-- | Given two features (vertex or edge) of a subdivision, report all
+-- faces that are incident to both.
 commonFaces :: (Incident s a (FaceId' s), Incident s b (FaceId' s)) => PlanarSubdivision s v e f r -> a -> b -> [FaceId' s]
 commonFaces = common

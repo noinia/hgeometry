@@ -583,9 +583,18 @@ boundaryVertices f = PG.boundaryVertices f . _graph
 --------------------------------------------------------------------------------
 -- * Access data
 
+
+-- | Lens to access the vertex data
+--
+-- Note that using the setting part of this lens may be very
+-- expensive!!  (O(n))
 vertexDataOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) (VertexData r v)
 vertexDataOf v = graph.PG.dataOf v
 
+-- | Get the location of a vertex in the plane graph
+--
+-- Note that the setting part of this lens may be very expensive!
+-- Moreover, use with care (as this may destroy planarity etc.)
 locationOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) (Point 2 r)
 locationOf v = vertexDataOf v.location
 

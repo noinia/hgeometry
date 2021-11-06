@@ -31,7 +31,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , incidentEdges, incomingEdges, outgoingEdges
                       , neighboursOf
                       , nextIncidentEdge, prevIncidentEdge
-
+                      , nextIncidentEdgeFrom, prevIncidentEdgeFrom
 
                       , leftFace, rightFace
                       , nextEdge, prevEdge
