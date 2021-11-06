@@ -24,6 +24,8 @@ import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
+
+
 -- | Specify the planar subdivison as a tree of components
 data PlanarSD v e f r = PlanarSD
   { outerFace :: f           -- ^ outer face
@@ -52,7 +54,11 @@ instance (FromJSON r, FromJSON v, FromJSON e, FromJSON f) => FromJSON (InnerSD v
 
 --------------------------------------------------------------------------------
 
-
+-- | This represents the following Planar subdivision. Note that the
+-- graph is undirected, the arrows are just to indicate what the
+-- Positive direction of the darts is.
+--
+-- ![mySubDiv](docs/Data/Geometry/PlanarSubdivision/mySubDiv.jpg)
 myTreeRep :: PlanarSD Int () String (RealNumber 3)
 myTreeRep = PlanarSD "f_infty" (InnerSD adjs fs)
   where
