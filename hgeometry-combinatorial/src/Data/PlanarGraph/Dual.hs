@@ -100,26 +100,32 @@ rightFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 rightFace d g = FaceId . tailOf d $ _dual g
 
 
--- -- | Get the next edge (in clockwise order) along the face that is to
--- -- the right of this dart.
--- --
--- -- >> showWithData myGraph $ nextEdge (dart 1 "+1") myGraph
--- -- (Dart (Arc 3) -1,"d-")
--- --
--- -- running time: \(O(1)\).
--- nextEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
--- nextEdge d = nextIncidentEdge d . _dual
+-- | Get the next edge (in clockwise order) along the face that is to
+-- the right of this dart.
+--
+-- >> showWithData myGraph $ nextEdge (dart 1 "+1") myGraph
+-- (Dart (Arc 3) -1,"d-")
+-- >> showWithData myGraph $ nextEdge (dart 2 "+1") myGraph
+-- (Dart (Arc 4) +1,"e+")
+--
+-- running time: \(O(1)\).
+nextEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
+nextEdge d = nextIncidentEdgeFrom d . _dual
+  -- prevIncidentEdge (twin d) (_dual g)
+  -- where
+  --   f = rightFace d g
 
--- -- | Get the previous edge (in clockwise order) along the face that is
--- -- to the right of this dart.
--- --
--- -- -- >> showWithData myGraph $ nextEdge (dart 1 "+1") myGraph
--- -- (Dart (Arc 2) -1,"c-")
--- --
--- --
--- -- running time: \(O(1)\).
--- prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
--- prevEdge d = nextIncidentEdge d . _dual
+-- | Get the previous edge (in clockwise order) along the face that is
+-- to the right of this dart.
+--
+-- >>> showWithData myGraph $ prevEdge (dart 1 "+1") myGraph
+-- (Dart (Arc 2) -1,"c-")
+-- >>> showWithData myGraph $ prevEdge (dart 3 "-1") myGraph
+-- (Dart (Arc 1) +1,"b+")
+--
+-- running time: \(O(1)\).
+prevEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
+prevEdge d = prevIncidentEdgeFrom d . _dual
 
 -- | Gets a dart bounding this face. I.e. a dart d such that the face lies to
 -- the right of the dart.

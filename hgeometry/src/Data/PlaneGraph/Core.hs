@@ -34,6 +34,7 @@ module Data.PlaneGraph.Core( -- $setup
                            , incidentEdges, incomingEdges, outgoingEdges
                            , neighboursOf
                            , nextIncidentEdge, prevIncidentEdge
+                           , nextIncidentEdgeFrom, prevIncidentEdgeFrom
 
 
                            , leftFace, rightFace
@@ -422,24 +423,50 @@ neighboursOf   :: VertexId' s -> PlaneGraph s v e f r
 neighboursOf v = PG.neighboursOf v . _graph
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
--- cyclic order around v in clockwise direction.
+-- cyclic (counterclockwise) order around v.
 --
 -- running time: \(O(1)\)
 --
 -- >>> nextIncidentEdge (dart 1 "+1") smallG
--- Dart (Arc 2) +1
+-- Dart (Arc 4) +1
 nextIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 nextIncidentEdge d = PG.nextIncidentEdge d . _graph
 
--- | Given a dart d that points into some vertex v, report the next dart in the
--- cyclic order around v (in clockwise order)
+-- | Given a dart d that points into some vertex v, report the previous dart in the
+-- cyclic (counterclockwise) order around v.
 --
 -- running time: \(O(1)\)
 --
 -- >>> prevIncidentEdge (dart 1 "+1") smallG
--- Dart (Arc 0) +1
+-- Dart (Arc 3) +1
 prevIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 prevIncidentEdge d = PG.prevIncidentEdge d . _graph
+
+
+-- | Given a dart d that points away from some vertex v, report the
+-- next dart in the cyclic (counterclockwise) order around v.
+--
+--
+-- running time: \(O(1)\)
+--
+-- >>> nextIncidentEdgeFrom (dart 1 "+1") smallG
+-- Dart (Arc 2) +1
+nextIncidentEdgeFrom   :: Dart s -> PlaneGraph s v e f r -> Dart s
+nextIncidentEdgeFrom d = PG.nextIncidentEdgeFrom d . _graph
+
+-- | Given a dart d that points into away from vertex v, report the previous dart in the
+-- cyclic (counterclockwise) order around v.
+--
+-- running time: \(O(1)\)
+--
+-- >>> prevIncidentEdgeFrom (dart 1 "+1") smallG
+-- Dart (Arc 0) +1
+prevIncidentEdgeFrom   :: Dart s -> PlaneGraph s v e f r -> Dart s
+prevIncidentEdgeFrom d = PG.prevIncidentEdgeFrom d . _graph
+
+
+
+
 
 
 -- | The face to the left of the dart

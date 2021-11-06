@@ -24,6 +24,7 @@ import qualified Data.Vector.Mutable        as MV
 import           GHC.Generics               (Generic)
 import           Unsafe.Coerce              (unsafeCoerce)
 
+
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -499,12 +500,14 @@ neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId 
 neighboursOf v g = flip tailOf g <$> incomingEdges v g
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
--- cyclic order around v.
+-- cyclic (counterclockwise) order around v.
 --
 -- >>> nextIncidentEdge (Dart (Arc 3) Positive) myGraph
 -- Dart (Arc 5) +1
 -- >>> showWithData myGraph $ nextIncidentEdge (Dart (Arc 3) Positive) myGraph
 -- (Dart (Arc 5) +1,"g+")
+-- >>> showWithData myGraph $ nextIncidentEdge (dart 1 "+1") myGraph
+-- (Dart (Arc 3) +1,"d+")
 --
 -- running time: \(O(1)\)
 nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
@@ -513,8 +516,8 @@ nextIncidentEdge d g = let perm  = g^.embedding
                        in next (perm^?!orbits.ix j) i
 
 
--- | Given a dart d that points into some vertex v, report the next dart in the
--- cyclic order around v.
+-- | Given a dart d that points into some vertex v, report the previous dart in the
+-- cyclic (counterclockwise) order around v.
 --
 -- >>> prevIncidentEdge (Dart (Arc 3) Positive) myGraph
 -- Dart (Arc 1) -1
@@ -526,6 +529,40 @@ prevIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 prevIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
                        in previous (perm^?!orbits.ix j) i
+
+
+-- | Given a dart d that points away from some vertex v, report the
+-- next dart in the cyclic (counterclockwise) order around v.
+--
+-- >>> nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+-- Dart (Arc 2) -1
+-- >>> showWithData myGraph $ nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+-- (Dart (Arc 2) -1,"c-")
+-- >>> showWithData myGraph $ nextIncidentEdgeFrom (dart 1 "+1") myGraph
+-- (Dart (Arc 0) +1,"a+")
+--
+-- running time: \(O(1)\)
+nextIncidentEdgeFrom     :: Dart s -> PlanarGraph s w v e f -> Dart s
+nextIncidentEdgeFrom d g = let perm  = g^.embedding
+                               (i,j) = lookupIdx perm d
+                           in next (perm^?!orbits.ix i) j
+
+
+-- | Given a dart d that points into away from vertex v, report the previous dart in the
+-- cyclic (counterclockwise) order around v.
+--
+-- >>> prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+-- Dart (Arc 4) +1
+-- >>> showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+-- (Dart (Arc 4) +1,"e+")
+-- >>> showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 1) Positive) myGraph
+-- (Dart (Arc 2) +1,"c+")
+--
+-- running time: \(O(1)\)
+prevIncidentEdgeFrom     :: Dart s -> PlanarGraph s w v e f -> Dart s
+prevIncidentEdgeFrom d g = let perm  = g^.embedding
+                               (i,j) = lookupIdx perm d
+                           in previous (perm^?!orbits.ix i) j
 
 
 --------------------------------------------------------------------------------

@@ -45,6 +45,7 @@ module Data.PlanarGraph( -- $setup
                        , tailOf, headOf, endPoints
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
                        , nextIncidentEdge, prevIncidentEdge
+                       , nextIncidentEdgeFrom, prevIncidentEdgeFrom
 
                        -- * Associated Data
 
@@ -57,7 +58,7 @@ module Data.PlanarGraph( -- $setup
                        , FaceId(..), FaceId'
                        , leftFace, rightFace
                        , boundaryDart, boundary, boundary', boundaryVertices
-                       -- , nextEdge, prevEdge
+                       , nextEdge, prevEdge
 
                        ) where
 
