@@ -50,4 +50,5 @@ drawPlanarSubdivisionWith fv fe ff g = ipeGroup . concat $ [vs, es, fs]
   where
     vs = mapMaybe (fmap iO . fv) . V.toList . vertices        $ g
     es = mapMaybe (fmap iO . fe) . V.toList . edgeSegments    $ g
-    fs = mapMaybe (fmap iO . ff) . V.toList . rawFacePolygons $ g
+    fs = mapMaybe (fmap iO . ff) . V.toList . internalFacePolygons $ g
+  -- FIXME: also draw the outer face
