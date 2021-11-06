@@ -682,7 +682,7 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
                    in ClosedLineSegment p q :+ ps^.dataOf d
 
 
--- | Given a dart d, generates the darts on the *outer boundary* of
+-- | Given a dart d, generates the darts on the *boundary* of
 -- the the face that is to the right of the given dart. The darts are
 -- reported in order along the face. This means that for internal
 -- faces the darts are reported in *clockwise* order along the
@@ -695,6 +695,10 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
 boundary'     :: Dart s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
 boundary' d ps = let (_,d',g) = asLocalD d ps
                  in (\d'' -> g^.dataOf d'') <$> PG.boundary' d' g
+
+
+-- FIXME: If the dart is *on* a hole, I suppose the darts on that hole
+-- would be reported.
 
 
 -- | The outerboundary of the face as a simple polygon. For internal
@@ -728,6 +732,34 @@ internalFacePolygon i ps = case F.toList $ holesOf i ps of
     res :+ x = faceBoundary i ps
     toHole d = faceBoundary (leftFace d ps) ps ^. core
 -- TODO: Verify that holes are in the right orientation.
+
+
+-- -- | Given the outerFaceId and the graph, construct a sufficiently
+-- -- large rectangular multipolygon ith a hole containing the boundary
+-- -- of the outer face.
+-- outerFacePolygon      :: (Num r, Ord r)
+--                       => FaceId' s -> PlanarSubdivision s v e f r -> MultiPolygon (Maybe v) r :+ f
+-- outerFacePolygon i ps =
+
+
+-- -- | Given a sufficiently large outer boundary,
+-- -- draw the outerface as a polygon with a hole.
+-- outerFacePolygon'          :: SimplePolygon v' r
+--                            -> PlanarSubdivision s v e f r -> MultiPolygon (Either v' v) r :+ f
+-- outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ pg^.dataOf i
+--   where
+--     i       = outerFaceId ps
+--     holePgs = map getBoundary . Seq.toList $ holesOf i ps
+
+--       ps^.components
+
+--     -- get the bondary of a component
+--     getBoundary c = reverseOuterBoundary . first Right . view core $ PG.faceBoundary i ps
+--     -- if we call faceBoundary on the outerface we get a polygon in
+--     -- the wrong orientation. So reverse it.
+-- -- FIXME: Continue here.
+
+
 
 -- | Lists all *internal* faces of the planar subdivision.
 internalFacePolygons    :: PlanarSubdivision s v e f r
