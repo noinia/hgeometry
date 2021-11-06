@@ -31,7 +31,7 @@ import           Unsafe.Coerce              (unsafeCoerce)
 -- >>> :{
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---     myGraph :: PlanarGraph () Primal () String ()
+--     myGraph :: PlanarGraph () Primal String String String
 --     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")
@@ -48,7 +48,10 @@ import           Unsafe.Coerce              (unsafeCoerce)
 --                             ]
 --                           , [ (Dart aG Negative, "g-")
 --                             ]
---                           ]
+--                           ] & vertexData .~ V.fromList ["u","v","w","x"]
+--                             & faceData   .~ V.fromList ["f_3", "f_infty","f_1","f_2"]
+--     showWithData     :: HasDataOf s i => s -> i -> (i, DataOf s i)
+--     showWithData g i = (i, g^.dataOf i)
 -- :}
 --
 --
@@ -185,6 +188,9 @@ edgeData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
                  (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
 edgeData = dartData
 
+
+
+
 -- | Helper function to update the data in a planar graph. Takes care to update
 -- both the data in the original graph as well as in the dual.
 updateData :: forall s w v e f v' e' f'
@@ -226,12 +232,12 @@ reorderEdgeData ds = V.create $ do
 -- | Traverse the vertices
 --
 -- >>> (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
--- Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+-- Just [(VertexId 0,"u"),(VertexId 1,"v"),(VertexId 2,"w"),(VertexId 3,"x")]
 -- >>> traverseVertices (\i x -> print (i,x)) myGraph >> pure ()
--- (VertexId 0,())
--- (VertexId 1,())
--- (VertexId 2,())
--- (VertexId 3,())
+-- (VertexId 0,"u")
+-- (VertexId 1,"v")
+-- (VertexId 2,"w")
+-- (VertexId 3,"x")
 traverseVertices   :: Applicative m
                    => (VertexId s w -> v -> m v')
                    -> PlanarGraph s w v e f
@@ -262,10 +268,10 @@ traverseDarts f = itraverseOf (rawDartData.itraversed) (f . toEnum)
 -- | Traverses the faces
 --
 -- >>> traverseFaces (\i x -> print (i,x)) myGraph >> pure ()
--- (FaceId 0,())
--- (FaceId 1,())
--- (FaceId 2,())
--- (FaceId 3,())
+-- (FaceId 0,"f_3")
+-- (FaceId 1,"f_infty")
+-- (FaceId 2,"f_1")
+-- (FaceId 3,"f_2")
 traverseFaces   :: Applicative m
                 => (FaceId s w -> f -> m f')
                 -> PlanarGraph s w v e f
@@ -408,11 +414,17 @@ edges = V.filter (isPositive . fst) . darts
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
+-- >>> showWithData myGraph $ tailOf (Dart (Arc 3) Positive) myGraph
+-- (VertexId 2,"w")
+--
 -- running time: \(O(1)\)
 tailOf     :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 tailOf d g = VertexId . fst $ lookupIdx (g^.embedding) d
 
 -- | The vertex this dart is heading in to
+--
+-- showWithData myGraph $ headOf (Dart (Arc 3) Positive) myGraph
+-- (VertexId 1,"v")
 --
 -- running time: \(O(1)\)
 headOf   :: Dart s -> PlanarGraph s w v e f -> VertexId s w
@@ -420,23 +432,40 @@ headOf d = tailOf (twin d)
 
 -- | endPoints d g = (tailOf d g, headOf d g)
 --
+-- >>> endPoints (Dart (Arc 3) Positive) myGraph
+-- (VertexId 2,VertexId 1)
+--
 -- running time: \(O(1)\)
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 endPoints d g = (tailOf d g, headOf d g)
 
-
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --
---
+-- >>> incidentEdges (VertexId 1) myGraph
+-- [Dart (Arc 4) -1,Dart (Arc 1) -1,Dart (Arc 3) -1,Dart (Arc 5) +1]
+-- >>> mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 1) myGraph
+-- (Dart (Arc 4) -1,"e-")
+-- (Dart (Arc 1) -1,"b-")
+-- (Dart (Arc 3) -1,"d-")
+-- (Dart (Arc 5) +1,"g+")
+-- >>> mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 3) myGraph
+-- (Dart (Arc 5) -1,"g-")
 --
 -- running time: \(O(k)\), where \(k\) is the output size
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
 incidentEdges (VertexId v) g = g^?!embedding.orbits.ix v
-  -- TODO: The Delaunay triang. stuff seems to produce these in clockwise order instead
 
 -- | All edges incident to vertex v in incoming direction
 -- (i.e. pointing into v) in counterclockwise order around v.
+--
+-- >>> incomingEdges (VertexId 1) myGraph
+-- [Dart (Arc 4) +1,Dart (Arc 1) +1,Dart (Arc 3) +1,Dart (Arc 5) -1]
+-- >>> mapM_ (print . showWithData myGraph) $ incomingEdges (VertexId 1) myGraph
+-- (Dart (Arc 4) +1,"e+")
+-- (Dart (Arc 1) +1,"b+")
+-- (Dart (Arc 3) +1,"d+")
+-- (Dart (Arc 5) -1,"g-")
 --
 -- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 incomingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
@@ -457,6 +486,14 @@ outgoingEdges v g = orient <$> incidentEdges v g
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 -- around the vertex.
 --
+-- >>> mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 1) myGraph -- around v
+-- (VertexId 2,"w")
+-- (VertexId 0,"u")
+-- (VertexId 2,"w")
+-- (VertexId 3,"x")
+-- >>> mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 3) myGraph -- around x
+-- (VertexId 1,"v")
+--
 -- running time: \(O(k)\), where \(k\) is the output size
 neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 neighboursOf v g = flip tailOf g <$> incomingEdges v g
@@ -464,21 +501,31 @@ neighboursOf v g = flip tailOf g <$> incomingEdges v g
 -- | Given a dart d that points into some vertex v, report the next dart in the
 -- cyclic order around v.
 --
+-- >>> nextIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- Dart (Arc 5) +1
+-- >>> showWithData myGraph $ nextIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- (Dart (Arc 5) +1,"g+")
+--
 -- running time: \(O(1)\)
 nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 nextIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
-                       in next (perm^?!orbits.ix i) j
+                       in next (perm^?!orbits.ix j) i
 
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
 -- cyclic order around v.
 --
+-- >>> prevIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- Dart (Arc 1) -1
+-- >>> showWithData myGraph $ prevIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- (Dart (Arc 1) -1,"b-")
+--
 -- running time: \(O(1)\)
 prevIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 prevIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
-                       in previous (perm^?!orbits.ix i) j
+                       in previous (perm^?!orbits.ix j) i
 
 
 --------------------------------------------------------------------------------
@@ -506,6 +553,9 @@ instance HasDataOf (PlanarGraph s w v e f) (FaceId s w) where
 
 
 -- | Data corresponding to the endpoints of the dart
+--
+-- >>> myGraph^.endPointDataOf (Dart (Arc 3) Positive)
+-- ("w","v")
 endPointDataOf   :: Dart s -> Getter (PlanarGraph s w v e f) (v,v)
 endPointDataOf d = to $ endPointData d
 
@@ -551,3 +601,35 @@ computeDual' g = dualG
                         (g^.rawDartData)
                         (g^.vertexData)
                         g
+
+
+
+--------------------------------------------------------------------------------
+
+-- myGraph :: PlanarGraph () Primal String String String
+-- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+--                             , (Dart aC Positive, "c+")
+--                             , (Dart aB Positive, "b+")
+--                             , (Dart aA Positive, "a+")
+--                             ]
+--                           , [ (Dart aE Negative, "e-")
+--                             , (Dart aB Negative, "b-")
+--                             , (Dart aD Negative, "d-")
+--                             , (Dart aG Positive, "g+")
+--                             ]
+--                           , [ (Dart aE Positive, "e+")
+--                             , (Dart aD Positive, "d+")
+--                             , (Dart aC Negative, "c-")
+--                             ]
+--                           , [ (Dart aG Negative, "g-")
+--                             ]
+--                           ]
+--           & vertexData .~ V.fromList ["u","v","w","x"]
+--           & faceData   .~ V.fromList ["f_3", "f_infty","f_1","f_2"]
+--   where
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+
+-- dart i s = Dart (Arc i) (read s)
+
+-- showWithData     :: HasDataOf s i => s -> i -> (i, DataOf s i)
+-- showWithData g i = (i, g^.dataOf i)
