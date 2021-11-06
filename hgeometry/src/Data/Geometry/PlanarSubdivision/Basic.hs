@@ -35,7 +35,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , edges', edges
                                             , faces', faces, internalFaces
                                             , darts'
-                                            -- , traverseVertices, traverseDarts, traverseFaces
+                                            , traverseVertices, traverseDarts, traverseFaces
+                                            , mapVertices, mapDarts, mapFaces
 
                                             , headOf, tailOf, twin, endPoints
 
@@ -613,32 +614,53 @@ instance HasDataOf (PlanarSubdivision s v e f r) (FaceId' s) where
   type DataOf (PlanarSubdivision s v e f r) (FaceId' s) = f
   dataOf f = faceDataOf f.fData
 
+-- | Traverse the vertices of the planar subdivision
+traverseVertices :: Applicative g
+                 => (VertexId' s -> v -> g v')
+                 -> PlanarSubdivision s v e f r -> g (PlanarSubdivision s v' e f r)
+traverseVertices h = traverseOf rawVertexData (traverseWith VertexId h)
 
--- -- | Traverse the vertices
--- --
--- traverseVertices   :: Applicative m
---                    => (VertexId' s -> v -> m v')
---                    -> PlanarSubdivision s v e f r
---                    -> m (PlanarSubdivision s v' e f r)
--- traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
-
--- -- | Traverses the darts
--- --
--- traverseDarts   :: Applicative m
---                 => (Dart s -> e -> m e')
---                 -> PlanarSubdivision s v e f r
---                 -> m (PlaneGraph s v e' f r)
--- traverseDarts f = traverseOf (dart) (PG.traverseDarts f)
+-- | Traverse the darts of the Planar subdivision
+traverseDarts   :: Applicative g
+                => (Dart s -> e -> g e')
+                -> PlanarSubdivision s v e f r -> g (PlanarSubdivision s v e' f r)
+traverseDarts h = traverseOf rawDartData (traverseWith toEnum h)
 
 
--- -- | Traverses the faces
--- --
--- traverseFaces   :: Applicative m
---                 => (FaceId' s  -> f -> m f')
---                 -> PlaneGraph s v e f r
---                 -> m (PlaneGraph s v e f' r)
--- traverseFaces f = traverseOf graph (PG.traverseFaces f)
+-- | Traverse the faces of the planar subdivision.
+traverseFaces   :: Applicative g
+                => (FaceId' s -> f -> g f')
+                -> PlanarSubdivision s v e f r -> g (PlanarSubdivision s v e f' r)
+traverseFaces h = traverseOf rawFaceData (traverseFaces' h)
+  where
+    traverseFaces' h' = itraverse (\i -> traverse (h' (FaceId . VertexId $ i)))
 
+-- | Helper function to implement traver(vertertices|darts|faces)
+traverseWith         :: Applicative g
+                     => (Int -> w s)
+                     -> (w s -> v -> g v')
+                     -> V.Vector (Raw ci i v)
+                     -> g (V.Vector (Raw ci i v'))
+traverseWith mkIdx h = itraverse (\i -> traverse (h $ mkIdx i))
+
+--------------------------------------------------------------------------------
+
+-- | Map with index over all faces
+mapFaces   :: (FaceId' s -> t -> f')
+           -> PlanarSubdivision s v e t r -> PlanarSubdivision s v e f' r
+mapFaces h = runIdentity . traverseFaces (\i x -> Identity $ h i x)
+
+-- | Map with index over all vertices
+mapVertices   :: (VertexId' s -> t -> v')
+              -> PlanarSubdivision s t e f r -> PlanarSubdivision s v' e f r
+mapVertices h = runIdentity . traverseVertices (\i x -> Identity $ h i x)
+
+-- | Map with index over all darts
+mapDarts   :: (Dart s -> t -> e')
+           -> PlanarSubdivision s v t f r -> PlanarSubdivision s v e' f r
+mapDarts h = runIdentity . traverseDarts (\i x -> Identity $ h i x)
+
+--------------------------------------------------------------------------------
 
 -- | Getter for the data at the endpoints of a dart
 --

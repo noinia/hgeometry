@@ -46,7 +46,7 @@ drawPlanarSubdivisionWith            :: (ToObject vi, ToObject ei, ToObject fi)
                                      -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
                                      -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    fi r
                                      -> IpeOut (PlanarSubdivision s v e f r) Group r
-drawPlanarSubdivisionWith fv fe ff g = ipeGroup . concat $ [vs, es, fs]
+drawPlanarSubdivisionWith fv fe ff g = ipeGroup . concat $ [fs, es, vs]
   where
     vs = mapMaybe (fmap iO . fv) . V.toList . vertices        $ g
     es = mapMaybe (fmap iO . fe) . V.toList . edgeSegments    $ g
