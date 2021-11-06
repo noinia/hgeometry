@@ -27,7 +27,7 @@ spec = describe "PlaneGraph tests" $ do
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
            outerFaceId simplePgGraph `shouldBe` FaceId (VertexId 1)
-         it "right orienations" $
+         it "right orientations" $
            allFaceOrientations myGraph `shouldBe` True
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
@@ -208,14 +208,9 @@ simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
 
 --------------------------------------------------------------------------------
 
-
 -- | Tests if all face orientations are correct
 allFaceOrientations    :: (Fractional r, Ord r) => PlaneGraph s v e f r -> Bool
-allFaceOrientations pg = all (rightOrientation oId) ipgs
-                      && rightOrientation oId opg
+allFaceOrientations pg = all (isCounterClockwise . (^._2.core)) ipgs
+                      && isCounterClockwise (opg^.core)
   where
-    (opg@(oId,_),ipgs) = facePolygons (outerFaceId pg) pg
-
-rightOrientation                    :: (Eq r, Num r)
-                                    => FaceId' s -> (FaceId' s, Polygon t v r :+ f) -> Bool
-rightOrientation oId (i, poly :+ _) = isCounterClockwise poly == (i /= oId)
+    ((_,opg),ipgs) = facePolygons (outerFaceId pg) pg
