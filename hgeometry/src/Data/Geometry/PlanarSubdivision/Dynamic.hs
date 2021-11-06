@@ -335,15 +335,15 @@ unSplitEdgeInPlaneGraph a b c f
 --deriving instance Show f => Show (Face f)
 
 
-instance {-# OVERLAPS #-} Show (VertexId s Primal) where show i = 'v' : show (fromEnum i)
-instance {-# OVERLAPS #-} Show (FaceId   s Primal) where show i = 'f' : show (fromEnum i)
-instance {-# OVERLAPS #-} Show (Dart s, v) where 
-  show (Dart (Arc s) Positive, _) = 'd' : show (fromEnum s) ++ "+"
-  show (Dart (Arc s) Negative, _) = 'd' : show (fromEnum s) ++ "-"
+-- instance {-# OVERLAPS #-} Show (VertexId s Primal) where show i = 'v' : show (fromEnum i)
+-- instance {-# OVERLAPS #-} Show (FaceId   s Primal) where show i = 'f' : show (fromEnum i)
+-- instance {-# OVERLAPS #-} Show (Dart s, v) where 
+--   show (Dart (Arc s) Positive, _) = 'd' : show (fromEnum s) ++ "+"
+--   show (Dart (Arc s) Negative, _) = 'd' : show (fromEnum s) ++ "-"
 
-instance Show f => Show (Face f) where show f = (show $ AR.fData f) ++ "~>" ++ (show $ incidentEdge f)
-instance (Show e, Show r) => Show (Vtx v e r) where show v = (show $ AR.id v) ++ "~>" ++ (show $ adj v)
-instance (Show v, Show f) => Show (Gr v f) where show g = "Gr " ++ (show $ adjacencies g) ++ " " ++ (show $ AR.faces g)
+-- instance Show f => Show (Face f) where show f = (show $ AR.fData f) ++ "~>" ++ (show $ incidentEdge f)
+-- instance (Show e, Show r) => Show (Vtx v e r) where show v = (show $ AR.id v) ++ "~>" ++ (show $ adj v)
+-- instance (Show v, Show f) => Show (Gr v f) where show g = "Gr " ++ (show $ adjacencies g) ++ " " ++ (show $ AR.faces g)
 
 -- ik heb:
 splitEdgeInAdjRep 
