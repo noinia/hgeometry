@@ -44,11 +44,11 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , vertexData, faceData, dartData, rawDartData
 
                       , edgeSegment, edgeSegments
-                      , rawFacePolygon, rawFaceBoundary
-                      , rawFacePolygons
+                      , faceBoundary, internalFacePolygon
+                      , outerFacePolygon, outerFacePolygon'
+                      , facePolygons, facePolygons'
 
                       , VertexId(..), FaceId(..), Dart, World(..), VertexId', FaceId'
-
 
                       , withEdgeDistances
                       , writePlaneGraph, readPlaneGraph

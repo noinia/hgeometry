@@ -28,6 +28,10 @@ import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 
+
+-- import Data.PlanarGraph.Dart
+-- import Data.PlanarGraph.AdjRep(Face(..))
+
 --------------------------------------------------------------------------------
 
 -- $setup
@@ -132,3 +136,28 @@ makeCCW (Gr vs fs) = Gr (map sort' vs) fs
                            -- hence, no need to pick a secondary comparison
 
 --------------------------------------------------------------------------------
+
+-- smallG = fromAdjRep (Proxy :: Proxy ()) small
+--   where
+--     small :: Gr (Vtx Int String Int) (Face String)
+--     small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+--                                     , (1,"0->1")
+--                                     , (3,"0->3")
+--                                     ] 0
+--                , Vtx 1 (Point2 2 2) [ (0,"1->0")
+--                                     , (2,"1->2")
+--                                     , (3,"1->3")
+--                                     ] 1
+--                , Vtx 2 (Point2 2 0) [ (0,"2->0")
+--                                     , (1,"2->1")
+--                                     ] 2
+--                , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
+--                                        , (1,"3->1")
+--                                        ] 3
+--                ]
+--                [ Face (2,1) "OuterFace"
+--                , Face (0,1) "A"
+--                , Face (1,0) "B"
+--                ]
+
+-- dart i s = Dart (Arc i) (read s)

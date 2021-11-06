@@ -163,7 +163,10 @@ boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s
 boundary (FaceId v) g = incidentEdges v $ _dual g
 
 -- | Given a dart d, generates the darts bounding the face that is to
--- the right of the given dart.
+-- the right of the given dart. The darts are reported in order along
+-- the face. This means that for internal faces the darts are reported
+-- in *clockwise* order along the boundary, whereas for the outer face
+-- the darts are reported in counter clockwise order.
 --
 -- >>> mapM_ (print . showWithData myGraph) $ boundary' (dart 1 "+1") myGraph
 -- (Dart (Arc 1) +1,"b+")
