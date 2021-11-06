@@ -27,8 +27,8 @@ spec = describe "PlaneGraph tests" $ do
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
            outerFaceId simplePgGraph `shouldBe` (FaceId (VertexId 1))
-         it "right orienations" $
-           allFaceOrientations (realToFrac @Integer @R <$> myGraph) `shouldBe` True
+         -- it "right orienations" $
+         --   allFaceOrientations (realToFrac @Integer @R <$> myGraph) `shouldBe` True
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "src/Data/myPlaneGraph.yaml")
