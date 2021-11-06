@@ -23,7 +23,8 @@ import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
--- | A Quadrant data type
+-- | A data type rperesenting the corners of a box.
+-- the order of the Corners is 'northWest, northEast, southEast, southWest'
 data Corners a = Corners { _northWest  :: !a
                          , _northEast  :: !a
                          , _southEast  :: !a
