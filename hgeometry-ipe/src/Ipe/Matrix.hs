@@ -1,10 +1,10 @@
-module Data.Geometry.Ipe.Matrix where
+module Ipe.Matrix where
 
 import           Control.Lens hiding (rmap)
 import           Data.Ext
-import qualified Data.Geometry.Ipe.Attributes as AT
-import           Data.Geometry.Ipe.Attributes hiding (Matrix)
-import           Data.Geometry.Ipe.Types
+import qualified Ipe.Attributes as AT
+import           Ipe.Attributes hiding (Matrix)
+import           Ipe.Types
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Proxy

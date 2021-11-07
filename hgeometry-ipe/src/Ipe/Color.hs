@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.Color
+-- Module      :  Ipe.Color
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,10 +10,10 @@
 -- the standard ipe stylesheet.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Color where
+module Ipe.Color where
 
 import Data.Colour.SRGB (RGB(..))
-import Data.Geometry.Ipe.Value
+import Ipe.Value
 import Data.Text
 import Data.Traversable
 --------------------------------------------------------------------------------

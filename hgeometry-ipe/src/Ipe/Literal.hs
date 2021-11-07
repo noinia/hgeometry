@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.Ipe.Literal where
+module Ipe.Literal where
 
 
 import Language.Haskell.TH

@@ -3,7 +3,7 @@ module Data.Tree.Draw where
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Tree
 
 --------------------------------------------------------------------------------

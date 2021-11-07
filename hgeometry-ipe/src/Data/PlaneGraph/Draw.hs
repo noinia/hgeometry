@@ -2,7 +2,7 @@
 module Data.PlaneGraph.Draw where
 
 import           Data.Ext
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Properties
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point

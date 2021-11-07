@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.Types
+-- Module      :  Ipe.Types
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,7 +11,7 @@
 -- Data type modeling the various elements in Ipe files.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Types(
+module Ipe.Types(
     LayerName(LayerName), layerName
   , Image(Image), imageData, rect
   , TextLabel(..)
@@ -60,10 +60,10 @@ module Data.Geometry.Ipe.Types(
 
 
 import           Control.Lens hiding (views)
-import           Data.Geometry.Ipe.Attributes hiding (Matrix)
-import           Data.Geometry.Ipe.Content
-import           Data.Geometry.Ipe.Layer
-import           Data.Geometry.Ipe.Literal
+import           Ipe.Attributes hiding (Matrix)
+import           Ipe.Content
+import           Ipe.Layer
+import           Ipe.Literal
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup (Endo)

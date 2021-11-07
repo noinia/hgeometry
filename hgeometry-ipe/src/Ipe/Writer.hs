@@ -3,14 +3,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.Writer
+-- Module      :  Ipe.Writer
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  Converting data types into IpeTypes
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
+module Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
                                , toIpeXML
 
                                , printAsIpeSelection, toIpeSelectionXML
@@ -32,12 +32,12 @@ import qualified Data.Foldable                as F
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse        (ellipseMatrix)
-import           Data.Geometry.Ipe.Attributes
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Color      (IpeColor (..))
-import           Data.Geometry.Ipe.Path
-import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Ipe.Value
+import           Ipe.Attributes
+import qualified Ipe.Attributes as IA
+import           Ipe.Color      (IpeColor (..))
+import           Ipe.Path
+import           Ipe.Types
+import           Ipe.Value
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.Matrix         as Matrix
 import           Data.Geometry.Point

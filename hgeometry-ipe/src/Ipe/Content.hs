@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.Ipe.Content(
+module Ipe.Content(
     Image(Image), imageData, rect
   , TextLabel(..)
   , MiniPage(..), width
@@ -29,11 +29,11 @@ import           Control.Lens hiding (views)
 import           Data.Bitraversable
 import           Data.Ext
 import           Data.Geometry.Box (Rectangle)
-import qualified Data.Geometry.Ipe.Attributes as AT
-import           Data.Geometry.Ipe.Attributes hiding (Matrix)
-import           Data.Geometry.Ipe.Color
-import           Data.Geometry.Ipe.Layer
-import           Data.Geometry.Ipe.Path
+import qualified Ipe.Attributes as AT
+import           Ipe.Attributes hiding (Matrix)
+import           Ipe.Color
+import           Ipe.Layer
+import           Ipe.Path
 import           Data.Geometry.Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.Properties

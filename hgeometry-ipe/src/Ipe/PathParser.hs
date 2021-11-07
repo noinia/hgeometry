@@ -1,13 +1,13 @@
 {-# Language OverloadedStrings #-}
 {-# Language DefaultSignatures #-}
-module Data.Geometry.Ipe.PathParser where
+module Ipe.PathParser where
 
 import           Data.Bifunctor
 import           Data.Char (isSpace)
 import           Data.Ext (ext)
 import           Data.Geometry.Box
-import           Data.Geometry.Ipe.ParserPrimitives
-import           Data.Geometry.Ipe.Path (Operation(..))
+import           Ipe.ParserPrimitives
+import           Ipe.Path (Operation(..))
 import           Data.Geometry.Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.Vector

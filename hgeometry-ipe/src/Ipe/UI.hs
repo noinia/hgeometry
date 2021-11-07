@@ -1,6 +1,6 @@
-module Data.Geometry.Ipe.UI where
+module Ipe.UI where
 
-import Data.Geometry.Ipe.Types
+import Ipe.Types
 
 data UIAttributes = UIAtributes deriving (Show,Eq,Ord)
 

@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.Ipe.Path(
+module Ipe.Path(
     Path(Path), pathSegments
   , PathSegment(..)
 

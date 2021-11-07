@@ -4,7 +4,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.Attributes
+-- Module      :  Ipe.Attributes
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -12,10 +12,10 @@
 -- Possible Attributes we can assign to items in an Ipe file
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Attributes where
+module Ipe.Attributes where
 
 import Control.Lens hiding (rmap, Const)
-import Data.Geometry.Ipe.Value
+import Ipe.Value
 import Data.Singletons
 import Data.Singletons.TH
 import Data.Text (Text)
@@ -316,7 +316,7 @@ normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
 -- | The only group attribute is a Clip
 -- data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 
--- A clipping path is a Path. Which is defined in Data.Geometry.Ipe.Types. To
+-- A clipping path is a Path. Which is defined in Ipe.Types. To
 -- avoid circular imports, we define GroupAttrElf and GroupAttribute there.
 
 --------------------------------------------------------------------------------

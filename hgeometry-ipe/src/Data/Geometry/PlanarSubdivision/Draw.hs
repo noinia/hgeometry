@@ -2,7 +2,7 @@ module Data.Geometry.PlanarSubdivision.Draw where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
