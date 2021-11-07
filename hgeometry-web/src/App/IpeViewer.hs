@@ -9,7 +9,7 @@ import           Data.Geometry.Web.ICanvas hiding (update, view)
 import qualified Data.Geometry.Web.ICanvas as ICanvas
 
 import           Data.Geometry.Web.Writer
-import           Data.Geometry.Ipe(IpePage, IpeObject, content, readSinglePageFile)
+import           Ipe(IpePage, IpeObject, content, readSinglePageFile)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty

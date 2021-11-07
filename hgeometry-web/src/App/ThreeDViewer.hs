@@ -13,11 +13,11 @@ import qualified Data.Geometry.Web.ICanvas as ICanvas
 import           Data.Geometry.Web.ICanvas hiding (update, view)
 
 import           Data.Geometry.Web.Writer
-import           Data.Geometry.Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
-import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
-import           Data.Geometry.Ipe.Color
-import           Data.Geometry.Ipe.Value
-import           Data.Geometry.Ipe.Attributes (Sing(..), attr)
+import           Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
+import           Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
+import           Ipe.Color
+import           Ipe.Value
+import           Ipe.Attributes (Sing(..), attr)
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon

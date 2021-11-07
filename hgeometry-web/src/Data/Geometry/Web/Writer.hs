@@ -8,8 +8,8 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Box
 import           Data.Geometry.Web.OrphanInstances ()
-import qualified Data.Geometry.Ipe as Ipe
-import qualified Data.Geometry.Ipe.Attributes as IA
+import qualified Ipe as Ipe
+import qualified Ipe.Attributes as IA
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
