@@ -1720,9 +1720,15 @@ Face :: (Int, Int) -> f -> Face f
 -- | an edge (u,v) s.t. the face is right from (u,v)
 [incidentEdge] :: Face f -> (Int, Int)
 [fData] :: Face f -> f
+instance GHC.Classes.Eq f => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Face f)
+instance GHC.Show.Show f => GHC.Show.Show (Data.PlanarGraph.AdjRep.Face f)
 instance GHC.Base.Functor Data.PlanarGraph.AdjRep.Face
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Face f)
+instance (GHC.Classes.Eq e, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Vtx v e)
+instance (GHC.Show.Show e, GHC.Show.Show v) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Vtx v e)
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Vtx v e)
+instance (GHC.Classes.Eq v, GHC.Classes.Eq f) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Gr v f)
+instance (GHC.Show.Show v, GHC.Show.Show f) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Gr v f)
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Gr v f)
 instance Data.Aeson.Types.ToJSON.ToJSON f => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.FromJSON.FromJSON f => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Face f)
@@ -1897,13 +1903,13 @@ reorderEdgeData :: Foldable f => f (Dart s, e) -> Vector e
 --   
 --   <pre>
 --   &gt;&gt;&gt; (^.vertexData) &lt;$&gt; traverseVertices (\i x -&gt; Just (i,x)) myGraph
---   Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+--   Just [(VertexId 0,"u"),(VertexId 1,"v"),(VertexId 2,"w"),(VertexId 3,"x")]
 --   
 --   &gt;&gt;&gt; traverseVertices (\i x -&gt; print (i,x)) myGraph &gt;&gt; pure ()
---   (VertexId 0,())
---   (VertexId 1,())
---   (VertexId 2,())
---   (VertexId 3,())
+--   (VertexId 0,"u")
+--   (VertexId 1,"v")
+--   (VertexId 2,"w")
+--   (VertexId 3,"x")
 --   </pre>
 traverseVertices :: Applicative m => (VertexId s w -> v -> m v') -> PlanarGraph s w v e f -> m (PlanarGraph s w v' e f)
 
@@ -1930,10 +1936,10 @@ traverseDarts :: Applicative m => (Dart s -> e -> m e') -> PlanarGraph s w v e f
 --   
 --   <pre>
 --   &gt;&gt;&gt; traverseFaces (\i x -&gt; print (i,x)) myGraph &gt;&gt; pure ()
---   (FaceId 0,())
---   (FaceId 1,())
---   (FaceId 2,())
---   (FaceId 3,())
+--   (FaceId 0,"f_3")
+--   (FaceId 1,"f_infty")
+--   (FaceId 2,"f_1")
+--   (FaceId 3,"f_2")
 --   </pre>
 traverseFaces :: Applicative m => (FaceId s w -> f -> m f') -> PlanarGraph s w v e f -> m (PlanarGraph s w v e f')
 
@@ -2043,26 +2049,64 @@ edges :: PlanarGraph s w v e f -> Vector (Dart s, e)
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --   
+--   <pre>
+--   &gt;&gt;&gt; showWithData myGraph $ tailOf (Dart (Arc 3) Positive) myGraph
+--   (VertexId 2,"w")
+--   </pre>
+--   
 --   running time: &lt;math&gt;
 tailOf :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 
 -- | The vertex this dart is heading in to
+--   
+--   showWithData myGraph $ headOf (Dart (Arc 3) Positive) myGraph
+--   (VertexId 1,"v")
 --   
 --   running time: &lt;math&gt;
 headOf :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 
 -- | endPoints d g = (tailOf d g, headOf d g)
 --   
+--   <pre>
+--   &gt;&gt;&gt; endPoints (Dart (Arc 3) Positive) myGraph
+--   (VertexId 2,VertexId 1)
+--   </pre>
+--   
 --   running time: &lt;math&gt;
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; incidentEdges (VertexId 1) myGraph
+--   [Dart (Arc 4) -1,Dart (Arc 1) -1,Dart (Arc 3) -1,Dart (Arc 5) +1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 1) myGraph
+--   (Dart (Arc 4) -1,"e-")
+--   (Dart (Arc 1) -1,"b-")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 5) +1,"g+")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 3) myGraph
+--   (Dart (Arc 5) -1,"g-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size
 incidentEdges :: VertexId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 
 -- | All edges incident to vertex v in incoming direction (i.e. pointing
 --   into v) in counterclockwise order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; incomingEdges (VertexId 1) myGraph
+--   [Dart (Arc 4) +1,Dart (Arc 1) +1,Dart (Arc 3) +1,Dart (Arc 5) -1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incomingEdges (VertexId 1) myGraph
+--   (Dart (Arc 4) +1,"e+")
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) +1,"d+")
+--   (Dart (Arc 5) -1,"g-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where (k) is the total number of incident
 --   edges of v
@@ -2078,20 +2122,84 @@ outgoingEdges :: VertexId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 --   around the vertex.
 --   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 1) myGraph -- around v
+--   (VertexId 2,"w")
+--   (VertexId 0,"u")
+--   (VertexId 2,"w")
+--   (VertexId 3,"x")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 3) myGraph -- around x
+--   (VertexId 1,"v")
+--   </pre>
+--   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size
 neighboursOf :: VertexId s w -> PlanarGraph s w v e f -> Vector (VertexId s w)
 
 -- | Given a dart d that points into some vertex v, report the next dart in
---   the cyclic order around v.
+--   the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; nextIncidentEdge (dart 3 "+1") myGraph
+--   Dart (Arc 5) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdge (dart 3 "+1") myGraph
+--   (Dart (Arc 5) +1,"g+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdge (dart 1 "+1") myGraph
+--   (Dart (Arc 3) -1,"d-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 nextIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
--- | Given a dart d that points into some vertex v, report the next dart in
---   the cyclic order around v.
+-- | Given a dart d that points into some vertex v, report the previous
+--   dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; prevIncidentEdge (dart 3 "+1") myGraph
+--   Dart (Arc 1) -1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdge (dart 3 "+1") myGraph
+--   (Dart (Arc 1) -1,"b-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 prevIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | Given a dart d that points away from some vertex v, report the next
+--   dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   Dart (Arc 2) -1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdgeFrom (dart 1 "+1") myGraph
+--   (Dart (Arc 0) +1,"a+")
+--   </pre>
+--   
+--   running time: &lt;math&gt;
+nextIncidentEdgeFrom :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | Given a dart d that points into away from vertex v, report the
+--   previous dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   Dart (Arc 4) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   (Dart (Arc 4) +1,"e+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 1) Positive) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   </pre>
+--   
+--   running time: &lt;math&gt;
+prevIncidentEdgeFrom :: Dart s -> PlanarGraph s w v e f -> Dart s
 
 -- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where {
@@ -2104,6 +2212,11 @@ class HasDataOf g i where {
 dataOf :: HasDataOf g i => i -> Lens' g (DataOf g i)
 
 -- | Data corresponding to the endpoints of the dart
+--   
+--   <pre>
+--   &gt;&gt;&gt; myGraph^.endPointDataOf (Dart (Arc 3) Positive)
+--   ("w","v")
+--   </pre>
 endPointDataOf :: Dart s -> Getter (PlanarGraph s w v e f) (v, v)
 
 -- | Data corresponding to the endpoints of the dart
@@ -2131,6 +2244,9 @@ computeDual :: forall s w v e f. PlanarGraph s w v e f -> PlanarGraph s (DualOf 
 
 -- | Does the actual work for dualGraph
 computeDual' :: DualOf (DualOf w) ~ w => PlanarGraph s w v e f -> PlanarGraph s (DualOf w) f e v
+myGraph :: PlanarGraph () Primal String String String
+dart :: forall k (s :: k). Int -> String -> Dart s
+showWithData :: HasDataOf s i => s -> i -> (i, DataOf s i)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World) v e f. GHC.Generics.Generic (Data.PlanarGraph.Core.PlanarGraph s w v e f)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.Core.FaceId s w)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.Core.FaceId s w)
@@ -2172,14 +2288,17 @@ faces :: PlanarGraph s w v e f -> Vector (FaceId s w, f)
 --   &gt;&gt;&gt; leftFace (dart 1 "+1") myGraph
 --   FaceId 1
 --   
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 1 "+1") myGraph
+--   (FaceId 1,"f_infty")
+--   
 --   &gt;&gt;&gt; leftFace (dart 1 "-1") myGraph
 --   FaceId 2
 --   
---   &gt;&gt;&gt; leftFace (dart 2 "+1") myGraph
---   FaceId 2
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 1 "-1") myGraph
+--   (FaceId 2,"f_1")
 --   
---   &gt;&gt;&gt; leftFace (dart 0 "+1") myGraph
---   FaceId 0
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 0 "+1") myGraph
+--   (FaceId 0,"f_3")
 --   </pre>
 --   
 --   running time: &lt;math&gt;.
@@ -2191,46 +2310,122 @@ leftFace :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 --   &gt;&gt;&gt; rightFace (dart 1 "+1") myGraph
 --   FaceId 2
 --   
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 1 "+1") myGraph
+--   (FaceId 2,"f_1")
+--   
 --   &gt;&gt;&gt; rightFace (dart 1 "-1") myGraph
 --   FaceId 1
 --   
---   &gt;&gt;&gt; rightFace (dart 2 "+1") myGraph
---   FaceId 1
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 1 "-1") myGraph
+--   (FaceId 1,"f_infty")
 --   
---   &gt;&gt;&gt; rightFace (dart 0 "+1") myGraph
---   FaceId 1
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 0 "+1") myGraph
+--   (FaceId 1,"f_infty")
 --   </pre>
 --   
 --   running time: &lt;math&gt;.
 rightFace :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 
--- | Get the next edge along the face
+-- | Get the next edge (in clockwise order) along the face that is to the
+--   right of this dart.
+--   
+--   <pre>
+--   &gt; showWithData myGraph $ nextEdge (dart 1 "+1") myGraph
+--   </pre>
+--   
+--   (Dart (Arc 3) -1,"d-") &gt;&gt; showWithData myGraph $ nextEdge (dart
+--   2 "+1") myGraph (Dart (Arc 4) +1,"e+")
 --   
 --   running time: &lt;math&gt;.
 nextEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
--- | Get the previous edge along the face
+-- | Get the previous edge (in clockwise order) along the face that is to
+--   the right of this dart.
+--   
+--   <pre>
+--   &gt;&gt;&gt; showWithData myGraph $ prevEdge (dart 1 "+1") myGraph
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevEdge (dart 3 "-1") myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   </pre>
 --   
 --   running time: &lt;math&gt;.
 prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
 -- | Gets a dart bounding this face. I.e. a dart d such that the face lies
 --   to the right of the dart.
+--   
+--   <pre>
+--   &gt;&gt;&gt; boundaryDart (FaceId $ VertexId 2) myGraph
+--   Dart (Arc 1) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ boundaryDart (FaceId $ VertexId 2) myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ boundaryDart (FaceId $ VertexId 1) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   </pre>
 boundaryDart :: FaceId s w -> PlanarGraph s w v e f -> Dart s
 
--- | The darts bounding this face, for internal faces in clockwise order,
---   for the outer face in counter clockwise order.
+-- | The darts bounding this face. The darts are reported in order along
+--   the face. This means that for internal faces the darts are reported in
+--   *clockwise* order along the boundary, whereas for the outer face the
+--   darts are reported in counter clockwise order.
+--   
+--   <pre>
+--   &gt;&gt;&gt; boundary (FaceId $ VertexId 2) myGraph
+--   [Dart (Arc 1) +1,Dart (Arc 3) -1,Dart (Arc 2) -1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary (FaceId $ VertexId 2) myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; boundary (FaceId $ VertexId 1) myGraph
+--   [Dart (Arc 2) +1,Dart (Arc 4) +1,Dart (Arc 1) -1,Dart (Arc 0) +1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary (FaceId $ VertexId 1) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   (Dart (Arc 4) +1,"e+")
+--   (Dart (Arc 1) -1,"b-")
+--   (Dart (Arc 0) +1,"a+")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size.
 boundary :: FaceId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Given a dart d, generates the darts bounding the face that is to the
+--   right of the given dart. The darts are reported in order along the
+--   face. This means that for internal faces the darts are reported in
+--   *clockwise* order along the boundary, whereas for the outer face the
+--   darts are reported in counter clockwise order.
+--   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary' (dart 1 "+1") myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 2) -1,"c-")
+--   </pre>
 --   
 --   &lt;math&gt;, where &lt;math&gt; is the number of darts reported
 boundary' :: Dart s -> PlanarGraph s w v e f -> Vector (Dart s)
 
 -- | The vertices bounding this face, for internal faces in clockwise
 --   order, for the outer face in counter clockwise order.
+--   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundaryVertices (FaceId $ VertexId 2) myGraph
+--   (VertexId 0,"u")
+--   (VertexId 1,"v")
+--   (VertexId 2,"w")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundaryVertices (FaceId $ VertexId 1) myGraph
+--   (VertexId 0,"u")
+--   (VertexId 2,"w")
+--   (VertexId 1,"v")
+--   (VertexId 0,"u")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size.
 boundaryVertices :: FaceId s w -> PlanarGraph s w v e f -> Vector (VertexId s w)
@@ -2556,13 +2751,13 @@ faces :: PlanarGraph s w v e f -> Vector (FaceId s w, f)
 --   
 --   <pre>
 --   &gt;&gt;&gt; (^.vertexData) &lt;$&gt; traverseVertices (\i x -&gt; Just (i,x)) myGraph
---   Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+--   Just [(VertexId 0,"u"),(VertexId 1,"v"),(VertexId 2,"w"),(VertexId 3,"x")]
 --   
 --   &gt;&gt;&gt; traverseVertices (\i x -&gt; print (i,x)) myGraph &gt;&gt; pure ()
---   (VertexId 0,())
---   (VertexId 1,())
---   (VertexId 2,())
---   (VertexId 3,())
+--   (VertexId 0,"u")
+--   (VertexId 1,"v")
+--   (VertexId 2,"w")
+--   (VertexId 3,"x")
 --   </pre>
 traverseVertices :: Applicative m => (VertexId s w -> v -> m v') -> PlanarGraph s w v e f -> m (PlanarGraph s w v' e f)
 
@@ -2589,35 +2784,73 @@ traverseDarts :: Applicative m => (Dart s -> e -> m e') -> PlanarGraph s w v e f
 --   
 --   <pre>
 --   &gt;&gt;&gt; traverseFaces (\i x -&gt; print (i,x)) myGraph &gt;&gt; pure ()
---   (FaceId 0,())
---   (FaceId 1,())
---   (FaceId 2,())
---   (FaceId 3,())
+--   (FaceId 0,"f_3")
+--   (FaceId 1,"f_infty")
+--   (FaceId 2,"f_1")
+--   (FaceId 3,"f_2")
 --   </pre>
 traverseFaces :: Applicative m => (FaceId s w -> f -> m f') -> PlanarGraph s w v e f -> m (PlanarGraph s w v e f')
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
+--   
+--   <pre>
+--   &gt;&gt;&gt; showWithData myGraph $ tailOf (Dart (Arc 3) Positive) myGraph
+--   (VertexId 2,"w")
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 tailOf :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 
 -- | The vertex this dart is heading in to
 --   
+--   showWithData myGraph $ headOf (Dart (Arc 3) Positive) myGraph
+--   (VertexId 1,"v")
+--   
 --   running time: &lt;math&gt;
 headOf :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 
 -- | endPoints d g = (tailOf d g, headOf d g)
+--   
+--   <pre>
+--   &gt;&gt;&gt; endPoints (Dart (Arc 3) Positive) myGraph
+--   (VertexId 2,VertexId 1)
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --   
+--   <pre>
+--   &gt;&gt;&gt; incidentEdges (VertexId 1) myGraph
+--   [Dart (Arc 4) -1,Dart (Arc 1) -1,Dart (Arc 3) -1,Dart (Arc 5) +1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 1) myGraph
+--   (Dart (Arc 4) -1,"e-")
+--   (Dart (Arc 1) -1,"b-")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 5) +1,"g+")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incidentEdges (VertexId 3) myGraph
+--   (Dart (Arc 5) -1,"g-")
+--   </pre>
+--   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size
 incidentEdges :: VertexId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 
 -- | All edges incident to vertex v in incoming direction (i.e. pointing
 --   into v) in counterclockwise order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; incomingEdges (VertexId 1) myGraph
+--   [Dart (Arc 4) +1,Dart (Arc 1) +1,Dart (Arc 3) +1,Dart (Arc 5) -1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ incomingEdges (VertexId 1) myGraph
+--   (Dart (Arc 4) +1,"e+")
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) +1,"d+")
+--   (Dart (Arc 5) -1,"g-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where (k) is the total number of incident
 --   edges of v
@@ -2633,20 +2866,84 @@ outgoingEdges :: VertexId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 --   around the vertex.
 --   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 1) myGraph -- around v
+--   (VertexId 2,"w")
+--   (VertexId 0,"u")
+--   (VertexId 2,"w")
+--   (VertexId 3,"x")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ neighboursOf (VertexId 3) myGraph -- around x
+--   (VertexId 1,"v")
+--   </pre>
+--   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size
 neighboursOf :: VertexId s w -> PlanarGraph s w v e f -> Vector (VertexId s w)
 
 -- | Given a dart d that points into some vertex v, report the next dart in
---   the cyclic order around v.
+--   the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; nextIncidentEdge (dart 3 "+1") myGraph
+--   Dart (Arc 5) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdge (dart 3 "+1") myGraph
+--   (Dart (Arc 5) +1,"g+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdge (dart 1 "+1") myGraph
+--   (Dart (Arc 3) -1,"d-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 nextIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
--- | Given a dart d that points into some vertex v, report the next dart in
---   the cyclic order around v.
+-- | Given a dart d that points into some vertex v, report the previous
+--   dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; prevIncidentEdge (dart 3 "+1") myGraph
+--   Dart (Arc 1) -1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdge (dart 3 "+1") myGraph
+--   (Dart (Arc 1) -1,"b-")
+--   </pre>
 --   
 --   running time: &lt;math&gt;
 prevIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | Given a dart d that points away from some vertex v, report the next
+--   dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   Dart (Arc 2) -1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ nextIncidentEdgeFrom (dart 1 "+1") myGraph
+--   (Dart (Arc 0) +1,"a+")
+--   </pre>
+--   
+--   running time: &lt;math&gt;
+nextIncidentEdgeFrom :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | Given a dart d that points into away from vertex v, report the
+--   previous dart in the cyclic (counterclockwise) order around v.
+--   
+--   <pre>
+--   &gt;&gt;&gt; prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   Dart (Arc 4) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 3) Positive) myGraph
+--   (Dart (Arc 4) +1,"e+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevIncidentEdgeFrom (Dart (Arc 1) Positive) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   </pre>
+--   
+--   running time: &lt;math&gt;
+prevIncidentEdgeFrom :: Dart s -> PlanarGraph s w v e f -> Dart s
 
 -- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where {
@@ -2659,6 +2956,11 @@ class HasDataOf g i where {
 dataOf :: HasDataOf g i => i -> Lens' g (DataOf g i)
 
 -- | Data corresponding to the endpoints of the dart
+--   
+--   <pre>
+--   &gt;&gt;&gt; myGraph^.endPointDataOf (Dart (Arc 3) Positive)
+--   ("w","v")
+--   </pre>
 endPointDataOf :: Dart s -> Getter (PlanarGraph s w v e f) (v, v)
 
 -- | Data corresponding to the endpoints of the dart
@@ -2683,14 +2985,17 @@ type FaceId' s = FaceId s Primal
 --   &gt;&gt;&gt; leftFace (dart 1 "+1") myGraph
 --   FaceId 1
 --   
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 1 "+1") myGraph
+--   (FaceId 1,"f_infty")
+--   
 --   &gt;&gt;&gt; leftFace (dart 1 "-1") myGraph
 --   FaceId 2
 --   
---   &gt;&gt;&gt; leftFace (dart 2 "+1") myGraph
---   FaceId 2
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 1 "-1") myGraph
+--   (FaceId 2,"f_1")
 --   
---   &gt;&gt;&gt; leftFace (dart 0 "+1") myGraph
---   FaceId 0
+--   &gt;&gt;&gt; showWithData myGraph $ leftFace (dart 0 "+1") myGraph
+--   (FaceId 0,"f_3")
 --   </pre>
 --   
 --   running time: &lt;math&gt;.
@@ -2702,14 +3007,17 @@ leftFace :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 --   &gt;&gt;&gt; rightFace (dart 1 "+1") myGraph
 --   FaceId 2
 --   
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 1 "+1") myGraph
+--   (FaceId 2,"f_1")
+--   
 --   &gt;&gt;&gt; rightFace (dart 1 "-1") myGraph
 --   FaceId 1
 --   
---   &gt;&gt;&gt; rightFace (dart 2 "+1") myGraph
---   FaceId 1
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 1 "-1") myGraph
+--   (FaceId 1,"f_infty")
 --   
---   &gt;&gt;&gt; rightFace (dart 0 "+1") myGraph
---   FaceId 1
+--   &gt;&gt;&gt; showWithData myGraph $ rightFace (dart 0 "+1") myGraph
+--   (FaceId 1,"f_infty")
 --   </pre>
 --   
 --   running time: &lt;math&gt;.
@@ -2717,15 +3025,58 @@ rightFace :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 
 -- | Gets a dart bounding this face. I.e. a dart d such that the face lies
 --   to the right of the dart.
+--   
+--   <pre>
+--   &gt;&gt;&gt; boundaryDart (FaceId $ VertexId 2) myGraph
+--   Dart (Arc 1) +1
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ boundaryDart (FaceId $ VertexId 2) myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ boundaryDart (FaceId $ VertexId 1) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   </pre>
 boundaryDart :: FaceId s w -> PlanarGraph s w v e f -> Dart s
 
--- | The darts bounding this face, for internal faces in clockwise order,
---   for the outer face in counter clockwise order.
+-- | The darts bounding this face. The darts are reported in order along
+--   the face. This means that for internal faces the darts are reported in
+--   *clockwise* order along the boundary, whereas for the outer face the
+--   darts are reported in counter clockwise order.
+--   
+--   <pre>
+--   &gt;&gt;&gt; boundary (FaceId $ VertexId 2) myGraph
+--   [Dart (Arc 1) +1,Dart (Arc 3) -1,Dart (Arc 2) -1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary (FaceId $ VertexId 2) myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; boundary (FaceId $ VertexId 1) myGraph
+--   [Dart (Arc 2) +1,Dart (Arc 4) +1,Dart (Arc 1) -1,Dart (Arc 0) +1]
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary (FaceId $ VertexId 1) myGraph
+--   (Dart (Arc 2) +1,"c+")
+--   (Dart (Arc 4) +1,"e+")
+--   (Dart (Arc 1) -1,"b-")
+--   (Dart (Arc 0) +1,"a+")
+--   </pre>
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size.
 boundary :: FaceId s w -> PlanarGraph s w v e f -> Vector (Dart s)
 
--- | Generates the darts incident to a face, starting with the given dart.
+-- | Given a dart d, generates the darts bounding the face that is to the
+--   right of the given dart. The darts are reported in order along the
+--   face. This means that for internal faces the darts are reported in
+--   *clockwise* order along the boundary, whereas for the outer face the
+--   darts are reported in counter clockwise order.
+--   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundary' (dart 1 "+1") myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   (Dart (Arc 3) -1,"d-")
+--   (Dart (Arc 2) -1,"c-")
+--   </pre>
 --   
 --   &lt;math&gt;, where &lt;math&gt; is the number of darts reported
 boundary' :: Dart s -> PlanarGraph s w v e f -> Vector (Dart s)
@@ -2733,15 +3084,45 @@ boundary' :: Dart s -> PlanarGraph s w v e f -> Vector (Dart s)
 -- | The vertices bounding this face, for internal faces in clockwise
 --   order, for the outer face in counter clockwise order.
 --   
+--   <pre>
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundaryVertices (FaceId $ VertexId 2) myGraph
+--   (VertexId 0,"u")
+--   (VertexId 1,"v")
+--   (VertexId 2,"w")
+--   
+--   &gt;&gt;&gt; mapM_ (print . showWithData myGraph) $ boundaryVertices (FaceId $ VertexId 1) myGraph
+--   (VertexId 0,"u")
+--   (VertexId 2,"w")
+--   (VertexId 1,"v")
+--   (VertexId 0,"u")
+--   </pre>
+--   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the output size.
 boundaryVertices :: FaceId s w -> PlanarGraph s w v e f -> Vector (VertexId s w)
 
--- | Get the next edge along the face
+-- | Get the next edge (in clockwise order) along the face that is to the
+--   right of this dart.
+--   
+--   <pre>
+--   &gt; showWithData myGraph $ nextEdge (dart 1 "+1") myGraph
+--   </pre>
+--   
+--   (Dart (Arc 3) -1,"d-") &gt;&gt; showWithData myGraph $ nextEdge (dart
+--   2 "+1") myGraph (Dart (Arc 4) +1,"e+")
 --   
 --   running time: &lt;math&gt;.
 nextEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
--- | Get the previous edge along the face
+-- | Get the previous edge (in clockwise order) along the face that is to
+--   the right of this dart.
+--   
+--   <pre>
+--   &gt;&gt;&gt; showWithData myGraph $ prevEdge (dart 1 "+1") myGraph
+--   (Dart (Arc 2) -1,"c-")
+--   
+--   &gt;&gt;&gt; showWithData myGraph $ prevEdge (dart 3 "-1") myGraph
+--   (Dart (Arc 1) +1,"b+")
+--   </pre>
 --   
 --   running time: &lt;math&gt;.
 prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
