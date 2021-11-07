@@ -1,22 +1,31 @@
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec (spec) where
 
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer as DC
-import qualified Algorithms.Geometry.DelaunayTriangulation.Naive            as Naive
+import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
-import qualified Data.CircularList.Util                                     as CU
+import           Control.Monad (replicateM)
+import qualified Data.CircularList.Util as CU
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import qualified Data.List.NonEmpty                                         as NonEmpty
-import qualified Data.Map                                                   as M
-import           Data.Maybe                                                 (fromJust, mapMaybe)
--- import           Data.RealNumber.Rational
-import qualified Data.Vector                                                as V
+import           Data.PlaneGraph.Draw
+import           Data.Geometry.PlanarSubdivision
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as M
+import           Data.Maybe (fromJust, mapMaybe)
+import qualified Data.PlaneGraph as PG
+import           Data.Proxy
+import           Data.RealNumber.Rational
+import qualified Data.Vector as V
 import           Paths_hgeometry_test
+import           System.Random
 import           Test.Hspec
 import           Test.Util
 
+type R = RealNumber 5
+
+--------------------------------------------------------------------------------
 
 dtEdges :: (Fractional r, Ord r)
         => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
@@ -34,6 +43,9 @@ spec = do
       dtEdges (take' 1 myPoints) `shouldBe` []
     toSpec (TestCase "myPoints" myPoints)
     toSpec (TestCase "myPoints'" myPoints')
+    it "testing edges of 9 random pts" $
+      fmap (flip PG.endPoints trianG) (PG.darts' trianG) == edgesPts''
+
     -- toSpec (TestCase "maartens points" buggyPoints3)
 
     ipeSpec
@@ -119,6 +131,17 @@ myPoints' = NonEmpty.fromList . map ext $
             ]
 
 --------------------------------------------------------------------------------
+
+trianG = let dts    = DC.delaunayTriangulation pts''
+         in toPlaneGraph (Proxy @()) dts
+
+pts'' :: NonEmpty.NonEmpty (Point 2 R :+ Int)
+pts'' = read "(Point2 (-214) 142 :+ 0) :| [Point2 (-59) 297 :+ 2,Point2 (-135) 141 :+ 1,Point2 193 (-123) :+ 6,Point2 51 (-147) :+ 3,Point2 242 114 :+ 7,Point2 186 290 :+ 5,Point2 262 293 :+ 8,Point2 109 1 :+ 4]"
+
+edgesPts'' :: V.Vector (VertexId' s, VertexId' s)
+edgesPts'' = V.fromList [(VertexId 0,VertexId 3),(VertexId 0,VertexId 1),(VertexId 0,VertexId 2),(VertexId 1,VertexId 0),(VertexId 1,VertexId 3),(VertexId 1,VertexId 4),(VertexId 1,VertexId 2),(VertexId 2,VertexId 0),(VertexId 2,VertexId 1),(VertexId 2,VertexId 4),(VertexId 2,VertexId 5),(VertexId 2,VertexId 8),(VertexId 3,VertexId 6),(VertexId 3,VertexId 4),(VertexId 3,VertexId 1),(VertexId 3,VertexId 0),(VertexId 4,VertexId 6),(VertexId 4,VertexId 7),(VertexId 4,VertexId 5),(VertexId 4,VertexId 2),(VertexId 4,VertexId 1),(VertexId 4,VertexId 3),(VertexId 5,VertexId 2),(VertexId 5,VertexId 4),(VertexId 5,VertexId 7),(VertexId 5,VertexId 8),(VertexId 6,VertexId 7),(VertexId 6,VertexId 4),(VertexId 6,VertexId 3),(VertexId 7,VertexId 8),(VertexId 7,VertexId 5),(VertexId 7,VertexId 4),(VertexId 7,VertexId 6),(VertexId 8,VertexId 2),(VertexId 8,VertexId 5),(VertexId 8,VertexId 7)]
+
+--------------------------------------------------------------------------------
 -- Issue #28 mentions that these sets loop.
 
 -- for Doubles I guess.
@@ -154,3 +177,52 @@ buggyPoints3 = NonEmpty.fromList
                , Point2 64 96                                               :+ 5
                ]
 -}
+
+
+--------------------------------------------------------------------------------
+-- From bug #149
+
+-- pts' :: IO (NonEmpty.NonEmpty (Point 2 R :+ Int))
+-- pts' = do let pointCount = 9
+--           rvs <- replicateM pointCount (randomRIO (Point2 (-300) (-300), Point2 300 300))
+--           let ne = NonEmpty.fromList $ zipWith (:+) (fmap (fromIntegral @Int @R) <$> rvs) [0..]
+--           pure ne
+
+-- withEndPoints pg d = let (VertexData u _, VertexData v _) = pg^.PG.endPointsOf d
+--                      in (d, (u,v))
+
+
+-- fooPG ne = do let dts    = DC.delaunayTriangulation ne
+--                   trian = toPlaneGraph (Proxy @()) dts
+--               mapM_ print ne
+--               print "============================"
+--               print trian
+--               print "============================"
+--               let oid = PG.outerFaceId trian
+--               mapM_ print $ fmap (withEndPoints trian) $ PG.boundary oid trian
+--               print "============================"
+--               -- mapM_ print $ trian^.rawFaceData
+--               -- print "============================"
+--               -- mapM_ print $ PG.boundaryVertices oid trian
+--               -- print "============================"
+--               -- mapM_ print $ snd (PG.facePolygons (PG.outerFaceId trian) trian)
+--               -- printAsIpeSelection . iO . defIO . view core
+--               --   $ outerFacePolygon (PG.outerFaceId trian) trian
+
+--               printAsIpeSelection $ drawPlaneGraph' trian
+
+--               -- printAs $ fmap snd . PG.edgeSegments $ trian
+
+-- foo ne = do let dts    = DC.delaunayTriangulation ne
+--                 trian = toPlanarSubdivision (Proxy @()) $ dts
+--             mapM_ print ne
+--             print "============================"
+--             print dts
+--             print "============================"
+--             mapM_ print $ trian^.rawFaceData
+--             print "============================"
+--             print $ PG.boundaryVertices (FaceId $ VertexId 7) $ trian^.components.to V.head
+--             print "============================"
+--             mapM_ print (internalFacePolygons trian)
+
+-- -- internalFaces' = V.tail . faces'
