@@ -127,5 +127,5 @@ toPlaneGraph    :: forall proxy s p r.
 toPlaneGraph _ tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
     g       = PPG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
-    f i adj = (VertexId i, VertexId <$> adj)
+    f i adj = (VertexId i, C.leftElements $ VertexId <$> adj) -- report in CCW order
     vtxData = (\(loc :+ p) -> VertexData loc p) <$> tr^.positions
