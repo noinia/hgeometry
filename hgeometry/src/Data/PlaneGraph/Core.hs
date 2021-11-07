@@ -50,7 +50,7 @@ module Data.PlaneGraph.Core( -- $setup
                            , edgeSegment, edgeSegments
                            , faceBoundary, internalFacePolygon
                            , outerFacePolygon, outerFacePolygon'
-                           , facePolygons, facePolygons'
+                           , facePolygons, facePolygons', internalFacePolygons
 
                            , VertexId(..), FaceId(..), Dart, World(..), VertexId', FaceId'
 
@@ -777,8 +777,7 @@ outerFacePolygon i pg =
     outerFacePolygon' i outer pg & core %~ first (either (const Nothing) Just)
   where
     outer = rectToPolygon . grow 1 . boundingBox $ pg
-    rectToPolygon r = let (Corners tl tr bl br) = corners r
-                      in unsafeFromPoints [tl,bl,br,tr]
+    rectToPolygon = unsafeFromPoints . reverse . F.toList . corners
 
 -- | Given the outerface id, and a sufficiently large outer boundary,
 -- draw the outerface as a polygon with a hole.
@@ -807,6 +806,12 @@ facePolygons'      :: FaceId' s -> PlaneGraph s v e f r
                    ->  V.Vector (FaceId' s, SimplePolygon v r :+ f)
 facePolygons' i ps = fmap (\j -> (j,internalFacePolygon j ps)) . V.filter (/= i) . faces' $ ps
 
+
+-- | lists all internal faces of the plane graph with their
+-- boundaries.
+internalFacePolygons    :: (Ord r, Fractional r)
+                        => PlaneGraph s v e f r ->  V.Vector (FaceId' s, SimplePolygon v r :+ f)
+internalFacePolygons pg = facePolygons' (outerFaceId pg) pg
 
 --------------------------------------------------------------------------------
 

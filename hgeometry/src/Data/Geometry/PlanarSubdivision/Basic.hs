@@ -33,7 +33,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , components, component
                                             , vertices', vertices
                                             , edges', edges
-                                            , faces', faces, internalFaces
+                                            , faces', internalFaces', faces, internalFaces
                                             , darts'
                                             , traverseVertices, traverseDarts, traverseFaces
                                             , mapVertices, mapDarts, mapFaces
@@ -338,6 +338,10 @@ edges ps = (\e -> (e,ps^.dataOf e)) <$> edges' ps
 faces'    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s)
 faces' ps = let n = numFaces ps
             in V.fromList $ map (FaceId . VertexId) [0..n-1]
+
+-- | \( O(n) \). Vector of all primal faces.
+internalFaces'    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s)
+internalFaces' = V.tail . faces'
 
 -- | \( O(n) \). Vector of all primal faces with associated data.
 faces    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s, FaceData (Dart s) f)
