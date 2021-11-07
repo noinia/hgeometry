@@ -71,8 +71,6 @@ computeDiagonals' pg' = (pg, monotoneDiags <> extraDiags)
                   . lefts . map (^._2.core)
                   . filter (\mp -> mp^._2.extra == Inside) -- triangulate only the insides
                   -- . filter (\f -> f^._1 /= outerFaceId')
-                  . F.toList . rawFacePolygons $ monotoneP
-
-    -- -- we alredy know we get the polgyons in *clockwise* order, so skip the
-    -- -- check if it is counter clockwise
-    -- toCounterClockWiseOrder'' = reverseOuterBoundary
+                  . F.toList . internalFacePolygons $ monotoneP
+    -- FIXME: we should already get all polygons in CCW order, so no
+    -- need for the toClockwiseOrder' call

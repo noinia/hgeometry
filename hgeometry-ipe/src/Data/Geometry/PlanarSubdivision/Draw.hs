@@ -13,8 +13,8 @@ import qualified Data.Vector as V
 drawColoredPlanarSubdivision  ::  IpeOut (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
                                           Group r
 drawColoredPlanarSubdivision ps = drawPlanarSubdivision
-    (ps&vertexData.traverse  .~ Just mempty
-       &dartData.traverse._2 .~ Just mempty
+    (ps&vertexData.traverse  ?~ mempty
+       &dartData.traverse._2 ?~ mempty
        &faceData.traverse    %~ fmap (attr SFill)
     )
 
@@ -36,19 +36,19 @@ drawPlanarSubdivision = drawPlanarSubdivisionWith fv fe ff
 -- | Draw everything using the defaults
 drawPlanarSubdivision'    :: forall s v e f r. IpeOut (PlanarSubdivision s v e f r) Group r
 drawPlanarSubdivision' ps = drawPlanarSubdivision
-  (ps&vertexData.traverse   .~ Just (mempty :: IpeAttributes IpeSymbol r)
-     &dartData.traverse._2  .~ Just (mempty :: IpeAttributes Path      r)
-     &faceData.traverse     .~ Just (mempty :: IpeAttributes Path      r))
+  (ps&vertexData.traverse   ?~ (mempty :: IpeAttributes IpeSymbol r)
+     &dartData.traverse._2  ?~ (mempty :: IpeAttributes Path      r)
+     &faceData.traverse     ?~ (mempty :: IpeAttributes Path      r))
 
-type MIO g i r = g -> Maybe (IpeObject' i r)
 
 drawPlanarSubdivisionWith            :: (ToObject vi, ToObject ei, ToObject fi)
-                                     => MIO (VertexId' s, VertexData r v)          vi r
-                                     -> MIO (Dart s,      LineSegment 2 v r :+ e)  ei r
-                                     -> MIO (FaceId' s,   SomePolygon v r :+ f)    fi r
+                                     => IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
+                                     -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
+                                     -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    fi r
                                      -> IpeOut (PlanarSubdivision s v e f r) Group r
 drawPlanarSubdivisionWith fv fe ff g = ipeGroup . concat $ [fs, es, vs]
   where
     vs = mapMaybe (fmap iO . fv) . V.toList . vertices        $ g
     es = mapMaybe (fmap iO . fe) . V.toList . edgeSegments    $ g
-    fs = mapMaybe (fmap iO . ff) . V.toList . rawFacePolygons $ g
+    fs = mapMaybe (fmap iO . ff) . V.toList . internalFacePolygons $ g
+  -- FIXME: also draw the outer face
