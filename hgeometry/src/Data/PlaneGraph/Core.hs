@@ -122,11 +122,45 @@ import           GHC.Generics (Generic)
 -- arrows are just to indicate what the Positive direction of the darts is.
 --
 -- ![myGraph](docs/Data/PlaneGraph/small.png)
-
 --
--- Here is also a slightly larger example graph
--- FIXME: TODO
-
+--
+-- Here is also a slightly larger example graph:
+-- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
+--
+-- >>> import Data.RealNumber.Rational
+-- >>> data MyWorld
+-- >>> :{
+-- let myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)
+--     myPlaneGraph = fromAdjRep (Proxy @MyWorld) myPlaneGraphAdjrep
+--     myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)
+--     myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]
+--                             , vtx 1 (Point2 4   4   ) [e 0, e 5, e 12]
+--                             , vtx 2 (Point2 3   7   ) [e 0, e 3]
+--                             , vtx 3 (Point2 0   5   ) [e 4, e 2]
+--                             , vtx 4 (Point2 3   8   ) [e 3, e 13]
+--                             , vtx 5 (Point2 8   1   ) [e 0, e 6, e 8, e 1]
+--                             , vtx 6 (Point2 6   (-1)) [e 5, e 9]
+--                             , vtx 7 (Point2 9   (-1)) [e 8, e 11]
+--                             , vtx 8 (Point2 12  1   ) [e 7, e 12, e 5]
+--                             , vtx 9 (Point2 8   (-5)) [e 0, e 10, e 6]
+--                             , vtx 10 (Point2 12 (-3)) [e 9, e 11]
+--                             , vtx 11 (Point2 14 (-1)) [e 10, e 7]
+--                             , vtx 12 (Point2 10 4   ) [e 1, e 8, e 13, e 14]
+--                             , vtx 13 (Point2 9  6   ) [e 4, e 14, e 12]
+--                             , vtx 14 (Point2 8  5   ) [e 13, e 12]
+--                             ]
+--                             [ Face (0,9) "OuterFace"
+--                             , Face (0,5) "A"
+--                             , Face (0,1) "B"
+--                             , Face (0,2) "C"
+--                             , Face (14,13) "D"
+--                             , Face (1,12) "E"
+--                             , Face (5,8) "F"
+--                             ]
+--       where
+--         e i = (i,())
+--         vtx i p es = Vtx i p es i
+-- :}
 
 --------------------------------------------------------------------------------
 -- * Vertex Data
@@ -468,7 +502,7 @@ neighboursOf v = PG.neighboursOf v . _graph
 -- >>> nextIncidentEdge (dart 1 "+1") myPlaneGraph
 -- Dart (Arc 7) +1
 -- >>> nextIncidentEdge (dart 17 "-1") myPlaneGraph
--- Dart (Arc 15) +1
+-- Dart (Arc 15) -1
 nextIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 nextIncidentEdge d = PG.nextIncidentEdge d . _graph
 
@@ -480,7 +514,7 @@ nextIncidentEdge d = PG.nextIncidentEdge d . _graph
 -- >>> prevIncidentEdge (dart 1 "+1") smallG
 -- Dart (Arc 3) +1
 -- >>> prevIncidentEdge (dart 1 "+1") myPlaneGraph
--- Dart (Arc 4) +1
+-- Dart (Arc 4) -1
 -- >>> prevIncidentEdge (dart 7 "-1") myPlaneGraph
 -- Dart (Arc 1) -1
 prevIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
