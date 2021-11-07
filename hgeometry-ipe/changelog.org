@@ -5,7 +5,15 @@
 ** 0.13
 
 - Newer BezierSpline parsing.
-- Renamed the modules from Data.Geometry.Ipe to simply Ipe.
+- Renamed the modules from Data.Geometry.Ipe to simply Ipe. The
+  following find and sed command should be able to help you migrate
+  (but use it at your own risk)
+
+  #+begin_src sh
+  find src -name "*.hs" -exec sed -i -e 's/Data.Geometry.Ipe/Ipe/g' {} \;
+  #+end_src
+
+
 
 ** 0.12
 
