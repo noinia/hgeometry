@@ -6,7 +6,7 @@ import Data.Geometry.PointLocation.PersistentSweep
 import Data.RealNumber.Rational
 import Data.Geometry.Point
 import Data.Geometry.Polygon
-import Data.Geometry.Ipe
+import Ipe
 import Test.Hspec
 
 --------------------------------------------------------------------------------

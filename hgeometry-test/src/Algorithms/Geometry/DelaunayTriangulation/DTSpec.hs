@@ -7,7 +7,7 @@ import           Control.Lens
 import qualified Data.CircularList.Util                                     as CU
 import           Data.Ext
 import           Data.Geometry
-import           Data.Geometry.Ipe
+import           Ipe
 import qualified Data.List.NonEmpty                                         as NonEmpty
 import qualified Data.Map                                                   as M
 import           Data.Maybe                                                 (fromJust, mapMaybe)

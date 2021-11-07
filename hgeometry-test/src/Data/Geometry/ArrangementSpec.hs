@@ -7,7 +7,7 @@ import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Arrangement
 import           Data.Geometry.Arrangement.Draw
-import           Data.Geometry.Ipe
+import           Ipe
 import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util(runOnFile)

@@ -10,7 +10,7 @@ import qualified Data.ByteString.Lazy   as LB
 import           Data.Ext
 import           Data.Function          (on)
 import           Data.Functor.Classes
-import           Data.Geometry.Ipe
+import           Ipe
 import qualified Data.List              as List
 import           Data.Proxy
 import           Data.Ratio

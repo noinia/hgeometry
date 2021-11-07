@@ -5,8 +5,8 @@ import Control.Lens
 import Control.Monad.Random.Strict(evalRand)
 import Data.Ext
 import Data.Geometry
-import Data.Geometry.Ipe
-import Data.Geometry.Ipe.Color (named)
+import Ipe
+import Ipe.Color (named)
 import Data.Maybe
 import System.Random (mkStdGen)
 import Test.Hspec

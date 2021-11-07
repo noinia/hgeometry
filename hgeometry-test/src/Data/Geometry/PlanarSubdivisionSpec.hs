@@ -7,7 +7,7 @@ import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 import           Control.Lens hiding (holesOf)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Point
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.PlanarSubdivision
