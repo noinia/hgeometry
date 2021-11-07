@@ -4,12 +4,10 @@ import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer as D
 import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
-import           Control.Monad (replicateM)
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.PlaneGraph.Draw
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
@@ -19,7 +17,6 @@ import           Data.Proxy
 import           Data.RealNumber.Rational
 import qualified Data.Vector as V
 import           Paths_hgeometry_test
-import           System.Random
 import           Test.Hspec
 import           Test.Util
 
