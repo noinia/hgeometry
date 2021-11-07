@@ -47,8 +47,8 @@ import           Ipe.PathParser
 import           Ipe.Types
 import           Ipe.Value
 import qualified Data.Geometry.Matrix as Matrix
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
+
+
 import qualified Data.Geometry.Polygon as Polygon
 import qualified Data.LSeq as LSeq
 import qualified Data.List as L

@@ -1,50 +1,66 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.PlaneGraph.Draw where
 
+import           Control.Lens
 import           Data.Ext
-import           Ipe
-import           Data.Geometry.Properties
+import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import           Data.Maybe (catMaybes)
+import           Data.Geometry.Properties
+import           Data.Maybe (mapMaybe)
 import           Data.PlaneGraph
-import qualified Data.Vector as V
+import           Ipe
 
 --------------------------------------------------------------------------------
 
--- | Draws a planegraph using Marks, LineSegments, and simple polygons for
--- vertices, edges, and faces, respectively. Uses the default IpeOuts to draw
--- these elements.
-drawPlaneGraph :: forall s v e f r. IpeOut (PlaneGraph s v e f r) Group r
-drawPlaneGraph = drawPlaneGraphWith defIO' defIO' defIO'
+-- | Draws only the values for which we have a Just attribute
+drawPlaneGraph :: forall s r. (Fractional r, Ord r)
+               => IpeOut (PlaneGraph s (Maybe (IpeAttributes IpeSymbol r))
+                                       (Maybe (IpeAttributes Path  r))
+                                       (Maybe (IpeAttributes Path  r))
+                           r) Group r
+drawPlaneGraph = drawPlaneGraphWith fv fe ff ff
   where
-    defIO'     :: (HasDefaultIpeOut g, NumType g ~ r) => g -> _x -> Maybe (IpeObject r)
-    defIO' p _ = Just . iO $ defIO p
+    fv                     :: (VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
+                           -> Maybe (IpeObject' IpeSymbol r)
+    fv (_,VertexData p ma) = (\a -> defIO p ! a) <$> ma -- draws a point
+    fe (_,s :+ ma)         = (\a -> defIO s ! a) <$> ma -- draw segment
+    ff (_,f :+ ma)         = (\a -> defIO f ! a) <$> ma -- draw a face
 
--- | Draws a planegraph using Marks, LineSegments, and simple polygons for
--- vertices, edges, and faces, respectively.
-drawPlaneGraphWith            :: (Point 2 r         -> v -> Maybe (IpeObject r))
-                              -> (LineSegment 2 v r -> e -> Maybe (IpeObject r))
-                              -> (SimplePolygon v r -> f -> Maybe (IpeObject r))
-                              -> IpeOut (PlaneGraph s v e f r) Group r
-drawPlaneGraphWith vF eF fF g = ipeGroup $ concatMap (catMaybes . V.toList) [vs, es, fs]
+-- | Draw everything using the defaults
+drawPlaneGraph'    :: forall s v e f r. (Ord r, Fractional r)
+                   => IpeOut (PlaneGraph s v e f r) Group r
+drawPlaneGraph' pg = drawPlaneGraph
+  (pg&vertexData.traverse   ?~ (mempty :: IpeAttributes IpeSymbol r)
+     &dartData.traverse._2  ?~ (mempty :: IpeAttributes Path      r)
+     &faceData.traverse     ?~ (mempty :: IpeAttributes Path      r))
+
+
+-- | Function to draw a graph by specifying how we want to draw the
+-- graph, as well as functions that specify how to render vertices,
+-- edges, and faces.
+drawPlaneGraphWith                 :: (ToObject vi, ToObject ei, ToObject fi, Fractional r, Ord r)
+                                   => IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
+                                   -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
+                                   -> IpeOut' Maybe (FaceId' s,   SimplePolygon v r :+ f)  fi r
+                                   -> IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f)   fi r
+                                   -> IpeOut (PlaneGraph s v e f r) Group r
+drawPlaneGraphWith fs fe fif fof g = drawPlaneGraphWith' (outerFaceId g) fs fe fif fof g
+
+-- | Function to draw a graph by specifying how we want to draw the
+-- graph, as well as functions that specify how to render vertices,
+-- edges, and faces.
+drawPlaneGraphWith'                    :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r)
+                                      => FaceId' s -- ^ outerface Id
+                                      -> IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
+                                      -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
+                                      -> IpeOut' Maybe (FaceId' s,   SimplePolygon v r :+ f)  fi r
+                                      -> IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f)   fi r
+                                      -> IpeOut (PlaneGraph s v e f r) Group r
+drawPlaneGraphWith' i fv fe fif fof g = ipeGroup . concat $ [vs, es, ifs, of']
   where
-    vs = (\(_,VertexData p v) -> vF p v) <$> vertices g
-    es = (\(_,s :+ e)         -> eF s e) <$> edgeSegments g
-    fs = (\(_,p :+ f)         -> fF p f) <$> rawFacePolygons g
-
-
--- | Draw a planegraph using the given functions. Fully generic in how we draw
--- the objects.
-genericDrawPlaneGraphWith            :: (VertexId' s :+ v -> IpeObject r)
-                                     -> (Dart s :+ e      -> IpeObject r)
-                                     -> (FaceId' s :+ f   -> IpeObject r)
-                                     -> IpeOut (PlaneGraph s v e f r) Group r
-genericDrawPlaneGraphWith vF eF fF g = ipeGroup $ concatMap V.toList [vs, es, fs]
-  where
-    vs = (\(v,VertexData _ x) -> vF $ v :+ x) <$> vertices g
-    es = wrap eF <$> edges g
-    fs = wrap fF <$> faces g
-
-    wrap f (a,b) = f $ a :+ b
+    (outerF,innerFs) = facePolygons i g
+    vs  = mapMaybe (fmap iO . fv)  . F.toList . vertices        $ g
+    es  = mapMaybe (fmap iO . fe)  . F.toList . edgeSegments    $ g
+    ifs = mapMaybe (fmap iO . fif) . F.toList $ innerFs
+    of' = mapMaybe (fmap iO . fof) [outerF]

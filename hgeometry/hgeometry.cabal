@@ -1,3 +1,4 @@
+cabal-version:       2.4
 name:                hgeometry
 version:             0.12.0.4
 synopsis:            Geometric Algorithms, Data structures, and Data types.
@@ -8,7 +9,7 @@ description:
   asymptotic running time guarantees. Note that HGeometry is still highly experimental, don't be surprised to find bugs.
 
 homepage:            https://fstaals.net/software/hgeometry
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
@@ -23,10 +24,8 @@ extra-source-files:  README.md
                      changelog
                      changelog.org
 
-Extra-doc-files:     docs/Data/PlaneGraph/small.png
-                     -- docs/**/*.png
-
-cabal-version:       2.0
+Extra-doc-files:     docs/**/*.png
+                     docs/**/*.jpg
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -100,6 +99,7 @@ library
                     Data.Geometry.PlanarSubdivision.Basic
                     Data.Geometry.PlanarSubdivision.Merge
                     Data.Geometry.PlanarSubdivision.Dynamic
+                    Data.Geometry.PlanarSubdivision.TreeRep
 
                     Data.Geometry.Arrangement
                     Data.Geometry.Arrangement.Internal
@@ -157,7 +157,7 @@ library
                     Algorithms.Geometry.Diameter.ConvexHull
 
                     -- Algorithms.Geometry.Sweep
-
+                    Algorithms.Geometry.PolygonTriangulation
                     Algorithms.Geometry.PolygonTriangulation.Types
                     Algorithms.Geometry.PolygonTriangulation.Triangulate
                     Algorithms.Geometry.PolygonTriangulation.MakeMonotone

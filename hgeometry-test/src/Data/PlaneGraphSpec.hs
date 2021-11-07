@@ -11,19 +11,27 @@ import           Data.PlaneGraph
 import qualified Data.Vector as V
 import           Data.Yaml.Util
 import           Test.Hspec
+import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 spec :: Spec
 spec = describe "PlaneGraph tests" $ do
          it "fromConnectedSegments, correct handling of high degree vertex" $ do
            draw test `shouldBe` mempty
            draw test2 `shouldBe` mempty
+         it "outerBoundaryVertices" $ do
+           (fmap (\i -> myGraph^.locationOf i) $ boundaryVertices (outerFaceId myGraph) myGraph)
+             `shouldBe` outerBoundaryVerticesTestSegs
          it "encode yaml test" $ do
            b <- B.readFile "src/Data/PlaneGraph/myPlaneGraph.yaml"
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
-           outerFaceId simplePgGraph `shouldBe` (FaceId (VertexId 1))
+           outerFaceId simplePgGraph `shouldBe` FaceId (VertexId 1)
+         it "right orientations" $
+           allFaceOrientations myGraph `shouldBe` True
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "src/Data/myPlaneGraph.yaml")
@@ -36,21 +44,22 @@ spec = describe "PlaneGraph tests" $ do
 
 data Test1 = Test1
 
-draw  :: PlaneGraph s p e extra r -> V.Vector (FaceId' s, Polygon 'Simple p r :+ extra)
-draw = V.filter isEmpty . rawFacePolygons
+draw    :: (Ord r, Fractional r)
+        => PlaneGraph s p e extra r -> V.Vector (FaceId' s, Polygon 'Simple p r :+ extra)
+draw g = V.filter isEmpty . snd $ facePolygons (outerFaceId g) g
   where
     isEmpty (_,p :+ _) = (< 3) . length . polygonVertices $ p
 
-test :: PlaneGraph Test1 _ () () Integer
+test :: PlaneGraph Test1 _ () () R
 test = fromConnectedSegments (Identity Test1) testSegs
 
-test2 :: PlaneGraph Test1 _ () () Integer
+test2 :: PlaneGraph Test1 _ () () R
 test2 = fromConnectedSegments (Identity Test1) testSegs2
 
 -- |
 --
 -- ![myGraph](src/Data/PlaneGraph/testsegs.png)
-testSegs :: [LineSegment 2 () Integer :+ ()]
+testSegs :: [LineSegment 2 () R :+ ()]
 testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (origin, Point2 10 10)
                    , (origin, Point2 12 10)
@@ -60,7 +69,7 @@ testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    , (Point2 10 10, Point2 13 20)
                    , (Point2 12 10, Point2 20 5)
                    ]
-testSegs2 :: [LineSegment 2 () Integer :+ ()]
+testSegs2 :: [LineSegment 2 () R :+ ()]
 testSegs2 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (origin, Point2 10 0)
                    , (Point2 10 0, Point2 10 10)
@@ -193,7 +202,29 @@ simplePgGraph :: Num r => PlaneGraph Test1 () () InOrOut r
 simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
   where
     pg = unsafeFromPoints . map ext $ [ Point2 144 160
-                                , Point2 64 96
-                                , Point2 128 32
-                                , Point2 208 96
+                                      , Point2 64 96
+                                      , Point2 128 32
+                                      , Point2 208 96
+                                      ]
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Tests if all face orientations are correct
+allFaceOrientations    :: (Fractional r, Ord r) => PlaneGraph s v e f r -> Bool
+allFaceOrientations pg = all (isCounterClockwise . (^._2.core)) ipgs
+                      && isCounterClockwise (opg^.core)
+  where
+    ((_,opg),ipgs) = facePolygons (outerFaceId pg) pg
+
+
+
+outerBoundaryVerticesTestSegs :: V.Vector (Point 2 R)
+outerBoundaryVerticesTestSegs = V.fromList $
+                                [ origin
+                                , Point2 20 5
+                                , Point2 12 10
+                                , Point2 10 10
+                                , Point2 13 20
                                 ]

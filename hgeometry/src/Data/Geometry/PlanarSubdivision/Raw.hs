@@ -39,6 +39,14 @@ instance (FromJSON ia, FromJSON a) => FromJSON (Raw s ia a)
 instance (ToJSON ia, ToJSON a) => ToJSON (Raw s ia a) where
   toEncoding = genericToEncoding defaultOptions
 
+instance FunctorWithIndex i (Raw ci i) where
+  imap f (Raw ci i x) = Raw ci i (f i x)
+instance FoldableWithIndex i (Raw ci i) where
+  ifoldMap f (Raw _ i x) = f i x
+instance TraversableWithIndex i (Raw ci i) where
+  itraverse f (Raw ci i x) = Raw ci i <$> f i x
+
+
 -- | get the dataVal of a Raw
 dataVal :: Lens (Raw s ia a) (Raw s ia b) a b
 dataVal = lens (\(Raw _ _ x) -> x) (\(Raw c i _) y -> Raw c i y)

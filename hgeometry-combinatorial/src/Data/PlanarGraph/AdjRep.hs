@@ -21,7 +21,7 @@ import           GHC.Generics   (Generic)
 -- | Data type representing the graph in its JSON/Yaml format
 data Gr v f = Gr { adjacencies :: [v]
                  , faces       :: [f]
-                 } deriving (Generic)
+                 } deriving (Generic, Show, Eq)
 
 instance Bifunctor Gr where
   bimap f g (Gr vs fs) = Gr (map f vs) (map g fs)
@@ -44,7 +44,7 @@ data Vtx v e = Vtx { id    :: Int
                                         -- vertices. This is not (yet)
                                         -- enforced by the data type.
                    , vData :: v
-                   } deriving (Generic)
+                   } deriving (Generic, Show, Eq)
 
 instance Bifunctor Vtx where
   bimap f g (Vtx i as x) = Vtx i (map (second g) as) (f x)
@@ -59,7 +59,7 @@ instance (FromJSON v, FromJSON e) => FromJSON (Vtx v e)
 data Face f = Face { incidentEdge :: (Int,Int) -- ^ an edge (u,v) s.t. the face
                                                -- is right from (u,v)
                    , fData        :: f
-                   } deriving (Generic,Functor)
+                   } deriving (Generic,Functor, Show, Eq)
 
 instance ToJSON f   => ToJSON   (Face f) where
   toEncoding = genericToEncoding defaultOptions

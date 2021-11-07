@@ -86,11 +86,11 @@ type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 -- showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
 -- showDT = mapM_ print . edgesAsPoints
 
-{- HLINT ignore edgesAsPoints -}
+
 -- | List add edges as point pairs.
 edgesAsPoints   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
 edgesAsPoints t = let pts = _positions t
-                       in map (\(u,v) -> (pts V.! u, pts V.! v)) . edgesAsVertices $ t
+                   in map (bimap (pts V.!) (pts V.!)) . edgesAsVertices $ t
 
 -- | List add edges as VertexID pairs.
 edgesAsVertices :: Triangulation p r -> [(VertexID,VertexID)]
@@ -127,5 +127,5 @@ toPlaneGraph    :: forall proxy s p r.
 toPlaneGraph _ tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
     g       = PPG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
-    f i adj = (VertexId i, VertexId <$> adj)
+    f i adj = (VertexId i, C.leftElements $ VertexId <$> adj) -- report in CCW order
     vtxData = (\(loc :+ p) -> VertexData loc p) <$> tr^.positions

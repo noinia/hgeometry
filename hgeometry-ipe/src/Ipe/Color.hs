@@ -41,6 +41,12 @@ named = IpeColor . Named
 --------------------------------------------------------------------------------
 -- * Basic Named colors
 
+black :: IpeColor r
+black = named "black"
+
+white :: IpeColor r
+white = named "white"
+
 red :: IpeColor r
 red = named "red"
 

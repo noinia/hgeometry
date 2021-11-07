@@ -256,7 +256,7 @@ testX = do segs <- readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.
            print $ draw ps
 
 
-draw = V.filter isEmpty . rawFacePolygons
+draw = V.filter isEmpty . internalFacePolygons
   where
     isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
     isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p

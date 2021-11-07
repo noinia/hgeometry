@@ -27,7 +27,7 @@ data Vtx v e r = Vtx { id    :: Int
                                           -- edge. Adjacencies are given in
                                           -- arbitrary order
                      , vData :: v
-                     } deriving (Generic, Functor)
+                     } deriving (Generic, Show, Eq, Functor)
 
 instance (ToJSON r,   ToJSON v, ToJSON e)     => ToJSON   (Vtx v e r) where
   toEncoding = genericToEncoding defaultOptions

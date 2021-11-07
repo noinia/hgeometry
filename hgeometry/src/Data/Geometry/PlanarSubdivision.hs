@@ -22,6 +22,7 @@ import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Merge
+import           Data.Geometry.PlanarSubdivision.TreeRep
 import           Data.Geometry.Polygon
 import           Data.Proxy
 
@@ -156,3 +157,26 @@ _getP (Hole _ p) = Just p
 -- mySubDiv = fromSimplePolygons (Id Test)
 --                               0
 --                               (NonEmpty.fromList [simplePg' :+ 1, trianglePG :+ 2])
+
+
+
+
+-- type R = Int
+-- data MyWorld
+
+-- mySubDiv :: PlanarSubdivision MyWorld Int (Int,Int) String R
+-- mySubDiv = undefined
+
+--     faceData xs = FaceData (Seq.fromList xs)
+
+
+
+-- fromTreeRep                                 :: TreeRep v e f r -> PlanarSubdivision s v e f r
+-- fromTreeRep (PlanarSD of' (InnerSD ajs fs)) = undefined
+
+
+-- fromInnerRep                     :: forall s v e f r. (Ord r, Fractional r)
+--                                  => InnerRep v e f r -> PlanarSubdivision s v e () r
+-- fromInnerRep f (InnerSD ajs fs) = fromConnectedSegments (Proxy @s) segs
+--   where
+--     segs = adjs

@@ -40,12 +40,12 @@ import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (fromMaybe)
+
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Vinyl (Rec(..))
 import           Data.Vinyl.CoRec
-import           Linear.Affine ((.+^))
+
 
 --------------------------------------------------------------------------------
 
@@ -59,6 +59,10 @@ import           Linear.Affine ((.+^))
 -- * The IpeOut type and the default combinator to use it
 
 type IpeOut g i r = g -> IpeObject' i r
+
+-- | Give the option to draw zero, one or more things, i.e. by
+-- choosing f ~ Maybe or f ~ []
+type IpeOut' f g i r = g -> f (IpeObject' i r)
 
 
 -- | Add attributes to an IpeObject'
