@@ -502,33 +502,28 @@ neighboursOf v g = flip tailOf g <$> incomingEdges v g
 -- | Given a dart d that points into some vertex v, report the next dart in the
 -- cyclic (counterclockwise) order around v.
 --
--- >>> nextIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- >>> nextIncidentEdge (dart 3 "+1") myGraph
 -- Dart (Arc 5) +1
--- >>> showWithData myGraph $ nextIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- >>> showWithData myGraph $ nextIncidentEdge (dart 3 "+1") myGraph
 -- (Dart (Arc 5) +1,"g+")
 -- >>> showWithData myGraph $ nextIncidentEdge (dart 1 "+1") myGraph
--- (Dart (Arc 3) +1,"d+")
+-- (Dart (Arc 3) -1,"d-")
 --
 -- running time: \(O(1)\)
-nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
-nextIncidentEdge d g = let perm  = g^.embedding
-                           (i,j) = lookupIdx perm d
-                       in next (perm^?!orbits.ix j) i
-
+nextIncidentEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
+nextIncidentEdge d = nextIncidentEdgeFrom (twin d)
 
 -- | Given a dart d that points into some vertex v, report the previous dart in the
 -- cyclic (counterclockwise) order around v.
 --
--- >>> prevIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- >>> prevIncidentEdge (dart 3 "+1") myGraph
 -- Dart (Arc 1) -1
--- >>> showWithData myGraph $ prevIncidentEdge (Dart (Arc 3) Positive) myGraph
+-- >>> showWithData myGraph $ prevIncidentEdge (dart 3 "+1") myGraph
 -- (Dart (Arc 1) -1,"b-")
 --
 -- running time: \(O(1)\)
-prevIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
-prevIncidentEdge d g = let perm  = g^.embedding
-                           (i,j) = lookupIdx perm d
-                       in previous (perm^?!orbits.ix j) i
+prevIncidentEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
+prevIncidentEdge d = prevIncidentEdgeFrom (twin d)
 
 
 -- | Given a dart d that points away from some vertex v, report the
@@ -643,30 +638,30 @@ computeDual' g = dualG
 
 --------------------------------------------------------------------------------
 
--- myGraph :: PlanarGraph () Primal String String String
--- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
---                             , (Dart aC Positive, "c+")
---                             , (Dart aB Positive, "b+")
---                             , (Dart aA Positive, "a+")
---                             ]
---                           , [ (Dart aE Negative, "e-")
---                             , (Dart aB Negative, "b-")
---                             , (Dart aD Negative, "d-")
---                             , (Dart aG Positive, "g+")
---                             ]
---                           , [ (Dart aE Positive, "e+")
---                             , (Dart aD Positive, "d+")
---                             , (Dart aC Negative, "c-")
---                             ]
---                           , [ (Dart aG Negative, "g-")
---                             ]
---                           ]
---           & vertexData .~ V.fromList ["u","v","w","x"]
---           & faceData   .~ V.fromList ["f_3", "f_infty","f_1","f_2"]
---   where
---     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+myGraph :: PlanarGraph () Primal String String String
+myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+                            , (Dart aC Positive, "c+")
+                            , (Dart aB Positive, "b+")
+                            , (Dart aA Positive, "a+")
+                            ]
+                          , [ (Dart aE Negative, "e-")
+                            , (Dart aB Negative, "b-")
+                            , (Dart aD Negative, "d-")
+                            , (Dart aG Positive, "g+")
+                            ]
+                          , [ (Dart aE Positive, "e+")
+                            , (Dart aD Positive, "d+")
+                            , (Dart aC Negative, "c-")
+                            ]
+                          , [ (Dart aG Negative, "g-")
+                            ]
+                          ]
+          & vertexData .~ V.fromList ["u","v","w","x"]
+          & faceData   .~ V.fromList ["f_3", "f_infty","f_1","f_2"]
+  where
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
 
--- dart i s = Dart (Arc i) (read s)
+dart i s = Dart (Arc i) (read s)
 
--- showWithData     :: HasDataOf s i => s -> i -> (i, DataOf s i)
--- showWithData g i = (i, g^.dataOf i)
+showWithData     :: HasDataOf s i => s -> i -> (i, DataOf s i)
+showWithData g i = (i, g^.dataOf i)

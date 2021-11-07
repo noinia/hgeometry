@@ -141,7 +141,9 @@ fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
     toOrbit (u,adjU) = concatMap (toDart u) adjU
 
     -- if u = v we have a self-loop, so we add both a positive and a negative dart
-    toDart u v = let Just a = findEdge u v oracle
+    toDart u v = let a = case findEdge u v oracle of
+                           Nothing -> error $ "edge not found? " <> show (u,v)
+                           Just a' -> a'
                  in case u `compare` v of
                       LT -> [Dart (Arc a) Positive]
                       EQ -> [Dart (Arc a) Positive, Dart (Arc a) Negative]

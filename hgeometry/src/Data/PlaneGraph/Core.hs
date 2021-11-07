@@ -123,6 +123,10 @@ import           GHC.Generics (Generic)
 --
 -- ![myGraph](docs/Data/PlaneGraph/small.png)
 
+--
+-- Here is also a slightly larger example graph
+-- FIXME: TODO
+
 
 --------------------------------------------------------------------------------
 -- * Vertex Data
@@ -134,6 +138,7 @@ data VertexData r v = VertexData { _location :: !(Point 2 r)
                                             ,Functor,Foldable,Traversable)
 makeLenses ''VertexData
 
+-- | Convert to an Ext
 vtxDataToExt                  :: VertexData r v -> Point 2 r :+ v
 vtxDataToExt (VertexData p v) = p :+ v
 
@@ -238,6 +243,8 @@ fromConnectedSegments _ ss = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxD
 --
 -- >>> numVertices smallG
 -- 4
+-- >>> numVertices myPlaneGraph
+-- 15
 numVertices :: PlaneGraph s v e f r  -> Int
 numVertices = PG.numVertices . _graph
 
@@ -245,6 +252,7 @@ numVertices = PG.numVertices . _graph
 --
 -- >>> numDarts smallG
 -- 10
+--
 numDarts :: PlaneGraph s v e f r  -> Int
 numDarts = PG.numDarts . _graph
 
@@ -259,6 +267,8 @@ numEdges = PG.numEdges . _graph
 --
 -- >>> numFaces smallG
 -- 3
+-- >>> numFaces myPlaneGraph
+-- 7
 numFaces :: PlaneGraph s v e f r  -> Int
 numFaces = PG.numFaces . _graph
 
@@ -284,8 +294,11 @@ darts' :: PlaneGraph s v e f r  -> V.Vector (Dart s)
 darts' = PG.darts' . _graph
 
 -- | Get all darts together with their data
+--
+--
 darts :: PlaneGraph s v e f r  -> V.Vector (Dart s, e)
 darts = PG.darts . _graph
+
 
 -- | Enumerate all edges. We report only the Positive darts
 edges' :: PlaneGraph s v e f r  -> V.Vector (Dart s)
@@ -331,7 +344,7 @@ faces' :: PlaneGraph s v e f r  -> V.Vector (FaceId' s)
 faces' = PG.faces' . _graph
 
 
--- | face I'ds of all internal faces in the plane graph
+-- | face Ids of all internal faces in the plane graph
 --
 -- running time: \(O(n)\)
 internalFaces'   :: (Ord r, Fractional r) => PlaneGraph s v e f r  -> V.Vector (FaceId' s)
@@ -343,9 +356,16 @@ internalFaces' g = let i = outerFaceId g in V.filter (/= i) $ faces' g
 -- (FaceId 0,"OuterFace")
 -- (FaceId 1,"A")
 -- (FaceId 2,"B")
+-- >>> mapM_ print $ faces myPlaneGraph
+-- (FaceId 0,"OuterFace")
+-- (FaceId 1,"A")
+-- (FaceId 2,"B")
+-- (FaceId 3,"C")
+-- (FaceId 4,"E")
+-- (FaceId 5,"F")
+-- (FaceId 6,"D")
 faces :: PlaneGraph s v e f r  -> V.Vector (FaceId' s, f)
 faces = PG.faces . _graph
-
 
 -- | Reports the outerface and all internal faces separately.
 -- running time: \(O(n)\)
@@ -394,6 +414,11 @@ endPoints d = PG.endPoints d . _graph
 --
 -- >>> incidentEdges (VertexId 1) smallG
 -- [Dart (Arc 1) -1,Dart (Arc 4) +1,Dart (Arc 3) +1]
+-- >>> mapM_ print $ incidentEdges (VertexId 5) myPlaneGraph
+-- Dart (Arc 1) -1
+-- Dart (Arc 7) +1
+-- Dart (Arc 10) +1
+-- Dart (Arc 4) -1
 incidentEdges   :: VertexId' s -> PlaneGraph s v e f r -> V.Vector (Dart s)
 incidentEdges v = PG.incidentEdges v . _graph
 
@@ -427,6 +452,8 @@ outgoingEdges v = PG.outgoingEdges v . _graph
 --
 -- >>> neighboursOf (VertexId 1) smallG
 -- [VertexId 0,VertexId 2,VertexId 3]
+-- >>> neighboursOf (VertexId 5) myPlaneGraph
+-- [VertexId 0,VertexId 6,VertexId 8,VertexId 1]
 neighboursOf   :: VertexId' s -> PlaneGraph s v e f r
                -> V.Vector (VertexId' s)
 neighboursOf v = PG.neighboursOf v . _graph
@@ -438,6 +465,10 @@ neighboursOf v = PG.neighboursOf v . _graph
 --
 -- >>> nextIncidentEdge (dart 1 "+1") smallG
 -- Dart (Arc 4) +1
+-- >>> nextIncidentEdge (dart 1 "+1") myPlaneGraph
+-- Dart (Arc 7) +1
+-- >>> nextIncidentEdge (dart 17 "-1") myPlaneGraph
+-- Dart (Arc 15) +1
 nextIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 nextIncidentEdge d = PG.nextIncidentEdge d . _graph
 
@@ -448,6 +479,10 @@ nextIncidentEdge d = PG.nextIncidentEdge d . _graph
 --
 -- >>> prevIncidentEdge (dart 1 "+1") smallG
 -- Dart (Arc 3) +1
+-- >>> prevIncidentEdge (dart 1 "+1") myPlaneGraph
+-- Dart (Arc 4) +1
+-- >>> prevIncidentEdge (dart 7 "-1") myPlaneGraph
+-- Dart (Arc 1) -1
 prevIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
 prevIncidentEdge d = PG.prevIncidentEdge d . _graph
 
@@ -460,6 +495,10 @@ prevIncidentEdge d = PG.prevIncidentEdge d . _graph
 --
 -- >>> nextIncidentEdgeFrom (dart 1 "+1") smallG
 -- Dart (Arc 2) +1
+-- >>> nextIncidentEdgeFrom (dart 1 "+1") myPlaneGraph
+-- Dart (Arc 2) +1
+-- >>> nextIncidentEdgeFrom (dart 4 "+1") myPlaneGraph
+-- Dart (Arc 15) +1
 nextIncidentEdgeFrom   :: Dart s -> PlaneGraph s v e f r -> Dart s
 nextIncidentEdgeFrom d = PG.nextIncidentEdgeFrom d . _graph
 
@@ -470,12 +509,10 @@ nextIncidentEdgeFrom d = PG.nextIncidentEdgeFrom d . _graph
 --
 -- >>> prevIncidentEdgeFrom (dart 1 "+1") smallG
 -- Dart (Arc 0) +1
+-- >>> prevIncidentEdgeFrom (dart 4 "+1") myPlaneGraph
+-- Dart (Arc 2) -1
 prevIncidentEdgeFrom   :: Dart s -> PlaneGraph s v e f r -> Dart s
 prevIncidentEdgeFrom d = PG.prevIncidentEdgeFrom d . _graph
-
-
-
-
 
 
 -- | The face to the left of the dart
@@ -575,6 +612,18 @@ boundaryDart f = PG.boundaryDart f . _graph
 -- [VertexId 0,VertexId 3,VertexId 1]
 -- >>> boundaryVertices (FaceId $ VertexId 0) smallG -- around outerface
 -- [VertexId 0,VertexId 2,VertexId 1,VertexId 3]
+-- >>> mapM_ print $ boundaryVertices (FaceId $ VertexId 0) myPlaneGraph
+-- VertexId 0
+-- VertexId 9
+-- VertexId 10
+-- VertexId 11
+-- VertexId 7
+-- VertexId 8
+-- VertexId 12
+-- VertexId 13
+-- VertexId 4
+-- VertexId 3
+-- VertexId 2
 boundaryVertices   :: FaceId' s -> PlaneGraph s v e f r
                    -> V.Vector (VertexId' s)
 boundaryVertices f = PG.boundaryVertices f . _graph
@@ -715,6 +764,27 @@ outerFaceDart ps = d
 -- (Dart (Arc 2) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 (-1) 4 :+ 3) :+ "0->3")
 -- (Dart (Arc 4) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 2 0 :+ 2) :+ "1->2")
 -- (Dart (Arc 3) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 (-1) 4 :+ 3) :+ "1->3")
+-- >>> mapM_ print $ edgeSegments myPlaneGraph
+-- (Dart (Arc 0) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 8 (-5) :+ 9) :+ ())
+-- (Dart (Arc 1) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 8 1 :+ 5) :+ ())
+-- (Dart (Arc 2) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 4 4 :+ 1) :+ ())
+-- (Dart (Arc 3) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 3 7 :+ 2) :+ ())
+-- (Dart (Arc 4) +1,ClosedLineSegment (Point2 4 4 :+ 1) (Point2 8 1 :+ 5) :+ ())
+-- (Dart (Arc 15) +1,ClosedLineSegment (Point2 4 4 :+ 1) (Point2 10 4 :+ 12) :+ ())
+-- (Dart (Arc 5) +1,ClosedLineSegment (Point2 3 7 :+ 2) (Point2 0 5 :+ 3) :+ ())
+-- (Dart (Arc 6) +1,ClosedLineSegment (Point2 0 5 :+ 3) (Point2 3 8 :+ 4) :+ ())
+-- (Dart (Arc 18) +1,ClosedLineSegment (Point2 3 8 :+ 4) (Point2 9 6 :+ 13) :+ ())
+-- (Dart (Arc 7) +1,ClosedLineSegment (Point2 8 1 :+ 5) (Point2 6 (-1) :+ 6) :+ ())
+-- (Dart (Arc 10) +1,ClosedLineSegment (Point2 8 1 :+ 5) (Point2 12 1 :+ 8) :+ ())
+-- (Dart (Arc 12) +1,ClosedLineSegment (Point2 6 (-1) :+ 6) (Point2 8 (-5) :+ 9) :+ ())
+-- (Dart (Arc 8) +1,ClosedLineSegment (Point2 9 (-1) :+ 7) (Point2 12 1 :+ 8) :+ ())
+-- (Dart (Arc 14) +1,ClosedLineSegment (Point2 9 (-1) :+ 7) (Point2 14 (-1) :+ 11) :+ ())
+-- (Dart (Arc 9) +1,ClosedLineSegment (Point2 12 1 :+ 8) (Point2 10 4 :+ 12) :+ ())
+-- (Dart (Arc 11) +1,ClosedLineSegment (Point2 8 (-5) :+ 9) (Point2 12 (-3) :+ 10) :+ ())
+-- (Dart (Arc 13) +1,ClosedLineSegment (Point2 12 (-3) :+ 10) (Point2 14 (-1) :+ 11) :+ ())
+-- (Dart (Arc 16) +1,ClosedLineSegment (Point2 10 4 :+ 12) (Point2 9 6 :+ 13) :+ ())
+-- (Dart (Arc 17) +1,ClosedLineSegment (Point2 10 4 :+ 12) (Point2 8 5 :+ 14) :+ ())
+-- (Dart (Arc 19) +1,ClosedLineSegment (Point2 9 6 :+ 13) (Point2 8 5 :+ 14) :+ ())
 edgeSegments    :: PlaneGraph s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
 edgeSegments ps = fmap withSegment . edges $ ps
   where
