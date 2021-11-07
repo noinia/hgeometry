@@ -5,7 +5,7 @@ import           Data.Data
 import           Data.Ext
 import           Data.Fixed
 import           Data.Geometry
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.PolyLine (fromPoints)
 import qualified Data.List as List
 import           Data.List (isSuffixOf)

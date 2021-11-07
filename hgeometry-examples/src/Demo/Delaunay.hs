@@ -10,7 +10,7 @@ import           Data.Ext
 import           Data.Geometry
 import           Data.Tree.Draw
 import           Data.Geometry.Triangulation.Draw
-import           Data.Geometry.Ipe
+import           Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
 import           Options.Applicative

@@ -5,10 +5,10 @@ import Control.Lens
 import Data.Data
 import Data.Ext
 import Data.Geometry.Box
-import Data.Geometry.Ipe
-import Data.Geometry.Ipe.Attributes
-import Data.Geometry.Ipe.Color
-import Data.Geometry.Ipe.IpeOut
+import Ipe
+import Ipe.Attributes
+import Ipe.Color
+import Ipe.IpeOut
 import Data.Geometry.Line
 import Data.Geometry.Point
 import Data.Geometry.Vector

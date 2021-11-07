@@ -4,7 +4,7 @@ module Demo.ReadPlanarSubdivision where
 import Control.Lens
 import Data.Data
 import Data.Ext
-import Data.Geometry.Ipe
+import Ipe
 import Data.Geometry.Polygon
 import Data.Geometry.PlanarSubdivision
 import Data.Semigroup
