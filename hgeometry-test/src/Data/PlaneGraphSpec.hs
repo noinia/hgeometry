@@ -22,6 +22,9 @@ spec = describe "PlaneGraph tests" $ do
          it "fromConnectedSegments, correct handling of high degree vertex" $ do
            draw test `shouldBe` mempty
            draw test2 `shouldBe` mempty
+         it "outerBoundaryVertices" $ do
+           (fmap (\i -> myGraph^.locationOf i) $ boundaryVertices (outerFaceId myGraph) myGraph)
+             `shouldBe` outerBoundaryVerticesTestSegs
          it "encode yaml test" $ do
            b <- B.readFile "src/Data/PlaneGraph/myPlaneGraph.yaml"
            encodeYaml myGraph `shouldBe` b
@@ -214,3 +217,14 @@ allFaceOrientations pg = all (isCounterClockwise . (^._2.core)) ipgs
                       && isCounterClockwise (opg^.core)
   where
     ((_,opg),ipgs) = facePolygons (outerFaceId pg) pg
+
+
+
+outerBoundaryVerticesTestSegs :: V.Vector (Point 2 R)
+outerBoundaryVerticesTestSegs = V.fromList $
+                                [ origin
+                                , Point2 20 5
+                                , Point2 12 10
+                                , Point2 10 10
+                                , Point2 13 20
+                                ]
