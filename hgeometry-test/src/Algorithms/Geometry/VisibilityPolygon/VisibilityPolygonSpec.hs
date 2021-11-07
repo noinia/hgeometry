@@ -10,7 +10,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box (Rectangle)
 import           Data.Geometry.Interval
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon

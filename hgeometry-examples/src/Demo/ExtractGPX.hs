@@ -13,7 +13,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Geometry
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
 import           Data.List (isSuffixOf)

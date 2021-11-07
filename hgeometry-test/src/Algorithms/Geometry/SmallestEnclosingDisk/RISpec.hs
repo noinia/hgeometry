@@ -10,7 +10,7 @@ import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ball (fromDiameter, disk, Disk)
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Maybe
 import           System.Random (mkStdGen)
 import           Paths_hgeometry_test

@@ -7,7 +7,7 @@ import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (ellipseToCircle)
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 -- import           Data.Geometry.ZeroSet

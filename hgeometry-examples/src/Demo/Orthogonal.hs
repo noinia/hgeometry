@@ -3,7 +3,7 @@ module Demo.Orthogonal where
 import Data.Ext
 import Data.Geometry
 import Data.Geometry.Polygon
-import Data.Geometry.Ipe
+import Ipe
 
 import Data.Geometry.LineSegment
 import Data.Geometry.SegmentTree

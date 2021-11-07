@@ -9,7 +9,7 @@ import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.HalfLine
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Triangulation.Draw
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational

@@ -1,10 +1,11 @@
+cabal-version:       2.4
 name:                hgeometry-ipe
-version:             0.12.0.0
+version:             0.13
 synopsis:            Reading and Writing ipe7 files.
 description:
    Reading and Writing ipe7 files and converting them to and from HGeometry types.
 homepage:            https://fstaals.net/software/hgeometry
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
@@ -26,7 +27,6 @@ extra-source-files:  README.md
 Extra-doc-files:
                      -- docs/**/*.png
 
-cabal-version:       2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -47,21 +47,21 @@ library
                     Data.Geometry.QuadTree.Draw
 
                     -- * Ipe Types
-                    Data.Geometry.Ipe
-                    Data.Geometry.Ipe.Literal
-                    Data.Geometry.Ipe.Value
-                    Data.Geometry.Ipe.Color
-                    Data.Geometry.Ipe.Attributes
-                    Data.Geometry.Ipe.Types
-                    Data.Geometry.Ipe.Writer
-                    Data.Geometry.Ipe.Reader
-                    Data.Geometry.Ipe.PathParser
-                    Data.Geometry.Ipe.IpeOut
-                    Data.Geometry.Ipe.FromIpe
-                    Data.Geometry.Ipe.Path
-                    Data.Geometry.Ipe.Matrix
-                    Data.Geometry.Ipe.Layer
-                    Data.Geometry.Ipe.Content
+                    Ipe
+                    Ipe.Literal
+                    Ipe.Value
+                    Ipe.Color
+                    Ipe.Attributes
+                    Ipe.Types
+                    Ipe.Writer
+                    Ipe.Reader
+                    Ipe.PathParser
+                    Ipe.IpeOut
+                    Ipe.FromIpe
+                    Ipe.Path
+                    Ipe.Matrix
+                    Ipe.Layer
+                    Ipe.Content
 
                     -- * Embedded Planar Graphs
                     Data.PlaneGraph.Draw
@@ -69,7 +69,7 @@ library
                     -- Data.Geometry.BezierSpline
 
   other-modules:
-                    Data.Geometry.Ipe.ParserPrimitives
+                    Ipe.ParserPrimitives
 
 
   -- other-extensions:
@@ -169,7 +169,7 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
 
 
-  other-modules: Data.Geometry.Ipe.ReaderSpec
+  other-modules: Ipe.ReaderSpec
 
   build-depends:        base
                       , hspec                >= 2.1

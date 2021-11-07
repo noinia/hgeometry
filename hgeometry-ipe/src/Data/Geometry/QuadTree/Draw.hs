@@ -4,9 +4,9 @@ module Data.Geometry.QuadTree.Draw where
 
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.IpeOut
-import           Data.Geometry.Ipe.Types
+import           Ipe.Attributes
+import           Ipe.IpeOut
+import           Ipe.Types
 import           Data.Geometry.QuadTree
 import           Data.Geometry.QuadTree.Cell
 import qualified Data.Text as T

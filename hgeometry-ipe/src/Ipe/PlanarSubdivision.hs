@@ -1,9 +1,9 @@
-module Data.Geometry.Ipe.PlanarSubdivision where
+module Ipe.PlanarSubdivision where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe
+import           Ipe.Attributes
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PlanarSubdivision

@@ -1,6 +1,6 @@
 {-# Language FlexibleContexts  #-}
 {-# Language OverloadedStrings  #-}
-module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
+module Ipe.ParserPrimitives( runP, runP'
                                          , pMany, pMany1, pChoice
                                          , pChar, pSpace, pWhiteSpace, pInteger
                                          , pNatural, pPaddedNatural

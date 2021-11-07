@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.IpeOut
+-- Module      :  Ipe.IpeOut
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -14,7 +14,7 @@
 -- conversion function from a geometry type g to an ipe type.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.IpeOut where
+module Ipe.IpeOut where
 
 
 import           Control.Lens hiding (Simple)
@@ -27,10 +27,10 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (Ellipse, circleToEllipse)
 import           Data.Geometry.HalfLine
-import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.FromIpe
-import           Data.Geometry.Ipe.Types
+import           Ipe.Attributes
+import           Ipe.Color (IpeColor(..))
+import           Ipe.FromIpe
+import           Ipe.Types
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point

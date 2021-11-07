@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
+module Ipe.Reader( -- * Reading ipe Files
                                  readRawIpeFile
                                , readIpeFile
                                , readSinglePageFile
@@ -38,14 +38,14 @@ import           Data.Geometry hiding (head)
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (ellipseMatrix)
-import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Matrix
-import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
-import           Data.Geometry.Ipe.Path
-import           Data.Geometry.Ipe.PathParser
-import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Ipe.Value
+import           Ipe.Attributes
+import           Ipe.Color (IpeColor(..))
+import           Ipe.Matrix
+import           Ipe.ParserPrimitives (pInteger, pWhiteSpace)
+import           Ipe.Path
+import           Ipe.PathParser
+import           Ipe.Types
+import           Ipe.Value
 import qualified Data.Geometry.Matrix as Matrix
 
 

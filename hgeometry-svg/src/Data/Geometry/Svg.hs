@@ -2,10 +2,10 @@ module Data.Geometry.Svg( module Data.Geometry.Svg.Writer
                         , svgViaIpe
                         ) where
 
-import           Data.Geometry.Ipe.IpeOut
+import           Ipe.IpeOut
 import           Data.Geometry.Svg.Writer
 import qualified Text.Blaze.Svg as Svg
-import           Data.Geometry.Ipe.Types(ToObject(..))
+import           Ipe.Types(ToObject(..))
 
 -- $setup
 -- >>> import Data.Geometry.Point

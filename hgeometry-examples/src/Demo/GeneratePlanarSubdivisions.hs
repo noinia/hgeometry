@@ -8,7 +8,7 @@ import           Control.Lens
 import           Data.Data
 import           Data.Ext
 import           Data.Geometry
-import           Data.Geometry.Ipe
+import           Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph
 import           Data.PlanarGraph as PG

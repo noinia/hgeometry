@@ -9,7 +9,7 @@ import           Control.Lens
 import           Data.Ext
 import           Test.Tasty.Bench
 import qualified Data.Foldable as F
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 import           Data.Geometry.PlanarSubdivision

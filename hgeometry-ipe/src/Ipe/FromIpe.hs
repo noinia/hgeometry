@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.FromIpe
+-- Module      :  Ipe.FromIpe
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- Functions that help reading geometric values from ipe images.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.FromIpe(
+module Ipe.FromIpe(
   -- * Individual readers
     _asPoint
   , _asLineSegment
@@ -35,9 +35,9 @@ import           Data.Ext
 import           Data.Geometry.Ball
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (Ellipse, _EllipseCircle)
-import           Data.Geometry.Ipe.Path
-import           Data.Geometry.Ipe.Reader
-import           Data.Geometry.Ipe.Types
+import           Ipe.Path
+import           Ipe.Reader
+import           Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import qualified Data.Geometry.PolyLine as PolyLine
@@ -50,8 +50,8 @@ import           Data.List.NonEmpty (NonEmpty(..))
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> :set -XOverloadedStrings
--- >>> import Data.Geometry.Ipe.Attributes
--- >>> import Data.Geometry.Ipe.Color(IpeColor(..))
+-- >>> import Ipe.Attributes
+-- >>> import Ipe.Color(IpeColor(..))
 -- >>> import Data.Geometry.Point
 -- >>> :{
 -- let testPath :: Path Int

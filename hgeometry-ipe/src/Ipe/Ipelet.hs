@@ -1,7 +1,7 @@
-module Data.Geometry.Ipe.Ipelet where
+module Ipe.Ipelet where
 
-import Data.Geometry.Ipe.Types
-import Data.Geometry.Ipe.UI
+import Ipe.Types
+import Ipe.UI
 import Data.Fixed
 import Foreign.Lua(Pushable(..),Peekable(..), Lua)
 

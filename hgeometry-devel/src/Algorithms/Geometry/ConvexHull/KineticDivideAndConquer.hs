@@ -44,7 +44,7 @@ import           Data.UnBounded
 import           Data.Util
 import qualified Data.Vector as V
 
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Maybe (catMaybes)
 import           Data.RealNumber.Rational
 

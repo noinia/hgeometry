@@ -9,7 +9,7 @@ import           Control.Lens
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
 import qualified Data.Map as Map

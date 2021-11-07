@@ -12,7 +12,7 @@ module Data.Geometry.Arrangement.Draw where
 
 import Control.Lens
 import Data.Geometry.Arrangement
-import Data.Geometry.Ipe
+import Ipe
 import Data.Geometry.PlanarSubdivision.Draw
 
 -- | Draws an arrangement

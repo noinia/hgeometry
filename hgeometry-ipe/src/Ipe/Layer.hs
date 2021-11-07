@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.Ipe.Layer(
+module Ipe.Layer(
   LayerName(LayerName), layerName
   ) where
 

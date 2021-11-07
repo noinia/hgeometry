@@ -6,7 +6,7 @@ import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as S
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 import qualified Data.Map as Map

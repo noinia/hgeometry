@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ipe.Sketchy
+-- Module      :  Ipe.Sketchy
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -14,7 +14,7 @@
 --
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Sketchy where
+module Ipe.Sketchy where
 
 import           Control.Lens
 import           Control.Monad.Random.Class

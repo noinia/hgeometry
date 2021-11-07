@@ -4,11 +4,12 @@ module Data.PlaneGraph.Draw where
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
+import           Data.Geometry.Properties
 import           Data.Maybe (mapMaybe)
 import           Data.PlaneGraph
+import           Ipe
 
 --------------------------------------------------------------------------------
 
