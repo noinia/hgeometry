@@ -43,6 +43,7 @@ module Ipe.Types(
   , LayerName(LayerName), layerName
   , View(View), layerNames, activeLayer
   -- * Styles and Preamble
+  , addStyleSheet
   , IpeStyle(IpeStyle), styleName, styleData
   , basicIpeStyle
   , IpePreamble(IpePreamble), encoding, preambleData
@@ -62,7 +63,7 @@ import           Data.Semigroup (Endo)
 import qualified Data.Set as Set
 import           Data.Text (Text)
 import           Text.XML.Expat.Tree (Node)
-import qualified Data.ByteString as B
+
 
 --------------------------------------------------------------------------------
 

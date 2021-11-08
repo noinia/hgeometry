@@ -5,6 +5,7 @@ import Test.Hspec
 import Data.Ext
 import Data.Geometry
 import Ipe
+import Ipe.Reader
 import Ipe.Path
 import Data.ByteString(ByteString)
 import Data.Proxy

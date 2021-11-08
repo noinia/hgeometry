@@ -468,6 +468,8 @@ readIpeStylesheet = fmap (ipeRead <=< readXML) . B.readFile
 -- | Given a path to a stylesheet, add it to the ipe file with the
 -- highest priority. Throws an error when this fails.
 addStyleSheetFrom      :: FilePath -> IpeFile r -> IO (IpeFile r)
-addStyleSheetFrom fp f = flip addStyleSheet f <$> readIpeStylesheet fp
+addStyleSheetFrom fp f = readIpeStylesheet fp >>= \case
+  Left err -> fail (show err)
+  Right s  -> pure $ addStyleSheet s f
 
 --------------------------------------------------------------------------------
