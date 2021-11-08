@@ -62,6 +62,7 @@ import           Data.Semigroup (Endo)
 import qualified Data.Set as Set
 import           Data.Text (Text)
 import           Text.XML.Expat.Tree (Node)
+import qualified Data.ByteString as B
 
 --------------------------------------------------------------------------------
 
@@ -87,6 +88,7 @@ makeLenses ''IpeStyle
 
 basicIpeStyle :: IpeStyle
 basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|resources/basic.isy|])
+
 
 
 -- | The maybe string is the encoding
@@ -188,3 +190,9 @@ singlePageFile = ipeFile . (NE.:| [])
 -- | Create a single page ipe file from a list of IpeObjects
 singlePageFromContent :: [IpeObject r] -> IpeFile r
 singlePageFromContent = singlePageFile . fromContent
+
+
+-- | Adds a stylesheet to the ipe file. This will be the first
+-- stylesheet, i.e. it has priority over all previously imported stylesheets.
+addStyleSheet     :: IpeStyle -> IpeFile r -> IpeFile r
+addStyleSheet s f = f&styles %~ (s:)

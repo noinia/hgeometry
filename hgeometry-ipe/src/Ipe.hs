@@ -57,6 +57,8 @@ module Ipe(
   -- * Ipe Syles and Preamble
   , IpeStyle(IpeStyle), styleName, styleData
   , basicIpeStyle
+  , readIpeStylesheet
+  , addStyleSheetFrom
   , IpePreamble(IpePreamble), encoding, preambleData
   -- * Reading Geometries *From* Ipe
   , IpeRead(..)
