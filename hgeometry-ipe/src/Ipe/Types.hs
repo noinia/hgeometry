@@ -12,50 +12,42 @@
 --
 --------------------------------------------------------------------------------
 module Ipe.Types(
-    LayerName(LayerName), layerName
-  , Image(Image), imageData, rect
-  , TextLabel(..)
-  , MiniPage(..), width
-
-  , IpeSymbol(Symbol), symbolPoint, symbolName
-
-  , Path(Path), pathSegments
-  , PathSegment(..)
-
-  , Group(Group), groupItems
-
-
-  , IpeObject(..), _IpeGroup, _IpeImage, _IpeTextLabel, _IpeMiniPage, _IpeUse, _IpePath
-  , IpeObject'
-  , ipeObject'
-  , ToObject(..)
-
-  , IpeAttributes
-  , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
-  , commonAttributes
-
-  , flattenGroups
-
-
-  , View(View), layerNames, activeLayer
-
-  , IpeStyle(IpeStyle), styleName, styleData
-  , basicIpeStyle
-
-
-  , IpePreamble(IpePreamble), encoding, preambleData
-
-  , IpeBitmap
-
-
+  -- * Ipe Files
+    IpeFile(IpeFile), preamble, styles, pages
+  , ipeFile, singlePageFile, singlePageFromContent
+  -- * Ipe Pages
   , IpePage(IpePage), layers, views, content
   , emptyPage, fromContent
   , onLayer, contentInView
   , withDefaults
-
-  , IpeFile(IpeFile), preamble, styles, pages
-  , ipeFile, singlePageFile, singlePageFromContent
+  -- * Content: Ipe Objects
+  , IpeObject(..), _IpeGroup, _IpeImage, _IpeTextLabel, _IpeMiniPage, _IpeUse, _IpePath
+  , IpeObject'
+  , ipeObject'
+  , ToObject(..)
+  -- ** Specific Ipe-Objects
+  , Path(Path), pathSegments
+  , PathSegment(..)
+  , IpeSymbol(Symbol), symbolPoint, symbolName
+  , Group(Group), groupItems
+  , TextLabel(..)
+  , MiniPage(..), width
+  , Image(Image), imageData, rect
+  , IpeBitmap
+  -- * Attributes
+  , IpeAttributes
+  , Attributes', AttributesOf, AttrMap, AttrMapSym1
+  , attributes, traverseIpeAttrs
+  , commonAttributes
+  -- * Layers and Views
+  , LayerName(LayerName), layerName
+  , View(View), layerNames, activeLayer
+  -- * Styles and Preamble
+  , IpeStyle(IpeStyle), styleName, styleData
+  , basicIpeStyle
+  , IpePreamble(IpePreamble), encoding, preambleData
+  --
+  -- , flattenGroups
   ) where
 
 

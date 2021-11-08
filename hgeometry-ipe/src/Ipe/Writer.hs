@@ -10,17 +10,16 @@
 -- Description :  Converting data types into IpeTypes
 --
 --------------------------------------------------------------------------------
-module Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
-                               , toIpeXML
+module Ipe.Writer(
+    writeIpeFile, writeIpeFile', writeIpePage
+  , toIpeXML
+  , printAsIpeSelection, toIpeSelectionXML
 
-                               , printAsIpeSelection, toIpeSelectionXML
+  , IpeWrite(..)
+  , IpeWriteText(..)
 
-
-                               , IpeWrite(..)
-                               , IpeWriteText(..)
-
-                               , ipeWriteAttrs, writeAttrValues
-                               ) where
+  , ipeWriteAttrs, writeAttrValues
+  ) where
 
 import           Control.Lens                 (view, (&), (.~), (^.), (^..))
 import qualified Data.ByteString              as B

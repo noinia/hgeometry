@@ -1,31 +1,32 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Ipe.Reader( -- * Reading ipe Files
-                                 readRawIpeFile
-                               , readIpeFile
-                               , readSinglePageFile
-                               , readSinglePageFileThrow
-                               , ConversionError
+module Ipe.Reader
+  ( -- * Reading ipe Files
+    readRawIpeFile
+  , readIpeFile
+  , readSinglePageFile
+  , readSinglePageFileThrow
+  , ConversionError
 
-                               -- * Reading XML directly
-                               , fromIpeXML
-                               , readXML
+    -- * Reading XML directly
+  , fromIpeXML
+  , readXML
 
-                               -- * Read classes
-                               , IpeReadText(..)
-                               , IpeRead(..)
-                               , IpeReadAttr(..)
+    -- * Read classes
+  , IpeReadText(..)
+  , IpeRead(..)
+  , IpeReadAttr(..)
 
 
-                               -- * Some low level implementation functions
-                               , ipeReadTextWith
-                               , ipeReadObject
-                               , ipeReadAttrs
-                               , ipeReadRec
+    -- * Some low level implementation functions
+  , ipeReadTextWith
+  , ipeReadObject
+  , ipeReadAttrs
+  , ipeReadRec
 
-                               , Coordinate(..)
-                               ) where
+  , Coordinate(..)
+  ) where
 
 import           Control.Applicative ((<|>))
 import           Control.Lens hiding (Const, rmap)
