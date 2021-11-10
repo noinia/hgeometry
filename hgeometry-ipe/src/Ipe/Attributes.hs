@@ -12,7 +12,12 @@
 -- Possible Attributes we can assign to items in an Ipe file
 --
 --------------------------------------------------------------------------------
-module Ipe.Attributes where
+module Ipe.Attributes
+  -- ( AttributeUniverse(..)
+  -- ,
+
+  -- )
+  where
 
 import Control.Lens hiding (rmap, Const)
 import Ipe.Value
@@ -27,7 +32,10 @@ import Text.Read (lexP, step, parens, prec, (+++)
 
 --------------------------------------------------------------------------------
 
-
+-- | The possible Attributes supported in Ipe. To use these
+-- attributes, you'll likely need their Singletons's version which is
+-- Prefixed by an 'S'. E.g. the 'Fill' attribute is represented by a
+-- singleton 'SFill :: Sing Fill'.
 data AttributeUniverse = -- common
                          Layer | Matrix | Pin | Transformations
                        -- symbol
@@ -44,34 +52,37 @@ data AttributeUniverse = -- common
 
 genSingletons [ ''AttributeUniverse ]
 
-
+-- | IpeObjects may have attributes. Essentially attributes are
+-- (key,value) pairs. The key is some name. Which attributes an object
+-- can have depends on the type of the object. However, all ipe
+-- objects support the Common Attributes
 type CommonAttributes = [ Layer, Matrix, Pin, Transformations ]
 
-
+-- | All attributes applicable to TextLabels
 type TextLabelAttributes = CommonAttributes
+-- | All attributes applicable to Minipages
 type MiniPageAttributes  = CommonAttributes
-
+-- | All attributes applicable to Images
 type ImageAttributes     = CommonAttributes
 
+-- | All attributes applicable to Symbols/Marks
+type SymbolAttributes = CommonAttributes ++ [Stroke, Fill, Pen, Size]
 
-type SymbolAttributes = CommonAttributes ++
-                          [Stroke, Fill, Pen, Size]
-
+-- | All attributes applicable to Paths
 type PathAttributes = CommonAttributes ++
                       [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
                       , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
                       ]
 
+-- | All attributes applicable to Groups
 type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
-
-
 --------------------------------------------------------------------------------
--- * Attr
+-- * A single attribute Attr
 
 -- | Attr implements the mapping from labels to types as specified by the
 -- (symbol representing) the type family 'f'
-newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
+newtype Attr (f :: TyFun u * -> *) -- ^Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
 
@@ -90,7 +101,7 @@ pattern NoAttr :: Attr f label
 pattern NoAttr = GAttr Nothing
 {-# COMPLETE NoAttr, Attr #-}
 
-
+-- | Traverse an attribute.
 traverseAttr   :: Applicative h => (Apply f label -> h (Apply g label))
                -> Attr f label -> h (Attr g label)
 traverseAttr f = \case
@@ -141,6 +152,7 @@ instance Monoid (Attr f l) where
 -- | A collection of Attributes.
 newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) = Attrs (Rec (Attr f) ats)
 
+-- | Get a vinyl Record with Attrs
 unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
 unAttrs = lens (\(Attrs r) -> r) (const Attrs)
 
@@ -161,13 +173,13 @@ instance RecApplicative ats => Monoid (Attributes f ats) where
 instance Semigroup (Attributes f ats) where
   (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith mappend as bs
 
+-- | Traverse implementation for Attrs
 traverseAttrs               :: Applicative h
                             => (forall label. Attr f label -> h (Attr g label))
                             -> Attributes f ats -> h (Attributes g ats)
 traverseAttrs f (Attrs ats) = Attrs <$> rtraverse f ats
 
-
-
+-- | Zip two Recs with the given function.
 zipRecsWith                       :: (forall a. f a -> g a -> h a)
                                   -> Rec f as -> Rec g as -> Rec h as
 zipRecsWith _ RNil      _         = RNil
@@ -216,15 +228,7 @@ attr     :: (at ∈ ats, RecApplicative ats)
 attr p x = x^.re (_Attr p)
 
 --------------------------------------------------------------------------------
--- | Common Attributes
-
--- IpeObjects may have attributes. Essentially attributes are (key,value)
--- pairs. The key is some name. Which attributes an object can have depends on
--- the type of the object. However, all ipe objects support the following
--- 'common attributes':
-
--- data CommonAttributeUniverse = Layer | Matrix | Pin | Transformations
---                              deriving (Show,Read,Eq)
+-- * Implementations for Common Attributes
 
 -- | Possible values for Pin
 data PinType = No | Yes | Horizontal | Vertical
@@ -233,60 +237,29 @@ data PinType = No | Yes | Horizontal | Vertical
 -- | Possible values for Transformation
 data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 
--- type family CommonAttrElf (r :: *) (f :: CommonAttributeUniverse)where
---   CommonAttrElf r 'Layer          = Text
---   CommonAttrElf r 'Matrix         = Matrix 3 3 r
---   CommonAttrElf r Pin             = PinType
---   CommonAttrElf r Transformations = TransformationTypes
-
--- genDefunSymbols [''CommonAttrElf]
-
-
--- type CommonAttributes r =
---   Attributes (CommonAttrElfSym1 r) [ 'Layer, 'Matrix, Pin, Transformations ]
-
 --------------------------------------------------------------------------------
--- Text Attributes
+-- * Text Attributes
 
--- these Attributes are speicifc to IpeObjects representing TextLabels and
--- MiniPages. The same structure as for the `CommonAttributes' applies here.
+-- these Attributes are speicifc to IpeObjects representing TextLabels
+-- and MiniPages. The same structure as for the `CommonAttributes'
+-- applies here.
 
 -- | TODO
 
 --------------------------------------------------------------------------------
--- | Symbol Attributes
+-- * Symbol Attributes
 
 -- | The optional Attributes for a symbol
 -- data SymbolAttributeUniverse = SymbolStroke | SymbolFill | SymbolPen | Size
 --                              deriving (Show,Eq)
 
+-- | Size
 newtype IpeSize  r = IpeSize  (IpeValue r) deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+-- | Pen/Thickness
 newtype IpePen   r = IpePen   (IpeValue r) deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
-
--- -- | And the corresponding types
--- type family SymbolAttrElf (r :: *) (s :: SymbolAttributeUniverse) :: * where
---   SymbolAttrElf r SymbolStroke = IpeColor
---   SymbolAttrElf r SymbolPen    = IpePen r
---   SymbolAttrElf r SymbolFill   = IpeColor
---   SymbolAttrElf r Size         = IpeSize r
-
--- genDefunSymbols [''SymbolAttrElf]
-
-
--- type SymbolAttributes r = [SymbolStroke, SymbolFill, SymbolPen, Size]
-
--- type SymbolAttributes r =
---   Attributes (SymbolAttrElfSym1 r) [SymbolStroke, SymbolFill, SymbolPen, Size]
-
 -------------------------------------------------------------------------------
--- | Path Attributes
-
--- | Possible attributes for a path
--- data PathAttributeUniverse = Stroke | Fill | Dash | Pen | LineCap | LineJoin
---                            | FillRule | Arrow | RArrow | Opacity | Tiling | Gradient
---                            deriving (Show,Eq)
-
+-- * Path Attributes
 
 -- | Possible values for Dash
 data IpeDash r = DashNamed Text
@@ -307,14 +280,14 @@ data IpeArrow r = IpeArrow { _arrowName :: Text
                            } deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''IpeArrow
 
+-- | A normal arrow
 normalArrow :: IpeArrow r
 normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
 
 --------------------------------------------------------------------------------
--- | Group Attributes
+-- * Group Attributes
 
 -- | The only group attribute is a Clip
--- data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 
 -- A clipping path is a Path. Which is defined in Ipe.Types. To
 -- avoid circular imports, we define GroupAttrElf and GroupAttribute there.
@@ -353,13 +326,6 @@ instance IpeAttrName Gradient   where attrName _ = "gradient"
 
 -- GroupAttributeUniverse
 instance IpeAttrName Clip     where attrName _ = "clip"
-
-
--- -- | Function that states that all elements in xs satisfy a given constraint c
--- type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
---   AllSatisfy c '[] = ()
---   AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
-
 
 -- | Writing Attribute names
 writeAttrNames           :: AllConstrained IpeAttrName rs => Rec f rs -> Rec (Const Text) rs

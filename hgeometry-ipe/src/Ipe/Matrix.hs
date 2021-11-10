@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Ipe.Matrix
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Matrix Attributes as defined in Ipe
+--
+--------------------------------------------------------------------------------
 module Ipe.Matrix where
 
 import           Control.Lens hiding (rmap)
@@ -34,8 +44,10 @@ applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
 applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
 applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
 
+-- | Applies all matrices in the file.
 applyMatrices   :: Fractional r => IpeFile r -> IpeFile r
 applyMatrices f = f&pages.traverse %~ applyMatricesPage
 
+-- | Applies all Matrices on a given page.
 applyMatricesPage   :: Fractional r => IpePage r -> IpePage r
 applyMatricesPage p = p&content.traverse %~ applyMatrix
