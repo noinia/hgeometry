@@ -61,6 +61,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , faceBoundary
                                             , internalFacePolygon, internalFacePolygons
                                             , outerFacePolygon, outerFacePolygon'
+                                            , facePolygons
 
                                             , VertexId(..), FaceId(..), Dart, World(..)
 
@@ -787,10 +788,27 @@ outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ ps^.data
     faceBoundary' d = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
                       <$> V.toList (boundary' d ps)
 
--- | Lists all *internal* faces of the planar subdivision.
+-- | Procuces a polygon for each *internal* face of the planar
+-- subdivision.
 internalFacePolygons    :: PlanarSubdivision s v e f r
                         -> V.Vector (FaceId' s, SomePolygon v r :+ f)
 internalFacePolygons ps = fmap (\(i,_) -> (i,internalFacePolygon i ps)) . internalFaces $ ps
+
+
+-- | Procuces a polygon for each face of the planar subdivision.
+facePolygons    :: (Num r, Ord r)
+                => PlanarSubdivision s v e f r
+                -> V.Vector (FaceId' s, SomePolygon (Maybe v) r :+ f)
+facePolygons ps = V.cons (outerFaceId ps, first Right $ outerFacePolygon ps) ifs
+  where
+    ifs = wrapJust <$> internalFacePolygons ps
+    g :: Bifunctor g => g a b -> g (Maybe a) b
+    g = first Just
+
+    wrapJust                 :: (FaceId' s, SomePolygon v r :+ f)
+                             -> (FaceId' s, SomePolygon (Maybe v) r :+ f)
+    wrapJust (i,(spg :+ f)) = (i,bimap g g spg :+ f)
+
 
 
 -- | Mapping between the internal and extenral darts
