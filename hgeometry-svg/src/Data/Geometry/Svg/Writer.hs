@@ -226,7 +226,8 @@ instance IpeToSvgAttr IA.LineJoin   where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.FillRule   where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.Arrow      where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.RArrow     where attrSvg _ = Nothing
-instance IpeToSvgAttr IA.Opacity    where attrSvg _ = Just A.opacity
+instance IpeToSvgAttr IA.StrokeOpacity    where attrSvg _ = Just A.strokeOpacity
+instance IpeToSvgAttr IA.Opacity    where attrSvg _ = Just A.fillOpacity
 instance IpeToSvgAttr IA.Tiling     where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.Gradient   where attrSvg _ = Nothing
 
