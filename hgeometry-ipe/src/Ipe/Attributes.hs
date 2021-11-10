@@ -42,7 +42,7 @@ data AttributeUniverse = -- common
                        | Stroke | Fill | Pen | Size
                        -- Path
                        | Dash | LineCap | LineJoin
-                       | FillRule | Arrow | RArrow | Opacity | Tiling | Gradient
+                       | FillRule | Arrow | RArrow | StrokeOpacity | Opacity | Tiling | Gradient
                        -- Group
                        | Clip
                        -- Extra
@@ -71,7 +71,7 @@ type SymbolAttributes = CommonAttributes ++ [Stroke, Fill, Pen, Size]
 -- | All attributes applicable to Paths
 type PathAttributes = CommonAttributes ++
                       [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
-                      , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
+                      , FillRule, Arrow, RArrow, StrokeOpacity, Opacity, Tiling, Gradient
                       ]
 
 -- | All attributes applicable to Groups
@@ -320,6 +320,7 @@ instance IpeAttrName LineJoin   where attrName _ = "join"
 instance IpeAttrName FillRule   where attrName _ = "fillrule"
 instance IpeAttrName Arrow      where attrName _ = "arrow"
 instance IpeAttrName RArrow     where attrName _ = "rarrow"
+instance IpeAttrName StrokeOpacity where attrName _ = "stroke-opacity"
 instance IpeAttrName Opacity    where attrName _ = "opacity"
 instance IpeAttrName Tiling     where attrName _ = "tiling"
 instance IpeAttrName Gradient   where attrName _ = "gradient"
