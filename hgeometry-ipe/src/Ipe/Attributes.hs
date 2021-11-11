@@ -82,7 +82,7 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
 -- | Attr implements the mapping from labels to types as specified by the
 -- (symbol representing) the type family 'f'
-newtype Attr (f :: TyFun u * -> *) -- ^Symbol repr. the Type family mapping
+newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
 
