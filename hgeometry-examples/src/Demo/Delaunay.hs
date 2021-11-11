@@ -3,18 +3,24 @@ module Demo.Delaunay where
 
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
 import           Algorithms.Geometry.DelaunayTriangulation.Types
-import           Algorithms.Geometry.EuclideanMST.EuclideanMST
+import           Algorithms.Geometry.EuclideanMST
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
 import           Data.Geometry
-import           Data.Tree.Draw
-import           Data.Geometry.Triangulation.Draw
-import           Ipe
+import           Data.Geometry.PlanarSubdivision
+import           Data.Geometry.PlanarSubdivision.Draw
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.RealNumber.Rational
 import           Data.Semigroup
+import           Data.Tree.Draw
+import           Ipe
+import           Ipe.Color
 import           Options.Applicative
 
+--------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 data Options = Options { _inPath    :: FilePath
                        , _outFile   :: FilePath
@@ -37,22 +43,29 @@ options = info (helper <*> parser)
 
 mainWith                          :: Options -> IO ()
 mainWith (Options inFile outFile) = do
-    ePage <- readSinglePageFile inFile
-    case ePage of
-      Left err                         -> print err
-      Right (page :: IpePage Rational) -> case page^..content.traverse._IpeUse of
-        []         -> putStrLn "No points found"
-        syms@(_:_) -> do
-           let pts  = syms&traverse.core %~ (^.symbolPoint)
-               pts' = NonEmpty.fromList pts
-               dt   = delaunayTriangulation $ pts'
-               emst = euclideanMST pts'
-               out  = [iO $ drawTriangulation dt, iO $ drawTree' emst]
-           -- print $ length $ edges' dt
-           -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
-           writeIpeFile outFile . singlePageFromContent $ out
+  pts <- readAllFrom @(Point 2 R) inFile
+  let pts' = NonEmpty.fromList pts
+      dt   = toPlanarSubdivision (Proxy @DTWorld) . delaunayTriangulation $ pts'
+      emst = euclideanMST pts'
+      out  = [ iO $ drawPlanarSubdivisionWith drawVtx drawEdge (drawInternalFace dt) drawOuterFace dt
+             , iO $ drawTree' emst
+             ]
+  writeIpeFile outFile . singlePageFromContent $ out
 
+-- | The world in which the delaunay triangulation "lives"
+data DTWorld
 
-data DT
+-- | Draw vertices using their default representation; filled marks.
+drawVtx                       :: IpeOut' Maybe (VertexId' s, VertexData r v) IpeSymbol r
+drawVtx (_vi, VertexData p v) = Just $ defIO p
 
---xs = [(1,(1,1)) , (2,(2,2)) ]
+-- |
+drawEdge :: IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  Path r
+drawEdge (_d, s :+ _) = Just $ defIO s
+
+drawInternalFace                 :: PlanarSubdivision s v e f r
+                         -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    Path r
+drawInternalFace s (fi, pg :+ _) = Just $ defIO pg ! attr SFill lightcyan
+
+drawOuterFace :: IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f)    fi r
+drawOuterFace = const Nothing
