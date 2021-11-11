@@ -1,13 +1,30 @@
 {-# Language OverloadedStrings #-}
 {-# Language DefaultSignatures #-}
-module Ipe.PathParser where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Ipe.PathParser
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Parser for a 'Path' in Ipe.
+--
+--------------------------------------------------------------------------------
+module Ipe.PathParser
+  ( Coordinate(..)
+  , readCoordinate, readPoint
+  , readMatrix, readRectangle
+  , runParser
+  , readPathOperations
+
+  , pOperation, pPoint, pCoordinate
+  ) where
 
 import           Data.Bifunctor
 import           Data.Char (isSpace)
 import           Data.Ext (ext)
+import           Data.Functor (($>))
 import           Data.Geometry.Box
-import           Ipe.ParserPrimitives
-import           Ipe.Path (Operation(..))
 import           Data.Geometry.Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
@@ -15,6 +32,8 @@ import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Text (Text)
 import qualified Data.Text as T
+import           Ipe.ParserPrimitives
+import           Ipe.Path (Operation(..))
 import           Text.Parsec.Error (messageString, errorMessages)
 
 
@@ -46,12 +65,15 @@ instance Coordinate (RealNumber p)
 -----------------------------------------------------------------------
 -- | Running the parsers
 
+-- | Read/parse a single coordinate value.
 readCoordinate :: Coordinate r => Text -> Either Text r
 readCoordinate = runParser pCoordinate
 
+-- | Read/parse a single point
 readPoint :: Coordinate r => Text -> Either Text (Point 2 r)
 readPoint = runParser pPoint
 
+-- | Run a parser
 runParser   :: Parser a -> Text -> Either Text a
 runParser p = bimap errorText fst . runP p
 
@@ -67,11 +89,13 @@ instance (Semigroup l, Semigroup r) => Semigroup (Either' l r) where
 instance (Semigroup l, Semigroup r, Monoid r) => Monoid (Either' l r) where
   mempty = Right' mempty
   mappend = (<>)
+
 either' :: (l -> a) -> (r -> a) -> Either' l r -> a
 either' lf _  (Left' l)  = lf l
 either' _  rf (Right' r) = rf r
 -- TODO: Use Validation instead of this home-brew one
 
+-- | Parse a sequence of path operations.
 readPathOperations :: Coordinate r => Text -> Either Text [Operation r]
 readPathOperations = unWrap . mconcat . map (wrap . runP pOperation)
                    . clean . splitKeepDelims "mlcqeasuh"
@@ -104,17 +128,18 @@ splitKeepDelims delims t = maybe mPref continue $ T.uncons rest
     continue (c,t') = pref `T.snoc` c : splitKeepDelims delims t'
 
 
+-- | Try to read/parse a matrix.
 readMatrix :: Coordinate r => Text -> Either Text (Matrix 3 3 r)
 readMatrix = runParser pMatrix
 
-
+-- | Try to read/parse a Rectangle
 readRectangle :: Coordinate r => Text -> Either Text (Rectangle () r)
 readRectangle = runParser pRectangle
 
 -----------------------------------------------------------------------
--- | The parsers themselves
+-- * The parsers themselves
 
-
+-- |  Parse an operation
 pOperation :: forall r. Coordinate r => Parser (Operation r)
 pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                      , LineTo       <$> pPoint                         *>> 'l'
@@ -122,8 +147,7 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                      , ArcTo        <$> pMatrix <*> pPoint'            *>> 'a'
                      , Spline       <$> pPoint `pSepBy` pWhiteSpace    *>> 'c'
                      , ClosedSpline <$> pPoint `pSepBy` pWhiteSpace    *>> 'u'
-                     , pChar 'h'  *> pure ClosePath
-                     -- for backward compatibility (ipe now marks all splines with 'c', but this used to be 'q', 'c', or s' depending on the length)
+                     , pChar 'h'     $> ClosePath
                      , QCurveTo     <$> pPoint <*> pPoint'             *>> 'q'
                      , CurveTo      <$> pPoint <*> pPoint' <*> pPoint' *>> 'c'
                      , Spline       <$> pPoint `pSepBy` pWhiteSpace    *>> 's'
@@ -132,22 +156,24 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                pPoint' = pWhiteSpace *> pPoint
                p *>> c = p <*>< pWhiteSpace ***> pChar c
 
-
+-- * Parse a Point
 pPoint :: Coordinate r => Parser (Point 2 r)
 pPoint = Point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
 
-
+-- * Parse a single coordinate.
 pCoordinate :: Coordinate r => Parser r
 pCoordinate = fromSeq <$> pInteger <*> pDecimal
               where
                 pDecimal  = pMaybe (pChar '.' *> pPaddedNatural)
 
 
+-- | Parser for a rectangle
 pRectangle :: Coordinate r => Parser (Rectangle () r)
 pRectangle = (\p q -> box (ext p) (ext q)) <$> pPoint
                                            <*  pWhiteSpace
                                            <*> pPoint
 
+-- | Parser for a matrix.
 pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
                                    <*> pCount 5 (pWhiteSpace *> pCoordinate)
