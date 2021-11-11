@@ -85,23 +85,10 @@ readSiInput fp = fmap f <$> readSinglePageFile fp
              | pg :+ a <- polies
              ]
       where
-        polies = page^..content.to flattenGroups.traverse
-               ._withAttrs _IpePath _asSimplePolygon
+        polies = readAll page -- read all simple polygons
         isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just (IpeColor (Named "red"))
 
 
 siToSpec                   :: SelfIntersectionTestCase Rational -> Spec
 siToSpec (SITestCase pg b) = it ("SelfIntersecting?: " <> take 50 (show pg)) $ do
                                hasSelfIntersections pg `shouldBe` b
-
-
-
--- flattenGroups :: [IpeObject r] -> [IpeObject r]
--- flattenGroups = concatMap flattenGroups'
-
--- flattenGroups'                              :: IpeObject r -> [IpeObject r]
--- flattenGroups' (IpeGroup (Group gs :+ ats)) =
---       map (applyAts ats) . concatMap flattenGroups' $ gs
---     where
---       applyAts ats = id
--- flattenGroups' o                            = [o]

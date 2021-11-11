@@ -1,4 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Ipe.Path
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Defines an Ipe Path.
+--
+--------------------------------------------------------------------------------
 module Ipe.Path(
     Path(Path), pathSegments
   , PathSegment(..)
