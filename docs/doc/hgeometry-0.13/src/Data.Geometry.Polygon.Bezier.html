@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_CqLfWejwgGgGV1Co4CsVqR"></span><span class="hs-pragma">{-# LANGUAGE DataKinds           #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Polygon.Bezier</span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier">PathJoin</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#fromBeziers"><span class="hs-identifier">fromBeziers</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier">approximate</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#approximateSome"><span class="hs-identifier">approximateSome</span></a></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.BezierSpline.html"><span class="hs-identifier">Data.Geometry.BezierSpline</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.BezierSpline.html#BezierSpline"><span class="hs-identifier">BezierSpline</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.BezierSpline.html#Bezier3"><span class="hs-identifier">Bezier3</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Geometry.BezierSpline.html"><span class="hs-identifier">Data.Geometry.BezierSpline</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Bezier</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PolyLine.html"><span class="hs-identifier">Data.Geometry.PolyLine</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PolyLine.html#points"><span class="hs-identifier">points</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Circular</span></span><span>       </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">CV</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="PathJoin"><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-var">PathJoin</span></a></span></span><span> </span><span id="local-6989586621680100205"><span class="annot"><a href="#local-6989586621680100205"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="JoinLine"><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#JoinLine"><span class="hs-identifier hs-var">JoinLine</span></a></span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="JoinCurve"><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#JoinCurve"><span class="hs-identifier hs-var">JoinCurve</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100205"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100205"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680100133"><span id="local-6989586621680100135"><span id="local-6989586621680100137"><span class="annot"><span class="annottext">Int -&gt; PathJoin r -&gt; ShowS
+[PathJoin r] -&gt; ShowS
+PathJoin r -&gt; String
+(Int -&gt; PathJoin r -&gt; ShowS)
+-&gt; (PathJoin r -&gt; String)
+-&gt; ([PathJoin r] -&gt; ShowS)
+-&gt; Show (PathJoin r)
+forall r. Show r =&gt; Int -&gt; PathJoin r -&gt; ShowS
+forall r. Show r =&gt; [PathJoin r] -&gt; ShowS
+forall r. Show r =&gt; PathJoin r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [PathJoin r] -&gt; ShowS
+$cshowList :: forall r. Show r =&gt; [PathJoin r] -&gt; ShowS
+show :: PathJoin r -&gt; String
+$cshow :: forall r. Show r =&gt; PathJoin r -&gt; String
+showsPrec :: Int -&gt; PathJoin r -&gt; ShowS
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; PathJoin r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680100128"><span id="local-6989586621680100130"><span class="annot"><span class="annottext">PathJoin r -&gt; PathJoin r -&gt; Bool
+(PathJoin r -&gt; PathJoin r -&gt; Bool)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; Bool) -&gt; Eq (PathJoin r)
+forall r. Eq r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c/= :: forall r. Eq r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+== :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c== :: forall r. Eq r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680100112"><span id="local-6989586621680100114"><span id="local-6989586621680100116"><span id="local-6989586621680100118"><span id="local-6989586621680100120"><span id="local-6989586621680100122"><span id="local-6989586621680100124"><span class="annot"><span class="annottext">Eq (PathJoin r)
+Eq (PathJoin r) =&gt;
+(PathJoin r -&gt; PathJoin r -&gt; Ordering)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; Bool)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; Bool)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; Bool)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; Bool)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; PathJoin r)
+-&gt; (PathJoin r -&gt; PathJoin r -&gt; PathJoin r)
+-&gt; Ord (PathJoin r)
+PathJoin r -&gt; PathJoin r -&gt; Bool
+PathJoin r -&gt; PathJoin r -&gt; Ordering
+PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall r. Ord r =&gt; Eq (PathJoin r)
+forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Ordering
+forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+min :: PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+$cmin :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+max :: PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+$cmax :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; PathJoin r
+&gt;= :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c&gt;= :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+&gt; :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c&gt; :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+&lt;= :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c&lt;= :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+&lt; :: PathJoin r -&gt; PathJoin r -&gt; Bool
+$c&lt; :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Bool
+compare :: PathJoin r -&gt; PathJoin r -&gt; Ordering
+$ccompare :: forall r. Ord r =&gt; PathJoin r -&gt; PathJoin r -&gt; Ordering
+$cp1Ord :: forall r. Ord r =&gt; Eq (PathJoin r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | Construct a polygon from a closed set of bezier curves. Each curve must be connected to</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--   its neighbours.</span><span>
+</span><span id="line-27"></span><span id="local-6989586621680100110"><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#fromBeziers"><span class="hs-identifier hs-type">fromBeziers</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621680100110"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680100110"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.BezierSpline.html#BezierSpline"><span class="hs-identifier hs-type">BezierSpline</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100110"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-type">PathJoin</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100110"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680100110"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-28"></span><span id="fromBeziers"><span class="annot"><span class="annottext">fromBeziers :: [BezierSpline 3 2 r] -&gt; SimplePolygon (PathJoin r) r
+</span><a href="Data.Geometry.Polygon.Bezier.html#fromBeziers"><span class="hs-identifier hs-var hs-var">fromBeziers</span></a></span></span><span> </span><span id="local-6989586621680100109"><span class="annot"><span class="annottext">curves :: [BezierSpline 3 2 r]
+</span><a href="#local-6989586621680100109"><span class="hs-identifier hs-var">curves</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r -&gt; Bool
+forall r (t :: PolygonType) p.
+(Eq r, Num r) =&gt;
+Polygon t p r -&gt; Bool
+</span><a href="Data.Geometry.Polygon.Core.html#isCounterClockwise"><span class="hs-identifier hs-var">isCounterClockwise</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r
+</span><a href="#local-6989586621680100107"><span class="hs-identifier hs-var">expanded</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100106"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100105"><span class="hs-identifier hs-var">p'</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621680100106"><span class="annot"><span class="annottext">p :: SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100106"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ PathJoin r] -&gt; SimplePolygon (PathJoin r) r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromPoints"><span class="hs-identifier hs-var">unsafeFromPoints</span></a></span><span>
+</span><span id="line-33"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100103"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; PathJoin r -&gt; Point 2 r :+ PathJoin r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; PathJoin r
+forall r. Point 2 r -&gt; Point 2 r -&gt; PathJoin r
+</span><a href="Data.Geometry.Polygon.Bezier.html#JoinCurve"><span class="hs-identifier hs-var">JoinCurve</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100101"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100100"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-34"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Data.Geometry.BezierSpline.html#Bezier3"><span class="hs-identifier hs-type">Bezier3</span></a></span><span> </span><span id="local-6989586621680100103"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621680100103"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680100101"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621680100101"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680100100"><span class="annot"><span class="annottext">c :: Point 2 r
+</span><a href="#local-6989586621680100100"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680100099"><span class="annot"><span class="annottext">_d :: Point 2 r
+</span><a href="#local-6989586621680100099"><span class="hs-identifier hs-var">_d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[BezierSpline 3 2 r]
+</span><a href="#local-6989586621680100109"><span class="hs-identifier hs-var">curves</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621680100105"><span class="annot"><span class="annottext">p' :: SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100105"><span class="hs-identifier hs-var hs-var">p'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ PathJoin r] -&gt; SimplePolygon (PathJoin r) r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromPoints"><span class="hs-identifier hs-var">unsafeFromPoints</span></a></span><span>
+</span><span id="line-36"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100098"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; PathJoin r -&gt; Point 2 r :+ PathJoin r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; PathJoin r
+forall r. Point 2 r -&gt; Point 2 r -&gt; PathJoin r
+</span><a href="Data.Geometry.Polygon.Bezier.html#JoinCurve"><span class="hs-identifier hs-var">JoinCurve</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100097"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100096"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-37"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Data.Geometry.BezierSpline.html#Bezier3"><span class="hs-identifier hs-type">Bezier3</span></a></span><span> </span><span id="local-6989586621680100095"><span class="annot"><span class="annottext">_a :: Point 2 r
+</span><a href="#local-6989586621680100095"><span class="hs-identifier hs-var">_a</span></a></span></span><span> </span><span id="local-6989586621680100096"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621680100096"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680100097"><span class="annot"><span class="annottext">c :: Point 2 r
+</span><a href="#local-6989586621680100097"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680100098"><span class="annot"><span class="annottext">d :: Point 2 r
+</span><a href="#local-6989586621680100098"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[BezierSpline 3 2 r] -&gt; [BezierSpline 3 2 r]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">[BezierSpline 3 2 r]
+</span><a href="#local-6989586621680100109"><span class="hs-identifier hs-var">curves</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-38"></span><span>    </span><span id="local-6989586621680100107"><span class="annot"><span class="annottext">expanded :: Polygon 'Simple () r
+</span><a href="#local-6989586621680100107"><span class="hs-identifier hs-var hs-var">expanded</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; Polygon 'Simple () r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromPoints"><span class="hs-identifier hs-var">unsafeFromPoints</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ ()] -&gt; Polygon 'Simple () r)
+-&gt; [Point 2 r :+ ()] -&gt; Polygon 'Simple () r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[[Point 2 r :+ ()]] -&gt; [Point 2 r :+ ()]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">concat</span></span><span>
+</span><span id="line-39"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r :+ ()) -&gt; [Point 2 r] -&gt; [Point 2 r :+ ()]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100091"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100090"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100089"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-40"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Data.Geometry.BezierSpline.html#Bezier3"><span class="hs-identifier hs-type">Bezier3</span></a></span><span> </span><span id="local-6989586621680100091"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621680100091"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680100090"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621680100090"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680100089"><span class="annot"><span class="annottext">c :: Point 2 r
+</span><a href="#local-6989586621680100089"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680100088"><span class="annot"><span class="annottext">_d :: Point 2 r
+</span><a href="#local-6989586621680100088"><span class="hs-identifier hs-var">_d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[BezierSpline 3 2 r]
+</span><a href="#local-6989586621680100109"><span class="hs-identifier hs-var">curves</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-type">approximate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680100174"><span class="annot"><a href="#local-6989586621680100174"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span id="local-6989586621680100175"><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100174"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-type">PathJoin</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100174"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-43"></span><span id="approximate"><span class="annot"><span class="annottext">approximate :: r -&gt; Polygon t (PathJoin r) r -&gt; Polygon t () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-var hs-var">approximate</span></a></span></span><span> </span><span id="local-6989586621680100087"><span class="annot"><span class="annottext">eps :: r
+</span><a href="#local-6989586621680100087"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span id="local-6989586621680100086"><span class="annot"><span class="annottext">p :: Polygon t (PathJoin r) r
+</span><a href="#local-6989586621680100086"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Polygon t (PathJoin r) r
+</span><a href="#local-6989586621680100086"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-45"></span><span>    </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span>  </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-46"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680100084"><span class="annot"><span class="annottext">vs :: CircularVector (Point 2 r :+ PathJoin r)
+</span><a href="#local-6989586621680100084"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t (PathJoin r) r
+</span><a href="#local-6989586621680100086"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Polygon t (PathJoin r) r
+-&gt; Getting
+     (CircularVector (Point 2 r :+ PathJoin r))
+     (Polygon t (PathJoin r) r)
+     (CircularVector (Point 2 r :+ PathJoin r))
+-&gt; CircularVector (Point 2 r :+ PathJoin r)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (CircularVector (Point 2 r :+ PathJoin r))
+  (Polygon t (PathJoin r) r)
+  (CircularVector (Point 2 r :+ PathJoin r))
+forall (t :: PolygonType) p r.
+Getter (Polygon t p r) (CircularVector (Point 2 r :+ p))
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryVector"><span class="hs-identifier hs-var">outerBoundaryVector</span></a></span><span>
+</span><span id="line-47"></span><span>      </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ ()) -&gt; Polygon t () r
+forall r p. CircularVector (Point 2 r :+ p) -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromCircularVector"><span class="hs-identifier hs-var">unsafeFromCircularVector</span></a></span><span> </span><span class="annot"><span class="annottext">(CircularVector (Point 2 r :+ ()) -&gt; Polygon t () r)
+-&gt; CircularVector (Point 2 r :+ ()) -&gt; Polygon t () r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+ -&gt; CircularVector (Point 2 r :+ ()))
+-&gt; CircularVector
+     (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ ())
+forall a b.
+(a -&gt; CircularVector b) -&gt; CircularVector a -&gt; CircularVector b
+</span><span class="hs-identifier hs-var">CV.concatMap</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ ())
+</span><a href="#local-6989586621680100079"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(CircularVector (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+ -&gt; CircularVector (Point 2 r :+ ()))
+-&gt; CircularVector
+     (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ PathJoin r)
+-&gt; CircularVector
+     (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+forall a b.
+CircularVector a -&gt; CircularVector b -&gt; CircularVector (a, b)
+</span><span class="hs-identifier hs-var">CV.zip</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ PathJoin r)
+</span><a href="#local-6989586621680100084"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+-&gt; CircularVector (Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ PathJoin r)
+forall a. Int -&gt; CircularVector a -&gt; CircularVector a
+</span><span class="hs-identifier hs-var">CV.rotateRight</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ PathJoin r)
+</span><a href="#local-6989586621680100084"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#MultiPolygon"><span class="hs-identifier hs-type">MultiPolygon</span></a></span><span> </span><span id="local-6989586621680100075"><span class="annot"><span class="annottext">v :: SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100075"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621680100074"><span class="annot"><span class="annottext">hs :: [SimplePolygon (PathJoin r) r]
+</span><a href="#local-6989586621680100074"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; [SimplePolygon () r] -&gt; MultiPolygon () r
+forall p r.
+SimplePolygon p r -&gt; [SimplePolygon p r] -&gt; MultiPolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#MultiPolygon"><span class="hs-identifier hs-var">MultiPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; SimplePolygon (PathJoin r) r -&gt; SimplePolygon () r
+forall (t :: PolygonType) r.
+(Ord r, Fractional r) =&gt;
+r -&gt; Polygon t (PathJoin r) r -&gt; Polygon t () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-var">approximate</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680100087"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (PathJoin r) r
+</span><a href="#local-6989586621680100075"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(SimplePolygon (PathJoin r) r -&gt; SimplePolygon () r)
+-&gt; [SimplePolygon (PathJoin r) r] -&gt; [SimplePolygon () r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; SimplePolygon (PathJoin r) r -&gt; SimplePolygon () r
+forall (t :: PolygonType) r.
+(Ord r, Fractional r) =&gt;
+r -&gt; Polygon t (PathJoin r) r -&gt; Polygon t () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-var">approximate</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680100087"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (PathJoin r) r]
+</span><a href="#local-6989586621680100074"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="#local-6989586621680100079"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-type">PathJoin</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-type">PathJoin</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CV.CircularVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680100175"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621680100079"><span class="annot"><span class="annottext">f :: (Point 2 r :+ PathJoin r, Point 2 r :+ PathJoin r)
+-&gt; CircularVector (Point 2 r :+ ())
+</span><a href="#local-6989586621680100079"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680100073"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621680100073"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#JoinLine"><span class="hs-identifier hs-type">JoinLine</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; CircularVector (Point 2 r :+ ())
+forall a. a -&gt; CircularVector a
+</span><span class="hs-identifier hs-var">CV.singleton</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100073"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><a href="#local-6989586621680100079"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680100071"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621680100071"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#JoinCurve"><span class="hs-identifier hs-type">JoinCurve</span></a></span><span> </span><span id="local-6989586621680100070"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621680100070"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680100069"><span class="annot"><span class="annottext">c :: Point 2 r
+</span><a href="#local-6989586621680100069"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680100068"><span class="annot"><span class="annottext">d :: Point 2 r
+</span><a href="#local-6989586621680100068"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680100067"><span class="annot"><span class="annottext">poly :: PolyLine 2 () r
+</span><a href="#local-6989586621680100067"><span class="hs-identifier hs-var hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; BezierSpline 3 2 r -&gt; PolyLine 2 () r
+forall (n :: Nat) (d :: Nat) r.
+(KnownNat n, Arity d, Ord r, Fractional r) =&gt;
+r -&gt; BezierSpline n d r -&gt; PolyLine d () r
+</span><a href="Data.Geometry.BezierSpline.html#approximate"><span class="hs-identifier hs-var">Bezier.approximate</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680100087"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+-&gt; Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; BezierSpline 3 2 r
+forall (d :: Nat) r.
+Point d r
+-&gt; Point d r -&gt; Point d r -&gt; Point d r -&gt; BezierSpline 3 d r
+</span><a href="Data.Geometry.BezierSpline.html#Bezier3"><span class="hs-identifier hs-var">Bezier3</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100071"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100070"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100069"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680100068"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>                                     </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; CircularVector (Point 2 r :+ ())
+forall a. [a] -&gt; CircularVector a
+</span><span class="hs-identifier hs-var">CV.unsafeFromList</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ ()] -&gt; CircularVector (Point 2 r :+ ()))
+-&gt; (LSeq 2 (Point 2 r :+ ()) -&gt; [Point 2 r :+ ()])
+-&gt; LSeq 2 (Point 2 r :+ ())
+-&gt; CircularVector (Point 2 r :+ ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">init</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ ()] -&gt; [Point 2 r :+ ()])
+-&gt; (LSeq 2 (Point 2 r :+ ()) -&gt; [Point 2 r :+ ()])
+-&gt; LSeq 2 (Point 2 r :+ ())
+-&gt; [Point 2 r :+ ()]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point 2 r :+ ()) -&gt; [Point 2 r :+ ()]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(LSeq 2 (Point 2 r :+ ()) -&gt; CircularVector (Point 2 r :+ ()))
+-&gt; LSeq 2 (Point 2 r :+ ()) -&gt; CircularVector (Point 2 r :+ ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r
+</span><a href="#local-6989586621680100067"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">PolyLine 2 () r
+-&gt; Getting
+     (LSeq 2 (Point 2 r :+ ()))
+     (PolyLine 2 () r)
+     (LSeq 2 (Point 2 r :+ ()))
+-&gt; LSeq 2 (Point 2 r :+ ())
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (LSeq 2 (Point 2 r :+ ()))
+  (PolyLine 2 () r)
+  (LSeq 2 (Point 2 r :+ ()))
+forall (d1 :: Nat) p1 r1 (d2 :: Nat) p2 r2.
+Iso
+  (PolyLine d1 p1 r1)
+  (PolyLine d2 p2 r2)
+  (LSeq 2 (Point d1 r1 :+ p1))
+  (LSeq 2 (Point d2 r2 :+ p2))
+</span><a href="Data.Geometry.PolyLine.html#points"><span class="hs-identifier hs-var">points</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621680100061"><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#approximateSome"><span class="hs-identifier hs-type">approximateSome</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SomePolygon"><span class="hs-identifier hs-type">SomePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#PathJoin"><span class="hs-identifier hs-type">PathJoin</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SomePolygon"><span class="hs-identifier hs-type">SomePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680100061"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-56"></span><span id="approximateSome"><span class="annot"><span class="annottext">approximateSome :: r -&gt; SomePolygon (PathJoin r) r -&gt; SomePolygon () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximateSome"><span class="hs-identifier hs-var hs-var">approximateSome</span></a></span></span><span> </span><span id="local-6989586621680100060"><span class="annot"><span class="annottext">eps :: r
+</span><a href="#local-6989586621680100060"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680100059"><span class="annot"><span class="annottext">p :: Polygon 'Simple (PathJoin r) r
+</span><a href="#local-6989586621680100059"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple () r -&gt; SomePolygon () r
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(Polygon 'Simple () r -&gt; SomePolygon () r)
+-&gt; Polygon 'Simple () r -&gt; SomePolygon () r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Polygon 'Simple (PathJoin r) r -&gt; Polygon 'Simple () r
+forall (t :: PolygonType) r.
+(Ord r, Fractional r) =&gt;
+r -&gt; Polygon t (PathJoin r) r -&gt; Polygon t () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-var">approximate</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680100060"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple (PathJoin r) r
+</span><a href="#local-6989586621680100059"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Data.Geometry.Polygon.Bezier.html#approximateSome"><span class="hs-identifier hs-var">approximateSome</span></a></span><span> </span><span id="local-6989586621680100058"><span class="annot"><span class="annottext">eps :: r
+</span><a href="#local-6989586621680100058"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680100057"><span class="annot"><span class="annottext">p :: Polygon 'Multi (PathJoin r) r
+</span><a href="#local-6989586621680100057"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon 'Multi () r -&gt; SomePolygon () r
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Polygon 'Multi () r -&gt; SomePolygon () r)
+-&gt; Polygon 'Multi () r -&gt; SomePolygon () r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Polygon 'Multi (PathJoin r) r -&gt; Polygon 'Multi () r
+forall (t :: PolygonType) r.
+(Ord r, Fractional r) =&gt;
+r -&gt; Polygon t (PathJoin r) r -&gt; Polygon t () r
+</span><a href="Data.Geometry.Polygon.Bezier.html#approximate"><span class="hs-identifier hs-var">approximate</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680100058"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon 'Multi (PathJoin r) r
+</span><a href="#local-6989586621680100057"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-58"></span></pre></body></html>
