@@ -16,7 +16,6 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
-import           Data.Geometry.Properties
 import           Data.Maybe (mapMaybe)
 import           Data.PlaneGraph
 import           Ipe
