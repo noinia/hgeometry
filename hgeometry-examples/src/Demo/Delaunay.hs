@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Demo.Delaunay where
 
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
@@ -50,22 +51,28 @@ mainWith (Options inFile outFile) = do
       out  = [ iO $ drawPlanarSubdivisionWith drawVtx drawEdge (drawInternalFace dt) drawOuterFace dt
              , iO $ drawTree' emst
              ]
-  writeIpeFile outFile . singlePageFromContent $ out
+      outputFile = singlePageFromContent out
+  outputFile' <- addStyleSheetFrom "../hgeometry-ipe/resources/opacities.isy" outputFile
+  writeIpeFile outFile outputFile'
 
 -- | The world in which the delaunay triangulation "lives"
 data DTWorld
 
--- | Draw vertices using their default representation; filled marks.
-drawVtx                       :: IpeOut' Maybe (VertexId' s, VertexData r v) IpeSymbol r
-drawVtx (_vi, VertexData p v) = Just $ defIO p
+-- | Draw vertices using their default representation; disk marks. For
+-- the rest we keep their original attributes.
+drawVtx                         :: IpeOut' Maybe (VertexId' s, VertexData r (IpeAttributes IpeSymbol r)) IpeSymbol r
+drawVtx (_vi, VertexData p ats) = Just $ defIO p ! ats
 
 -- |
-drawEdge :: IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  Path r
+drawEdge              :: IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  Path r
 drawEdge (_d, s :+ _) = Just $ defIO s
 
 drawInternalFace                 :: PlanarSubdivision s v e f r
                          -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    Path r
 drawInternalFace s (fi, pg :+ _) = Just $ defIO pg ! attr SFill lightcyan
 
-drawOuterFace :: IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f)    fi r
-drawOuterFace = const Nothing
+--
+drawOuterFace :: (Ord r, Num r) => IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f) Path r
+drawOuterFace (_, pg :+ _) = Just $ defIO pg ! attr SOpacity "10%"
+
+  -- const Nothing
