@@ -16,9 +16,5 @@ import Ipe
 import Data.Geometry.PlanarSubdivision.Draw
 
 -- | Draws an arrangement
-drawArrangement :: IpeOut (Arrangement s l v e f r) Group r
+drawArrangement :: (Ord r, Num r) => IpeOut (Arrangement s l v e f r) Group r
 drawArrangement = drawPlanarSubdivision' . view subdivision
-
--- | Draws an arrangement
-drawColoredArrangement :: IpeOut (Arrangement s l v e (Maybe (IpeColor r)) r) Group r
-drawColoredArrangement = drawColoredPlanarSubdivision . view subdivision

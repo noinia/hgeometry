@@ -80,17 +80,13 @@ module Ipe(
   , IpeWriteText(..)
   -- ** IpeOut
   , module Ipe.IpeOut
-
-
-
+  -- ** Batch reexports
 
   , module Ipe.Types
-  -- , module Ipe.Writer
-  -- , module Ipe.Reader
   , module Ipe.FromIpe
   , module Ipe.Attributes
   , module Ipe.Value
-  , module Ipe.Color
+  , IpeColor(..), named
   ) where
 
 import Ipe.Types
@@ -100,4 +96,4 @@ import Ipe.IpeOut
 import Ipe.FromIpe
 import Ipe.Attributes
 import Ipe.Value
-import Ipe.Color(IpeColor(..))
+import Ipe.Color

@@ -60,6 +60,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , edgeSegment, edgeSegments
                                             , faceBoundary
                                             , internalFacePolygon, internalFacePolygons
+                                            , outerFacePolygon, outerFacePolygon'
+                                            , facePolygons
 
                                             , VertexId(..), FaceId(..), Dart, World(..)
 
@@ -75,6 +77,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
+import           Data.Bifunctor (first, second)
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -96,9 +99,9 @@ import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , HasDataOf(..)
                                 )
 import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
-import qualified Data.Set as Set
 import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
@@ -523,6 +526,7 @@ outerBoundaryDarts f ps = V.concatMap single . V.fromList . NonEmpty.toList $ as
   where
     single (_,f',g) = (\d -> g^.dataOf d) <$> PG.boundary f' g
 
+
 -- | Get the local face and component from a given face.
 asLocalF                          :: FaceId' s -> PlanarSubdivision s v e f r
                                   -> NonEmpty (ComponentId s, FaceId' (Wrap s), Component s r)
@@ -708,24 +712,23 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
                    in ClosedLineSegment p q :+ ps^.dataOf d
 
 
--- | Given a dart d, generates the darts on the *boundary* of
--- the the face that is to the right of the given dart. The darts are
--- reported in order along the face. This means that for internal
--- faces the darts are reported in *clockwise* order along the
--- boundary, whereas for the outer face the darts are reported in
--- counter clockwise order.
+-- | Given a dart d, generates the darts on (the current component of)
+-- the boundary of the the face that is to the right of the given
+-- dart. The darts are reported in order along the face. This means
+-- that for
 --
--- note: Darts on holes are not reported!
+-- - (the outer boundary of an) internal faces the darts are reported
+--   in *clockwise* order along the boundary,
+-- - the "inner" boundary of a face, i.e. the boundary of ahole, the
+--   darts are reported in *counter clockwise* order.
+--
+-- Note that this latter case means that in the darts of a a component
+-- of the outer face are reported in counter clockwise order.
 --
 -- \(O(k)\), where \(k\) is the number of darts reported
 boundary'     :: Dart s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
 boundary' d ps = let (_,d',g) = asLocalD d ps
                  in (\d'' -> g^.dataOf d'') <$> PG.boundary' d' g
-
-
--- FIXME: If the dart is *on* a hole, I suppose the darts on that hole
--- would be reported.
-
 
 -- | The outerboundary of the face as a simple polygon. For internal
 -- faces the polygon that is reported has its vertices stored in CCW
@@ -733,18 +736,18 @@ boundary' d ps = let (_,d',g) = asLocalD d ps
 --
 -- pre: FaceId refers to an internal face.
 --
--- For the other face this prodcuces a polygon in CW order (this may
--- lead to unexpected results.)
---
 -- \(O(k)\), where \(k\) is the complexity of the outer boundary of
 -- the face
 faceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
-faceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
+faceBoundary i ps = unsafeFromPoints (reverse pts) :+ (ps^.dataOf i)
   where
     d   = V.head $ outerBoundaryDarts i ps
     pts = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
        <$> V.toList (boundary' d ps)
-
+    -- for internal faces boundary' produces the boundary darts in
+    -- clockwise order. Hence, we reverse the sequence of points we
+    -- obtain to get the points/vertices in CCW order, so that we can
+    -- construct a simplepolygon out of them.
 
 -- | Constructs the boundary of the given face.
 --
@@ -760,37 +763,52 @@ internalFacePolygon i ps = case F.toList $ holesOf i ps of
 -- TODO: Verify that holes are in the right orientation.
 
 
--- -- | Given the outerFaceId and the graph, construct a sufficiently
--- -- large rectangular multipolygon ith a hole containing the boundary
--- -- of the outer face.
--- outerFacePolygon      :: (Num r, Ord r)
---                       => FaceId' s -> PlanarSubdivision s v e f r -> MultiPolygon (Maybe v) r :+ f
--- outerFacePolygon i ps =
+-- | Returns a sufficiently large, rectangular, polygon that contains
+-- the entire planar subdivision. Each component corresponds to a hole
+-- in this polygon.
+outerFacePolygon    :: (Num r, Ord r)
+                    => PlanarSubdivision s v e f r -> MultiPolygon (Maybe v) r :+ f
+outerFacePolygon ps = outerFacePolygon' outer ps & core %~ first (either (const Nothing) Just)
+  where
+    outer = rectToPolygon . grow 1 . boundingBox $ ps
+    rectToPolygon = unsafeFromPoints . reverse . F.toList . corners
 
+-- | Given a sufficiently large outer boundary, draw the outerface as
+-- a polygon with a hole.
+outerFacePolygon'          :: SimplePolygon v' r
+                           -> PlanarSubdivision s v e f r -> MultiPolygon (Either v' v) r :+ f
+outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ ps^.dataOf i
+  where
+    i       = outerFaceId ps
+    holePgs = map getBoundary . F.toList $ holesOf i ps
+    -- get the bondary of a hole. Note that for holes, the function
+    -- 'boundary' promisses to report the darts, and therefore the
+    -- vertices in CCW order. Hence, we can directly construct a SimplePolygon out of it.
+    getBoundary d = unsafeFromPoints . fmap (second Right) $ faceBoundary' (twin d)
+    faceBoundary' d = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
+                      <$> V.toList (boundary' d ps)
 
--- -- | Given a sufficiently large outer boundary,
--- -- draw the outerface as a polygon with a hole.
--- outerFacePolygon'          :: SimplePolygon v' r
---                            -> PlanarSubdivision s v e f r -> MultiPolygon (Either v' v) r :+ f
--- outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ pg^.dataOf i
---   where
---     i       = outerFaceId ps
---     holePgs = map getBoundary . Seq.toList $ holesOf i ps
-
---       ps^.components
-
---     -- get the bondary of a component
---     getBoundary c = reverseOuterBoundary . first Right . view core $ PG.faceBoundary i ps
---     -- if we call faceBoundary on the outerface we get a polygon in
---     -- the wrong orientation. So reverse it.
--- -- FIXME: Continue here.
-
-
-
--- | Lists all *internal* faces of the planar subdivision.
+-- | Procuces a polygon for each *internal* face of the planar
+-- subdivision.
 internalFacePolygons    :: PlanarSubdivision s v e f r
                         -> V.Vector (FaceId' s, SomePolygon v r :+ f)
 internalFacePolygons ps = fmap (\(i,_) -> (i,internalFacePolygon i ps)) . internalFaces $ ps
+
+
+-- | Procuces a polygon for each face of the planar subdivision.
+facePolygons    :: (Num r, Ord r)
+                => PlanarSubdivision s v e f r
+                -> V.Vector (FaceId' s, SomePolygon (Maybe v) r :+ f)
+facePolygons ps = V.cons (outerFaceId ps, first Right $ outerFacePolygon ps) ifs
+  where
+    ifs = wrapJust <$> internalFacePolygons ps
+    g :: Bifunctor g => g a b -> g (Maybe a) b
+    g = first Just
+
+    wrapJust                 :: (FaceId' s, SomePolygon v r :+ f)
+                             -> (FaceId' s, SomePolygon (Maybe v) r :+ f)
+    wrapJust (i,(spg :+ f)) = (i,bimap g g spg :+ f)
+
 
 
 -- | Mapping between the internal and extenral darts

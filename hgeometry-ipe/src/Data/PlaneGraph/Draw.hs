@@ -1,4 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.PlaneGraph.Draw
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper functions to draw a PlaneGraph in ipe
+--
+--------------------------------------------------------------------------------
 module Data.PlaneGraph.Draw where
 
 import           Control.Lens
@@ -6,7 +16,6 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
-import           Data.Geometry.Properties
 import           Data.Maybe (mapMaybe)
 import           Data.PlaneGraph
 import           Ipe
@@ -36,9 +45,8 @@ drawPlaneGraph' pg = drawPlaneGraph
      &faceData.traverse     ?~ (mempty :: IpeAttributes Path      r))
 
 
--- | Function to draw a graph by specifying how we want to draw the
--- graph, as well as functions that specify how to render vertices,
--- edges, and faces.
+-- | Function to draw a graph by giving functions that specify how to
+-- render vertices, edges, and faces.
 drawPlaneGraphWith                 :: (ToObject vi, ToObject ei, ToObject fi, Fractional r, Ord r)
                                    => IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
                                    -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
@@ -47,9 +55,8 @@ drawPlaneGraphWith                 :: (ToObject vi, ToObject ei, ToObject fi, Fr
                                    -> IpeOut (PlaneGraph s v e f r) Group r
 drawPlaneGraphWith fs fe fif fof g = drawPlaneGraphWith' (outerFaceId g) fs fe fif fof g
 
--- | Function to draw a graph by specifying how we want to draw the
--- graph, as well as functions that specify how to render vertices,
--- edges, and faces.
+-- | Function to draw a graph by giving the outer faceId and the
+-- functions that specify how to render vertices, edges, and faces.
 drawPlaneGraphWith'                    :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r)
                                       => FaceId' s -- ^ outerface Id
                                       -> IpeOut' Maybe (VertexId' s, VertexData r v)          vi r

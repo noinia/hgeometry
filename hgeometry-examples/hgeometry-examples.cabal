@@ -1,11 +1,12 @@
+cabal-version:       2.4
 name:                hgeometry-examples
-version:             0.12.0.0
+version:             0.13
 synopsis:            Examples for HGeometry
 description:
     Examples of Geometric Algorithms implemented using HGeometry
 
 homepage:            https://fstaals.net/software/hgeometry
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
@@ -16,25 +17,15 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-data-files:          data/BAPC2014/sample.in
-                     data/BAPC2014/sample.out
-                     data/BAPC2014/testdata.in
-                     data/BAPC2014/testdata.out
-                     data/BAPC2012/G.in
-                     data/BAPC2012/G.out
-                     data/BAPC2012/sampleG.in
-                     data/BAPC2012/sampleG.out
-
+data-files:          data/**/*.in
+                     data/**/*.out
+                     ../hgeometry-ipe/resources/opacities.isy
+                     ../hgeometry-ipe/docs/coloredPoints.ipe
                      data/world.ipe
-
-                     -- in the future (cabal >=2.4) we can use
-                     -- examples/**/*.in
-                     -- examples/**/*.out
 
 extra-source-files:  README.md
                      changelog.org
 
-cabal-version:       2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -44,7 +35,7 @@ executable hgeometry-examples
   main-is: Main.hs
 
   build-depends: base                    >= 4.11      &&     < 5
-               , hgeometry               >= 0.12.0.0
+               , hgeometry               >= 0.13
                , hgeometry-combinatorial
                , hgeometry-ipe
                , lens
