@@ -49,7 +49,8 @@ mainWith (Options inFile outFile) = do
       dt   = toPlanarSubdivision (Proxy @DTWorld) . delaunayTriangulation $ pts'
       emst = euclideanMST pts'
       out  = [ iO $ drawPlanarSubdivisionWith drawVtx drawEdge (drawInternalFace dt) drawOuterFace dt
-             , iO $ drawTree' emst
+                  ! attr SLayer "delaunayTriangulation"
+             , iO $ drawTree' emst ! attr SLayer "emst"
              ]
       outputFile = singlePageFromContent out
   outputFile' <- addStyleSheetFrom "../hgeometry-ipe/resources/opacities.isy" outputFile
@@ -63,10 +64,11 @@ data DTWorld
 drawVtx                         :: IpeOut' Maybe (VertexId' s, VertexData r (IpeAttributes IpeSymbol r)) IpeSymbol r
 drawVtx (_vi, VertexData p ats) = Just $ defIO p ! ats
 
--- |
+-- | Draw edges using normal line segments
 drawEdge              :: IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  Path r
 drawEdge (_d, s :+ _) = Just $ defIO s
 
+-- | Internal faces are filled polygons.
 drawInternalFace                 :: PlanarSubdivision s v e f r
                          -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    Path r
 drawInternalFace s (fi, pg :+ _) = Just $ defIO pg ! attr SFill lightcyan
@@ -74,5 +76,6 @@ drawInternalFace s (fi, pg :+ _) = Just $ defIO pg ! attr SFill lightcyan
 --
 drawOuterFace :: (Ord r, Num r) => IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f) Path r
 drawOuterFace (_, pg :+ _) = Just $ defIO pg ! attr SOpacity "10%"
+                                             ! attr SFill lightgray
 
   -- const Nothing
