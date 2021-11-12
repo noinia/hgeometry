@@ -18,6 +18,8 @@ import Data.Text
 import Data.Traversable
 --------------------------------------------------------------------------------
 
+-- | Defines a color in Ipe. Colors are either RGB Values or Named
+-- values.
 newtype IpeColor r = IpeColor (IpeValue (RGB r)) deriving (Show,Read,Eq)
 
 instance Ord r => Ord (IpeColor r) where

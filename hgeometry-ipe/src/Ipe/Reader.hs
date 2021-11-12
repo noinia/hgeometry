@@ -1,34 +1,39 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Ipe.Reader( -- * Reading ipe Files
-                                 readRawIpeFile
-                               , readIpeFile
-                               , readSinglePageFile
-                               , readSinglePageFileThrow
-                               , ConversionError
+module Ipe.Reader
+  ( -- * Reading ipe Files
+    readRawIpeFile
+  , readIpeFile
+  , readSinglePageFile
+  , readSinglePageFileThrow
+  , ConversionError
+  -- * Readiing ipe style files
+  , readIpeStylesheet
+  , addStyleSheetFrom
 
-                               -- * Reading XML directly
-                               , fromIpeXML
-                               , readXML
+    -- * Reading XML directly
+  , fromIpeXML
+  , readXML
 
-                               -- * Read classes
-                               , IpeReadText(..)
-                               , IpeRead(..)
-                               , IpeReadAttr(..)
+    -- * Read classes
+  , IpeReadText(..)
+  , IpeRead(..)
+  , IpeReadAttr(..)
 
 
-                               -- * Some low level implementation functions
-                               , ipeReadTextWith
-                               , ipeReadObject
-                               , ipeReadAttrs
-                               , ipeReadRec
+    -- * Some low level implementation functions
+  , ipeReadTextWith
+  , ipeReadObject
+  , ipeReadAttrs
+  , ipeReadRec
 
-                               , Coordinate(..)
-                               ) where
+  , Coordinate(..)
+  ) where
 
 import           Control.Applicative ((<|>))
 import           Control.Lens hiding (Const, rmap)
+import           Control.Monad ((<=<))
 import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
@@ -38,6 +43,7 @@ import           Data.Geometry hiding (head)
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (ellipseMatrix)
+import qualified Data.Geometry.Matrix as Matrix
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Matrix
@@ -46,7 +52,6 @@ import           Ipe.Path
 import           Ipe.PathParser
 import           Ipe.Types
 import           Ipe.Value
-import qualified Data.Geometry.Matrix as Matrix
 
 
 import qualified Data.Geometry.Polygon as Polygon
@@ -450,7 +455,21 @@ instance (Coordinate r, Eq r) => IpeRead (IpeFile r) where
   ipeRead _                     = Left "Ipe: Element expected, text found"
 
 
+instance IpeRead IpeStyle where
+  ipeRead = \case
+    xml@(Element "ipestyle" ats _) -> Right $ IpeStyle (lookup "name" ats) xml
+    _                              -> Left "ipeStyle exptected. Something else found"
 
 
+-- | Reads an Ipe stylesheet from Disk.
+readIpeStylesheet :: FilePath -> IO (Either ConversionError IpeStyle)
+readIpeStylesheet = fmap (ipeRead <=< readXML) . B.readFile
+
+-- | Given a path to a stylesheet, add it to the ipe file with the
+-- highest priority. Throws an error when this fails.
+addStyleSheetFrom      :: FilePath -> IpeFile r -> IO (IpeFile r)
+addStyleSheetFrom fp f = readIpeStylesheet fp >>= \case
+  Left err -> fail (show err)
+  Right s  -> pure $ addStyleSheet s f
 
 --------------------------------------------------------------------------------

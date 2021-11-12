@@ -51,7 +51,8 @@ mainWith (Options inFile outFile) = do
       Right (page :: IpePage R) -> runPage page
   where
     runPage page = do
-      let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asSimplePolygon
+      let polies  :: [SimplePolygon () R :+ IpeAttributes Path R]
+          polies  = readAll page
           polies' = filter (not . hasSelfIntersections . (^.core)) polies
           intersections' = concatMap (Map.keys . interiorIntersections
                                       . listEdges . (^.core)) polies

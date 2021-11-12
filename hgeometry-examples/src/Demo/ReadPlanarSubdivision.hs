@@ -43,17 +43,17 @@ mainWith (Options inFile outFile) = do
       Right (page :: IpePage Rational) -> runPage page
   where
     runPage page = do
-      let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asSimplePolygon
+      let polies  = readAll page
       mapM_ print polies
 
 
 
-flattenGroups :: [IpeObject r] -> [IpeObject r]
-flattenGroups = concatMap flattenGroups'
+-- flattenGroups :: [IpeObject r] -> [IpeObject r]
+-- flattenGroups = concatMap flattenGroups'
 
-flattenGroups'                              :: IpeObject r -> [IpeObject r]
-flattenGroups' (IpeGroup (Group gs :+ ats)) =
-      map (applyAts ats) . concatMap flattenGroups' $ gs
-    where
-      applyAts ats = id
-flattenGroups' o                            = [o]
+-- flattenGroups'                              :: IpeObject r -> [IpeObject r]
+-- flattenGroups' (IpeGroup (Group gs :+ ats)) =
+--       map (applyAts ats) . concatMap flattenGroups' $ gs
+--     where
+--       applyAts ats = id
+-- flattenGroups' o                            = [o]

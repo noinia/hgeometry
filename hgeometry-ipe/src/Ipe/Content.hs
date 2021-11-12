@@ -140,9 +140,10 @@ type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
   AttrMap r FillRule = FillType
   AttrMap r Arrow    = IpeArrow r
   AttrMap r RArrow   = IpeArrow r
-  AttrMap r Opacity  = IpeOpacity
-  AttrMap r Tiling   = IpeTiling
-  AttrMap r Gradient = IpeGradient
+  AttrMap r StrokeOpacity = IpeOpacity
+  AttrMap r Opacity       = IpeOpacity
+  AttrMap r Tiling        = IpeTiling
+  AttrMap r Gradient      = IpeGradient
 
   AttrMap r Clip = Path r -- strictly we event want this to be a closed path I guess
 
@@ -178,6 +179,7 @@ instance TraverseIpeAttr LineJoin   where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr FillRule   where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Arrow      where traverseIpeAttr f = traverseAttr (traverse f)
 instance TraverseIpeAttr RArrow     where traverseIpeAttr f = traverseAttr (traverse f)
+instance TraverseIpeAttr StrokeOpacity  where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Opacity    where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Tiling     where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Gradient   where traverseIpeAttr _ = pureAttr

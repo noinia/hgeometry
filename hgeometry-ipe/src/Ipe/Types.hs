@@ -12,50 +12,43 @@
 --
 --------------------------------------------------------------------------------
 module Ipe.Types(
-    LayerName(LayerName), layerName
-  , Image(Image), imageData, rect
-  , TextLabel(..)
-  , MiniPage(..), width
-
-  , IpeSymbol(Symbol), symbolPoint, symbolName
-
-  , Path(Path), pathSegments
-  , PathSegment(..)
-
-  , Group(Group), groupItems
-
-
-  , IpeObject(..), _IpeGroup, _IpeImage, _IpeTextLabel, _IpeMiniPage, _IpeUse, _IpePath
-  , IpeObject'
-  , ipeObject'
-  , ToObject(..)
-
-  , IpeAttributes
-  , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
-  , commonAttributes
-
-  , flattenGroups
-
-
-  , View(View), layerNames, activeLayer
-
-  , IpeStyle(IpeStyle), styleName, styleData
-  , basicIpeStyle
-
-
-  , IpePreamble(IpePreamble), encoding, preambleData
-
-  , IpeBitmap
-
-
+  -- * Ipe Files
+    IpeFile(IpeFile), preamble, styles, pages
+  , ipeFile, singlePageFile, singlePageFromContent
+  -- * Ipe Pages
   , IpePage(IpePage), layers, views, content
   , emptyPage, fromContent
   , onLayer, contentInView
   , withDefaults
-
-  , IpeFile(IpeFile), preamble, styles, pages
-  , ipeFile, singlePageFile, singlePageFromContent
+  -- * Content: Ipe Objects
+  , IpeObject(..), _IpeGroup, _IpeImage, _IpeTextLabel, _IpeMiniPage, _IpeUse, _IpePath
+  , IpeObject'
+  , ipeObject'
+  , ToObject(..)
+  -- ** Specific Ipe-Objects
+  , Path(Path), pathSegments
+  , PathSegment(..)
+  , IpeSymbol(Symbol), symbolPoint, symbolName
+  , Group(Group), groupItems
+  , TextLabel(..)
+  , MiniPage(..), width
+  , Image(Image), imageData, rect
+  , IpeBitmap
+  -- * Attributes
+  , IpeAttributes
+  , Attributes', AttributesOf, AttrMap, AttrMapSym1
+  , attributes, traverseIpeAttrs
+  , commonAttributes
+  -- * Layers and Views
+  , LayerName(LayerName), layerName
+  , View(View), layerNames, activeLayer
+  -- * Styles and Preamble
+  , addStyleSheet
+  , IpeStyle(IpeStyle), styleName, styleData
+  , basicIpeStyle
+  , IpePreamble(IpePreamble), encoding, preambleData
+  --
+  -- , flattenGroups
   ) where
 
 
@@ -70,6 +63,7 @@ import           Data.Semigroup (Endo)
 import qualified Data.Set as Set
 import           Data.Text (Text)
 import           Text.XML.Expat.Tree (Node)
+
 
 --------------------------------------------------------------------------------
 
@@ -95,6 +89,7 @@ makeLenses ''IpeStyle
 
 basicIpeStyle :: IpeStyle
 basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|resources/basic.isy|])
+
 
 
 -- | The maybe string is the encoding
@@ -196,3 +191,9 @@ singlePageFile = ipeFile . (NE.:| [])
 -- | Create a single page ipe file from a list of IpeObjects
 singlePageFromContent :: [IpeObject r] -> IpeFile r
 singlePageFromContent = singlePageFile . fromContent
+
+
+-- | Adds a stylesheet to the ipe file. This will be the first
+-- stylesheet, i.e. it has priority over all previously imported stylesheets.
+addStyleSheet     :: IpeStyle -> IpeFile r -> IpeFile r
+addStyleSheet s f = f&styles %~ (s:)
