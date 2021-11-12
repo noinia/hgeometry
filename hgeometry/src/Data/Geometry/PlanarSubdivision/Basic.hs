@@ -784,7 +784,7 @@ outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ ps^.data
     -- get the bondary of a hole. Note that for holes, the function
     -- 'boundary' promisses to report the darts, and therefore the
     -- vertices in CCW order. Hence, we can directly construct a SimplePolygon out of it.
-    getBoundary d = unsafeFromPoints . fmap (second Right) $ faceBoundary' d
+    getBoundary d = unsafeFromPoints . fmap (second Right) $ faceBoundary' (twin d)
     faceBoundary' d = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
                       <$> V.toList (boundary' d ps)
 
