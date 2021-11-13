@@ -5,7 +5,10 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Use 'iperender' to generate png, pdf, or svg files
+-- Use 'iperender' to generate png, pdf, or svg files.
+--
+-- Note that all functions in this module require that 'iperender' is
+-- installed (it is bundled with ipe) and available on the path.
 
 --------------------------------------------------------------------------------
 module Ipe.IpeRender where
@@ -15,6 +18,8 @@ import qualified System.Process.Typed as Process
 --------------------------------------------------------------------------------
 
 -- | Call 'iperender' to produce an image of the specified type.
+--
+-- note that pdf files produces with iperender cannot be opened with ipe.
 ipeRenderWith                          :: Options -- ^ the options to use
                                        -> FileType -- ^ output file type
                                        -> FilePath -- ^ input file path
@@ -36,6 +41,8 @@ ipeRenderWith options fType inFp outFp =
            ]
 
 -- | Call 'iperender' with the default options.
+--
+-- note that pdf files produces with iperender cannot be opened with ipe.
 ipeRender :: FileType -> FilePath -> FilePath -> IO ()
 ipeRender = ipeRenderWith defaultOptions
 
