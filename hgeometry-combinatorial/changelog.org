@@ -2,6 +2,16 @@
 
 * Changelog
 
+** 0.13
+
+- Moved 'intersects' from the HasIntersectionWith class into a new
+  class IsIntersectableWith. This allows separate (weaker) constraints
+  for checking *if* geometries intersect rather than computing exact
+  intersections.
+- Bug fixes in the orientations of boundaries in PlanarGraph.
+- Implementation of Logaritmic Method, wich allows us to transform a
+  static data structure into an insertion only data structure
+
 ** 0.12
 
 - Add Data.Double.Approximate: Floating point numbers take take
