@@ -25,8 +25,8 @@ import           Data.Tree
 import qualified Data.Vector as V
 import           Witherable
 
-import Data.RealNumber.Rational
-type R = RealNumber 5
+-- import Data.RealNumber.Rational
+-- type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
@@ -122,17 +122,17 @@ extract' is'@(i:is) j (x:xs) | i == j    = x : extract' is (j+1) xs
 --------------------------------------------------------------------------------
 
 
-tr :: Tree Int
-tr = Node 0 [Node 1 [], Node 2 [Node 3 [], Node 2 [], Node 4 [Node 5 []]]]
+-- tr :: Tree Int
+-- tr = Node 0 [Node 1 [], Node 2 [Node 3 [], Node 2 [], Node 4 [Node 5 []]]]
 
-poly :: PolyLine 2 Int R
-poly = case fromPoints [origin :+ 0, Point2 1 1 :+ 1, Point2 2 2 :+ 2, Point2 3 3 :+ 3] of
-         Just p -> p
+-- poly :: PolyLine 2 Int R
+-- poly = case fromPoints [origin :+ 0, Point2 1 1 :+ 1, Point2 2 2 :+ 2, Point2 3 3 :+ 3] of
+--          Just p -> p
 
-test = Seq.fromList [0..5]
+-- test = Seq.fromList [0..5]
 
-myTree :: Tree Int
-myTree = Node {rootLabel = 0, subForest = [Node {rootLabel = 1, subForest = []}
-                                       ,Node {rootLabel = 2, subForest = []}
-                                       ,Node {rootLabel = 3, subForest = []}]
-           }
+-- myTree :: Tree Int
+-- myTree = Node {rootLabel = 0, subForest = [Node {rootLabel = 1, subForest = []}
+--                                        ,Node {rootLabel = 2, subForest = []}
+--                                        ,Node {rootLabel = 3, subForest = []}]
+--            }
