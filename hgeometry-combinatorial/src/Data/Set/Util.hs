@@ -136,5 +136,5 @@ queryBy cmp fs q s = withOrd cmp $ liftOrd1 (fs $ O q) s
 
 
 
-test = queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- test = queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
 -- test = succBy cmpS (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
