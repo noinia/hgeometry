@@ -2218,9 +2218,6 @@ computeDual :: forall s w v e f. PlanarGraph s w v e f -> PlanarGraph s (DualOf 
 
 -- | Does the actual work for dualGraph
 computeDual' :: DualOf (DualOf w) ~ w => PlanarGraph s w v e f -> PlanarGraph s (DualOf w) f e v
-myGraph :: PlanarGraph () Primal String String String
-dart :: forall k (s :: k). Int -> String -> Dart s
-showWithData :: HasDataOf s i => s -> i -> (i, DataOf s i)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World) v e f. GHC.Generics.Generic (Data.PlanarGraph.Core.PlanarGraph s w v e f)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.Core.FaceId s w)
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.Core.FaceId s w)
@@ -4848,7 +4845,6 @@ deleteAllBy :: (a -> a -> Ordering) -> a -> Set a -> Set a
 --   Just (S "bbb")
 --   </pre>
 queryBy :: (a -> a -> Ordering) -> (forall b. Ord b => b -> Set b -> t b) -> a -> Set a -> t a
-test :: Maybe S
 instance GHC.Show.Show Data.Set.Util.S
 
 

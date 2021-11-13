@@ -22,7 +22,7 @@
 </span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-23"></span><span>
 </span><span id="line-24"></span><span class="hs-comment">-- | The four cardinal directions.</span><span>
-</span><span id="line-25"></span><span class="hs-keyword">data</span><span> </span><span id="CardinalDirection"><span class="annot"><a href="Data.Geometry.Directions.html#CardinalDirection"><span class="hs-identifier hs-var">CardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="North"><span class="annot"><a href="Data.Geometry.Directions.html#North"><span class="hs-identifier hs-var">North</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="East"><span class="annot"><a href="Data.Geometry.Directions.html#East"><span class="hs-identifier hs-var">East</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="South"><span class="annot"><a href="Data.Geometry.Directions.html#South"><span class="hs-identifier hs-var">South</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="West"><span class="annot"><a href="Data.Geometry.Directions.html#West"><span class="hs-identifier hs-var">West</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680070560"><span id="local-6989586621680070562"><span id="local-6989586621680070564"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection -&gt; ShowS
+</span><span id="line-25"></span><span class="hs-keyword">data</span><span> </span><span id="CardinalDirection"><span class="annot"><a href="Data.Geometry.Directions.html#CardinalDirection"><span class="hs-identifier hs-var">CardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="North"><span class="annot"><a href="Data.Geometry.Directions.html#North"><span class="hs-identifier hs-var">North</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="East"><span class="annot"><a href="Data.Geometry.Directions.html#East"><span class="hs-identifier hs-var">East</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="South"><span class="annot"><a href="Data.Geometry.Directions.html#South"><span class="hs-identifier hs-var">South</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="West"><span class="annot"><a href="Data.Geometry.Directions.html#West"><span class="hs-identifier hs-var">West</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680070369"><span id="local-6989586621680070371"><span id="local-6989586621680070373"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection -&gt; ShowS
 [CardinalDirection] -&gt; ShowS
 CardinalDirection -&gt; String
 (Int -&gt; CardinalDirection -&gt; ShowS)
@@ -37,7 +37,7 @@ show :: CardinalDirection -&gt; String
 $cshow :: CardinalDirection -&gt; String
 showsPrec :: Int -&gt; CardinalDirection -&gt; ShowS
 $cshowsPrec :: Int -&gt; CardinalDirection -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070551"><span id="local-6989586621680070553"><span id="local-6989586621680070555"><span id="local-6989586621680070557"><span class="annot"><span class="annottext">ReadPrec [CardinalDirection]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070360"><span id="local-6989586621680070362"><span id="local-6989586621680070364"><span id="local-6989586621680070366"><span class="annot"><span class="annottext">ReadPrec [CardinalDirection]
 ReadPrec CardinalDirection
 Int -&gt; ReadS CardinalDirection
 ReadS [CardinalDirection]
@@ -57,7 +57,7 @@ readList :: ReadS [CardinalDirection]
 $creadList :: ReadS [CardinalDirection]
 readsPrec :: Int -&gt; ReadS CardinalDirection
 $creadsPrec :: Int -&gt; ReadS CardinalDirection
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070546"><span id="local-6989586621680070548"><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070355"><span id="local-6989586621680070357"><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
 (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
 -&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
 -&gt; Eq CardinalDirection
@@ -66,7 +66,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
 == :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
 $c== :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070530"><span id="local-6989586621680070532"><span id="local-6989586621680070534"><span id="local-6989586621680070536"><span id="local-6989586621680070538"><span id="local-6989586621680070540"><span id="local-6989586621680070542"><span class="annot"><span class="annottext">Eq CardinalDirection
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070339"><span id="local-6989586621680070341"><span id="local-6989586621680070343"><span id="local-6989586621680070345"><span id="local-6989586621680070347"><span id="local-6989586621680070349"><span id="local-6989586621680070351"><span class="annot"><span class="annottext">Eq CardinalDirection
 Eq CardinalDirection =&gt;
 (CardinalDirection -&gt; CardinalDirection -&gt; Ordering)
 -&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
@@ -104,7 +104,7 @@ $c&lt; :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
 compare :: CardinalDirection -&gt; CardinalDirection -&gt; Ordering
 $ccompare :: CardinalDirection -&gt; CardinalDirection -&gt; Ordering
 $cp1Ord :: Eq CardinalDirection
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070513"><span id="local-6989586621680070515"><span id="local-6989586621680070517"><span id="local-6989586621680070519"><span id="local-6989586621680070521"><span id="local-6989586621680070523"><span id="local-6989586621680070525"><span id="local-6989586621680070527"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070322"><span id="local-6989586621680070324"><span id="local-6989586621680070326"><span id="local-6989586621680070328"><span id="local-6989586621680070330"><span id="local-6989586621680070332"><span id="local-6989586621680070334"><span id="local-6989586621680070336"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection
 CardinalDirection -&gt; Int
 CardinalDirection -&gt; [CardinalDirection]
 CardinalDirection -&gt; CardinalDirection
@@ -149,7 +149,7 @@ pred :: CardinalDirection -&gt; CardinalDirection
 $cpred :: CardinalDirection -&gt; CardinalDirection
 succ :: CardinalDirection -&gt; CardinalDirection
 $csucc :: CardinalDirection -&gt; CardinalDirection
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070508"><span id="local-6989586621680070510"><span class="annot"><span class="annottext">CardinalDirection
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070317"><span id="local-6989586621680070319"><span class="annot"><span class="annottext">CardinalDirection
 CardinalDirection -&gt; CardinalDirection -&gt; Bounded CardinalDirection
 forall a. a -&gt; a -&gt; Bounded a
 maxBound :: CardinalDirection
@@ -178,8 +178,8 @@ $cminBound :: CardinalDirection
 </span><span id="line-39"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- | Intercardinal directions</span><span>
-</span><span id="line-42"></span><span id="local-6989586621680070505"><span id="local-6989586621680070506"></span></span><span class="hs-keyword">data</span><span> </span><span id="InterCardinalDirection"><span class="annot"><a href="Data.Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-var">InterCardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NorthWest"><span class="annot"><a href="Data.Geometry.Directions.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="NorthEast"><span class="annot"><a href="Data.Geometry.Directions.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthEast"><span class="annot"><a href="Data.Geometry.Directions.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthWest"><span class="annot"><a href="Data.Geometry.Directions.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span></span><span>
-</span><span id="line-43"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680070495"><span id="local-6989586621680070497"><span id="local-6989586621680070499"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection -&gt; ShowS
+</span><span id="line-42"></span><span id="local-6989586621680070314"><span id="local-6989586621680070315"></span></span><span class="hs-keyword">data</span><span> </span><span id="InterCardinalDirection"><span class="annot"><a href="Data.Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-var">InterCardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NorthWest"><span class="annot"><a href="Data.Geometry.Directions.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="NorthEast"><span class="annot"><a href="Data.Geometry.Directions.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthEast"><span class="annot"><a href="Data.Geometry.Directions.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthWest"><span class="annot"><a href="Data.Geometry.Directions.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680070304"><span id="local-6989586621680070306"><span id="local-6989586621680070308"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection -&gt; ShowS
 [InterCardinalDirection] -&gt; ShowS
 InterCardinalDirection -&gt; String
 (Int -&gt; InterCardinalDirection -&gt; ShowS)
@@ -194,7 +194,7 @@ show :: InterCardinalDirection -&gt; String
 $cshow :: InterCardinalDirection -&gt; String
 showsPrec :: Int -&gt; InterCardinalDirection -&gt; ShowS
 $cshowsPrec :: Int -&gt; InterCardinalDirection -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070487"><span id="local-6989586621680070489"><span id="local-6989586621680070491"><span id="local-6989586621680070493"><span class="annot"><span class="annottext">ReadPrec [InterCardinalDirection]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070296"><span id="local-6989586621680070298"><span id="local-6989586621680070300"><span id="local-6989586621680070302"><span class="annot"><span class="annottext">ReadPrec [InterCardinalDirection]
 ReadPrec InterCardinalDirection
 Int -&gt; ReadS InterCardinalDirection
 ReadS [InterCardinalDirection]
@@ -214,7 +214,7 @@ readList :: ReadS [InterCardinalDirection]
 $creadList :: ReadS [InterCardinalDirection]
 readsPrec :: Int -&gt; ReadS InterCardinalDirection
 $creadsPrec :: Int -&gt; ReadS InterCardinalDirection
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070483"><span id="local-6989586621680070485"><span class="annot"><span class="annottext">InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070292"><span id="local-6989586621680070294"><span class="annot"><span class="annottext">InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
 (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
 -&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
 -&gt; Eq InterCardinalDirection
@@ -223,7 +223,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
 == :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
 $c== :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070468"><span id="local-6989586621680070470"><span id="local-6989586621680070472"><span id="local-6989586621680070474"><span id="local-6989586621680070476"><span id="local-6989586621680070478"><span id="local-6989586621680070480"><span class="annot"><span class="annottext">Eq InterCardinalDirection
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070277"><span id="local-6989586621680070279"><span id="local-6989586621680070281"><span id="local-6989586621680070283"><span id="local-6989586621680070285"><span id="local-6989586621680070287"><span id="local-6989586621680070289"><span class="annot"><span class="annottext">Eq InterCardinalDirection
 Eq InterCardinalDirection =&gt;
 (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering)
 -&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
@@ -268,7 +268,7 @@ $c&lt; :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
 compare :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering
 $ccompare :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering
 $cp1Ord :: Eq InterCardinalDirection
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070452"><span id="local-6989586621680070454"><span id="local-6989586621680070456"><span id="local-6989586621680070458"><span id="local-6989586621680070460"><span id="local-6989586621680070462"><span id="local-6989586621680070464"><span id="local-6989586621680070466"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680070261"><span id="local-6989586621680070263"><span id="local-6989586621680070265"><span id="local-6989586621680070267"><span id="local-6989586621680070269"><span id="local-6989586621680070271"><span id="local-6989586621680070273"><span id="local-6989586621680070275"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection
 InterCardinalDirection -&gt; Int
 InterCardinalDirection -&gt; [InterCardinalDirection]
 InterCardinalDirection -&gt; InterCardinalDirection
