@@ -1,6 +1,6 @@
 #!/bin/sh
 
-pkgs="hgeometry-combinatorial hgeometry hgeometry-ipe"
+pkgs="hgeometry-combinatorial hgeometry hgeometry-ipe hgeometry-svg"
 
 for pkg in ${pkgs} ; do
   cabal build ${pkg}
