@@ -162,11 +162,11 @@ computeDiagonals p' = map f . sweep
 -- pre: the polygon boundary is given in counterClockwise order.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r)
-                  => proxy s -> Polygon t p r
-                  -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-makeMonotone px pg = let (e:es) = listEdges pg
-                     in constructSubdivision px e es (computeDiagonals pg)
+makeMonotone    :: forall s t p r. (Fractional r, Ord r)
+                => Polygon t p r
+                -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+makeMonotone pg = let (e:es) = listEdges pg
+                  in constructSubdivision e es (computeDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)

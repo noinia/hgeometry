@@ -2,6 +2,15 @@
 
 * Changelog
 
+** 0.14
+
+- Got rid of proxies to build planar graphs, use TypeApplication
+  instead. Also slightly changed some of the types to better reflect
+  what they need; in particular 'buildGraph' now takes only the
+  adjacency lists (no face information). And 'fromAdjRep' which
+  computes a PlanarGraph from its adjacencylists (including vertex and
+  edge info.)
+
 ** 0.13
 
 - Moved 'intersects' from the HasIntersectionWith class into a new

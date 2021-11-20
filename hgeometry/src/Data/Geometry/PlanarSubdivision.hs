@@ -24,7 +24,6 @@ import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Merge
 import           Data.Geometry.PlanarSubdivision.TreeRep
 import           Data.Geometry.Polygon
-import           Data.Proxy
 
 
 -- import Data.Geometry.Point
@@ -42,25 +41,23 @@ import           Data.Proxy
 --
 -- runningtime: \(O(n\log n\log k)\) in case of polygons with holes,
 -- and \(O(n\log k)\) in case of simple polygons.
-fromPolygons       :: (Foldable1 c, Ord r, Fractional r)
-                   => proxy s
-                   -> f -- ^ outer face data
-                   -> c (Polygon t p r :+ f) -- ^ the disjoint polygons
-                   -> PlanarSubdivision s p () f r
-fromPolygons px oD = mergeAllWith const
-                   . fmap (\(pg :+ iD) -> fromPolygon px pg iD oD) . toNonEmpty
+fromPolygons    :: forall s c t p r f. (Foldable1 c, Ord r, Fractional r)
+                => f -- ^ outer face data
+                -> c (Polygon t p r :+ f) -- ^ the disjoint polygons
+                -> PlanarSubdivision s p () f r
+fromPolygons oD = mergeAllWith const
+                . fmap (\(pg :+ iD) -> fromPolygon pg iD oD) . toNonEmpty
 
 -- | Version of 'fromPolygons' that accepts 'SomePolygon's as input.
-fromPolygons'      :: forall proxy c s p r f. (Foldable1 c, Ord r, Fractional r)
-                   => proxy s
-                   -> f -- ^ outer face data
+fromPolygons'      :: forall s c p r f. (Foldable1 c, Ord r, Fractional r)
+                   => f -- ^ outer face data
                    -> c (SomePolygon p r :+ f) -- ^ the disjoint polygons
                    -> PlanarSubdivision s p () f r
-fromPolygons' px oD =
+fromPolygons' oD =
     mergeAllWith const . fmap (\(pg :+ iD) -> either (build iD) (build iD) pg) . toNonEmpty
   where
     build       :: f -> Polygon t p r -> PlanarSubdivision s p () f r
-    build iD pg = fromPolygon px pg iD oD
+    build iD pg = fromPolygon pg iD oD
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible
@@ -70,21 +67,19 @@ fromPolygons' px oD =
 --
 -- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a
 -- polygon with holes.
-fromPolygon                              :: forall proxy t p f r s. (Ord r, Fractional r)
-                                         => proxy s
-                                         -> Polygon t p r
+fromPolygon                              :: forall s t p f r. (Ord r, Fractional r)
+                                         => Polygon t p r
                                          -> f -- ^ data inside
                                          -> f -- ^ data outside the polygon
                                          -> PlanarSubdivision s p () f r
-fromPolygon p pg@SimplePolygon{} iD oD   = fromSimplePolygon p pg iD oD
-fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
+fromPolygon pg@SimplePolygon{} iD oD   = fromSimplePolygon @s pg iD oD
+fromPolygon (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
     Nothing  -> outerPG
-    Just hs' -> let hs'' = (\pg -> fromSimplePolygon wp (toCounterClockWiseOrder pg) oD iD) <$> hs'
+    Just hs' -> let hs'' = (\pg -> fromSimplePolygon @(Wrap s)
+                                   (toCounterClockWiseOrder pg) oD iD) <$> hs'
                 in embedAsHolesIn hs'' (\_ x -> x) i outerPG
   where
-    wp = Proxy :: Proxy (Wrap s)
-
-    outerPG = fromSimplePolygon p vs iD oD
+    outerPG = fromSimplePolygon @s vs iD oD
     i = V.last $ faces' outerPG
 
 

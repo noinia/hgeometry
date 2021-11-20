@@ -22,7 +22,6 @@ import qualified Data.PlanarGraph.AdjRep as PGA
 import qualified Data.PlanarGraph.IO as PGIO
 import           Data.PlaneGraph.Core
 import           Data.PlaneGraph.AdjRep
-import           Data.Proxy
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
@@ -60,7 +59,7 @@ import Data.RealNumber.Rational
 --                , Face (0,1) "A"
 --                , Face (1,0) "B"
 --                ]
---     smallG = fromAdjRep (Proxy :: Proxy ()) small
+--     smallG = fromAdjRep @() small
 -- :}
 --
 --
@@ -91,7 +90,7 @@ instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlaneGraph s v e f 
 
 instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
          => FromJSON (PlaneGraph s v e f r) where
-  parseJSON v = fromAdjRep (Proxy :: Proxy s) <$> parseJSON v
+  parseJSON v = fromAdjRep @s <$> parseJSON v
 
 --------------------------------------------------------------------------------
 
@@ -110,9 +109,9 @@ toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdj
 -- should be in counter clockwise order.
 --
 -- running time: \(O(n)\)
-fromAdjRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
-fromAdjRep px = PlaneGraph . PGIO.fromAdjRep px
-              . first (\(Vtx v p aj x) -> PGA.Vtx v aj $ VertexData p x)
+fromAdjRep :: forall s v e f r. Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
+fromAdjRep = PlaneGraph . PGIO.fromAdjRep
+           . first (\(Vtx v p aj x) -> PGA.Vtx v aj $ VertexData p x)
 
 --------------------------------------------------------------------------------
 
@@ -167,7 +166,7 @@ data MyWorld
 
 -- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
 myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)
-myPlaneGraph = fromAdjRep (Proxy @MyWorld) myPlaneGraphAdjrep
+myPlaneGraph = fromAdjRep @MyWorld myPlaneGraphAdjrep
 
 myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)
 myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]

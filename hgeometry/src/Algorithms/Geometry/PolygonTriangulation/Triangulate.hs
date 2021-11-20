@@ -24,10 +24,9 @@ import           Data.Geometry.Polygon
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate        :: (Ord r, Fractional r)
-                   => proxy s -> Polygon t p r
-                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-triangulate px pg' = constructSubdivision px e es diags
+triangulate     :: forall s t p r. (Ord r, Fractional r)
+                => Polygon t p r -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+triangulate pg' = constructSubdivision e es diags
   where
     (pg, diags)   = computeDiagonals' pg'
     (e:es)        = listEdges pg
@@ -36,10 +35,9 @@ triangulate px pg' = constructSubdivision px e es diags
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate'        :: (Ord r, Fractional r)
-                    => proxy s -> Polygon t p r
-                    -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
-triangulate' px pg' = constructGraph px e es diags
+triangulate'     :: forall s t p r. (Ord r, Fractional r)
+                 => Polygon t p r -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
+triangulate' pg' = constructGraph e es diags
   where
     (pg, diags)   = computeDiagonals' pg'
     (e:es)        = listEdges pg
@@ -62,7 +60,7 @@ computeDiagonals'     :: (Ord r, Fractional r)
 computeDiagonals' pg' = (pg, monotoneDiags <> extraDiags)
   where
     pg            = toCounterClockWiseOrder pg'
-    monotoneP     = MM.makeMonotone (Identity pg) pg -- use some arbitrary proxy type
+    monotoneP     = MM.makeMonotone @() pg -- use some arbitrary proxy type
     -- outerFaceId'  = outerFaceId monotoneP
 
     monotoneDiags = map (^._2.core) . filter (\e' -> e'^._2.extra == Diagonal)

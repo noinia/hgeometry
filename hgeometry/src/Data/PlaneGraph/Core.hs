@@ -88,7 +88,6 @@ import           GHC.Generics (Generic)
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> import Data.Proxy
 -- >>> import Data.PlaneGraph.AdjRep(Gr(Gr),Face(Face),Vtx(Vtx))
 -- >>> import Data.PlaneGraph.IO(fromAdjRep)
 -- >>> import Data.PlanarGraph.Dart(Dart(..),Arc(..))
@@ -114,7 +113,7 @@ import           GHC.Generics (Generic)
 --                , Face (0,1) "A"
 --                , Face (1,0) "B"
 --                ]
---     smallG = fromAdjRep (Proxy :: Proxy ()) small
+--     smallG = fromAdjRep @() small
 -- :}
 --
 --
@@ -131,7 +130,7 @@ import           GHC.Generics (Generic)
 -- >>> data MyWorld
 -- >>> :{
 -- let myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)
---     myPlaneGraph = fromAdjRep (Proxy @MyWorld) myPlaneGraphAdjrep
+--     myPlaneGraph = fromAdjRep @MyWorld myPlaneGraphAdjrep
 --     myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)
 --     myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]
 --                             , vtx 1 (Point2 4   4   ) [e 0, e 5, e 12]
@@ -215,23 +214,23 @@ instance IsBoxable (PlaneGraph s v e f r) where
 --
 -- pre: the input polygon is given in counterclockwise order
 -- running time: \(O(n)\).
-fromSimplePolygon                            :: proxy s
-                                             -> SimplePolygon p r
+fromSimplePolygon                            :: forall s p r f.
+                                                SimplePolygon p r
                                              -> f -- ^ data inside
                                              -> f -- ^ data outside the polygon
                                              -> PlaneGraph s p () f r
-fromSimplePolygon p poly iD oD = PlaneGraph g'
+fromSimplePolygon poly iD oD = PlaneGraph g'
   where
     vs     = poly ^. outerBoundaryVector
-    g      = fromVertices p vs
+    g      = fromVertices vs
     fData' = V.fromList [iD, oD]
     g'     = g & PG.faceData .~ fData'
 
 -- | Constructs a planar from the given vertices
-fromVertices      :: proxy s
-                  -> CircularVector (Point 2 r :+ p)
-                  -> PlanarGraph s Primal (VertexData r p) () ()
-fromVertices _ vs = g&PG.vertexData .~ vData'
+fromVertices    :: forall s r p.
+                   CircularVector (Point 2 r :+ p)
+                -> PlanarGraph s Primal (VertexData r p) () ()
+fromVertices vs = g&PG.vertexData .~ vData'
   where
     n = length vs
     g = planarGraph [ [ (Dart (Arc i)               Positive, ())
@@ -245,11 +244,10 @@ fromVertices _ vs = g&PG.vertexData .~ vData'
 -- pre: The segments form a single connected component
 --
 -- running time: \(O(n\log n)\)
-fromConnectedSegments      :: (Foldable f, Ord r, Num r)
-                           => proxy s
-                           -> f (LineSegment 2 p r :+ e)
-                           -> PlaneGraph s (NonEmpty.NonEmpty p) e () r
-fromConnectedSegments _ ss = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxData
+fromConnectedSegments    :: forall s p r e f. (Foldable f, Ord r, Num r)
+                         => f (LineSegment 2 p r :+ e)
+                         -> PlaneGraph s (NonEmpty.NonEmpty p) e () r
+fromConnectedSegments ss = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxData
   where
     pts         = M.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
     f (s :+ e)  = [ ( s^.start.core

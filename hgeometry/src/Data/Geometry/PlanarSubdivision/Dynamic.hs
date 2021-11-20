@@ -1,33 +1,29 @@
-module Data.Geometry.PlanarSubdivision.Dynamic 
+module Data.Geometry.PlanarSubdivision.Dynamic
   ( splitEdge, unSplitEdge
   , sproutIntoFace
   , splitFace
   ) where
 
-import Control.Lens
-
-import Data.Vector (Vector, toList, (//), empty)
-import qualified Data.Vector as V
-import Data.List (sort, sortOn, findIndex)
-
-import Data.Functor.Identity
-import Data.Ext
-import Data.Geometry hiding (Vector, head, imap)
-import Data.Geometry.PlanarSubdivision
-import Data.Geometry.PlanarSubdivision.Raw
-
-import Data.PlanarGraph (Dart (Dart), Arc (Arc), VertexId (VertexId), FaceId (FaceId), Direction (Positive, Negative))
-import Data.PlaneGraph (PlaneGraph)
-import qualified Data.PlaneGraph as PG
-import Data.PlaneGraph.AdjRep hiding (id, vData, faces)
-import qualified Data.PlaneGraph.AdjRep as AR (id, vData, fData, faces, Face (..))
-
+import           Control.Lens
+import           Data.Ext
+import           Data.Functor.Identity
+import           Data.Geometry hiding (Vector, head, imap)
+import           Data.Geometry.PlanarSubdivision
+import           Data.Geometry.PlanarSubdivision.Basic
+import           Data.Geometry.PlanarSubdivision.Raw
+import           Data.List (sort, sortOn, findIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.PlanarGraph (Dart (Dart), Arc (Arc), VertexId (VertexId), FaceId (FaceId), Direction (Positive, Negative))
+import           Data.PlaneGraph (PlaneGraph)
+import qualified Data.PlaneGraph as PG
+import qualified Data.PlaneGraph.AdjRep as AR (id, vData, fData, faces, Face (..))
+import           Data.PlaneGraph.AdjRep hiding (id, vData, faces)
+import           Data.Vector (Vector, toList, (//), empty)
+import qualified Data.Vector as V
 
-import Debug.Trace
+import           Debug.Trace
 
-import Data.Geometry.PlanarSubdivision.Basic
 
 tracingOn = False
 
@@ -44,17 +40,17 @@ tr s a | tracingOn = trace ("\9608 " ++ s ++ ": " ++ show a) a
 
 -- | Splits a given edge of a planar subdivision by inserting a new vertex on the edges.
 --   Increases #vertices and #edges by 1.
-splitEdge 
+splitEdge
   :: (Show v, Show e, Show f, Show r)
-  => VertexId' s 
-  -> VertexId' s 
-  -> Point 2 r 
-  -> v 
-  -> (e -> (e, e)) 
-  -> PlanarSubdivision s v e f r 
+  => VertexId' s
+  -> VertexId' s
+  -> Point 2 r
+  -> v
+  -> (e -> (e, e))
+  -> PlanarSubdivision s v e f r
   -> PlanarSubdivision s v e f r
 
-splitEdge a b p v f d = 
+splitEdge a b p v f d =
   let (_, la, _) = asLocalV a d
       (_, lb, _) = asLocalV b d
       v' = (freeVertexId d, v)
@@ -67,12 +63,12 @@ splitEdge a b p v f d =
 --   Increases #vertices and #edges by 1.
 sproutIntoFace
   :: (Show v, Show e, Show f, Show r)
-  => VertexId' s 
-  -> FaceId' s 
-  -> Point 2 r 
-  -> v                       
+  => VertexId' s
+  -> FaceId' s
+  -> Point 2 r
+  -> v
   -> (e, e)
-  -> PlanarSubdivision s v e f r 
+  -> PlanarSubdivision s v e f r
   -> PlanarSubdivision s v e f r
 
 sproutIntoFace a f p v (e1, e2) d =
@@ -89,11 +85,11 @@ sproutIntoFace a f p v (e1, e2) d =
 --   Increases #edges and #faces by 1.
 splitFace
   :: (Show v, Show e, Show f, Show r)
-  => VertexId' s 
-  -> VertexId' s 
-  -> (e, e)                       
-  -> (f -> (f, f)) 
-  -> PlanarSubdivision s v e f r 
+  => VertexId' s
+  -> VertexId' s
+  -> (e, e)
+  -> (f -> (f, f))
+  -> PlanarSubdivision s v e f r
   -> PlanarSubdivision s v e f r
 
 splitFace a b e g d =
@@ -124,14 +120,14 @@ splitFaceDifferentComponents = undefined
 
 -- | Splits a given edge of a planar subdivision by inserting a new vertex on the edges.
 --   Increases #vertices and #edges by 1.
-unSplitEdge 
+unSplitEdge
   :: (Show v, Show e, Show f, Show r)
-  => VertexId' s 
+  => VertexId' s
   -> ((e, e) -> e)
-  -> PlanarSubdivision s v e f r 
+  -> PlanarSubdivision s v e f r
   -> PlanarSubdivision s v e f r
 
-unSplitEdge b f d = 
+unSplitEdge b f d =
   let [a, c] = tr "[a, c]" $ toList $ neighboursOf b d
       (_, la, _) = asLocalV a d
       (_, lb, _) = asLocalV b d
@@ -177,7 +173,7 @@ setComponents' p cs = p & components .~ fmap remExtraData cs
                         & rawDartData   .~ (tr "rawDartData"   . vectorise $ getRawEdgeData cs)
                         & rawFaceData   .~ (tr "rawFaceData"   . vectorise $ getRawFaceData cs)
 
-getRawVertexData :: Vector (Component' s v e f r) 
+getRawVertexData :: Vector (Component' s v e f r)
                  -> [(VertexId' s, Raw s (VertexId' (Wrap s)) v)]
 getRawVertexData = concat . imap (\ci g -> map (\(li, VertexData _ (gi, v)) -> (gi, Raw (toEnum ci) li v)) $ toList $ PG.vertices g) . toList
 
@@ -194,7 +190,7 @@ getRawEdgeData = concat . imap (\ci g -> map (\(li, (gi, e)) -> (gi, Raw (toEnum
 
 
 -- data RawFace	s f
--- _faceIdx :: !(Maybe (ComponentId s, FaceId' (Wrap s)))	 
+-- _faceIdx :: !(Maybe (ComponentId s, FaceId' (Wrap s)))
 -- _faceDataVal :: !(FaceData (Dart s) f)
 
 -- | Something in this implementation is not right. It makes asLocalF produce an error.
@@ -229,36 +225,36 @@ vectorise vs = V.replicate (length vs) undefined // map (\(i, a) -> (fromEnum i,
 -- INSERTIONS --
 
 
-splitEdgeInPlaneGraph 
-  :: (Show v, Show e, Show f, Show r) 
-  => VertexId' s 
-  -> VertexId' s 
-  -> Point 2 r 
-  -> v 
-  -> (e -> (e, e)) 
-  -> PlaneGraph s v e f r 
+splitEdgeInPlaneGraph
+  :: (Show v, Show e, Show f, Show r)
+  => VertexId' s
+  -> VertexId' s
+  -> Point 2 r
+  -> v
+  -> (e -> (e, e))
+  -> PlaneGraph s v e f r
   -> PlaneGraph s v e f r
 -- LET OP! TEST OF a EN b WEL VOORKOMEN!
-splitEdgeInPlaneGraph a b p v f 
-  = tr "splitEdgeInPlaneGraph" 
-  . PG.fromAdjRep undefined 
-  . splitEdgeInAdjRep (fromEnum a) (fromEnum b) p v f 
+splitEdgeInPlaneGraph a b p v f
+  = tr "splitEdgeInPlaneGraph"
+  . PG.fromAdjRep
+  . splitEdgeInAdjRep (fromEnum a) (fromEnum b) p v f
   . PG.toAdjRep
 
 sproutIntoFaceInPlaneGraph
-  :: (Show v, Show e, Show f, Show r) 
-  => VertexId' s 
-  -> VertexId' s 
-  -> Point 2 r 
-  -> v 
+  :: (Show v, Show e, Show f, Show r)
+  => VertexId' s
+  -> VertexId' s
+  -> Point 2 r
+  -> v
   -> (e, e)
-  -> PlaneGraph s v e f r 
+  -> PlaneGraph s v e f r
   -> PlaneGraph s v e f r
 sproutIntoFaceInPlaneGraph a c p v e g =
   let ai = fromEnum a
       ci = fromEnum c
-  in tr "splitEdgeInPlaneGraph" 
-   $ PG.fromAdjRep undefined 
+  in tr "splitEdgeInPlaneGraph"
+   $ PG.fromAdjRep
    $ sproutInAdjRep ai ci p v e
    $ PG.toAdjRep g
 
@@ -279,7 +275,7 @@ splitFaceInPlaneGraph
   -> PlaneGraph s v e f r -- input graaf
   -> PlaneGraph s v e f r -- output graaf
 
-splitFaceInPlaneGraph a b c d f e h g = 
+splitFaceInPlaneGraph a b c d f e h g =
   let ai = fromEnum a
       bi = fromEnum b
       ci = fromEnum c
@@ -287,28 +283,28 @@ splitFaceInPlaneGraph a b c d f e h g =
       fi = fromEnum $ tr "fi" $ traceShow (g ^. dataOf f) $ PG.tailOf (PG.boundaryDart f g) g
       fj = fromEnum $ tr "fj" $ PG.headOf (PG.boundaryDart f g) g
       -- ^ boundaryDart seems not working either
-  in tr "splitFaceInPlaneGraph" 
-   $ PG.fromAdjRep undefined 
-   $ splitFaceInAdjRep ai bi ci di fi fj e h 
+  in tr "splitFaceInPlaneGraph"
+   $ PG.fromAdjRep
+   $ splitFaceInAdjRep ai bi ci di fi fj e h
    $ PG.toAdjRep g
 
 
 -- DELETIONS --
 
 
-unSplitEdgeInPlaneGraph 
-  :: (Show v, Show e, Show f, Show r) 
-  => VertexId' s 
-  -> VertexId' s 
-  -> VertexId' s 
-  -> ((e, e) -> e) 
-  -> PlaneGraph s v e f r 
+unSplitEdgeInPlaneGraph
+  :: (Show v, Show e, Show f, Show r)
+  => VertexId' s
+  -> VertexId' s
+  -> VertexId' s
+  -> ((e, e) -> e)
+  -> PlaneGraph s v e f r
   -> PlaneGraph s v e f r
 
-unSplitEdgeInPlaneGraph a b c f 
-  = tr "unSplitEdgeInPlaneGraph" 
-  . PG.fromAdjRep undefined 
-  . unSplitEdgeInAdjRep (fromEnum a) (fromEnum b) (fromEnum c) f 
+unSplitEdgeInPlaneGraph a b c f
+  = tr "unSplitEdgeInPlaneGraph"
+  . PG.fromAdjRep
+  . unSplitEdgeInAdjRep (fromEnum a) (fromEnum b) (fromEnum c) f
   . PG.toAdjRep
 
 
@@ -316,18 +312,18 @@ unSplitEdgeInPlaneGraph a b c f
 -- ADJREPS --
 -------------
 
--- Gr   
--- adjacencies :: [v]  
--- faces :: [f]   
+-- Gr
+-- adjacencies :: [v]
+-- faces :: [f]
 
--- Vtx  
--- id :: Int  
--- loc :: Point 2 r   
--- adj :: [(Int, e)] 
--- vData :: v   
+-- Vtx
+-- id :: Int
+-- loc :: Point 2 r
+-- adj :: [(Int, e)]
+-- vData :: v
 
--- Face   
--- incidentEdge :: (Int, Int)   
+-- Face
+-- incidentEdge :: (Int, Int)
 -- fData :: f
 
 --deriving instance (Show v, Show f) => Show (Gr v f)
@@ -337,7 +333,7 @@ unSplitEdgeInPlaneGraph a b c f
 
 -- instance {-# OVERLAPS #-} Show (VertexId s Primal) where show i = 'v' : show (fromEnum i)
 -- instance {-# OVERLAPS #-} Show (FaceId   s Primal) where show i = 'f' : show (fromEnum i)
--- instance {-# OVERLAPS #-} Show (Dart s, v) where 
+-- instance {-# OVERLAPS #-} Show (Dart s, v) where
 --   show (Dart (Arc s) Positive, _) = 'd' : show (fromEnum s) ++ "+"
 --   show (Dart (Arc s) Negative, _) = 'd' : show (fromEnum s) ++ "-"
 
@@ -346,7 +342,7 @@ unSplitEdgeInPlaneGraph a b c f
 -- instance (Show v, Show f) => Show (Gr v f) where show g = "Gr " ++ (show $ adjacencies g) ++ " " ++ (show $ AR.faces g)
 
 -- ik heb:
-splitEdgeInAdjRep 
+splitEdgeInAdjRep
   :: (Show v, Show e, Show f, Show r)
   => Int                     -- index van vertex a
   -> Int                     -- index van vertex b
@@ -356,7 +352,7 @@ splitEdgeInAdjRep
   -> Gr (Vtx v e r) (Face f) -- input graaf
   -> Gr (Vtx v e r) (Face f) -- output graaf
 
-splitEdgeInAdjRep a b p v f g = 
+splitEdgeInAdjRep a b p v f g =
   let n  = length $ adjacencies g
       -- first find vertices a and b
       oa = headTrace "splitEdgeInAdjRep oa" $ filter ((== a) . AR.id) $ adjacencies g
@@ -371,11 +367,11 @@ splitEdgeInAdjRep a b p v f g =
       -- create new vertex c
       nc = Vtx {AR.id = n, loc = p, adj = [(a, snd $ f e2), (b, snd $ f e1)], AR.vData = v}
       -- update faces (only if incidentEdge happens to point to ab)
-      nf = replace ((== (a, b)) . incidentEdge) (\f -> f {incidentEdge = (a, n)}) 
-         $ replace ((== (b, a)) . incidentEdge) (\f -> f {incidentEdge = (b, n)}) 
+      nf = replace ((== (a, b)) . incidentEdge) (\f -> f {incidentEdge = (a, n)})
+         $ replace ((== (b, a)) . incidentEdge) (\f -> f {incidentEdge = (b, n)})
          $ AR.faces g
   in tr "splitEdgeInAdjRep" $ (tr "original" g) {adjacencies = sortOn AR.id $ na : nb : nc : os, AR.faces = nf}
-  
+
 
 sproutInAdjRep
   :: (Show v, Show e, Show f, Show r)
@@ -394,7 +390,7 @@ sproutInAdjRep a c p v e g =
       os = tr "os" $ filter ((/= a) . AR.id) $ adjacencies g
       -- need to find index of c
       fj (Just x) = x
-      fj Nothing  = error "splitFaceInAdjRep got Nothing"      
+      fj Nothing  = error "splitFaceInAdjRep got Nothing"
       ci = tr "ci" $ fj $ findIndex ((== c) . fst) $ adj oa
       -- create new adjacency to new vertex z in a
       na = tr "na" $ oa {adj = take ci (adj oa) ++ (n, fst e) : drop ci (adj oa)}
@@ -402,7 +398,7 @@ sproutInAdjRep a c p v e g =
       nz = Vtx {AR.id = n, loc = p, adj = [(a, snd e)], AR.vData = v}
   in tr "splitFaceInAdjRep" $ (tr "original" g) {adjacencies = sortOn AR.id $ na : nz : os}
 
-splitFaceInAdjRep 
+splitFaceInAdjRep
   :: (Show v, Show e, Show f, Show r)
   => Int                     -- index van vertex a
   -> Int                     -- index van vertex b
@@ -418,14 +414,14 @@ splitFaceInAdjRep
 -- is it easier to split a vertex than a face?
 
 splitFaceInAdjRep a b c d u v e f g =
-  let 
+  let
       -- first find vertices a and b
       oa = tr "oa" $ headTrace "splitFaceInAdjRep oa" $ filter ((== a) . AR.id) $ adjacencies g
       ob = tr "ob" $ headTrace "splitFaceInAdjRep ob" $ filter ((== b) . AR.id) $ adjacencies g
       os = tr "os" $ filter ((lift (&&) (/= a) (/= b)) . AR.id) $ adjacencies g
       -- insert new adjacency between a and b
       fj (Just x) = x
-      fj Nothing  = error "splitFaceInAdjRep got Nothing"      
+      fj Nothing  = error "splitFaceInAdjRep got Nothing"
       -- need to find indices c and d!
       ci = tr "ci" $ fj $ findIndex ((== c) . fst) $ adj oa
       di = tr "di" $ fj $ findIndex ((== d) . fst) $ adj ob
@@ -439,12 +435,12 @@ splitFaceInAdjRep a b c d u v e f g =
       f1 = tr "f1" $ AR.Face {incidentEdge = (a, b), AR.fData = fst $ f fd}
       f2 = tr "f2" $ AR.Face {incidentEdge = (b, a), AR.fData = snd $ f fd}
   in tr "splitFaceInAdjRep" $ (tr "original" g) {adjacencies = sortOn AR.id $ na : nb : os, AR.faces = ef ++ [f1, f2]}
-  
 
 
 
 
-unSplitEdgeInAdjRep 
+
+unSplitEdgeInAdjRep
   :: (Show v, Show e, Show f, Show r)
   => Int                     -- index van vertex a
   -> Int                     -- index van vertex b (te verwijderen)
@@ -453,7 +449,7 @@ unSplitEdgeInAdjRep
   -> Gr (Vtx v e r) (Face f) -- input graaf
   -> Gr (Vtx v e r) (Face f) -- output graaf
 
-unSplitEdgeInAdjRep a b c f g = 
+unSplitEdgeInAdjRep a b c f g =
   let n  = length $ adjacencies g
       -- first find vertices a, b and c
       oa = head $ filter ((== a) . AR.id) $ adjacencies g
@@ -470,27 +466,27 @@ unSplitEdgeInAdjRep a b c f g =
       nc = oc {adj = replace ((== b) . fst) (const (a, f (ecb, eba))) $ adj oc}
       nv = sortOn AR.id $ na : nc : os
       -- update faces (only if incidentEdge happens to point to ab or bc)
-      nf = replace ((== (a, b)) . incidentEdge) (\f -> f {incidentEdge = (a, c)}) 
-         $ replace ((== (b, a)) . incidentEdge) (\f -> f {incidentEdge = (c, a)}) 
-         $ replace ((== (b, c)) . incidentEdge) (\f -> f {incidentEdge = (a, c)}) 
-         $ replace ((== (c, b)) . incidentEdge) (\f -> f {incidentEdge = (c, a)}) 
+      nf = replace ((== (a, b)) . incidentEdge) (\f -> f {incidentEdge = (a, c)})
+         $ replace ((== (b, a)) . incidentEdge) (\f -> f {incidentEdge = (c, a)})
+         $ replace ((== (b, c)) . incidentEdge) (\f -> f {incidentEdge = (a, c)})
+         $ replace ((== (c, b)) . incidentEdge) (\f -> f {incidentEdge = (c, a)})
          $ AR.faces g
       -- restore consecutive numbering: replace vertex n-1 by b
       ng = replaceIndex (n - 1) b $ (tr "original" g) {adjacencies = nv, AR.faces = nf}
   in tr "unSplitEdgeInAdjRep" $ ng
 
--- Gr   
--- adjacencies :: [v]  
--- faces :: [f]   
+-- Gr
+-- adjacencies :: [v]
+-- faces :: [f]
 
--- Vtx  
--- id :: Int  
--- loc :: Point 2 r   
--- adj :: [(Int, e)] 
--- vData :: v   
+-- Vtx
+-- id :: Int
+-- loc :: Point 2 r
+-- adj :: [(Int, e)]
+-- vData :: v
 
--- Face   
--- incidentEdge :: (Int, Int)   
+-- Face
+-- incidentEdge :: (Int, Int)
 -- fData :: f
 
 replaceIndex :: Int -> Int -> Gr (Vtx v e r) (Face f) -> Gr (Vtx v e r) (Face f)

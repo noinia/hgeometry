@@ -38,7 +38,7 @@ data TestCase r = TestCase { _lines      :: [Line 2 r :+ ()]
 data Test = Test
 
 drawArr    :: [Line 2 Rational :+ a] -> B.ByteString
-drawArr ls = let arr = constructArrangement (Identity Test) ls
+drawArr ls = let arr = constructArrangement @Test ls
                  out = [ iO $ drawArrangement arr ]
                  Just bs = toIpeXML . singlePageFromContent $ out
              in bs
