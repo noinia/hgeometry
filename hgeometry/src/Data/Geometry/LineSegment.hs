@@ -63,11 +63,17 @@ instance (Fractional r, Ord r)
 
 instance (Fractional r, Ord r) => LineSegment 2 p r `HasIntersectionWith` Rectangle q r where
   seg@(LineSegment p q) `intersects` rect =
-      inRect p || inRect q || any (seg `intersects`) (sides rect)
+      inRect p || inRect q || any (seg `intersects`) (sides rect) || bothOpenAndOnBoundary seg
     where
       inRect = \case
         Open   (a :+ _) -> a `insideBox`  rect -- if strictly inside the seg intersects.
         Closed (a :+ _) -> a `inBox`      rect -- in or on the boundary is fine
+
+      -- if somehow the segment is open, and both endpoints lie on
+      -- different sides of the boundary, (so the segment crosses the
+      -- interior) it also intersects. Handle that case.
+      bothOpenAndOnBoundary (OpenLineSegment _ _) = interpolate (1/2) seg `intersects` rect
+      bothOpenAndOnBoundary _                     = False
 
 -- instance (Num r, Ord r)
 --          => (LineSegment 2 p r) `IsIntersectableWith` (Boundary (Rectangle q r)) where
