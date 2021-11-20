@@ -40,7 +40,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 -- import           Data.Geometry.SubLine
 import           Data.Util
-import Data.Geometry.LineSegment (LineSegment(ClosedLineSegment))
 -- import           Data.Vinyl.CoRec
 -- import           Data.Bifunctor
 -- import           Data.Either

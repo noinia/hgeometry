@@ -8,13 +8,17 @@ import Data.Geometry.LineSegment
 import Data.Geometry.LineSegment.Internal (onSegment, onSegment2)
 import Data.Geometry.Point
 import Data.Geometry.Vector
+import Data.Geometry.Boundary
+import Data.Geometry.Box
 import Data.Intersection
 import Data.RealNumber.Rational
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
+import Ipe
+import Ipe.Color
 
-
+--------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
@@ -59,3 +63,27 @@ spec =
     it "intersecting line segment and line" $ do
       let s = ClosedLineSegment (ext origin) (ext $ Point2 10 (0 :: R))
       (s `intersect` horizontalLine (0 :: R)) `shouldBe` coRec s
+    describe "linesegment x box intersection tests" $
+      ipeIntersectionTests "src/Data/Geometry/linesegmentBoxIntersections.ipe"
+
+
+
+
+ipeIntersectionTests    :: FilePath -> Spec
+ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> readAllFrom fp
+                             sequence_ $ [ mkTestCase seg box' | seg <- segs, box' <- boxes ]
+  where
+    mkTestCase :: LineSegment 2 () R :+ IpeAttributes Path R
+               -> Rectangle () R :+  IpeAttributes Path R
+               -> Spec
+    mkTestCase (seg :+ segAts) (rect :+ rectAts) =
+      it ("seg x box intersection test " <> show seg <> " X " <> show rect) $ do
+        (seg `intersects` rect) `shouldBe` sameColor segAts rectAts
+        (seg `intersects` (Boundary rect)) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
+
+
+sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
+sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
+
+notOrange     :: IpeAttributes Path R -> Bool
+notOrange ats = ats^?_Attr SStroke /= Just orange
