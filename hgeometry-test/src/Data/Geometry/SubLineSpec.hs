@@ -42,7 +42,7 @@ spec = do
         myLine   = fromLine $ lineThrough (Point2 0 0) (Point2 10 0)
 
         myAnswer :: Interval (Either () Char) (UnBounded R)
-        myAnswer = ClosedInterval (Val 0 :+ Right 'a' (Val (7 / 5) :+ Right 'b')
+        myAnswer = ClosedInterval (Val 0 :+ Right 'a') (Val (7 / 5) :+ Right 'b')
     (myLine `intersect` (mkSL mySeg)) `shouldBe` coRec (myLine&subRange .~ myAnswer)
 
     let sc, sm :: LineSegment 2 () R
