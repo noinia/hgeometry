@@ -137,16 +137,15 @@ onSubLine2UB        :: (Ord r, Fractional r)
 p `onSubLine2UB` sl = p `onSubLineUB` sl
 
 
-type instance IntersectionOf (SubLine 2 p s r) (SubLine 2 q s r) = [ NoIntersection
-                                                                   , Point 2 r
-                                                                   , SubLine 2 p s r
-                                                                   ]
+type instance IntersectionOf (SubLine 2 p s r) (SubLine 2 q s r) =
+  [ NoIntersection, Point 2 r, SubLine 2 (Either p q) s r]
+
 instance (Ord r, Fractional r) =>
-         SubLine 2 p r r `HasIntersectionWith` SubLine 2 p r r
+         SubLine 2 p r r `HasIntersectionWith` SubLine 2 q r r
 
 {- HLINT ignore "Redundant bracket" -}
 instance (Ord r, Fractional r) =>
-         SubLine 2 p r r `IsIntersectableWith` SubLine 2 p r r where
+         SubLine 2 p r r `IsIntersectableWith` SubLine 2 q r r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -168,10 +167,10 @@ instance (Ord r, Fractional r) =>
               &end.core   .~ toOffset' (s'^.end.extra.core)   l
 
 instance (Ord r, Fractional r) =>
-         SubLine 2 p (UnBounded r) r `HasIntersectionWith` SubLine 2 p (UnBounded r) r
+         SubLine 2 p (UnBounded r) r `HasIntersectionWith` SubLine 2 q (UnBounded r) r
 
 instance (Ord r, Fractional r) =>
-         SubLine 2 p (UnBounded r) r `IsIntersectableWith` SubLine 2 p (UnBounded r) r where
+         SubLine 2 p (UnBounded r) r `IsIntersectableWith` SubLine 2 q (UnBounded r) r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $

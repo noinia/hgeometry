@@ -127,10 +127,11 @@ type instance Dimension (Interval a r) = 1
 type instance NumType   (Interval a r) = r
 
 
-type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
+type instance IntersectionOf (Interval a r) (Interval b r)
+  = [NoIntersection, Interval (Either a b) r]
 
-instance Ord r => Interval a r `HasIntersectionWith` Interval a r
-instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
+instance Ord r => Interval a r `HasIntersectionWith` Interval b r
+instance Ord r => Interval a r `IsIntersectableWith` Interval b r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -140,9 +141,10 @@ instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
                                                          (u&unEndPoint %~ g) )
       :& RNil
     where
-      f x = Arg (x^.core) x
-      r' = fmap f r
-      s' = fmap f s
+      r' :: Range (Arg r (r :+ Either a b))
+      r' = fmap (\(x :+ a) -> Arg x (x :+ Left a))  r
+      s' :: Range (Arg r (r :+ Either a b))
+      s' = fmap (\(x :+ b) -> Arg x (x :+ Right b)) s
 
       g (Arg _ x) = x
 

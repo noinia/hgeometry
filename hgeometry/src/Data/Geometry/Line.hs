@@ -16,6 +16,7 @@ module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -75,7 +76,7 @@ instance (Ord r, Fractional r)
   line' `intersect` (Boundary rect)  = case asAP segP of
       [sl'] -> case fromUnbounded sl' of
         Nothing   -> error "intersect: line x boundary rect; unbounded line? absurd"
-        Just sl'' -> coRec $ sl''^.re _SubLine
+        Just sl'' -> coRec $ first (either id id) $ sl''^.re _SubLine
       []    -> case nub' $ asAP pointP of
         [p]   -> coRec p
         [p,q] -> coRec (p,q)
@@ -97,7 +98,7 @@ instance (Ord r, Fractional r)
              => proxy t -> [t]
       asAP _ = mapMaybe (asA @t) ints
 
-      segP   = Proxy :: Proxy (SubLine 2 () (UnBounded r) r)
+      segP   = Proxy :: Proxy (SubLine 2 (Either () ()) (UnBounded r) r)
       pointP = Proxy :: Proxy (Point 2 r)
 
 

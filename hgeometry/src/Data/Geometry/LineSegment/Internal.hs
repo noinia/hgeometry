@@ -222,10 +222,13 @@ type instance IntersectionOf (Point d r) (LineSegment d p r) = [ NoIntersection
                                                                , Point d r
                                                                ]
 
-type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoIntersection
-                                                                       , Point 2 r
-                                                                       , LineSegment 2 p r
-                                                                       ]
+-- type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoIntersection
+--                                                                        , Point 2 r
+--                                                                        , LineSegment 2 p r
+--                                                                        ]
+
+type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 q r) =
+  [ NoIntersection, Point 2 r, LineSegment 2 (Either p q) r]
 
 type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
                                                               , Point 2 r
@@ -273,10 +276,10 @@ p `onSegment` (LineSegment up vp) =
   -- Fractional constraint
 
 instance (Ord r, Fractional r) =>
-         LineSegment 2 p r `HasIntersectionWith` LineSegment 2 p r
+         LineSegment 2 p r `HasIntersectionWith` LineSegment 2 q r
 
 instance (Ord r, Fractional r) =>
-         LineSegment 2 p r `IsIntersectableWith` LineSegment 2 p r where
+         LineSegment 2 p r `IsIntersectableWith` LineSegment 2 q r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
