@@ -57,32 +57,32 @@ instance Bifunctor (Slab o) where
   bimap f g (Slab i) = Slab $ bimap f g i
 
 
-type instance IntersectionOf (Slab o a r)          (Slab o a r) =
-  [NoIntersection, Slab o a r]
-type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical a r) =
-  '[Rectangle (a,a) r]
+type instance IntersectionOf (Slab o a r) (Slab o b r) =
+  [NoIntersection, Slab o (Either a b) r]
+type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical b r) =
+  '[Rectangle (a,b) r]
 
 
-instance Ord r => Slab o a r `HasIntersectionWith` Slab o a r
+instance Ord r => Slab o a r `HasIntersectionWith` Slab o b r
 
-instance Ord r => Slab o a r `IsIntersectableWith` Slab o a r where
+instance Ord r => Slab o a r `IsIntersectableWith` Slab o b r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Slab i) `intersect` (Slab i') = match (i `intersect` i') $
-        H (\NoIntersection -> coRec NoIntersection)
-     :& H (\i''            -> coRec (Slab i'' :: Slab o a r))
+        H (\NoIntersection                   -> coRec NoIntersection)
+     :& H (\i''                              -> coRec $ (Slab i'' :: Slab o (Either a b) r))
      :& RNil
 
-instance Slab Horizontal a r `HasIntersectionWith` Slab Vertical a r where
+instance Slab Horizontal a r `HasIntersectionWith` Slab Vertical b r where
   _ `intersects` _ = True
 
-instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical a r where
+instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical b r where
   nonEmptyIntersection _ _ _ = True
 
   (Slab h) `intersect` (Slab v) = coRec $ box low high
     where
-      low  = Point2 (v^.start.core) (h^.start.core) :+ (v^.start.extra, h^.start.extra)
-      high = Point2 (v^.end.core)   (h^.end.core)   :+ (v^.end.extra,   h^.end.extra)
+      low  = Point2 (v^.start.core) (h^.start.core) :+ (h^.start.extra, v^.start.extra)
+      high = Point2 (v^.end.core)   (h^.end.core)   :+ (h^.end.extra, v^.end.extra)
 
 
 

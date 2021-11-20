@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.LineSegmentSpec where
 
+import Data.Bifunctor
 import Control.Lens
 import Data.Ext
 import Data.Geometry.Line
@@ -8,13 +9,18 @@ import Data.Geometry.LineSegment
 import Data.Geometry.LineSegment.Internal (onSegment, onSegment2)
 import Data.Geometry.Point
 import Data.Geometry.Vector
+import Data.Geometry.Boundary
+import Data.Geometry.Box
 import Data.Intersection
 import Data.RealNumber.Rational
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
+import Ipe
+import Ipe.Color
+import Data.Vinyl
 
-
+--------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
@@ -59,3 +65,42 @@ spec =
     it "intersecting line segment and line" $ do
       let s = ClosedLineSegment (ext origin) (ext $ Point2 10 (0 :: R))
       (s `intersect` horizontalLine (0 :: R)) `shouldBe` coRec s
+    describe "linesegment x box intersection tests" $
+      ipeIntersectionTests "src/Data/Geometry/linesegmentBoxIntersections.ipe"
+
+
+
+
+ipeIntersectionTests    :: FilePath -> Spec
+ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> readAllFrom fp
+                             sequence_ $ [ mkTestCase (arrowAsOpen seg) box'
+                                         | seg <- segs, box' <- boxes ]
+  where
+    mkTestCase :: LineSegment 2 () R :+ IpeAttributes Path R
+               -> Rectangle () R :+  IpeAttributes Path R
+               -> Spec
+    mkTestCase (seg :+ segAts) (rect :+ rectAts) =
+      describe ("seg x rect intersection " <> show seg <> " X " <> show rect) $ do
+        it "intersects rect" $
+          (seg `intersects` rect) `shouldBe` sameColor segAts rectAts
+        it "intersects boundary" $
+          (seg `intersects` (Boundary rect)) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
+
+
+sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
+sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
+
+notOrange     :: IpeAttributes Path R -> Bool
+notOrange ats = ats^?_Attr SStroke /= Just orange
+
+
+-- | interpret an andpoint that has an arrow as an open endpoint.
+arrowAsOpen    :: forall p r. LineSegment 2 p r :+ IpeAttributes Path r
+               -> LineSegment 2 p r :+ IpeAttributes Path r
+arrowAsOpen ((LineSegment' (p :+ a) (q :+ b)) :+ ats) =
+    LineSegment (f SRArrow p <&> (:+ a)) (f SArrow q <&> (:+ b)) :+ ats
+  where
+    f   :: at ∈ AttributesOf Path => proxy at -> Point 2 r -> EndPoint (Point 2 r)
+    f x = case ats^?_Attr x of
+            Just _  -> Open
+            Nothing -> Closed

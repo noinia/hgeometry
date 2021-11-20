@@ -248,6 +248,10 @@ instance HasDefaultFromIpe (MultiPolygon () r) where
   type DefaultFromIpe (MultiPolygon () r) = Path
   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
 
+instance (Num r, Ord r) => HasDefaultFromIpe (Rectangle () r) where
+  type DefaultFromIpe (Rectangle () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asRectangle
+
 
 -- | Read all g's from some ipe page(s).
 readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
