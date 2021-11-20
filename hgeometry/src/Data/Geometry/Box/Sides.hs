@@ -16,7 +16,7 @@ module Data.Geometry.Box.Sides( Sides(Sides), north, east, south, west
 import Data.Geometry.Directions
 import Data.Geometry.Box.Internal
 import Data.Geometry.Box.Corners
-import Data.Geometry.LineSegment
+import Data.Geometry.LineSegment.Internal
 import Data.Functor.Apply
 import Data.Semigroup.Foldable.Class
 import Data.Semigroup.Traversable.Class

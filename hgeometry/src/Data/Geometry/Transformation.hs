@@ -28,8 +28,8 @@ module Data.Geometry.Transformation
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Box (Rectangle, IsBoxable)
-import qualified Data.Geometry.Box as Box
+import           Data.Geometry.Box.Internal (Rectangle, IsBoxable)
+import qualified Data.Geometry.Box.Internal as Box
 import           Data.Geometry.Properties
 import           Data.Geometry.Point
 import           Data.Geometry.Transformation.Internal

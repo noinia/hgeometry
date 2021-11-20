@@ -205,7 +205,6 @@ p `insideBox` b = FV.and . FV.zipWith R.inRange (toVec p) . fmap toOpenRange . e
   where
     toOpenRange (R.Range' l r) = R.OpenRange l r
 
-
 -- | Get a vector with the extent of the box in each dimension. Note that the
 -- resulting vector is 0 indexed whereas one would normally count dimensions
 -- starting at zero.
