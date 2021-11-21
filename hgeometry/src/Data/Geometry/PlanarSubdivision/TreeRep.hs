@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision.TreeRep
   ( PlanarSD(..), InnerSD
-  , Gr(..), Vtx(..),
+  , Gr(..), Vtx(..), Face(..)
   , myTreeRep
   ) where
 
