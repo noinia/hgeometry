@@ -23,9 +23,10 @@ import GHC.Generics (Generic)
 -- | A vertex, represented by an id, location, its adjacencies, and its data.
 data Vtx v e r = Vtx { id    :: {-# UNPACK #-} !Int
                      , loc   :: !(Point 2 r)
-                     , adj   :: [(Int,e)] -- ^ adjacent vertices + data on the
-                                          -- edge. Adjacencies are given in
-                                          -- arbitrary order
+                     , adj   :: [(Int,e)]
+                       -- ^ adjacent vertices + data on the
+                       -- edge. Idealy adjacencies are given in CCW
+                       -- order around the vertex.
                      , vData :: !v
                      } deriving (Generic, Show, Eq, Functor)
 
