@@ -1,0 +1,1095 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.LineSegmentIntersection.BooleanSweep</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals, David Himmelstrup</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  David Himmelstrup</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- \( O(n \log n) \) algorithm for determining if any two line segments overlap.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Shamos and Hoey.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.LineSegmentIntersection.BooleanSweep</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#hasIntersections"><span class="hs-identifier">hasIntersections</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier">segmentsOverlap</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>              </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">contains</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Interval.html"><span class="hs-identifier">Data.Geometry.Interval</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Triangle.html"><span class="hs-identifier">Data.Geometry.Triangle</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>                 </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Down</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span>                  </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">SS</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set.Util</span></span><span>             </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">SS</span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- import           Data.RealNumber.Rational</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- import Debug.Trace</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Tests if there are any intersections.</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- \(O(n\log n)\)</span><span>
+</span><span id="line-40"></span><span id="local-6989586621680095180"><span id="local-6989586621680095181"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#hasIntersections"><span class="hs-identifier hs-type">hasIntersections</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095181"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095181"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095180"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095181"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-42"></span><span id="hasIntersections"><span class="annot"><span class="annottext">hasIntersections :: [LineSegment 2 p r] -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#hasIntersections"><span class="hs-identifier hs-var hs-var">hasIntersections</span></a></span></span><span> </span><span id="local-6989586621680095179"><span class="annot"><span class="annottext">ss :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680095179"><span class="hs-identifier hs-var">ss</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Event p r] -&gt; StatusStructure p r -&gt; Bool
+forall r p.
+(Ord r, Num r) =&gt;
+[Event p r] -&gt; StatusStructure p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var">sweep</span></a></span><span> </span><span class="annot"><span class="annottext">[Event p r]
+</span><a href="#local-6989586621680095177"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+forall a. Set a
+</span><span class="hs-identifier hs-var">SS.empty</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621680095177"><span class="annot"><span class="annottext">pts :: [Event p r]
+</span><a href="#local-6989586621680095177"><span class="hs-identifier hs-var hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Event p r -&gt; Event p r -&gt; Ordering) -&gt; [Event p r] -&gt; [Event p r]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.sortBy</span></span><span> </span><span class="annot"><span class="annottext">Event p r -&gt; Event p r -&gt; Ordering
+forall r p. (Num r, Ord r) =&gt; Event p r -&gt; Event p r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordEvents"><span class="hs-identifier hs-var">ordEvents</span></a></span><span> </span><span class="annot"><span class="annottext">([Event p r] -&gt; [Event p r])
+-&gt; ([LineSegment 2 p r] -&gt; [Event p r])
+-&gt; [LineSegment 2 p r]
+-&gt; [Event p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; [Event p r])
+-&gt; [LineSegment 2 p r] -&gt; [Event p r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; [Event p r]
+forall r p. Ord r =&gt; LineSegment 2 p r -&gt; [Event p r]
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#asEventPts"><span class="hs-identifier hs-var">asEventPts</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; [Event p r])
+-&gt; [LineSegment 2 p r] -&gt; [Event p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680095179"><span class="hs-identifier hs-var">ss</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- | Computes the event points for a given line segment</span><span>
+</span><span id="line-47"></span><span id="local-6989586621680095326"><span id="local-6989586621680095327"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#asEventPts"><span class="hs-identifier hs-type">asEventPts</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095327"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095326"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095327"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-type">Event</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095326"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095327"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-48"></span><span id="asEventPts"><span class="annot"><span class="annottext">asEventPts :: LineSegment 2 p r -&gt; [Event p r]
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#asEventPts"><span class="hs-identifier hs-var hs-var">asEventPts</span></a></span></span><span> </span><span id="local-6989586621680095170"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall r. Ord r =&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-var">ordPoints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Event p r
+forall p r. LineSegment 2 p r -&gt; Event p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-var">Insert</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Event p r
+forall p r. LineSegment 2 p r -&gt; Event p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-var">Delete</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-identifier">_</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span id="local-6989586621680095161"><span class="annot"><span class="annottext">a :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095161"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680095160"><span class="annot"><span class="annottext">b :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095160"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095170"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-52"></span><span>              </span><span id="local-6989586621680095159"><span class="annot"><span class="annottext">s' :: LineSegment 2 p r
+</span><a href="#local-6989586621680095159"><span class="hs-identifier hs-var hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; EndPoint (Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall (d :: Nat) r p.
+EndPoint (Point d r :+ p)
+-&gt; EndPoint (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-var">LineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095160"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095161"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-53"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Event p r
+forall p r. LineSegment 2 p r -&gt; Event p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-var">Insert</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095159"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Event p r
+forall p r. LineSegment 2 p r -&gt; Event p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-var">Delete</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095159"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- * Data type for Events</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | The actual event consists of a point and its type</span><span>
+</span><span id="line-59"></span><span class="hs-keyword">data</span><span> </span><span id="Event"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-var">Event</span></a></span></span><span> </span><span id="local-6989586621680095300"><span class="annot"><a href="#local-6989586621680095300"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680095299"><span class="annot"><a href="#local-6989586621680095299"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Insert"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-var">Insert</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095300"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095299"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Delete"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-var">Delete</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095300"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095299"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="local-6989586621680095289"><span id="local-6989586621680095290"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#eventPoint"><span class="hs-identifier hs-type">eventPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-type">Event</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095290"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095289"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095289"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-62"></span><span id="eventPoint"><span class="annot"><span class="annottext">eventPoint :: Event p r -&gt; Point 2 r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#eventPoint"><span class="hs-identifier hs-var hs-var">eventPoint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-type">Insert</span></a></span><span> </span><span id="local-6989586621680095157"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621680095157"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095157"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-63"></span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#eventPoint"><span class="hs-identifier hs-var">eventPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-type">Delete</span></a></span><span> </span><span id="local-6989586621680095156"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621680095156"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095156"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- Sort order:</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--  1. Y-coord. Larger Ys before smaller.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--  2. X-coord. Smaller Xs before larger.</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--  3. Type: Inserts before deletions</span><span>
+</span><span id="line-69"></span><span id="local-6989586621680095334"><span id="local-6989586621680095335"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordEvents"><span class="hs-identifier hs-type">ordEvents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095335"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095335"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-type">Event</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095334"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095335"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-type">Event</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095334"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095335"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span><span>
+</span><span id="line-70"></span><span id="ordEvents"><span class="annot"><span class="annottext">ordEvents :: Event p r -&gt; Event p r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordEvents"><span class="hs-identifier hs-var hs-var">ordEvents</span></a></span></span><span> </span><span id="local-6989586621680095155"><span class="annot"><span class="annottext">e1 :: Event p r
+</span><a href="#local-6989586621680095155"><span class="hs-identifier hs-var">e1</span></a></span></span><span> </span><span id="local-6989586621680095154"><span class="annot"><span class="annottext">e2 :: Event p r
+</span><a href="#local-6989586621680095154"><span class="hs-identifier hs-var">e2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall r. Ord r =&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-var">ordPoints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Event p r -&gt; Point 2 r
+forall p r. Event p r -&gt; Point 2 r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#eventPoint"><span class="hs-identifier hs-var">eventPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Event p r
+</span><a href="#local-6989586621680095155"><span class="hs-identifier hs-var">e1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Event p r -&gt; Point 2 r
+forall p r. Event p r -&gt; Point 2 r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#eventPoint"><span class="hs-identifier hs-var">eventPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Event p r
+</span><a href="#local-6989586621680095154"><span class="hs-identifier hs-var">e2</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Event p r -&gt; Event p r -&gt; Ordering
+forall p r p r. Event p r -&gt; Event p r -&gt; Ordering
+</span><a href="#local-6989586621680095153"><span class="hs-identifier hs-var">cmpType</span></a></span><span> </span><span class="annot"><span class="annottext">Event p r
+</span><a href="#local-6989586621680095155"><span class="hs-identifier hs-var">e1</span></a></span><span> </span><span class="annot"><span class="annottext">Event p r
+</span><a href="#local-6989586621680095154"><span class="hs-identifier hs-var">e2</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621680095153"><span class="annot"><span class="annottext">cmpType :: Event p r -&gt; Event p r -&gt; Ordering
+</span><a href="#local-6989586621680095153"><span class="hs-identifier hs-var hs-var">cmpType</span></a></span></span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-type">Insert</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-type">Delete</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-73"></span><span>    </span><span class="annot"><a href="#local-6989586621680095153"><span class="hs-identifier hs-var">cmpType</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-type">Delete</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-type">Insert</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><a href="#local-6989586621680095153"><span class="hs-identifier hs-var">cmpType</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- | An ordering that is decreasing on y, increasing on x</span><span>
+</span><span id="line-77"></span><span id="local-6989586621680095319"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-type">ordPoints</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095319"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095319"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095319"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span><span>
+</span><span id="line-78"></span><span id="ordPoints"><span class="annot"><span class="annottext">ordPoints :: Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-var hs-var">ordPoints</span></a></span></span><span> </span><span id="local-6989586621680095152"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621680095152"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680095151"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621680095151"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680095150"><span class="annot"><span class="annottext">f :: point d b -&gt; (Down b, b)
+</span><a href="#local-6989586621680095150"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680095149"><span class="annot"><span class="annottext">p :: point d b
+</span><a href="#local-6989586621680095149"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Down b
+forall a. a -&gt; Down a
+</span><span class="hs-identifier hs-var">Down</span></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Down b) -&gt; b -&gt; Down b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point d b
+</span><a href="#local-6989586621680095149"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point d b -&gt; Getting b (point d b) b -&gt; b
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting b (point d b) b
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">point d b
+</span><a href="#local-6989586621680095149"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point d b -&gt; Getting b (point d b) b -&gt; b
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting b (point d b) b
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; (Down r, r)) -&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; (Down r, r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) b.
+(ImplicitPeano (Peano d), ArityPeano (Peano (FromPeano (Peano d))),
+ KnownNat (FromPeano (Peano d)), KnownNat d, AsAPoint point,
+ (1 &lt;=? d) ~ 'True, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+point d b -&gt; (Down b, b)
+</span><a href="#local-6989586621680095150"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095152"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095151"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- * The Main Sweep</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-keyword">type</span><span> </span><span id="StatusStructure"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#StatusStructure"><span class="hs-identifier hs-var">StatusStructure</span></a></span></span><span> </span><span id="local-6989586621680095145"><span class="annot"><a href="#local-6989586621680095145"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680095144"><span class="annot"><a href="#local-6989586621680095144"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SS.Set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095145"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095144"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- | Run the sweep handling all events</span><span>
+</span><span id="line-86"></span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-type">sweep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680095340"><span class="annot"><a href="#local-6989586621680095340"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621680095339"><span class="annot"><a href="#local-6989586621680095339"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Event"><span class="hs-identifier hs-type">Event</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095339"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#StatusStructure"><span class="hs-identifier hs-type">StatusStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095339"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095340"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-88"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-89"></span><span id="sweep"><span class="annot"><span class="annottext">sweep :: [Event p r] -&gt; StatusStructure p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var hs-var">sweep</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-90"></span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var">sweep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Delete"><span class="hs-identifier hs-type">Delete</span></a></span><span> </span><span id="local-6989586621680095143"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621680095143"><span class="hs-identifier hs-var">l</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621680095142"><span class="annot"><span class="annottext">eq :: [Event p r]
+</span><a href="#local-6989586621680095142"><span class="hs-identifier hs-var">eq</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680095141"><span class="annot"><span class="annottext">ss :: StatusStructure p r
+</span><a href="#local-6989586621680095141"><span class="hs-identifier hs-var">ss</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-91"></span><span>    </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680095140"><span class="hs-identifier hs-var">overlaps</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">[Event p r] -&gt; StatusStructure p r -&gt; Bool
+forall r p.
+(Ord r, Num r) =&gt;
+[Event p r] -&gt; StatusStructure p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var">sweep</span></a></span><span> </span><span class="annot"><span class="annottext">[Event p r]
+</span><a href="#local-6989586621680095142"><span class="hs-identifier hs-var">eq</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095138"><span class="hs-identifier hs-var">ss'</span></a></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>    </span><span id="local-6989586621680095137"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680095137"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095143"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680095136"><span class="annot"><span class="annottext">before :: StatusStructure p r
+</span><a href="#local-6989586621680095136"><span class="hs-identifier hs-var">before</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095135"><span class="annot"><span class="annottext">_contains :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680095135"><span class="hs-identifier hs-var">_contains</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095134"><span class="annot"><span class="annottext">after :: StatusStructure p r
+</span><a href="#local-6989586621680095134"><span class="hs-identifier hs-var">after</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+forall r p.
+(Num r, Ord r) =&gt;
+Point 2 r
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#splitBeforeAfter"><span class="hs-identifier hs-var">splitBeforeAfter</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095137"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095141"><span class="hs-identifier hs-var">ss</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621680095140"><span class="annot"><span class="annottext">overlaps :: Bool
+</span><a href="#local-6989586621680095140"><span class="hs-identifier hs-var hs-var">overlaps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe Bool -&gt; Bool
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p.
+(Num r, Ord r) =&gt;
+LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier hs-var">segmentsOverlap</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool)
+-&gt; Maybe (LineSegment 2 p r) -&gt; Maybe (LineSegment 2 p r -&gt; Bool)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095130"><span class="hs-identifier hs-var">sl</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (LineSegment 2 p r -&gt; Bool)
+-&gt; Maybe (LineSegment 2 p r) -&gt; Maybe Bool
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095129"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621680095130"><span class="annot"><span class="annottext">sl :: Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095130"><span class="hs-identifier hs-var hs-var">sl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; Maybe (LineSegment 2 p r)
+forall a. Set a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">SS.lookupMax</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095136"><span class="hs-identifier hs-var">before</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621680095129"><span class="annot"><span class="annottext">sr :: Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095129"><span class="hs-identifier hs-var hs-var">sr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; Maybe (LineSegment 2 p r)
+forall a. Set a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">SS.lookupMin</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095134"><span class="hs-identifier hs-var">after</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621680095138"><span class="annot"><span class="annottext">ss' :: StatusStructure p r
+</span><a href="#local-6989586621680095138"><span class="hs-identifier hs-var hs-var">ss'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095136"><span class="hs-identifier hs-var">before</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; StatusStructure p r -&gt; StatusStructure p r
+forall a. Set a -&gt; Set a -&gt; Set a
+</span><span class="hs-operator hs-var">`SS.join`</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095134"><span class="hs-identifier hs-var">after</span></a></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var">sweep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#Insert"><span class="hs-identifier hs-type">Insert</span></a></span><span> </span><span id="local-6989586621680095125"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621680095125"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span id="local-6989586621680095124"><span class="annot"><span class="annottext">startPoint :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095124"><span class="hs-identifier hs-var">startPoint</span></a></span></span><span> </span><span id="local-6989586621680095123"><span class="annot"><span class="annottext">_endPoint :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095123"><span class="hs-identifier hs-var">_endPoint</span></a></span></span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621680095122"><span class="annot"><span class="annottext">eq :: [Event p r]
+</span><a href="#local-6989586621680095122"><span class="hs-identifier hs-var">eq</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680095121"><span class="annot"><span class="annottext">ss :: StatusStructure p r
+</span><a href="#local-6989586621680095121"><span class="hs-identifier hs-var">ss</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-100"></span><span>    </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680095120"><span class="hs-identifier hs-var">endOverlap</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680095119"><span class="hs-identifier hs-var">overlaps</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">[Event p r] -&gt; StatusStructure p r -&gt; Bool
+forall r p.
+(Ord r, Num r) =&gt;
+[Event p r] -&gt; StatusStructure p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#sweep"><span class="hs-identifier hs-var">sweep</span></a></span><span> </span><span class="annot"><span class="annottext">[Event p r]
+</span><a href="#local-6989586621680095122"><span class="hs-identifier hs-var">eq</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095118"><span class="hs-identifier hs-var">ss'</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621680095117"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680095117"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095125"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680095116"><span class="annot"><span class="annottext">before :: StatusStructure p r
+</span><a href="#local-6989586621680095116"><span class="hs-identifier hs-var">before</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095115"><span class="annot"><span class="annottext">contains :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680095115"><span class="hs-identifier hs-var">contains</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095114"><span class="annot"><span class="annottext">after :: StatusStructure p r
+</span><a href="#local-6989586621680095114"><span class="hs-identifier hs-var">after</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+forall r p.
+(Num r, Ord r) =&gt;
+Point 2 r
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#splitBeforeAfter"><span class="hs-identifier hs-var">splitBeforeAfter</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095117"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095121"><span class="hs-identifier hs-var">ss</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621680095120"><span class="annot"><span class="annottext">endOverlap :: Bool
+</span><a href="#local-6989586621680095120"><span class="hs-identifier hs-var hs-var">endOverlap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680095115"><span class="hs-identifier hs-var">contains</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p) -&gt; Bool
+forall a. EndPoint a -&gt; Bool
+</span><span class="hs-identifier hs-var">isClosed</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095124"><span class="hs-identifier hs-var">startPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621680095119"><span class="annot"><span class="annottext">overlaps :: Bool
+</span><a href="#local-6989586621680095119"><span class="hs-identifier hs-var hs-var">overlaps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
+forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">or</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe Bool -&gt; Bool
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p.
+(Num r, Ord r) =&gt;
+LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier hs-var">segmentsOverlap</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095125"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Bool)
+-&gt; Maybe (LineSegment 2 p r) -&gt; Maybe Bool
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095108"><span class="hs-identifier hs-var">sl</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe Bool -&gt; Bool
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p.
+(Num r, Ord r) =&gt;
+LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier hs-var">segmentsOverlap</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095125"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Bool)
+-&gt; Maybe (LineSegment 2 p r) -&gt; Maybe Bool
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095107"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621680095108"><span class="annot"><span class="annottext">sl :: Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095108"><span class="hs-identifier hs-var hs-var">sl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; Maybe (LineSegment 2 p r)
+forall a. Set a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">SS.lookupMax</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095116"><span class="hs-identifier hs-var">before</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621680095107"><span class="annot"><span class="annottext">sr :: Maybe (LineSegment 2 p r)
+</span><a href="#local-6989586621680095107"><span class="hs-identifier hs-var hs-var">sr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; Maybe (LineSegment 2 p r)
+forall a. Set a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">SS.lookupMin</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095114"><span class="hs-identifier hs-var">after</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621680095118"><span class="annot"><span class="annottext">ss' :: StatusStructure p r
+</span><a href="#local-6989586621680095118"><span class="hs-identifier hs-var hs-var">ss'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095116"><span class="hs-identifier hs-var">before</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; StatusStructure p r -&gt; StatusStructure p r
+forall a. Set a -&gt; Set a -&gt; Set a
+</span><span class="hs-operator hs-var">`SS.join`</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; StatusStructure p r
+forall a. a -&gt; Set a
+</span><span class="hs-identifier hs-var">SS.singleton</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095125"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; StatusStructure p r -&gt; StatusStructure p r
+forall a. Set a -&gt; Set a -&gt; Set a
+</span><span class="hs-operator hs-var">`SS.join`</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095114"><span class="hs-identifier hs-var">after</span></a></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- | split the status structure around p.</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- the result is (before,contains,after)</span><span>
+</span><span id="line-114"></span><span id="local-6989586621680095257"><span id="local-6989586621680095258"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#splitBeforeAfter"><span class="hs-identifier hs-type">splitBeforeAfter</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>                     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#StatusStructure"><span class="hs-identifier hs-type">StatusStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095257"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-116"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#StatusStructure"><span class="hs-identifier hs-type">StatusStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095257"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095257"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#StatusStructure"><span class="hs-identifier hs-type">StatusStructure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095257"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095258"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-117"></span><span id="splitBeforeAfter"><span class="annot"><span class="annottext">splitBeforeAfter :: Point 2 r
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#splitBeforeAfter"><span class="hs-identifier hs-var hs-var">splitBeforeAfter</span></a></span></span><span> </span><span id="local-6989586621680095105"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680095105"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680095104"><span class="annot"><span class="annottext">ss :: StatusStructure p r
+</span><a href="#local-6989586621680095104"><span class="hs-identifier hs-var">ss</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095103"><span class="hs-identifier hs-var">before</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Bool)
+-&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
+-&gt; (LineSegment 2 p r -&gt; Bool) -&gt; LineSegment 2 p r -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p. Ord r =&gt; Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#endsAt"><span class="hs-identifier hs-var">endsAt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095105"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; [LineSegment 2 p r])
+-&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r -&gt; [LineSegment 2 p r]
+forall a. Set a -&gt; [a]
+</span><span class="hs-identifier hs-var">SS.toList</span></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095100"><span class="hs-identifier hs-var">contains</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095099"><span class="hs-identifier hs-var">after</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680095103"><span class="annot"><span class="annottext">before :: StatusStructure p r
+</span><a href="#local-6989586621680095103"><span class="hs-identifier hs-var">before</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095100"><span class="annot"><span class="annottext">contains :: StatusStructure p r
+</span><a href="#local-6989586621680095100"><span class="hs-identifier hs-var">contains</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095099"><span class="annot"><span class="annottext">after :: StatusStructure p r
+</span><a href="#local-6989586621680095099"><span class="hs-identifier hs-var">after</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Ordering)
+-&gt; StatusStructure p r
+-&gt; (StatusStructure p r, StatusStructure p r, StatusStructure p r)
+forall a. (a -&gt; Ordering) -&gt; Set a -&gt; (Set a, Set a, Set a)
+</span><span class="hs-identifier hs-var">SS.splitBy</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Ordering
+</span><a href="#local-6989586621680095097"><span class="hs-identifier hs-var">cmpLine</span></a></span><span> </span><span class="annot"><span class="annottext">StatusStructure p r
+</span><a href="#local-6989586621680095104"><span class="hs-identifier hs-var">ss</span></a></span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621680095097"><span class="annot"><span class="annottext">cmpLine :: LineSegment 2 p r -&gt; Ordering
+</span><a href="#local-6989586621680095097"><span class="hs-identifier hs-var hs-var">cmpLine</span></a></span></span><span> </span><span id="local-6989586621680095096"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
+</span><a href="#local-6989586621680095096"><span class="hs-identifier hs-var">line</span></a></span></span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Bool
+forall r p. Eq r =&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#isHorizontal"><span class="hs-identifier hs-var">isHorizontal</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095096"><span class="hs-identifier hs-var">line</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-122"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">[</span><span id="local-6989586621680095094"><span class="annot"><span class="annottext">_top :: Point 2 r
+</span><a href="#local-6989586621680095094"><span class="hs-identifier hs-var">_top</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095093"><span class="annot"><span class="annottext">bot :: Point 2 r
+</span><a href="#local-6989586621680095093"><span class="hs-identifier hs-var">bot</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; Ordering) -&gt; [Point 2 r] -&gt; [Point 2 r]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.sortBy</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall r. Ord r =&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-var">ordPoints</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095096"><span class="hs-identifier hs-var">line</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095096"><span class="hs-identifier hs-var">line</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">in</span><span>
+</span><span id="line-123"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095093"><span class="hs-identifier hs-var">bot</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095105"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>    </span><span class="annot"><a href="#local-6989586621680095097"><span class="hs-identifier hs-var">cmpLine</span></a></span><span> </span><span id="local-6989586621680095091"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
+</span><a href="#local-6989586621680095091"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-125"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">[</span><span id="local-6989586621680095090"><span class="annot"><span class="annottext">top :: Point 2 r
+</span><a href="#local-6989586621680095090"><span class="hs-identifier hs-var">top</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680095089"><span class="annot"><span class="annottext">bot :: Point 2 r
+</span><a href="#local-6989586621680095089"><span class="hs-identifier hs-var">bot</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; Ordering) -&gt; [Point 2 r] -&gt; [Point 2 r]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.sortBy</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall r. Ord r =&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#ordPoints"><span class="hs-identifier hs-var">ordPoints</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095091"><span class="hs-identifier hs-var">line</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095091"><span class="hs-identifier hs-var">line</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">in</span><span>
+</span><span id="line-126"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095089"><span class="hs-identifier hs-var">bot</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095090"><span class="hs-identifier hs-var">top</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095105"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-127"></span><span>        </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-128"></span><span>        </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-129"></span><span>        </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span id="local-6989586621680095232"><span id="local-6989586621680095233"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#isHorizontal"><span class="hs-identifier hs-type">isHorizontal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621680095233"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095232"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095233"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-133"></span><span id="isHorizontal"><span class="annot"><span class="annottext">isHorizontal :: LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#isHorizontal"><span class="hs-identifier hs-var hs-var">isHorizontal</span></a></span></span><span> </span><span id="local-6989586621680095084"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621680095084"><span class="hs-identifier hs-var">s</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095084"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Getting r (LineSegment 2 p r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r))
+-&gt; ((r -&gt; Const r r)
+    -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; Getting r (LineSegment 2 p r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (r -&gt; Const r r)
+-&gt; (Point 2 r :+ p)
+-&gt; Const r (Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095084"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Getting r (LineSegment 2 p r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r))
+-&gt; ((r -&gt; Const r r)
+    -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; Getting r (LineSegment 2 p r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (r -&gt; Const r r)
+-&gt; (Point 2 r :+ p)
+-&gt; Const r (Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- | Test if a segment ends at p</span><span>
+</span><span id="line-136"></span><span id="local-6989586621680095236"><span id="local-6989586621680095237"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#endsAt"><span class="hs-identifier hs-type">endsAt</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095237"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095237"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095236"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095237"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-137"></span><span id="endsAt"><span class="annot"><span class="annottext">endsAt :: Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#endsAt"><span class="hs-identifier hs-var hs-var">endsAt</span></a></span></span><span> </span><span id="local-6989586621680095083"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680095083"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621680095082"><span class="annot"><span class="annottext">b :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095082"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Point 2 r)
+-&gt; EndPoint (Point 2 r :+ p) -&gt; EndPoint (Point 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+-&gt; (Point 2 r :+ p) -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095082"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r) -&gt; EndPoint (Point 2 r) -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; EndPoint (Point 2 r)
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Open</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095083"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- * Finding New events</span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span id="local-6989586621680095254"><span id="local-6989586621680095255"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier hs-type">segmentsOverlap</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095255"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095255"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095254"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095255"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095254"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095255"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-143"></span><span id="segmentsOverlap"><span class="annot"><span class="annottext">segmentsOverlap :: LineSegment 2 p r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#segmentsOverlap"><span class="hs-identifier hs-var hs-var">segmentsOverlap</span></a></span></span><span> </span><span id="local-6989586621680095079"><span class="annot"><span class="annottext">a :: LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span id="local-6989586621680095078"><span class="annot"><span class="annottext">aStart :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095078"><span class="hs-identifier hs-var">aStart</span></a></span></span><span> </span><span id="local-6989586621680095077"><span class="annot"><span class="annottext">aEnd :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095077"><span class="hs-identifier hs-var">aEnd</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680095076"><span class="annot"><span class="annottext">b :: LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p) -&gt; Bool
+forall a. EndPoint a -&gt; Bool
+</span><span class="hs-identifier hs-var">isClosed</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095078"><span class="hs-identifier hs-var">aStart</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095078"><span class="hs-identifier hs-var">aStart</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; EndPoint (Point 2 r :+ p)
+-&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p))
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; EndPoint (Point 2 r :+ p)
+ -&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p)))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#onSegment2"><span class="hs-operator hs-var">`onSegment2`</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p) -&gt; Bool
+forall a. EndPoint a -&gt; Bool
+</span><span class="hs-identifier hs-var">isClosed</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095077"><span class="hs-identifier hs-var">aEnd</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095077"><span class="hs-identifier hs-var">aEnd</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; EndPoint (Point 2 r :+ p)
+-&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p))
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; EndPoint (Point 2 r :+ p)
+ -&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p)))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+forall r p.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#onSegment2"><span class="hs-operator hs-var">`onSegment2`</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+</span><a href="#local-6989586621680095073"><span class="hs-identifier hs-var">opposite</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-147"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+forall r p. (Ord r, Num r) =&gt; Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+</span><a href="Data.Geometry.Triangle.html#onTriangleRelaxed"><span class="hs-identifier hs-var">onTriangleRelaxed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Triangle 2 p r
+</span><a href="#local-6989586621680095070"><span class="hs-identifier hs-var">t1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-148"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+forall r p. (Ord r, Num r) =&gt; Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+</span><a href="Data.Geometry.Triangle.html#onTriangleRelaxed"><span class="hs-identifier hs-var">onTriangleRelaxed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; LineSegment 2 p r -&gt; Const (Point 2 r) (LineSegment 2 p r))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Triangle 2 p r
+</span><a href="#local-6989586621680095069"><span class="hs-identifier hs-var">t2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621680095073"><span class="annot"><span class="annottext">opposite :: CCW -&gt; CCW -&gt; Bool
+</span><a href="#local-6989586621680095073"><span class="hs-identifier hs-var hs-var">opposite</span></a></span></span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><a href="#local-6989586621680095073"><span class="hs-identifier hs-var">opposite</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-152"></span><span>    </span><span class="annot"><a href="#local-6989586621680095073"><span class="hs-identifier hs-var">opposite</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-153"></span><span>    </span><span id="local-6989586621680095070"><span class="annot"><span class="annottext">t1 :: Triangle 2 p r
+</span><a href="#local-6989586621680095070"><span class="hs-identifier hs-var hs-var">t1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Triangle 2 p r
+forall (d :: Nat) p r.
+(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-154"></span><span>    </span><span id="local-6989586621680095069"><span class="annot"><span class="annottext">t2 :: Triangle 2 p r
+</span><a href="#local-6989586621680095069"><span class="hs-identifier hs-var hs-var">t2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Triangle 2 p r
+forall (d :: Nat) p r.
+(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095079"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095076"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r :+ p) (LineSegment 2 p r) (Point 2 r :+ p)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- Copied from Data.Geometry.LineSegment.Internal. Delete when PR#62 is merged.</span><span>
+</span><span id="line-157"></span><span id="local-6989586621680095210"><span id="local-6989586621680095211"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#onSegment2"><span class="hs-identifier hs-type">onSegment2</span></a></span><span>                          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680095211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680095211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>                                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095211"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680095210"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680095211"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-159"></span><span id="local-6989586621680095067"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680095067"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="onSegment2"><span class="annot"><span class="annottext">onSegment2 :: Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.html#onSegment2"><span class="hs-operator hs-var hs-var">`onSegment2`</span></a></span></span><span> </span><span id="local-6989586621680095066"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621680095066"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span id="local-6989586621680095065"><span class="annot"><span class="annottext">u :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095065"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621680095064"><span class="annot"><span class="annottext">v :: EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095064"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095067"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095065"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting
+     (Point 2 r :+ p) (EndPoint (Point 2 r :+ p)) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (Point 2 r :+ p) (EndPoint (Point 2 r :+ p)) (Point 2 r :+ p)
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095064"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting
+     (Point 2 r :+ p) (EndPoint (Point 2 r :+ p)) (Point 2 r :+ p)
+-&gt; Point 2 r :+ p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (Point 2 r :+ p) (EndPoint (Point 2 r :+ p)) (Point 2 r :+ p)
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-160"></span><span>    </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680095062"><span class="annot"><span class="annottext">su :: SideTest
+</span><a href="#local-6989586621680095062"><span class="hs-identifier hs-var hs-var">su</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095067"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; SideTest
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; SideTest
+</span><a href="Data.Geometry.Line.Internal.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621680095060"><span class="hs-identifier hs-var">lu</span></a></span><span>
+</span><span id="line-161"></span><span>                    </span><span id="local-6989586621680095059"><span class="annot"><span class="annottext">sv :: SideTest
+</span><a href="#local-6989586621680095059"><span class="hs-identifier hs-var hs-var">sv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680095067"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; SideTest
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; SideTest
+</span><a href="Data.Geometry.Line.Internal.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621680095058"><span class="hs-identifier hs-var">lv</span></a></span><span>
+</span><span id="line-162"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="#local-6989586621680095062"><span class="hs-identifier hs-var">su</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="#local-6989586621680095059"><span class="hs-identifier hs-var">sv</span></a></span><span>
+</span><span id="line-163"></span><span>                </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">SideTest
+</span><a href="#local-6989586621680095062"><span class="hs-identifier hs-var">su</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="Data.Geometry.Line.Internal.html#OnLine"><span class="hs-identifier hs-var">OnLine</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621680095055"><span class="hs-operator hs-var">`implies`</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p) -&gt; Bool
+forall a. EndPoint a -&gt; Bool
+</span><span class="hs-identifier hs-var">isClosed</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095065"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>                </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">SideTest
+</span><a href="#local-6989586621680095059"><span class="hs-identifier hs-var">sv</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="Data.Geometry.Line.Internal.html#OnLine"><span class="hs-identifier hs-var">OnLine</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621680095055"><span class="hs-operator hs-var">`implies`</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p) -&gt; Bool
+forall a. EndPoint a -&gt; Bool
+</span><span class="hs-identifier hs-var">isClosed</span></span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095064"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>    </span><span class="hs-identifier">_</span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-166"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-167"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621680095053"><span class="annot"><span class="annottext">w :: Vector 2 r
+</span><a href="#local-6989586621680095053"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; Line 2 r
+forall r. Num r =&gt; Line 2 r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#perpendicularTo"><span class="hs-identifier hs-var">perpendicularTo</span></a></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; Line 2 r) -&gt; Line 2 r -&gt; Line 2 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Line
+     (Dimension (LineSegment 2 p r)) (NumType (LineSegment 2 p r))
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; Line (Dimension t) (NumType t)
+</span><a href="Data.Geometry.Line.Internal.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680095066"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-168"></span><span>    </span><span id="local-6989586621680095060"><span class="annot"><span class="annottext">lu :: Line 2 r
+</span><a href="#local-6989586621680095060"><span class="hs-identifier hs-var hs-var">lu</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Line 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-var">Line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095065"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; EndPoint (Point 2 r :+ p)
+-&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p))
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; EndPoint (Point 2 r :+ p)
+ -&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p)))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621680095053"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-169"></span><span>    </span><span id="local-6989586621680095058"><span class="annot"><span class="annottext">lv :: Line 2 r
+</span><a href="#local-6989586621680095058"><span class="hs-identifier hs-var hs-var">lv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Line 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-var">Line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621680095064"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; EndPoint (Point 2 r :+ p)
+-&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p))
+forall a b. Lens (EndPoint a) (EndPoint b) a b
+</span><span class="hs-identifier hs-var">unEndPoint</span></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+ -&gt; EndPoint (Point 2 r :+ p)
+ -&gt; Const (Point 2 r) (EndPoint (Point 2 r :+ p)))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
+-&gt; Getting (Point 2 r) (EndPoint (Point 2 r :+ p)) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621680095053"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>    </span><span id="local-6989586621680095050"><span class="annot"><span class="annottext">a :: Bool
+</span><a href="#local-6989586621680095050"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680095055"><span class="annot"><span class="annottext">implies :: Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621680095055"><span class="hs-operator hs-var hs-var">`implies`</span></a></span></span><span> </span><span id="local-6989586621680095049"><span class="annot"><span class="annottext">b :: Bool
+</span><a href="#local-6989586621680095049"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680095049"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680095050"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-172"></span></pre></body></html>
