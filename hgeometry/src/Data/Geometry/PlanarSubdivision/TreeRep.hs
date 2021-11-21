@@ -5,13 +5,14 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Data types that help encode/decode a planegraph as a JSON/YAML file.
+-- Data types to represent a PlanarSubdivision using adjacency representations
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.TreeRep( PlanarSD(..)
-                                              , Vtx(..)
-                                              , myTreeRep
-                                              ) where
+module Data.Geometry.PlanarSubdivision.TreeRep
+  ( PlanarSD(..), InnerSD(..)
+  , Vtx(..)
+  , myTreeRep
+  ) where
 
 -- FIXME; uncomment myTreeRep
 
@@ -29,12 +30,14 @@ import Data.RealNumber.Rational
 -- | Specify the planar subdivison as a tree of components
 data PlanarSD v e f r = PlanarSD
   { outerFace :: f           -- ^ outer face
-  , inner     :: InnerSD v e f r
+  , inner     :: [InnerSD v e f r] -- ^ for each component, an inner
   } deriving (Show,Eq,Functor,Generic)
 
 instance (ToJSON r,   ToJSON v, ToJSON e, ToJSON f)     => ToJSON   (PlanarSD v e f r) where
   toEncoding = genericToEncoding defaultOptions
 instance (FromJSON r, FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarSD v e f r)
+
+
 
 
 data InnerSD v e f r = InnerSD
@@ -60,13 +63,33 @@ instance (FromJSON r, FromJSON v, FromJSON e, FromJSON f) => FromJSON (InnerSD v
 --
 -- ![mySubDiv](docs/Data/Geometry/PlanarSubdivision/mySubDiv.jpg)
 myTreeRep :: PlanarSD Int () String (RealNumber 3)
-myTreeRep = PlanarSD "f_infty" (InnerSD ads fs)
+myTreeRep = PlanarSD "f_infty" [ InnerSD ads1 fs1
+                               , InnerSD ads2 fs2
+                               ]
   where
-    fs = [ ("f_1", [])
-         , ("f_2", [f5, f6])
-         , ("f_3", [])
-         , ("f_4", [f7])
-         ]
+    -- hole 1 in the outer face
+    ads1 = [ vtx 9 (Point2 4    (-4)) [e 10, e 11]
+           , vtx 10 (Point2 8   (-4)) [e 11, e 9]
+           , vtx 11 (Point2 11  (-2)) [e 10, e 12]
+           , vtx 12 (Point2 7   (-1)) [e 9, e 11]
+           ]
+    fs1= [("f_1", [])]
+
+    -- hole 2 in the outer face
+    ads2 = [ vtx 0 (Point2 0    0)    [e 1, e 4]
+           , vtx 1 (Point2 10   2)    [e 0, e 5]
+           , vtx 2 (Point2 9    9)    [e 1, e 7, e 3]
+           , vtx 3 (Point2 0    10)   [e 2, e 4]
+           , vtx 4 (Point2 (-4) 5)    [e 0, e 3]
+           , vtx 5 (Point2 15   3)    [e 1, e 6]
+           , vtx 6 (Point2 20   6)    [e 5, e 7]
+           , vtx 7 (Point2 10   14)   [e 2, e 6, e 8]
+           , vtx 8 (Point2 4    13)   [e 7, e 3]
+           ]
+    fs2 = [ ("f_2", [f5, f6])
+          , ("f_3", [])
+          , ("f_4", [f7])
+          ]
 
     f5 = InnerSD [ vtx 16 (Point2 3    8) [e 17, e 18]
                  , vtx 17 (Point2 0    7) [e 16, e 18]
@@ -90,20 +113,6 @@ myTreeRep = PlanarSD "f_infty" (InnerSD ads fs)
                  , vtx 26 (Point2 12  5) [e 24, e 25]
                  ] [("f_8",[])]
 
-    ads = [ vtx 0 (Point2 0    0)    [e 1, e 4]
-          , vtx 1 (Point2 10   2)    [e 0, e 5]
-          , vtx 2 (Point2 9    9)    [e 1, e 7, e 3]
-          , vtx 3 (Point2 0    10)   [e 2, e 4]
-          , vtx 4 (Point2 (-4) 5)    [e 0, e 3]
-          , vtx 5 (Point2 15   3)    [e 1, e 6]
-          , vtx 6 (Point2 20   6)    [e 5, e 7]
-          , vtx 7 (Point2 10   14)   [e 2, e 6, e 8]
-          , vtx 8 (Point2 4    13)   [e 7, e 3]
-          , vtx 9 (Point2 4    (-4)) [e 10, e 11]
-          , vtx 10 (Point2 8   (-4)) [e 11, e 9]
-          , vtx 11 (Point2 11  (-2)) [e 10, e 12]
-          , vtx 12 (Point2 7   (-1)) [e 9, e 11]
-          ]
 
     e i = (i,())
 
