@@ -26,51 +26,51 @@
 </span><span id="line-26"></span><span>                                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-comment">-- ^ output file path</span><span>
 </span><span id="line-27"></span><span>                                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-28"></span><span id="ipeRenderWith"><span class="annot"><span class="annottext">ipeRenderWith :: Options -&gt; FileType -&gt; FilePath -&gt; FilePath -&gt; IO ()
-</span><a href="Ipe.IpeRender.html#ipeRenderWith"><span class="hs-identifier hs-var hs-var">ipeRenderWith</span></a></span></span><span> </span><span id="local-6989586621679537451"><span class="annot"><span class="annottext">options :: Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span></span><span> </span><span id="local-6989586621679537450"><span class="annot"><span class="annottext">fType :: FileType
-</span><a href="#local-6989586621679537450"><span class="hs-identifier hs-var">fType</span></a></span></span><span> </span><span id="local-6989586621679537449"><span class="annot"><span class="annottext">inFp :: FilePath
-</span><a href="#local-6989586621679537449"><span class="hs-identifier hs-var">inFp</span></a></span></span><span> </span><span id="local-6989586621679537448"><span class="annot"><span class="annottext">outFp :: FilePath
-</span><a href="#local-6989586621679537448"><span class="hs-identifier hs-var">outFp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Ipe.IpeRender.html#ipeRenderWith"><span class="hs-identifier hs-var hs-var">ipeRenderWith</span></a></span></span><span> </span><span id="local-6989586621679537453"><span class="annot"><span class="annottext">options :: Options
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span></span><span> </span><span id="local-6989586621679537452"><span class="annot"><span class="annottext">fType :: FileType
+</span><a href="#local-6989586621679537452"><span class="hs-identifier hs-var">fType</span></a></span></span><span> </span><span id="local-6989586621679537451"><span class="annot"><span class="annottext">inFp :: FilePath
+</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">inFp</span></a></span></span><span> </span><span id="local-6989586621679537450"><span class="annot"><span class="annottext">outFp :: FilePath
+</span><a href="#local-6989586621679537450"><span class="hs-identifier hs-var">outFp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-29"></span><span>    </span><span class="annot"><span class="annottext">ProcessConfig () () () -&gt; (Process () () () -&gt; IO ()) -&gt; IO ()
 forall (m :: * -&gt; *) stdin stdout stderr a.
 MonadUnliftIO m =&gt;
 ProcessConfig stdin stdout stderr
 -&gt; (Process stdin stdout stderr -&gt; m a) -&gt; m a
 </span><span class="hs-identifier hs-var">Process.withProcessWait</span></span><span> </span><span class="annot"><span class="annottext">ProcessConfig () () ()
-</span><a href="#local-6989586621679537446"><span class="hs-identifier hs-var">processCfg</span></a></span><span> </span><span class="annot"><span class="annottext">((Process () () () -&gt; IO ()) -&gt; IO ())
+</span><a href="#local-6989586621679537448"><span class="hs-identifier hs-var">processCfg</span></a></span><span> </span><span class="annot"><span class="annottext">((Process () () () -&gt; IO ()) -&gt; IO ())
 -&gt; (Process () () () -&gt; IO ()) -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679537445"><span class="annot"><span class="annottext">_iperenderProc :: Process () () ()
-</span><a href="#local-6989586621679537445"><span class="hs-identifier hs-var">_iperenderProc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; IO ()
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679537447"><span class="annot"><span class="annottext">_iperenderProc :: Process () () ()
+</span><a href="#local-6989586621679537447"><span class="hs-identifier hs-var">_iperenderProc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; IO ()
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-30"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-31"></span><span>    </span><span id="local-6989586621679537446"><span class="annot"><span class="annottext">processCfg :: ProcessConfig () () ()
-</span><a href="#local-6989586621679537446"><span class="hs-identifier hs-var hs-var">processCfg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath] -&gt; ProcessConfig () () ()
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679537448"><span class="annot"><span class="annottext">processCfg :: ProcessConfig () () ()
+</span><a href="#local-6989586621679537448"><span class="hs-identifier hs-var hs-var">processCfg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath] -&gt; ProcessConfig () () ()
 </span><span class="hs-identifier hs-var">Process.proc</span></span><span> </span><span class="annot"><span class="hs-string">&quot;iperender&quot;</span></span><span> </span><span class="annot"><span class="annottext">[FilePath]
-</span><a href="#local-6989586621679537443"><span class="hs-identifier hs-var">args</span></a></span><span>
-</span><span id="line-32"></span><span>    </span><span id="local-6989586621679537443"><span class="annot"><span class="annottext">args :: [FilePath]
-</span><a href="#local-6989586621679537443"><span class="hs-identifier hs-var hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+</span><a href="#local-6989586621679537445"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621679537445"><span class="annot"><span class="annottext">args :: [FilePath]
+</span><a href="#local-6989586621679537445"><span class="hs-identifier hs-var hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">FileType -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">FileType
-</span><a href="#local-6989586621679537450"><span class="hs-identifier hs-var">fType</span></a></span><span>
+</span><a href="#local-6989586621679537452"><span class="hs-identifier hs-var">fType</span></a></span><span>
 </span><span id="line-33"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;-page&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#pageNumber"><span class="hs-identifier hs-var hs-var">pageNumber</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-34"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;-view&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#viewNumber"><span class="hs-identifier hs-var hs-var">viewNumber</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;-resolution&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#resolution"><span class="hs-identifier hs-var hs-var">resolution</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-36"></span><span>           </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath] -&gt; [FilePath]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span>
@@ -79,7 +79,7 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Background
 </span><a href="Ipe.IpeRender.html#transparent"><span class="hs-identifier hs-var hs-var">transparent</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath] -&gt; [FilePath]
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath] -&gt; [FilePath]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span>
 </span><span id="line-38"></span><span>           </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;-nocrop&quot;</span></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Crop
@@ -87,13 +87,13 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Crop
 </span><a href="Ipe.IpeRender.html#crop"><span class="hs-identifier hs-var hs-var">crop</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath] -&gt; [FilePath]
+</span><a href="#local-6989586621679537453"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath] -&gt; [FilePath]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span>
 </span><span id="line-39"></span><span>           </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679537449"><span class="hs-identifier hs-var">inFp</span></a></span><span>
+</span><a href="#local-6989586621679537451"><span class="hs-identifier hs-var">inFp</span></a></span><span>
 </span><span id="line-40"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679537448"><span class="hs-identifier hs-var">outFp</span></a></span><span>
+</span><a href="#local-6989586621679537450"><span class="hs-identifier hs-var">outFp</span></a></span><span>
 </span><span id="line-41"></span><span>           </span><span class="hs-special">]</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="hs-comment">-- | Call 'iperender' with the default options.</span><span>
@@ -109,7 +109,7 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span class="hs-comment">-- | Output filetypes supported by iperender</span><span>
 </span><span id="line-52"></span><span class="hs-keyword">data</span><span> </span><span id="FileType"><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-var">FileType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PNG"><span class="annot"><a href="Ipe.IpeRender.html#PNG"><span class="hs-identifier hs-var">PNG</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="EPS"><span class="annot"><a href="Ipe.IpeRender.html#EPS"><span class="hs-identifier hs-var">EPS</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PDF"><span class="annot"><a href="Ipe.IpeRender.html#PDF"><span class="hs-identifier hs-var">PDF</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SVG"><span class="annot"><a href="Ipe.IpeRender.html#SVG"><span class="hs-identifier hs-var">SVG</span></a></span></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537425"><span id="local-6989586621679537427"><span class="annot"><span class="annottext">FileType -&gt; FileType -&gt; Bool
+</span><span id="line-53"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537427"><span id="local-6989586621679537429"><span class="annot"><span class="annottext">FileType -&gt; FileType -&gt; Bool
 (FileType -&gt; FileType -&gt; Bool)
 -&gt; (FileType -&gt; FileType -&gt; Bool) -&gt; Eq FileType
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -117,7 +117,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: FileType -&gt; FileType -&gt; Bool
 == :: FileType -&gt; FileType -&gt; Bool
 $c== :: FileType -&gt; FileType -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537409"><span id="local-6989586621679537411"><span id="local-6989586621679537413"><span id="local-6989586621679537415"><span id="local-6989586621679537417"><span id="local-6989586621679537419"><span id="local-6989586621679537421"><span class="annot"><span class="annottext">Eq FileType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537411"><span id="local-6989586621679537413"><span id="local-6989586621679537415"><span id="local-6989586621679537417"><span id="local-6989586621679537419"><span id="local-6989586621679537421"><span id="local-6989586621679537423"><span class="annot"><span class="annottext">Eq FileType
 Eq FileType =&gt;
 (FileType -&gt; FileType -&gt; Ordering)
 -&gt; (FileType -&gt; FileType -&gt; Bool)
@@ -155,7 +155,7 @@ $c&lt; :: FileType -&gt; FileType -&gt; Bool
 compare :: FileType -&gt; FileType -&gt; Ordering
 $ccompare :: FileType -&gt; FileType -&gt; Ordering
 $cp1Ord :: Eq FileType
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537392"><span id="local-6989586621679537394"><span id="local-6989586621679537396"><span id="local-6989586621679537398"><span id="local-6989586621679537400"><span id="local-6989586621679537402"><span id="local-6989586621679537404"><span id="local-6989586621679537406"><span class="annot"><span class="annottext">Int -&gt; FileType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537394"><span id="local-6989586621679537396"><span id="local-6989586621679537398"><span id="local-6989586621679537400"><span id="local-6989586621679537402"><span id="local-6989586621679537404"><span id="local-6989586621679537406"><span id="local-6989586621679537408"><span class="annot"><span class="annottext">Int -&gt; FileType
 FileType -&gt; Int
 FileType -&gt; [FileType]
 FileType -&gt; FileType
@@ -198,9 +198,9 @@ succ :: FileType -&gt; FileType
 $csucc :: FileType -&gt; FileType
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679537386"><span id="local-6989586621679537389"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-type">FileType</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-56"></span><span>  </span><span id="local-6989586621679537384"><span class="annot"><span class="annottext">show :: FileType -&gt; FilePath
-</span><a href="#local-6989586621679537384"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679537388"><span id="local-6989586621679537391"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-type">FileType</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679537386"><span class="annot"><span class="annottext">show :: FileType -&gt; FilePath
+</span><a href="#local-6989586621679537386"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-57"></span><span>    </span><span class="annot"><a href="Ipe.IpeRender.html#PNG"><span class="hs-identifier hs-type">PNG</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;png&quot;</span></span><span>
 </span><span id="line-58"></span><span>    </span><span class="annot"><a href="Ipe.IpeRender.html#EPS"><span class="hs-identifier hs-type">EPS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;eps&quot;</span></span><span>
 </span><span id="line-59"></span><span>    </span><span class="annot"><a href="Ipe.IpeRender.html#PDF"><span class="hs-identifier hs-type">PDF</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;pdf&quot;</span></span><span>
@@ -217,7 +217,7 @@ $csucc :: FileType -&gt; FileType
 </span><a href="Ipe.IpeRender.html#transparent"><span class="hs-identifier hs-var hs-var">transparent</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#Background"><span class="hs-identifier hs-type">Background</span></a></span><span>
 </span><span id="line-67"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="crop"><span class="annot"><span class="annottext">Options -&gt; Crop
 </span><a href="Ipe.IpeRender.html#crop"><span class="hs-identifier hs-var hs-var">crop</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-type">Crop</span></a></span><span>
-</span><span id="line-68"></span><span>                       </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537377"><span id="local-6989586621679537379"><span id="local-6989586621679537381"><span class="annot"><span class="annottext">Int -&gt; Options -&gt; FilePath -&gt; FilePath
+</span><span id="line-68"></span><span>                       </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537379"><span id="local-6989586621679537381"><span id="local-6989586621679537383"><span class="annot"><span class="annottext">Int -&gt; Options -&gt; FilePath -&gt; FilePath
 [Options] -&gt; FilePath -&gt; FilePath
 Options -&gt; FilePath
 (Int -&gt; Options -&gt; FilePath -&gt; FilePath)
@@ -233,7 +233,7 @@ show :: Options -&gt; FilePath
 $cshow :: Options -&gt; FilePath
 showsPrec :: Int -&gt; Options -&gt; FilePath -&gt; FilePath
 $cshowsPrec :: Int -&gt; Options -&gt; FilePath -&gt; FilePath
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537373"><span id="local-6989586621679537375"><span class="annot"><span class="annottext">Options -&gt; Options -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537375"><span id="local-6989586621679537377"><span class="annot"><span class="annottext">Options -&gt; Options -&gt; Bool
 (Options -&gt; Options -&gt; Bool)
 -&gt; (Options -&gt; Options -&gt; Bool) -&gt; Eq Options
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -241,7 +241,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: Options -&gt; Options -&gt; Bool
 == :: Options -&gt; Options -&gt; Bool
 $c== :: Options -&gt; Options -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537358"><span id="local-6989586621679537360"><span id="local-6989586621679537362"><span id="local-6989586621679537364"><span id="local-6989586621679537366"><span id="local-6989586621679537368"><span id="local-6989586621679537370"><span class="annot"><span class="annottext">Eq Options
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537360"><span id="local-6989586621679537362"><span id="local-6989586621679537364"><span id="local-6989586621679537366"><span id="local-6989586621679537368"><span id="local-6989586621679537370"><span id="local-6989586621679537372"><span class="annot"><span class="annottext">Eq Options
 Eq Options =&gt;
 (Options -&gt; Options -&gt; Ordering)
 -&gt; (Options -&gt; Options -&gt; Bool)
@@ -292,7 +292,7 @@ $cp1Ord :: Eq Options
 </span><span id="line-74"></span><span class="hs-comment">-- | Whether or not to render a transparent background in output png</span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- images.</span><span>
 </span><span id="line-76"></span><span class="hs-keyword">data</span><span> </span><span id="Background"><span class="annot"><a href="Ipe.IpeRender.html#Background"><span class="hs-identifier hs-var">Background</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OpaqueBackground"><span class="annot"><a href="Ipe.IpeRender.html#OpaqueBackground"><span class="hs-identifier hs-var">OpaqueBackground</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="TransparentBackground"><span class="annot"><a href="Ipe.IpeRender.html#TransparentBackground"><span class="hs-identifier hs-var">TransparentBackground</span></a></span></span><span>
-</span><span id="line-77"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537350"><span id="local-6989586621679537352"><span id="local-6989586621679537354"><span class="annot"><span class="annottext">Int -&gt; Background -&gt; FilePath -&gt; FilePath
+</span><span id="line-77"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537352"><span id="local-6989586621679537354"><span id="local-6989586621679537356"><span class="annot"><span class="annottext">Int -&gt; Background -&gt; FilePath -&gt; FilePath
 [Background] -&gt; FilePath -&gt; FilePath
 Background -&gt; FilePath
 (Int -&gt; Background -&gt; FilePath -&gt; FilePath)
@@ -308,7 +308,7 @@ show :: Background -&gt; FilePath
 $cshow :: Background -&gt; FilePath
 showsPrec :: Int -&gt; Background -&gt; FilePath -&gt; FilePath
 $cshowsPrec :: Int -&gt; Background -&gt; FilePath -&gt; FilePath
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537342"><span id="local-6989586621679537344"><span id="local-6989586621679537346"><span id="local-6989586621679537348"><span class="annot"><span class="annottext">ReadPrec [Background]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537344"><span id="local-6989586621679537346"><span id="local-6989586621679537348"><span id="local-6989586621679537350"><span class="annot"><span class="annottext">ReadPrec [Background]
 ReadPrec Background
 Int -&gt; ReadS Background
 ReadS [Background]
@@ -328,7 +328,7 @@ readList :: ReadS [Background]
 $creadList :: ReadS [Background]
 readsPrec :: Int -&gt; ReadS Background
 $creadsPrec :: Int -&gt; ReadS Background
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537337"><span id="local-6989586621679537339"><span class="annot"><span class="annottext">Background -&gt; Background -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537339"><span id="local-6989586621679537341"><span class="annot"><span class="annottext">Background -&gt; Background -&gt; Bool
 (Background -&gt; Background -&gt; Bool)
 -&gt; (Background -&gt; Background -&gt; Bool) -&gt; Eq Background
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -336,7 +336,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: Background -&gt; Background -&gt; Bool
 == :: Background -&gt; Background -&gt; Bool
 $c== :: Background -&gt; Background -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537322"><span id="local-6989586621679537324"><span id="local-6989586621679537326"><span id="local-6989586621679537328"><span id="local-6989586621679537330"><span id="local-6989586621679537332"><span id="local-6989586621679537334"><span class="annot"><span class="annottext">Eq Background
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537324"><span id="local-6989586621679537326"><span id="local-6989586621679537328"><span id="local-6989586621679537330"><span id="local-6989586621679537332"><span id="local-6989586621679537334"><span id="local-6989586621679537336"><span class="annot"><span class="annottext">Eq Background
 Eq Background =&gt;
 (Background -&gt; Background -&gt; Ordering)
 -&gt; (Background -&gt; Background -&gt; Bool)
@@ -374,7 +374,7 @@ $c&lt; :: Background -&gt; Background -&gt; Bool
 compare :: Background -&gt; Background -&gt; Ordering
 $ccompare :: Background -&gt; Background -&gt; Ordering
 $cp1Ord :: Eq Background
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537306"><span id="local-6989586621679537308"><span id="local-6989586621679537310"><span id="local-6989586621679537312"><span id="local-6989586621679537314"><span id="local-6989586621679537316"><span id="local-6989586621679537318"><span id="local-6989586621679537320"><span class="annot"><span class="annottext">Int -&gt; Background
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537308"><span id="local-6989586621679537310"><span id="local-6989586621679537312"><span id="local-6989586621679537314"><span id="local-6989586621679537316"><span id="local-6989586621679537318"><span id="local-6989586621679537320"><span id="local-6989586621679537322"><span class="annot"><span class="annottext">Int -&gt; Background
 Background -&gt; Int
 Background -&gt; [Background]
 Background -&gt; Background
@@ -419,7 +419,7 @@ $csucc :: Background -&gt; Background
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span class="hs-comment">-- | Whether or not to crop the output image.</span><span>
 </span><span id="line-80"></span><span class="hs-keyword">data</span><span> </span><span id="Crop"><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-var">Crop</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NoCrop"><span class="annot"><a href="Ipe.IpeRender.html#NoCrop"><span class="hs-identifier hs-var">NoCrop</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Crop"><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-var">Crop</span></a></span></span><span>
-</span><span id="line-81"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537300"><span id="local-6989586621679537302"><span id="local-6989586621679537304"><span class="annot"><span class="annottext">Int -&gt; Crop -&gt; FilePath -&gt; FilePath
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679537302"><span id="local-6989586621679537304"><span id="local-6989586621679537306"><span class="annot"><span class="annottext">Int -&gt; Crop -&gt; FilePath -&gt; FilePath
 [Crop] -&gt; FilePath -&gt; FilePath
 Crop -&gt; FilePath
 (Int -&gt; Crop -&gt; FilePath -&gt; FilePath)
@@ -435,7 +435,7 @@ show :: Crop -&gt; FilePath
 $cshow :: Crop -&gt; FilePath
 showsPrec :: Int -&gt; Crop -&gt; FilePath -&gt; FilePath
 $cshowsPrec :: Int -&gt; Crop -&gt; FilePath -&gt; FilePath
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537292"><span id="local-6989586621679537294"><span id="local-6989586621679537296"><span id="local-6989586621679537298"><span class="annot"><span class="annottext">ReadPrec [Crop]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537294"><span id="local-6989586621679537296"><span id="local-6989586621679537298"><span id="local-6989586621679537300"><span class="annot"><span class="annottext">ReadPrec [Crop]
 ReadPrec Crop
 Int -&gt; ReadS Crop
 ReadS [Crop]
@@ -452,14 +452,14 @@ readList :: ReadS [Crop]
 $creadList :: ReadS [Crop]
 readsPrec :: Int -&gt; ReadS Crop
 $creadsPrec :: Int -&gt; ReadS Crop
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537288"><span id="local-6989586621679537290"><span class="annot"><span class="annottext">Crop -&gt; Crop -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537290"><span id="local-6989586621679537292"><span class="annot"><span class="annottext">Crop -&gt; Crop -&gt; Bool
 (Crop -&gt; Crop -&gt; Bool) -&gt; (Crop -&gt; Crop -&gt; Bool) -&gt; Eq Crop
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Crop -&gt; Crop -&gt; Bool
 $c/= :: Crop -&gt; Crop -&gt; Bool
 == :: Crop -&gt; Crop -&gt; Bool
 $c== :: Crop -&gt; Crop -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537273"><span id="local-6989586621679537275"><span id="local-6989586621679537277"><span id="local-6989586621679537279"><span id="local-6989586621679537281"><span id="local-6989586621679537283"><span id="local-6989586621679537285"><span class="annot"><span class="annottext">Eq Crop
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537275"><span id="local-6989586621679537277"><span id="local-6989586621679537279"><span id="local-6989586621679537281"><span id="local-6989586621679537283"><span id="local-6989586621679537285"><span id="local-6989586621679537287"><span class="annot"><span class="annottext">Eq Crop
 Eq Crop =&gt;
 (Crop -&gt; Crop -&gt; Ordering)
 -&gt; (Crop -&gt; Crop -&gt; Bool)
@@ -497,7 +497,7 @@ $c&lt; :: Crop -&gt; Crop -&gt; Bool
 compare :: Crop -&gt; Crop -&gt; Ordering
 $ccompare :: Crop -&gt; Crop -&gt; Ordering
 $cp1Ord :: Eq Crop
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537257"><span id="local-6989586621679537259"><span id="local-6989586621679537261"><span id="local-6989586621679537263"><span id="local-6989586621679537265"><span id="local-6989586621679537267"><span id="local-6989586621679537269"><span id="local-6989586621679537271"><span class="annot"><span class="annottext">Int -&gt; Crop
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679537259"><span id="local-6989586621679537261"><span id="local-6989586621679537263"><span id="local-6989586621679537265"><span id="local-6989586621679537267"><span id="local-6989586621679537269"><span id="local-6989586621679537271"><span id="local-6989586621679537273"><span class="annot"><span class="annottext">Int -&gt; Crop
 Crop -&gt; Int
 Crop -&gt; [Crop]
 Crop -&gt; Crop

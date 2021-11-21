@@ -2472,11 +2472,19 @@ toAdjRep :: PlanarGraph s w v e f -> Gr (Vtx v e) (Face f)
 --   adjacencylists should be in counter clockwise order.
 --   
 --   running time: &lt;math&gt;
-fromAdjRep :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+fromAdjRep :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+
+-- | Read a planar graph, given by its adjacencylists in counter clockwise
+--   order.
+--   
+--   pre: no self-loops and no multiedges
+--   
+--   running time: &lt;math&gt;
+fromAdjRep' :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
 
 -- | Builds the graph from the adjacency lists (but ignores all associated
 --   data)
-buildGraph :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal () () ()
+buildGraph :: forall s v e. [Vtx v e] -> PlanarGraph s Primal () () ()
 reorder :: Vector (i :+ a) -> (i -> Int) -> Vector a
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex,
@@ -2619,7 +2627,7 @@ toAdjacencyLists :: PlanarGraph s w v e f -> [(VertexId s w, Vector (VertexId s 
 --   adjacencylists should be in counter clockwise order.
 --   
 --   running time: &lt;math&gt;
-fromAdjRep :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+fromAdjRep :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
 
 -- | Transforms the planar graph into a format that can be easily converted
 --   into JSON format. For every vertex, the adjacent vertices are given in
