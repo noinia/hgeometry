@@ -9,7 +9,17 @@
 -- Converting from/to Adjacency Representation of the plane graph
 --
 --------------------------------------------------------------------------------
-module Data.PlaneGraph.IO where
+module Data.PlaneGraph.IO
+  ( -- $setup
+    --  * Reading and Writing the Plane Graph to a file
+    readPlaneGraph
+  , writePlaneGraph
+  -- * Converting to and from Adjacency list representions
+  , toAdjRep
+  , fromAdjRep, fromAdjRep'
+  -- * Helper functions
+  , makeCCW
+  ) where
 
 import           Control.Lens
 import           Control.Monad (forM_)
@@ -28,7 +38,7 @@ import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 
 
-import Data.RealNumber.Rational
+-- import Data.RealNumber.Rational
 -- import Data.PlanarGraph.Dart
 -- import Data.PlaneGraph.AdjRep
 
@@ -110,8 +120,19 @@ toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdj
 --
 -- running time: \(O(n)\)
 fromAdjRep :: forall s v e f r. Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
-fromAdjRep = PlaneGraph . PGIO.fromAdjRep
-           . first (\(Vtx v p aj x) -> PGA.Vtx v aj $ VertexData p x)
+fromAdjRep = PlaneGraph . PGIO.fromAdjRep . first wrapVtx
+
+-- | Given the AdjacencyList representation of a plane graph,
+-- construct the plane graph representing it. All the adjacencylists
+-- should be in counter clockwise order.
+--
+-- running time: \(O(n)\)
+fromAdjRep' :: forall s v e r. [Vtx v e r] -> PlaneGraph s v e () r
+fromAdjRep' = PlaneGraph . PGIO.fromAdjRep' . map wrapVtx
+
+-- | Convert a vertex in PlaneGeometry format to generic PlanarGraph Vtx format.
+wrapVtx                :: Vtx v e r -> PGA.Vtx (VertexData r v) e
+wrapVtx (Vtx v p aj x) = PGA.Vtx v aj $ VertexData p x
 
 --------------------------------------------------------------------------------
 
@@ -162,42 +183,40 @@ makeCCW (Gr vs fs) = Gr (map sort' vs) fs
 
 -- dart i s = Dart (Arc i) (read s)
 
-data MyWorld
+-- data MyWorld
 
--- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
-myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)
-myPlaneGraph = fromAdjRep @MyWorld myPlaneGraphAdjrep
+-- -- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
+-- myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)
+-- myPlaneGraph = fromAdjRep @MyWorld myPlaneGraphAdjrep
 
-myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)
-myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]
-                        , vtx 1 (Point2 4   4   ) [e 0, e 5, e 12]
-                        , vtx 2 (Point2 3   7   ) [e 0, e 3]
-                        , vtx 3 (Point2 0   5   ) [e 4, e 2]
-                        , vtx 4 (Point2 3   8   ) [e 3, e 13]
-                        , vtx 5 (Point2 8   1   ) [e 0, e 6, e 8, e 1]
-                        , vtx 6 (Point2 6   (-1)) [e 5, e 9]
-                        , vtx 7 (Point2 9   (-1)) [e 8, e 11]
-                        , vtx 8 (Point2 12  1   ) [e 7, e 12, e 5]
-                        , vtx 9 (Point2 8   (-5)) [e 0, e 10, e 6]
-                        , vtx 10 (Point2 12 (-3)) [e 9, e 11]
-                        , vtx 11 (Point2 14 (-1)) [e 10, e 7]
-                        , vtx 12 (Point2 10 4   ) [e 1, e 8, e 13, e 14]
-                        , vtx 13 (Point2 9  6   ) [e 4, e 14, e 12]
-                        , vtx 14 (Point2 8  5   ) [e 13, e 12]
-                        ]
-                        [ Face (0,9) "OuterFace"
-                        , Face (0,5) "A"
-                        , Face (0,1) "B"
-                        , Face (0,2) "C"
-                        , Face (14,13) "D"
-                        , Face (1,12) "E"
-                        , Face (5,8) "F"
-                        ]
-  where
-    e i = (i,())
-    vtx i p es = Vtx i p es i
-
-
+-- myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)
+-- myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]
+--                         , vtx 1 (Point2 4   4   ) [e 0, e 5, e 12]
+--                         , vtx 2 (Point2 3   7   ) [e 0, e 3]
+--                         , vtx 3 (Point2 0   5   ) [e 4, e 2]
+--                         , vtx 4 (Point2 3   8   ) [e 3, e 13]
+--                         , vtx 5 (Point2 8   1   ) [e 0, e 6, e 8, e 1]
+--                         , vtx 6 (Point2 6   (-1)) [e 5, e 9]
+--                         , vtx 7 (Point2 9   (-1)) [e 8, e 11]
+--                         , vtx 8 (Point2 12  1   ) [e 7, e 12, e 5]
+--                         , vtx 9 (Point2 8   (-5)) [e 0, e 10, e 6]
+--                         , vtx 10 (Point2 12 (-3)) [e 9, e 11]
+--                         , vtx 11 (Point2 14 (-1)) [e 10, e 7]
+--                         , vtx 12 (Point2 10 4   ) [e 1, e 8, e 13, e 14]
+--                         , vtx 13 (Point2 9  6   ) [e 4, e 14, e 12]
+--                         , vtx 14 (Point2 8  5   ) [e 13, e 12]
+--                         ]
+--                         [ Face (0,9) "OuterFace"
+--                         , Face (0,5) "A"
+--                         , Face (0,1) "B"
+--                         , Face (0,2) "C"
+--                         , Face (14,13) "D"
+--                         , Face (1,12) "E"
+--                         , Face (5,8) "F"
+--                         ]
+--   where
+--     e i = (i,())
+--     vtx i p es = Vtx i p es i
 
 
 -- myPlaneGraph' :: IO (PlaneGraph MyWorld () () () (RealNumber 5))
