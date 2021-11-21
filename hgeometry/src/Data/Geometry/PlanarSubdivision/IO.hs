@@ -143,32 +143,36 @@ fromTreeRep (PlanarSD ofD inners) = undefined
 ----------------------------------------
 
 
+type InnerSD' s v e f r = Gr (Vtx v e r) (PG.Face (f, [ComponentId s]))
+
 runFromTreeRep :: FromTreeRep s v e f r a -> ( DList.DList (Int, Raw s Int v)
-                                             , DList.DList (Int, InnerSD v e f r)
+                                             , DList.DList (Int, InnerSD' s v e f r)
                                              )
 runFromTreeRep = flip evalState (ComponentId 0) . runWriterT . execWriterT
 
 
 type FromTreeRep s v e f r =
   WriterT (DList.DList (Int, Raw s Int v))
-          (WriterT (DList.DList (Int, InnerSD v e f r))
+          (WriterT (DList.DList (Int, InnerSD' s v e f r))
                    (State (ComponentId s))
           )
 
-handleInner               :: InnerSD v e f r -> FromTreeRep s v e f r ()
-handleInner gr@(Gr as fs) = do ci <- nextCI
-                               tellC (ci, gr)
-                               zipWithM_ (report ci) [0..] as
-                               mapM_ go fs
+handleInner            :: InnerSD v e f r -> FromTreeRep s v e f r (ComponentId s)
+handleInner (Gr as fs) = do ci <- nextCI
+                            zipWithM_ (report ci) [0..] as
+                            fs' <-  mapM go fs
+                            tellC (ci, Gr as fs')
+                            pure ci
   where
     -- re-assign the vertices a local index that we can use to construct a graph out of it.
     report ci li (Vtx i _ _ v) = tellV $ (i, Raw ci li v)
-    go (Face _ _ hs) = mapM_ handleInner hs
+    go (Face e f hs) = (\cis -> PG.Face e (f,cis)) <$> mapM handleInner hs
+
 
 tellV :: (Int, Raw s Int v) -> FromTreeRep s v e f r ()
 tellV = tell . DList.singleton
 
-tellC                    :: (ComponentId s, InnerSD v e f r) -> FromTreeRep s v e f r ()
+tellC                    :: (ComponentId s, InnerSD' s v e f r) -> FromTreeRep s v e f r ()
 tellC (ComponentId i, x) = lift $ tell (DList.singleton (i,x))
 
 nextCI :: FromTreeRep s v e f r (ComponentId s)
@@ -215,14 +219,12 @@ fromAssocs xs = V.create $ do v <- MV.new (length xs)
 
 -- | creates a planegraph for this component, taking care of the vertex mapping as well.
 fromInner                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
-                         -> InnerSD v e f r
-                         -> PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
+                         -> InnerSD' s v e f r
+                         -> PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r
 fromInner vs (Gr ajs fs) = fromAdjRep $ Gr ajs' fs'
   where
     ajs' = map makeLocal ajs
-    fs'  = map (\(Face (i,j) f hs) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
-      -- FIXME: we need to know the componentId of the holes I think. That way we
-      -- can drop the '[InnerSD v e f r]' from the type
+    fs'  = map (\(PG.Face (i,j) (f,hs)) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
 
 
     makeLocal (Vtx i p ns _) = Vtx (idxOf i) p (map (first idxOf) ns) (VertexId i)
