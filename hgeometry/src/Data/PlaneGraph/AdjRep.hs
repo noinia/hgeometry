@@ -21,12 +21,12 @@ import GHC.Generics (Generic)
 --------------------------------------------------------------------------------
 
 -- | A vertex, represented by an id, location, its adjacencies, and its data.
-data Vtx v e r = Vtx { id    :: Int
-                     , loc   :: Point 2 r
+data Vtx v e r = Vtx { id    :: {-# UNPACK #-} !Int
+                     , loc   :: !(Point 2 r)
                      , adj   :: [(Int,e)] -- ^ adjacent vertices + data on the
                                           -- edge. Adjacencies are given in
                                           -- arbitrary order
-                     , vData :: v
+                     , vData :: !v
                      } deriving (Generic, Show, Eq, Functor)
 
 instance (ToJSON r,   ToJSON v, ToJSON e)     => ToJSON   (Vtx v e r) where

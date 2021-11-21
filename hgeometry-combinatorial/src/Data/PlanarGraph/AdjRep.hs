@@ -33,7 +33,7 @@ instance (FromJSON v, FromJSON f) => FromJSON (Gr v f)
 ----------------------------------------
 
 -- | A vertex, represented by an id, its adjacencies, and its data.
-data Vtx v e = Vtx { id    :: Int
+data Vtx v e = Vtx { id    :: {-# UNPACK #-} !Int
                    , adj   :: [(Int,e)] -- ^ adjacent vertices + data
                                         -- on the edge. Some
                                         -- functions, like
@@ -43,7 +43,7 @@ data Vtx v e = Vtx { id    :: Int
                                         -- order around the
                                         -- vertices. This is not (yet)
                                         -- enforced by the data type.
-                   , vData :: v
+                   , vData :: !v
                    } deriving (Generic, Show, Eq)
 
 instance Bifunctor Vtx where
@@ -58,7 +58,7 @@ instance (FromJSON v, FromJSON e) => FromJSON (Vtx v e)
 -- | Faces
 data Face f = Face { incidentEdge :: (Int,Int) -- ^ an edge (u,v) s.t. the face
                                                -- is right from (u,v)
-                   , fData        :: f
+                   , fData        :: !f
                    } deriving (Generic,Functor, Show, Eq)
 
 instance ToJSON f   => ToJSON   (Face f) where
