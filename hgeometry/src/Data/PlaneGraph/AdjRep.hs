@@ -28,7 +28,7 @@ data Vtx v e r = Vtx { id    :: {-# UNPACK #-} !Int
                        -- edge. Idealy adjacencies are given in CCW
                        -- order around the vertex.
                      , vData :: !v
-                     } deriving (Generic, Show, Eq, Functor)
+                     } deriving (Generic, Show, Eq, Functor, Foldable, Traversable)
 
 instance (ToJSON r,   ToJSON v, ToJSON e)     => ToJSON   (Vtx v e r) where
   toEncoding = genericToEncoding defaultOptions

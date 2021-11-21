@@ -32,7 +32,6 @@ import qualified Data.Foldable as F
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.TreeRep
 import qualified Data.PlaneGraph as PG
-import           Data.PlaneGraph.AdjRep (Gr(..))
 import qualified Data.PlaneGraph.AdjRep as PG
 import qualified Data.PlaneGraph.IO as PGIO
 import           Data.Yaml (ParseException)
@@ -78,8 +77,8 @@ toInners psd f0 = map (toInner psd) . F.toList $ holesOf f0 psd
 
 -- | Compute the InnerSD corresponding to the component indicated by
 -- the given dart. The given dart lies on the outside of the hole.
-toInner        :: PlanarSubdivision s v e f r -> Dart s -> InnerSD v e f r
-toInner psd d = InnerSD (mkAdj psd c <$> as) (mkFace psd <$> fs)
+toInner       :: PlanarSubdivision s v e f r -> Dart s -> InnerSD v e f r
+toInner psd d = Gr (mkAdj psd c <$> as) (mkFace psd c <$> fs)
   where
     (_,_,c)  = asLocalD d psd
     (Gr as fs) = PGIO.toAdjRep c
@@ -96,10 +95,14 @@ mkAdj psd c (Vtx _ p ns vi) = Vtx (fromEnum vi) p (map makeGlobal ns) (psd^.data
                        in (fromEnum vj, psd^.dataOf d)
 
 -- | Make Face information.
-mkFace                       :: forall s v e f r. PlanarSubdivision s v e f r
-                             -> PG.Face (FaceId' s)
-                             -> (f, [InnerSD v e f r])
-mkFace psd (PG.Face _ fi) = (psd^.dataOf fi, toInners psd fi)
+mkFace                          :: forall s v e f r.
+                                   PlanarSubdivision s v e f r
+                                -> Component s r
+                                -> PG.Face (FaceId' s)
+                                -> Face v e f r
+mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners psd fi)
+  where
+    toG i = fromEnum $ c^.PG.dataOf (toEnum i :: VertexId' (Wrap s))
 
 
 -- FIXME: InnerSD is more or less a Gr as well. So maybe use that
@@ -110,9 +113,14 @@ mkFace psd (PG.Face _ fi) = (psd^.dataOf fi, toInners psd fi)
 --------------------------------------------------------------------------------
 -- * From TreeRep
 
+-- | Reads a planar subdivision from the given Tree-Rep representation.
 fromTreeRep :: forall s v e f r. PlanarSD v e f r -> PlanarSubdivision s v e f r
-fromTreeRep (PlanarSD ofD is) = undefined
+fromTreeRep (PlanarSD ofD inners) = undefined
 
+
+
+-- fromInner                  :: InnerSD s v e f r -> PlaneGraph (Wrap s) v e f r
+-- fromInner (InnerSD ajs fs) =
 
 
 --------------------------------------------------------------------------------
