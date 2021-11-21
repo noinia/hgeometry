@@ -118,6 +118,9 @@ toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdj
 -- construct the plane graph representing it. All the adjacencylists
 -- should be in counter clockwise order.
 --
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
+--
 -- running time: \(O(n)\)
 fromAdjRep :: forall s v e f r. Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
 fromAdjRep = PlaneGraph . PGIO.fromAdjRep . first wrapVtx
@@ -125,6 +128,8 @@ fromAdjRep = PlaneGraph . PGIO.fromAdjRep . first wrapVtx
 -- | Given the AdjacencyList representation of a plane graph,
 -- construct the plane graph representing it. All the adjacencylists
 -- should be in counter clockwise order.
+--
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
 --
 -- running time: \(O(n)\)
 fromAdjRep' :: forall s v e r. [Vtx v e r] -> PlaneGraph s v e () r

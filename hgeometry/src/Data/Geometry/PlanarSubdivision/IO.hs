@@ -25,18 +25,25 @@ module Data.Geometry.PlanarSubdivision.IO
 
   ) where
 
+-- import Data.PlanarGraph.Dart(Arc(..))
 import           Control.Lens hiding (holesOf)
+import           Control.Monad.State.Strict
+import           Control.Monad.Writer
 import           Data.Aeson
+import           Data.Bifunctor
 import qualified Data.ByteString as B
+import qualified Data.DList as DList
 import qualified Data.Foldable as F
 import           Data.Geometry.PlanarSubdivision.Basic
+import           Data.Geometry.PlanarSubdivision.Raw
 import           Data.Geometry.PlanarSubdivision.TreeRep
 import qualified Data.PlaneGraph as PG
 import qualified Data.PlaneGraph.AdjRep as PG
 import qualified Data.PlaneGraph.IO as PGIO
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
-
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
@@ -67,6 +74,8 @@ instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
 -- | Convert to a Tree based representation.
 --
 -- The adjacencies of vertices are given in counter clockwise order.
+--
+-- running time: \(O(n)\)
 toTreeRep :: PlanarSubdivision s v e f r -> PlanarSD v e f r
 toTreeRep psd = let f0 = outerFaceId psd
                 in PlanarSD (psd^.dataOf f0) (toInners psd f0)
@@ -113,14 +122,109 @@ mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners
 --------------------------------------------------------------------------------
 -- * From TreeRep
 
+-- data Status s v e = Status !Int
+--                        [(VertexId' s, ComponentId s, v) ]
+--                        [(Dart s, ComponentId s, e)]
+--               deriving (Show)
+
 -- | Reads a planar subdivision from the given Tree-Rep representation.
 fromTreeRep :: forall s v e f r. PlanarSD v e f r -> PlanarSubdivision s v e f r
 fromTreeRep (PlanarSD ofD inners) = undefined
+  where
+    (vs,cs) = bimap (fromAssocs . DList.toList) ()
+            . runFromTreeRep $ mapM_ handleInner inners
 
 
 
--- fromInner                  :: InnerSD s v e f r -> PlaneGraph (Wrap s) v e f r
--- fromInner (InnerSD ajs fs) =
+
+
+
+
+----------------------------------------
+
+
+runFromTreeRep :: FromTreeRep s v e f r a -> ( DList.DList (Int, Raw s Int v)
+                                             , DList.DList (ComponentId s, InnerSD v e f r)
+                                             )
+runFromTreeRep = flip evalState (ComponentId 0) . runWriterT . execWriterT
+
+
+type FromTreeRep s v e f r =
+  WriterT (DList.DList (Int, Raw s Int v))
+          (WriterT (DList.DList (ComponentId s, InnerSD v e f r))
+                   (State (ComponentId s))
+          )
+
+handleInner            :: InnerSD v e f r -> FromTreeRep s v e f r ()
+handleInner (Gr as fs) = do ci <- nextCI
+                            zipWithM_ (report ci) [0..] as
+                            mapM_ go fs
+  where
+    -- re-assign the vertices a local index that we can use to construct a graph out of it.
+    report ci li (Vtx i _ _ v) = tellV $ (i, Raw ci li v)
+    go (Face _ _ hs) = mapM_ handleInner hs
+
+tellV :: (Int, Raw s Int v) -> FromTreeRep s v e f r ()
+tellV = tell . DList.singleton
+
+tellC   :: (ComponentId s, InnerSD v e f r) -> FromTreeRep s v e f r ()
+tellC x = lift $ tell (DList.singleton x)
+
+nextCI :: FromTreeRep s v e f r (ComponentId s)
+nextCI = do ci@(ComponentId i) <- get
+            put $ ComponentId (i+1)
+            pure ci
+
+----------------------------------------
+
+-- | build a vector out of an association list
+fromAssocs    :: [(Int,a)] -> V.Vector a
+fromAssocs xs = V.create $ do v <- MV.new (length xs)
+                              forM_ xs $ \(i,x) -> MV.write v i x
+                              pure v
+
+
+-- ----------------------------------------
+
+-- type OutputDarts s e = WriterT (DList.DList (Dart s, Raw s (Dart (Wrap s)) e))
+--                                (State (Arc s))
+
+-- tellE :: (Dart s, Raw s (Dart (Wrap s)) e) -> OutputDarts s e ()
+-- tellE = tell . DList.singleton
+
+-- nextArc :: OutputDarts s e (Arc s)
+-- nextArc = do a@(Arc i) <- get
+--              put $ Arc (i+1)
+--              pure a
+
+
+-- outputDarts :: PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
+--             -> OutputDarts s e (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [InnerSD v e f r]) r)
+-- outputDarts pg = mapM_
+
+--   edges' pg
+
+
+
+
+-- fromInnerM                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
+--                          -> PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
+--                          -> OutputDarts s e
+--   (PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r)
+
+-- | creates a planegraph for this component, taking care of the vertex mapping as well.
+fromInner                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
+                         -> InnerSD v e f r
+                         -> PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
+fromInner vs (Gr ajs fs) = fromAdjRep $ Gr ajs' fs'
+  where
+    ajs' = map makeLocal ajs
+    fs'  = map (\(Face (i,j) f hs) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
+
+    makeLocal (Vtx i p ns _) = Vtx (idxOf i) p (map (first idxOf) ns) (VertexId i)
+    idxOf i = vs^?!ix i.to _idxVal
+
+
 
 
 --------------------------------------------------------------------------------

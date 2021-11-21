@@ -77,6 +77,9 @@ toAdjRep g = Gr vs fs
 -- into a planar graph. The adjacencylists should be in counter
 -- clockwise order.
 --
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
+--
 -- running time: \(O(n)\)
 fromAdjRep            :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
 fromAdjRep (Gr as fs) = g&faceData   .~ reorder fs' (_unVertexId._unFaceId)
@@ -90,7 +93,8 @@ fromAdjRep (Gr as fs) = g&faceData   .~ reorder fs' (_unVertexId._unFaceId)
 
 -- | Read a planar graph, given by its adjacencylists in counter clockwise order.
 --
--- pre: no self-loops and no multiedges
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
 --
 -- running time: \(O(n)\)
 fromAdjRep' :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
@@ -98,7 +102,8 @@ fromAdjRep' = fst . fromAdjRep''
 
 -- | implementation of fromAdjRep'. Returns the oracle used to build the graph as well.
 --
--- pre: no self-loops and no multiedges
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
 --
 -- running time: \(O(n)\)
 fromAdjRep''    :: forall s v e. [Vtx v e]
