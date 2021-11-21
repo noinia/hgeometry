@@ -9,72 +9,80 @@
 -- Description :  Basic data types to represent a PlanarSubdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
-                                            , VertexData(VertexData), PG.vData, PG.location
+module Data.Geometry.PlanarSubdivision.Basic
+  ( -- $setup
+    PlanarSubdivision(PlanarSubdivision)
+  , Component, ComponentId
 
-                                            , FaceData(FaceData), holes, fData
+    -- * Constructing Planar Subdivisions
+  , fromSimplePolygon
+  , fromConnectedSegments
+  , fromPlaneGraph, fromPlaneGraph'
 
-                                            , PlanarSubdivision(PlanarSubdivision)
-                                            , Wrap
+  -- * Quering the Planar Subdivision
+  , numComponents, numVertices
+  , numEdges, numFaces, numDarts
+  , dual
 
-                                            , Component, ComponentId
+  , components, component
+  , vertices', vertices
+  , edges', edges
+  , faces', internalFaces', faces, internalFaces
+  , darts'
 
-                                            , PolygonFaceData(..)
-                                            , PlanarGraph
-                                            , PlaneGraph
-                                            , fromSimplePolygon
-                                            , fromConnectedSegments
-                                            , fromPlaneGraph, fromPlaneGraph'
+  -- * Incidences and Adjacencies
+  , headOf, tailOf, twin, endPoints
 
-                                            , numComponents, numVertices
-                                            , numEdges, numFaces, numDarts
-                                            , dual
+  , incidentEdges, incomingEdges, outgoingEdges
+  , nextIncidentEdge, prevIncidentEdge
+  , nextIncidentEdgeFrom, prevIncidentEdgeFrom
+  , neighboursOf
 
-                                            , components, component
-                                            , vertices', vertices
-                                            , edges', edges
-                                            , faces', internalFaces', faces, internalFaces
-                                            , darts'
-                                            , traverseVertices, traverseDarts, traverseFaces
-                                            , mapVertices, mapDarts, mapFaces
+  , leftFace, rightFace
+  , outerBoundaryDarts, boundaryVertices, holesOf
+  , outerFaceId
+  , boundary'
 
-                                            , headOf, tailOf, twin, endPoints
+  , Incident (incidences)
+  , common, commonVertices, commonDarts, commonFaces
 
-                                            , incidentEdges, incomingEdges, outgoingEdges
-                                            , nextIncidentEdge, prevIncidentEdge
-                                            , nextIncidentEdgeFrom, prevIncidentEdgeFrom
-                                            , neighboursOf
+  -- * Data
+  , locationOf
+  , HasDataOf(..)
 
-                                            , leftFace, rightFace
-                                            , outerBoundaryDarts, boundaryVertices, holesOf
-                                            , outerFaceId
-                                            , boundary'
+  , endPointsOf, endPointData
 
-                                            , locationOf
-                                            , HasDataOf(..)
+  , faceDataOf
 
-                                            , endPointsOf, endPointData
+  , traverseVertices, traverseDarts, traverseFaces
+  , mapVertices, mapDarts, mapFaces
 
-                                            , faceDataOf
+  -- * Obtaining a Geometric Representation
+  , edgeSegment, edgeSegments
+  , faceBoundary
+  , internalFacePolygon, internalFacePolygons
+  , outerFacePolygon, outerFacePolygon'
+  , facePolygons
 
-                                            , edgeSegment, edgeSegments
-                                            , faceBoundary
-                                            , internalFacePolygon, internalFacePolygons
-                                            , outerFacePolygon, outerFacePolygon'
-                                            , facePolygons
+  -- * IO
 
-                                            , VertexId(..), FaceId(..), Dart, World(..)
+  -- * ReExports
+  , VertexId', FaceId'
+  , VertexId(..), FaceId(..), Dart, World(..)
+  , VertexData(VertexData), PG.vData, PG.location
+  , PlanarGraph
+  , PlaneGraph
 
-                                            , rawVertexData, rawDartData, rawFaceData
-                                            , vertexData, dartData, faceData
-                                            , dataVal
-
-                                            , dartMapping, Raw(..)
-
-                                            , asLocalD, asLocalV, asLocalF
-                                            , Incident (incidences)
-                                            , common, commonVertices, commonDarts, commonFaces
-                                            ) where
+  -- * Helper; dealing with the Raw types
+  , PolygonFaceData(..)
+  , FaceData(FaceData), holes, fData
+  , Wrap
+  , rawVertexData, rawDartData, rawFaceData
+  , vertexData, dartData, faceData
+  , dataVal
+  , dartMapping, Raw(..)
+  , asLocalD, asLocalV, asLocalF
+  ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Bifunctor (first, second)
