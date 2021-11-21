@@ -44,6 +44,8 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
+-- import           VectorBuilder.Builder (vector, Bilder)
+-- import           VectorBuilder.Vector (build)
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
@@ -129,15 +131,37 @@ mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners
 
 -- | Reads a planar subdivision from the given Tree-Rep representation.
 fromTreeRep :: forall s v e f r. PlanarSD v e f r -> PlanarSubdivision s v e f r
-fromTreeRep (PlanarSD ofD inners) = undefined
+fromTreeRep (PlanarSD ofD inners) =
+    PlanarSubdivision pgs' rawVtxData' rawDartData' rawFaceData'
   where
     (vs,cs) = bimap mkVec mkVec . runFromTreeRep $ mapM_ handleInner inners
-
     mkVec = fromAssocs . DList.toList
 
+    rawVtxData' = undefined
+    -- TODO: rebuild the 'vs' vector to replace the Ints by the local
+    -- vertexId's.  we can do this by traversing the vectors in the
+    -- components and using their data field ; that field stores the global vertexId.
+
+    pgs :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r)
     pgs = fmap (fromInner vs) cs
 
+    pgs' = V.imap (makeLocal rawDartData') pgs
 
+    rawDartData' :: V.Vector (Raw s (Dart (Wrap s)) e)
+    rawDartData' = V.concatMap (\(d, ci, pg) -> let d' = twin d in
+                                                  V.fromList [ Raw ci d  (pg^.PG.dataOf d)
+                                                             , Raw ci d' (pg^.PG.dataOf d')
+                                                             ]
+                               )
+                 . V.concatMap Prelude.id
+                 . V.imap (\ci pg -> (,ComponentId @s ci, pg) <$> PG.edges' pg) $ pgs
+
+    rawFaceData' = undefined
+
+
+makeLocal gds i pg = undefined -- PG.mapDarts (\d _ ->
+                               --   ) pg
+  -- fixme: hmm, maybe this is more annoying than I thougth.
 
 
 ----------------------------------------
@@ -185,11 +209,14 @@ nextCI = do ci@(ComponentId i) <- get
 -- | build a vector out of an association list
 fromAssocs    :: [(Int,a)] -> V.Vector a
 fromAssocs xs = V.create $ do v <- MV.new (length xs)
-                              forM_ xs $ \(i,x) -> MV.write v i x
+                              forM_ xs $ uncurry (MV.write v)
                               pure v
 
 
 -- ----------------------------------------
+
+
+
 
 -- type OutputDarts s e = WriterT (DList.DList (Dart s, Raw s (Dart (Wrap s)) e))
 --                                (State (Arc s))
