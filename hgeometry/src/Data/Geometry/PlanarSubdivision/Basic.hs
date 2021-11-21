@@ -212,24 +212,22 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
 --
 -- pre: the input polygon is given in counterclockwise order
 -- running time: \(O(n)\).
-fromSimplePolygon            :: (Ord r, Fractional r)
-                             => proxy s
-                             -> SimplePolygon p r
+fromSimplePolygon            :: forall s p f r. (Ord r, Fractional r)
+                             => SimplePolygon p r
                              -> f -- ^ data inside
                              -> f -- ^ data outside the polygon
                              -> PlanarSubdivision s p () f r
-fromSimplePolygon p pg iD oD =
-  fromPlaneGraph (PG.fromSimplePolygon p pg iD oD)
+fromSimplePolygon pg iD oD =
+  fromPlaneGraph (PG.fromSimplePolygon pg iD oD)
 
 -- | Constructs a connected planar subdivision.
 --
 -- pre: the segments form a single connected component
 -- running time: \(O(n\log n)\)
-fromConnectedSegments    :: (Foldable f, Ord r, Fractional r)
-                         => proxy s
-                         -> f (LineSegment 2 p r :+ e)
-                         -> PlanarSubdivision s (NonEmpty p) e () r
-fromConnectedSegments px = fromPlaneGraph . PG.fromConnectedSegments px
+fromConnectedSegments :: forall s p e r f. (Foldable f, Ord r, Fractional r)
+                      => f (LineSegment 2 p r :+ e)
+                      -> PlanarSubdivision s (NonEmpty p) e () r
+fromConnectedSegments = fromPlaneGraph . PG.fromConnectedSegments
 
 -- g1 = PG.fromConnectedSegments (Identity Test1) testSegs
 -- ps1 = fromConnectedSegments (Identity Test1) testSegs

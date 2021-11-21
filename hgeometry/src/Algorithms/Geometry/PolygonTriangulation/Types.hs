@@ -31,16 +31,15 @@ data PolygonEdgeType = Original | Diagonal
 --
 --
 -- running time: \(O(n\log n)\)
-constructSubdivision                  :: forall proxy r s p. (Fractional r, Ord r)
-                                      => proxy s
-                                      -> LineSegment 2 p r -- ^ A counter-clockwise
-                                                         -- edge along the outer
-                                                         -- boundary
-                                      -> [LineSegment 2 p r] -- ^ remaining original edges
-                                      -> [LineSegment 2 p r] -- ^ diagonals
-                                      -> PlanarSubdivision s
-                                            p PolygonEdgeType PolygonFaceData r
-constructSubdivision px e origs diags = fromPlaneGraph $ constructGraph px e origs diags
+constructSubdivision               :: forall s r p. (Fractional r, Ord r)
+                                   => LineSegment 2 p r -- ^ A counter-clockwise
+                                                      -- edge along the outer
+                                                      -- boundary
+                                   -> [LineSegment 2 p r] -- ^ remaining original edges
+                                   -> [LineSegment 2 p r] -- ^ diagonals
+                                   -> PlanarSubdivision s
+                                         p PolygonEdgeType PolygonFaceData r
+constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs diags
 
 -- constructSubdivision px e origs diags =
 --     subdiv & rawVertexData.traverse.dataVal  %~ NonEmpty.head
@@ -80,22 +79,21 @@ constructSubdivision px e origs diags = fromPlaneGraph $ constructGraph px e ori
 --
 --
 -- running time: \(O(n\log n)\)
-constructGraph                  :: forall proxy r s p. (Fractional r, Ord r)
-                                      => proxy s
-                                      -> LineSegment 2 p r -- ^ A counter-clockwise
+constructGraph                  :: forall s r p. (Fractional r, Ord r)
+                                      => LineSegment 2 p r -- ^ A counter-clockwise
                                                          -- edge along the outer
                                                          -- boundary
                                       -> [LineSegment 2 p r] -- ^ remaining original edges
                                       -> [LineSegment 2 p r] -- ^ diagonals
                                       -> PG.PlaneGraph s
                                             p PolygonEdgeType PolygonFaceData r
-constructGraph px e origs diags =
+constructGraph e origs diags =
     subdiv & PG.vertexData.traverse  %~ NonEmpty.head
            & PG.faceData             .~ faceData'
            & PG.rawDartData.traverse %~ snd
   where
     subdiv :: PG.PlaneGraph s (NonEmpty p) (Bool,PolygonEdgeType) () r
-    subdiv = PG.fromConnectedSegments px $ e' : origs' <> diags'
+    subdiv = PG.fromConnectedSegments $ e' : origs' <> diags'
 
     diags' = (:+ (True, Diagonal)) <$> diags
     origs' = (:+ (False,Original)) <$> origs

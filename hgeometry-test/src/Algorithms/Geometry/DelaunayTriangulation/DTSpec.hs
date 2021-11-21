@@ -18,7 +18,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (fromJust, mapMaybe)
 import qualified Data.PlaneGraph as PG
-import           Data.Proxy
 import           Data.RealNumber.Rational
 import qualified Data.Vector as V
 import           Paths_hgeometry_test
@@ -135,7 +134,7 @@ myPoints' = NonEmpty.fromList . map ext $
 --------------------------------------------------------------------------------
 
 trianG = let dts    = DC.delaunayTriangulation pts''
-         in toPlaneGraph (Proxy @()) dts
+         in toPlaneGraph @() dts
 
 pts'' :: NonEmpty.NonEmpty (Point 2 R :+ Int)
 pts'' = read "(Point2 (-214) 142 :+ 0) :| [Point2 (-59) 297 :+ 2,Point2 (-135) 141 :+ 1,Point2 193 (-123) :+ 6,Point2 51 (-147) :+ 3,Point2 242 114 :+ 7,Point2 186 290 :+ 5,Point2 262 293 :+ 8,Point2 109 1 :+ 4]"

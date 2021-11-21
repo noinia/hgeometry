@@ -23,12 +23,11 @@ import           Test.Hspec
 --------------------------------------------------------------------------------
 
 data Test = Test
-data Id a = Id a
 
 
 
 simplePg  :: PlanarSubdivision Test () () PolygonFaceData Rational
-simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
+simplePg  = fromSimplePolygon @Test simplePg' Inside Outside
 
 simplePg' :: SimplePolygon () Rational
 simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
@@ -42,7 +41,7 @@ simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
                                                              ]
 
 triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
-triangle = (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
+triangle = (\pg -> fromSimplePolygon @Test pg Inside Outside)
          $ trianglePG
 
 trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
@@ -124,11 +123,11 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
 testSpec    :: (Ord r, Eq p, Fractional r, Show r, Show p)
             => SimplePolygon p r -> Spec
 testSpec pg = do
-  let ps = PS.fromSimplePolygon (Id Test) pg Inside Outside
-  sameAsConnectedPG (PG.fromSimplePolygon (Id Test) pg Inside Outside) ps
+  let ps = PS.fromSimplePolygon @Test pg Inside Outside
+  sameAsConnectedPG (PG.fromSimplePolygon @Test pg Inside Outside) ps
   -- sameAsConnectedPG (TM.triangulate' (Id Test) pg)
   --                   (TM.triangulate  (Id Test) pg)
-  sameAsConnectedPG (TR.triangulate' (Id Test) pg) (TR.triangulate  (Id Test) pg)
+  sameAsConnectedPG (TR.triangulate' @Test pg) (TR.triangulate  @Test pg)
   it "correct outerface" $ do
     let i = outerFaceId ps
         x = ps^.dataOf i
@@ -189,14 +188,14 @@ testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 384
                                                              ]
 
 
-testPolyP  = fromSimplePolygon (Id Test) testPoly5 Inside Outside
+testPolyP  = fromSimplePolygon @Test testPoly5 Inside Outside
 testPolygPlaneG = fromJust $ testPolyP^?components.ix 0
 
-monotonePs = MM.makeMonotone (Id Test) testPoly5
+monotonePs = MM.makeMonotone @Test testPoly5
 monotonePlaneG = fromJust $ monotonePs^?components.ix 0
 
-test = TR.triangulate (Id Test) testPoly5
-test' = TR.triangulate' (Id Test) testPoly5
+test = TR.triangulate @Test testPoly5
+test' = TR.triangulate' @Test testPoly5
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
 -- printMP = mapM_ printAsIpeSelection
@@ -242,7 +241,7 @@ noEmptyFacesSpec = describe "fromConnectedSegments, correct handling of high deg
     -- it "connectedsegments.ipe" $
     --   draw' segs3 `shouldBe` mempty
   where
-    draw' = draw . fromConnectedSegments (Identity Test1)
+    draw' = draw . fromConnectedSegments @Test1
 
 readFromIpeFile    :: FilePath -> IO [LineSegment 2 () Rational :+ _]
 readFromIpeFile fp = do Right page <- readSinglePageFile fp
@@ -252,7 +251,7 @@ readFromIpeFile fp = do Right page <- readSinglePageFile fp
 data Test1 = Test1
 
 testX = do segs <- readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.ipe"
-           let ps = fromConnectedSegments (Identity Test1) segs
+           let ps = fromConnectedSegments @Test1 segs
            print $ draw ps
 
 

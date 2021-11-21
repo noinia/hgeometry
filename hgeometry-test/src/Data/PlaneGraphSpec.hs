@@ -39,7 +39,7 @@ spec = describe "PlaneGraph tests" $ do
          --   (Right myGraph)
         -- the result is the same up to renumbering it seems. That is fine.
   where
-    myGraph = fromConnectedSegments (Identity Test1) testSegs
+    myGraph = fromConnectedSegments @Test1 testSegs
 
 
 data Test1 = Test1
@@ -51,10 +51,10 @@ draw g = V.filter isEmpty . snd $ facePolygons (outerFaceId g) g
     isEmpty (_,p :+ _) = (< 3) . length . polygonVertices $ p
 
 test :: PlaneGraph Test1 _ () () R
-test = fromConnectedSegments (Identity Test1) testSegs
+test = fromConnectedSegments @Test1 testSegs
 
 test2 :: PlaneGraph Test1 _ () () R
-test2 = fromConnectedSegments (Identity Test1) testSegs2
+test2 = fromConnectedSegments @Test1 testSegs2
 
 -- |
 --
@@ -199,7 +199,7 @@ myGraph' = Gr [ Vtx 0 (Point2 0 0) [ (1,())
 data InOrOut = In | Out deriving (Show,Eq)
 
 simplePgGraph :: Num r => PlaneGraph Test1 () () InOrOut r
-simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
+simplePgGraph = fromSimplePolygon @Test1 pg In Out
   where
     pg = unsafeFromPoints . map ext $ [ Point2 144 160
                                       , Point2 64 96

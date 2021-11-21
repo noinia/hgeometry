@@ -19,7 +19,6 @@ import           Data.Ext
 import           Data.Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph
-import           Data.Proxy
 import           Data.Tree
 
 --------------------------------------------------------------------------------
@@ -39,7 +38,7 @@ euclideanMST pts = (\v -> g^.locationOf v :+ g^.dataOf v) <$> t
     -- since we care only about the relative order of the edges we can use the
     -- squared Euclidean distance rather than the Euclidean distance, thus
     -- avoiding the Floating constraint
-    g = withEdgeDistances squaredEuclideanDist . toPlaneGraph (Proxy :: Proxy MSTW)
+    g = withEdgeDistances squaredEuclideanDist . toPlaneGraph @MSTW
       . delaunayTriangulation $ pts
     t = mst $ g^.graph
 

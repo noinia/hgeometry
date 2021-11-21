@@ -46,7 +46,7 @@ mainWith                          :: Options -> IO ()
 mainWith (Options inFile outFile) = do
   pts <- readAllFrom @(Point 2 R) inFile
   let pts' = NonEmpty.fromList pts
-      dt   = toPlanarSubdivision (Proxy @DTWorld) . delaunayTriangulation $ pts'
+      dt   = toPlanarSubdivision @DTWorld . delaunayTriangulation $ pts'
       emst = euclideanMST pts'
       out  = [ iO $ drawPlanarSubdivisionWith drawVtx drawEdge (drawInternalFace dt) drawOuterFace dt
                   ! attr SLayer "delaunayTriangulation"

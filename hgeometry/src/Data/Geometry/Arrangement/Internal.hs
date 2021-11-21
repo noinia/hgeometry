@@ -53,39 +53,36 @@ type instance Dimension (Arrangement s l v e f r) = 2
 -- | Builds an arrangement of \(n\) lines
 --
 -- running time: \(O(n^2\log n\)
-constructArrangement       :: (Ord r, Fractional r)
-                           => proxy s
-                           -> [Line 2 r :+ l]
-                           -> Arrangement s l () (Maybe l) () r
-constructArrangement px ls = let b  = makeBoundingBox ls
-                             in constructArrangementInBox' px b ls
+constructArrangement    :: forall s l r. (Ord r, Fractional r)
+                        => [Line 2 r :+ l]
+                        -> Arrangement s l () (Maybe l) () r
+constructArrangement ls = let b  = makeBoundingBox ls
+                          in constructArrangementInBox' b ls
 
 -- | Constructs the arrangemnet inside the box.  note that the resulting box
 -- may be larger than the given box to make sure that all vertices of the
 -- arrangement actually fit.
 --
 -- running time: \(O(n^2\log n\)
-constructArrangementInBox            :: (Ord r, Fractional r)
-                                     => proxy s
-                                     -> Rectangle () r
-                                     -> [Line 2 r :+ l]
-                                     -> Arrangement s l () (Maybe l) () r
-constructArrangementInBox px rect ls = let b  = makeBoundingBox ls
-                                       in constructArrangementInBox' px (b <> rect) ls
+constructArrangementInBox         :: forall s l r. (Ord r, Fractional r)
+                                  => Rectangle () r
+                                  -> [Line 2 r :+ l]
+                                  -> Arrangement s l () (Maybe l) () r
+constructArrangementInBox rect ls = let b  = makeBoundingBox ls
+                                    in constructArrangementInBox' (b <> rect) ls
 
 
 -- | Constructs the arrangemnet inside the box. (for parts to be useful, it is
 -- assumed this boxfits at least the boundingbox of the intersections in the
 -- Arrangement)
-constructArrangementInBox'            :: (Ord r, Fractional r)
-                                      => proxy s
-                                      -> Rectangle () r
-                                      -> [Line 2 r :+ l]
-                                      -> Arrangement s l () (Maybe l) () r
-constructArrangementInBox' px rect ls =
+constructArrangementInBox'         :: forall s l r. (Ord r, Fractional r)
+                                   => Rectangle () r
+                                   -> [Line 2 r :+ l]
+                                   -> Arrangement s l () (Maybe l) () r
+constructArrangementInBox' rect ls =
     Arrangement (V.fromList ls) subdiv rect (link parts' subdiv)
   where
-    subdiv = fromConnectedSegments px segs
+    subdiv = fromConnectedSegments segs
                 & rawVertexData.traverse.dataVal .~ ()
     (segs,parts') = computeSegsAndParts rect ls
 

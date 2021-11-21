@@ -56,7 +56,7 @@ mainWith (Options inFile outFile) = do
           polies' = filter (not . hasSelfIntersections . (^.core)) polies
           intersections' = concatMap (Map.keys . interiorIntersections
                                       . listEdges . (^.core)) polies
-          subdivs = map (\(pg :+ _) -> triangulate (Identity PX) pg) polies'
+          subdivs = map (\(pg :+ _) -> triangulate @PX pg) polies'
           triangles' = mapMaybe (^?_2.core._Left)
                      . concatMap (F.toList. internalFacePolygons) $ subdivs
           -- ofs = map (\s -> faceBoundary (outerFaceId s) s) subdivs
