@@ -231,6 +231,15 @@ instance IpeToSvgAttr IA.Opacity    where attrSvg _ = Just A.fillOpacity
 instance IpeToSvgAttr IA.Tiling     where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.Gradient   where attrSvg _ = Nothing
 
+-- TextAttibuteUniverse
+instance IpeToSvgAttr IA.Width   where attrSvg _ = Nothing
+instance IpeToSvgAttr IA.Height  where attrSvg _ = Nothing
+instance IpeToSvgAttr IA.Depth   where attrSvg _ = Nothing
+instance IpeToSvgAttr IA.VAlign  where attrSvg _ = Nothing
+instance IpeToSvgAttr IA.HAlign  where attrSvg _ = Nothing
+instance IpeToSvgAttr IA.Style   where attrSvg _ = Nothing
+
+
 -- GroupAttributeUniverse
 instance IpeToSvgAttr IA.Clip     where attrSvg _ = Just A.clip
 
@@ -262,6 +271,11 @@ instance Real r => ToValue (IA.IpeDash r) where
   toValue _ = mempty
 
 instance Real r => ToValue (Matrix 3 3 r) where
+  toValue _ = mempty
+
+instance ToValue IA.HorizontalAlignment where
+  toValue _ = mempty
+instance ToValue IA.VerticalAlignment where
   toValue _ = mempty
 
 instance ToValue IA.FillType where
