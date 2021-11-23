@@ -282,7 +282,7 @@ makeLenses ''IpeArrow
 
 -- | A normal arrow
 normalArrow :: IpeArrow r
-normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
+normalArrow = IpeArrow "normal" (IpeSize $ Named "normal")
 
 --------------------------------------------------------------------------------
 -- * Group Attributes
