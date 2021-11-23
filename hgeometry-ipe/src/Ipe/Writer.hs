@@ -254,6 +254,19 @@ instance IpeWriteText r => IpeWriteText (Path r) where
       concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
 
 
+instance IpeWriteText HorizontalAlignment where
+  ipeWriteText = \case
+    AlignLeft    -> Just "left"
+    AlignHCenter -> Just "center"
+    AlignRight   -> Just "right"
+
+instance IpeWriteText VerticalAlignment where
+  ipeWriteText = \case
+    AlignTop      -> Just "top"
+    AlignVCenter  -> Just "center"
+    AlignBottom   -> Just "bottom"
+    AlignBaseline -> Just "baseline"
+
 --------------------------------------------------------------------------------
 instance IpeWriteText r => IpeWrite (IpeSymbol r) where
   ipeWrite (Symbol p n) = f <$> ipeWriteText p

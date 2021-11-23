@@ -43,6 +43,8 @@ data AttributeUniverse = -- common
                        -- Path
                        | Dash | LineCap | LineJoin
                        | FillRule | Arrow | RArrow | StrokeOpacity | Opacity | Tiling | Gradient
+                       -- Text (Label and Minipage)
+                       | Width | Height | Depth | VAlign | HAlign | Style
                        -- Group
                        | Clip
                        -- Extra
@@ -58,10 +60,14 @@ genSingletons [ ''AttributeUniverse ]
 -- objects support the Common Attributes
 type CommonAttributes = [ Layer, Matrix, Pin, Transformations ]
 
+-- | All attributes applicable to Text (TextLabels and Minipages)
+type TextAttributes = CommonAttributes ++
+                      [Stroke, Size, Width, Height, Depth, VAlign, HAlign, Style, Opacity]
+
 -- | All attributes applicable to TextLabels
-type TextLabelAttributes = CommonAttributes
+type TextLabelAttributes = TextAttributes
 -- | All attributes applicable to Minipages
-type MiniPageAttributes  = CommonAttributes
+type MiniPageAttributes  = TextAttributes
 -- | All attributes applicable to Images
 type ImageAttributes     = CommonAttributes
 
@@ -232,10 +238,10 @@ attr p x = x^.re (_Attr p)
 
 -- | Possible values for Pin
 data PinType = No | Yes | Horizontal | Vertical
-             deriving (Eq,Show,Read)
+             deriving (Eq,Show,Read,Enum)
 
 -- | Possible values for Transformation
-data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
+data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq,Enum)
 
 --------------------------------------------------------------------------------
 -- * Text Attributes
@@ -244,7 +250,17 @@ data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 -- and MiniPages. The same structure as for the `CommonAttributes'
 -- applies here.
 
--- | TODO
+data HorizontalAlignment = AlignLeft | AlignHCenter | AlignRight
+                         deriving (Show,Read,Eq,Ord,Enum)
+
+data VerticalAlignment = AlignTop | AlignVCenter | AlignBottom | AlignBaseline
+                       deriving (Show,Read,Eq,Ord,Enum)
+
+-- | Should be a symbolic name.
+type TeXStyle = Text
+
+-- | size of text in points
+type TextSizeUnit r = r
 
 --------------------------------------------------------------------------------
 -- * Symbol Attributes
@@ -324,6 +340,14 @@ instance IpeAttrName StrokeOpacity where attrName _ = "stroke-opacity"
 instance IpeAttrName Opacity    where attrName _ = "opacity"
 instance IpeAttrName Tiling     where attrName _ = "tiling"
 instance IpeAttrName Gradient   where attrName _ = "gradient"
+
+-- TextAttibuteUniverse
+instance IpeAttrName Width   where attrName _ = "width"
+instance IpeAttrName Height  where attrName _ = "height"
+instance IpeAttrName Depth   where attrName _ = "depth"
+instance IpeAttrName VAlign  where attrName _ = "valign"
+instance IpeAttrName HAlign  where attrName _ = "halign"
+instance IpeAttrName Style   where attrName _ = "style"
 
 -- GroupAttributeUniverse
 instance IpeAttrName Clip     where attrName _ = "clip"
