@@ -120,7 +120,8 @@ mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners
 -- * From TreeRep
 
 -- | Reads a planar subdivision from the given Tree-Rep representation.
-fromTreeRep :: forall s v e f r. PlanarSD v e f r -> PlanarSubdivision s v e f r
+fromTreeRep                       :: forall s v e f r. (Num r, Ord r)
+                                  => PlanarSD v e f r -> PlanarSubdivision s v e f r
 fromTreeRep (PlanarSD ofD inners) =
     PlanarSubdivision pgs'' rawVtxData' rawDartData' rawFaceData'
   where
@@ -159,9 +160,28 @@ fromTreeRep (PlanarSD ofD inners) =
 
     rawFaceData' = V.cons (RawFace Nothing ofData) rawInnerFaces
     -- data of the outer face
-    ofData = FaceData (fromVector . fmap (\pg -> pg^.PG.dataOf (PG.outerFaceDart pg)) $ pgs') ofD
+    ofData = FaceData (fromVector . fmap outerBoundaryDart' $ pgs') ofD
 
-    rawInnerFaces = undefined
+
+    rawInnerFaces :: V.Vector (RawFace s f)
+    rawInnerFaces = V.concatMap (\ci pg ->
+                                    (\(lfi, (fd,hcs)) -> RawFace (Just (ci,lfi))
+                                                                 (FaceData (toHoles hcs) fd)
+                                    ) <$> PG.internalFaces pg
+                                )
+                   . V.imap (\ci pg -> (ComponentId @s ci,pg))
+                   $ pgs'
+
+    -- for each of the holes, get a dart on their outer face;
+    -- i.e. since the outer face of the component is actually the inner face of
+    -- the face under consideration we can construct the hole data this way.
+    toHoles ::  [ComponentId s] -> Seq.Seq (Dart s)
+    toHoles = Seq.fromList . map (\(ComponentId ci) -> outerBoundaryDart (pgs' V.! ci))
+
+
+outerBoundaryDart'    :: (Num r, Ord r) => PlaneGraph s' v (Dart s) f r -> Dart s
+outerBoundaryDart' pg = pg^.PG.dataOf (PG.outerFaceDart pg)
+
 
 fromVector v = Seq.fromFunction (V.length v) (v V.!)
 
