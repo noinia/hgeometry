@@ -19,9 +19,9 @@ module Data.Geometry.PlanarSubdivision.IO
 
 
   -- * Converting to and from Adjacency list representions
-  , toTreeRep
-  , toAdjRep
-  , fromAdjRep, fromAdjRep'
+  , toTreeRep, fromTreeRep
+  -- , toAdjRep
+  -- , fromAdjRep, fromAdjRep'
 
   ) where
 
@@ -48,11 +48,15 @@ import           Data.Yaml.Util
 -- import           VectorBuilder.Builder (vector, Bilder)
 -- import           VectorBuilder.Vector (build)
 
+-- -- import Data.Geometry.Point
+import Data.RealNumber.Rational
+
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
 
 -- | Reads a plane graph from a bytestring
-readPlanarSubdivision :: forall s v e f r. (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+readPlanarSubdivision :: forall s v e f r.
+                         (FromJSON v, FromJSON e, FromJSON f, FromJSON r, Num r, Ord r)
                       => B.ByteString
                       -> Either ParseException (PlanarSubdivision s v e f r)
 readPlanarSubdivision = decodeYaml
@@ -68,7 +72,7 @@ instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlanarSubdivision s
   toEncoding = toEncoding . toTreeRep
   toJSON     = toJSON     . toTreeRep
 
-instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r, Num r, Ord r)
          => FromJSON (PlanarSubdivision s v e f r) where
   parseJSON v = fromTreeRep @s <$> parseJSON v
 
@@ -139,7 +143,7 @@ fromTreeRep (PlanarSD ofD inners) =
     pgs' = withGlobalDarts rawDartData' pgs
     -- and finally also with face data
     pgs'' :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (FaceId' s) r)
-    pgs'' = undefined pgs'
+    pgs'' = withGlobalFaceIds rawFaceData' pgs'
 
     -- builds the rawDart data vector. I.e. for every positive dart in
     -- the plane graphs representing the components we collect the
@@ -156,15 +160,13 @@ fromTreeRep (PlanarSD ofD inners) =
                  . V.concatMap Prelude.id
                  . V.imap (\ci pg -> (,ComponentId @s ci, pg) <$> PG.edges' pg) $ pgs
 
-
-
+    rawFaceData' :: V.Vector (RawFace s f)
     rawFaceData' = V.cons (RawFace Nothing ofData) rawInnerFaces
     -- data of the outer face
     ofData = FaceData (fromVector . fmap outerBoundaryDart' $ pgs') ofD
 
-
     rawInnerFaces :: V.Vector (RawFace s f)
-    rawInnerFaces = V.concatMap (\ci pg ->
+    rawInnerFaces = V.concatMap (\(ci, pg) ->
                                     (\(lfi, (fd,hcs)) -> RawFace (Just (ci,lfi))
                                                                  (FaceData (toHoles hcs) fd)
                                     ) <$> PG.internalFaces pg
@@ -176,34 +178,12 @@ fromTreeRep (PlanarSD ofD inners) =
     -- i.e. since the outer face of the component is actually the inner face of
     -- the face under consideration we can construct the hole data this way.
     toHoles ::  [ComponentId s] -> Seq.Seq (Dart s)
-    toHoles = Seq.fromList . map (\(ComponentId ci) -> outerBoundaryDart (pgs' V.! ci))
+    toHoles = Seq.fromList . map (\(ComponentId ci) -> outerBoundaryDart' (pgs' V.! ci))
 
 
+-- | given a component, get a dart --using its global dart id-- on the outer boundary.
 outerBoundaryDart'    :: (Num r, Ord r) => PlaneGraph s' v (Dart s) f r -> Dart s
 outerBoundaryDart' pg = pg^.PG.dataOf (PG.outerFaceDart pg)
-
-
-fromVector v = Seq.fromFunction (V.length v) (v V.!)
-
-
--- Makes sure that the darts in all components accurately point to
--- their corresponding global dart
-withGlobalDarts         :: forall s e f r.
-                           V.Vector (Raw s (Dart (Wrap s)) e) -- ^ global raw dart data
-                        -> V.Vector (PlaneGraph (Wrap s) (VertexId' s) e        (f, [ComponentId s]) r)
-                        -> V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [ComponentId s]) r)
-withGlobalDarts gds pgs = V.zipWith writeTo distributed pgs
-  where
-    -- distribute the global darts to the right component
-    distributed = V.create $ do
-      v <- MV.replicate (V.length pgs) []
-      iforM_ gds $ \di (Raw (ComponentId i) ld _) ->
-        MV.modify v ((fromEnum ld, toEnum @(Dart s) di):) i
-      pure v
-    -- assing the raw dart data from the assocs
-    writeTo assocs pg = pg&PG.rawDartData .~ fromAssocs assocs
-
-
 
 -- | rebuild the global rawVertexData vector by replacing the Ints by the local
 -- vertexId's.
@@ -221,12 +201,46 @@ rebuildRawVtxData pgs gvs = V.create $ do
     pure v
   -- maybe we can use unsafeFreeze . modify . unsafeThaw here to avoid allocating another vector.
 
+-- | Makes sure that the darts in all components accurately point to
+-- their corresponding global dart
+withGlobalDarts         :: forall s v e f r.
+                           V.Vector (Raw s (Dart (Wrap s)) e) -- ^ global raw dart data
+                        -> V.Vector (PlaneGraph (Wrap s) v e        f r)
+                        -> V.Vector (PlaneGraph (Wrap s) v (Dart s) f r)
+withGlobalDarts gds pgs = V.zipWith writeTo distributed pgs
+  where
+    -- distribute the global darts to the right component
+    distributed = V.create $ do
+      v <- MV.replicate (V.length pgs) []
+      iforM_ gds $ \di (Raw (ComponentId i) ld _) ->
+        MV.modify v ((fromEnum ld, toEnum @(Dart s) di):) i
+      pure v
+    -- assing the raw dart data from the assocs
+    writeTo assocs pg = pg&PG.rawDartData .~ fromAssocs assocs
+
+-- | Use the global face id's to assign the local faceIds, similar to how we update the darts
+-- from their global information.
+withGlobalFaceIds         :: forall s v e f g r. V.Vector (RawFace s f) -- ^ global faceId's
+                          -> V.Vector (PlaneGraph (Wrap s) v e g           r)
+                          -> V.Vector (PlaneGraph (Wrap s) v e (FaceId' s) r)
+withGlobalFaceIds gfs pgs = V.zipWith writeTo distributed pgs
+  where
+    -- distribute the global faceId's to the right component
+    distributed = V.create $ do
+      v <- MV.replicate (V.length pgs) []
+      iforM_ gfs $ \fi (RawFace mc _) -> case mc of
+          Nothing                    -> pure ()
+          Just ((ComponentId i), lf) -> MV.modify v ((fromEnum lf, toEnum @(FaceId' s) fi):) i
+      pure v
+    -- assing the raw dart data from the assocs
+    writeTo assocs pg = pg&PG.faceData .~ fromAssocs assocs
 
 ----------------------------------------
 
 
 type InnerSD' s v e f r = Gr (Vtx v e r) (PG.Face (f, [ComponentId s]))
 
+-- | run the fromTreeRep Monad
 runFromTreeRep :: FromTreeRep s v e f r a -> ( DList.DList (Int, Raw s Int v)
                                              , DList.DList (Int, InnerSD' s v e f r)
                                              )
@@ -276,22 +290,13 @@ nextCI = do ci@(ComponentId i) <- get
             put $ ComponentId (i+1)
             pure ci
 
-----------------------------------------
-
--- | build a vector out of an association list
-fromAssocs    :: [(Int,a)] -> V.Vector a
-fromAssocs xs = V.create $ do v <- MV.new (length xs)
-                              forM_ xs $ uncurry (MV.write v)
-                              pure v
-
-
 ------------------------------------------
 
 -- | creates a planegraph for this component, taking care of the vertex mapping as well.
 fromInner                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
                          -> InnerSD' s v e f r
                          -> PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r
-fromInner vs (Gr ajs fs) = fromAdjRep $ Gr ajs' fs'
+fromInner vs (Gr ajs fs) = PG.fromAdjRep $ Gr ajs' fs'
   where
     ajs' = map makeLocal ajs
     fs'  = map (\(PG.Face (i,j) (f,hs)) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
@@ -300,8 +305,19 @@ fromInner vs (Gr ajs fs) = fromAdjRep $ Gr ajs' fs'
     makeLocal (Vtx i p ns _) = Vtx (idxOf i) p (map (first idxOf) ns) (VertexId i)
     idxOf i = vs^?!ix i.to _idxVal
 
+--------------------------------------------------------------------------------
+-- * Generic helpers
+
+-- | build a vector out of an association list
+fromAssocs    :: [(Int,a)] -> V.Vector a
+fromAssocs xs = V.create $ do v <- MV.new (length xs)
+                              forM_ xs $ uncurry (MV.write v)
+                              pure v
 
 
+-- | helper function to convert vectors into Seqs.
+fromVector   :: V.Vector a -> Seq.Seq a
+fromVector v = Seq.fromFunction (V.length v) (v V.!)
 
 --------------------------------------------------------------------------------
 
@@ -315,8 +331,19 @@ fromInner vs (Gr ajs fs) = fromAdjRep $ Gr ajs' fs'
 -- toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdjRep
 --          .  view graph
 
-toAdjRep = undefined
+toAdjRep = toTreeRep
 
-fromAdjRep = undefined
+-- fromAdjRep = undefined
 
-fromAdjRep'= undefined
+-- fromAdjRep'= undefined
+
+
+--------------------------------------------------------------------------------
+
+data Dummy
+
+test :: PlanarSubdivision Dummy Int () String (RealNumber 3)
+test = fromTreeRep myTriangle
+
+test2 :: PlanarSubdivision Dummy Int () String (RealNumber 3)
+test2 = fromTreeRep myTreeRep

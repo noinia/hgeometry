@@ -64,13 +64,13 @@ import           Data.Aeson
 import           Data.Bifunctor (first)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Function (on)
+
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
-import           Data.Geometry.Line (cmpSlope, supportingLine)
+
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Data.Geometry.Vector.VectorFamily
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty

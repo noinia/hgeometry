@@ -74,6 +74,9 @@ instance (Fractional r, Ord r) => LineSegment 2 p r `HasIntersectionWith` Rectan
       -- interior) it also intersects. Handle that case.
       bothOpenAndOnBoundary (OpenLineSegment _ _) = interpolate (1/2) seg `intersects` rect
       bothOpenAndOnBoundary _                     = False
+      -- Note: GHC warns that this pattern suposedly is redundant, that is not actually the case!
+
+
 
 -- instance (Num r, Ord r)
 --          => (LineSegment 2 p r) `IsIntersectableWith` (Boundary (Rectangle q r)) where

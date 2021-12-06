@@ -11,7 +11,7 @@
 module Data.Geometry.PlanarSubdivision.TreeRep
   ( PlanarSD(..), InnerSD
   , Gr(..), Vtx(..), Face(..)
-  , myTreeRep
+  , myTreeRep, myTriangle
   ) where
 
 -- FIXME; uncomment myTreeRep
@@ -20,9 +20,10 @@ import Data.Aeson
 import Data.PlaneGraph.AdjRep (Vtx(..), Gr(..))
 import GHC.Generics (Generic)
 import Data.Geometry.Point
-import Data.RealNumber.Rational
 import Data.Traversable
 import Data.Bitraversable
+
+import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
@@ -134,4 +135,17 @@ myTreeRep = PlanarSD "f_infty" [ Gr ads1 fs1
 
     e i = (i,())
 
+    vtx i p as = Vtx i p as i
+
+
+-- the simplest planar subdivision I could think of: a single triagnle
+myTriangle :: PlanarSD Int () String (RealNumber 3)
+myTriangle = PlanarSD "outerface" [ Gr ads fs ]
+  where
+    ads = [ vtx 0 (Point2 0 0) [e 1, e 2]
+          , vtx 1 (Point2 10 0) [e 2, e 0]
+          , vtx 2 (Point2 0 10) [e 0, e 1]
+          ]
+    fs = [ Face (0,1) "interior" []]
+    e i = (i,())
     vtx i p as = Vtx i p as i
