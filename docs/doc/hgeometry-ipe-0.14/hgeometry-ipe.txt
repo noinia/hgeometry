@@ -1717,14 +1717,14 @@ treeEdges :: Tree a -> [(a, a)]
 module Data.PlaneGraph.Draw
 
 -- | Draws only the values for which we have a Just attribute
-drawPlaneGraph :: forall s r. (Fractional r, Ord r) => IpeOut (PlaneGraph s (Maybe (IpeAttributes IpeSymbol r)) (Maybe (IpeAttributes Path r)) (Maybe (IpeAttributes Path r)) r) Group r
+drawPlaneGraph :: forall s r. (Num r, Ord r) => IpeOut (PlaneGraph s (Maybe (IpeAttributes IpeSymbol r)) (Maybe (IpeAttributes Path r)) (Maybe (IpeAttributes Path r)) r) Group r
 
 -- | Draw everything using the defaults
-drawPlaneGraph' :: forall s v e f r. (Ord r, Fractional r) => IpeOut (PlaneGraph s v e f r) Group r
+drawPlaneGraph' :: forall s v e f r. (Ord r, Num r) => IpeOut (PlaneGraph s v e f r) Group r
 
 -- | Function to draw a graph by giving functions that specify how to
 --   render vertices, edges, and faces.
-drawPlaneGraphWith :: (ToObject vi, ToObject ei, ToObject fi, Fractional r, Ord r) => IpeOut' Maybe (VertexId' s, VertexData r v) vi r -> IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r -> IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r -> IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r -> IpeOut (PlaneGraph s v e f r) Group r
+drawPlaneGraphWith :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) => IpeOut' Maybe (VertexId' s, VertexData r v) vi r -> IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r -> IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r -> IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r -> IpeOut (PlaneGraph s v e f r) Group r
 
 -- | Function to draw a graph by giving the outer faceId and the functions
 --   that specify how to render vertices, edges, and faces.
