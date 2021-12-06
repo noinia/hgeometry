@@ -160,7 +160,7 @@ component ci = components.singular (ix $ unCI ci)
 -- | Constructs a planarsubdivision from a PlaneGraph
 --
 -- runningTime: \(O(n)\)
-fromPlaneGraph   :: forall s v e f r. (Ord r, Fractional r)
+fromPlaneGraph   :: forall s v e f r. (Ord r, Num r)
                       => PlaneGraph s v e f r -> PlanarSubdivision s v e f r
 fromPlaneGraph g = fromPlaneGraph' g (PG.outerFaceDart g)
 
@@ -212,7 +212,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
 --
 -- pre: the input polygon is given in counterclockwise order
 -- running time: \(O(n)\).
-fromSimplePolygon            :: forall s p f r. (Ord r, Fractional r)
+fromSimplePolygon            :: forall s p f r. (Ord r, Num r)
                              => SimplePolygon p r
                              -> f -- ^ data inside
                              -> f -- ^ data outside the polygon
@@ -224,7 +224,7 @@ fromSimplePolygon pg iD oD =
 --
 -- pre: the segments form a single connected component
 -- running time: \(O(n\log n)\)
-fromConnectedSegments :: forall s p e r f. (Foldable f, Ord r, Fractional r)
+fromConnectedSegments :: forall s p e r f. (Foldable f, Ord r, Num r)
                       => f (LineSegment 2 p r :+ e)
                       -> PlanarSubdivision s (NonEmpty p) e () r
 fromConnectedSegments = fromPlaneGraph . PG.fromConnectedSegments

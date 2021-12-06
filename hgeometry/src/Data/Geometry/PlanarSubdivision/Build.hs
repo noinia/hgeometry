@@ -54,7 +54,7 @@ makeLenses ''Label
 -- construct a planarsubdivsion representing them.
 --
 -- running time: \(O(n)\)
-fromPolygons          :: forall proxy s p r f. (Ord r, Fractional r)
+fromPolygons          :: forall proxy s p r f. (Ord r, Num r)
                       => proxy s
                       -> NonEmpty (SimplePolygon p r :+ f)
                       -> f -- ^ data outside the polygons
