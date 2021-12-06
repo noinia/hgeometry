@@ -23,7 +23,7 @@ import           Ipe
 --------------------------------------------------------------------------------
 
 -- | Draws only the values for which we have a Just attribute
-drawPlaneGraph :: forall s r. (Fractional r, Ord r)
+drawPlaneGraph :: forall s r. (Num r, Ord r)
                => IpeOut (PlaneGraph s (Maybe (IpeAttributes IpeSymbol r))
                                        (Maybe (IpeAttributes Path  r))
                                        (Maybe (IpeAttributes Path  r))
@@ -37,7 +37,7 @@ drawPlaneGraph = drawPlaneGraphWith fv fe ff ff
     ff (_,f :+ ma)         = (\a -> defIO f ! a) <$> ma -- draw a face
 
 -- | Draw everything using the defaults
-drawPlaneGraph'    :: forall s v e f r. (Ord r, Fractional r)
+drawPlaneGraph'    :: forall s v e f r. (Ord r, Num r)
                    => IpeOut (PlaneGraph s v e f r) Group r
 drawPlaneGraph' pg = drawPlaneGraph
   (pg&vertexData.traverse   ?~ (mempty :: IpeAttributes IpeSymbol r)
@@ -47,7 +47,7 @@ drawPlaneGraph' pg = drawPlaneGraph
 
 -- | Function to draw a graph by giving functions that specify how to
 -- render vertices, edges, and faces.
-drawPlaneGraphWith                 :: (ToObject vi, ToObject ei, ToObject fi, Fractional r, Ord r)
+drawPlaneGraphWith                 :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r)
                                    => IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
                                    -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
                                    -> IpeOut' Maybe (FaceId' s,   SimplePolygon v r :+ f)  fi r

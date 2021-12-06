@@ -70,6 +70,7 @@ import           Data.Geometry.Interval
 import           Data.Geometry.Line (cmpSlope, supportingLine)
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.Point
+import           Data.Geometry.Vector
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty
@@ -379,7 +380,7 @@ faces' = PG.faces' . _graph
 -- | face Ids of all internal faces in the plane graph
 --
 -- running time: \(O(n)\)
-internalFaces'   :: (Ord r, Fractional r) => PlaneGraph s v e f r  -> V.Vector (FaceId' s)
+internalFaces'   :: (Ord r, Num r) => PlaneGraph s v e f r  -> V.Vector (FaceId' s)
 internalFaces' g = let i = outerFaceId g in V.filter (/= i) $ faces' g
 
 -- | All faces with their face data.
@@ -401,14 +402,14 @@ faces = PG.faces . _graph
 
 -- | Reports the outerface and all internal faces separately.
 -- running time: \(O(n)\)
-faces''   :: (Ord r, Fractional r)
+faces''   :: (Ord r, Num r)
           => PlaneGraph s v e f r -> ((FaceId' s, f), V.Vector (FaceId' s, f))
 faces'' g = let i = outerFaceId g
             in ((i,g^.dataOf i), V.filter (\(j,_) -> i /= j) $ faces g)
 
 -- | Reports all internal faces.
 -- running time: \(O(n)\)
-internalFaces :: (Ord r, Fractional r)
+internalFaces :: (Ord r, Num r)
               => PlaneGraph s v e f r -> V.Vector (FaceId' s, f)
 internalFaces = snd . faces''
 
@@ -761,7 +762,7 @@ endPointData d = PG.endPointData d . _graph
 --
 -- running time: \(O(n)\)
 --
-outerFaceId    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> FaceId' s
+outerFaceId    :: (Ord r, Num r) => PlaneGraph s v e f r -> FaceId' s
 outerFaceId ps = leftFace (outerFaceDart ps) ps
 
 
@@ -770,19 +771,22 @@ outerFaceId ps = leftFace (outerFaceDart ps) ps
 --
 -- running time: \(O(n)\)
 --
-outerFaceDart    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> Dart s
-outerFaceDart ps = d
+outerFaceDart    :: (Ord r, Num r) => PlaneGraph s v e f r -> Dart s
+outerFaceDart pg = d
   where
-    (v,_)  = V.minimumBy (comparing (^._2.location)) . vertices $ ps
+    (v,_)  = V.minimumBy (comparing (^._2.location)) . vertices $ pg
            -- compare lexicographically; i.e. if same x-coord prefer the one with the
            -- smallest y-coord
-    d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
-           .  fmap (\d' -> d' :+ edgeSegment d' ps ^. core.to supportingLine)
-           $ incidentEdges v ps
+
+    (_ :+ d) = V.minimumBy (cwCmpAroundWith' (Vector2 0 1) (pg^.locationOf v :+ ()))
+             . fmap (\d' -> let u = headOf d' pg in (pg^.locationOf u) :+ d)
+             $ outgoingEdges v pg
     -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
     -- basically: find the leftmost vertex, find the incident edge with the largest slope
     -- and take the face left of that edge. This is the outerface.
     -- note that this requires that the edges are straight line segments
+
+  --FIXME: Verify that this does the same thing as before.
 
 
 --------------------------------------------------------------------------------
@@ -911,7 +915,7 @@ facePolygons' i ps = fmap (\j -> (j,internalFacePolygon j ps)) . V.filter (/= i)
 
 -- | lists all internal faces of the plane graph with their
 -- boundaries.
-internalFacePolygons    :: (Ord r, Fractional r)
+internalFacePolygons    :: (Ord r, Num r)
                         => PlaneGraph s v e f r ->  V.Vector (FaceId' s, SimplePolygon v r :+ f)
 internalFacePolygons pg = facePolygons' (outerFaceId pg) pg
 

@@ -4,14 +4,17 @@ module Data.PlaneGraphSpec (spec) where
 import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Ext
+import           Data.Function (on)
+import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import           Data.Ord (comparing)
 import           Data.PlaneGraph
+import           Data.RealNumber.Rational
 import qualified Data.Vector as V
 import           Data.Yaml.Util
 import           Test.Hspec
-import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
@@ -32,6 +35,10 @@ spec = describe "PlaneGraph tests" $ do
            outerFaceId simplePgGraph `shouldBe` FaceId (VertexId 1)
          it "right orientations" $
            allFaceOrientations myGraph `shouldBe` True
+         it "outerfaceDart still the same" $
+           outerFaceDart myGraph `shouldBe` outerFaceDartFractional myGraph
+
+
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "src/Data/myPlaneGraph.yaml")
@@ -228,3 +235,28 @@ outerBoundaryVerticesTestSegs = V.fromList $
                                 , Point2 10 10
                                 , Point2 13 20
                                 ]
+
+
+--------------------------------------------------------------------------------
+
+
+-- | gets a dart incident to the outer face (in particular, that has the
+-- outerface on its left)
+--
+-- running time: \(O(n)\)
+--
+outerFaceDartFractional    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> Dart s
+outerFaceDartFractional ps = d
+  where
+    (v,_)  = V.minimumBy (comparing (^._2.location)) . vertices $ ps
+           -- compare lexicographically; i.e. if same x-coord prefer the one with the
+           -- smallest y-coord
+    d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
+           .  fmap (\d' -> d' :+ edgeSegment d' ps ^. core.to supportingLine)
+           $ incidentEdges v ps
+    -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
+    -- basically: find the leftmost vertex, find the incident edge with the largest slope
+    -- and take the face left of that edge. This is the outerface.
+    -- note that this requires that the edges are straight line segments
+
+      -- this implementation uses a fractional constraint, which I don't think we need.

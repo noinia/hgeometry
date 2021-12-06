@@ -160,7 +160,7 @@ component ci = components.singular (ix $ unCI ci)
 -- | Constructs a planarsubdivision from a PlaneGraph
 --
 -- runningTime: \(O(n)\)
-fromPlaneGraph   :: forall s v e f r. (Ord r, Fractional r)
+fromPlaneGraph   :: forall s v e f r. (Ord r, Num r)
                       => PlaneGraph s v e f r -> PlanarSubdivision s v e f r
 fromPlaneGraph g = fromPlaneGraph' g (PG.outerFaceDart g)
 
