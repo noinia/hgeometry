@@ -40,6 +40,7 @@ import           Data.Geometry.PlanarSubdivision.TreeRep
 import qualified Data.PlaneGraph as PG
 import qualified Data.PlaneGraph.AdjRep as PG
 import qualified Data.PlaneGraph.IO as PGIO
+import qualified Data.Sequence as Seq
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
@@ -115,38 +116,36 @@ mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners
   where
     toG i = fromEnum $ c^.PG.dataOf (toEnum i :: VertexId' (Wrap s))
 
-
--- FIXME: InnerSD is more or less a Gr as well. So maybe use that
--- instead.  the only difference is that apparently a PG.Face refers
--- to an incident edge. My guess is that we need this as well to
--- reconstruct the PSD.
-
 --------------------------------------------------------------------------------
 -- * From TreeRep
-
--- data Status s v e = Status !Int
---                        [(VertexId' s, ComponentId s, v) ]
---                        [(Dart s, ComponentId s, e)]
---               deriving (Show)
 
 -- | Reads a planar subdivision from the given Tree-Rep representation.
 fromTreeRep :: forall s v e f r. PlanarSD v e f r -> PlanarSubdivision s v e f r
 fromTreeRep (PlanarSD ofD inners) =
-    PlanarSubdivision pgs' rawVtxData' rawDartData' rawFaceData'
+    PlanarSubdivision pgs'' rawVtxData' rawDartData' rawFaceData'
   where
     (vs,cs) = bimap mkVec mkVec . runFromTreeRep $ mapM_ handleInner inners
     mkVec = fromAssocs . DList.toList
 
-    rawVtxData' = undefined
-    -- TODO: rebuild the 'vs' vector to replace the Ints by the local
-    -- vertexId's.  we can do this by traversing the vectors in the
-    -- components and using their data field ; that field stores the global vertexId.
+    -- rebuild the global vs vector by replacing the Ints  by the local vertexId's.
+    rawVtxData' = rebuildRawVtxData pgs vs
 
+    -- componetns with only vertex data
     pgs :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r)
     pgs = fmap (fromInner vs) cs
+    -- with also the dart data
+    pgs' :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [ComponentId s]) r)
+    pgs' = withGlobalDarts rawDartData' pgs
+    -- and finally also with face data
+    pgs'' :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (FaceId' s) r)
+    pgs'' = undefined pgs'
 
-    pgs' = V.imap (makeLocal rawDartData') pgs
-
+    -- builds the rawDart data vector. I.e. for every positive dart in
+    -- the plane graphs representing the components we collect the
+    -- dart together with its componentId (and the plane graph
+    -- representing the component) for each positive dart we then thus
+    -- create it, and its twin ; i.e. we make sure these appear
+    -- consecutively and at the right position in the rawDart data vector.
     rawDartData' :: V.Vector (Raw s (Dart (Wrap s)) e)
     rawDartData' = V.concatMap (\(d, ci, pg) -> let d' = twin d in
                                                   V.fromList [ Raw ci d  (pg^.PG.dataOf d)
@@ -156,12 +155,51 @@ fromTreeRep (PlanarSD ofD inners) =
                  . V.concatMap Prelude.id
                  . V.imap (\ci pg -> (,ComponentId @s ci, pg) <$> PG.edges' pg) $ pgs
 
-    rawFaceData' = undefined
 
 
-makeLocal gds i pg = undefined -- PG.mapDarts (\d _ ->
-                               --   ) pg
-  -- fixme: hmm, maybe this is more annoying than I thougth.
+    rawFaceData' = V.cons (RawFace Nothing ofData) rawInnerFaces
+    -- data of the outer face
+    ofData = FaceData (fromVector . fmap (\pg -> pg^.PG.dataOf (PG.outerFaceDart pg)) $ pgs') ofD
+
+    rawInnerFaces = undefined
+
+fromVector v = Seq.fromFunction (V.length v) (v V.!)
+
+
+-- Makes sure that the darts in all components accurately point to
+-- their corresponding global dart
+withGlobalDarts         :: forall s e f r.
+                           V.Vector (Raw s (Dart (Wrap s)) e) -- ^ global raw dart data
+                        -> V.Vector (PlaneGraph (Wrap s) (VertexId' s) e        (f, [ComponentId s]) r)
+                        -> V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [ComponentId s]) r)
+withGlobalDarts gds pgs = V.zipWith writeTo distributed pgs
+  where
+    -- distribute the global darts to the right component
+    distributed = V.create $ do
+      v <- MV.replicate (V.length pgs) []
+      iforM_ gds $ \di (Raw (ComponentId i) ld _) ->
+        MV.modify v ((fromEnum ld, toEnum @(Dart s) di):) i
+      pure v
+    -- assing the raw dart data from the assocs
+    writeTo assocs pg = pg&PG.rawDartData .~ fromAssocs assocs
+
+
+
+-- | rebuild the global rawVertexData vector by replacing the Ints by the local
+-- vertexId's.
+--
+-- It does this by traversing the vertices in the components. They
+-- already store the global vertexId, so we can use it to update the
+-- global data.
+rebuildRawVtxData         :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) e f r)
+                          -> V.Vector (Raw s Int v)
+                          -> V.Vector (Raw s (VertexId' (Wrap s)) v)
+rebuildRawVtxData pgs gvs = V.create $ do
+    v <- MV.new (V.length gvs)
+    forM_ pgs $ \pg -> forM_ (PG.vertices pg) $ \(lv,VertexData _ (VertexId i)) ->
+      MV.write v i $ (gvs V.! i) { _idxVal  = lv }
+    pure v
+  -- maybe we can use unsafeFreeze . modify . unsafeThaw here to avoid allocating another vector.
 
 
 ----------------------------------------
@@ -180,7 +218,18 @@ type FromTreeRep s v e f r =
           (WriterT (DList.DList (Int, InnerSD' s v e f r))
                    (State (ComponentId s))
           )
+  -- we can output a new vertex (i, rawVtx) where is is the globalId and rawVtx
+  -- is the raw vertex information associated with this vertex.
+  --
+  -- we can also output a new component; i.e. the componentId we
+  -- assign to it and the component itself.
+  --
+  -- state mainstins the first free ci
 
+
+-- | handles the particluar component, i.e. creates a new componentId
+-- (which is returned in the end), and outputs the component, all its
+-- decendant components, and the vertices in these components.
 handleInner            :: InnerSD v e f r -> FromTreeRep s v e f r (ComponentId s)
 handleInner (Gr as fs) = do ci <- nextCI
                             zipWithM_ (report ci) [0..] as
@@ -189,16 +238,19 @@ handleInner (Gr as fs) = do ci <- nextCI
                             pure ci
   where
     -- re-assign the vertices a local index that we can use to construct a graph out of it.
-    report ci li (Vtx i _ _ v) = tellV $ (i, Raw ci li v)
+    report ci li (Vtx i _ _ v) = tellV (i, Raw ci li v)
     go (Face e f hs) = (\cis -> PG.Face e (f,cis)) <$> mapM handleInner hs
 
 
+-- | outputs a new vertex
 tellV :: (Int, Raw s Int v) -> FromTreeRep s v e f r ()
 tellV = tell . DList.singleton
 
+-- | outputs a new component
 tellC                    :: (ComponentId s, InnerSD' s v e f r) -> FromTreeRep s v e f r ()
 tellC (ComponentId i, x) = lift $ tell (DList.singleton (i,x))
 
+-- | gets the next available CI.
 nextCI :: FromTreeRep s v e f r (ComponentId s)
 nextCI = do ci@(ComponentId i) <- get
             put $ ComponentId (i+1)
@@ -213,36 +265,7 @@ fromAssocs xs = V.create $ do v <- MV.new (length xs)
                               pure v
 
 
--- ----------------------------------------
-
-
-
-
--- type OutputDarts s e = WriterT (DList.DList (Dart s, Raw s (Dart (Wrap s)) e))
---                                (State (Arc s))
-
--- tellE :: (Dart s, Raw s (Dart (Wrap s)) e) -> OutputDarts s e ()
--- tellE = tell . DList.singleton
-
--- nextArc :: OutputDarts s e (Arc s)
--- nextArc = do a@(Arc i) <- get
---              put $ Arc (i+1)
---              pure a
-
-
--- outputDarts :: PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
---             -> OutputDarts s e (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [InnerSD v e f r]) r)
--- outputDarts pg = mapM_
-
---   edges' pg
-
-
-
-
--- fromInnerM                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
---                          -> PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r
---                          -> OutputDarts s e
---   (PlaneGraph (Wrap s) (VertexId' s) e (f, [InnerSD v e f r]) r)
+------------------------------------------
 
 -- | creates a planegraph for this component, taking care of the vertex mapping as well.
 fromInner                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
