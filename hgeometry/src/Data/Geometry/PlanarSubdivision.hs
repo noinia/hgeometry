@@ -41,7 +41,7 @@ import           Data.Geometry.Polygon
 --
 -- runningtime: \(O(n\log n\log k)\) in case of polygons with holes,
 -- and \(O(n\log k)\) in case of simple polygons.
-fromPolygons    :: forall s c t p r f. (Foldable1 c, Ord r, Fractional r)
+fromPolygons    :: forall s c t p r f. (Foldable1 c, Ord r, Num r)
                 => f -- ^ outer face data
                 -> c (Polygon t p r :+ f) -- ^ the disjoint polygons
                 -> PlanarSubdivision s p () f r
@@ -49,7 +49,7 @@ fromPolygons oD = mergeAllWith const
                 . fmap (\(pg :+ iD) -> fromPolygon pg iD oD) . toNonEmpty
 
 -- | Version of 'fromPolygons' that accepts 'SomePolygon's as input.
-fromPolygons'      :: forall s c p r f. (Foldable1 c, Ord r, Fractional r)
+fromPolygons'      :: forall s c p r f. (Foldable1 c, Ord r, Num r)
                    => f -- ^ outer face data
                    -> c (SomePolygon p r :+ f) -- ^ the disjoint polygons
                    -> PlanarSubdivision s p () f r
@@ -67,7 +67,7 @@ fromPolygons' oD =
 --
 -- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a
 -- polygon with holes.
-fromPolygon                              :: forall s t p f r. (Ord r, Fractional r)
+fromPolygon                              :: forall s t p f r. (Ord r, Num r)
                                          => Polygon t p r
                                          -> f -- ^ data inside
                                          -> f -- ^ data outside the polygon
