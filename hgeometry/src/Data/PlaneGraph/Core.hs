@@ -468,8 +468,8 @@ incomingEdges v = PG.incomingEdges v . _graph
 
 
 
--- | All edges incident to vertex v in incoming direction
--- (i.e. pointing into v) in counterclockwise order around v.
+-- | All edges incident to vertex v in outgoing direction
+-- (i.e. pointing out of v) in counterclockwise order around v.
 --
 -- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 --
@@ -778,15 +778,17 @@ outerFaceDart pg = d
            -- compare lexicographically; i.e. if same x-coord prefer the one with the
            -- smallest y-coord
 
-    (_ :+ d) = V.minimumBy (cwCmpAroundWith' (Vector2 0 1) (pg^.locationOf v :+ ()))
-             . fmap (\d' -> let u = headOf d' pg in (pg^.locationOf u) :+ d)
+    (_ :+ d) = V.minimumBy (cwCmpAroundWith' (Vector2 (-1) 0) (pg^.locationOf v :+ ()))
+             . fmap (\d' -> let u = headOf d' pg in (pg^.locationOf u) :+ d')
              $ outgoingEdges v pg
     -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
     -- basically: find the leftmost vertex, find the incident edge with the largest slope
     -- and take the face left of that edge. This is the outerface.
     -- note that this requires that the edges are straight line segments
-
-  --FIXME: Verify that this does the same thing as before.
+    --
+    -- note that rather computing slopes we just ask for the first
+    -- vertec cw vertex around v. First with respect to some direction
+    -- pointing towards the left.
 
 
 --------------------------------------------------------------------------------
