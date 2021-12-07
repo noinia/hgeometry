@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry-combinatorial
-version:             0.13
+version:             0.14
 synopsis:            Data structures, and Data types.
 description:
     The Non-geometric data types and algorithms used in HGeometry.
@@ -110,10 +110,8 @@ library
                     Data.PlanarGraph.Immutable
                     Data.PlanarGraph.AdjRep
                     Data.PlanarGraph.IO
-                    Data.PlanarGraph.Dart
-                    Data.PlanarGraph.Core
-                    Data.PlanarGraph.Dual
                     Data.PlanarGraph.EdgeOracle
+                    Data.PlanarGraph.Dart
 
                     -- * Other
                     System.Random.Shuffle
@@ -125,6 +123,9 @@ library
                     Data.Yaml.Util
 
   other-modules:    Data.PlanarGraph.Internal
+                    Data.PlanarGraph.Core
+                    Data.PlanarGraph.Dual
+
 
   -- other-extensions:
   build-depends:
