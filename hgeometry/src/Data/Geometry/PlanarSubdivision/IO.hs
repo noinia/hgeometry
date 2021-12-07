@@ -16,13 +16,9 @@ module Data.Geometry.PlanarSubdivision.IO
     readPlanarSubdivision
   , writePlanarSubdivision
 
-
-
   -- * Converting to and from Adjacency list representions
   , toTreeRep, fromTreeRep
-  -- , toAdjRep
-  -- , fromAdjRep, fromAdjRep'
-
+  , toAdjRep, fromAdjRep
   ) where
 
 -- import Data.PlanarGraph.Dart(Arc(..))
@@ -50,6 +46,7 @@ import           Data.Yaml.Util
 
 -- -- import Data.Geometry.Point
 import Data.RealNumber.Rational
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
@@ -74,7 +71,7 @@ instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlanarSubdivision s
 
 instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r, Num r, Ord r)
          => FromJSON (PlanarSubdivision s v e f r) where
-  parseJSON v = fromTreeRep @s <$> parseJSON v
+  parseJSON v = undefined -- fromTreeRep @s <$> parseJSON v
 
 --------------------------------------------------------------------------------
 
@@ -124,7 +121,9 @@ mkFace psd c (PG.Face (u,v) fi) = Face (toG u, toG v) (psd^.dataOf fi) (toInners
 -- * From TreeRep
 
 -- | Reads a planar subdivision from the given Tree-Rep representation.
-fromTreeRep                       :: forall s v e f r. (Num r, Ord r)
+--
+-- running time: \(O(n)\)
+fromTreeRep                       :: forall s v e f r. (Num r, Ord r, Show r, Show v, Show e, Show f)
                                   => PlanarSD v e f r -> PlanarSubdivision s v e f r
 fromTreeRep (PlanarSD ofD inners) =
     PlanarSubdivision pgs'' rawVtxData' rawDartData' rawFaceData'
@@ -137,13 +136,13 @@ fromTreeRep (PlanarSD ofD inners) =
 
     -- componetns with only vertex data
     pgs :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r)
-    pgs = fmap (fromInner vs) cs
+    pgs = traceShow "woei" $ fmap (fromInner vs) cs
     -- with also the dart data
     pgs' :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (f, [ComponentId s]) r)
-    pgs' = withGlobalDarts rawDartData' pgs
+    pgs' = traceShow "woei2" $ withGlobalDarts rawDartData' pgs
     -- and finally also with face data
     pgs'' :: V.Vector (PlaneGraph (Wrap s) (VertexId' s) (Dart s) (FaceId' s) r)
-    pgs'' = withGlobalFaceIds rawFaceData' pgs'
+    pgs'' = traceShow "woei3" $ withGlobalFaceIds rawFaceData' pgs'
 
     -- builds the rawDart data vector. I.e. for every positive dart in
     -- the plane graphs representing the components we collect the
@@ -161,17 +160,18 @@ fromTreeRep (PlanarSD ofD inners) =
                  . V.imap (\ci pg -> (,ComponentId @s ci, pg) <$> PG.edges' pg) $ pgs
 
     rawFaceData' :: V.Vector (RawFace s f)
-    rawFaceData' = V.cons (RawFace Nothing ofData) rawInnerFaces
+    rawFaceData' = V.cons (RawFace Nothing ofData) (tr "rawInnerFaces" rawInnerFaces)
     -- data of the outer face
-    ofData = FaceData (fromVector . fmap outerBoundaryDart' $ pgs') ofD
+    ofData = FaceData mempty ofD
+      -- FIXME!!     (fromVector . fmap outerBoundaryDart' . tr "???" $ pgs') ofD
 
     rawInnerFaces :: V.Vector (RawFace s f)
-    rawInnerFaces = V.concatMap (\(ci, pg) ->
+    rawInnerFaces = V.concatMap (\(ci, pg) -> -- tr "per coimponent " $
                                     (\(lfi, (fd,hcs)) -> RawFace (Just (ci,lfi))
                                                                  (FaceData (toHoles hcs) fd)
-                                    ) <$> PG.internalFaces pg
+                                    ) <$> PG.internalFaces (tr ("the pg: " <> show (PG.faces' pg)) pg)
                                 )
-                   . V.imap (\ci pg -> (ComponentId @s ci,pg))
+                   . V.imap (\ci pg -> tr "woeix" (ComponentId @s ci,pg)) . tr "goz"
                    $ pgs'
 
     -- for each of the holes, get a dart on their outer face;
@@ -183,7 +183,8 @@ fromTreeRep (PlanarSD ofD inners) =
 
 -- | given a component, get a dart --using its global dart id-- on the outer boundary.
 outerBoundaryDart'    :: (Num r, Ord r) => PlaneGraph s' v (Dart s) f r -> Dart s
-outerBoundaryDart' pg = pg^.PG.dataOf (PG.outerFaceDart pg)
+outerBoundaryDart' pg | trace "called" False = undefined
+                      | otherwise   = pg^.PG.dataOf (PG.outerFaceDart pg)
 
 -- | rebuild the global rawVertexData vector by replacing the Ints by the local
 -- vertexId's.
@@ -203,11 +204,11 @@ rebuildRawVtxData pgs gvs = V.create $ do
 
 -- | Makes sure that the darts in all components accurately point to
 -- their corresponding global dart
-withGlobalDarts         :: forall s v e f r.
+withGlobalDarts         :: forall s v e f r. (Show r, Show v, Show e, Show f) =>
                            V.Vector (Raw s (Dart (Wrap s)) e) -- ^ global raw dart data
                         -> V.Vector (PlaneGraph (Wrap s) v e        f r)
                         -> V.Vector (PlaneGraph (Wrap s) v (Dart s) f r)
-withGlobalDarts gds pgs = V.zipWith writeTo distributed pgs
+withGlobalDarts gds pgs = tr "ret" $ V.zipWith writeTo distributed pgs
   where
     -- distribute the global darts to the right component
     distributed = V.create $ do
@@ -233,7 +234,7 @@ withGlobalFaceIds gfs pgs = V.zipWith writeTo distributed pgs
           Just ((ComponentId i), lf) -> MV.modify v ((fromEnum lf, toEnum @(FaceId' s) fi):) i
       pure v
     -- assing the raw dart data from the assocs
-    writeTo assocs pg = pg&PG.faceData .~ fromAssocs assocs
+    writeTo assocs pg = pg&PG.faceData .~ tr "go" (fromAssocs assocs)
 
 ----------------------------------------
 
@@ -293,14 +294,18 @@ nextCI = do ci@(ComponentId i) <- get
 ------------------------------------------
 
 -- | creates a planegraph for this component, taking care of the vertex mapping as well.
-fromInner                :: V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
+fromInner                :: (Show r, Show v, Show e, Show f) =>
+  V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
                          -> InnerSD' s v e f r
                          -> PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r
 fromInner vs (Gr ajs fs) = PG.fromAdjRep $ Gr ajs' fs'
   where
     ajs' = map makeLocal ajs
     fs'  = map (\(PG.Face (i,j) (f,hs)) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
+    -- FIXME: we are not construcitng a PG.Face for the outer face of this component.
+    -- that should not be an issue anymore now though.
 
+    -- so far the best option seems to be to use PG.fromAdjRep', (or actually preferrably a version that also returns the edge oracle), so that we can set the face data ourselves *after* we've determined the outerFaceId.
 
     makeLocal (Vtx i p ns _) = Vtx (idxOf i) p (map (first idxOf) ns) (VertexId i)
     idxOf i = vs^?!ix i.to _idxVal
@@ -321,22 +326,13 @@ fromVector v = Seq.fromFunction (V.length v) (v V.!)
 
 --------------------------------------------------------------------------------
 
--- -- | Transforms the PlanarSubdivision into adjacency lists. For every
--- -- vertex, the adjacent vertices are given in counter clockwise order.
--- --
--- -- See 'toAdjacencyLists' for notes on how we handle self-loops.
--- --
--- -- running time: \(O(n)\)
--- toAdjRep :: PlanarSubdivision s v e f r -> Gr (Vtx v e r) (Face f)
--- toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdjRep
---          .  view graph
-
+-- |  Alias for 'toTreeRep'
+toAdjRep :: PlanarSubdivision s v e f r -> PlanarSD v e f r
 toAdjRep = toTreeRep
 
--- fromAdjRep = undefined
-
--- fromAdjRep'= undefined
-
+-- | Alias for 'fromTreeRep'
+fromAdjRep :: forall s v e f r. (Num r, Ord r) => PlanarSD v e f r -> PlanarSubdivision s v e f r
+fromAdjRep = undefined -- fromTreeRep
 
 --------------------------------------------------------------------------------
 
@@ -347,3 +343,14 @@ test = fromTreeRep myTriangle
 
 test2 :: PlanarSubdivision Dummy Int () String (RealNumber 3)
 test2 = fromTreeRep myTreeRep
+
+
+tr :: Show b => String -> b -> b
+tr s b = traceShow (s <> " : " <> show b) b
+
+
+
+-- myGr = Gr {adjacencies = [Vtx {id = 0, loc = Point2 0 0, adj = [(1,()),(2,())], vData = VertexId 0},Vtx {id = 1, loc = Point2 10 0, adj = [(2,()),(0,())], vData = VertexId 1},Vtx {id = 2, loc = Point2 0 10, adj = [(0,()),(1,())], vData = VertexId 2}]
+--           , faces = [Face {incidentEdge = (0,1), fData = "interior"}]
+--           }
+-- -- we are not passing any otherface data here....

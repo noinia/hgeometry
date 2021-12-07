@@ -142,7 +142,7 @@ myTreeRep = PlanarSD "f_infty" [ Gr ads1 fs1
 myTriangle :: PlanarSD Int () String (RealNumber 3)
 myTriangle = PlanarSD "outerface" [ Gr ads fs ]
   where
-    ads = [ vtx 0 (Point2 0 0) [e 1, e 2]
+    ads = [ vtx 0 (Point2 0 0)  [e 1, e 2]
           , vtx 1 (Point2 10 0) [e 2, e 0]
           , vtx 2 (Point2 0 10) [e 0, e 1]
           ]

@@ -120,6 +120,7 @@ toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdj
 --
 -- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
 --      - no self-loops and no multi-edges
+--      - we specify some face information for all of the vertices, edges, and faces
 --
 -- running time: \(O(n)\)
 fromAdjRep :: forall s v e f r. Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
