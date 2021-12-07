@@ -5,7 +5,7 @@ import           Algorithms.Graph.DFS  (dfsSensitive)
 import           Control.DeepSeq       (NFData (rnf))
 import           Control.Exception     (evaluate)
 import qualified Data.Foldable         as F
-import           Data.PlanarGraph.Core (VertexId (VertexId), World (Primal))
+import           Data.PlanarGraph (VertexId (VertexId), World (Primal))
 import qualified Data.Set              as S
 import           Data.Tree             (Tree (rootLabel, subForest))
 import           Test.Hspec            (Spec, anyErrorCall, describe, it, shouldBe, shouldThrow)
