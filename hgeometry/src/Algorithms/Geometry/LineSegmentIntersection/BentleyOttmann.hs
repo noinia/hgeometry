@@ -13,9 +13,6 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
   ( intersections
   , interiorIntersections
-    -- FIXME: Move ordAt and xCoordAt to Data.Geometry.LineSegment?
-  , ordAt
-  , xCoordAt
   ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
@@ -121,24 +118,6 @@ startSegs e = case eventType e of
 
 --------------------------------------------------------------------------------
 
--- | Compare based on the x-coordinate of the intersection with the horizontal
--- line through y
-ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
-ordAt y = comparing (xCoordAt y)
-
--- | Given a y coord and a line segment that intersects the horizontal line
--- through y, compute the x-coordinate of this intersection point.
---
--- note that we will pretend that the line segment is closed, even if it is not
-xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
-      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
-                                    -- precondition it intersects the sweep
-                                    -- line, we return the x-coord of the
-                                    -- rightmost endpoint.
-      | otherwise    = px + alpha * (qx - px)
-  where
-    alpha = (y - py) / (qy - py)
 
 --------------------------------------------------------------------------------
 -- * The Main Sweep
@@ -211,7 +190,7 @@ toStatusStruct p xs = ss `SS.join` hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs
-    ss           = SS.fromListBy (ordAt $ maxY xs) rest
+    ss           = SS.fromListBy (ordAtY $ maxY xs) rest
     hors         = SS.fromListBy (comparing rightEndpoint) hors'
 
     isHorizontal s  = s^.start.core.yCoord == s^.end.core.yCoord

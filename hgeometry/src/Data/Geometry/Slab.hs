@@ -97,13 +97,13 @@ class HasBoundingLines (o :: Orthogonal) where
 instance HasBoundingLines Horizontal where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ horizontalLine
 
-  p `inSlab` (Slab i) = (p^.yCoord) `inInterval` i
+  p `inSlab` (Slab i) = (p^.yCoord) `intersectsInterval` i
 
 
 instance HasBoundingLines Vertical where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ verticalLine
 
-  p `inSlab` (Slab i) = (p^.xCoord) `inInterval` i
+  p `inSlab` (Slab i) = (p^.xCoord) `intersectsInterval` i
 
 
 type instance IntersectionOf (Line 2 r) (Slab o a r) =

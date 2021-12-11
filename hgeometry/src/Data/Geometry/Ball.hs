@@ -156,7 +156,7 @@ pattern Circle c r = Sphere c r
 --
 -- >>> disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
 -- Just (Ball {_center = Point2 0.0 0.0 :+ (), _squaredRadius = 100.0})
-disk       :: (Eq r, Fractional r)
+disk       :: (Ord r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 disk p q r = match (f p `intersect` f q) $
        H (\NoIntersection -> Nothing)

@@ -22,7 +22,7 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line.Internal
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Data.Geometry.Point.Internal
 import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation

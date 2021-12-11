@@ -15,7 +15,7 @@ import           Test.QuickCheck.Instances ()
 import           Test.Util
 
 naive   :: (Ord r, Foldable f) => r -> f (Interval p r) -> [Interval p r]
-naive q = filter (q `inInterval`) . F.toList
+naive q = filter (q `intersectsInterval`) . F.toList
 
 sameAsNaive                 :: (Ord r, Ord p, Foldable f)
                             => f (Interval p r)

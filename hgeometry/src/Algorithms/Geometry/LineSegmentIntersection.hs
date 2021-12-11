@@ -6,28 +6,26 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection
-  ( hasInteriorIntersections
-  , hasSelfIntersections
+  ( BooleanSweep.hasIntersections
+  , BO.intersections
+  , BO.interiorIntersections
   , Intersections
   , Associated(..)
+  , associated
   , IntersectionPoint(..)
   , isEndPointIntersection
-  , associated
-  , Compare
+  , hasSelfIntersections
   ) where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
+import qualified Algorithms.Geometry.LineSegmentIntersection.BooleanSweep as BooleanSweep
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 
--- Tests if there are any interior intersections.
---
--- | \(O(n \log n)\)
-hasInteriorIntersections :: (Ord r, Fractional r)
-                         => [LineSegment 2 p r] -> Bool
-hasInteriorIntersections = not . null . BO.interiorIntersections
 
--- | \(O(n \log n)\)
-hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
-hasSelfIntersections = hasInteriorIntersections . listEdges
+-- | Test if the polygon has self intersections.
+--
+-- \(O(n \log n)\)
+hasSelfIntersections :: (Ord r, Num r) => Polygon t p r -> Bool
+hasSelfIntersections = BooleanSweep.hasIntersections . listEdges
