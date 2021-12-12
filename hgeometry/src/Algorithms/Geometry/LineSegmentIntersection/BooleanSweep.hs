@@ -20,7 +20,7 @@ import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Triangle
+
 import           Data.Intersection
 import qualified Data.List as L
 import           Data.Maybe
@@ -37,11 +37,11 @@ import Data.Geometry.Polygon
 -- | Tests if there are any intersections.
 --
 -- \(O(n\log n)\)
-hasIntersections    :: (Ord r, Num r)
+hasIntersections    :: (Ord r, Num r, Show r, Show p)
                  => [LineSegment 2 p r] -> Bool
 hasIntersections ss = sweep pts SS.empty
   where
-    pts = L.sortBy ordEvents . concatMap asEventPts $ ss
+    pts = tr "events" $ L.sortBy ordEvents . concatMap asEventPts $ ss
 
 -- | Computes the event points for a given line segment
 asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
@@ -57,6 +57,7 @@ asEventPts s =
 
 -- | The actual event consists of a point and its type
 data Event p r = Insert (LineSegment 2 p r) | Delete (LineSegment 2 p r)
+               deriving (Show)
 
 eventPoint :: Event p r -> Point 2 r
 eventPoint (Insert l) = l^.start.core
@@ -83,7 +84,7 @@ ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 type StatusStructure p r = SS.Set (LineSegment 2 p r)
 
 -- | Run the sweep handling all events
-sweep :: forall r p. (Ord r, Num r)
+sweep :: forall r p. (Ord r, Num r, Show r, Show p)
       => [Event p r] -> StatusStructure p r
       -> Bool
 sweep [] _ = False
@@ -96,7 +97,7 @@ sweep (Delete l:eq) ss =
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` after
-sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss =
+sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss = tr ("insert " <> show l) $
     endOverlap || overlaps || sweep eq ss'
   where
     p = l^.start.core
@@ -110,8 +111,8 @@ sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss =
     endOverlap = isClosed startPoint && any (p `intersects`) contains
 
     overlaps = tr "overlaps" $
-      or [ fromMaybe False (intersects l <$> sl)
-                  , fromMaybe False (intersects l <$> sr) ]
+      or [ fromMaybe False (tr ("left:" <> show (l,sl)) $ intersects l <$> sl)
+                  , fromMaybe False (tr ("right: " <> show (l,sr)) $ intersects l <$> sr) ]
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` SS.singleton l `SS.join` after
@@ -178,3 +179,12 @@ s1 = read "LineSegment (Closed (Point2 240 620 :+ ())) (Open (Point2 320 544 :+ 
 s2 = read "LineSegment (Closed (Point2 144 592 :+ ())) (Open (Point2 336 624 :+ ()))"
 
 tr s x = traceShow (s <> " : ", x) x
+
+edges' :: [LineSegment 2 () Int]
+edges' = [ LineSegment (Closed (Point2 240 624 :+ ())) (Open (Point2 320 544 :+ ()))
+--         , LineSegment (Closed (Point2 320 544 :+ ())) (Open (Point2 336 624 :+ ()))
+         , LineSegment (Closed (Point2 336 624 :+ ())) (Open (Point2 144 592 :+ ()))
+         , LineSegment (Closed (Point2 144 592 :+ ())) (Open (Point2 240 624 :+ ()))
+         ]
+
+-- ah, I guess it selects the wrong predecessor/successor seg, since they overlap at the endpoint.
