@@ -61,7 +61,7 @@ asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
                in [Event p (Start $ s :| []), Event q (End s)]
 
 -- | Group the segments with the intersection points
-merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
+merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r] -> Intersections p r
 merge = foldr (\(IntersectionPoint p a) -> M.insertWith (<>) p a) M.empty
 
 -- | Group the startpoints such that segments with the same start point
@@ -228,18 +228,18 @@ isClosedStart p (LineSegment s e)
 -- (s:ss) = isClosedStart p s ||
 
 
-shouldReport   :: Eq r => Point 2 r -> [LineSegment 2 p r] -> Associated p r
-shouldReport p = foldMap (\(s,c) -> case c of
-                                      Start'   -> Associated [s] [] []
-                                      End'     -> Associated [] [s] []
-                                      Neighter -> Associated [] [] [s]
-                         )
-               . overlapsOr (\(LineSegment a b,c) -> case c of
-                                             Start'   -> isClosed a
-                                             End'     -> isClosed b
-                                             Neighter -> False
-                              ) (overlap p)
-               . map (\s -> (s, categorize p s))
+-- shouldReport   :: Eq r => Point 2 r -> [LineSegment 2 p r] -> Associated p r
+-- shouldReport p = foldMap (\(s,c) -> case c of
+--                                       Start'   -> Associated [s] [] []
+--                                       End'     -> Associated [] [s] []
+--                                       Neighter -> Associated [] [] [s]
+--                          )
+--                . overlapsOr (\(LineSegment a b,c) -> case c of
+--                                              Start'   -> isClosed a
+--                                              End'     -> isClosed b
+--                                              Neighter -> False
+--                               ) (overlap p)
+--                . map (\s -> (s, categorize p s))
 
 overlap :: Point 2 r -> (LineSegment 2 q r, Cat) -> (LineSegment 2 q r, Cat) -> Bool
 overlap p s1 s2 = go (toStart s1) (toStart s2)
@@ -349,7 +349,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     starts' = filter (isClosedStart p) starts
 
 
-    starts'' = shouldReport p . SS.toAscList $ newSegs
+    -- starts'' = shouldReport p . SS.toAscList $ newSegs
     -- FIXME: we should look at the starts in-order (around p).
     -- closed endpoints we should report anyway. For an open endpoint
     -- we should check if it overlaps with a sucessor or predecessor
@@ -361,7 +361,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     closedEnds = filter (isClosedStart p) ends
 
     toReport = case starts' <> contains' of
-                 (_:_:_) -> [IntersectionPoint p $ associated (starts' <> closedEnds) contains]
+                 (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) contains]
                  _       -> []
 
     -- new status structure

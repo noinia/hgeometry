@@ -310,26 +310,6 @@ withRank v (LineSegment p q) (LineSegment a b) = (i1,i2)
     cmp     :: EndPoint (Point 2 r :+ a) -> EndPoint (Point 2 r :+ b) -> Ordering
     cmp c d = cmpInDirection v (c^.unEndPoint.core) (d^.unEndPoint.core)
 
-
-test1,test2,test3,test4 :: LineSegment 2 () Int
-test1 = ClosedLineSegment (ext $ Point2 0 10) (ext $ Point2 0 20)
-
-test2 = OpenLineSegment (ext $ Point2 0 5) (ext $ Point2 0 20)
-
-test3 = ClosedLineSegment (ext $ Point2 0 21) (ext $ Point2 0 5)
-
-test4 = LineSegment (Open $ ext $ Point2 0 10) (Closed $ ext $ Point2 0 9)
-
-test = withRank (Vector2 0 1) test1 test4
-
-
-shouldBe = (==)
-testI = [ (test1 `intersects` test2 ) `shouldBe` True
-        , (test1 `intersects` test3 ) `shouldBe` True
-        , (test1 `intersects` test4 ) `shouldBe` False
-        , (test2 `intersects` test4 ) `shouldBe` True
-        ]
-
 instance (Ord r, Num r) =>
          LineSegment 2 p r `HasIntersectionWith` LineSegment 2 q r where
   s1@(LineSegment p _) `intersects` s2

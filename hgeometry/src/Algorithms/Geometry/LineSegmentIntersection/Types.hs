@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
@@ -8,16 +9,90 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.Types where
 
+-- import           Algorithms.DivideAndConquer
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
+import           Data.Bifunctor
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Line
 import qualified Data.Map as Map
+import qualified Data.Set as Set
+-- import qualified Data.List as List
 import           GHC.Generics
+import           Data.Vinyl.CoRec
+import           Data.Intersection
+import           Data.Maybe (fromMaybe)
+
+-- --------------------------------------------------------------------------------
+
+-- -- | Represents a set of line segments that intersect in a common
+-- -- point. The segments are ordered based on the CCW order of their
+-- -- starting point with respect to the common point, where (Vector2 0
+-- -- 1) is the zero direction.
+-- --
+-- type CCWOrderedAround p r = ByCCWOrder (LineSegment 2 p r) r
+
+-- -- | A set of points cyclically ordered around some central point.
+-- -- note that we are not actually storing this central point
+-- newtype ByCCWOrder v r =
+--   ByCCWOrder { _unCCWOrderedAround :: MultiMap (Point 2 r) v }
+--   deriving (Show,Eq,Generic)
 
 --------------------------------------------------------------------------------
+
+-- | Assumes that two segments have the same start point
+newtype AroundStart a = AroundStart a deriving (Show,Read,NFData)
+
+instance Eq r => Eq (AroundStart (LineSegment 2 p r)) where
+  -- | equality on endpoint
+  (AroundStart s) == (AroundStart s') = s^.end.core == s'^.end.core
+
+instance (Ord r, Num r) => Ord (AroundStart (LineSegment 2 p r)) where
+  -- | ccw ordered around their suposed common startpoint
+  (AroundStart s) `compare` (AroundStart s') =
+    ccwCmpAround (s^.start.core) (s^.end.core)  (s'^.end.core)
+
+----------------------------------------
+
+-- | Assumes that two segments have the same end point
+newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData)
+
+instance Eq r => Eq (AroundEnd (LineSegment 2 p r)) where
+  -- | equality on endpoint
+  (AroundEnd s) == (AroundEnd s') = s^.start.core == s'^.start.core
+
+instance (Ord r, Num r) => Ord (AroundEnd (LineSegment 2 p r)) where
+  -- | ccw ordered around their suposed common end point
+  (AroundEnd s) `compare` (AroundEnd s') =
+    ccwCmpAround (s^.end.core) (s^.start.core)  (s'^.start.core)
+
+--------------------------------------------------------------------------------
+
+-- | Assumes that two segments intersect in a single point.
+newtype AroundIntersection a = AroundIntersection a deriving (Show,Read,NFData)
+
+instance Eq r => Eq (AroundIntersection (LineSegment 2 p r)) where
+  -- | equality ignores the p type
+  (AroundIntersection s) == (AroundIntersection s') = first (const ()) s == first (const ()) s'
+
+instance (Ord r, Fractional r) => Ord (AroundIntersection (LineSegment 2 p r)) where
+  -- | ccw ordered around their common intersection point.
+  (AroundIntersection s) `compare` (AroundIntersection s') = cmpAroundP p s s'
+    where
+      p = fromMaybe er . asA @(Point 2 r) $ (supportingLine s) `intersect` supportingLine s'
+      er = error "AroundIntersection: Segments don't intersect in a point!"
+
+-- | compare around p
+cmpAroundP        :: (Ord r, Num r) => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+cmpAroundP p s s' = ccwCmpAround p (s^.start.core)  (s'^.start.core)
+
+
+--------------------------------------------------------------------------------
+
+
 
 -- | The line segments that contain a given point p may either have p
 -- as the endpoint or have p in their interior.
@@ -25,11 +100,18 @@ import           GHC.Generics
 -- if somehow the segment is degenerate, and p is both the start and
 -- end it is reported only as the start point.
 data Associated p r =
-  Associated { _startPointOf :: [LineSegment 2 p r] -- ^ segments for which the intersection point is the start point (i.e. s^.start.core == p)
-             , _endPointOf   :: [LineSegment 2 p r] -- ^ segments for which the intersection point is the end point (i.e. s^.end.core == p)
-             , _interiorTo   :: [LineSegment 2 p r]
-             } deriving (Show, Eq, Generic)
+  Associated { _startPointOf :: Set.Set (AroundEnd (LineSegment 2 p r))
+             -- ^ segments for which the intersection point is the
+             -- start point (i.e. s^.start.core == p)
+             , _endPointOf   :: Set.Set (AroundStart (LineSegment 2 p r))
+             -- ^ segments for which the intersection point is the end
+             -- point (i.e. s^.end.core == p)
+             , _interiorTo   :: Set.Set (AroundIntersection (LineSegment 2 p r))
+             } deriving stock (Show, Read, Generic, Eq)
+
 makeLenses ''Associated
+
+
 
 -- | Reports whether this associated has any interior intersections
 --
@@ -37,23 +119,32 @@ makeLenses ''Associated
 isInteriorIntersection :: Associated p r -> Bool
 isInteriorIntersection = not . null . _interiorTo
 
+
 -- | test if the given segment has p as its endpoint, an construct the
 -- appropriate associated representing that.
-mkAssociated                :: (Eq r) => Point 2 r -> LineSegment 2 p r -> Associated p r
+--
+-- pre: p intersects the segment
+mkAssociated                :: (Ord r, Fractional r)
+                            => Point 2 r -> LineSegment 2 p r -> Associated p r
 mkAssociated p s@(LineSegment a b)
-  | p == a^.unEndPoint.core = Associated [s] [] []
-  | p == b^.unEndPoint.core = Associated [] [s] []
-  | otherwise               = mempty
+  | p == a^.unEndPoint.core = mempty&startPointOf .~  Set.singleton (AroundEnd s)
+  | p == b^.unEndPoint.core = mempty&endPointOf   .~  Set.singleton (AroundStart s)
+  | otherwise               = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 
-associated  :: [LineSegment 2 p r] -> [LineSegment 2 p r] -> Associated p r
-associated as bs = Associated [] as bs
+-- | test if the given segment has p as its endpoint, an construct the
+-- appropriate associated representing that.
+--
+-- If p is not one of the endpoints we concstruct an empty Associated!
+--
+mkAssociated'     :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 p r -> Associated p r
+mkAssociated' p s = (mkAssociated p s)&interiorTo .~ mempty
 
+instance (Ord r, Fractional r) => Semigroup (Associated p r) where
+  (Associated ss es is) <> (Associated ss' es' is') =
+    Associated (ss <> ss') (es <> es') (is <> is')
 
-instance Semigroup (Associated p r) where
-  (Associated ss es is) <> (Associated ss' es' is') = Associated (ss <> ss') (es <> es') (is <> is')
-
-instance Monoid (Associated p r) where
+instance (Ord r, Fractional r) => Monoid (Associated p r) where
   mempty = Associated mempty mempty mempty
 
 instance (NFData p, NFData r) => NFData (Associated p r)
@@ -61,13 +152,39 @@ instance (NFData p, NFData r) => NFData (Associated p r)
 -- | For each intersection point the segments intersecting there.
 type Intersections p r = Map.Map (Point 2 r) (Associated p r)
 
--- | An intersection point together with all segments intersecting at this point.
+-- | An intersection point together with all segments intersecting at
+-- this point.
 data IntersectionPoint p r =
   IntersectionPoint { _intersectionPoint :: !(Point 2 r)
                     , _associatedSegs    :: !(Associated p r)
-                    } deriving (Show,Eq)
+                    } deriving (Show,Read,Eq,Generic)
 makeLenses ''IntersectionPoint
 
+instance (NFData p, NFData r) => NFData (IntersectionPoint p r)
 
 
--- newtype E a b = E (a -> b)
+-- sameOrder           :: (Ord r, Num r, Eq p) => Point 2 r
+--                     -> [LineSegment 2 p r] -> [LineSegment 2 p r] -> Bool
+-- sameOrder c ss ss' = f ss == f ss'
+--   where
+--     f = map (^.extra) . sortAround' (ext c) . map (\s -> s^.end.core :+ s)
+
+
+
+
+-- | Given a point p, and a bunch of segments that suposedly intersect
+-- at p, correctly categorize them.
+mkIntersectionPoint         :: (Ord r, Fractional r)
+                            => Point 2 r
+                            -> [LineSegment 2 p r] -- ^ uncategorized
+                            -> [LineSegment 2 p r] -- ^ segments we know contain p,
+                            -> IntersectionPoint p r
+mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ as <> cs
+
+  -- IntersectionPoint p
+  --                           $ Associated mempty mempty (Set.fromAscList cs')
+  --                           <> foldMap (mkAssociated p) as
+  -- where
+  --   cs' = map AroundIntersection . List.sortBy (cmpAroundP p) $ cs
+  -- -- TODO: In the bentley ottman algo we already know the sorted order of the segments
+  -- -- so we can likely save the additional sort

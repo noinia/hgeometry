@@ -11,7 +11,6 @@ module Algorithms.Geometry.LineSegmentIntersection
   , BO.interiorIntersections
   , Intersections
   , Associated(..)
-  , associated
   , IntersectionPoint(..)
   -- , isInteriorIntersection
   , hasSelfIntersections
