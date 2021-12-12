@@ -46,6 +46,10 @@ mkAssociated p s@(LineSegment a b)
   | otherwise               = mempty
 
 
+associated  :: [LineSegment 2 p r] -> [LineSegment 2 p r] -> Associated p r
+associated as bs = Associated [] as bs
+
+
 instance Semigroup (Associated p r) where
   (Associated ss es is) <> (Associated ss' es' is') = Associated (ss <> ss') (es <> es') (is <> is')
 

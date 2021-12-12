@@ -13,7 +13,7 @@ module Algorithms.Geometry.LineSegmentIntersection
   , Associated(..)
   , associated
   , IntersectionPoint(..)
-  , isEndPointIntersection
+  -- , isInteriorIntersection
   , hasSelfIntersections
   ) where
 
@@ -24,8 +24,13 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 
 
+import qualified Data.Map as Map
+
 -- | Test if the polygon has self intersections.
 --
 -- \(O(n \log n)\)
-hasSelfIntersections :: (Ord r, Num r) => Polygon t p r -> Bool
-hasSelfIntersections = BooleanSweep.hasIntersections . listEdges
+hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
+hasSelfIntersections = not . Map.null . BO.interiorIntersections . listEdges
+-- hasSelfIntersections :: (Ord r, Num r) => Polygon t p r -> Bool
+-- hasSelfIntersections = BooleanSweep.hasIntersections . listEdges
+-- FIXME: fix the open/closed bug, then switch to a boolean sweep based version

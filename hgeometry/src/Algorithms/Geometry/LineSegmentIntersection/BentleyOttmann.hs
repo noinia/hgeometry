@@ -248,19 +248,7 @@ overlap p s1 s2 = go (toStart s1) (toStart s2)
                                         Start' -> (s,False)
                                         End'   -> (LineSegment b a,False) -- flip to start
                                         Neighter -> (s, True)
-    go (s1,c1) (s2,c2) = (c1 && c2) -- if both are interiors certainly report
-
-
-      case (c1,c2) of
-      ()
-
-
-  -- case (t1,t2) of
-  --     (Start',Start')   -> undefined
-  --     (End',undefined)     -> undefined
-  --     (Neighter,undefined) ->  undefined
-
-
+    go = undefined
 
 
 
@@ -300,7 +288,6 @@ overlapsWithNeighbour p = go0
 
 
 
-associated as bs = Associated undefined undefined bs
 
 
 annotateReport   :: (a -> Bool) -> [a] -> [(a,Bool)]

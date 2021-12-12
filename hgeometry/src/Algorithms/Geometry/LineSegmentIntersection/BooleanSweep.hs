@@ -37,11 +37,11 @@ import Data.Geometry.Polygon
 -- | Tests if there are any intersections.
 --
 -- \(O(n\log n)\)
-hasIntersections    :: (Ord r, Num r, Show r, Show p)
+hasIntersections    :: (Ord r, Num r)
                  => [LineSegment 2 p r] -> Bool
 hasIntersections ss = sweep pts SS.empty
   where
-    pts = tr "events" $ L.sortBy ordEvents . concatMap asEventPts $ ss
+    pts = L.sortBy ordEvents . concatMap asEventPts $ ss
 
 -- | Computes the event points for a given line segment
 asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
@@ -84,7 +84,7 @@ ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 type StatusStructure p r = SS.Set (LineSegment 2 p r)
 
 -- | Run the sweep handling all events
-sweep :: forall r p. (Ord r, Num r, Show r, Show p)
+sweep :: forall r p. (Ord r, Num r)
       => [Event p r] -> StatusStructure p r
       -> Bool
 sweep [] _ = False
@@ -97,7 +97,7 @@ sweep (Delete l:eq) ss =
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` after
-sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss = tr ("insert " <> show l) $
+sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss =
     endOverlap || overlaps || sweep eq ss'
   where
     p = l^.start.core
@@ -110,9 +110,9 @@ sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss = tr ("insert " <> sho
     -- since there may be segments whose endpoint is open and coincides with p.
     endOverlap = isClosed startPoint && any (p `intersects`) contains
 
-    overlaps = tr "overlaps" $
-      or [ fromMaybe False (tr ("left:" <> show (l,sl)) $ intersects l <$> sl)
-                  , fromMaybe False (tr ("right: " <> show (l,sr)) $ intersects l <$> sr) ]
+    overlaps =
+      or [ fromMaybe False (intersects l <$> sl)
+                  , fromMaybe False (intersects l <$> sr) ]
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` SS.singleton l `SS.join` after
