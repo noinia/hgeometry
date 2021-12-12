@@ -109,10 +109,6 @@ instance Ord r => Ord (Event p r) where
                                         EQ -> s `compare` t
                                         x  -> x
 
--- | An ordering that is decreasing on y, increasing on x
-ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
-ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
-
 -- | Get the segments that start at the given event point
 startSegs   :: Event p r -> [LineSegment 2 p r]
 startSegs e = case eventType e of
@@ -434,3 +430,11 @@ findNewEvent p l r = match (l `intersect` r) $
   :& H (const Nothing) -- full segment intersectsions are handled
                        -- at insertion time
   :& RNil
+
+
+
+type R = Rational
+
+seg1, seg2 :: LineSegment 2 () R
+seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
+seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 5)

@@ -30,7 +30,7 @@ testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
 ipeSpec = do testCases (testPath <> "manual.ipe")
-             -- testCases (testPath <> "open.ipe")
+             testCases (testPath <> "open.ipe")
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
@@ -56,7 +56,7 @@ data TestCase r = TestCase { _segments :: [LineSegment 2 () r]
 toSpec                 :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
 toSpec (TestCase segs) = describe ("testing segments ") $ do
                             samePointsAsNaive segs
-                            sameAsNaive $ take 5 segs
+                            sameAsNaive segs
 
 -- | Test if we have the same intersection points
 samePointsAsNaive segs = it "Same points as Naive" $ do
@@ -68,28 +68,3 @@ sameAsNaive      :: (Fractional r, Ord r, Eq p
                     ) => [LineSegment 2 p r] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do
     (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)
-
-
--- -- | For each intersection point the segments intersecting there.
--- newtype Intersections' p r = Intersections { asMap :: Intersections p r }
-
--- toIntersectionPoints :: Intersections' p r -> [IntersectionPoint p r]
--- toIntersectionPoints = map (uncurry IntersectionPoint) . Map.toAscList . asMap
-
--- instance (Show p, Show r) => Show (Intersections' p r) where
---   show = ("\n" <> ) . intercalate "\n" . map show . toIntersectionPoints
-
--- instance (Ord r, Num r, Eq p) => Eq (Intersections' p r) where
---   is == is' = toIntersectionPoints is == toIntersectionPoints is'
-
-
-
-      --  expected:
-
-
-      -- fromList [(Point2 144 80,Associated {_startPointOf = fromList [AroundEnd (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ()))], _endPointOf = fromList [AroundStart (ClosedLineSegment (Point2 16 16 :+ ()) (Point2 144 80 :+ ()))], _interiorTo = fromList []})
-      --          ,(Point2 144.00052~ 79.99982~,Associated {_startPointOf = fromList [], _endPointOf = fromList [], _interiorTo = fromList [AroundIntersection (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ())),AroundIntersection (ClosedLineSegment (Point2 137.6866 70.548 :+ ()) (Point2 148.53751~ 86.79160~ :+ ()))]}),(Point2 183.32299~ 66.57686~,Associated {_startPointOf = fromList [], _endPointOf = fromList [], _interiorTo = fromList [AroundIntersection (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ())),AroundIntersection (ClosedLineSegment (Point2 128 32 :+ ()) (Point2 256 112 :+ ()))]})]
-
-
-
-      --   but got: fromList [(Point2 144 80,Associated {_startPointOf = fromList [AroundEnd (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ()))], _endPointOf = fromList [AroundStart (ClosedLineSegment (Point2 16 16 :+ ()) (Point2 144 80 :+ ()))], _interiorTo = fromList [AroundIntersection (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ())),AroundIntersection (ClosedLineSegment (Point2 16 16 :+ ()) (Point2 144 80 :+ ()))]}),(Point2 144.00052~ 79.99982~,Associated {_startPointOf = fromList [], _endPointOf = fromList [], _interiorTo = fromList [AroundIntersection (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ())),AroundIntersection (ClosedLineSegment (Point2 137.6866 70.548 :+ ()) (Point2 148.53751~ 86.79160~ :+ ()))]}),(Point2 183.32299~ 66.57686~,Associated {_startPointOf = fromList [], _endPointOf = fromList [], _interiorTo = fromList [AroundIntersection (ClosedLineSegment (Point2 144 80 :+ ()) (Point2 225.708 52.1085 :+ ())),AroundIntersection (ClosedLineSegment (Point2 128 32 :+ ()) (Point2 256 112 :+ ()))]})]

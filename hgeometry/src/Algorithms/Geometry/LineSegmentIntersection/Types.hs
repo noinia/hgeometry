@@ -20,28 +20,21 @@ import           Data.Geometry.Point
 import           Data.Geometry.Line
 import qualified Data.Map as Map
 import qualified Data.Set as Set
--- import qualified Data.List as List
+import           Data.Ord (comparing, Down(..))
 import           GHC.Generics
 import           Data.Vinyl.CoRec
 import           Data.Intersection
 import           Data.Maybe (fromMaybe)
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
--- -- | Represents a set of line segments that intersect in a common
--- -- point. The segments are ordered based on the CCW order of their
--- -- starting point with respect to the common point, where (Vector2 0
--- -- 1) is the zero direction.
--- --
--- type CCWOrderedAround p r = ByCCWOrder (LineSegment 2 p r) r
 
--- -- | A set of points cyclically ordered around some central point.
--- -- note that we are not actually storing this central point
--- newtype ByCCWOrder v r =
---   ByCCWOrder { _unCCWOrderedAround :: MultiMap (Point 2 r) v }
---   deriving (Show,Eq,Generic)
+-- FIXME: What do we do when one segmnet lies *on* the other one. For
+-- the short segment it should be an "around start", but then the
+-- startpoints do not match.
+--
+-- for the long one it's an "on" segment, but they do not intersect
 
---------------------------------------------------------------------------------
 
 -- | Assumes that two segments have the same start point
 newtype AroundStart a = AroundStart a deriving (Show,Read,NFData)
@@ -88,6 +81,10 @@ instance (Ord r, Fractional r) => Ord (AroundIntersection (LineSegment 2 p r)) w
 -- | compare around p
 cmpAroundP        :: (Ord r, Num r) => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
 cmpAroundP p s s' = ccwCmpAround p (s^.start.core)  (s'^.start.core)
+
+
+-- seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
+-- seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 )
 
 
 --------------------------------------------------------------------------------
@@ -188,3 +185,9 @@ mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ a
   --   cs' = map AroundIntersection . List.sortBy (cmpAroundP p) $ cs
   -- -- TODO: In the bentley ottman algo we already know the sorted order of the segments
   -- -- so we can likely save the additional sort
+
+
+
+-- | An ordering that is decreasing on y, increasing on x
+ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
+ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b

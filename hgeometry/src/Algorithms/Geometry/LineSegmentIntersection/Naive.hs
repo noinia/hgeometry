@@ -6,9 +6,9 @@ module Algorithms.Geometry.LineSegmentIntersection.Naive
   ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
-import           Control.Lens
+-- import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Interval
+-- import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -16,6 +16,9 @@ import qualified Data.Map as M
 import           Data.Util
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
+import qualified Data.List as List
+
+--------------------------------------------------------------------------------
 
 -- | Compute all intersections (naively)
 --
@@ -31,8 +34,13 @@ collect              :: (Ord r, Fractional r)
 collect (Two s s') m = match (s `intersect` s') $
      H (\NoIntersection -> m)
   :& H (\p              -> handlePoint s s' p m)
-  :& H (\s''            -> foldr (handlePoint s s') m [s''^.start.core, s''^.end.core])
+  :& H (\s''            -> handlePoint s s' (topEndPoint s'') m)
   :& RNil
+
+
+topEndPoint :: Ord r => LineSegment 2 p r -> Point 2 r
+topEndPoint (LineSegment' (a :+ _) (b :+ _)) = List.minimumBy ordPoints [a,b]
+
 
 -- | Add s and s' to the map with key p
 handlePoint        :: (Ord r, Fractional r)
@@ -41,3 +49,10 @@ handlePoint        :: (Ord r, Fractional r)
                    -> Point 2 r
                    -> Intersections p r -> Intersections p r
 handlePoint s s' p = M.insertWith (<>) p (mkAssociated p s <> mkAssociated p s')
+
+
+type R = Rational
+
+seg1, seg2 :: LineSegment 2 () R
+seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
+seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 5)
