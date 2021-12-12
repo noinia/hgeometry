@@ -16,7 +16,7 @@ import qualified Data.DList                            as DList
 import           Data.Ext
 import qualified Data.Foldable                         as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
+import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.IntMap                           as IntMap

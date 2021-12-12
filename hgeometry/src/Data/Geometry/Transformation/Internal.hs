@@ -51,6 +51,12 @@ type instance NumType (Transformation d r) = r
 identity :: (Num r, Arity (d + 1)) => Transformation d r
 identity = Transformation identityMatrix
 
+instance (Num r, Arity (d+1)) => Semigroup (Transformation d r) where
+  (<>) = (|.|)
+instance (Num r, Arity (d+1)) => Monoid (Transformation d r) where
+  mempty = identity
+
+
 -- if it exists?
 
 -- | Compute the inverse transformation
