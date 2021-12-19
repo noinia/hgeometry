@@ -69,10 +69,8 @@ instance (Fractional r, Ord r) => LineSegment 2 p r `HasIntersectionWith` Rectan
         Open   (a :+ _) -> a `insideBox`  rect -- if strictly inside the seg intersects.
         Closed (a :+ _) -> a `inBox`      rect -- in or on the boundary is fine
 
-      -- if somehow the segment is open, and both endpoints lie on
-      -- different sides of the boundary, (so the segment crosses the
-      -- interior) it also intersects. Handle that case.
-      bothOpenAndOnBoundary (OpenLineSegment _ _) = interpolate (1/2) seg `intersects` rect
+      bothOpenAndOnBoundary (LineSegment (Open _) (Open _))
+                                                  = interpolate (1/2) seg `intersects` rect
       bothOpenAndOnBoundary _                     = False
 
 -- instance (Num r, Ord r)
