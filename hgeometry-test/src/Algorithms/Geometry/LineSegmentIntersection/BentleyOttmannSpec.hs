@@ -7,6 +7,7 @@ import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.LineSegment
+import           Data.Geometry.LineSegmentSpec (arrowAsOpen)
 import           Data.Geometry.Polygon
 import           Data.List (intercalate)
 import qualified Data.Map as Map
@@ -14,6 +15,7 @@ import           Data.Proxy
 import           Data.RealNumber.Rational
 import           Ipe
 import           Paths_hgeometry_test
+import           System.FilePath.Lens
 import           Test.Hspec
 
 type R = RealNumber 5
@@ -30,7 +32,7 @@ testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
 ipeSpec = do testCases (testPath <> "manual.ipe")
-             testCases (testPath <> "open.ipe")
+             -- testCases (testPath <> "open.ipe")
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
@@ -43,20 +45,19 @@ testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
 readInput    :: FilePath -> IO (Either ConversionError [TestCase R])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
-    f page = [TestCase segs]
+    f page = [TestCase (fp^.filename) segs]
       where
-        segs = page^..content.traverse._IpePath.core._asLineSegment
+        segs = map (view core . arrowAsOpen) . readAll $ page
 
 
-
-data TestCase r = TestCase { _segments :: [LineSegment 2 () r]
+data TestCase r = TestCase { _name :: String, _segments :: [LineSegment 2 () r]
                            } deriving (Show,Eq)
 
 
 toSpec                 :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
-toSpec (TestCase segs) = describe ("testing segments ") $ do
-                            samePointsAsNaive segs
-                            sameAsNaive segs
+toSpec (TestCase name segs) = describe ("testing segments from " <> name) $ do
+                                 samePointsAsNaive segs
+                                 sameAsNaive segs
 
 -- | Test if we have the same intersection points
 samePointsAsNaive segs = it "Same points as Naive" $ do
