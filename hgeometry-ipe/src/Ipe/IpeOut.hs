@@ -218,6 +218,14 @@ ipeLineIn bBox l = match (l `intersect` bBox) $
 ipeHalfLine :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
 ipeHalfLine = ipeHalfLineIn defaultBox
 
+-- | Renders a ray, i.e. a half line drawing an arrow in the direction
+-- of the ray.
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeRay :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
+ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
+
+
 -- | Renders the HalfLine in the given box.
 --
 -- pre: the intersection of the box with the line is non-empty
