@@ -17,14 +17,14 @@ import           Data.Bifunctor
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Line
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import           Data.Ord (comparing, Down(..))
 import           GHC.Generics
 import           Data.Vinyl.CoRec
+import           Data.Vinyl
 import           Data.Intersection
-import           Data.Maybe (fromMaybe)
+
 
 ----------------------------------------------------------------------------------
 
@@ -73,10 +73,17 @@ instance Eq r => Eq (AroundIntersection (LineSegment 2 p r)) where
 
 instance (Ord r, Fractional r) => Ord (AroundIntersection (LineSegment 2 p r)) where
   -- | ccw ordered around their common intersection point.
-  (AroundIntersection s) `compare` (AroundIntersection s') = cmpAroundP p s s'
+  l@(AroundIntersection s) `compare` r@(AroundIntersection s') = match (s `intersect` s') $
+        H (\NoIntersection     -> error "AroundIntersection: segments do not intersect!")
+     :& H (\p                  -> cmpAroundP p s s')
+     :& H (\_                  -> (squaredLength s) `compare` (squaredLength s'))
+                                 -- if s and s' just happen to be the same length but
+                                 -- intersect in different behaviour from using (==).
+                                 -- but that situation doese not satisfy the precondition
+                                 -- of aroundIntersection anyway.
+     :& RNil
     where
-      p = fromMaybe er . asA @(Point 2 r) $ (supportingLine s) `intersect` supportingLine s'
-      er = error "AroundIntersection: Segments don't intersect in a point!"
+      squaredLength (LineSegment' a b) = squaredEuclideanDist (a^.core) (b^.core)
 
 -- | compare around p
 cmpAroundP        :: (Ord r, Num r) => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
@@ -84,7 +91,7 @@ cmpAroundP p s s' = ccwCmpAround p (s^.start.core)  (s'^.start.core)
 
 
 -- seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
--- seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 )
+-- seg2 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
 
 
 --------------------------------------------------------------------------------
