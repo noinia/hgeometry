@@ -22,6 +22,7 @@ module Data.Geometry.PlanarSubdivision.IO
   ) where
 
 -- import Data.PlanarGraph.Dart(Arc(..))
+import           Data.Ord (comparing)
 import           Control.Lens hiding (holesOf)
 import           Control.Monad.State.Strict
 import           Control.Monad.Writer
@@ -41,12 +42,11 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
--- import           VectorBuilder.Builder (vector, Bilder)
--- import           VectorBuilder.Vector (build)
-
--- -- import Data.Geometry.Point
-import Data.RealNumber.Rational
-import Debug.Trace
+import           Data.Ext
+import           Data.Geometry.Point
+import           Data.Geometry.Vector
+import           Data.RealNumber.Rational
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
@@ -294,21 +294,43 @@ nextCI = do ci@(ComponentId i) <- get
 ------------------------------------------
 
 -- | creates a planegraph for this component, taking care of the vertex mapping as well.
-fromInner                :: (Show r, Show v, Show e, Show f) =>
+fromInner                :: (Ord r, Num r, Show r, Show v, Show e, Show f) =>
   V.Vector (Raw s Int v) -- ^ provides the mapping to local ints'
                          -> InnerSD' s v e f r
                          -> PlaneGraph (Wrap s) (VertexId' s) e (f, [ComponentId s]) r
 fromInner vs (Gr ajs fs) = PG.fromAdjRep $ Gr ajs' fs'
   where
     ajs' = map makeLocal ajs
-    fs'  = map (\(PG.Face (i,j) (f,hs)) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
-    -- FIXME: we are not construcitng a PG.Face for the outer face of this component.
-    -- that should not be an issue anymore now though.
+    d = bimap idxOf idxOf $ localOuterFaceDart ajs
+
+    err = error "no face data set"
+    PG.Face _ (dummy,_) = Prelude.head fs -- FIXME, we should not really do this.
+
+    fs'  = PG.Face d (dummy, [])
+         : map (\(PG.Face (i,j) (f,hs)) -> PG.Face (idxOf i, idxOf j) (f,hs)) fs
+    -- FIXME: I hope we are indeed getting rid of the undefines
 
     -- so far the best option seems to be to use PG.fromAdjRep', (or actually preferrably a version that also returns the edge oracle), so that we can set the face data ourselves *after* we've determined the outerFaceId.
 
     makeLocal (Vtx i p ns _) = Vtx (idxOf i) p (map (first idxOf) ns) (VertexId i)
     idxOf i = vs^?!ix i.to _idxVal
+
+
+-- | computes a dart that has the "outer face" (local to this
+-- component) to its left.
+localOuterFaceDart    :: (Ord r, Num r) => [Vtx v e r] -> (Int,Int)
+localOuterFaceDart es = (ui,vi)
+  where
+    (Vtx ui u ajs _) = F.minimumBy (comparing PG.loc) es
+
+    (_ :+ vi) = F.minimumBy (cwCmpAroundWith' (Vector2 (-1) 0) (u :+ ()))
+              . map (\(i,_) -> (vs V.! i) :+ i)
+              $ ajs
+
+    vs  = fromAssocs [(i,p) | Vtx i p _ _ <- es]
+
+
+-- I think the idea was to construct a PG for the outerface as well. That basically means we need to find an edge incident to the outerface.
 
 --------------------------------------------------------------------------------
 -- * Generic helpers
