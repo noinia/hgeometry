@@ -4030,6 +4030,20 @@ clampTo :: Ord r => Range r -> r -> r
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint
 --   is indeed smaller than the right endpoint. Note that we treat empty
 --   open-ranges as invalid as well.
+--   
+--   <pre>
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 5) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 5)
+--   True
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Closed 5) (Closed 40)
+--   True
+--   </pre>
 isValidRange :: Ord a => Range a -> Bool
 
 -- | Wether or not the first range completely covers the second one

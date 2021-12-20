@@ -154,137 +154,6 @@ type family Dimension t :: Nat
 type family NumType t :: *
 
 
-module Data.Geometry.Interval
-
--- | An Interval is essentially a <a>Range</a> but with possible payload
---   
---   We can think of an interval being defined as:
---   
---   <pre>
---   &gt;&gt;&gt; data Interval a r = Interval (EndPoint (r :+ a)) (EndPoint (r :+ a))
---   </pre>
-data Interval a r
-pattern Interval :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
-pattern OpenInterval :: (r :+ a) -> (r :+ a) -> Interval a r
-pattern ClosedInterval :: (r :+ a) -> (r :+ a) -> Interval a r
-
--- | Constrct an interval from a Range
-fromRange :: Range (r :+ a) -> Interval a r
-
--- | Cast an interval to a range.
-toRange :: Interval a r -> Range (r :+ a)
-
--- | Intervals and ranges are isomorphic.
-_Range :: Iso' (Interval a r) (Range (r :+ a))
-class HasStart t where {
-    type family StartCore t;
-    type family StartExtra t;
-}
-start :: HasStart t => Lens' t (StartCore t :+ StartExtra t)
-class HasEnd t where {
-    type family EndCore t;
-    type family EndExtra t;
-}
-end :: HasEnd t => Lens' t (EndCore t :+ EndExtra t)
-
--- | Test if a value lies in an interval. Note that the difference between
---   inInterval and inRange is that the extra value is *not* used in the
---   comparison with inInterval, whereas it is in inRange.
-inInterval :: Ord r => r -> Interval a r -> Bool
-
--- | Shifts the interval to the left by delta
-shiftLeft' :: Num r => r -> Interval a r -> Interval a r
-
--- | Makes sure the start and endpoint are oriented such that the starting
---   value is smaller than the ending value.
-asProperInterval :: Ord r => Interval p r -> Interval p r
-
--- | Flips the start and endpoint of the interval.
-flipInterval :: Interval a r -> Interval a r
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Classes.Ord r, GHC.Classes.Ord a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Geometry.Interval.Interval a r)
-instance GHC.Generics.Generic (Data.Geometry.Interval.Interval a r)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Geometry.Interval.Interval a r)
-instance (Control.DeepSeq.NFData a, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.Interval.Interval a r)
-instance Data.Geometry.Interval.HasEnd (Data.Geometry.Interval.Interval a r)
-instance Data.Geometry.Interval.HasStart (Data.Geometry.Interval.Interval a r)
-instance (GHC.Show.Show a, GHC.Show.Show r) => GHC.Show.Show (Data.Geometry.Interval.Interval a r)
-instance GHC.Base.Functor (Data.Geometry.Interval.Interval a)
-instance Data.Foldable.Foldable (Data.Geometry.Interval.Interval a)
-instance Data.Traversable.Traversable (Data.Geometry.Interval.Interval a)
-instance Data.Bifunctor.Bifunctor Data.Geometry.Interval.Interval
-instance GHC.Classes.Ord r => Data.Intersection.HasIntersectionWith (Data.Geometry.Interval.Interval a r) (Data.Geometry.Interval.Interval b r)
-instance GHC.Classes.Ord r => Data.Intersection.IsIntersectableWith (Data.Geometry.Interval.Interval a r) (Data.Geometry.Interval.Interval b r)
-
-
-module Data.Geometry.IntervalTree
-
--- | Information stored in a node of the Interval Tree
-data NodeData i r
-NodeData :: !r -> !Map (L r) [i] -> !Map (R r) [i] -> NodeData i r
-[_splitPoint] :: NodeData i r -> !r
-[_intervalsLeft] :: NodeData i r -> !Map (L r) [i]
-[_intervalsRight] :: NodeData i r -> !Map (R r) [i]
-splitPoint :: forall i_aHXr r_aHXs. Lens' (NodeData i_aHXr r_aHXs) r_aHXs
-intervalsLeft :: forall i_aHXr r_aHXs. Lens' (NodeData i_aHXr r_aHXs) (Map (L r_aHXs) [i_aHXr])
-intervalsRight :: forall i_aHXr r_aHXs. Lens' (NodeData i_aHXr r_aHXs) (Map (R r_aHXs) [i_aHXr])
-
--- | IntervalTree type, storing intervals of type i
-newtype IntervalTree i r
-IntervalTree :: BinaryTree (NodeData i r) -> IntervalTree i r
-[_unIntervalTree] :: IntervalTree i r -> BinaryTree (NodeData i r)
-unIntervalTree :: forall i_aI6G r_aI6H i_aIdK r_aIdL. Iso (IntervalTree i_aI6G r_aI6H) (IntervalTree i_aIdK r_aIdL) (BinaryTree (NodeData i_aI6G r_aI6H)) (BinaryTree (NodeData i_aIdK r_aIdL))
-
--- | Anything that looks like an interval
-class IntervalLike i
-asRange :: IntervalLike i => i -> Range (NumType i)
-
--- | Given an ordered list of points, create an interval tree
---   
---   &lt;math&gt;
-createTree :: Ord r => [r] -> IntervalTree i r
-
--- | Build an interval tree
---   
---   &lt;math&gt;
-fromIntervals :: (Ord r, IntervalLike i, NumType i ~ r) => [i] -> IntervalTree i r
-
--- | Insert : pre: the interval intersects some midpoint in the tree
---   
---   &lt;math&gt;
-insert :: (Ord r, IntervalLike i, NumType i ~ r) => i -> IntervalTree i r -> IntervalTree i r
-
--- | Delete an interval from the Tree
---   
---   &lt;math&gt; (under some general position assumption)
-delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i) => i -> IntervalTree i r -> IntervalTree i r
-
--- | Find all intervals that stab x
---   
---   &lt;math&gt;, where k is the output size
-stab :: Ord r => r -> IntervalTree i r -> [i]
-
--- | Find all intervals that stab x
---   
---   &lt;math&gt;, where k is the output size
-search :: Ord r => r -> IntervalTree i r -> [i]
-
--- | Lists the intervals. We don't guarantee anything about the order
---   
---   running time: &lt;math&gt;.
-toList :: IntervalTree i r -> [i]
-instance Data.Geometry.IntervalTree.IntervalLike (Data.Range.Range r)
-instance Data.Geometry.IntervalTree.IntervalLike (Data.Geometry.Interval.Interval p r)
-instance (Control.DeepSeq.NFData i, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.IntervalTree.IntervalTree i r)
-instance GHC.Generics.Generic (Data.Geometry.IntervalTree.IntervalTree i r)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq i) => GHC.Classes.Eq (Data.Geometry.IntervalTree.IntervalTree i r)
-instance (GHC.Show.Show r, GHC.Show.Show i) => GHC.Show.Show (Data.Geometry.IntervalTree.IntervalTree i r)
-instance (Control.DeepSeq.NFData i, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.IntervalTree.NodeData i r)
-instance GHC.Generics.Generic (Data.Geometry.IntervalTree.NodeData i r)
-instance (GHC.Classes.Ord r, GHC.Classes.Ord i) => GHC.Classes.Ord (Data.Geometry.IntervalTree.NodeData i r)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq i) => GHC.Classes.Eq (Data.Geometry.IntervalTree.NodeData i r)
-instance (GHC.Show.Show r, GHC.Show.Show i) => GHC.Show.Show (Data.Geometry.IntervalTree.NodeData i r)
-
-
 module Data.Geometry.RangeTree.Measure
 class LabeledMeasure v
 labeledMeasure :: LabeledMeasure v => [a] -> v a
@@ -388,130 +257,6 @@ instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.R
 instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.RangeTree.Generic.NodeData v r)
 instance Data.Measured.Class.Measured (Data.Geometry.RangeTree.Measure.Count p) (Data.Geometry.RangeTree.Generic.CountOf p)
 instance (GHC.Base.Semigroup v, GHC.Classes.Ord r) => GHC.Base.Semigroup (Data.Geometry.RangeTree.Generic.NodeData v r)
-
-
-module Data.Geometry.SegmentTree.Generic
-
--- | Internal nodes store a split point, the range, and an associated data
---   structure
-data NodeData v r
-NodeData :: !EndPoint r -> !Range r -> !v -> NodeData v r
-[_splitPoint] :: NodeData v r -> !EndPoint r
-[_range] :: NodeData v r -> !Range r
-[_assoc] :: NodeData v r -> !v
-splitPoint :: forall v_aNi1 r_aNi2. Lens' (NodeData v_aNi1 r_aNi2) (EndPoint r_aNi2)
-range :: forall v_aNi1 r_aNi2. Lens' (NodeData v_aNi1 r_aNi2) (Range r_aNi2)
-assoc :: forall v_aNi1 r_aNi2 v_aNp3. Lens (NodeData v_aNi1 r_aNi2) (NodeData v_aNp3 r_aNi2) v_aNi1 v_aNp3
-
--- | Leaf nodes store an atomic range, and an associated data structure.
-data LeafData v r
-LeafData :: !AtomicRange r -> !v -> LeafData v r
-[_atomicRange] :: LeafData v r -> !AtomicRange r
-[_leafAssoc] :: LeafData v r -> !v
-atomicRange :: forall v_aNpt r_aNpu r_aNDb. Lens (LeafData v_aNpt r_aNpu) (LeafData v_aNpt r_aNDb) (AtomicRange r_aNpu) (AtomicRange r_aNDb)
-leafAssoc :: forall v_aNpt r_aNpu v_aNDc. Lens (LeafData v_aNpt r_aNpu) (LeafData v_aNDc r_aNpu) v_aNpt v_aNDc
-
--- | Segment tree on a Fixed set of endpoints
-newtype SegmentTree v r
-SegmentTree :: BinLeafTree (NodeData v r) (LeafData v r) -> SegmentTree v r
-[_unSegmentTree] :: SegmentTree v r -> BinLeafTree (NodeData v r) (LeafData v r)
-unSegmentTree :: forall v_aNDq r_aNDr v_aNLk r_aNLl. Iso (SegmentTree v_aNDq r_aNDr) (SegmentTree v_aNLk r_aNLl) (BinLeafTree (NodeData v_aNDq r_aNDr) (LeafData v_aNDq r_aNDr)) (BinLeafTree (NodeData v_aNLk r_aNLl) (LeafData v_aNLk r_aNLl))
-
--- | Class for associcated data structures
-class Measured v i => Assoc v i
-insertAssoc :: Assoc v i => i -> v -> v
-deleteAssoc :: Assoc v i => i -> v -> v
-
--- | Given a sorted list of endpoints, without duplicates, construct a
---   segment tree
---   
---   &lt;math&gt; time
-createTree :: NonEmpty r -> v -> SegmentTree v r
-
--- | Build a SegmentTree
---   
---   &lt;math&gt;
-fromIntervals :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType i ~ r) => (Interval p r -> i) -> NonEmpty (Interval p r) -> SegmentTree v r
-
--- | Pre: the interval should have one of the endpoints on which the tree
---   is built.
-insert :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i) => i -> SegmentTree v r -> SegmentTree v r
-
--- | Delete an interval from the tree
---   
---   pre: The segment is in the tree!
-delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i) => i -> SegmentTree v r -> SegmentTree v r
-
--- | Search for all intervals intersecting x
---   
---   &lt;math&gt; where &lt;math&gt; is the output size
-search :: (Ord r, Monoid v) => r -> SegmentTree v r -> v
-
--- | Returns the associated values of the nodes on the search path to x
---   
---   &lt;math&gt;
-stab :: Ord r => r -> SegmentTree v r -> [v]
-
--- | Interval
-newtype I a
-I :: a -> I a
-[_unI] :: I a -> a
-fromIntervals' :: (Eq p, Ord r) => NonEmpty (Interval p r) -> SegmentTree [I (Interval p r)] r
-newtype Count
-Count :: Word -> Count
-[getCount] :: Count -> Word
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.C a)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.C a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Geometry.SegmentTree.Generic.C a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.C a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Geometry.SegmentTree.Generic.C a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.C a)
-instance Control.DeepSeq.NFData Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Generics.Generic Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Real.Real Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Enum.Enum Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Real.Integral Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Num.Num Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Classes.Ord Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Classes.Eq Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Show.Show Data.Geometry.SegmentTree.Generic.Count
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.BuildLeaf a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.BuildLeaf a)
-instance Data.Measured.Class.Measured Data.Geometry.SegmentTree.Generic.Count (Data.Geometry.SegmentTree.Generic.C i)
-instance Data.Geometry.SegmentTree.Generic.Assoc Data.Geometry.SegmentTree.Generic.Count (Data.Geometry.SegmentTree.Generic.C i)
-instance GHC.Base.Semigroup Data.Geometry.SegmentTree.Generic.Count
-instance GHC.Base.Monoid Data.Geometry.SegmentTree.Generic.Count
-instance Data.Measured.Class.Measured [Data.Geometry.SegmentTree.Generic.I a] (Data.Geometry.SegmentTree.Generic.I a)
-instance GHC.Classes.Eq a => Data.Geometry.SegmentTree.Generic.Assoc [Data.Geometry.SegmentTree.Generic.I a] (Data.Geometry.SegmentTree.Generic.I a)
-instance Data.Geometry.IntervalTree.IntervalLike a => Data.Geometry.IntervalTree.IntervalLike (Data.Geometry.SegmentTree.Generic.I a)
-instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
-instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
-instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.LeafData v r)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.LeafData v r)
-instance GHC.Base.Functor (Data.Geometry.SegmentTree.Generic.LeafData v)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.LeafData v r)
-instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.LeafData v r)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.AtomicRange r)
-instance GHC.Base.Functor Data.Geometry.SegmentTree.Generic.AtomicRange
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.AtomicRange r)
-instance GHC.Show.Show r => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.AtomicRange r)
-instance Control.DeepSeq.NFData r => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.AtomicRange r)
-instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.NodeData v r)
-instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.NodeData v r)
-instance GHC.Base.Functor (Data.Geometry.SegmentTree.Generic.NodeData v)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.NodeData v r)
-instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.NodeData v r)
-
-
-module Data.Geometry.SegmentTree
 
 
 module Data.Geometry.Vector.VectorFixed
@@ -975,6 +720,44 @@ instance Data.Geometry.Vector.VectorFamily.Arity d => Test.QuickCheck.Arbitrary.
 instance (System.Random.Random r, Data.Geometry.Vector.VectorFamily.Arity d) => System.Random.Random (Data.Geometry.Vector.VectorFamily.Vector d r)
 
 
+-- | type-indexed matrices.
+module Data.Geometry.Matrix
+
+-- | A matrix of n rows, each of m columns, storing values of type r.
+newtype Matrix n m r
+Matrix :: Vector n (Vector m r) -> Matrix n m r
+
+-- | Produces the Identity Matrix.
+identityMatrix :: (Arity d, Num r) => Matrix d d r
+
+-- | Matrix product.
+multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
+
+-- | Matrix * column vector.
+mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
+
+-- | Class of matrices that are invertible.
+class Invertible n r
+inverse' :: Invertible n r => Matrix n n r -> Matrix n n r
+
+-- | Class of matrices that have a determinant.
+class Arity d => HasDeterminant d
+det :: (HasDeterminant d, Num r) => Matrix d d r -> r
+instance (GHC.Show.Show r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Show.Show (Data.Geometry.Matrix.Matrix n m r)
+instance (GHC.Classes.Eq r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Classes.Eq (Data.Geometry.Matrix.Matrix n m r)
+instance (GHC.Classes.Ord r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Classes.Ord (Data.Geometry.Matrix.Matrix n m r)
+instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Base.Functor (Data.Geometry.Matrix.Matrix n m)
+instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => Data.Foldable.Foldable (Data.Geometry.Matrix.Matrix n m)
+instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => Data.Traversable.Traversable (Data.Geometry.Matrix.Matrix n m)
+instance Data.Geometry.Matrix.HasDeterminant 1
+instance Data.Geometry.Matrix.HasDeterminant 2
+instance Data.Geometry.Matrix.HasDeterminant 3
+instance Data.Geometry.Matrix.HasDeterminant 4
+instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 2 r
+instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 3 r
+instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 4 r
+
+
 -- | &lt;math&gt;-dimensional points.
 module Data.Geometry.Point
 
@@ -1211,6 +994,27 @@ cmpByDistanceTo :: (Ord r, Num r, Arity d) => Point d r -> Point d r -> Point d 
 -- | Compare by distance to the first argument
 cmpByDistanceTo' :: (Ord r, Num r, Arity d) => (Point d r :+ c) -> (Point d r :+ p) -> (Point d r :+ q) -> Ordering
 
+-- | Compare the points with respect to the direction given by the vector,
+--   i.e. by taking planes whose normal is the given vector.
+--   
+--   <pre>
+--   &gt;&gt;&gt; cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 0)
+--   LT
+--   
+--   &gt;&gt;&gt; cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 0)
+--   LT
+--   
+--   &gt;&gt;&gt; cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 10)
+--   LT
+--   
+--   &gt;&gt;&gt; cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 10)
+--   GT
+--   
+--   &gt;&gt;&gt; cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
+--   EQ
+--   </pre>
+cmpInDirection :: (Ord r, Num r) => Vector 2 r -> Point 2 r -> Point 2 r -> Ordering
+
 -- | Squared Euclidean distance between two points
 squaredEuclideanDist :: (Num r, Arity d) => Point d r -> Point d r -> r
 
@@ -1380,109 +1184,6 @@ module Algorithms.Geometry.ClosestPair
 closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
 
 
--- | type-indexed matrices.
-module Data.Geometry.Matrix
-
--- | A matrix of n rows, each of m columns, storing values of type r.
-newtype Matrix n m r
-Matrix :: Vector n (Vector m r) -> Matrix n m r
-
--- | Produces the Identity Matrix.
-identityMatrix :: (Arity d, Num r) => Matrix d d r
-
--- | Matrix product.
-multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
-
--- | Matrix * column vector.
-mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
-
--- | Class of matrices that are invertible.
-class Invertible n r
-inverse' :: Invertible n r => Matrix n n r -> Matrix n n r
-
--- | Class of matrices that have a determinant.
-class Arity d => HasDeterminant d
-det :: (HasDeterminant d, Num r) => Matrix d d r -> r
-instance (GHC.Show.Show r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Show.Show (Data.Geometry.Matrix.Matrix n m r)
-instance (GHC.Classes.Eq r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Classes.Eq (Data.Geometry.Matrix.Matrix n m r)
-instance (GHC.Classes.Ord r, Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Classes.Ord (Data.Geometry.Matrix.Matrix n m r)
-instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => GHC.Base.Functor (Data.Geometry.Matrix.Matrix n m)
-instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => Data.Foldable.Foldable (Data.Geometry.Matrix.Matrix n m)
-instance (Data.Geometry.Vector.VectorFamily.Arity n, Data.Geometry.Vector.VectorFamily.Arity m) => Data.Traversable.Traversable (Data.Geometry.Matrix.Matrix n m)
-instance Data.Geometry.Matrix.HasDeterminant 1
-instance Data.Geometry.Matrix.HasDeterminant 2
-instance Data.Geometry.Matrix.HasDeterminant 3
-instance Data.Geometry.Matrix.HasDeterminant 4
-instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 2 r
-instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 3 r
-instance GHC.Real.Fractional r => Data.Geometry.Matrix.Invertible 4 r
-
-
--- | SubLine; a part of a line
-module Data.Geometry.SubLine
-
--- | Part of a line. The interval is ranged based on the vector of the line
---   l, and s.t.t zero is the anchorPoint of l.
-data SubLine d p s r
-SubLine :: Line d r -> Interval p s -> SubLine d p s r
-[_line] :: SubLine d p s r -> Line d r
-[_subRange] :: SubLine d p s r -> Interval p s
-
--- | Line part of SubLine.
-line :: Lens (SubLine d1 p s r1) (SubLine d2 p s r2) (Line d1 r1) (Line d2 r2)
-
--- | Interval part of SubLine.
-subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
-
--- | Annotate the subRange with the actual ending points
-fixEndPoints :: (Num r, Arity d) => SubLine d p r r -> SubLine d (Point d r :+ p) r r
-
--- | forget the extra information stored at the endpoints of the subline.
-dropExtra :: SubLine d p s r -> SubLine d () s r
-
--- | Prism for downcasting an unbounded subline to a subline.
-_unBounded :: Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
-
--- | Transform into an subline with a potentially unbounded interval
-toUnbounded :: SubLine d p r r -> SubLine d p (UnBounded r) r
-
--- | Try to make a potentially unbounded subline into a bounded one.
-fromUnbounded :: SubLine d p (UnBounded r) r -> Maybe (SubLine d p r r)
-
--- | given point p, and a Subline l r such that p lies on line l, test if
---   it lies on the subline, i.e. in the interval r
-onSubLine :: (Ord r, Fractional r, Arity d) => Point d r -> SubLine d p r r -> Bool
-
--- | given point p, and a Subline l r such that p lies on line l, test if
---   it lies on the subline, i.e. in the interval r
-onSubLineUB :: (Ord r, Fractional r) => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
-
--- | given point p, and a Subline l r such that p lies on line l, test if
---   it lies on the subline, i.e. in the interval r
-onSubLine2 :: (Ord r, Num r) => Point 2 r -> SubLine 2 p r r -> Bool
-
--- | given point p, and a Subline l r such that p lies on line l, test if
---   it lies on the subline, i.e. in the interval r
-onSubLine2UB :: (Ord r, Fractional r) => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
-
--- | Get the endpoints of an unbounded interval
-getEndPointsUnBounded :: (Num r, Arity d) => SubLine d p (UnBounded r) r -> Interval p (UnBounded (Point d r))
-
--- | Create a SubLine that covers the original line from -infinity to
---   +infinity.
-fromLine :: Arity d => Line d r -> SubLine d () (UnBounded r) r
-instance (GHC.Show.Show r, GHC.Show.Show s, GHC.Show.Show p, Data.Geometry.Vector.VectorFamily.Arity d) => GHC.Show.Show (Data.Geometry.SubLine.SubLine d p s r)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq s, GHC.Real.Fractional r, GHC.Classes.Eq p, Data.Geometry.Vector.VectorFamily.Arity d) => GHC.Classes.Eq (Data.Geometry.SubLine.SubLine d p s r)
-instance Data.Geometry.Vector.VectorFamily.Arity d => GHC.Base.Functor (Data.Geometry.SubLine.SubLine d p s)
-instance Data.Geometry.Vector.VectorFamily.Arity d => Data.Foldable.Foldable (Data.Geometry.SubLine.SubLine d p s)
-instance Data.Geometry.Vector.VectorFamily.Arity d => Data.Traversable.Traversable (Data.Geometry.SubLine.SubLine d p s)
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary p, Test.QuickCheck.Arbitrary.Arbitrary s, Data.Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r, GHC.Classes.Ord s, GHC.Classes.Ord p, GHC.Num.Num r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Geometry.SubLine.SubLine d p s r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.SubLine.SubLine 2 p r r) (Data.Geometry.SubLine.SubLine 2 q r r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.SubLine.SubLine 2 p r r) (Data.Geometry.SubLine.SubLine 2 q r r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.SubLine.SubLine 2 p (Data.UnBounded.UnBounded r) r) (Data.Geometry.SubLine.SubLine 2 q (Data.UnBounded.UnBounded r) r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.SubLine.SubLine 2 p (Data.UnBounded.UnBounded r) r) (Data.Geometry.SubLine.SubLine 2 q (Data.UnBounded.UnBounded r) r)
-
-
 -- | Orthogonal &lt;math&gt;-dimensiontal boxes (e.g. rectangles)
 module Data.Geometry.Box.Internal
 
@@ -1490,19 +1191,19 @@ module Data.Geometry.Box.Internal
 newtype CWMin a
 CWMin :: a -> CWMin a
 [_cwMin] :: CWMin a -> a
-cwMin :: forall a_a1J96 a_a1JnU. Iso (CWMin a_a1J96) (CWMin a_a1JnU) a_a1J96 a_a1JnU
+cwMin :: forall a_a1tDO a_a1tTc. Iso (CWMin a_a1tDO) (CWMin a_a1tTc) a_a1tDO a_a1tTc
 
 -- | Coordinate wize maximum
 newtype CWMax a
 CWMax :: a -> CWMax a
 [_cwMax] :: CWMax a -> a
-cwMax :: forall a_a1Jo0 a_a1JF4. Iso (CWMax a_a1Jo0) (CWMax a_a1JF4) a_a1Jo0 a_a1JF4
+cwMax :: forall a_a1tTi a_a1uam. Iso (CWMax a_a1tTi) (CWMax a_a1uam) a_a1tTi a_a1uam
 data Box d p r
 Box :: !CWMin (Point d r) :+ p -> !CWMax (Point d r) :+ p -> Box d p r
 [_minP] :: Box d p r -> !CWMin (Point d r) :+ p
 [_maxP] :: Box d p r -> !CWMax (Point d r) :+ p
-minP :: forall d_a1JFb p_a1JFc r_a1JFd. Lens' (Box d_a1JFb p_a1JFc r_a1JFd) ((:+) (CWMin (Point d_a1JFb r_a1JFd)) p_a1JFc)
-maxP :: forall d_a1JFb p_a1JFc r_a1JFd. Lens' (Box d_a1JFb p_a1JFc r_a1JFd) ((:+) (CWMax (Point d_a1JFb r_a1JFd)) p_a1JFc)
+minP :: forall d_a1uat p_a1uau r_a1uav. Lens' (Box d_a1uat p_a1uau r_a1uav) ((:+) (CWMin (Point d_a1uat r_a1uav)) p_a1uau)
+maxP :: forall d_a1uat p_a1uau r_a1uav. Lens' (Box d_a1uat p_a1uau r_a1uav) ((:+) (CWMax (Point d_a1uat r_a1uav)) p_a1uau)
 
 -- | Given the point with the lowest coordinates and the point with highest
 --   coordinates, create a box.
@@ -1820,6 +1521,340 @@ instance GHC.Classes.Eq g => GHC.Classes.Eq (Data.Geometry.Boundary.Boundary g)
 instance GHC.Show.Show g => GHC.Show.Show (Data.Geometry.Boundary.Boundary g)
 
 
+module Data.Geometry.Interval
+
+-- | An Interval is essentially a <a>Range</a> but with possible payload
+--   
+--   We can think of an interval being defined as:
+--   
+--   <pre>
+--   &gt;&gt;&gt; data Interval a r = Interval (EndPoint (r :+ a)) (EndPoint (r :+ a))
+--   </pre>
+data Interval a r
+pattern Interval :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
+pattern OpenInterval :: (r :+ a) -> (r :+ a) -> Interval a r
+pattern ClosedInterval :: (r :+ a) -> (r :+ a) -> Interval a r
+
+-- | Constrct an interval from a Range
+fromRange :: Range (r :+ a) -> Interval a r
+
+-- | Cast an interval to a range.
+toRange :: Interval a r -> Range (r :+ a)
+
+-- | Intervals and ranges are isomorphic.
+_Range :: Iso' (Interval a r) (Range (r :+ a))
+class HasStart t where {
+    type family StartCore t;
+    type family StartExtra t;
+}
+start :: HasStart t => Lens' t (StartCore t :+ StartExtra t)
+class HasEnd t where {
+    type family EndCore t;
+    type family EndExtra t;
+}
+end :: HasEnd t => Lens' t (EndCore t :+ EndExtra t)
+
+-- | Test if a value lies in an interval. Note that the difference between
+--   inInterval and inRange is that the extra value is *not* used in the
+--   comparison with inInterval, whereas it is in inRange.
+intersectsInterval :: Ord r => r -> Interval a r -> Bool
+
+-- | Compute where the given query value is with respect to the interval.
+--   
+--   Note that even if the boundary of the interval is open we may return
+--   <a>OnBoundary</a>.
+inInterval :: Ord r => r -> Interval a r -> PointLocationResult
+
+-- | Shifts the interval to the left by delta
+shiftLeft' :: Num r => r -> Interval a r -> Interval a r
+
+-- | Makes sure the start and endpoint are oriented such that the starting
+--   value is smaller than the ending value.
+asProperInterval :: Ord r => Interval p r -> Interval p r
+
+-- | Flips the start and endpoint of the interval.
+flipInterval :: Interval a r -> Interval a r
+instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Classes.Ord r, GHC.Classes.Ord a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Geometry.Interval.Interval a r)
+instance GHC.Generics.Generic (Data.Geometry.Interval.Interval a r)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Geometry.Interval.Interval a r)
+instance (Control.DeepSeq.NFData a, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.Interval.Interval a r)
+instance Data.Geometry.Interval.HasEnd (Data.Geometry.Interval.Interval a r)
+instance Data.Geometry.Interval.HasStart (Data.Geometry.Interval.Interval a r)
+instance (GHC.Show.Show a, GHC.Show.Show r) => GHC.Show.Show (Data.Geometry.Interval.Interval a r)
+instance GHC.Base.Functor (Data.Geometry.Interval.Interval a)
+instance Data.Foldable.Foldable (Data.Geometry.Interval.Interval a)
+instance Data.Traversable.Traversable (Data.Geometry.Interval.Interval a)
+instance Data.Bifunctor.Bifunctor Data.Geometry.Interval.Interval
+instance GHC.Classes.Ord r => Data.Intersection.HasIntersectionWith (Data.Geometry.Interval.Interval a r) (Data.Geometry.Interval.Interval b r)
+instance GHC.Classes.Ord r => Data.Intersection.IsIntersectableWith (Data.Geometry.Interval.Interval a r) (Data.Geometry.Interval.Interval b r)
+
+
+-- | SubLine; a part of a line
+module Data.Geometry.SubLine
+
+-- | Part of a line. The interval is ranged based on the vector of the line
+--   l, and s.t.t zero is the anchorPoint of l.
+data SubLine d p s r
+SubLine :: Line d r -> Interval p s -> SubLine d p s r
+[_line] :: SubLine d p s r -> Line d r
+[_subRange] :: SubLine d p s r -> Interval p s
+
+-- | Line part of SubLine.
+line :: Lens (SubLine d1 p s r1) (SubLine d2 p s r2) (Line d1 r1) (Line d2 r2)
+
+-- | Interval part of SubLine.
+subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
+
+-- | Annotate the subRange with the actual ending points
+fixEndPoints :: (Num r, Arity d) => SubLine d p r r -> SubLine d (Point d r :+ p) r r
+
+-- | forget the extra information stored at the endpoints of the subline.
+dropExtra :: SubLine d p s r -> SubLine d () s r
+
+-- | given point p, and a Subline l r such that p lies on line l, test if
+--   it lies on the subline, i.e. in the interval r
+onSubLine :: (Ord r, Fractional r, Arity d) => Point d r -> SubLine d p r r -> Bool
+
+-- | given point p, and a Subline l r such that p lies on line l, test if
+--   it lies on the subline, i.e. in the interval r
+onSubLineUB :: (Ord r, Fractional r) => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
+
+-- | given point p, and a Subline l r such that p lies on line l, test if
+--   it lies on the subline, i.e. in the interval r
+onSubLine2 :: (Ord r, Num r) => Point 2 r -> SubLine 2 p r r -> Bool
+
+-- | given point p, and a Subline l r such that p lies on line l, test if
+--   it lies on the subline, i.e. in the interval r
+onSubLine2UB :: (Ord r, Fractional r) => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
+
+-- | Given a subline with vector u, and a vector v that is parallel to u
+--   (but possibly pointing in the exact opposite direction). Make the
+--   subline point in direction v as well (but keep the magnitude of the
+--   original vector.)
+--   
+--   pre: the lines are parallel.
+reorient :: (Eq r, Num r, Arity d) => SubLine d p r r -> Vector d r -> SubLine d p r r
+
+-- | Get the endpoints of an unbounded interval
+getEndPointsUnBounded :: (Num r, Arity d) => SubLine d p (UnBounded r) r -> Interval p (UnBounded (Point d r))
+
+-- | Create a SubLine that covers the original line from -infinity to
+--   +infinity.
+fromLine :: Arity d => Line d r -> SubLine d () (UnBounded r) r
+
+-- | Prism for downcasting an unbounded subline to a subline.
+_unBounded :: Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
+
+-- | Transform into an subline with a potentially unbounded interval
+toUnbounded :: SubLine d p r r -> SubLine d p (UnBounded r) r
+
+-- | Try to make a potentially unbounded subline into a bounded one.
+fromUnbounded :: SubLine d p (UnBounded r) r -> Maybe (SubLine d p r r)
+instance (GHC.Show.Show r, GHC.Show.Show s, GHC.Show.Show p, Data.Geometry.Vector.VectorFamily.Arity d) => GHC.Show.Show (Data.Geometry.SubLine.SubLine d p s r)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq s, GHC.Real.Fractional r, GHC.Classes.Eq p, Data.Geometry.Vector.VectorFamily.Arity d) => GHC.Classes.Eq (Data.Geometry.SubLine.SubLine d p s r)
+instance Data.Geometry.Vector.VectorFamily.Arity d => GHC.Base.Functor (Data.Geometry.SubLine.SubLine d p s)
+instance Data.Geometry.Vector.VectorFamily.Arity d => Data.Foldable.Foldable (Data.Geometry.SubLine.SubLine d p s)
+instance Data.Geometry.Vector.VectorFamily.Arity d => Data.Traversable.Traversable (Data.Geometry.SubLine.SubLine d p s)
+instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary p, Test.QuickCheck.Arbitrary.Arbitrary s, Data.Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r, GHC.Classes.Ord s, GHC.Classes.Ord p, GHC.Num.Num r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Geometry.SubLine.SubLine d p s r)
+instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.SubLine.SubLine 2 p r r) (Data.Geometry.SubLine.SubLine 2 q r r)
+instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.SubLine.SubLine 2 p r r) (Data.Geometry.SubLine.SubLine 2 q r r)
+instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.SubLine.SubLine 2 p (Data.UnBounded.UnBounded r) r) (Data.Geometry.SubLine.SubLine 2 q (Data.UnBounded.UnBounded r) r)
+instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.SubLine.SubLine 2 p (Data.UnBounded.UnBounded r) r) (Data.Geometry.SubLine.SubLine 2 q (Data.UnBounded.UnBounded r) r)
+
+
+module Data.Geometry.IntervalTree
+
+-- | Information stored in a node of the Interval Tree
+data NodeData i r
+NodeData :: !r -> !Map (L r) [i] -> !Map (R r) [i] -> NodeData i r
+[_splitPoint] :: NodeData i r -> !r
+[_intervalsLeft] :: NodeData i r -> !Map (L r) [i]
+[_intervalsRight] :: NodeData i r -> !Map (R r) [i]
+splitPoint :: forall i_a1HyW r_a1HyX. Lens' (NodeData i_a1HyW r_a1HyX) r_a1HyX
+intervalsLeft :: forall i_a1HyW r_a1HyX. Lens' (NodeData i_a1HyW r_a1HyX) (Map (L r_a1HyX) [i_a1HyW])
+intervalsRight :: forall i_a1HyW r_a1HyX. Lens' (NodeData i_a1HyW r_a1HyX) (Map (R r_a1HyX) [i_a1HyW])
+
+-- | IntervalTree type, storing intervals of type i
+newtype IntervalTree i r
+IntervalTree :: BinaryTree (NodeData i r) -> IntervalTree i r
+[_unIntervalTree] :: IntervalTree i r -> BinaryTree (NodeData i r)
+unIntervalTree :: forall i_a1HHv r_a1HHw i_a1HOs r_a1HOt. Iso (IntervalTree i_a1HHv r_a1HHw) (IntervalTree i_a1HOs r_a1HOt) (BinaryTree (NodeData i_a1HHv r_a1HHw)) (BinaryTree (NodeData i_a1HOs r_a1HOt))
+
+-- | Anything that looks like an interval
+class IntervalLike i
+asRange :: IntervalLike i => i -> Range (NumType i)
+
+-- | Given an ordered list of points, create an interval tree
+--   
+--   &lt;math&gt;
+createTree :: Ord r => [r] -> IntervalTree i r
+
+-- | Build an interval tree
+--   
+--   &lt;math&gt;
+fromIntervals :: (Ord r, IntervalLike i, NumType i ~ r) => [i] -> IntervalTree i r
+
+-- | Insert : pre: the interval intersects some midpoint in the tree
+--   
+--   &lt;math&gt;
+insert :: (Ord r, IntervalLike i, NumType i ~ r) => i -> IntervalTree i r -> IntervalTree i r
+
+-- | Delete an interval from the Tree
+--   
+--   &lt;math&gt; (under some general position assumption)
+delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i) => i -> IntervalTree i r -> IntervalTree i r
+
+-- | Find all intervals that stab x
+--   
+--   &lt;math&gt;, where k is the output size
+stab :: Ord r => r -> IntervalTree i r -> [i]
+
+-- | Find all intervals that stab x
+--   
+--   &lt;math&gt;, where k is the output size
+search :: Ord r => r -> IntervalTree i r -> [i]
+
+-- | Lists the intervals. We don't guarantee anything about the order
+--   
+--   running time: &lt;math&gt;.
+toList :: IntervalTree i r -> [i]
+instance Data.Geometry.IntervalTree.IntervalLike (Data.Range.Range r)
+instance Data.Geometry.IntervalTree.IntervalLike (Data.Geometry.Interval.Interval p r)
+instance (Control.DeepSeq.NFData i, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.IntervalTree.IntervalTree i r)
+instance GHC.Generics.Generic (Data.Geometry.IntervalTree.IntervalTree i r)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq i) => GHC.Classes.Eq (Data.Geometry.IntervalTree.IntervalTree i r)
+instance (GHC.Show.Show r, GHC.Show.Show i) => GHC.Show.Show (Data.Geometry.IntervalTree.IntervalTree i r)
+instance (Control.DeepSeq.NFData i, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.IntervalTree.NodeData i r)
+instance GHC.Generics.Generic (Data.Geometry.IntervalTree.NodeData i r)
+instance (GHC.Classes.Ord r, GHC.Classes.Ord i) => GHC.Classes.Ord (Data.Geometry.IntervalTree.NodeData i r)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq i) => GHC.Classes.Eq (Data.Geometry.IntervalTree.NodeData i r)
+instance (GHC.Show.Show r, GHC.Show.Show i) => GHC.Show.Show (Data.Geometry.IntervalTree.NodeData i r)
+
+
+module Data.Geometry.SegmentTree.Generic
+
+-- | Internal nodes store a split point, the range, and an associated data
+--   structure
+data NodeData v r
+NodeData :: !EndPoint r -> !Range r -> !v -> NodeData v r
+[_splitPoint] :: NodeData v r -> !EndPoint r
+[_range] :: NodeData v r -> !Range r
+[_assoc] :: NodeData v r -> !v
+splitPoint :: forall v_a1KtM r_a1KtN. Lens' (NodeData v_a1KtM r_a1KtN) (EndPoint r_a1KtN)
+range :: forall v_a1KtM r_a1KtN. Lens' (NodeData v_a1KtM r_a1KtN) (Range r_a1KtN)
+assoc :: forall v_a1KtM r_a1KtN v_a1KAO. Lens (NodeData v_a1KtM r_a1KtN) (NodeData v_a1KAO r_a1KtN) v_a1KtM v_a1KAO
+
+-- | Leaf nodes store an atomic range, and an associated data structure.
+data LeafData v r
+LeafData :: !AtomicRange r -> !v -> LeafData v r
+[_atomicRange] :: LeafData v r -> !AtomicRange r
+[_leafAssoc] :: LeafData v r -> !v
+atomicRange :: forall v_a1KBe r_a1KBf r_a1KOW. Lens (LeafData v_a1KBe r_a1KBf) (LeafData v_a1KBe r_a1KOW) (AtomicRange r_a1KBf) (AtomicRange r_a1KOW)
+leafAssoc :: forall v_a1KBe r_a1KBf v_a1KOX. Lens (LeafData v_a1KBe r_a1KBf) (LeafData v_a1KOX r_a1KBf) v_a1KBe v_a1KOX
+
+-- | Segment tree on a Fixed set of endpoints
+newtype SegmentTree v r
+SegmentTree :: BinLeafTree (NodeData v r) (LeafData v r) -> SegmentTree v r
+[_unSegmentTree] :: SegmentTree v r -> BinLeafTree (NodeData v r) (LeafData v r)
+unSegmentTree :: forall v_a1KPb r_a1KPc v_a1KWT r_a1KWU. Iso (SegmentTree v_a1KPb r_a1KPc) (SegmentTree v_a1KWT r_a1KWU) (BinLeafTree (NodeData v_a1KPb r_a1KPc) (LeafData v_a1KPb r_a1KPc)) (BinLeafTree (NodeData v_a1KWT r_a1KWU) (LeafData v_a1KWT r_a1KWU))
+
+-- | Class for associcated data structures
+class Measured v i => Assoc v i
+insertAssoc :: Assoc v i => i -> v -> v
+deleteAssoc :: Assoc v i => i -> v -> v
+
+-- | Given a sorted list of endpoints, without duplicates, construct a
+--   segment tree
+--   
+--   &lt;math&gt; time
+createTree :: NonEmpty r -> v -> SegmentTree v r
+
+-- | Build a SegmentTree
+--   
+--   &lt;math&gt;
+fromIntervals :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType i ~ r) => (Interval p r -> i) -> NonEmpty (Interval p r) -> SegmentTree v r
+
+-- | Pre: the interval should have one of the endpoints on which the tree
+--   is built.
+insert :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i) => i -> SegmentTree v r -> SegmentTree v r
+
+-- | Delete an interval from the tree
+--   
+--   pre: The segment is in the tree!
+delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i) => i -> SegmentTree v r -> SegmentTree v r
+
+-- | Search for all intervals intersecting x
+--   
+--   &lt;math&gt; where &lt;math&gt; is the output size
+search :: (Ord r, Monoid v) => r -> SegmentTree v r -> v
+
+-- | Returns the associated values of the nodes on the search path to x
+--   
+--   &lt;math&gt;
+stab :: Ord r => r -> SegmentTree v r -> [v]
+
+-- | Interval
+newtype I a
+I :: a -> I a
+[_unI] :: I a -> a
+fromIntervals' :: (Eq p, Ord r) => NonEmpty (Interval p r) -> SegmentTree [I (Interval p r)] r
+newtype Count
+Count :: Word -> Count
+[getCount] :: Count -> Word
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.C a)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.C a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Geometry.SegmentTree.Generic.C a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.C a)
+instance GHC.Read.Read a => GHC.Read.Read (Data.Geometry.SegmentTree.Generic.C a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.C a)
+instance Control.DeepSeq.NFData Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Generics.Generic Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Real.Real Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Enum.Enum Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Real.Integral Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Num.Num Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Classes.Ord Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Classes.Eq Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Show.Show Data.Geometry.SegmentTree.Generic.Count
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Read.Read a => GHC.Read.Read (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.BuildLeaf a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.BuildLeaf a)
+instance Data.Measured.Class.Measured Data.Geometry.SegmentTree.Generic.Count (Data.Geometry.SegmentTree.Generic.C i)
+instance Data.Geometry.SegmentTree.Generic.Assoc Data.Geometry.SegmentTree.Generic.Count (Data.Geometry.SegmentTree.Generic.C i)
+instance GHC.Base.Semigroup Data.Geometry.SegmentTree.Generic.Count
+instance GHC.Base.Monoid Data.Geometry.SegmentTree.Generic.Count
+instance Data.Measured.Class.Measured [Data.Geometry.SegmentTree.Generic.I a] (Data.Geometry.SegmentTree.Generic.I a)
+instance GHC.Classes.Eq a => Data.Geometry.SegmentTree.Generic.Assoc [Data.Geometry.SegmentTree.Generic.I a] (Data.Geometry.SegmentTree.Generic.I a)
+instance Data.Geometry.IntervalTree.IntervalLike a => Data.Geometry.IntervalTree.IntervalLike (Data.Geometry.SegmentTree.Generic.I a)
+instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
+instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.SegmentTree v r)
+instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.LeafData v r)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.LeafData v r)
+instance GHC.Base.Functor (Data.Geometry.SegmentTree.Generic.LeafData v)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.LeafData v r)
+instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.LeafData v r)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.AtomicRange r)
+instance GHC.Base.Functor Data.Geometry.SegmentTree.Generic.AtomicRange
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.AtomicRange r)
+instance GHC.Show.Show r => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.AtomicRange r)
+instance Control.DeepSeq.NFData r => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.AtomicRange r)
+instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData r) => Control.DeepSeq.NFData (Data.Geometry.SegmentTree.Generic.NodeData v r)
+instance GHC.Generics.Generic (Data.Geometry.SegmentTree.Generic.NodeData v r)
+instance GHC.Base.Functor (Data.Geometry.SegmentTree.Generic.NodeData v)
+instance (GHC.Classes.Eq r, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.Geometry.SegmentTree.Generic.NodeData v r)
+instance (GHC.Show.Show r, GHC.Show.Show v) => GHC.Show.Show (Data.Geometry.SegmentTree.Generic.NodeData v r)
+
+
+module Data.Geometry.SegmentTree
+
+
 -- | Line segment data type and some basic functions on line segments
 module Data.Geometry.LineSegment.Internal
 
@@ -1873,6 +1908,20 @@ shiftLeft :: Num r => r -> Range r -> Range r
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint
 --   is indeed smaller than the right endpoint. Note that we treat empty
 --   open-ranges as invalid as well.
+--   
+--   <pre>
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 5) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 5)
+--   True
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Closed 5) (Closed 40)
+--   True
+--   </pre>
 isValidRange :: Ord a => Range a -> Bool
 
 -- | Wether or not the first range completely covers the second one
@@ -2034,7 +2083,13 @@ fromRange :: Range (r :+ a) -> Interval a r
 -- | Test if a value lies in an interval. Note that the difference between
 --   inInterval and inRange is that the extra value is *not* used in the
 --   comparison with inInterval, whereas it is in inRange.
-inInterval :: Ord r => r -> Interval a r -> Bool
+intersectsInterval :: Ord r => r -> Interval a r -> Bool
+
+-- | Compute where the given query value is with respect to the interval.
+--   
+--   Note that even if the boundary of the interval is open we may return
+--   <a>OnBoundary</a>.
+inInterval :: Ord r => r -> Interval a r -> PointLocationResult
 
 -- | Shifts the interval to the left by delta
 shiftLeft' :: Num r => r -> Interval a r -> Interval a r
@@ -2122,7 +2177,31 @@ interpolate :: (Fractional r, Arity d) => r -> LineSegment d p r -> Point d r
 -- | smart constructor that creates a valid segment, i.e. it validates that
 --   the endpoints are disjoint.
 validSegment :: (Eq r, Arity d) => EndPoint (Point d r :+ p) -> EndPoint (Point d r :+ p) -> Maybe (LineSegment d p r)
+
+-- | Compute a random line segmeent
 sampleLineSegment :: (Arity d, RandomGen g, Random r) => Rand g (LineSegment d () r)
+
+-- | Given an x-coordinate, compare the segments based on the y-coordinate
+--   of the intersection with the horizontal line through y
+ordAtX :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+
+-- | Given a y-coordinate, compare the segments based on the x-coordinate
+--   of the intersection with the horizontal line through y
+ordAtY :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+
+-- | Given a y coord and a line segment that intersects the horizontal line
+--   through y, compute the x-coordinate of this intersection point.
+--   
+--   note that we will pretend that the line segment is closed, even if it
+--   is not
+xCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+
+-- | Given an x-coordinate and a line segment that intersects the vertical
+--   line through x, compute the y-coordinate of this intersection point.
+--   
+--   note that we will pretend that the line segment is closed, even if it
+--   is not
+yCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
 instance (Data.Geometry.Vector.VectorFamily.Arity d, Control.DeepSeq.NFData r, Control.DeepSeq.NFData p) => Control.DeepSeq.NFData (Data.Geometry.LineSegment.Internal.LineSegment d p r)
 instance (GHC.Classes.Eq r, GHC.Classes.Eq p, Data.Geometry.Vector.VectorFamily.Arity d) => GHC.Classes.Eq (Data.Geometry.LineSegment.Internal.LineSegment d p r)
 instance Data.Geometry.Vector.VectorFamily.Arity d => GHC.Base.Functor (Data.Geometry.LineSegment.Internal.LineSegment d p)
@@ -2140,9 +2219,9 @@ instance (GHC.Classes.Ord r, GHC.Num.Num r) => Data.Intersection.HasIntersection
 instance (GHC.Classes.Ord r, GHC.Num.Num r) => Data.Intersection.IsIntersectableWith (Data.Geometry.Point.Internal.Point 2 r) (Data.Geometry.LineSegment.Internal.LineSegment 2 p r)
 instance (GHC.Classes.Ord r, GHC.Real.Fractional r, Data.Geometry.Vector.VectorFamily.Arity d) => Data.Intersection.HasIntersectionWith (Data.Geometry.Point.Internal.Point d r) (Data.Geometry.LineSegment.Internal.LineSegment d p r)
 instance (GHC.Classes.Ord r, GHC.Real.Fractional r, Data.Geometry.Vector.VectorFamily.Arity d) => Data.Intersection.IsIntersectableWith (Data.Geometry.Point.Internal.Point d r) (Data.Geometry.LineSegment.Internal.LineSegment d p r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.LineSegment.Internal.LineSegment 2 q r)
+instance (GHC.Classes.Ord r, GHC.Num.Num r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.LineSegment.Internal.LineSegment 2 q r)
 instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.LineSegment.Internal.LineSegment 2 q r)
-instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.Line.Internal.Line 2 r)
+instance (GHC.Classes.Ord r, GHC.Num.Num r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.Line.Internal.Line 2 r)
 instance (GHC.Classes.Ord r, GHC.Real.Fractional r) => Data.Intersection.IsIntersectableWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.Line.Internal.Line 2 r)
 
 
@@ -2153,10 +2232,10 @@ module Data.Geometry.Box.Corners
 --   clockwise order starting from the topleft.
 data Corners a
 Corners :: !a -> !a -> !a -> !a -> Corners a
-northWest :: forall a_a1XEN. Lens' (Corners a_a1XEN) a_a1XEN
-northEast :: forall a_a1XEN. Lens' (Corners a_a1XEN) a_a1XEN
-southEast :: forall a_a1XEN. Lens' (Corners a_a1XEN) a_a1XEN
-southWest :: forall a_a1XEN. Lens' (Corners a_a1XEN) a_a1XEN
+northWest :: forall a_a1ZpA. Lens' (Corners a_a1ZpA) a_a1ZpA
+northEast :: forall a_a1ZpA. Lens' (Corners a_a1ZpA) a_a1ZpA
+southEast :: forall a_a1ZpA. Lens' (Corners a_a1ZpA) a_a1ZpA
+southWest :: forall a_a1ZpA. Lens' (Corners a_a1ZpA) a_a1ZpA
 
 -- | Get the corners of a rectangle, the order is: (TopLeft, TopRight,
 --   BottomRight, BottomLeft). The extra values in the Top points are taken
@@ -2191,10 +2270,10 @@ module Data.Geometry.Box.Sides
 -- | The four sides of a rectangle
 data Sides a
 Sides :: !a -> !a -> !a -> !a -> Sides a
-north :: forall a_a205O. Lens' (Sides a_a205O) a_a205O
-east :: forall a_a205O. Lens' (Sides a_a205O) a_a205O
-south :: forall a_a205O. Lens' (Sides a_a205O) a_a205O
-west :: forall a_a205O. Lens' (Sides a_a205O) a_a205O
+north :: forall a_a21QB. Lens' (Sides a_a21QB) a_a21QB
+east :: forall a_a21QB. Lens' (Sides a_a21QB) a_a21QB
+south :: forall a_a21QB. Lens' (Sides a_a21QB) a_a21QB
+west :: forall a_a21QB. Lens' (Sides a_a21QB) a_a21QB
 topSide :: Num r => Rectangle p r -> LineSegment 2 p r
 
 -- | Oriented from *left to right*
@@ -2290,6 +2369,20 @@ shiftLeft :: Num r => r -> Range r -> Range r
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint
 --   is indeed smaller than the right endpoint. Note that we treat empty
 --   open-ranges as invalid as well.
+--   
+--   <pre>
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 5) (Closed 4)
+--   False
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Open 4) (Closed 5)
+--   True
+--   
+--   &gt;&gt;&gt; isValidRange $ Range (Closed 5) (Closed 40)
+--   True
+--   </pre>
 isValidRange :: Ord a => Range a -> Bool
 
 -- | Wether or not the first range completely covers the second one
@@ -2451,7 +2544,13 @@ fromRange :: Range (r :+ a) -> Interval a r
 -- | Test if a value lies in an interval. Note that the difference between
 --   inInterval and inRange is that the extra value is *not* used in the
 --   comparison with inInterval, whereas it is in inRange.
-inInterval :: Ord r => r -> Interval a r -> Bool
+intersectsInterval :: Ord r => r -> Interval a r -> Bool
+
+-- | Compute where the given query value is with respect to the interval.
+--   
+--   Note that even if the boundary of the interval is open we may return
+--   <a>OnBoundary</a>.
+inInterval :: Ord r => r -> Interval a r -> PointLocationResult
 
 -- | Shifts the interval to the left by delta
 shiftLeft' :: Num r => r -> Interval a r -> Interval a r
@@ -2504,7 +2603,31 @@ flipSegment :: LineSegment d p r -> LineSegment d p r
 --   Point2 10.0 10.0
 --   </pre>
 interpolate :: (Fractional r, Arity d) => r -> LineSegment d p r -> Point d r
+
+-- | Compute a random line segmeent
 sampleLineSegment :: (Arity d, RandomGen g, Random r) => Rand g (LineSegment d () r)
+
+-- | Given an x-coordinate, compare the segments based on the y-coordinate
+--   of the intersection with the horizontal line through y
+ordAtX :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+
+-- | Given a y-coordinate, compare the segments based on the x-coordinate
+--   of the intersection with the horizontal line through y
+ordAtY :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+
+-- | Given a y coord and a line segment that intersects the horizontal line
+--   through y, compute the x-coordinate of this intersection point.
+--   
+--   note that we will pretend that the line segment is closed, even if it
+--   is not
+xCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+
+-- | Given an x-coordinate and a line segment that intersects the vertical
+--   line through x, compute the y-coordinate of this intersection point.
+--   
+--   note that we will pretend that the line segment is closed, even if it
+--   is not
+yCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
 instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.Boundary.Boundary (Data.Geometry.Box.Internal.Rectangle q r))
 instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Data.Intersection.HasIntersectionWith (Data.Geometry.LineSegment.Internal.LineSegment 2 p r) (Data.Geometry.Box.Internal.Rectangle q r)
 
@@ -2532,17 +2655,6 @@ intersections :: (Ord r, Fractional r) => [LineSegment 2 p r] -> Intersections p
 --   
 --   &lt;math&gt;, where &lt;math&gt; is the number of intersections.
 interiorIntersections :: (Ord r, Fractional r) => [LineSegment 2 p r] -> Intersections p r
-
--- | Compare based on the x-coordinate of the intersection with the
---   horizontal line through y
-ordAt :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
-
--- | Given a y coord and a line segment that intersects the horizontal line
---   through y, compute the x-coordinate of this intersection point.
---   
---   note that we will pretend that the line segment is closed, even if it
---   is not
-xCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann.Event p r)
 instance (GHC.Show.Show r, GHC.Show.Show p) => GHC.Show.Show (Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann.Event p r)
 instance GHC.Show.Show s => GHC.Show.Show (Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann.EventType s)
@@ -2570,8 +2682,8 @@ data Cell r
 Cell :: {-# UNPACK #-} !WidthIndex -> !Point 2 r -> Cell r
 [_cellWidthIndex] :: Cell r -> {-# UNPACK #-} !WidthIndex
 [_lowerLeft] :: Cell r -> !Point 2 r
-lowerLeft :: forall r_a2a3m r_a2aeo. Lens (Cell r_a2a3m) (Cell r_a2aeo) (Point 2 r_a2a3m) (Point 2 r_a2aeo)
-cellWidthIndex :: forall r_a2a3m. Lens' (Cell r_a2a3m) WidthIndex
+lowerLeft :: forall r_a2fNZ r_a2fZ1. Lens (Cell r_a2fNZ) (Cell r_a2fZ1) (Point 2 r_a2fNZ) (Point 2 r_a2fZ1)
+cellWidthIndex :: forall r_a2fNZ. Lens' (Cell r_a2fNZ) WidthIndex
 
 -- | Computes a cell that contains the given rectangle
 fitsRectangle :: (RealFrac r, Ord r) => Rectangle p r -> Cell r
@@ -2648,8 +2760,8 @@ module Data.Geometry.QuadTree.Split
 data Split i v p
 No :: !p -> Split i v p
 Yes :: !v -> Quadrants i -> Split i v p
-_Yes :: forall i_a2dwx v_a2dwy p_a2dwz i_a2dD0 v_a2dD1. Prism (Split i_a2dD0 v_a2dD1 p_a2dwz) (Split i_a2dwx v_a2dwy p_a2dwz) (v_a2dD1, Quadrants i_a2dD0) (v_a2dwy, Quadrants i_a2dwx)
-_No :: forall i_a2dwx v_a2dwy p_a2dwz p_a2dCU. Prism (Split i_a2dwx v_a2dwy p_a2dCU) (Split i_a2dwx v_a2dwy p_a2dwz) p_a2dCU p_a2dwz
+_Yes :: forall i_a2jhy v_a2jhz p_a2jhA i_a2jo1 v_a2jo2. Prism (Split i_a2jo1 v_a2jo2 p_a2jhA) (Split i_a2jhy v_a2jhz p_a2jhA) (v_a2jo2, Quadrants i_a2jo1) (v_a2jhz, Quadrants i_a2jhy)
+_No :: forall i_a2jhy v_a2jhz p_a2jhA p_a2jnV. Prism (Split i_a2jhy v_a2jhz p_a2jnV) (Split i_a2jhy v_a2jhz p_a2jhA) p_a2jnV p_a2jhA
 
 -- | A splitter is a function that determines weather or not we should the
 --   given cell corresponding to the given input (i).
@@ -2674,8 +2786,8 @@ module Data.Geometry.QuadTree.Tree
 data Tree v p
 Leaf :: !p -> Tree v p
 Node :: !v -> Quadrants (Tree v p) -> Tree v p
-_Node :: forall v_a2exD p_a2exE v_a2eBd. Prism (Tree v_a2eBd p_a2exE) (Tree v_a2exD p_a2exE) (v_a2eBd, Quadrants (Tree v_a2eBd p_a2exE)) (v_a2exD, Quadrants (Tree v_a2exD p_a2exE))
-_Leaf :: forall v_a2exD p_a2exE. Prism' (Tree v_a2exD p_a2exE) p_a2exE
+_Node :: forall v_a2kiE p_a2kiF v_a2kme. Prism (Tree v_a2kme p_a2kiF) (Tree v_a2kiE p_a2kiF) (v_a2kme, Quadrants (Tree v_a2kme p_a2kiF)) (v_a2kiE, Quadrants (Tree v_a2kiE p_a2kiF))
+_Leaf :: forall v_a2kiE p_a2kiF. Prism' (Tree v_a2kiE p_a2kiF) p_a2kiF
 
 -- | Fold on the Tree type.
 foldTree :: (p -> b) -> (v -> Quadrants b -> b) -> Tree v p -> b
@@ -2721,8 +2833,8 @@ data QuadTree v p r
 QuadTree :: !Cell r -> !Tree v p -> QuadTree v p r
 [_startingCell] :: QuadTree v p r -> !Cell r
 [_tree] :: QuadTree v p r -> !Tree v p
-tree :: forall v_a2fPY p_a2fPZ r_a2fQ0 v_a2g29 p_a2g2a. Lens (QuadTree v_a2fPY p_a2fPZ r_a2fQ0) (QuadTree v_a2g29 p_a2g2a r_a2fQ0) (Tree v_a2fPY p_a2fPZ) (Tree v_a2g29 p_a2g2a)
-startingCell :: forall v_a2fPY p_a2fPZ r_a2fQ0 r_a2g28. Lens (QuadTree v_a2fPY p_a2fPZ r_a2fQ0) (QuadTree v_a2fPY p_a2fPZ r_a2g28) (Cell r_a2fQ0) (Cell r_a2g28)
+tree :: forall v_a2lAZ p_a2lB0 r_a2lB1 v_a2lNa p_a2lNb. Lens (QuadTree v_a2lAZ p_a2lB0 r_a2lB1) (QuadTree v_a2lNa p_a2lNb r_a2lB1) (Tree v_a2lAZ p_a2lB0) (Tree v_a2lNa p_a2lNb)
+startingCell :: forall v_a2lAZ p_a2lB0 r_a2lB1 r_a2lN9. Lens (QuadTree v_a2lAZ p_a2lB0 r_a2lB1) (QuadTree v_a2lAZ p_a2lB0 r_a2lN9) (Cell r_a2lB1) (Cell r_a2lN9)
 withCells :: (Fractional r, Ord r) => QuadTree v p r -> QuadTree (v :+ Cell r) (p :+ Cell r) r
 withCellsTree :: (Fractional r, Ord r) => QuadTree v p r -> Tree (v :+ Cell r) (p :+ Cell r)
 leaves :: QuadTree v p r -> NonEmpty p
@@ -2900,6 +3012,9 @@ isIdenticalTo :: (Eq r, Arity d) => Line d r -> Line d r -> Bool
 --   </pre>
 isParallelTo :: (Eq r, Fractional r, Arity d) => Line d r -> Line d r -> Bool
 
+-- | Check whether two lines are parallel
+isParallelTo2 :: (Eq r, Num r) => Line 2 r -> Line 2 r -> Bool
+
 -- | Test if point p lies on line l
 --   
 --   <pre>
@@ -2939,9 +3054,9 @@ toOffset :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Maybe r
 --   0.5
 --   </pre>
 --   
---   &lt;6,4&gt; is not on the line but we can still point closest to it.
---   &gt;&gt;&gt; toOffset' (Point2 6 4) (lineThrough origin $ Point2 10
---   10) 0.5
+--   The point (6,4) is not on the line but we can still point closest to
+--   it. &gt;&gt;&gt; toOffset' (Point2 6 4) (lineThrough origin $ Point2
+--   10 10) 0.5
 toOffset' :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
 
 -- | Squared distance from point p to line l
@@ -2961,7 +3076,7 @@ fromLinearFunction :: Num r => r -> r -> Line 2 r
 
 -- | get values a,b s.t. the input line is described by y = ax + b. returns
 --   Nothing if the line is vertical
-toLinearFunction :: forall r. (Fractional r, Eq r) => Line 2 r -> Maybe (r, r)
+toLinearFunction :: forall r. (Fractional r, Ord r) => Line 2 r -> Maybe (r, r)
 
 -- | Given a point p and a line l, computes the point q on l closest to p.
 pointClosestTo :: (Fractional r, Arity d) => Point d r -> Line d r -> Point d r
@@ -3039,7 +3154,7 @@ Vertical :: Orthogonal
 newtype Slab (o :: Orthogonal) a r
 Slab :: Interval a r -> Slab (o :: Orthogonal) a r
 [_unSlab] :: Slab (o :: Orthogonal) a r -> Interval a r
-unSlab :: forall o_a2nDb a_a2nDc r_a2nDd o_a2nIQ a_a2nIR r_a2nIS. Iso (Slab o_a2nDb a_a2nDc r_a2nDd) (Slab o_a2nIQ a_a2nIR r_a2nIS) (Interval a_a2nDc r_a2nDd) (Interval a_a2nIR r_a2nIS)
+unSlab :: forall o_a2toj a_a2tok r_a2tol o_a2ttY a_a2ttZ r_a2tu0. Iso (Slab o_a2toj a_a2tok r_a2tol) (Slab o_a2ttY a_a2ttZ r_a2tu0) (Interval a_a2tok r_a2tol) (Interval a_a2ttZ r_a2tu0)
 
 -- | Smart consturctor for creating a horizontal slab
 horizontalSlab :: (r :+ a) -> (r :+ a) -> Slab Horizontal a r
@@ -3082,8 +3197,8 @@ data HyperPlane (d :: Nat) (r :: *)
 HyperPlane :: !Point d r -> !Vector d r -> HyperPlane (d :: Nat) (r :: *)
 [_inPlane] :: HyperPlane (d :: Nat) (r :: *) -> !Point d r
 [_normalVec] :: HyperPlane (d :: Nat) (r :: *) -> !Vector d r
-normalVec :: forall d_a2qPt r_a2qPu. Lens' (HyperPlane d_a2qPt r_a2qPu) (Vector d_a2qPt r_a2qPu)
-inPlane :: forall d_a2qPt r_a2qPu. Lens' (HyperPlane d_a2qPt r_a2qPu) (Point d_a2qPt r_a2qPu)
+normalVec :: forall d_a2wAd r_a2wAe. Lens' (HyperPlane d_a2wAd r_a2wAe) (Vector d_a2wAd r_a2wAe)
+inPlane :: forall d_a2wAd r_a2wAe. Lens' (HyperPlane d_a2wAd r_a2wAe) (Point d_a2wAd r_a2wAe)
 type Plane = HyperPlane 3
 pattern Plane :: Point 3 r -> Vector 3 r -> Plane r
 
@@ -3140,10 +3255,10 @@ dualLine :: Num r => Point 2 r -> Line 2 r
 
 -- | Returns Nothing if the input line is vertical Maps a line l: y = ax +
 --   b to a point (a,-b)
-dualPoint :: (Fractional r, Eq r) => Line 2 r -> Maybe (Point 2 r)
+dualPoint :: (Fractional r, Ord r) => Line 2 r -> Maybe (Point 2 r)
 
 -- | Pre: the input line is not vertical
-dualPoint' :: (Fractional r, Eq r) => Line 2 r -> Point 2 r
+dualPoint' :: (Fractional r, Ord r) => Line 2 r -> Point 2 r
 
 
 module Data.Geometry.KDTree
@@ -3202,8 +3317,8 @@ module Data.Geometry.HalfLine
 -- | &lt;math&gt;-dimensional Half-Lines
 data HalfLine d r
 HalfLine :: Point d r -> Vector d r -> HalfLine d r
-startPoint :: forall d_a2uRt r_a2uRu. Lens' (HalfLine d_a2uRt r_a2uRu) (Point d_a2uRt r_a2uRu)
-halfLineDirection :: forall d_a2uRt r_a2uRu. Lens' (HalfLine d_a2uRt r_a2uRu) (Vector d_a2uRt r_a2uRu)
+startPoint :: forall d_a2ADG r_a2ADH. Lens' (HalfLine d_a2ADG r_a2ADH) (Point d_a2ADG r_a2ADH)
+halfLineDirection :: forall d_a2ADG r_a2ADH. Lens' (HalfLine d_a2ADG r_a2ADH) (Vector d_a2ADG r_a2ADH)
 
 -- | Transform a LineSegment into a half-line, by forgetting the second
 --   endpoint. Note that this also forgets about if the starting point was
@@ -3245,7 +3360,7 @@ module Data.Geometry.HalfSpace
 newtype HalfSpace d r
 HalfSpace :: HyperPlane d r -> HalfSpace d r
 [_boundingPlane] :: HalfSpace d r -> HyperPlane d r
-boundingPlane :: forall d_a2zXS r_a2zXT d_a2zZO r_a2zZP. Iso (HalfSpace d_a2zXS r_a2zXT) (HalfSpace d_a2zZO r_a2zZP) (HyperPlane d_a2zXS r_a2zXT) (HyperPlane d_a2zZO r_a2zZP)
+boundingPlane :: forall d_a2FJj r_a2FJk d_a2FLf r_a2FLg. Iso (HalfSpace d_a2FJj r_a2FJk) (HalfSpace d_a2FLf r_a2FLg) (HyperPlane d_a2FJj r_a2FJk) (HyperPlane d_a2FLf r_a2FLg)
 type HalfPlane = HalfSpace 2
 
 -- | Get the halfplane left of a line (i.e. "above") a line
@@ -3289,8 +3404,8 @@ data Ball d p r
 Ball :: !Point d r :+ p -> !r -> Ball d p r
 [_center] :: Ball d p r -> !Point d r :+ p
 [_squaredRadius] :: Ball d p r -> !r
-squaredRadius :: forall d_a2ChK p_a2ChL r_a2ChM. Lens' (Ball d_a2ChK p_a2ChL r_a2ChM) r_a2ChM
-center :: forall d_a2ChK p_a2ChL r_a2ChM d_a2Ckr p_a2Cks. Lens (Ball d_a2ChK p_a2ChL r_a2ChM) (Ball d_a2Ckr p_a2Cks r_a2ChM) ((:+) (Point d_a2ChK r_a2ChM) p_a2ChL) ((:+) (Point d_a2Ckr r_a2ChM) p_a2Cks)
+squaredRadius :: forall d_a2I2N p_a2I2O r_a2I2P. Lens' (Ball d_a2I2N p_a2I2O r_a2I2P) r_a2I2P
+center :: forall d_a2I2N p_a2I2O r_a2I2P d_a2I5u p_a2I5v. Lens (Ball d_a2I2N p_a2I2O r_a2I2P) (Ball d_a2I5u p_a2I5v r_a2I2P) ((:+) (Point d_a2I2N r_a2I2P) p_a2I2O) ((:+) (Point d_a2I5u r_a2I2P) p_a2I5v)
 
 -- | A lens to get/set the radius of a Ball
 radius :: Floating r => Lens' (Ball d p r) r
@@ -3360,7 +3475,7 @@ pattern Circle :: (Point 2 r :+ p) -> r -> Circle p r
 --   &gt;&gt;&gt; disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
 --   Just (Ball {_center = Point2 0.0 0.0 :+ (), _squaredRadius = 100.0})
 --   </pre>
-disk :: (Eq r, Fractional r) => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
+disk :: (Ord r, Fractional r) => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 
 -- | Creates a circle from three points on the boundary
 from3Points :: Fractional r => (Point 2 r :+ p) -> (Point 2 r :+ q) -> (Point 2 r :+ s) -> Circle () r
@@ -3413,7 +3528,7 @@ isDegenerateTriangle :: (Num r, Eq r) => Triangle 2 p r -> Bool
 
 -- | Get the inscribed disk. Returns Nothing if the triangle is degenerate,
 --   i.e. if the points are colinear.
-inscribedDisk :: (Eq r, Fractional r) => Triangle 2 p r -> Maybe (Disk () r)
+inscribedDisk :: (Ord r, Fractional r) => Triangle 2 p r -> Maybe (Disk () r)
 
 -- | Given a point q and a triangle, q inside the triangle, get the
 --   baricentric cordinates of q
@@ -3635,25 +3750,12 @@ instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransf
 instance Data.Geometry.Box.Internal.IsBoxable (Data.Geometry.Polygon.Convex.ConvexPolygon p r)
 
 
--- | &lt;math&gt; algorithm for determining if any two line segments
---   overlap.
---   
---   Shamos and Hoey.
-module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
-
--- | Tests if there are any intersections.
---   
---   &lt;math&gt;
-hasIntersections :: (Ord r, Num r) => [LineSegment 2 p r] -> Bool
-segmentsOverlap :: (Num r, Ord r) => LineSegment 2 p r -> LineSegment 2 p r -> Bool
-
-
 module Data.Geometry.Ellipse
 
 -- | A type representing planar ellipses
 newtype Ellipse r
 Ellipse :: Transformation 2 r -> Ellipse r
-affineTransformation :: forall r_a2YWn r_a2Zp4. Iso (Ellipse r_a2YWn) (Ellipse r_a2Zp4) (Transformation 2 r_a2YWn) (Transformation 2 r_a2Zp4)
+affineTransformation :: forall r_a34b3 r_a34DK. Iso (Ellipse r_a34b3) (Ellipse r_a34DK) (Transformation 2 r_a34b3) (Transformation 2 r_a34DK)
 ellipseMatrix :: Iso (Ellipse r) (Ellipse s) (Matrix 3 3 r) (Matrix 3 3 s)
 
 -- | Ellipse representing the unit circle
@@ -3687,9 +3789,9 @@ NodeData :: !Int -> !Box d () r -> !a -> NodeData d r a
 [_splitDim] :: NodeData d r a -> !Int
 [_bBox] :: NodeData d r a -> !Box d () r
 [_nodeData] :: NodeData d r a -> !a
-splitDim :: forall d_a32oO r_a32oP a_a32oQ. Lens' (NodeData d_a32oO r_a32oP a_a32oQ) Int
-nodeData :: forall d_a32oO r_a32oP a_a32oQ a_a32tC. Lens (NodeData d_a32oO r_a32oP a_a32oQ) (NodeData d_a32oO r_a32oP a_a32tC) a_a32oQ a_a32tC
-bBox :: forall d_a32oO r_a32oP a_a32oQ d_a32tA r_a32tB. Lens (NodeData d_a32oO r_a32oP a_a32oQ) (NodeData d_a32tA r_a32tB a_a32oQ) (Box d_a32oO () r_a32oP) (Box d_a32tA () r_a32tB)
+splitDim :: forall d_a37Du r_a37Dv a_a37Dw. Lens' (NodeData d_a37Du r_a37Dv a_a37Dw) Int
+nodeData :: forall d_a37Du r_a37Dv a_a37Dw a_a37Ii. Lens (NodeData d_a37Du r_a37Dv a_a37Dw) (NodeData d_a37Du r_a37Dv a_a37Ii) a_a37Dw a_a37Ii
+bBox :: forall d_a37Du r_a37Dv a_a37Dw d_a37Ig r_a37Ih. Lens (NodeData d_a37Du r_a37Dv a_a37Dw) (NodeData d_a37Ig r_a37Ih a_a37Dw) (Box d_a37Du () r_a37Dv) (Box d_a37Ig () r_a37Ih)
 
 -- | Non-empty sequence of points.
 type PointSeq d p r = LSeq 1 (Point d r :+ p)
@@ -3709,9 +3811,9 @@ FAC :: !Seq (Point d r :+ p) -> !Seq (Point d r :+ p) -> !ShortSide -> FindAndCo
 [_leftPart] :: FindAndCompact d r p -> !Seq (Point d r :+ p)
 [_rightPart] :: FindAndCompact d r p -> !Seq (Point d r :+ p)
 [_shortSide] :: FindAndCompact d r p -> !ShortSide
-shortSide :: forall d_a32FW r_a32FX p_a32FY. Lens' (FindAndCompact d_a32FW r_a32FX p_a32FY) ShortSide
-rightPart :: forall d_a32FW r_a32FX p_a32FY. Lens' (FindAndCompact d_a32FW r_a32FX p_a32FY) (Seq ((:+) (Point d_a32FW r_a32FX) p_a32FY))
-leftPart :: forall d_a32FW r_a32FX p_a32FY. Lens' (FindAndCompact d_a32FW r_a32FX p_a32FY) (Seq ((:+) (Point d_a32FW r_a32FX) p_a32FY))
+shortSide :: forall d_a37UC r_a37UD p_a37UE. Lens' (FindAndCompact d_a37UC r_a37UD p_a37UE) ShortSide
+rightPart :: forall d_a37UC r_a37UD p_a37UE. Lens' (FindAndCompact d_a37UC r_a37UD p_a37UE) (Seq ((:+) (Point d_a37UC r_a37UD) p_a37UE))
+leftPart :: forall d_a37UC r_a37UD p_a37UE. Lens' (FindAndCompact d_a37UC r_a37UD p_a37UE) (Seq ((:+) (Point d_a37UC r_a37UD) p_a37UE))
 
 
 -- | Algorithm to construct a well separated pair decomposition (wspd).
@@ -3732,7 +3834,7 @@ data NodeData d r a
 NodeData :: !Int -> !Box d () r -> !a -> NodeData d r a
 type WSP d p r a = (PointSet d p r a, PointSet d p r a)
 type SplitTree d p r a = BinLeafTree (NodeData d r a) (Point d r :+ p)
-nodeData :: forall d_a32oO r_a32oP a_a32oQ a_a32tC. Lens (NodeData d_a32oO r_a32oP a_a32oQ) (NodeData d_a32oO r_a32oP a_a32tC) a_a32oQ a_a32tC
+nodeData :: forall d_a37Du r_a37Dv a_a37Dw a_a37Ii. Lens (NodeData d_a37Du r_a37Dv a_a37Dw) (NodeData d_a37Du r_a37Dv a_a37Ii) a_a37Dw a_a37Ii
 data Level
 Level :: Int -> Maybe Int -> Level
 [_unLevel] :: Level -> Int
@@ -3901,15 +4003,15 @@ data LPSolution d r
 NoSolution :: LPSolution d r
 Single :: !Point d r -> LPSolution d r
 UnBounded :: HalfLine d r -> LPSolution d r
-_UnBounded :: forall d_a37vT r_a37vU. Prism' (LPSolution d_a37vT r_a37vU) (HalfLine d_a37vT r_a37vU)
-_Single :: forall d_a37vT r_a37vU. Prism' (LPSolution d_a37vT r_a37vU) (Point d_a37vT r_a37vU)
-_NoSolution :: forall d_a37vT r_a37vU. Prism' (LPSolution d_a37vT r_a37vU) ()
+_UnBounded :: forall d_a3cKz r_a3cKA. Prism' (LPSolution d_a3cKz r_a3cKA) (HalfLine d_a3cKz r_a3cKA)
+_Single :: forall d_a3cKz r_a3cKA. Prism' (LPSolution d_a3cKz r_a3cKA) (Point d_a3cKz r_a3cKA)
+_NoSolution :: forall d_a3cKz r_a3cKA. Prism' (LPSolution d_a3cKz r_a3cKA) ()
 data LinearProgram d r
 LinearProgram :: !Vector d r -> [HalfSpace d r] -> LinearProgram d r
 [_objective] :: LinearProgram d r -> !Vector d r
 [_constraints] :: LinearProgram d r -> [HalfSpace d r]
-objective :: forall d_a37xc r_a37xd. Lens' (LinearProgram d_a37xc r_a37xd) (Vector d_a37xc r_a37xd)
-constraints :: forall d_a37xc r_a37xd. Lens' (LinearProgram d_a37xc r_a37xd) [HalfSpace d_a37xc r_a37xd]
+objective :: forall d_a3cLS r_a3cLT. Lens' (LinearProgram d_a3cLS r_a3cLT) (Vector d_a3cLS r_a3cLT)
+constraints :: forall d_a3cLS r_a3cLT. Lens' (LinearProgram d_a3cLS r_a3cLT) [HalfSpace d_a3cLS r_a3cLT]
 instance Data.Geometry.Vector.VectorFamily.Arity d => GHC.Base.Functor (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d)
 instance (Data.Geometry.Vector.VectorFamily.Arity d, GHC.Show.Show r) => GHC.Show.Show (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d r)
 instance (Data.Geometry.Vector.VectorFamily.Arity d, GHC.Real.Fractional r, GHC.Classes.Eq r) => GHC.Classes.Eq (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d r)
@@ -5065,8 +5167,8 @@ data DiskResult p r
 DiskResult :: Disk () r -> TwoOrThree (Point 2 r :+ p) -> DiskResult p r
 [_enclosingDisk] :: DiskResult p r -> Disk () r
 [_definingPoints] :: DiskResult p r -> TwoOrThree (Point 2 r :+ p)
-enclosingDisk :: forall p_a3bWl r_a3bWm. Lens' (DiskResult p_a3bWl r_a3bWm) (Disk () r_a3bWm)
-definingPoints :: forall p_a3bWl r_a3bWm p_a3cfb. Lens (DiskResult p_a3bWl r_a3bWm) (DiskResult p_a3cfb r_a3bWm) (TwoOrThree ((:+) (Point 2 r_a3bWm) p_a3bWl)) (TwoOrThree ((:+) (Point 2 r_a3bWm) p_a3cfb))
+enclosingDisk :: forall p_a3haD r_a3haE. Lens' (DiskResult p_a3haD r_a3haE) (Disk () r_a3haE)
+definingPoints :: forall p_a3haD r_a3haE p_a3htt. Lens (DiskResult p_a3haD r_a3haE) (DiskResult p_a3htt r_a3haE) (TwoOrThree ((:+) (Point 2 r_a3haE) p_a3haD)) (TwoOrThree ((:+) (Point 2 r_a3haE) p_a3htt))
 
 -- | List of two or three elements
 data TwoOrThree a
@@ -5223,30 +5325,72 @@ zHash :: V2 Word -> Word
 zUnHash :: Word -> V2 Word
 
 
+-- | &lt;math&gt; algorithm for determining if any two sets of line
+--   segments intersect.
+--   
+--   Shamos and Hoey.
+module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
+
+-- | Tests if there are any intersections.
+--   
+--   &lt;math&gt;
+hasIntersections :: (Ord r, Num r) => [LineSegment 2 p r] -> Bool
+instance (GHC.Show.Show r, GHC.Show.Show p) => GHC.Show.Show (Algorithms.Geometry.LineSegmentIntersection.BooleanSweep.Event p r)
+
+
 module Algorithms.Geometry.LineSegmentIntersection
 
--- | &lt;math&gt;
-hasInteriorIntersections :: (Ord r, Fractional r) => [LineSegment 2 p r] -> Bool
+-- | Tests if there are any intersections.
+--   
+--   &lt;math&gt;
+hasIntersections :: (Ord r, Num r) => [LineSegment 2 p r] -> Bool
 
--- | &lt;math&gt;
-hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
+-- | Compute all intersections
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the number of intersections.
+intersections :: (Ord r, Fractional r) => [LineSegment 2 p r] -> Intersections p r
+
+-- | Computes all intersection points p s.t. p lies in the interior of at
+--   least one of the segments.
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the number of intersections.
+interiorIntersections :: (Ord r, Fractional r) => [LineSegment 2 p r] -> Intersections p r
+
+-- | For each intersection point the segments intersecting there.
 type Intersections p r = Map (Point 2 r) (Associated p r)
+
+-- | The line segments that contain a given point p may either have p as
+--   the endpoint or have p in their interior.
+--   
+--   if somehow the segment is degenerate, and p is both the start and end
+--   it is reported only as the start point.
 data Associated p r
-Associated :: Set' (LineSegment 2 p r) -> Set' (LineSegment 2 p r) -> Associated p r
-[_endPointOf] :: Associated p r -> Set' (LineSegment 2 p r)
-[_interiorTo] :: Associated p r -> Set' (LineSegment 2 p r)
+Associated :: Set (AroundEnd (LineSegment 2 p r)) -> Set (AroundStart (LineSegment 2 p r)) -> Set (AroundIntersection (LineSegment 2 p r)) -> Associated p r
+
+-- | segments for which the intersection point is the start point (i.e.
+--   s^.start.core == p)
+[_startPointOf] :: Associated p r -> Set (AroundEnd (LineSegment 2 p r))
+
+-- | segments for which the intersection point is the end point (i.e.
+--   s^.end.core == p)
+[_endPointOf] :: Associated p r -> Set (AroundStart (LineSegment 2 p r))
+[_interiorTo] :: Associated p r -> Set (AroundIntersection (LineSegment 2 p r))
+
+-- | An intersection point together with all segments intersecting at this
+--   point.
 data IntersectionPoint p r
 IntersectionPoint :: !Point 2 r -> !Associated p r -> IntersectionPoint p r
 [_intersectionPoint] :: IntersectionPoint p r -> !Point 2 r
 [_associatedSegs] :: IntersectionPoint p r -> !Associated p r
 
--- | reports true if there is at least one segment for which this
---   intersection point is interior.
+-- | Given a point p, and a bunch of segments that suposedly intersect at
+--   p, correctly categorize them.
+mkIntersectionPoint :: (Ord r, Fractional r) => Point 2 r -> [LineSegment 2 p r] -> [LineSegment 2 p r] -> IntersectionPoint p r
+
+-- | Test if the polygon has self intersections.
 --   
 --   &lt;math&gt;
-isEndPointIntersection :: Associated p r -> Bool
-associated :: Ord r => [LineSegment 2 p r] -> [LineSegment 2 p r] -> Associated p r
-type Compare a = a -> a -> Ordering
+hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
 
 
 module Algorithms.Geometry.ConvexHull.QuickHull
@@ -5462,7 +5606,7 @@ type UpperHullAlgorithm a r = NonEmpty (Point 2 r :+ a) -> NonEmpty (Point 2 r :
 --   computing the upper convex hull. It uses the given algorithm to do so
 --   
 --   running time: O(time required by the given upper hull algorithm)
-lowerEnvelopeWith :: (Fractional r, Eq r) => UpperHullAlgorithm (Line 2 r :+ a) r -> NonEmpty (Line 2 r :+ a) -> Envelope a r
+lowerEnvelopeWith :: (Fractional r, Ord r) => UpperHullAlgorithm (Line 2 r :+ a) r -> NonEmpty (Line 2 r :+ a) -> Envelope a r
 
 -- | Computes the vertices of the envelope, in left to right order
 vertices :: (Ord r, Fractional r) => Envelope a r -> [Point 2 r :+ (a, a)]
@@ -5680,8 +5824,8 @@ module Data.Geometry.VerticalRayShooting.PersistentSweep
 data VerticalRayShootingStructure p e r
 VerticalRayShootingStructure :: r -> Vector (r :+ StatusStructure p e r) -> VerticalRayShootingStructure p e r
 type StatusStructure p e r = Set (LineSegment 2 p r :+ e)
-leftMost :: forall p_a3op5 e_a3op6 r_a3op7. Getter (VerticalRayShootingStructure p_a3op5 e_a3op6 r_a3op7) r_a3op7
-sweepStruct :: forall p_a3op5 e_a3op6 r_a3op7. Getter (VerticalRayShootingStructure p_a3op5 e_a3op6 r_a3op7) (Vector ((:+) r_a3op7 (StatusStructure p_a3op5 e_a3op6 r_a3op7)))
+leftMost :: forall p_a3u2X e_a3u2Y r_a3u2Z. Getter (VerticalRayShootingStructure p_a3u2X e_a3u2Y r_a3u2Z) r_a3u2Z
+sweepStruct :: forall p_a3u2X e_a3u2Y r_a3u2Z. Getter (VerticalRayShootingStructure p_a3u2X e_a3u2Y r_a3u2Z) (Vector ((:+) r_a3u2Z (StatusStructure p_a3u2X e_a3u2Y r_a3u2Z)))
 
 -- | Given a set of &lt;math&gt; interiorly pairwise disjoint *closed*
 --   segments, compute a vertical ray shooting data structure. (i.e. the
@@ -5721,17 +5865,6 @@ lookupAboveOrOn :: (Ord r, Num r) => Point 2 r -> StatusStructure p e r -> Maybe
 
 -- | generic searching function
 searchInSlab :: Num r => (Line 2 r -> Bool) -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
-
--- | Compare based on the y-coordinate of the intersection with the
---   horizontal line through y
-ordAt :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r :+ e)
-
--- | Given an x-coordinate and a line segment that intersects the vertical
---   line through x, compute the y-coordinate of this intersection point.
---   
---   note that we will pretend that the line segment is closed, even if it
---   is not
-yCoordAt :: (Fractional r, Ord r) => r -> (LineSegment 2 p r :+ e) -> r
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Geometry.VerticalRayShooting.PersistentSweep.Action a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Geometry.VerticalRayShooting.PersistentSweep.Action a)
 instance (GHC.Classes.Eq r, GHC.Classes.Eq p, GHC.Classes.Eq e) => GHC.Classes.Eq (Data.Geometry.VerticalRayShooting.PersistentSweep.VerticalRayShootingStructure p e r)
@@ -5866,7 +5999,7 @@ module Data.PlaneGraph
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r
 PlaneGraph :: PlanarGraph s Primal (VertexData r v) e f -> PlaneGraph s v e f r
-graph :: forall s_a3zmF v_a3zmG e_a3zmH f_a3zmI r_a3zmJ s_a3zxK v_a3zxL e_a3zxM f_a3zxN r_a3zxO. Iso (PlaneGraph s_a3zmF v_a3zmG e_a3zmH f_a3zmI r_a3zmJ) (PlaneGraph s_a3zxK v_a3zxL e_a3zxM f_a3zxN r_a3zxO) (PlanarGraph s_a3zmF 'Primal (VertexData r_a3zmJ v_a3zmG) e_a3zmH f_a3zmI) (PlanarGraph s_a3zxK 'Primal (VertexData r_a3zxO v_a3zxL) e_a3zxM f_a3zxN)
+graph :: forall s_a3EQC v_a3EQD e_a3EQE f_a3EQF r_a3EQG s_a3F1H v_a3F1I e_a3F1J f_a3F1K r_a3F1L. Iso (PlaneGraph s_a3EQC v_a3EQD e_a3EQE f_a3EQF r_a3EQG) (PlaneGraph s_a3F1H v_a3F1I e_a3F1J f_a3F1K r_a3F1L) (PlanarGraph s_a3EQC 'Primal (VertexData r_a3EQG v_a3EQD) e_a3EQE f_a3EQF) (PlanarGraph s_a3F1H 'Primal (VertexData r_a3F1L v_a3F1I) e_a3F1J f_a3F1K)
 
 -- | A *connected* Planar graph with bidirected edges. I.e. the edges
 --   (darts) are directed, however, for every directed edge, the edge in
@@ -5882,8 +6015,8 @@ data PlanarGraph (s :: k) (w :: World) v e f
 -- | Note that the functor instance is in v
 data VertexData r v
 VertexData :: !Point 2 r -> !v -> VertexData r v
-vData :: forall r_a3z7C v_a3z7D v_a3zmq. Lens (VertexData r_a3z7C v_a3z7D) (VertexData r_a3z7C v_a3zmq) v_a3z7D v_a3zmq
-location :: forall r_a3z7C v_a3z7D r_a3zmp. Lens (VertexData r_a3z7C v_a3z7D) (VertexData r_a3zmp v_a3z7D) (Point 2 r_a3z7C) (Point 2 r_a3zmp)
+vData :: forall r_a3EBz v_a3EBA v_a3EQn. Lens (VertexData r_a3EBz v_a3EBA) (VertexData r_a3EBz v_a3EQn) v_a3EBA v_a3EQn
+location :: forall r_a3EBz v_a3EBA r_a3EQm. Lens (VertexData r_a3EBz v_a3EBA) (VertexData r_a3EQm v_a3EBA) (Point 2 r_a3EBz) (Point 2 r_a3EQm)
 
 -- | Convert to an Ext
 vtxDataToExt :: VertexData r v -> Point 2 r :+ v
@@ -6547,8 +6680,8 @@ data FaceData h f
 FaceData :: Seq h -> !f -> FaceData h f
 [_holes] :: FaceData h f -> Seq h
 [_fData] :: FaceData h f -> !f
-holes :: forall h_a3IKx f_a3IKy h_a3JAd. Lens (FaceData h_a3IKx f_a3IKy) (FaceData h_a3JAd f_a3IKy) (Seq h_a3IKx) (Seq h_a3JAd)
-fData :: forall h_a3IKx f_a3IKy f_a3JAc. Lens (FaceData h_a3IKx f_a3IKy) (FaceData h_a3IKx f_a3JAc) f_a3IKy f_a3JAc
+holes :: forall h_a3Oeu f_a3Oev h_a3P4a. Lens (FaceData h_a3Oeu f_a3Oev) (FaceData h_a3P4a f_a3Oev) (Seq h_a3Oeu) (Seq h_a3P4a)
+fData :: forall h_a3Oeu f_a3Oev f_a3P49. Lens (FaceData h_a3Oeu f_a3Oev) (FaceData h_a3Oeu f_a3P49) f_a3Oev f_a3P49
 
 -- | Face data, if the face is an inner face, store the component and
 --   faceId of it. If not, this face must be the outer face (and thus we
@@ -6557,8 +6690,8 @@ data RawFace s f
 RawFace :: !Maybe (ComponentId s, FaceId' (Wrap s)) -> !FaceData (Dart s) f -> RawFace s f
 [_faceIdx] :: RawFace s f -> !Maybe (ComponentId s, FaceId' (Wrap s))
 [_faceDataVal] :: RawFace s f -> !FaceData (Dart s) f
-faceIdx :: forall s_a3JAs f_a3JAt. Lens' (RawFace s_a3JAs f_a3JAt) (Maybe (ComponentId s_a3JAs, FaceId' (Wrap s_a3JAs)))
-faceDataVal :: forall s_a3JAs f_a3JAt f_a3JQf. Lens (RawFace s_a3JAs f_a3JAt) (RawFace s_a3JAs f_a3JQf) (FaceData (Dart s_a3JAs) f_a3JAt) (FaceData (Dart s_a3JAs) f_a3JQf)
+faceIdx :: forall s_a3P4p f_a3P4q. Lens' (RawFace s_a3P4p f_a3P4q) (Maybe (ComponentId s_a3P4p, FaceId' (Wrap s_a3P4p)))
+faceDataVal :: forall s_a3P4p f_a3P4q f_a3Pkc. Lens (RawFace s_a3P4p f_a3P4q) (RawFace s_a3P4p f_a3Pkc) (FaceData (Dart s_a3P4p) f_a3P4q) (FaceData (Dart s_a3P4p) f_a3Pkc)
 instance forall k (s :: k) f. GHC.Generics.Generic (Data.Geometry.PlanarSubdivision.Raw.RawFace s f)
 instance forall k (s :: k). Data.Traversable.Traversable (Data.Geometry.PlanarSubdivision.Raw.RawFace s)
 instance forall k (s :: k). Data.Foldable.Foldable (Data.Geometry.PlanarSubdivision.Raw.RawFace s)
@@ -6608,14 +6741,14 @@ type FaceId' (s :: k) = FaceId s 'Primal
 -- | Note that the functor instance is in v
 data VertexData r v
 VertexData :: !Point 2 r -> !v -> VertexData r v
-vData :: forall r_a3z7C v_a3z7D v_a3zmq. Lens (VertexData r_a3z7C v_a3z7D) (VertexData r_a3z7C v_a3zmq) v_a3z7D v_a3zmq
-location :: forall r_a3z7C v_a3z7D r_a3zmp. Lens (VertexData r_a3z7C v_a3z7D) (VertexData r_a3zmp v_a3z7D) (Point 2 r_a3z7C) (Point 2 r_a3zmp)
+vData :: forall r_a3EBz v_a3EBA v_a3EQn. Lens (VertexData r_a3EBz v_a3EBA) (VertexData r_a3EBz v_a3EQn) v_a3EBA v_a3EQn
+location :: forall r_a3EBz v_a3EBA r_a3EQm. Lens (VertexData r_a3EBz v_a3EBA) (VertexData r_a3EQm v_a3EBA) (Point 2 r_a3EBz) (Point 2 r_a3EQm)
 
 -- | The Face data consists of the data itself and a list of holes
 data FaceData h f
 FaceData :: Seq h -> !f -> FaceData h f
-holes :: forall h_a3IKx f_a3IKy h_a3JAd. Lens (FaceData h_a3IKx f_a3IKy) (FaceData h_a3JAd f_a3IKy) (Seq h_a3IKx) (Seq h_a3JAd)
-fData :: forall h_a3IKx f_a3IKy f_a3JAc. Lens (FaceData h_a3IKx f_a3IKy) (FaceData h_a3IKx f_a3JAc) f_a3IKy f_a3JAc
+holes :: forall h_a3Oeu f_a3Oev h_a3P4a. Lens (FaceData h_a3Oeu f_a3Oev) (FaceData h_a3P4a f_a3Oev) (Seq h_a3Oeu) (Seq h_a3P4a)
+fData :: forall h_a3Oeu f_a3Oev f_a3P49. Lens (FaceData h_a3Oeu f_a3Oev) (FaceData h_a3Oeu f_a3P49) f_a3Oev f_a3P49
 
 -- | A planarsubdivision is essentially a bunch of plane-graphs; one for
 --   every connected component. These graphs store the global ID's (darts,
@@ -6729,7 +6862,7 @@ numDarts :: PlanarSubdivision s v e f r -> Int
 
 -- | Get the dual graph of this graph.
 dual :: forall k (s :: k) (w :: World) v e f. Getter (PlanarGraph s w v e f) (PlanarGraph s (DualOf w) f e v)
-components :: forall s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC r_a3PnK. Lens (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC) (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PnK) (Vector (Component s_a3Pay r_a3PaC)) (Vector (Component s_a3Pay r_a3PnK))
+components :: forall s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz r_a3URH. Lens (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz) (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3URH) (Vector (Component s_a3UEv r_a3UEz)) (Vector (Component s_a3UEv r_a3URH))
 
 -- | Lens to access a particular component of the planar subdivision.
 component :: ComponentId s -> Lens' (PlanarSubdivision s v e f r) (Component s r)
@@ -7024,9 +7157,9 @@ data Dart (s :: k)
 data World
 Primal :: World
 Dual :: World
-rawVertexData :: forall s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC v_a3PnN. Lens (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC) (PlanarSubdivision s_a3Pay v_a3PnN e_a3PaA f_a3PaB r_a3PaC) (Vector (Raw s_a3Pay (VertexId' (Wrap s_a3Pay)) v_a3Paz)) (Vector (Raw s_a3Pay (VertexId' (Wrap s_a3Pay)) v_a3PnN))
-rawDartData :: forall s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC e_a3PnL. Lens (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC) (PlanarSubdivision s_a3Pay v_a3Paz e_a3PnL f_a3PaB r_a3PaC) (Vector (Raw s_a3Pay (Dart (Wrap s_a3Pay)) e_a3PaA)) (Vector (Raw s_a3Pay (Dart (Wrap s_a3Pay)) e_a3PnL))
-rawFaceData :: forall s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC f_a3PnM. Lens (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PaB r_a3PaC) (PlanarSubdivision s_a3Pay v_a3Paz e_a3PaA f_a3PnM r_a3PaC) (Vector (RawFace s_a3Pay f_a3PaB)) (Vector (RawFace s_a3Pay f_a3PnM))
+rawVertexData :: forall s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz v_a3URK. Lens (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz) (PlanarSubdivision s_a3UEv v_a3URK e_a3UEx f_a3UEy r_a3UEz) (Vector (Raw s_a3UEv (VertexId' (Wrap s_a3UEv)) v_a3UEw)) (Vector (Raw s_a3UEv (VertexId' (Wrap s_a3UEv)) v_a3URK))
+rawDartData :: forall s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz e_a3URI. Lens (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz) (PlanarSubdivision s_a3UEv v_a3UEw e_a3URI f_a3UEy r_a3UEz) (Vector (Raw s_a3UEv (Dart (Wrap s_a3UEv)) e_a3UEx)) (Vector (Raw s_a3UEv (Dart (Wrap s_a3UEv)) e_a3URI))
+rawFaceData :: forall s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz f_a3URJ. Lens (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3UEy r_a3UEz) (PlanarSubdivision s_a3UEv v_a3UEw e_a3UEx f_a3URJ r_a3UEz) (Vector (RawFace s_a3UEv f_a3UEy)) (Vector (RawFace s_a3UEv f_a3URJ))
 
 -- | Lens to the facedata of the vertexdata themselves. The indices
 --   correspond to the vertexId's
@@ -7111,9 +7244,9 @@ module Data.Geometry.PointLocation.PersistentSweep
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r
 PointLocationDS :: VerticalRayShootingStructure v (Dart s) r -> PlanarSubdivision s v e f r -> FaceId' s -> PointLocationDS s v e f r
-verticalRayShootingStructure :: forall s_a402I v_a402J e_a402K f_a402L r_a402M. Getter (PointLocationDS s_a402I v_a402J e_a402K f_a402L r_a402M) (VerticalRayShootingStructure v_a402J (Dart s_a402I) r_a402M)
-subdivision :: forall s_a402I v_a402J e_a402K f_a402L r_a402M. Getter (PointLocationDS s_a402I v_a402J e_a402K f_a402L r_a402M) (PlanarSubdivision s_a402I v_a402J e_a402K f_a402L r_a402M)
-outerFace :: forall s_a402I v_a402J e_a402K f_a402L r_a402M. Getter (PointLocationDS s_a402I v_a402J e_a402K f_a402L r_a402M) (FaceId' s_a402I)
+verticalRayShootingStructure :: forall s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ. Getter (PointLocationDS s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ) (VerticalRayShootingStructure v_a45wG (Dart s_a45wF) r_a45wJ)
+subdivision :: forall s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ. Getter (PointLocationDS s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ) (PlanarSubdivision s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ)
+outerFace :: forall s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ. Getter (PointLocationDS s_a45wF v_a45wG e_a45wH f_a45wI r_a45wJ) (FaceId' s_a45wF)
 
 -- | Builds a pointlocation data structure on the planar subdivision with
 --   &lt;math&gt; vertices.
@@ -7202,10 +7335,10 @@ Arrangement :: Vector (Line 2 r :+ l) -> PlanarSubdivision s v e f r -> Rectangl
 [_subdivision] :: Arrangement s l v e f r -> PlanarSubdivision s v e f r
 [_boundedArea] :: Arrangement s l v e f r -> Rectangle () r
 [_unboundedIntersections] :: Arrangement s l v e f r -> ArrangementBoundary s l r
-inputLines :: forall s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou. Lens' (Arrangement s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou) (Vector ((:+) (Line 2 r_a44Ou) l_a44Oq))
-subdivision :: forall s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou v_a44W9 e_a44Wa f_a44Wb. Lens (Arrangement s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou) (Arrangement s_a44Op l_a44Oq v_a44W9 e_a44Wa f_a44Wb r_a44Ou) (PlanarSubdivision s_a44Op v_a44Or e_a44Os f_a44Ot r_a44Ou) (PlanarSubdivision s_a44Op v_a44W9 e_a44Wa f_a44Wb r_a44Ou)
-boundedArea :: forall s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou. Lens' (Arrangement s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou) (Rectangle () r_a44Ou)
-unboundedIntersections :: forall s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou. Lens' (Arrangement s_a44Op l_a44Oq v_a44Or e_a44Os f_a44Ot r_a44Ou) (ArrangementBoundary s_a44Op l_a44Oq r_a44Ou)
+inputLines :: forall s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air. Lens' (Arrangement s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air) (Vector ((:+) (Line 2 r_a4air) l_a4ain))
+subdivision :: forall s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air v_a4aq6 e_a4aq7 f_a4aq8. Lens (Arrangement s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air) (Arrangement s_a4aim l_a4ain v_a4aq6 e_a4aq7 f_a4aq8 r_a4air) (PlanarSubdivision s_a4aim v_a4aio e_a4aip f_a4aiq r_a4air) (PlanarSubdivision s_a4aim v_a4aq6 e_a4aq7 f_a4aq8 r_a4air)
+boundedArea :: forall s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air. Lens' (Arrangement s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air) (Rectangle () r_a4air)
+unboundedIntersections :: forall s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air. Lens' (Arrangement s_a4aim l_a4ain v_a4aio e_a4aip f_a4aiq r_a4air) (ArrangementBoundary s_a4aim l_a4ain r_a4air)
 type ArrangementBoundary s e r = Vector (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
 
 -- | Builds an arrangement of &lt;math&gt; lines
