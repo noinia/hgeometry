@@ -26,6 +26,7 @@ module Data.Geometry.LineSegment
   , flipSegment
 
   , interpolate, sampleLineSegment
+  , ordAtX, ordAtY, xCoordAt, yCoordAt
   ) where
 
 -- import           Control.Lens
@@ -72,8 +73,9 @@ instance (Fractional r, Ord r) => LineSegment 2 p r `HasIntersectionWith` Rectan
       -- if somehow the segment is open, and both endpoints lie on
       -- different sides of the boundary, (so the segment crosses the
       -- interior) it also intersects. Handle that case.
-      bothOpenAndOnBoundary (OpenLineSegment _ _) = interpolate (1/2) seg `intersects` rect
-      bothOpenAndOnBoundary _                     = False
+      bothOpenAndOnBoundary (LineSegment (Open _) (Open _)) =
+        interpolate (1/2) seg `intersects` rect
+      bothOpenAndOnBoundary _                               = False
 
 -- instance (Num r, Ord r)
 --          => (LineSegment 2 p r) `IsIntersectableWith` (Boundary (Rectangle q r)) where

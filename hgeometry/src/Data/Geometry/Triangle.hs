@@ -105,7 +105,7 @@ isDegenerateTriangle = (== 0) . doubleArea
 
 -- | Get the inscribed disk. Returns Nothing if the triangle is degenerate,
 -- i.e. if the points are colinear.
-inscribedDisk                  :: (Eq r, Fractional r)
+inscribedDisk                  :: (Ord r, Fractional r)
                                => Triangle 2 p r -> Maybe (Disk () r)
 inscribedDisk (Triangle p q r) = disk (p^.core) (q^.core) (r^.core)
 

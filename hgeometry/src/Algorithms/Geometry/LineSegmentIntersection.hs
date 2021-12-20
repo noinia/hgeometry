@@ -6,28 +6,30 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection
-  ( hasInteriorIntersections
-  , hasSelfIntersections
+  ( BooleanSweep.hasIntersections
+  , BO.intersections
+  , BO.interiorIntersections
   , Intersections
   , Associated(..)
-  , IntersectionPoint(..)
-  , isEndPointIntersection
-  , associated
-  , Compare
+  , IntersectionPoint(..), mkIntersectionPoint
+  -- , isInteriorIntersection
+  , hasSelfIntersections
   ) where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
+import qualified Algorithms.Geometry.LineSegmentIntersection.BooleanSweep as BooleanSweep
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 
--- Tests if there are any interior intersections.
---
--- | \(O(n \log n)\)
-hasInteriorIntersections :: (Ord r, Fractional r)
-                         => [LineSegment 2 p r] -> Bool
-hasInteriorIntersections = not . null . BO.interiorIntersections
 
--- | \(O(n \log n)\)
+import qualified Data.Map as Map
+
+-- | Test if the polygon has self intersections.
+--
+-- \(O(n \log n)\)
 hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
-hasSelfIntersections = hasInteriorIntersections . listEdges
+hasSelfIntersections = not . Map.null . BO.interiorIntersections . listEdges
+-- hasSelfIntersections :: (Ord r, Num r) => Polygon t p r -> Bool
+-- hasSelfIntersections = BooleanSweep.hasIntersections . listEdges
+-- FIXME: fix the open/closed bug, then switch to a boolean sweep based version
