@@ -2,7 +2,6 @@
 {-# LANGUAGE TemplateHaskell     #-}
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld where
 
-import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
 import Algorithms.Geometry.PolygonTriangulation.Types
 
 import           Control.Lens
@@ -181,11 +180,11 @@ handle e = let i = getIdx e in getEventType e >>= \case
 
 insertAt   :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
            -> OrdSeq (LineSegment 2 q r) -> OrdSeq (LineSegment 2 q r)
-insertAt v = SS.insertBy (ordAt $ v^.yCoord)
+insertAt v = SS.insertBy (ordAtY $ v^.yCoord)
 
 deleteAt   :: (Fractional r, Ord r) => Point 2 r -> LineSegment 2 p r
            -> OrdSeq (LineSegment 2 p r) -> OrdSeq (LineSegment 2 p r)
-deleteAt v = SS.deleteAllBy (ordAt $ v^.yCoord)
+deleteAt v = SS.deleteAllBy (ordAtY $ v^.yCoord)
 
 
 handleStart              :: (Fractional r, Ord r)

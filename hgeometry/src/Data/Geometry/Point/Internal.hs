@@ -242,6 +242,12 @@ instance PointFunctor (Point d) where
   pmap f = f
 
 
+
+--------------------------------------------------------------------------------
+
+
+
+
 --------------------------------------------------------------------------------
 -- * Functions specific to Two Dimensional points
 
@@ -254,7 +260,6 @@ cmpByDistanceTo c p q = comparing (squaredEuclideanDist c) p q
 cmpByDistanceTo'  :: (Ord r, Num r, Arity d)
                   => Point d r :+ c -> Point d r :+ p -> Point d r :+ q -> Ordering
 cmpByDistanceTo' c p q = cmpByDistanceTo (c^.core) (p^.core) (q^.core)
-
 
 
 -- | Squared Euclidean distance between two points

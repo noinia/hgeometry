@@ -15,7 +15,9 @@ module Data.Geometry.Line.Internal where
 import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
+import           Data.Geometry.Point.Internal
+import           Data.Geometry.Point.Orientation.Degenerate
+import           Data.Geometry.Point.Class
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           Data.Ord (comparing)
@@ -111,8 +113,17 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 isParallelTo                         :: (Eq r, Fractional r, Arity d)
                                      => Line d r -> Line d r -> Bool
 (Line _ u) `isParallelTo` (Line _ v) = u `isScalarMultipleOf` v
-  -- TODO: Maybe use a specialize pragma for 2D (see intersect instance for two lines.)
+{-# RULES
+"isParallelTo/isParallelTo2" [3]
+     forall (l1 :: forall r. Line 2 r) l2. isParallelTo l1 l2 = isParallelTo2 l1 l2
+#-}
+{-# INLINE[2] isParallelTo #-}
 
+-- | Check whether two lines are parallel
+isParallelTo2 :: (Eq r, Num r) => Line 2 r -> Line 2 r -> Bool
+isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
+    where
+      denom       = vy * ux - vx * uy
 
 -- | Test if point p lies on line l
 --
@@ -128,9 +139,6 @@ p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
-
-
-
 
 
 -- | Get the point at the given position along line, where 0 corresponds to the
@@ -154,7 +162,7 @@ toOffset p (Line q v) = scalarMultiple (p .-. q) v
 -- >>> toOffset' (Point2 5 5) (lineThrough origin $ Point2 10 10)
 -- 0.5
 --
--- \<6,4\> is not on the line but we can still point closest to it.
+-- The point (6,4) is not on the line but we can still point closest to it.
 -- >>> toOffset' (Point2 6 4) (lineThrough origin $ Point2 10 10)
 -- 0.5
 toOffset'             :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
@@ -171,16 +179,14 @@ type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
                                                      , Line 2 r
                                                      ]
 
-instance (Eq r, Fractional r) => Line 2 r `HasIntersectionWith` Line 2 r
+instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Line 2 r where
+  l1 `intersects` l2@(Line q _) = not (l1 `isParallelTo2` l2) || q `onLine2` l1
 
-instance (Eq r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
-
-
+instance (Ord r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-
   l@(Line p ~(Vector2 ux uy)) `intersect` (Line q ~v@(Vector2 vx vy))
-      | areParallel = if q `onLine` l then coRec l
-                                      else coRec NoIntersection
+      | areParallel = if q `onLine2` l then coRec l
+                                       else coRec NoIntersection
       | otherwise   = coRec r
     where
       r = q .+^ alpha *^ v
@@ -229,7 +235,7 @@ fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical
-toLinearFunction                             :: forall r. (Fractional r, Eq r)
+toLinearFunction                             :: forall r. (Fractional r, Ord r)
                                              => Line 2 r -> Maybe (r,r)
 toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine (0 :: r)) $
        (H $ \NoIntersection -> Nothing)    -- l is a vertical line

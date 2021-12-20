@@ -29,6 +29,8 @@ module Data.Geometry.LineSegment.Internal
   , interpolate
   , validSegment
   , sampleLineSegment
+
+  , ordAtX, ordAtY, xCoordAt, yCoordAt
   ) where
 
 import           Control.Arrow ((&&&))
@@ -37,6 +39,7 @@ import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable as F
+
 import           Data.Geometry.Box.Internal
 import           Data.Geometry.Interval hiding (width, midPoint)
 import           Data.Geometry.Line.Internal
@@ -51,6 +54,7 @@ import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 import           Test.QuickCheck (Arbitrary(..), suchThatMap)
 import           Text.Read
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -111,6 +115,7 @@ instance (Arbitrary r, Arbitrary p, Eq r, Arity d) => Arbitrary (LineSegment d p
 
 deriving instance (Arity d, NFData r, NFData p) => NFData (LineSegment d p r)
 
+-- | Compute a random line segmeent
 sampleLineSegment :: (Arity d, RandomGen g, Random r) => Rand g (LineSegment d () r)
 sampleLineSegment = do
   a <- ext <$> getRandom
@@ -275,8 +280,66 @@ p `onSegment` (LineSegment up vp) =
   -- work in higher dimensions that might allow us to drop the
   -- Fractional constraint
 
-instance (Ord r, Fractional r) =>
-         LineSegment 2 p r `HasIntersectionWith` LineSegment 2 q r
+
+-- | Orders the endpoints of the segments in the given direction.
+withRank                                       :: forall p q r. (Ord r, Num r)
+                                               => Vector 2 r
+                                               -> LineSegment 2 p r  -> LineSegment 2 q r
+                                               -> (Interval p Int, Interval q Int)
+withRank v (LineSegment p q) (LineSegment a b) = (i1,i2)
+  where
+    -- let rank p = 3, rank q = 6
+    i1 = Interval (p&unEndPoint.core .~ 3) (q&unEndPoint.core .~ 6)
+
+    i2 = Interval (a&unEndPoint.core .~ assign' 1 a') (a&unEndPoint.core .~ assign' 2 b')
+
+    -- make sure the intervals are in the same order, otherwise flip them.
+    (a',b') = case cmp a b of
+                LT -> (a,b)
+                EQ -> (a,b)
+                GT -> (b,a)
+
+    assign' x c = case cmp c p of
+                    LT -> x
+                    EQ -> 3
+                    GT -> case cmp c q of
+                            LT -> 4 + x
+                            EQ -> 6
+                            GT -> 7 + x
+
+    cmp     :: EndPoint (Point 2 r :+ a) -> EndPoint (Point 2 r :+ b) -> Ordering
+    cmp c d = cmpInDirection v (c^.unEndPoint.core) (d^.unEndPoint.core)
+
+instance (Ord r, Num r) =>
+         LineSegment 2 p r `HasIntersectionWith` LineSegment 2 q r where
+  s1@(LineSegment p _) `intersects` s2
+    | l1 `isParallelTo2` l2 = parallelCase
+    | otherwise             = s1 `intersects` l2  && s2 `intersects` l1
+    where
+      l1@(Line _ v) = supportingLine s1
+      l2 = supportingLine s2
+
+      parallelCase = (p^.unEndPoint.core) `onLine2` l2 && i1 `intersects` i2
+      (i1,i2) = withRank v s1 s2
+
+    -- correctness argument:
+    -- if the segments share a supportingLine (l1 and l2 parallel, and point of l1 on l2)
+    -- the segments intersect iff their intervals along the line intersect.
+
+    -- if the supporting lines intersect in a point, say x the
+    -- segments intersect iff s1 intersects the supporting line and
+    -- vice versa:
+    ---
+    -- => direction: is trivial
+    -- <= direction: s1 intersects l2 means x
+    -- lies on s1. Symmetrically s2 intersects l1 means x lies on
+    -- s2. Hence, x lies on both s1 and s2, and thus the segments
+    -- intersect.
+
+
+
+
+
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` LineSegment 2 q r where
@@ -288,8 +351,16 @@ instance (Ord r, Fractional r) =>
       :& H (coRec . subLineToSegment)
       :& RNil
 
-instance (Ord r, Fractional r) =>
+instance (Ord r, Num r) =>
          LineSegment 2 p r `HasIntersectionWith` Line 2 r where
+  (LineSegment p q) `intersects` l = case onSide (p^.unEndPoint.core) l of
+    OnLine -> isClosed p || case onSide (q^.unEndPoint.core) l of
+                              OnLine -> isClosed q || (p^.unEndPoint.core) /= (q^.unEndPoint.core)
+                              _      -> False
+    sp     -> case onSide (q^.unEndPoint.core) l of
+                OnLine -> isClosed q
+                sq     -> sp /= sq
+
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` Line 2 r where
@@ -418,3 +489,45 @@ validSegment     :: (Eq r, Arity d)
                  -> Maybe (LineSegment d p r)
 validSegment u v = let s = LineSegment u v
                    in if s^.start.core /= s^.end.core then Just s else Nothing
+
+
+
+-- | Given a y-coordinate, compare the segments based on the
+-- x-coordinate of the intersection with the horizontal line through y
+ordAtY   :: (Fractional r, Ord r) => r
+         -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+ordAtY y = comparing (xCoordAt y)
+
+-- | Given an x-coordinate, compare the segments based on the
+-- y-coordinate of the intersection with the horizontal line through y
+ordAtX   :: (Fractional r, Ord r) => r
+         -> LineSegment 2 p r -> LineSegment 2 p r -> Ordering
+ordAtX x = comparing (yCoordAt x)
+
+-- | Given a y coord and a line segment that intersects the horizontal line
+-- through y, compute the x-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
+xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
+      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
+                                    -- precondition it intersects the sweep
+                                    -- line, we return the x-coord of the
+                                    -- rightmost endpoint.
+      | otherwise    = px + alpha * (qx - px)
+  where
+    alpha = (y - py) / (qy - py)
+
+
+-- | Given an x-coordinate and a line segment that intersects the vertical line
+-- through x, compute the y-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
+yCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+yCoordAt x (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
+    | px == qx  = py `max` qy -- s is vertical, since by the precondition it
+                              -- intersects we return the y-coord of the topmost
+                              -- endpoint.
+    | otherwise = py + alpha * (qy - py)
+  where
+    alpha = (x - px) / (qx - px)

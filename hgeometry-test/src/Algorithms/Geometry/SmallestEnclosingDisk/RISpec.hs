@@ -50,7 +50,7 @@ toSpec (TestCase pts sol) =
           (diskOf $ fromJust sol)
 
 
-diskOf               :: (Fractional r, Eq r)
+diskOf               :: (Fractional r, Ord r)
                      => TwoOrThree (Point 2 r) -> Disk () r
 diskOf (Two p q)     = fromDiameter p q
 diskOf (Three p q r) = fromMaybe (error "Wrong manual disk") $ disk p q r

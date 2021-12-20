@@ -19,9 +19,9 @@ dualLine (Point2 x y) = fromLinearFunction x (-y)
 
 -- | Returns Nothing if the input line is vertical
 -- Maps a line l: y = ax + b to a point (a,-b)
-dualPoint   :: (Fractional r, Eq r) => Line 2 r -> Maybe (Point 2 r)
+dualPoint   :: (Fractional r, Ord r) => Line 2 r -> Maybe (Point 2 r)
 dualPoint l = (\(a,b) -> Point2 a (-b)) <$> toLinearFunction l
 
 -- | Pre: the input line is not vertical
-dualPoint' :: (Fractional r, Eq r) => Line 2 r -> Point 2 r
+dualPoint' :: (Fractional r, Ord r) => Line 2 r -> Point 2 r
 dualPoint' = fromJust . dualPoint
