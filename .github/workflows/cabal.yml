@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ghc: ['8.8', '8.10','9.0']
+        ghc: ['8.8', '8.10','9.0', '9.2']
         os: [ubuntu-latest, macOS-latest]
     name: GHC ${{ matrix.ghc }} / ${{ matrix.os }}
     steps:
@@ -47,15 +47,15 @@ jobs:
         cabal build hgeometry-examples
         cabal build pkg:hgeometry:benchmarks
     - name: Build showcase
-      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.8') }}
       run: |
         cabal build hgeometry-showcase:showcase
     - name: Test hgeometry
-      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
+      # if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
       run: |
         cabal test --test-show-details=always hgeometry
     - name: Test hgeometry-combinatorial
-      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
+      # if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.10') }}
       run: |
         cabal test --test-show-details=streaming hgeometry-combinatorial
     - name: Test hgeometry-test
