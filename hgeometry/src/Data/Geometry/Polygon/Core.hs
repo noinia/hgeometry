@@ -272,6 +272,15 @@ instance (FromJSON r, Eq r, Num r, FromJSON p) => FromJSON (Polygon Multi p r) w
       pMulti  o = (\vs hs -> MultiPolygon (fromPoints vs) (map fromPoints hs))
                <$> o .: "outerBoundary" <*> o .: "holes"
 
+instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Boundary (Polygon t p r)) where
+  pointClosestToWithDistance q = minimumBy (comparing snd)
+                               . fmap (pointClosestToWithDistance q)
+                               . listEdges . review _Boundary
+
+instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Polygon t p r) where
+  pointClosestToWithDistance q pg
+    | q `intersects` pg = (q, 0)
+    | otherwise         = pointClosestToWithDistance q (Boundary pg)
 
 
 -- * Functions on Polygons

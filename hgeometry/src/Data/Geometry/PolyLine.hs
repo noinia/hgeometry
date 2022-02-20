@@ -88,6 +88,12 @@ instance HasEnd (PolyLine d p r) where
   type EndExtra (PolyLine d p r) = p
   end = points.last1
 
+instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (PolyLine d p r) where
+  pointClosestToWithDistance q = minimumBy (comparing snd)
+                               . fmap (pointClosestToWithDistance q)
+                               . edgeSegments
+
+
 -- | Builds a Polyline from a list of points, if there are sufficiently many points
 fromPoints :: [Point d r :+ p] -> Maybe (PolyLine d p r)
 fromPoints = fmap PolyLine . LSeq.eval @2 . LSeq.fromList
