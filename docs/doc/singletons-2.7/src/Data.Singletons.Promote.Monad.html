@@ -1,0 +1,649 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Data/Singletons/Promote/Monad.hs
+
+(c) Richard Eisenberg 2014
+rae@cs.brynmawr.edu
+
+This file defines the PrM monad and its operations, for use during promotion.
+
+The PrM monad allows reading from a PrEnv environment and writing to a list
+of DDec, and is wrapped around a Q.
+-}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving, FlexibleContexts,
+             TypeFamilies, KindSignatures #-}</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.Promote.Monad</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier">PrM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteM"><span class="hs-identifier">promoteM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteM_"><span class="hs-identifier">promoteM_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteMDecs"><span class="hs-identifier">promoteMDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#VarPromotions"><span class="hs-identifier">VarPromotions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#allLocals"><span class="hs-identifier">allLocals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#emitDecs"><span class="hs-identifier">emitDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#emitDecsM"><span class="hs-identifier">emitDecsM</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>  </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#lambdaBind"><span class="hs-identifier">lambdaBind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#LetBind"><span class="hs-identifier">LetBind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#letBind"><span class="hs-identifier">letBind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#lookupVarE"><span class="hs-identifier">lookupVarE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#forallBind"><span class="hs-identifier">forallBind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#allBoundKindVars"><span class="hs-identifier">allBoundKindVars</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Writer</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">lift</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OMap</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">OMap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OSet</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">OSet</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html"><span class="hs-identifier">Data.Singletons.Syntax</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html"><span class="hs-identifier">Data.Singletons.TH.Options</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">type</span><span> </span><span id="LetExpansions"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#LetExpansions"><span class="hs-identifier hs-var">LetExpansions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>  </span><span class="hs-comment">-- from **term-level** name</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- environment during promotion</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">data</span><span> </span><span id="PrEnv"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-var">PrEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>  </span><span id="PrEnv"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-var">PrEnv</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="pr_options"><span class="annot"><span class="annottext">PrEnv -&gt; Options
+</span><a href="Data.Singletons.Promote.Monad.html#pr_options"><span class="hs-identifier hs-var hs-var">pr_options</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#Options"><span class="hs-identifier hs-type">Options</span></a></span><span>
+</span><span id="line-37"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pr_lambda_bound"><span class="annot"><span class="annottext">PrEnv -&gt; OMap Name Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_lambda_bound"><span class="hs-identifier hs-var hs-var">pr_lambda_bound</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-38"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pr_let_bound"><span class="annot"><span class="annottext">PrEnv -&gt; LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var hs-var">pr_let_bound</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#LetExpansions"><span class="hs-identifier hs-type">LetExpansions</span></a></span><span>
+</span><span id="line-39"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pr_forall_bound"><span class="annot"><span class="annottext">PrEnv -&gt; OSet Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_forall_bound"><span class="hs-identifier hs-var hs-var">pr_forall_bound</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OSet</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-comment">-- See Note [Explicitly binding kind variables]</span><span>
+</span><span id="line-40"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="pr_local_decls"><span class="annot"><span class="annottext">PrEnv -&gt; [Dec]
+</span><a href="Data.Singletons.Promote.Monad.html#pr_local_decls"><span class="hs-identifier hs-var hs-var">pr_local_decls</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span>
+</span><span id="line-41"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#emptyPrEnv"><span class="hs-identifier hs-type">emptyPrEnv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span>
+</span><span id="line-44"></span><span id="emptyPrEnv"><span class="annot"><span class="annottext">emptyPrEnv :: PrEnv
+</span><a href="Data.Singletons.Promote.Monad.html#emptyPrEnv"><span class="hs-identifier hs-var hs-var">emptyPrEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PrEnv :: Options
+-&gt; OMap Name Name -&gt; LetExpansions -&gt; OSet Name -&gt; [Dec] -&gt; PrEnv
+</span><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_options :: Options
+</span><a href="Data.Singletons.Promote.Monad.html#pr_options"><span class="hs-identifier hs-var">pr_options</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="Data.Singletons.TH.Options.html#defaultOptions"><span class="hs-identifier hs-var">defaultOptions</span></a></span><span>
+</span><span id="line-45"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_lambda_bound :: OMap Name Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_lambda_bound"><span class="hs-identifier hs-var">pr_lambda_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OMap Name Name
+forall k v. OMap k v
+</span><span class="hs-identifier hs-var">OMap.empty</span></span><span>
+</span><span id="line-46"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_let_bound :: LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var">pr_let_bound</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LetExpansions
+forall k v. OMap k v
+</span><span class="hs-identifier hs-var">OMap.empty</span></span><span>
+</span><span id="line-47"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_forall_bound :: OSet Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_forall_bound"><span class="hs-identifier hs-var">pr_forall_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+forall a. OSet a
+</span><span class="hs-identifier hs-var">OSet.empty</span></span><span>
+</span><span id="line-48"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_local_decls :: [Dec]
+</span><a href="Data.Singletons.Promote.Monad.html#pr_local_decls"><span class="hs-identifier hs-var">pr_local_decls</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- the promotion monad</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">newtype</span><span> </span><span id="PrM"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-var">PrM</span></a></span></span><span> </span><span id="local-6989586621681357395"><span class="annot"><a href="#local-6989586621681357395"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PrM"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-var">PrM</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WriterT</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621681357395"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span> </span><span id="local-6989586621681357390"><span id="local-6989586621681357392"><span class="annot"><span class="annottext">a -&gt; PrM b -&gt; PrM a
+(a -&gt; b) -&gt; PrM a -&gt; PrM b
+(forall a b. (a -&gt; b) -&gt; PrM a -&gt; PrM b)
+-&gt; (forall a b. a -&gt; PrM b -&gt; PrM a) -&gt; Functor PrM
+forall a b. a -&gt; PrM b -&gt; PrM a
+forall a b. (a -&gt; b) -&gt; PrM a -&gt; PrM b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; PrM b -&gt; PrM a
+$c&lt;$ :: forall a b. a -&gt; PrM b -&gt; PrM a
+fmap :: (a -&gt; b) -&gt; PrM a -&gt; PrM b
+$cfmap :: forall a b. (a -&gt; b) -&gt; PrM a -&gt; PrM b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357378"><span id="local-6989586621681357380"><span id="local-6989586621681357382"><span id="local-6989586621681357384"><span id="local-6989586621681357386"><span class="annot"><span class="annottext">Functor PrM
+a -&gt; PrM a
+Functor PrM
+-&gt; (forall a. a -&gt; PrM a)
+-&gt; (forall a b. PrM (a -&gt; b) -&gt; PrM a -&gt; PrM b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; PrM a -&gt; PrM b -&gt; PrM c)
+-&gt; (forall a b. PrM a -&gt; PrM b -&gt; PrM b)
+-&gt; (forall a b. PrM a -&gt; PrM b -&gt; PrM a)
+-&gt; Applicative PrM
+PrM a -&gt; PrM b -&gt; PrM b
+PrM a -&gt; PrM b -&gt; PrM a
+PrM (a -&gt; b) -&gt; PrM a -&gt; PrM b
+(a -&gt; b -&gt; c) -&gt; PrM a -&gt; PrM b -&gt; PrM c
+forall a. a -&gt; PrM a
+forall a b. PrM a -&gt; PrM b -&gt; PrM a
+forall a b. PrM a -&gt; PrM b -&gt; PrM b
+forall a b. PrM (a -&gt; b) -&gt; PrM a -&gt; PrM b
+forall a b c. (a -&gt; b -&gt; c) -&gt; PrM a -&gt; PrM b -&gt; PrM c
+forall (f :: * -&gt; *).
+Functor f
+-&gt; (forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+&lt;* :: PrM a -&gt; PrM b -&gt; PrM a
+$c&lt;* :: forall a b. PrM a -&gt; PrM b -&gt; PrM a
+*&gt; :: PrM a -&gt; PrM b -&gt; PrM b
+$c*&gt; :: forall a b. PrM a -&gt; PrM b -&gt; PrM b
+liftA2 :: (a -&gt; b -&gt; c) -&gt; PrM a -&gt; PrM b -&gt; PrM c
+$cliftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; PrM a -&gt; PrM b -&gt; PrM c
+&lt;*&gt; :: PrM (a -&gt; b) -&gt; PrM a -&gt; PrM b
+$c&lt;*&gt; :: forall a b. PrM (a -&gt; b) -&gt; PrM a -&gt; PrM b
+pure :: a -&gt; PrM a
+$cpure :: forall a. a -&gt; PrM a
+$cp1Applicative :: Functor PrM
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357370"><span id="local-6989586621681357372"><span id="local-6989586621681357374"><span class="annot"><span class="annottext">Applicative PrM
+a -&gt; PrM a
+Applicative PrM
+-&gt; (forall a b. PrM a -&gt; (a -&gt; PrM b) -&gt; PrM b)
+-&gt; (forall a b. PrM a -&gt; PrM b -&gt; PrM b)
+-&gt; (forall a. a -&gt; PrM a)
+-&gt; Monad PrM
+PrM a -&gt; (a -&gt; PrM b) -&gt; PrM b
+PrM a -&gt; PrM b -&gt; PrM b
+forall a. a -&gt; PrM a
+forall a b. PrM a -&gt; PrM b -&gt; PrM b
+forall a b. PrM a -&gt; (a -&gt; PrM b) -&gt; PrM b
+forall (m :: * -&gt; *).
+Applicative m
+-&gt; (forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+return :: a -&gt; PrM a
+$creturn :: forall a. a -&gt; PrM a
+&gt;&gt; :: PrM a -&gt; PrM b -&gt; PrM b
+$c&gt;&gt; :: forall a b. PrM a -&gt; PrM b -&gt; PrM b
+&gt;&gt;= :: PrM a -&gt; (a -&gt; PrM b) -&gt; PrM b
+$c&gt;&gt;= :: forall a b. PrM a -&gt; (a -&gt; PrM b) -&gt; PrM b
+$cp1Monad :: Applicative PrM
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357319"><span id="local-6989586621681357321"><span id="local-6989586621681357323"><span id="local-6989586621681357325"><span id="local-6989586621681357327"><span id="local-6989586621681357329"><span id="local-6989586621681357331"><span id="local-6989586621681357333"><span id="local-6989586621681357335"><span id="local-6989586621681357337"><span id="local-6989586621681357339"><span id="local-6989586621681357341"><span id="local-6989586621681357343"><span id="local-6989586621681357345"><span id="local-6989586621681357347"><span id="local-6989586621681357349"><span id="local-6989586621681357351"><span id="local-6989586621681357353"><span id="local-6989586621681357355"><span id="local-6989586621681357357"><span id="local-6989586621681357359"><span id="local-6989586621681357361"><span id="local-6989586621681357363"><span id="local-6989586621681357365"><span class="annot"><span class="annottext">MonadFail PrM
+MonadIO PrM
+PrM [Extension]
+PrM (Maybe a)
+PrM Loc
+a -&gt; PrM ()
+Bool -&gt; String -&gt; PrM (Maybe Name)
+Bool -&gt; String -&gt; PrM ()
+String -&gt; PrM String
+String -&gt; PrM Name
+String -&gt; PrM ()
+[Dec] -&gt; PrM ()
+IO a -&gt; PrM a
+Q () -&gt; PrM ()
+Name -&gt; PrM [DecidedStrictness]
+Name -&gt; PrM [Role]
+Name -&gt; PrM (Maybe Fixity)
+Name -&gt; PrM Type
+Name -&gt; PrM Info
+Name -&gt; [Type] -&gt; PrM [Dec]
+MonadIO PrM
+-&gt; MonadFail PrM
+-&gt; (String -&gt; PrM Name)
+-&gt; (Bool -&gt; String -&gt; PrM ())
+-&gt; (forall a. PrM a -&gt; PrM a -&gt; PrM a)
+-&gt; (Bool -&gt; String -&gt; PrM (Maybe Name))
+-&gt; (Name -&gt; PrM Info)
+-&gt; (Name -&gt; PrM (Maybe Fixity))
+-&gt; (Name -&gt; PrM Type)
+-&gt; (Name -&gt; [Type] -&gt; PrM [Dec])
+-&gt; (Name -&gt; PrM [Role])
+-&gt; (forall a. Data a =&gt; AnnLookup -&gt; PrM [a])
+-&gt; (Module -&gt; PrM ModuleInfo)
+-&gt; (Name -&gt; PrM [DecidedStrictness])
+-&gt; PrM Loc
+-&gt; (forall a. IO a -&gt; PrM a)
+-&gt; (String -&gt; PrM ())
+-&gt; (String -&gt; PrM String)
+-&gt; ([Dec] -&gt; PrM ())
+-&gt; (ForeignSrcLang -&gt; String -&gt; PrM ())
+-&gt; (Q () -&gt; PrM ())
+-&gt; (String -&gt; PrM ())
+-&gt; (forall a. Typeable a =&gt; PrM (Maybe a))
+-&gt; (forall a. Typeable a =&gt; a -&gt; PrM ())
+-&gt; (Extension -&gt; PrM Bool)
+-&gt; PrM [Extension]
+-&gt; Quasi PrM
+Extension -&gt; PrM Bool
+ForeignSrcLang -&gt; String -&gt; PrM ()
+Module -&gt; PrM ModuleInfo
+AnnLookup -&gt; PrM [a]
+PrM a -&gt; PrM a -&gt; PrM a
+forall a. Data a =&gt; AnnLookup -&gt; PrM [a]
+forall a. Typeable a =&gt; PrM (Maybe a)
+forall a. Typeable a =&gt; a -&gt; PrM ()
+forall a. IO a -&gt; PrM a
+forall a. PrM a -&gt; PrM a -&gt; PrM a
+forall (m :: * -&gt; *).
+MonadIO m
+-&gt; MonadFail m
+-&gt; (String -&gt; m Name)
+-&gt; (Bool -&gt; String -&gt; m ())
+-&gt; (forall a. m a -&gt; m a -&gt; m a)
+-&gt; (Bool -&gt; String -&gt; m (Maybe Name))
+-&gt; (Name -&gt; m Info)
+-&gt; (Name -&gt; m (Maybe Fixity))
+-&gt; (Name -&gt; m Type)
+-&gt; (Name -&gt; [Type] -&gt; m [Dec])
+-&gt; (Name -&gt; m [Role])
+-&gt; (forall a. Data a =&gt; AnnLookup -&gt; m [a])
+-&gt; (Module -&gt; m ModuleInfo)
+-&gt; (Name -&gt; m [DecidedStrictness])
+-&gt; m Loc
+-&gt; (forall a. IO a -&gt; m a)
+-&gt; (String -&gt; m ())
+-&gt; (String -&gt; m String)
+-&gt; ([Dec] -&gt; m ())
+-&gt; (ForeignSrcLang -&gt; String -&gt; m ())
+-&gt; (Q () -&gt; m ())
+-&gt; (String -&gt; m ())
+-&gt; (forall a. Typeable a =&gt; m (Maybe a))
+-&gt; (forall a. Typeable a =&gt; a -&gt; m ())
+-&gt; (Extension -&gt; m Bool)
+-&gt; m [Extension]
+-&gt; Quasi m
+qExtsEnabled :: PrM [Extension]
+$cqExtsEnabled :: PrM [Extension]
+qIsExtEnabled :: Extension -&gt; PrM Bool
+$cqIsExtEnabled :: Extension -&gt; PrM Bool
+qPutQ :: a -&gt; PrM ()
+$cqPutQ :: forall a. Typeable a =&gt; a -&gt; PrM ()
+qGetQ :: PrM (Maybe a)
+$cqGetQ :: forall a. Typeable a =&gt; PrM (Maybe a)
+qAddCorePlugin :: String -&gt; PrM ()
+$cqAddCorePlugin :: String -&gt; PrM ()
+qAddModFinalizer :: Q () -&gt; PrM ()
+$cqAddModFinalizer :: Q () -&gt; PrM ()
+qAddForeignFilePath :: ForeignSrcLang -&gt; String -&gt; PrM ()
+$cqAddForeignFilePath :: ForeignSrcLang -&gt; String -&gt; PrM ()
+qAddTopDecls :: [Dec] -&gt; PrM ()
+$cqAddTopDecls :: [Dec] -&gt; PrM ()
+qAddTempFile :: String -&gt; PrM String
+$cqAddTempFile :: String -&gt; PrM String
+qAddDependentFile :: String -&gt; PrM ()
+$cqAddDependentFile :: String -&gt; PrM ()
+qRunIO :: IO a -&gt; PrM a
+$cqRunIO :: forall a. IO a -&gt; PrM a
+qLocation :: PrM Loc
+$cqLocation :: PrM Loc
+qReifyConStrictness :: Name -&gt; PrM [DecidedStrictness]
+$cqReifyConStrictness :: Name -&gt; PrM [DecidedStrictness]
+qReifyModule :: Module -&gt; PrM ModuleInfo
+$cqReifyModule :: Module -&gt; PrM ModuleInfo
+qReifyAnnotations :: AnnLookup -&gt; PrM [a]
+$cqReifyAnnotations :: forall a. Data a =&gt; AnnLookup -&gt; PrM [a]
+qReifyRoles :: Name -&gt; PrM [Role]
+$cqReifyRoles :: Name -&gt; PrM [Role]
+qReifyInstances :: Name -&gt; [Type] -&gt; PrM [Dec]
+$cqReifyInstances :: Name -&gt; [Type] -&gt; PrM [Dec]
+qReifyType :: Name -&gt; PrM Type
+$cqReifyType :: Name -&gt; PrM Type
+qReifyFixity :: Name -&gt; PrM (Maybe Fixity)
+$cqReifyFixity :: Name -&gt; PrM (Maybe Fixity)
+qReify :: Name -&gt; PrM Info
+$cqReify :: Name -&gt; PrM Info
+qLookupName :: Bool -&gt; String -&gt; PrM (Maybe Name)
+$cqLookupName :: Bool -&gt; String -&gt; PrM (Maybe Name)
+qRecover :: PrM a -&gt; PrM a -&gt; PrM a
+$cqRecover :: forall a. PrM a -&gt; PrM a -&gt; PrM a
+qReport :: Bool -&gt; String -&gt; PrM ()
+$cqReport :: Bool -&gt; String -&gt; PrM ()
+qNewName :: String -&gt; PrM Name
+$cqNewName :: String -&gt; PrM Name
+$cp2Quasi :: MonadFail PrM
+$cp1Quasi :: MonadIO PrM
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Quasi</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span>           </span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357311"><span id="local-6989586621681357313"><span id="local-6989586621681357315"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357300"><span id="local-6989586621681357302"><span id="local-6989586621681357304"><span id="local-6989586621681357306"><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-54"></span><span>           </span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357296"><span class="annot"><span class="annottext">Monad PrM
+Monad PrM -&gt; (forall a. String -&gt; PrM a) -&gt; MonadFail PrM
+String -&gt; PrM a
+forall a. String -&gt; PrM a
+forall (m :: * -&gt; *).
+Monad m -&gt; (forall a. String -&gt; m a) -&gt; MonadFail m
+fail :: String -&gt; PrM a
+$cfail :: forall a. String -&gt; PrM a
+$cp1MonadFail :: Monad PrM
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadFail</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357292"><span class="annot"><span class="annottext">Monad PrM
+Monad PrM -&gt; (forall a. IO a -&gt; PrM a) -&gt; MonadIO PrM
+IO a -&gt; PrM a
+forall a. IO a -&gt; PrM a
+forall (m :: * -&gt; *).
+Monad m -&gt; (forall a. IO a -&gt; m a) -&gt; MonadIO m
+liftIO :: IO a -&gt; PrM a
+$cliftIO :: forall a. IO a -&gt; PrM a
+$cp1MonadIO :: Monad PrM
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadIO</span></span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621681357286"><span class="annot"><span class="annottext">localDeclarations :: PrM [Dec]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">localDeclarations</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; [Dec]) -&gt; PrM [Dec]
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; [Dec]
+</span><a href="Data.Singletons.Promote.Monad.html#pr_local_decls"><span class="hs-identifier hs-var hs-var">pr_local_decls</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621681357280"><span class="annot"><span class="annottext">getOptions :: PrM Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var hs-var hs-var hs-var">getOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; Options) -&gt; PrM Options
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; Options
+</span><a href="Data.Singletons.Promote.Monad.html#pr_options"><span class="hs-identifier hs-var hs-var">pr_options</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- return *type-level* names</span><span>
+</span><span id="line-63"></span><span id="local-6989586621681357278"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#allLocals"><span class="hs-identifier hs-type">allLocals</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357278"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357278"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-64"></span><span id="allLocals"><span class="annot"><span class="annottext">allLocals :: m [Name]
+</span><a href="Data.Singletons.Promote.Monad.html#allLocals"><span class="hs-identifier hs-var hs-var">allLocals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621681357277"><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621681357277"><span class="hs-identifier hs-var">lambdas</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; [(Name, Name)]) -&gt; m [(Name, Name)]
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OMap Name Name -&gt; [(Name, Name)]
+forall k v. OMap k v -&gt; [(k, v)]
+</span><span class="hs-identifier hs-var">OMap.assocs</span></span><span> </span><span class="annot"><span class="annottext">(OMap Name Name -&gt; [(Name, Name)])
+-&gt; (PrEnv -&gt; OMap Name Name) -&gt; PrEnv -&gt; [(Name, Name)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; OMap Name Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_lambda_bound"><span class="hs-identifier hs-var hs-var">pr_lambda_bound</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621681357274"><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357274"><span class="hs-identifier hs-var">lets</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; LetExpansions) -&gt; m LetExpansions
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var hs-var">pr_let_bound</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-comment">-- filter out shadowed variables!</span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><span class="annottext">[Name] -&gt; m [Name]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357273"><span class="hs-identifier hs-var">typeName</span></a></span><span>
+</span><span id="line-69"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681357272"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357272"><span class="hs-identifier hs-var">termName</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357273"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357273"><span class="hs-identifier hs-var">typeName</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621681357277"><span class="hs-identifier hs-var">lambdas</span></a></span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Name -&gt; LetExpansions -&gt; Maybe DType
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Maybe v
+</span><span class="hs-identifier hs-var">OMap.lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357272"><span class="hs-identifier hs-var">termName</span></a></span><span> </span><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357274"><span class="hs-identifier hs-var">lets</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-71"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span id="local-6989586621681357269"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357269"><span class="hs-identifier hs-var">typeName'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357269"><span class="hs-identifier hs-var">typeName'</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357273"><span class="hs-identifier hs-var">typeName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-72"></span><span>             </span><span class="annot"><span class="annottext">Maybe DType
+</span><span class="hs-identifier">_</span></span><span>                                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span id="local-6989586621681357447"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#emitDecs"><span class="hs-identifier hs-type">emitDecs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621681357447"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357447"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-75"></span><span id="emitDecs"><span class="annot"><span class="annottext">emitDecs :: [DDec] -&gt; m ()
+</span><a href="Data.Singletons.Promote.Monad.html#emitDecs"><span class="hs-identifier hs-var hs-var">emitDecs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DDec] -&gt; m ()
+forall w (m :: * -&gt; *). MonadWriter w m =&gt; w -&gt; m ()
+</span><span class="hs-identifier hs-var">tell</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span id="local-6989586621681357267"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#emitDecsM"><span class="hs-identifier hs-type">emitDecsM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621681357267"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357267"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357267"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-78"></span><span id="emitDecsM"><span class="annot"><span class="annottext">emitDecsM :: m [DDec] -&gt; m ()
+</span><a href="Data.Singletons.Promote.Monad.html#emitDecsM"><span class="hs-identifier hs-var hs-var">emitDecsM</span></a></span></span><span> </span><span id="local-6989586621681357266"><span class="annot"><span class="annottext">m [DDec]
+</span><a href="#local-6989586621681357266"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621681357265"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357265"><span class="hs-identifier hs-var">decs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m [DDec]
+</span><a href="#local-6989586621681357266"><span class="hs-identifier hs-var">action</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="annottext">[DDec] -&gt; m ()
+forall (m :: * -&gt; *). MonadWriter [DDec] m =&gt; [DDec] -&gt; m ()
+</span><a href="Data.Singletons.Promote.Monad.html#emitDecs"><span class="hs-identifier hs-var">emitDecs</span></a></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357265"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- when lambda-binding variables, we still need to add the variables</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- to the let-expansion, because of shadowing. ugh.</span><span>
+</span><span id="line-84"></span><span id="local-6989586621681357264"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#lambdaBind"><span class="hs-identifier hs-type">lambdaBind</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Syntax.html#VarPromotions"><span class="hs-identifier hs-type">VarPromotions</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357264"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357264"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-85"></span><span id="lambdaBind"><span class="annot"><span class="annottext">lambdaBind :: [(Name, Name)] -&gt; PrM a -&gt; PrM a
+</span><a href="Data.Singletons.Promote.Monad.html#lambdaBind"><span class="hs-identifier hs-var hs-var">lambdaBind</span></a></span></span><span> </span><span id="local-6989586621681357263"><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621681357263"><span class="hs-identifier hs-var">binds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; PrEnv) -&gt; PrM a -&gt; PrM a
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; PrEnv
+</span><a href="#local-6989586621681357261"><span class="hs-identifier hs-var">add_binds</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621681357261"><span class="annot"><span class="annottext">add_binds :: PrEnv -&gt; PrEnv
+</span><a href="#local-6989586621681357261"><span class="hs-identifier hs-var hs-var">add_binds</span></a></span></span><span> </span><span id="local-6989586621681357260"><span class="annot"><span class="annottext">env :: PrEnv
+</span><a href="#local-6989586621681357260"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_lambda_bound :: PrEnv -&gt; OMap Name Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_lambda_bound"><span class="hs-identifier hs-var">pr_lambda_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681357259"><span class="annot"><span class="annottext">OMap Name Name
+</span><a href="#local-6989586621681357259"><span class="hs-identifier hs-var">lambdas</span></a></span></span><span>
+</span><span id="line-87"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_let_bound :: PrEnv -&gt; LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var">pr_let_bound</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681357258"><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357258"><span class="hs-identifier hs-var">lets</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-88"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681357257"><span class="annot"><span class="annottext">new_lets :: LetExpansions
+</span><a href="#local-6989586621681357257"><span class="hs-identifier hs-var hs-var">new_lets</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, DType)] -&gt; LetExpansions
+forall k v. Ord k =&gt; [(k, v)] -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OMap.fromList</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357255"><span class="hs-identifier hs-var">tmN</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DVarT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357254"><span class="hs-identifier hs-var">tyN</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681357255"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357255"><span class="hs-identifier hs-var">tmN</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357254"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357254"><span class="hs-identifier hs-var">tyN</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621681357263"><span class="hs-identifier hs-var">binds</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="hs-keyword">in</span><span>
+</span><span id="line-89"></span><span>          </span><span class="annot"><span class="annottext">PrEnv
+</span><a href="#local-6989586621681357260"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_lambda_bound :: OMap Name Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_lambda_bound"><span class="hs-identifier hs-var">pr_lambda_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, Name)] -&gt; OMap Name Name
+forall k v. Ord k =&gt; [(k, v)] -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OMap.fromList</span></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621681357263"><span class="hs-identifier hs-var">binds</span></a></span><span> </span><span class="annot"><span class="annottext">OMap Name Name -&gt; OMap Name Name -&gt; OMap Name Name
+forall k v. Ord k =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var">`OMap.union`</span></span><span> </span><span class="annot"><span class="annottext">OMap Name Name
+</span><a href="#local-6989586621681357259"><span class="hs-identifier hs-var">lambdas</span></a></span><span>
+</span><span id="line-90"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_let_bound :: LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var">pr_let_bound</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357257"><span class="hs-identifier hs-var">new_lets</span></a></span><span>            </span><span class="annot"><span class="annottext">LetExpansions -&gt; LetExpansions -&gt; LetExpansions
+forall k v. Ord k =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var">`OMap.union`</span></span><span> </span><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357258"><span class="hs-identifier hs-var">lets</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">type</span><span> </span><span id="LetBind"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#LetBind"><span class="hs-identifier hs-var">LetBind</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span id="local-6989586621681357252"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#letBind"><span class="hs-identifier hs-type">letBind</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#LetBind"><span class="hs-identifier hs-type">LetBind</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357252"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357252"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-94"></span><span id="letBind"><span class="annot"><span class="annottext">letBind :: [(Name, DType)] -&gt; PrM a -&gt; PrM a
+</span><a href="Data.Singletons.Promote.Monad.html#letBind"><span class="hs-identifier hs-var hs-var">letBind</span></a></span></span><span> </span><span id="local-6989586621681357251"><span class="annot"><span class="annottext">[(Name, DType)]
+</span><a href="#local-6989586621681357251"><span class="hs-identifier hs-var">binds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; PrEnv) -&gt; PrM a -&gt; PrM a
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; PrEnv
+</span><a href="#local-6989586621681357250"><span class="hs-identifier hs-var">add_binds</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621681357250"><span class="annot"><span class="annottext">add_binds :: PrEnv -&gt; PrEnv
+</span><a href="#local-6989586621681357250"><span class="hs-identifier hs-var hs-var">add_binds</span></a></span></span><span> </span><span id="local-6989586621681357249"><span class="annot"><span class="annottext">env :: PrEnv
+</span><a href="#local-6989586621681357249"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_let_bound :: PrEnv -&gt; LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var">pr_let_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681357248"><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357248"><span class="hs-identifier hs-var">lets</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-96"></span><span>          </span><span class="annot"><span class="annottext">PrEnv
+</span><a href="#local-6989586621681357249"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_let_bound :: LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var">pr_let_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, DType)] -&gt; LetExpansions
+forall k v. Ord k =&gt; [(k, v)] -&gt; OMap k v
+</span><span class="hs-identifier hs-var">OMap.fromList</span></span><span> </span><span class="annot"><span class="annottext">[(Name, DType)]
+</span><a href="#local-6989586621681357251"><span class="hs-identifier hs-var">binds</span></a></span><span> </span><span class="annot"><span class="annottext">LetExpansions -&gt; LetExpansions -&gt; LetExpansions
+forall k v. Ord k =&gt; OMap k v -&gt; OMap k v -&gt; OMap k v
+</span><span class="hs-operator hs-var">`OMap.union`</span></span><span> </span><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357248"><span class="hs-identifier hs-var">lets</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#lookupVarE"><span class="hs-identifier hs-type">lookupVarE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>
+</span><span id="line-99"></span><span id="lookupVarE"><span class="annot"><span class="annottext">lookupVarE :: Name -&gt; PrM DType
+</span><a href="Data.Singletons.Promote.Monad.html#lookupVarE"><span class="hs-identifier hs-var hs-var">lookupVarE</span></a></span></span><span> </span><span id="local-6989586621681357247"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357247"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621681357246"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621681357246"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">PrM Options
+forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621681357245"><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357245"><span class="hs-identifier hs-var">lets</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; LetExpansions) -&gt; PrM LetExpansions
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; LetExpansions
+</span><a href="Data.Singletons.Promote.Monad.html#pr_let_bound"><span class="hs-identifier hs-var hs-var">pr_let_bound</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Name -&gt; LetExpansions -&gt; Maybe DType
+forall k v. Ord k =&gt; k -&gt; OMap k v -&gt; Maybe v
+</span><span class="hs-identifier hs-var">OMap.lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357247"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">LetExpansions
+</span><a href="#local-6989586621681357245"><span class="hs-identifier hs-var">lets</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-103"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621681357244"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681357244"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DType -&gt; PrM DType
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621681357244"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="annot"><span class="annottext">Maybe DType
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DType -&gt; PrM DType
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(DType -&gt; PrM DType) -&gt; DType -&gt; PrM DType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; DType) -&gt; Name -&gt; DType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#defunctionalizedName0"><span class="hs-identifier hs-var">defunctionalizedName0</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621681357246"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621681357247"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- Add to the set of bound kind variables currently in scope.</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- See Note [Explicitly binding kind variables]</span><span>
+</span><span id="line-108"></span><span id="local-6989586621681357241"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#forallBind"><span class="hs-identifier hs-type">forallBind</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OSet</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357241"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357241"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-109"></span><span id="forallBind"><span class="annot"><span class="annottext">forallBind :: OSet Name -&gt; PrM a -&gt; PrM a
+</span><a href="Data.Singletons.Promote.Monad.html#forallBind"><span class="hs-identifier hs-var hs-var">forallBind</span></a></span></span><span> </span><span id="local-6989586621681357240"><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621681357240"><span class="hs-identifier hs-var">kvs1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="annottext">(PrEnv -&gt; PrEnv) -&gt; PrM a -&gt; PrM a
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621681357239"><span class="annot"><span class="annottext">env :: PrEnv
+</span><a href="#local-6989586621681357239"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrEnv"><span class="hs-identifier hs-type">PrEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_forall_bound :: PrEnv -&gt; OSet Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_forall_bound"><span class="hs-identifier hs-var">pr_forall_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621681357238"><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621681357238"><span class="hs-identifier hs-var">kvs2</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-111"></span><span>    </span><span class="annot"><span class="annottext">PrEnv
+</span><a href="#local-6989586621681357239"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_forall_bound :: OSet Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_forall_bound"><span class="hs-identifier hs-var">pr_forall_bound</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621681357240"><span class="hs-identifier hs-var">kvs1</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name -&gt; OSet Name -&gt; OSet Name
+forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var">`OSet.union`</span></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621681357238"><span class="hs-identifier hs-var">kvs2</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- Look up the set of bound kind variables currently in scope.</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- See Note [Explicitly binding kind variables]</span><span>
+</span><span id="line-115"></span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#allBoundKindVars"><span class="hs-identifier hs-type">allBoundKindVars</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OSet</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span id="allBoundKindVars"><span class="annot"><span class="annottext">allBoundKindVars :: PrM (OSet Name)
+</span><a href="Data.Singletons.Promote.Monad.html#allBoundKindVars"><span class="hs-identifier hs-var hs-var">allBoundKindVars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PrEnv -&gt; OSet Name) -&gt; PrM (OSet Name)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">PrEnv -&gt; OSet Name
+</span><a href="Data.Singletons.Promote.Monad.html#pr_forall_bound"><span class="hs-identifier hs-var hs-var">pr_forall_bound</span></a></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span id="local-6989586621681357420"><span id="local-6989586621681357421"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteM"><span class="hs-identifier hs-type">promoteM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357421"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357420"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357421"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621681357420"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-119"></span><span id="promoteM"><span class="annot"><span class="annottext">promoteM :: [Dec] -&gt; PrM a -&gt; q (a, [DDec])
+</span><a href="Data.Singletons.Promote.Monad.html#promoteM"><span class="hs-identifier hs-var hs-var">promoteM</span></a></span></span><span> </span><span id="local-6989586621681357236"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357236"><span class="hs-identifier hs-var">locals</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span id="local-6989586621681357235"><span class="annot"><span class="annottext">ReaderT PrEnv (WriterT [DDec] Q) a
+</span><a href="#local-6989586621681357235"><span class="hs-identifier hs-var">rdr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-120"></span><span>  </span><span id="local-6989586621681357234"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621681357234"><span class="hs-identifier hs-var">opts</span></a></span></span><span>         </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">q Options
+forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span id="local-6989586621681357233"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357233"><span class="hs-identifier hs-var">other_locals</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">q [Dec]
+forall (m :: * -&gt; *). DsMonad m =&gt; m [Dec]
+</span><span class="hs-identifier hs-var">localDeclarations</span></span><span>
+</span><span id="line-122"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621681357232"><span class="annot"><span class="annottext">wr :: WriterT [DDec] Q a
+</span><a href="#local-6989586621681357232"><span class="hs-identifier hs-var hs-var">wr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT PrEnv (WriterT [DDec] Q) a -&gt; PrEnv -&gt; WriterT [DDec] Q a
+forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var hs-var">runReaderT</span></span><span> </span><span class="annot"><span class="annottext">ReaderT PrEnv (WriterT [DDec] Q) a
+</span><a href="#local-6989586621681357235"><span class="hs-identifier hs-var">rdr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PrEnv
+</span><a href="Data.Singletons.Promote.Monad.html#emptyPrEnv"><span class="hs-identifier hs-var">emptyPrEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">pr_options :: Options
+</span><a href="Data.Singletons.Promote.Monad.html#pr_options"><span class="hs-identifier hs-var">pr_options</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621681357234"><span class="hs-identifier hs-var">opts</span></a></span><span>
+</span><span id="line-123"></span><span>                                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">pr_local_decls :: [Dec]
+</span><a href="Data.Singletons.Promote.Monad.html#pr_local_decls"><span class="hs-identifier hs-var">pr_local_decls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357233"><span class="hs-identifier hs-var">other_locals</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; [Dec] -&gt; [Dec]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357236"><span class="hs-identifier hs-var">locals</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>      </span><span id="local-6989586621681357230"><span class="annot"><span class="annottext">q :: Q (a, [DDec])
+</span><a href="#local-6989586621681357230"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriterT [DDec] Q a -&gt; Q (a, [DDec])
+forall w (m :: * -&gt; *) a. WriterT w m a -&gt; m (a, w)
+</span><span class="hs-identifier hs-var hs-var">runWriterT</span></span><span> </span><span class="annot"><span class="annottext">WriterT [DDec] Q a
+</span><a href="#local-6989586621681357232"><span class="hs-identifier hs-var">wr</span></a></span><span>
+</span><span id="line-125"></span><span>  </span><span class="annot"><span class="annottext">Q (a, [DDec]) -&gt; q (a, [DDec])
+forall (m :: * -&gt; *) a. Quasi m =&gt; Q a -&gt; m a
+</span><span class="hs-identifier hs-var">runQ</span></span><span> </span><span class="annot"><span class="annottext">Q (a, [DDec])
+</span><a href="#local-6989586621681357230"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span id="local-6989586621681357227"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteM_"><span class="hs-identifier hs-type">promoteM_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357227"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357227"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-128"></span><span id="promoteM_"><span class="annot"><span class="annottext">promoteM_ :: [Dec] -&gt; PrM () -&gt; q [DDec]
+</span><a href="Data.Singletons.Promote.Monad.html#promoteM_"><span class="hs-identifier hs-var hs-var">promoteM_</span></a></span></span><span> </span><span id="local-6989586621681357226"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357226"><span class="hs-identifier hs-var">locals</span></a></span></span><span> </span><span id="local-6989586621681357225"><span class="annot"><span class="annottext">PrM ()
+</span><a href="#local-6989586621681357225"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357224"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357224"><span class="hs-identifier hs-var">decs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; PrM () -&gt; q ((), [DDec])
+forall (q :: * -&gt; *) a.
+OptionsMonad q =&gt;
+[Dec] -&gt; PrM a -&gt; q (a, [DDec])
+</span><a href="Data.Singletons.Promote.Monad.html#promoteM"><span class="hs-identifier hs-var">promoteM</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357226"><span class="hs-identifier hs-var">locals</span></a></span><span> </span><span class="annot"><span class="annottext">PrM ()
+</span><a href="#local-6989586621681357225"><span class="hs-identifier hs-var">thing</span></a></span><span>
+</span><span id="line-130"></span><span>  </span><span class="annot"><span class="annottext">[DDec] -&gt; q [DDec]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357224"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- promoteM specialized to [DDec]</span><span>
+</span><span id="line-133"></span><span id="local-6989586621681357223"><span class="annot"><a href="Data.Singletons.Promote.Monad.html#promoteMDecs"><span class="hs-identifier hs-type">promoteMDecs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681357223"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.Promote.Monad.html#PrM"><span class="hs-identifier hs-type">PrM</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621681357223"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-134"></span><span id="promoteMDecs"><span class="annot"><span class="annottext">promoteMDecs :: [Dec] -&gt; PrM [DDec] -&gt; q [DDec]
+</span><a href="Data.Singletons.Promote.Monad.html#promoteMDecs"><span class="hs-identifier hs-var hs-var">promoteMDecs</span></a></span></span><span> </span><span id="local-6989586621681357222"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357222"><span class="hs-identifier hs-var">locals</span></a></span></span><span> </span><span id="local-6989586621681357221"><span class="annot"><span class="annottext">PrM [DDec]
+</span><a href="#local-6989586621681357221"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621681357220"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357220"><span class="hs-identifier hs-var">decs1</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681357219"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357219"><span class="hs-identifier hs-var">decs2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; PrM [DDec] -&gt; q ([DDec], [DDec])
+forall (q :: * -&gt; *) a.
+OptionsMonad q =&gt;
+[Dec] -&gt; PrM a -&gt; q (a, [DDec])
+</span><a href="Data.Singletons.Promote.Monad.html#promoteM"><span class="hs-identifier hs-var">promoteM</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621681357222"><span class="hs-identifier hs-var">locals</span></a></span><span> </span><span class="annot"><span class="annottext">PrM [DDec]
+</span><a href="#local-6989586621681357221"><span class="hs-identifier hs-var">thing</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span class="annot"><span class="annottext">[DDec] -&gt; q [DDec]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([DDec] -&gt; q [DDec]) -&gt; [DDec] -&gt; q [DDec]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357220"><span class="hs-identifier hs-var">decs1</span></a></span><span> </span><span class="annot"><span class="annottext">[DDec] -&gt; [DDec] -&gt; [DDec]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621681357219"><span class="hs-identifier hs-var">decs2</span></a></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">{-
+Note [Explicitly binding kind variables]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We want to ensure that when we single type signatures for functions and data
+constructors, we should explicitly quantify every kind variable bound by a
+forall. For example, if we were to single the identity function:
+
+  identity :: forall a. a -&gt; a
+  identity x = x
+
+We want the final result to be:
+
+  sIdentity :: forall a (x :: a). Sing x -&gt; Sing (Identity x :: a)
+  sIdentity sX = sX
+
+Accomplishing this takes a bit of care during promotion. When promoting a
+function, we determine what set of kind variables are currently bound at that
+point and store them in an ALetDecEnv (as lde_bound_kvs), which in turn is
+singled. Then, during singling, we extract every kind variable in a singled
+type signature, subtract the lde_bound_kvs, and explicitly bind the variables
+that remain.
+
+For a top-level function like identity, lde_bound_kvs is the empty set. But
+consider this more complicated example:
+
+  f :: forall a. a -&gt; a
+  f = g
+    where
+      g :: a -&gt; a
+      g x = x
+
+When singling, we would eventually end up in this spot:
+
+  sF :: forall a (x :: a). Sing a -&gt; Sing (F a :: a)
+  sF = sG
+    where
+      sG :: _
+      sG x = x
+
+We must make sure /not/ to fill in the following type for _:
+
+  sF :: forall a (x :: a). Sing a -&gt; Sing (F a :: a)
+  sF = sG
+    where
+      sG :: forall a (y :: a). Sing a -&gt; Sing (G a :: a)
+      sG x = x
+
+This would be incorrect, as the `a` bound by sF /must/ be the same one used in
+sG, as per the scoping of the original `f` function. Thus, we ensure that the
+bound variables from `f` are put into lde_bound_kvs when promoting `g` so
+that we subtract out `a` and are left with the correct result:
+
+  sF :: forall a (x :: a). Sing a -&gt; Sing (F a :: a)
+  sF = sG
+    where
+      sG :: forall (y :: a). Sing a -&gt; Sing (G a :: a)
+      sG x = x
+-}</span><span>
+</span><span id="line-196"></span></pre></body></html>

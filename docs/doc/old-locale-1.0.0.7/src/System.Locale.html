@@ -52,7 +52,7 @@
 </span><span id="line-46"></span><span>        </span><span id="timeFmt"><span class="annot"><span class="annottext">TimeLocale -&gt; String
 </span><a href="System.Locale.html#timeFmt"><span class="hs-identifier hs-var hs-var">timeFmt</span></a></span></span><span class="hs-special">,</span><span> </span><span id="time12Fmt"><span class="annot"><span class="annottext">TimeLocale -&gt; String
 </span><a href="System.Locale.html#time12Fmt"><span class="hs-identifier hs-var hs-var">time12Fmt</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-47"></span><span>        </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039527"><span id="local-6989586621679039529"><span class="annot"><span class="annottext">TimeLocale -&gt; TimeLocale -&gt; Bool
+</span><span id="line-47"></span><span>        </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679027854"><span id="local-6989586621679027856"><span class="annot"><span class="annottext">TimeLocale -&gt; TimeLocale -&gt; Bool
 (TimeLocale -&gt; TimeLocale -&gt; Bool)
 -&gt; (TimeLocale -&gt; TimeLocale -&gt; Bool) -&gt; Eq TimeLocale
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -60,9 +60,9 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: TimeLocale -&gt; TimeLocale -&gt; Bool
 == :: TimeLocale -&gt; TimeLocale -&gt; Bool
 $c== :: TimeLocale -&gt; TimeLocale -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039511"><span id="local-6989586621679039513"><span id="local-6989586621679039515"><span id="local-6989586621679039517"><span id="local-6989586621679039519"><span id="local-6989586621679039521"><span id="local-6989586621679039523"><span class="annot"><span class="annottext">Eq TimeLocale
-Eq TimeLocale =&gt;
-(TimeLocale -&gt; TimeLocale -&gt; Ordering)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679027838"><span id="local-6989586621679027840"><span id="local-6989586621679027842"><span id="local-6989586621679027844"><span id="local-6989586621679027846"><span id="local-6989586621679027848"><span id="local-6989586621679027850"><span class="annot"><span class="annottext">Eq TimeLocale
+Eq TimeLocale
+-&gt; (TimeLocale -&gt; TimeLocale -&gt; Ordering)
 -&gt; (TimeLocale -&gt; TimeLocale -&gt; Bool)
 -&gt; (TimeLocale -&gt; TimeLocale -&gt; Bool)
 -&gt; (TimeLocale -&gt; TimeLocale -&gt; Bool)
@@ -74,8 +74,8 @@ TimeLocale -&gt; TimeLocale -&gt; Bool
 TimeLocale -&gt; TimeLocale -&gt; Ordering
 TimeLocale -&gt; TimeLocale -&gt; TimeLocale
 forall a.
-Eq a =&gt;
-(a -&gt; a -&gt; Ordering)
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
@@ -98,7 +98,7 @@ $c&lt; :: TimeLocale -&gt; TimeLocale -&gt; Bool
 compare :: TimeLocale -&gt; TimeLocale -&gt; Ordering
 $ccompare :: TimeLocale -&gt; TimeLocale -&gt; Ordering
 $cp1Ord :: Eq TimeLocale
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039504"><span id="local-6989586621679039506"><span id="local-6989586621679039508"><span class="annot"><span class="annottext">Int -&gt; TimeLocale -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679027831"><span id="local-6989586621679027833"><span id="local-6989586621679027835"><span class="annot"><span class="annottext">Int -&gt; TimeLocale -&gt; ShowS
 [TimeLocale] -&gt; ShowS
 TimeLocale -&gt; String
 (Int -&gt; TimeLocale -&gt; ShowS)
@@ -126,41 +126,99 @@ $cshowsPrec :: Int -&gt; TimeLocale -&gt; ShowS
 -&gt; String
 -&gt; String
 -&gt; TimeLocale
-</span><a href="System.Locale.html#TimeLocale"><span class="hs-identifier hs-type hs-type">TimeLocale</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><a href="System.Locale.html#TimeLocale"><span class="hs-identifier hs-type">TimeLocale</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-51"></span><span>        </span><span class="annot"><span class="annottext">wDays :: [(String, String)]
-</span><a href="System.Locale.html#wDays"><span class="hs-identifier hs-var">wDays</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Sunday&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-string">&quot;Sun&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Monday&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="hs-string">&quot;Mon&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-52"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Tuesday&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-string">&quot;Tue&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Wednesday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Wed&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-53"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Thursday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Thu&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Friday&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="hs-string">&quot;Fri&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-54"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Saturday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Sat&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#wDays"><span class="hs-identifier hs-var">wDays</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Sunday&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Sun&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Monday&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Mon&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Tuesday&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Tue&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Wednesday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Wed&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Thursday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Thu&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Friday&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Fri&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-54"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Saturday&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Sat&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span>        </span><span class="annot"><span class="annottext">months :: [(String, String)]
-</span><a href="System.Locale.html#months"><span class="hs-identifier hs-var">months</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;January&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-string">&quot;Jan&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;February&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-string">&quot;Feb&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-57"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;March&quot;</span></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="hs-string">&quot;Mar&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;April&quot;</span></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="hs-string">&quot;Apr&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-58"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;May&quot;</span></span><span class="hs-special">,</span><span>       </span><span class="annot"><span class="hs-string">&quot;May&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;June&quot;</span></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-string">&quot;Jun&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-59"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;July&quot;</span></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-string">&quot;Jul&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;August&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="hs-string">&quot;Aug&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-60"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;September&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Sep&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;October&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-string">&quot;Oct&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-61"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;November&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-string">&quot;Nov&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;December&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-string">&quot;Dec&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#months"><span class="hs-identifier hs-var">months</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;January&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Jan&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;February&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Feb&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;March&quot;</span></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Mar&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;April&quot;</span></span><span class="hs-special">,</span><span>     </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Apr&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;May&quot;</span></span><span class="hs-special">,</span><span>       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;May&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;June&quot;</span></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Jun&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;July&quot;</span></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Jul&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;August&quot;</span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Aug&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-60"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;September&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Sep&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;October&quot;</span></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Oct&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-61"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;November&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Nov&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;December&quot;</span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Dec&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-62"></span><span>
 </span><span id="line-63"></span><span>        </span><span class="annot"><span class="annottext">intervals :: [(String, String)]
-</span><a href="System.Locale.html#intervals"><span class="hs-identifier hs-var">intervals</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;year&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;years&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;month&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;months&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;day&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;days&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-66"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;hour&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;hours&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;min&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;mins&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-68"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;sec&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;secs&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;usec&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-string">&quot;usecs&quot;</span></span><span class="hs-special">)</span><span>
+</span><a href="System.Locale.html#intervals"><span class="hs-identifier hs-var">intervals</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;year&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;years&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;month&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;months&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;day&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;days&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;hour&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;hours&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;min&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;mins&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;sec&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;secs&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;usec&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;usecs&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-70"></span><span>                    </span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-71"></span><span>
 </span><span id="line-72"></span><span>        </span><span class="annot"><span class="annottext">amPm :: (String, String)
-</span><a href="System.Locale.html#amPm"><span class="hs-identifier hs-var">amPm</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;AM&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;PM&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#amPm"><span class="hs-identifier hs-var">amPm</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;AM&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;PM&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
 </span><span id="line-73"></span><span>        </span><span class="annot"><span class="annottext">dateTimeFmt :: String
-</span><a href="System.Locale.html#dateTimeFmt"><span class="hs-identifier hs-var">dateTimeFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;%a %b %e %H:%M:%S %Z %Y&quot;</span></span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#dateTimeFmt"><span class="hs-identifier hs-var">dateTimeFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%a %b %e %H:%M:%S %Z %Y&quot;</span></span><span class="hs-special">,</span><span>
 </span><span id="line-74"></span><span>        </span><span class="annot"><span class="annottext">dateFmt :: String
-</span><a href="System.Locale.html#dateFmt"><span class="hs-identifier hs-var">dateFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;%m/%d/%y&quot;</span></span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#dateFmt"><span class="hs-identifier hs-var">dateFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%m/%d/%y&quot;</span></span><span class="hs-special">,</span><span>
 </span><span id="line-75"></span><span>        </span><span class="annot"><span class="annottext">timeFmt :: String
-</span><a href="System.Locale.html#timeFmt"><span class="hs-identifier hs-var">timeFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;%H:%M:%S&quot;</span></span><span class="hs-special">,</span><span>
+</span><a href="System.Locale.html#timeFmt"><span class="hs-identifier hs-var">timeFmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%H:%M:%S&quot;</span></span><span class="hs-special">,</span><span>
 </span><span id="line-76"></span><span>        </span><span class="annot"><span class="annottext">time12Fmt :: String
-</span><a href="System.Locale.html#time12Fmt"><span class="hs-identifier hs-var">time12Fmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;%I:%M:%S %p&quot;</span></span><span>
+</span><a href="System.Locale.html#time12Fmt"><span class="hs-identifier hs-var">time12Fmt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%I:%M:%S %p&quot;</span></span><span>
 </span><span id="line-77"></span><span>        </span><span class="hs-special">}</span><span>
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span>
@@ -176,21 +234,26 @@ The @Maybe String@ argument allows to supply an optional time specification. E.g
 </span><span id="line-89"></span><span>
 </span><span id="line-90"></span><span class="annot"><a href="System.Locale.html#iso8601DateFormat"><span class="hs-identifier hs-type">iso8601DateFormat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-91"></span><span id="iso8601DateFormat"><span class="annot"><span class="annottext">iso8601DateFormat :: Maybe String -&gt; String
-</span><a href="System.Locale.html#iso8601DateFormat"><span class="hs-identifier hs-var hs-var">iso8601DateFormat</span></a></span></span><span> </span><span id="local-6989586621679039501"><span class="annot"><span class="annottext">mTimeFmt :: Maybe String
-</span><a href="#local-6989586621679039501"><span class="hs-identifier hs-var">mTimeFmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-92"></span><span>    </span><span class="annot"><span class="hs-string">&quot;%Y-%m-%d&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="System.Locale.html#iso8601DateFormat"><span class="hs-identifier hs-var hs-var">iso8601DateFormat</span></a></span></span><span> </span><span id="local-6989586621679027829"><span class="annot"><span class="annottext">Maybe String
+</span><a href="#local-6989586621679027829"><span class="hs-identifier hs-var">mTimeFmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-92"></span><span>    </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%Y-%m-%d&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe String
-</span><a href="#local-6989586621679039501"><span class="hs-identifier hs-var">mTimeFmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-93"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-94"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679039500"><span class="annot"><span class="annottext">fmt :: String
-</span><a href="#local-6989586621679039500"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-char">'T'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><a href="#local-6989586621679027829"><span class="hs-identifier hs-var">mTimeFmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-93"></span><span>             </span><span class="annot"><span class="annottext">Maybe String
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-94"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679027828"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679027828"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'T'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679039500"><span class="hs-identifier hs-var">fmt</span></a></span><span>
+</span><a href="#local-6989586621679027828"><span class="hs-identifier hs-var">fmt</span></a></span><span>
 </span><span id="line-95"></span><span>
 </span><span id="line-96"></span><span class="hs-comment">-- | Format string according to &lt;http://tools.ietf.org/html/rfc822#section-5 RFC822&gt;.</span><span>
 </span><span id="line-97"></span><span class="annot"><a href="System.Locale.html#rfc822DateFormat"><span class="hs-identifier hs-type">rfc822DateFormat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-98"></span><span id="rfc822DateFormat"><span class="annot"><span class="annottext">rfc822DateFormat :: String
-</span><a href="System.Locale.html#rfc822DateFormat"><span class="hs-identifier hs-var hs-var">rfc822DateFormat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;%a, %_d %b %Y %H:%M:%S %Z&quot;</span></span><span>
+</span><a href="System.Locale.html#rfc822DateFormat"><span class="hs-identifier hs-var hs-var">rfc822DateFormat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%a, %_d %b %Y %H:%M:%S %Z&quot;</span></span><span>
 </span><span id="line-99"></span></pre></body></html>

@@ -47,7 +47,7 @@ errorQuoteExp :: String -> Q Exp
 --   
 --   Only available when built with <tt>template-haskell-2.9.0.0</tt> or
 --   later.
-unsafeSpliceCoerce :: forall a. Q Exp -> Q (TExp a)
+unsafeSpliceCoerce :: forall (r :: RuntimeRep) (a :: TYPE r). Q Exp -> Q (TExp a)
 
 module Language.Haskell.TH.Lift
 deriveLift :: Name -> Q [Dec]
@@ -81,19 +81,23 @@ makeLift' :: Info -> Q Exp
 -- | A <a>Lift</a> instance can have any of its values turned into a
 --   Template Haskell expression. This is needed when a value used within a
 --   Template Haskell quotation is bound outside the Oxford brackets
---   (<tt>[| ... |]</tt>) but not at the top level. As an example:
+--   (<tt>[| ... |]</tt> or <tt>[|| ... ||]</tt>) but not at the top level.
+--   As an example:
 --   
 --   <pre>
---   add1 :: Int -&gt; Q Exp
---   add1 x = [| x + 1 |]
+--   add1 :: Int -&gt; Q (TExp Int)
+--   add1 x = [|| x + 1 ||]
 --   </pre>
 --   
 --   Template Haskell has no way of knowing what value <tt>x</tt> will take
 --   on at splice-time, so it requires the type of <tt>x</tt> to be an
 --   instance of <a>Lift</a>.
 --   
---   A <a>Lift</a> instance must satisfy <tt>$(lift x) ≡ x</tt> for all
---   <tt>x</tt>, where <tt>$(...)</tt> is a Template Haskell splice.
+--   A <a>Lift</a> instance must satisfy <tt>$(lift x) ≡ x</tt> and
+--   <tt>$$(liftTyped x) ≡ x</tt> for all <tt>x</tt>, where <tt>$(...)</tt>
+--   and <tt>$$(...)</tt> are Template Haskell splices. It is additionally
+--   expected that <tt><a>lift</a> x ≡ <a>unTypeQ</a> (<a>liftTyped</a>
+--   x)</tt>.
 --   
 --   <a>Lift</a> instances can be derived automatically by use of the
 --   <tt>-XDeriveLift</tt> GHC language extension:
@@ -107,11 +111,17 @@ makeLift' :: Info -> Q Exp
 --   data Bar a = Bar1 a (Bar a) | Bar2 String
 --     deriving Lift
 --   </pre>
-class Lift t
+--   
+--   Levity-polymorphic since <i>template-haskell-2.16.0.0</i>.
+class Lift (t :: TYPE r)
 
 -- | Turn a value into a Template Haskell expression, suitable for use in a
 --   splice.
 lift :: Lift t => t -> Q Exp
+
+-- | Turn a value into a Template Haskell typed expression, suitable for
+--   use in a typed splice.
+liftTyped :: Lift t => t -> Q (TExp t)
 instance Language.Haskell.TH.Syntax.Lift Language.Haskell.TH.Syntax.Name
 instance Language.Haskell.TH.Syntax.Lift Language.Haskell.TH.Syntax.OccName
 instance Language.Haskell.TH.Syntax.Lift Language.Haskell.TH.Syntax.PkgName

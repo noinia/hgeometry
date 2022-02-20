@@ -62,11 +62,11 @@
 </span><span id="line-62"></span><span class="hs-comment">--</span><span>
 </span><span id="line-63"></span><span class="hs-comment">-- @since 0.2.1.0</span><span>
 </span><span id="line-64"></span><span class="hs-comment">--</span><span>
-</span><span id="line-65"></span><span class="hs-keyword">newtype</span><span> </span><span id="NonEmptyVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-var">NonEmptyVector</span></a></span></span><span> </span><span id="local-6989586621679078263"><span class="annot"><a href="#local-6989586621679078263"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NonEmptyVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-var">NonEmptyVector</span></a></span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">newtype</span><span> </span><span id="NonEmptyVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-var">NonEmptyVector</span></a></span></span><span> </span><span id="local-6989586621679054219"><span class="annot"><a href="#local-6989586621679054219"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NonEmptyVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-var">NonEmptyVector</span></a></span></span><span>
 </span><span id="line-66"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="_neVec"><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Vector a
-</span><a href="Data.Vector.NonEmpty.Internal.html#_neVec"><span class="hs-identifier hs-var hs-var">_neVec</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679078263"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Data.Vector.NonEmpty.Internal.html#_neVec"><span class="hs-identifier hs-var hs-var">_neVec</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679054219"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-67"></span><span>    </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span>
-</span><span id="line-68"></span><span>      </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679078175"><span id="local-6989586621679078177"><span class="annot"><span class="annottext">NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
+</span><span id="line-68"></span><span>      </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679054131"><span id="local-6989586621679054133"><span class="annot"><span class="annottext">NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
 (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool)
 -&gt; (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool)
 -&gt; Eq (NonEmptyVector a)
@@ -76,9 +76,9 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall a. Eq a =&gt; NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
 == :: NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
 $c== :: forall a. Eq a =&gt; NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078159"><span id="local-6989586621679078161"><span id="local-6989586621679078163"><span id="local-6989586621679078165"><span id="local-6989586621679078167"><span id="local-6989586621679078169"><span id="local-6989586621679078171"><span class="annot"><span class="annottext">Eq (NonEmptyVector a)
-Eq (NonEmptyVector a) =&gt;
-(NonEmptyVector a -&gt; NonEmptyVector a -&gt; Ordering)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054115"><span id="local-6989586621679054117"><span id="local-6989586621679054119"><span id="local-6989586621679054121"><span id="local-6989586621679054123"><span id="local-6989586621679054125"><span id="local-6989586621679054127"><span class="annot"><span class="annottext">Eq (NonEmptyVector a)
+Eq (NonEmptyVector a)
+-&gt; (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Ordering)
 -&gt; (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool)
 -&gt; (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool)
 -&gt; (NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool)
@@ -90,8 +90,8 @@ NonEmptyVector a -&gt; NonEmptyVector a -&gt; Bool
 NonEmptyVector a -&gt; NonEmptyVector a -&gt; Ordering
 NonEmptyVector a -&gt; NonEmptyVector a -&gt; NonEmptyVector a
 forall a.
-Eq a =&gt;
-(a -&gt; a -&gt; Ordering)
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
@@ -125,7 +125,7 @@ compare :: NonEmptyVector a -&gt; NonEmptyVector a -&gt; Ordering
 $ccompare :: forall a. Ord a =&gt; NonEmptyVector a -&gt; NonEmptyVector a -&gt; Ordering
 $cp1Ord :: forall a. Ord a =&gt; Eq (NonEmptyVector a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-69"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078156"><span class="annot"><span class="annottext">(a -&gt; b -&gt; Bool) -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Bool
+</span><span id="line-69"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054112"><span class="annot"><span class="annottext">(a -&gt; b -&gt; Bool) -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Bool
 (forall a b.
  (a -&gt; b -&gt; Bool) -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Bool)
 -&gt; Eq1 NonEmptyVector
@@ -136,11 +136,11 @@ forall (f :: * -&gt; *).
 liftEq :: (a -&gt; b -&gt; Bool) -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Bool
 $cliftEq :: forall a b.
 (a -&gt; b -&gt; Bool) -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Eq1</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078152"><span class="annot"><span class="annottext">Eq1 NonEmptyVector
-Eq1 NonEmptyVector =&gt;
-(forall a b.
- (a -&gt; b -&gt; Ordering)
- -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Eq1</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054108"><span class="annot"><span class="annottext">Eq1 NonEmptyVector
+Eq1 NonEmptyVector
+-&gt; (forall a b.
+    (a -&gt; b -&gt; Ordering)
+    -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering)
 -&gt; Ord1 NonEmptyVector
 (a -&gt; b -&gt; Ordering)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering
@@ -148,8 +148,8 @@ forall a b.
 (a -&gt; b -&gt; Ordering)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering
 forall (f :: * -&gt; *).
-Eq1 f =&gt;
-(forall a b. (a -&gt; b -&gt; Ordering) -&gt; f a -&gt; f b -&gt; Ordering)
+Eq1 f
+-&gt; (forall a b. (a -&gt; b -&gt; Ordering) -&gt; f a -&gt; f b -&gt; Ordering)
 -&gt; Ord1 f
 liftCompare :: (a -&gt; b -&gt; Ordering)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering
@@ -157,7 +157,7 @@ $cliftCompare :: forall a b.
 (a -&gt; b -&gt; Ordering)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; Ordering
 $cp1Ord1 :: Eq1 NonEmptyVector
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Ord1</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078147"><span id="local-6989586621679078149"><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Ord1</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054103"><span id="local-6989586621679054105"><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS)
 -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; NonEmptyVector a -&gt; ShowS
 (Int -&gt; a -&gt; ShowS)
 -&gt; ([a] -&gt; ShowS) -&gt; [NonEmptyVector a] -&gt; ShowS
@@ -191,15 +191,15 @@ $cliftShowsPrec :: forall a.
 (Int -&gt; a -&gt; ShowS)
 -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; NonEmptyVector a -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Show1</span></span></span></span><span>
-</span><span id="line-70"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="%24cNonEmptyVector"><span id="%24tNonEmptyVector"><span id="local-6989586621679078117"><span id="local-6989586621679078119"><span id="local-6989586621679078121"><span id="local-6989586621679078123"><span id="local-6989586621679078125"><span id="local-6989586621679078127"><span id="local-6989586621679078129"><span id="local-6989586621679078131"><span id="local-6989586621679078133"><span id="local-6989586621679078135"><span id="local-6989586621679078137"><span id="local-6989586621679078139"><span id="local-6989586621679078141"><span id="local-6989586621679078143"><span class="annot"><span class="annottext">Typeable (NonEmptyVector a)
+</span><span id="line-70"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="%24cNonEmptyVector"><span id="%24tNonEmptyVector"><span id="local-6989586621679054073"><span id="local-6989586621679054075"><span id="local-6989586621679054077"><span id="local-6989586621679054079"><span id="local-6989586621679054081"><span id="local-6989586621679054083"><span id="local-6989586621679054085"><span id="local-6989586621679054087"><span id="local-6989586621679054089"><span id="local-6989586621679054091"><span id="local-6989586621679054093"><span id="local-6989586621679054095"><span id="local-6989586621679054097"><span id="local-6989586621679054099"><span class="annot"><span class="annottext">Typeable (NonEmptyVector a)
 DataType
 Constr
-Typeable (NonEmptyVector a) =&gt;
-(forall (c :: * -&gt; *).
- (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
- -&gt; (forall g. g -&gt; c g)
- -&gt; NonEmptyVector a
- -&gt; c (NonEmptyVector a))
+Typeable (NonEmptyVector a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+    -&gt; (forall g. g -&gt; c g)
+    -&gt; NonEmptyVector a
+    -&gt; c (NonEmptyVector a))
 -&gt; (forall (c :: * -&gt; *).
     (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
     -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (NonEmptyVector a))
@@ -291,10 +291,10 @@ forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
 (forall d e. (Data d, Data e) =&gt; c (t d e))
 -&gt; Maybe (c (NonEmptyVector a))
 forall a.
-Typeable a =&gt;
-(forall (c :: * -&gt; *).
- (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
- -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+Typeable a
+-&gt; (forall (c :: * -&gt; *).
+    (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+    -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
 -&gt; (forall (c :: * -&gt; *).
     (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
     -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
@@ -426,14 +426,14 @@ Data a =&gt;
 (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
 -&gt; (forall g. g -&gt; c g) -&gt; NonEmptyVector a -&gt; c (NonEmptyVector a)
 $cp1Data :: forall a. Data a =&gt; Typeable (NonEmptyVector a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078112"><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054068"><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ()
 (NonEmptyVector a -&gt; ()) -&gt; NFData (NonEmptyVector a)
 forall a. NFData a =&gt; NonEmptyVector a -&gt; ()
 forall a. (a -&gt; ()) -&gt; NFData a
 rnf :: NonEmptyVector a -&gt; ()
 $crnf :: forall a. NFData a =&gt; NonEmptyVector a -&gt; ()
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span>
-</span><span id="line-71"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078107"><span id="local-6989586621679078109"><span class="annot"><span class="annottext">a -&gt; NonEmptyVector b -&gt; NonEmptyVector a
+</span><span id="line-71"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054063"><span id="local-6989586621679054065"><span class="annot"><span class="annottext">a -&gt; NonEmptyVector b -&gt; NonEmptyVector a
 (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
 (forall a b. (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b)
 -&gt; (forall a b. a -&gt; NonEmptyVector b -&gt; NonEmptyVector a)
@@ -447,10 +447,10 @@ forall (f :: * -&gt; *).
 $c&lt;$ :: forall a b. a -&gt; NonEmptyVector b -&gt; NonEmptyVector a
 fmap :: (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
 $cfmap :: forall a b. (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078095"><span id="local-6989586621679078097"><span id="local-6989586621679078099"><span id="local-6989586621679078101"><span id="local-6989586621679078103"><span class="annot"><span class="annottext">Functor NonEmptyVector
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054051"><span id="local-6989586621679054053"><span id="local-6989586621679054055"><span id="local-6989586621679054057"><span id="local-6989586621679054059"><span class="annot"><span class="annottext">Functor NonEmptyVector
 a -&gt; NonEmptyVector a
-Functor NonEmptyVector =&gt;
-(forall a. a -&gt; NonEmptyVector a)
+Functor NonEmptyVector
+-&gt; (forall a. a -&gt; NonEmptyVector a)
 -&gt; (forall a b.
     NonEmptyVector (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b)
 -&gt; (forall a b c.
@@ -477,8 +477,8 @@ forall a b c.
 (a -&gt; b -&gt; c)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector c
 forall (f :: * -&gt; *).
-Functor f =&gt;
-(forall a. a -&gt; f a)
+Functor f
+-&gt; (forall a. a -&gt; f a)
 -&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
 -&gt; (forall a b. f a -&gt; f b -&gt; f b)
@@ -501,11 +501,11 @@ NonEmptyVector (a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
 pure :: a -&gt; NonEmptyVector a
 $cpure :: forall a. a -&gt; NonEmptyVector a
 $cp1Applicative :: Functor NonEmptyVector
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078087"><span id="local-6989586621679078089"><span id="local-6989586621679078091"><span class="annot"><span class="annottext">Applicative NonEmptyVector
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054043"><span id="local-6989586621679054045"><span id="local-6989586621679054047"><span class="annot"><span class="annottext">Applicative NonEmptyVector
 a -&gt; NonEmptyVector a
-Applicative NonEmptyVector =&gt;
-(forall a b.
- NonEmptyVector a -&gt; (a -&gt; NonEmptyVector b) -&gt; NonEmptyVector b)
+Applicative NonEmptyVector
+-&gt; (forall a b.
+    NonEmptyVector a -&gt; (a -&gt; NonEmptyVector b) -&gt; NonEmptyVector b)
 -&gt; (forall a b.
     NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector b)
 -&gt; (forall a. a -&gt; NonEmptyVector a)
@@ -518,8 +518,8 @@ NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector b
 forall a b.
 NonEmptyVector a -&gt; (a -&gt; NonEmptyVector b) -&gt; NonEmptyVector b
 forall (m :: * -&gt; *).
-Applicative m =&gt;
-(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+Applicative m
+-&gt; (forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
 -&gt; (forall a b. m a -&gt; m b -&gt; m b)
 -&gt; (forall a. a -&gt; m a)
 -&gt; Monad m
@@ -533,10 +533,10 @@ $c&gt;&gt;= :: forall a b.
 NonEmptyVector a -&gt; (a -&gt; NonEmptyVector b) -&gt; NonEmptyVector b
 $cp1Monad :: Applicative NonEmptyVector
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span>
-</span><span id="line-72"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078079"><span id="local-6989586621679078081"><span id="local-6989586621679078083"><span class="annot"><span class="annottext">Monad NonEmptyVector
-Monad NonEmptyVector =&gt;
-(forall a b.
- NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector (a, b))
+</span><span id="line-72"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054035"><span id="local-6989586621679054037"><span id="local-6989586621679054039"><span class="annot"><span class="annottext">Monad NonEmptyVector
+Monad NonEmptyVector
+-&gt; (forall a b.
+    NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector (a, b))
 -&gt; (forall a b c.
     (a -&gt; b -&gt; c)
     -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector c)
@@ -555,8 +555,8 @@ forall a b c.
 (a -&gt; b -&gt; c)
 -&gt; NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector c
 forall (m :: * -&gt; *).
-Monad m =&gt;
-(forall a b. m a -&gt; m b -&gt; m (a, b))
+Monad m
+-&gt; (forall a b. m a -&gt; m b -&gt; m (a, b))
 -&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; m a -&gt; m b -&gt; m c)
 -&gt; (forall a b. m (a, b) -&gt; (m a, m b))
 -&gt; MonadZip m
@@ -573,7 +573,7 @@ $cmzip :: forall a b.
 NonEmptyVector a -&gt; NonEmptyVector b -&gt; NonEmptyVector (a, b)
 $cp1MonadZip :: Monad NonEmptyVector
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">MonadZip</span></span></span></span></span><span>
-</span><span id="line-73"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679078072"><span id="local-6989586621679078074"><span id="local-6989586621679078076"><span class="annot"><span class="annottext">b -&gt; NonEmptyVector a -&gt; NonEmptyVector a
+</span><span id="line-73"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679054028"><span id="local-6989586621679054030"><span id="local-6989586621679054032"><span class="annot"><span class="annottext">b -&gt; NonEmptyVector a -&gt; NonEmptyVector a
 NonEmpty (NonEmptyVector a) -&gt; NonEmptyVector a
 NonEmptyVector a -&gt; NonEmptyVector a -&gt; NonEmptyVector a
 (NonEmptyVector a -&gt; NonEmptyVector a -&gt; NonEmptyVector a)
@@ -600,16 +600,16 @@ $c&lt;&gt; :: forall a. NonEmptyVector a -&gt; NonEmptyVector a -&gt; NonEmptyVe
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span>
 </span><span id="line-74"></span><span>      </span><span class="hs-special">)</span><span>
 </span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span id="local-6989586621679078070"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679078065"><span id="local-6989586621679078068"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679078070"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078070"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-77"></span><span>    </span><span id="local-6989586621679078063"><span class="annot"><span class="annottext">show :: NonEmptyVector a -&gt; String
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span id="local-6989586621679078061"><span class="annot"><span class="annottext">v :: Vector a
-</span><a href="#local-6989586621679078061"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; String
+</span><span id="line-76"></span><span id="local-6989586621679054026"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679054021"><span id="local-6989586621679054024"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679054026"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679054026"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679054019"><span class="annot"><span class="annottext">show :: NonEmptyVector a -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span id="local-6989586621679054017"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679054017"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679078061"><span class="hs-identifier hs-var">v</span></a></span></span><span>
+</span><a href="#local-6989586621679054017"><span class="hs-identifier hs-var">v</span></a></span></span><span>
 </span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span id="local-6989586621679078060"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679078053"><span id="local-6989586621679078056"><span id="local-6989586621679078058"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679078060"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679078060"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679078051"><span class="annot"><span class="annottext">readPrec :: ReadPrec (NonEmptyVector a)
+</span><span id="line-79"></span><span id="local-6989586621679054016"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679054009"><span id="local-6989586621679054012"><span id="local-6989586621679054014"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679054016"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679054016"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679054007"><span class="annot"><span class="annottext">readPrec :: ReadPrec (NonEmptyVector a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">readPrec</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
 forall a. Read a =&gt; ReadPrec a
 </span><span class="hs-identifier hs-var">Read.readPrec</span></span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
@@ -620,8 +620,8 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span id="line-81"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReadPrec (NonEmptyVector a)
 forall a. ReadPrec a
 </span><span class="hs-identifier hs-var">Read.pfail</span></span><span>
-</span><span id="line-82"></span><span>      </span><span id="local-6989586621679078048"><span class="annot"><span class="annottext">as :: [a]
-</span><a href="#local-6989586621679078048"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ReadPrec (NonEmptyVector a)
+</span><span id="line-82"></span><span>      </span><span id="local-6989586621679054004"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679054004"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ReadPrec (NonEmptyVector a)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector a -&gt; NonEmptyVector a
 forall a. Vector a -&gt; NonEmptyVector a
@@ -630,14 +630,15 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Vector a
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679078048"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span></span><span>
+</span><a href="#local-6989586621679054004"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679078040"><span id="local-6989586621679078043"><span id="local-6989586621679078045"><span class="annot"><span class="hs-identifier hs-type">Read1</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679053996"><span id="local-6989586621679053999"><span id="local-6989586621679054001"><span class="annot"><span class="hs-identifier hs-type">Read1</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
 #if __GLASGOW_HASKELL__ &gt; 802
-</span><span>    </span><span id="local-6989586621679078038"><span class="annot"><span class="annottext">liftReadPrec :: ReadPrec a -&gt; ReadPrec [a] -&gt; ReadPrec (NonEmptyVector a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftReadPrec</span></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679078036"><span class="annot"><span class="annottext">rl :: ReadPrec [a]
-</span><a href="#local-6989586621679078036"><span class="hs-identifier hs-var">rl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
-</span><a href="#local-6989586621679078036"><span class="hs-identifier hs-var">rl</span></a></span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
+</span><span>    </span><span id="local-6989586621679053994"><span class="annot"><span class="annottext">liftReadPrec :: ReadPrec a -&gt; ReadPrec [a] -&gt; ReadPrec (NonEmptyVector a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftReadPrec</span></span></span><span> </span><span class="annot"><span class="annottext">ReadPrec a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679053992"><span class="annot"><span class="annottext">ReadPrec [a]
+</span><a href="#local-6989586621679053992"><span class="hs-identifier hs-var">rl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
+</span><a href="#local-6989586621679053992"><span class="hs-identifier hs-var">rl</span></a></span><span> </span><span class="annot"><span class="annottext">ReadPrec [a]
 -&gt; ([a] -&gt; ReadPrec (NonEmptyVector a))
 -&gt; ReadPrec (NonEmptyVector a)
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
@@ -645,8 +646,8 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span id="line-87"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReadPrec (NonEmptyVector a)
 forall a. ReadPrec a
 </span><span class="hs-identifier hs-var">Read.pfail</span></span><span>
-</span><span id="line-88"></span><span>      </span><span id="local-6989586621679078035"><span class="annot"><span class="annottext">as :: [a]
-</span><a href="#local-6989586621679078035"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ReadPrec (NonEmptyVector a)
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621679053991"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679053991"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; ReadPrec (NonEmptyVector a)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector a -&gt; NonEmptyVector a
 forall a. Vector a -&gt; NonEmptyVector a
@@ -655,32 +656,32 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Vector a
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679078035"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span class="hs-cpp">
+</span><a href="#local-6989586621679053991"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span class="hs-cpp">
 #else
 </span><span>    </span><span class="hs-identifier">liftReadsPrec</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">r</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">s</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">r</span><span> </span><span class="hs-identifier">s</span><span> </span><span class="hs-operator">&gt;&gt;=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-91"></span><span>      </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-92"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">as</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">s'</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">return</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">NonEmptyVector</span><span> </span><span class="hs-operator">$</span><span> </span><span class="hs-identifier">V.fromList</span><span> </span><span class="hs-keyword">as</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">s'</span><span class="hs-special">)</span><span class="hs-cpp">
 #endif
 </span><span>
-</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679078002"><span id="local-6989586621679078004"><span id="local-6989586621679078006"><span id="local-6989586621679078008"><span id="local-6989586621679078010"><span id="local-6989586621679078012"><span id="local-6989586621679078014"><span id="local-6989586621679078016"><span id="local-6989586621679078018"><span id="local-6989586621679078020"><span id="local-6989586621679078022"><span id="local-6989586621679078024"><span id="local-6989586621679078026"><span id="local-6989586621679078028"><span id="local-6989586621679078030"><span id="local-6989586621679078033"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-96"></span><span>    </span><span id="local-6989586621679078000"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; NonEmptyVector a -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span id="local-6989586621679077998"><span class="annot"><span class="annottext">f :: a -&gt; m
-</span><a href="#local-6989586621679077998"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Vector a -&gt; m
+</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679053958"><span id="local-6989586621679053960"><span id="local-6989586621679053962"><span id="local-6989586621679053964"><span id="local-6989586621679053966"><span id="local-6989586621679053968"><span id="local-6989586621679053970"><span id="local-6989586621679053972"><span id="local-6989586621679053974"><span id="local-6989586621679053976"><span id="local-6989586621679053978"><span id="local-6989586621679053980"><span id="local-6989586621679053982"><span id="local-6989586621679053984"><span id="local-6989586621679053986"><span id="local-6989586621679053989"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679053956"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; NonEmptyVector a -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span id="local-6989586621679053954"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679053954"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Vector a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">Foldable.foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679077998"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m)
+</span><a href="#local-6989586621679053954"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m)
 -&gt; (NonEmptyVector a -&gt; Vector a) -&gt; NonEmptyVector a -&gt; m
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Vector a
 forall a. NonEmptyVector a -&gt; Vector a
 </span><a href="Data.Vector.NonEmpty.Internal.html#_neVec"><span class="hs-identifier hs-var hs-var">_neVec</span></a></span><span>
 </span><span id="line-97"></span><span>
-</span><span id="line-98"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679077988"><span id="local-6989586621679077990"><span id="local-6989586621679077992"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-99"></span><span>    </span><span id="local-6989586621679077986"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621679077984"><span class="annot"><span class="annottext">f :: a -&gt; f b
-</span><a href="#local-6989586621679077984"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector b -&gt; NonEmptyVector b)
+</span><span id="line-98"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679053944"><span id="local-6989586621679053946"><span id="local-6989586621679053948"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679053942"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621679053940"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679053940"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector b -&gt; NonEmptyVector b)
 -&gt; f (Vector b) -&gt; f (NonEmptyVector b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
@@ -695,7 +696,7 @@ forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679077984"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; f (Vector b))
+</span><a href="#local-6989586621679053940"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; f (Vector b))
 -&gt; (NonEmptyVector a -&gt; Vector a)
 -&gt; NonEmptyVector a
 -&gt; f (Vector b)
@@ -717,9 +718,9 @@ forall a. NonEmptyVector a -&gt; Vector a
 </span><span id="line-111"></span><span class="hs-comment">--</span><span>
 </span><span id="line-112"></span><span class="hs-comment">-- @since 0.2.1.0</span><span>
 </span><span id="line-113"></span><span class="hs-comment">--</span><span>
-</span><span id="line-114"></span><span class="hs-keyword">newtype</span><span> </span><span id="NonEmptyMVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-var">NonEmptyMVector</span></a></span></span><span> </span><span id="local-6989586621679077983"><span class="annot"><a href="#local-6989586621679077983"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679077982"><span class="annot"><a href="#local-6989586621679077982"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NonEmptyMVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-var">NonEmptyMVector</span></a></span></span><span>
+</span><span id="line-114"></span><span class="hs-keyword">newtype</span><span> </span><span id="NonEmptyMVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-var">NonEmptyMVector</span></a></span></span><span> </span><span id="local-6989586621679053939"><span class="annot"><a href="#local-6989586621679053939"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679053938"><span class="annot"><a href="#local-6989586621679053938"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NonEmptyMVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-var">NonEmptyMVector</span></a></span></span><span>
 </span><span id="line-115"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="_nemVec"><span class="annot"><span class="annottext">NonEmptyMVector s a -&gt; MVector s a
-</span><a href="Data.Vector.NonEmpty.Internal.html#_nemVec"><span class="hs-identifier hs-var hs-var">_nemVec</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077983"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077982"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><a href="Data.Vector.NonEmpty.Internal.html#_nemVec"><span class="hs-identifier hs-var hs-var">_nemVec</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679053939"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679053938"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-116"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-117"></span><span>
 </span><span id="line-118"></span><span class="hs-comment">-- | 'NonEmptyMVector' parametrized by 'PrimState'</span><span>
@@ -732,5 +733,5 @@ forall a. NonEmptyVector a -&gt; Vector a
 </span><span id="line-125"></span><span class="hs-comment">--</span><span>
 </span><span id="line-126"></span><span class="hs-comment">-- @since 0.2.1.0</span><span>
 </span><span id="line-127"></span><span class="hs-comment">--</span><span>
-</span><span id="line-128"></span><span class="hs-keyword">type</span><span> </span><span id="NonEmptySTVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptySTVector"><span class="hs-identifier hs-var">NonEmptySTVector</span></a></span></span><span> </span><span id="local-6989586621679077979"><span class="annot"><a href="#local-6989586621679077979"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-type">NonEmptyMVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077979"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-128"></span><span class="hs-keyword">type</span><span> </span><span id="NonEmptySTVector"><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptySTVector"><span class="hs-identifier hs-var">NonEmptySTVector</span></a></span></span><span> </span><span id="local-6989586621679053935"><span class="annot"><a href="#local-6989586621679053935"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Vector.NonEmpty.Internal.html#NonEmptyMVector"><span class="hs-identifier hs-type">NonEmptyMVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679053935"><span class="hs-identifier hs-type">s</span></a></span><span>
 </span><span id="line-129"></span></pre></body></html>

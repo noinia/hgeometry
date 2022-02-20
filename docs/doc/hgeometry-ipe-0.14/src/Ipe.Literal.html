@@ -39,7 +39,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; (String -&gt; Q Type)
 -&gt; (String -&gt; Q [Dec])
 -&gt; QuasiQuoter
-</span><span class="hs-identifier hs-type hs-type">QuasiQuoter</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">quoteExp :: String -&gt; Q Exp
+</span><span class="hs-identifier hs-type">QuasiQuoter</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">quoteExp :: String -&gt; Q Exp
 </span><span class="hs-identifier hs-var">quoteExp</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Q Exp
 </span><a href="Ipe.Literal.html#literally"><span class="hs-identifier hs-var">literally</span></a></span><span>
 </span><span id="line-28"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">quotePat :: String -&gt; Q Pat
@@ -73,7 +73,8 @@ forall a. HasCallStack =&gt; a
 forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
 </span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; String -&gt; Node Text Text
 forall a. HasCallStack =&gt; String -&gt; a
-</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;xmlLiteral. error parsing xml: &quot;</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Node Text Text)
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;xmlLiteral. error parsing xml: &quot;</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Node Text Text)
 -&gt; (XMLParseError -&gt; String) -&gt; XMLParseError -&gt; Node Text Text
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">XMLParseError -&gt; String

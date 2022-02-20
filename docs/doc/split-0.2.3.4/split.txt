@@ -531,14 +531,14 @@ chop :: ([a] -> (b, [a])) -> [a] -> [b]
 --       where divvyedPrices = divvy 20 1 priceList
 --   </pre>
 divvy :: Int -> Int -> [a] -> [[a]]
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.List.Split.Internals.Chunk a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.List.Split.Internals.Chunk a)
-instance GHC.Show.Show Data.List.Split.Internals.EndPolicy
-instance GHC.Classes.Eq Data.List.Split.Internals.EndPolicy
-instance GHC.Show.Show Data.List.Split.Internals.CondensePolicy
-instance GHC.Classes.Eq Data.List.Split.Internals.CondensePolicy
 instance GHC.Show.Show Data.List.Split.Internals.DelimPolicy
 instance GHC.Classes.Eq Data.List.Split.Internals.DelimPolicy
+instance GHC.Show.Show Data.List.Split.Internals.CondensePolicy
+instance GHC.Classes.Eq Data.List.Split.Internals.CondensePolicy
+instance GHC.Show.Show Data.List.Split.Internals.EndPolicy
+instance GHC.Classes.Eq Data.List.Split.Internals.EndPolicy
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.List.Split.Internals.Chunk a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.List.Split.Internals.Chunk a)
 
 
 -- | The <a>Data.List.Split</a> module contains a wide range of strategies

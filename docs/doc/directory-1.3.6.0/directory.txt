@@ -281,6 +281,14 @@ replicateM_ :: Applicative m => Int -> m a -> m ()
 infixr 1 <=<
 
 -- | Left-to-right composition of Kleisli arrows.
+--   
+--   '<tt>(bs <a>&gt;=&gt;</a> cs) a</tt>' can be understood as the
+--   <tt>do</tt> expression
+--   
+--   <pre>
+--   do b &lt;- bs a
+--      cs b
+--   </pre>
 (>=>) :: Monad m => (a -> m b) -> (b -> m c) -> a -> m c
 infixr 1 >=>
 
@@ -294,6 +302,9 @@ infixr 1 >=>
 --   <tt>debug</tt> is <a>True</a>, and otherwise do nothing.
 when :: Applicative f => Bool -> f () -> f ()
 
+-- | Reverse all the bits in the argument
+complement :: Bits a => a -> a
+
 -- | Bitwise "and"
 (.&.) :: Bits a => a -> a -> a
 infixl 7 .&.
@@ -301,9 +312,6 @@ infixl 7 .&.
 -- | Bitwise "or"
 (.|.) :: Bits a => a -> a -> a
 infixl 5 .|.
-
--- | Reverse all the bits in the argument
-complement :: Bits a => a -> a
 
 -- | Convert a letter to the corresponding upper-case letter, if any. Any
 --   other character is returned unchanged.
@@ -456,10 +464,20 @@ maybeToList :: Maybe a -> [a]
 fromMaybe :: a -> Maybe a -> a
 
 -- | An associative operation.
+--   
+--   <pre>
+--   &gt;&gt;&gt; [1,2,3] &lt;&gt; [4,5,6]
+--   [1,2,3,4,5,6]
+--   </pre>
 (<>) :: Semigroup a => a -> a -> a
 infixr 6 <>
 
 -- | Identity of <a>mappend</a>
+--   
+--   <pre>
+--   &gt;&gt;&gt; "Hello world" &lt;&gt; mempty
+--   "Hello world"
+--   </pre>
 mempty :: Monoid a => a
 
 -- | Fold a list using the monoid.
@@ -467,6 +485,11 @@ mempty :: Monoid a => a
 --   For most types, the default definition for <a>mconcat</a> will be
 --   used, but the function is included in the class definition so that an
 --   optimized version can be provided for specific types.
+--   
+--   <pre>
+--   &gt;&gt;&gt; mconcat ["Hello", " ", "Haskell", "!"]
+--   "Hello Haskell!"
+--   </pre>
 mconcat :: Monoid a => [a] -> a
 
 -- | Write a new value into an <a>IORef</a>
@@ -1022,16 +1045,17 @@ type EpochTime = CTime
 --   
 --   A tricky implementation detail is the question of how to abort an
 --   <tt>IO</tt> computation. This combinator relies on asynchronous
---   exceptions internally. The technique works very well for computations
---   executing inside of the Haskell runtime system, but it doesn't work at
---   all for non-Haskell code. Foreign function calls, for example, cannot
---   be timed out with this combinator simply because an arbitrary C
---   function cannot receive asynchronous exceptions. When <tt>timeout</tt>
---   is used to wrap an FFI call that blocks, no timeout event can be
---   delivered until the FFI call returns, which pretty much negates the
---   purpose of the combinator. In practice, however, this limitation is
---   less severe than it may sound. Standard I/O functions like
---   <a>hGetBuf</a>, <a>hPutBuf</a>, Network.Socket.accept, or
+--   exceptions internally (namely throwing the computation the
+--   <a>Timeout</a> exception). The technique works very well for
+--   computations executing inside of the Haskell runtime system, but it
+--   doesn't work at all for non-Haskell code. Foreign function calls, for
+--   example, cannot be timed out with this combinator simply because an
+--   arbitrary C function cannot receive asynchronous exceptions. When
+--   <tt>timeout</tt> is used to wrap an FFI call that blocks, no timeout
+--   event can be delivered until the FFI call returns, which pretty much
+--   negates the purpose of the combinator. In practice, however, this
+--   limitation is less severe than it may sound. Standard I/O functions
+--   like <a>hGetBuf</a>, <a>hPutBuf</a>, Network.Socket.accept, or
 --   <a>hWaitForInput</a> appear to be blocking, but they really don't
 --   because the runtime system uses scheduling mechanisms like
 --   <tt>select(2)</tt> to perform asynchronous I/O, so it is possible to

@@ -26,15 +26,15 @@
 </span><span id="line-26"></span><span class="hs-comment">-- | A data type rperesenting the corners of a box.  the order of the</span><span>
 </span><span id="line-27"></span><span class="hs-comment">-- Corners is 'northWest, northEast, southEast, southWest', i.e. in</span><span>
 </span><span id="line-28"></span><span class="hs-comment">-- clockwise order starting from the topleft.</span><span>
-</span><span id="line-29"></span><span id="local-6989586621680116207"><span id="local-6989586621680116208"></span></span><span class="hs-keyword">data</span><span> </span><span id="Corners"><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span></span><span> </span><span id="local-6989586621680116325"><span class="annot"><a href="#local-6989586621680116325"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Corners"><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_northWest"><span class="annot"><span class="annottext">Corners a -&gt; a
-</span><a href="Data.Geometry.Box.Corners.html#_northWest"><span class="hs-identifier hs-var hs-var">_northWest</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680116325"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-29"></span><span id="local-6989586621680019030"><span id="local-6989586621680019031"></span></span><span class="hs-keyword">data</span><span> </span><span id="Corners"><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span></span><span> </span><span id="local-6989586621680019148"><span class="annot"><a href="#local-6989586621680019148"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Corners"><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_northWest"><span class="annot"><span class="annottext">Corners a -&gt; a
+</span><a href="Data.Geometry.Box.Corners.html#_northWest"><span class="hs-identifier hs-var hs-var">_northWest</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680019148"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-30"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_northEast"><span class="annot"><span class="annottext">Corners a -&gt; a
-</span><a href="Data.Geometry.Box.Corners.html#_northEast"><span class="hs-identifier hs-var hs-var">_northEast</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680116325"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Data.Geometry.Box.Corners.html#_northEast"><span class="hs-identifier hs-var hs-var">_northEast</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680019148"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-31"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_southEast"><span class="annot"><span class="annottext">Corners a -&gt; a
-</span><a href="Data.Geometry.Box.Corners.html#_southEast"><span class="hs-identifier hs-var hs-var">_southEast</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680116325"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Data.Geometry.Box.Corners.html#_southEast"><span class="hs-identifier hs-var hs-var">_southEast</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680019148"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-32"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="_southWest"><span class="annot"><span class="annottext">Corners a -&gt; a
-</span><a href="Data.Geometry.Box.Corners.html#_southWest"><span class="hs-identifier hs-var hs-var">_southWest</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680116325"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-33"></span><span>                         </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680116197"><span id="local-6989586621680116199"><span id="local-6989586621680116201"><span class="annot"><span class="annottext">Int -&gt; Corners a -&gt; ShowS
+</span><a href="Data.Geometry.Box.Corners.html#_southWest"><span class="hs-identifier hs-var hs-var">_southWest</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680019148"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-33"></span><span>                         </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680019020"><span id="local-6989586621680019022"><span id="local-6989586621680019024"><span class="annot"><span class="annottext">Int -&gt; Corners a -&gt; ShowS
 [Corners a] -&gt; ShowS
 Corners a -&gt; String
 (Int -&gt; Corners a -&gt; ShowS)
@@ -52,7 +52,7 @@ show :: Corners a -&gt; String
 $cshow :: forall a. Show a =&gt; Corners a -&gt; String
 showsPrec :: Int -&gt; Corners a -&gt; ShowS
 $cshowsPrec :: forall a. Show a =&gt; Int -&gt; Corners a -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680116192"><span id="local-6989586621680116194"><span class="annot"><span class="annottext">Corners a -&gt; Corners a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680019015"><span id="local-6989586621680019017"><span class="annot"><span class="annottext">Corners a -&gt; Corners a -&gt; Bool
 (Corners a -&gt; Corners a -&gt; Bool)
 -&gt; (Corners a -&gt; Corners a -&gt; Bool) -&gt; Eq (Corners a)
 forall a. Eq a =&gt; Corners a -&gt; Corners a -&gt; Bool
@@ -61,9 +61,9 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall a. Eq a =&gt; Corners a -&gt; Corners a -&gt; Bool
 == :: Corners a -&gt; Corners a -&gt; Bool
 $c== :: forall a. Eq a =&gt; Corners a -&gt; Corners a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680116176"><span id="local-6989586621680116178"><span id="local-6989586621680116180"><span id="local-6989586621680116182"><span id="local-6989586621680116184"><span id="local-6989586621680116186"><span id="local-6989586621680116188"><span class="annot"><span class="annottext">Eq (Corners a)
-Eq (Corners a) =&gt;
-(Corners a -&gt; Corners a -&gt; Ordering)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018999"><span id="local-6989586621680019001"><span id="local-6989586621680019003"><span id="local-6989586621680019005"><span id="local-6989586621680019007"><span id="local-6989586621680019009"><span id="local-6989586621680019011"><span class="annot"><span class="annottext">Eq (Corners a)
+Eq (Corners a)
+-&gt; (Corners a -&gt; Corners a -&gt; Ordering)
 -&gt; (Corners a -&gt; Corners a -&gt; Bool)
 -&gt; (Corners a -&gt; Corners a -&gt; Bool)
 -&gt; (Corners a -&gt; Corners a -&gt; Bool)
@@ -75,8 +75,8 @@ Corners a -&gt; Corners a -&gt; Bool
 Corners a -&gt; Corners a -&gt; Ordering
 Corners a -&gt; Corners a -&gt; Corners a
 forall a.
-Eq a =&gt;
-(a -&gt; a -&gt; Ordering)
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
 -&gt; (a -&gt; a -&gt; Bool)
@@ -114,7 +114,7 @@ forall a x. Rep (Corners a) x -&gt; Corners a
 forall a x. Corners a -&gt; Rep (Corners a) x
 $cto :: forall a x. Rep (Corners a) x -&gt; Corners a
 $cfrom :: forall a x. Corners a -&gt; Rep (Corners a) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680116168"><span id="local-6989586621680116170"><span class="annot"><span class="annottext">a -&gt; Corners b -&gt; Corners a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680018991"><span id="local-6989586621680018993"><span class="annot"><span class="annottext">a -&gt; Corners b -&gt; Corners a
 (a -&gt; b) -&gt; Corners a -&gt; Corners b
 (forall a b. (a -&gt; b) -&gt; Corners a -&gt; Corners b)
 -&gt; (forall a b. a -&gt; Corners b -&gt; Corners a) -&gt; Functor Corners
@@ -127,7 +127,7 @@ forall (f :: * -&gt; *).
 $c&lt;$ :: forall a b. a -&gt; Corners b -&gt; Corners a
 fmap :: (a -&gt; b) -&gt; Corners a -&gt; Corners b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Corners a -&gt; Corners b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680116133"><span id="local-6989586621680116135"><span id="local-6989586621680116137"><span id="local-6989586621680116139"><span id="local-6989586621680116141"><span id="local-6989586621680116143"><span id="local-6989586621680116145"><span id="local-6989586621680116147"><span id="local-6989586621680116149"><span id="local-6989586621680116151"><span id="local-6989586621680116153"><span id="local-6989586621680116155"><span id="local-6989586621680116157"><span id="local-6989586621680116159"><span id="local-6989586621680116161"><span id="local-6989586621680116163"><span id="local-6989586621680116165"><span class="annot"><span class="annottext">Corners a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018956"><span id="local-6989586621680018958"><span id="local-6989586621680018960"><span id="local-6989586621680018962"><span id="local-6989586621680018964"><span id="local-6989586621680018966"><span id="local-6989586621680018968"><span id="local-6989586621680018970"><span id="local-6989586621680018972"><span id="local-6989586621680018974"><span id="local-6989586621680018976"><span id="local-6989586621680018978"><span id="local-6989586621680018980"><span id="local-6989586621680018982"><span id="local-6989586621680018984"><span id="local-6989586621680018986"><span id="local-6989586621680018988"><span class="annot"><span class="annottext">Corners a -&gt; Bool
 (a -&gt; m) -&gt; Corners a -&gt; m
 (a -&gt; b -&gt; b) -&gt; b -&gt; Corners a -&gt; b
 (forall m. Monoid m =&gt; Corners m -&gt; m)
@@ -212,12 +212,13 @@ foldMap :: (a -&gt; m) -&gt; Corners a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Corners a -&gt; m
 fold :: Corners m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Corners m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680116122"><span id="local-6989586621680116124"><span id="local-6989586621680116126"><span id="local-6989586621680116128"><span class="annot"><span class="annottext">Functor Corners
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018945"><span id="local-6989586621680018947"><span id="local-6989586621680018949"><span id="local-6989586621680018951"><span class="annot"><span class="annottext">Functor Corners
 Foldable Corners
-(Functor Corners, Foldable Corners) =&gt;
-(forall (f :: * -&gt; *) a b.
- Applicative f =&gt;
- (a -&gt; f b) -&gt; Corners a -&gt; f (Corners b))
+Functor Corners
+-&gt; Foldable Corners
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; Corners a -&gt; f (Corners b))
 -&gt; (forall (f :: * -&gt; *) a.
     Applicative f =&gt;
     Corners (f a) -&gt; f (Corners a))
@@ -230,10 +231,11 @@ Foldable Corners
 -&gt; Traversable Corners
 (a -&gt; f b) -&gt; Corners a -&gt; f (Corners b)
 forall (t :: * -&gt; *).
-(Functor t, Foldable t) =&gt;
-(forall (f :: * -&gt; *) a b.
- Applicative f =&gt;
- (a -&gt; f b) -&gt; t a -&gt; f (t b))
+Functor t
+-&gt; Foldable t
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; t a -&gt; f (t b))
 -&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
 -&gt; (forall (m :: * -&gt; *) a b.
     Monad m =&gt;
@@ -267,107 +269,111 @@ Applicative f =&gt;
 $cp2Traversable :: Foldable Corners
 $cp1Traversable :: Functor Corners
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span id="southWest"><span id="southEast"><span id="northEast"><span id="northWest"><span id="local-6989586621680116325"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Corners</span></span></span></span></span></span><span>
+</span><span id="line-34"></span><span id="southWest"><span id="southEast"><span id="northEast"><span id="northWest"><span id="local-6989586621680019148"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Corners</span></span></span></span></span></span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><span class="hs-identifier hs-var">Index</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680116120"><span class="annot"><a href="#local-6989586621680116120"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><span class="hs-identifier hs-var">IxValue</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680116119"><span class="annot"><a href="#local-6989586621680116119"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680116119"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><span class="hs-identifier hs-var">Index</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680018943"><span class="annot"><a href="#local-6989586621680018943"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><span class="hs-identifier hs-var">IxValue</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680018942"><span class="annot"><a href="#local-6989586621680018942"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680018942"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span id="local-6989586621680116118"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-41"></span><span>  </span><span id="local-6989586621680116115"><span class="annot"><span class="annottext">ix :: Index (Corners a) -&gt; Traversal' (Corners a) (IxValue (Corners a))
+</span><span id="line-40"></span><span id="local-6989586621680018941"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018941"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621680018938"><span class="annot"><span class="annottext">ix :: Index (Corners a) -&gt; Traversal' (Corners a) (IxValue (Corners a))
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">ix</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-42"></span><span>    </span><span class="annot"><a href="Data.Geometry.Directions.html#NorthWest"><span class="hs-identifier hs-type">NorthWest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="annottext">Index (Corners a)
+</span><a href="Data.Geometry.Directions.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
 -&gt; Corners a -&gt; f (Corners a)
 forall a. Lens' (Corners a) a
 </span><a href="Data.Geometry.Box.Corners.html#northWest"><span class="hs-identifier hs-var">northWest</span></a></span><span>
-</span><span id="line-43"></span><span>    </span><span class="annot"><a href="Data.Geometry.Directions.html#NorthEast"><span class="hs-identifier hs-type">NorthEast</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
+</span><span id="line-43"></span><span>    </span><span class="annot"><span class="annottext">Index (Corners a)
+</span><a href="Data.Geometry.Directions.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
 -&gt; Corners a -&gt; f (Corners a)
 forall a. Lens' (Corners a) a
 </span><a href="Data.Geometry.Box.Corners.html#northEast"><span class="hs-identifier hs-var">northEast</span></a></span><span>
-</span><span id="line-44"></span><span>    </span><span class="annot"><a href="Data.Geometry.Directions.html#SouthEast"><span class="hs-identifier hs-type">SouthEast</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
+</span><span id="line-44"></span><span>    </span><span class="annot"><span class="annottext">Index (Corners a)
+</span><a href="Data.Geometry.Directions.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
 -&gt; Corners a -&gt; f (Corners a)
 forall a. Lens' (Corners a) a
 </span><a href="Data.Geometry.Box.Corners.html#southEast"><span class="hs-identifier hs-var">southEast</span></a></span><span>
-</span><span id="line-45"></span><span>    </span><span class="annot"><a href="Data.Geometry.Directions.html#SouthWest"><span class="hs-identifier hs-type">SouthWest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
+</span><span id="line-45"></span><span>    </span><span class="annot"><span class="annottext">Index (Corners a)
+</span><a href="Data.Geometry.Directions.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(IxValue (Corners a) -&gt; f (IxValue (Corners a)))
 -&gt; Corners a -&gt; f (Corners a)
 forall a. Lens' (Corners a) a
 </span><a href="Data.Geometry.Box.Corners.html#southWest"><span class="hs-identifier hs-var">southWest</span></a></span></span><span>
 </span><span id="line-46"></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680116103"><span id="local-6989586621680116105"><span id="local-6989586621680116107"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span></span></span><span>
-</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680116097"><span class="annot"><span class="hs-identifier hs-type">Traversable1</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>  </span><span id="local-6989586621680116095"><span class="annot"><span class="annottext">traverse1 :: (a -&gt; f b) -&gt; Corners a -&gt; f (Corners b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></span></span><span> </span><span id="local-6989586621680116093"><span class="annot"><span class="annottext">f :: a -&gt; f b
-</span><a href="#local-6989586621680116093"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680116092"><span class="annot"><span class="annottext">a :: a
-</span><a href="#local-6989586621680116092"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680116091"><span class="annot"><span class="annottext">b :: a
-</span><a href="#local-6989586621680116091"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680116090"><span class="annot"><span class="annottext">c :: a
-</span><a href="#local-6989586621680116090"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680116089"><span class="annot"><span class="annottext">d :: a
-</span><a href="#local-6989586621680116089"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Corners b
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018926"><span id="local-6989586621680018928"><span id="local-6989586621680018930"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span></span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018920"><span class="annot"><span class="hs-identifier hs-type">Traversable1</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621680018918"><span class="annot"><span class="annottext">traverse1 :: (a -&gt; f b) -&gt; Corners a -&gt; f (Corners b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></span></span><span> </span><span id="local-6989586621680018916"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621680018916"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680018915"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018915"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680018914"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018914"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680018913"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018913"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680018912"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018912"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Corners b
 forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
 </span><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; b -&gt; b -&gt; b -&gt; Corners b)
 -&gt; f b -&gt; f (b -&gt; b -&gt; b -&gt; Corners b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680116093"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116092"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; b -&gt; Corners b) -&gt; f b -&gt; f (b -&gt; b -&gt; Corners b)
+</span><a href="#local-6989586621680018916"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018915"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; b -&gt; Corners b) -&gt; f b -&gt; f (b -&gt; b -&gt; Corners b)
 forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;.&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680116093"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116091"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; Corners b) -&gt; f b -&gt; f (b -&gt; Corners b)
+</span><a href="#local-6989586621680018916"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018914"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; Corners b) -&gt; f b -&gt; f (b -&gt; Corners b)
 forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;.&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680116093"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116090"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; Corners b) -&gt; f b -&gt; f (Corners b)
+</span><a href="#local-6989586621680018916"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018913"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; Corners b) -&gt; f b -&gt; f (Corners b)
 forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;.&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680116093"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116089"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><a href="#local-6989586621680018916"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018912"><span class="hs-identifier hs-var">d</span></a></span><span>
 </span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680116078"><span id="local-6989586621680116080"><span id="local-6989586621680116082"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>  </span><span id="local-6989586621680116076"><span class="annot"><span class="annottext">pure :: a -&gt; Corners a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621680116075"><span class="annot"><span class="annottext">x :: a
-</span><a href="#local-6989586621680116075"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; a -&gt; Corners a
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018901"><span id="local-6989586621680018903"><span id="local-6989586621680018905"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621680018899"><span class="annot"><span class="annottext">pure :: a -&gt; Corners a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621680018898"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018898"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; a -&gt; Corners a
 forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
 </span><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116075"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116075"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116075"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116075"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680116074"><span class="annot"><span class="annottext">f :: a -&gt; b
-</span><a href="#local-6989586621680116074"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680116073"><span class="annot"><span class="annottext">g :: a -&gt; b
-</span><a href="#local-6989586621680116073"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621680116072"><span class="annot"><span class="annottext">h :: a -&gt; b
-</span><a href="#local-6989586621680116072"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621680116071"><span class="annot"><span class="annottext">i :: a -&gt; b
-</span><a href="#local-6989586621680116071"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680116070"><span class="annot"><span class="annottext">&lt;*&gt; :: Corners (a -&gt; b) -&gt; Corners a -&gt; Corners b
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680116069"><span class="annot"><span class="annottext">a :: a
-</span><a href="#local-6989586621680116069"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680116068"><span class="annot"><span class="annottext">b :: a
-</span><a href="#local-6989586621680116068"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680116067"><span class="annot"><span class="annottext">c :: a
-</span><a href="#local-6989586621680116067"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680116066"><span class="annot"><span class="annottext">d :: a
-</span><a href="#local-6989586621680116066"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Corners b
+</span><a href="#local-6989586621680018898"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018898"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018898"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018898"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680018897"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018897"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680018896"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018896"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621680018895"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018895"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621680018894"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018894"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680018893"><span class="annot"><span class="annottext">&lt;*&gt; :: Corners (a -&gt; b) -&gt; Corners a -&gt; Corners b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621680018892"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018892"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680018891"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018891"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680018890"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018890"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621680018889"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018889"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Corners b
 forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
 </span><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680116074"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116069"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680116073"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116068"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680116072"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116067"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680116071"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680116066"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680018897"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018892"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018896"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018891"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018895"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018890"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680018894"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680018889"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span id="local-6989586621680116065"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680116060"><span id="local-6989586621680116062"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621680116065"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116065"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-56"></span><span>  </span><span id="local-6989586621680116058"><span class="annot"><span class="annottext">s :: Corners a
-</span><a href="#local-6989586621680116058"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621680116057"><span class="annot"><span class="annottext">&lt;&gt; :: Corners a -&gt; Corners a -&gt; Corners a
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621680116056"><span class="annot"><span class="annottext">s' :: Corners a
-</span><a href="#local-6989586621680116056"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span id="line-55"></span><span id="local-6989586621680018888"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018883"><span id="local-6989586621680018885"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621680018888"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018888"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621680018881"><span class="annot"><span class="annottext">Corners a
+</span><a href="#local-6989586621680018881"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621680018880"><span class="annot"><span class="annottext">&lt;&gt; :: Corners a -&gt; Corners a -&gt; Corners a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621680018879"><span class="annot"><span class="annottext">Corners a
+</span><a href="#local-6989586621680018879"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Corners a -&gt; Corners (a -&gt; a)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Corners a
-</span><a href="#local-6989586621680116058"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Corners (a -&gt; a) -&gt; Corners a -&gt; Corners a
+</span><a href="#local-6989586621680018881"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Corners (a -&gt; a) -&gt; Corners a -&gt; Corners a
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Corners a
-</span><a href="#local-6989586621680116056"><span class="hs-identifier hs-var">s'</span></a></span></span><span>
-</span><span id="line-57"></span><span id="local-6989586621680116055"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680116049"><span id="local-6989586621680116051"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621680116055"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116055"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>  </span><span id="local-6989586621680116047"><span class="annot"><span class="annottext">mempty :: Corners a
+</span><a href="#local-6989586621680018879"><span class="hs-identifier hs-var">s'</span></a></span></span><span>
+</span><span id="line-57"></span><span id="local-6989586621680018878"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018872"><span id="local-6989586621680018874"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621680018878"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018878"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621680018870"><span class="annot"><span class="annottext">mempty :: Corners a
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Corners a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
@@ -382,19 +388,19 @@ forall a. Monoid a =&gt; a
 </span><span id="line-65"></span><span class="hs-comment">-- (TopLeft, TopRight, BottomRight, BottomLeft).</span><span>
 </span><span id="line-66"></span><span class="hs-comment">-- The extra values in the Top points are taken from the Top point,</span><span>
 </span><span id="line-67"></span><span class="hs-comment">-- the extra values in the Bottom points are taken from the Bottom point</span><span>
-</span><span id="line-68"></span><span id="local-6989586621680116045"><span id="local-6989586621680116046"><span class="annot"><a href="Data.Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-type">corners</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680116046"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116045"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116046"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680116046"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680116045"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-68"></span><span id="local-6989586621680018868"><span id="local-6989586621680018869"><span class="annot"><a href="Data.Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-type">corners</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680018869"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018868"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018869"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680018869"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680018868"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-69"></span><span id="corners"><span class="annot"><span class="annottext">corners :: Rectangle p r -&gt; Corners (Point 2 r :+ p)
-</span><a href="Data.Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-var hs-var">corners</span></a></span></span><span> </span><span id="local-6989586621680116044"><span class="annot"><span class="annottext">r :: Rectangle p r
-</span><a href="#local-6989586621680116044"><span class="hs-identifier hs-var">r</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680116043"><span class="annot"><span class="annottext">w :: r
-</span><a href="#local-6989586621680116043"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle p r -&gt; r
+</span><a href="Data.Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-var hs-var">corners</span></a></span></span><span> </span><span id="local-6989586621680018867"><span class="annot"><span class="annottext">Rectangle p r
+</span><a href="#local-6989586621680018867"><span class="hs-identifier hs-var">r</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680018866"><span class="annot"><span class="annottext">w :: r
+</span><a href="#local-6989586621680018866"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle p r -&gt; r
 forall r p. Num r =&gt; Rectangle p r -&gt; r
 </span><a href="Data.Geometry.Box.Internal.html#width"><span class="hs-identifier hs-var">width</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680116044"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-70"></span><span>                    </span><span id="local-6989586621680116041"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
-</span><a href="#local-6989586621680116041"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r -&gt; CWMax (Point 2 r) :+ p
+</span><a href="#local-6989586621680018867"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-70"></span><span>                    </span><span id="local-6989586621680018864"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621680018864"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r -&gt; CWMax (Point 2 r) :+ p
 forall (d :: Nat) p r. Box d p r -&gt; CWMax (Point d r) :+ p
 </span><a href="Data.Geometry.Box.Internal.html#_maxP"><span class="hs-identifier hs-var hs-var">_maxP</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680116044"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(CWMax (Point 2 r) :+ p)
+</span><a href="#local-6989586621680018867"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(CWMax (Point 2 r) :+ p)
 -&gt; ((CWMax (Point 2 r) :+ p) -&gt; Point 2 r :+ p) -&gt; Point 2 r :+ p
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(CWMax (Point 2 r) -&gt; Identity (Point 2 r))
@@ -410,11 +416,11 @@ forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">CWMax (Point 2 r) -&gt; Point 2 r
 forall a. CWMax a -&gt; a
 </span><a href="Data.Geometry.Box.Internal.html#_cwMax"><span class="hs-identifier hs-var hs-var">_cwMax</span></a></span><span>
-</span><span id="line-71"></span><span>                    </span><span id="local-6989586621680116037"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
-</span><a href="#local-6989586621680116037"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r -&gt; CWMin (Point 2 r) :+ p
+</span><span id="line-71"></span><span>                    </span><span id="local-6989586621680018860"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621680018860"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r -&gt; CWMin (Point 2 r) :+ p
 forall (d :: Nat) p r. Box d p r -&gt; CWMin (Point d r) :+ p
 </span><a href="Data.Geometry.Box.Internal.html#_minP"><span class="hs-identifier hs-var hs-var">_minP</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680116044"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(CWMin (Point 2 r) :+ p)
+</span><a href="#local-6989586621680018867"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(CWMin (Point 2 r) :+ p)
 -&gt; ((CWMin (Point 2 r) :+ p) -&gt; Point 2 r :+ p) -&gt; Point 2 r :+ p
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(CWMin (Point 2 r) -&gt; Identity (Point 2 r))
@@ -437,7 +443,7 @@ forall a. CWMin a -&gt; a
 -&gt; Corners (Point 2 r :+ p)
 forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
 </span><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-var">Corners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680116041"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+</span><a href="#local-6989586621680018864"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
 -&gt; ((Point 2 r :+ p) -&gt; Point 2 r :+ p) -&gt; Point 2 r :+ p
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Identity (Point 2 r))
@@ -462,10 +468,10 @@ forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">subtract</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680116043"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680116041"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621680018866"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680018864"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-73"></span><span>                           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680116037"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+</span><a href="#local-6989586621680018860"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
 -&gt; ((Point 2 r :+ p) -&gt; Point 2 r :+ p) -&gt; Point 2 r :+ p
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Identity (Point 2 r))
@@ -490,28 +496,28 @@ forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680116043"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>      </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680116037"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><a href="#local-6989586621680018866"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>      </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680018860"><span class="hs-identifier hs-var">q</span></a></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-77"></span><span>
 </span><span id="line-78"></span><span class="hs-comment">-- | Gets the corners in a particular direction</span><span>
-</span><span id="line-79"></span><span id="local-6989586621680116030"><span class="annot"><a href="Data.Geometry.Box.Corners.html#cornersInDirection"><span class="hs-identifier hs-type">cornersInDirection</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Directions.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680116030"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Two</span></span><span> </span><span class="annot"><a href="#local-6989586621680116030"><span class="hs-identifier hs-type">p</span></a></span></span><span>
+</span><span id="line-79"></span><span id="local-6989586621680018853"><span class="annot"><a href="Data.Geometry.Box.Corners.html#cornersInDirection"><span class="hs-identifier hs-type">cornersInDirection</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Directions.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018853"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Two</span></span><span> </span><span class="annot"><a href="#local-6989586621680018853"><span class="hs-identifier hs-type">p</span></a></span></span><span>
 </span><span id="line-80"></span><span id="cornersInDirection"><span class="annot"><span class="annottext">cornersInDirection :: CardinalDirection -&gt; Corners p -&gt; Two p
-</span><a href="Data.Geometry.Box.Corners.html#cornersInDirection"><span class="hs-identifier hs-var hs-var">cornersInDirection</span></a></span></span><span> </span><span id="local-6989586621680116029"><span class="annot"><span class="annottext">d :: CardinalDirection
-</span><a href="#local-6989586621680116029"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621680116028"><span class="annot"><span class="annottext">c :: Corners p
-</span><a href="#local-6989586621680116028"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680116027"><span class="annot"><span class="annottext">icd :: InterCardinalDirection
-</span><a href="#local-6989586621680116027"><span class="hs-identifier hs-var">icd</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Corners p
-</span><a href="#local-6989586621680116028"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Corners p -&gt; Getting (Endo p) (Corners p) p -&gt; p
+</span><a href="Data.Geometry.Box.Corners.html#cornersInDirection"><span class="hs-identifier hs-var hs-var">cornersInDirection</span></a></span></span><span> </span><span id="local-6989586621680018852"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621680018852"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621680018851"><span class="annot"><span class="annottext">Corners p
+</span><a href="#local-6989586621680018851"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680018850"><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="#local-6989586621680018850"><span class="hs-identifier hs-var">icd</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Corners p
+</span><a href="#local-6989586621680018851"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Corners p -&gt; Getting (Endo p) (Corners p) p -&gt; p
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
 </span><span class="hs-operator hs-var">^?!</span></span><span class="annot"><span class="annottext">Index (Corners p) -&gt; Traversal' (Corners p) (IxValue (Corners p))
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
 </span><span class="hs-identifier hs-var">ix</span></span><span> </span><span class="annot"><span class="annottext">Index (Corners p)
 InterCardinalDirection
-</span><a href="#local-6989586621680116027"><span class="hs-identifier hs-var">icd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InterCardinalDirection -&gt; p) -&gt; V2 InterCardinalDirection -&gt; Two p
+</span><a href="#local-6989586621680018850"><span class="hs-identifier hs-var">icd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InterCardinalDirection -&gt; p) -&gt; V2 InterCardinalDirection -&gt; Two p
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">CardinalDirection -&gt; V2 InterCardinalDirection
 </span><a href="Data.Geometry.Directions.html#interCardinalsOf"><span class="hs-identifier hs-var">interCardinalsOf</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621680116029"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><a href="#local-6989586621680018852"><span class="hs-identifier hs-var">d</span></a></span><span>
 </span><span id="line-81"></span></pre></body></html>

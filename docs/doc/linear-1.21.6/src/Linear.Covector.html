@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- License     :  BSD-style (see the file LICENSE)</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Stability   :  provisional</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Operations on affine spaces.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Linear.Covector</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier">Covector</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Covector.html#%24%2A"><span class="hs-operator">($*)</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Plus</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">zero</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Plus</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Plus</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Bind</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Rep</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Rep</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.Algebra.html"><span class="hs-identifier">Linear.Algebra</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Linear functionals from elements of an (infinite) free module to a scalar</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">newtype</span><span> </span><span id="Covector"><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span></span><span> </span><span id="local-6989586621679196301"><span class="annot"><a href="#local-6989586621679196301"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679196302"><span class="annot"><a href="#local-6989586621679196302"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Covector"><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="runCovector"><span class="annot"><span class="annottext">Covector r a -&gt; (a -&gt; r) -&gt; r
+</span><a href="Linear.Covector.html#runCovector"><span class="hs-identifier hs-var hs-var">runCovector</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679196302"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679196301"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679196301"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">infixr</span><span> </span><span class="hs-number">0</span><span> </span><span class="annot"><a href="Linear.Covector.html#%24%2A"><span class="hs-operator hs-type">$*</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span id="local-6989586621679196184"><span id="local-6989586621679196185"><span class="annot"><a href="Linear.Covector.html#%24%2A"><span class="hs-operator hs-type">($*)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Representable</span></span><span> </span><span class="annot"><a href="#local-6989586621679196185"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196184"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rep</span></span><span> </span><span class="annot"><a href="#local-6989586621679196185"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679196185"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196184"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679196184"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-31"></span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196183"><span class="annot"><span class="annottext">(Rep f -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196183"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="%24%2A"><span class="annot"><span class="annottext">$* :: Covector r (Rep f) -&gt; f r -&gt; r
+</span><a href="Linear.Covector.html#%24%2A"><span class="hs-operator hs-var hs-var">$*</span></a></span></span><span> </span><span id="local-6989586621679196182"><span class="annot"><span class="annottext">f r
+</span><a href="#local-6989586621679196182"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rep f -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196183"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f r -&gt; Rep f -&gt; r
+forall (f :: * -&gt; *) a. Representable f =&gt; f a -&gt; Rep f -&gt; a
+</span><span class="hs-identifier hs-var">Rep.index</span></span><span> </span><span class="annot"><span class="annottext">f r
+</span><a href="#local-6989586621679196182"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679196180"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196177"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196180"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679196175"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Covector r a -&gt; Covector r b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679196174"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196174"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196173"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196173"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((b -&gt; r) -&gt; r) -&gt; Covector r b)
+-&gt; ((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196172"><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196172"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196173"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196172"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; r) -&gt; (a -&gt; b) -&gt; a -&gt; r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196174"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679196170"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196162"><span id="local-6989586621679196164"><span id="local-6989586621679196166"><span class="annot"><span class="hs-identifier hs-type">Apply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196160"><span class="annot"><span class="annottext">((a -&gt; b) -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196160"><span class="hs-identifier hs-var">mf</span></a></span></span><span> </span><span id="local-6989586621679196159"><span class="annot"><span class="annottext">&lt;.&gt; :: Covector r (a -&gt; b) -&gt; Covector r a -&gt; Covector r b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;.&gt;</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196157"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196157"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((b -&gt; r) -&gt; r) -&gt; Covector r b)
+-&gt; ((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196156"><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196156"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196160"><span class="hs-identifier hs-var">mf</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; b) -&gt; r) -&gt; r) -&gt; ((a -&gt; b) -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196155"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196155"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196157"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196156"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; r) -&gt; (a -&gt; b) -&gt; a -&gt; r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196155"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679196154"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196145"><span id="local-6989586621679196147"><span id="local-6989586621679196149"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196154"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679196143"><span class="annot"><span class="annottext">pure :: a -&gt; Covector r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679196142"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196142"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; r) -&gt; r) -&gt; Covector r a)
+-&gt; ((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196141"><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196141"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196141"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196142"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196140"><span class="annot"><span class="annottext">((a -&gt; b) -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196140"><span class="hs-identifier hs-var">mf</span></a></span></span><span> </span><span id="local-6989586621679196139"><span class="annot"><span class="annottext">&lt;*&gt; :: Covector r (a -&gt; b) -&gt; Covector r a -&gt; Covector r b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196138"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196138"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((b -&gt; r) -&gt; r) -&gt; Covector r b)
+-&gt; ((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196137"><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196137"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196140"><span class="hs-identifier hs-var">mf</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; b) -&gt; r) -&gt; r) -&gt; ((a -&gt; b) -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196136"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196136"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196138"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; (a -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196137"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; r) -&gt; (a -&gt; b) -&gt; a -&gt; r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679196136"><span class="hs-identifier hs-var">f</span></a></span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679196135"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196131"><span class="annot"><span class="hs-identifier hs-type">Bind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196135"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196129"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196129"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679196128"><span class="annot"><span class="annottext">&gt;&gt;- :: Covector r a -&gt; (a -&gt; Covector r b) -&gt; Covector r b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&gt;&gt;-</span></span></span><span> </span><span id="local-6989586621679196126"><span class="annot"><span class="annottext">a -&gt; Covector r b
+</span><a href="#local-6989586621679196126"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((b -&gt; r) -&gt; r) -&gt; Covector r b)
+-&gt; ((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196125"><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196125"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196129"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; (a -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196124"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196124"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Covector r b -&gt; (b -&gt; r) -&gt; r
+forall r a. Covector r a -&gt; (a -&gt; r) -&gt; r
+</span><a href="Linear.Covector.html#runCovector"><span class="hs-identifier hs-var hs-var">runCovector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Covector r b
+</span><a href="#local-6989586621679196126"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196124"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196125"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679196123"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196117"><span id="local-6989586621679196119"><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196123"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span>  </span><span class="hs-identifier">return</span><span> </span><span class="hs-identifier">a</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">Covector</span><span> </span><span class="hs-operator">$</span><span> </span><span class="hs-glyph">\</span><span class="hs-identifier">k</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">k</span><span> </span><span class="hs-identifier">a</span><span class="hs-cpp">
+#endif
+</span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196115"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196115"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679196114"><span class="annot"><span class="annottext">&gt;&gt;= :: Covector r a -&gt; (a -&gt; Covector r b) -&gt; Covector r b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&gt;&gt;=</span></span></span><span> </span><span id="local-6989586621679196113"><span class="annot"><span class="annottext">a -&gt; Covector r b
+</span><a href="#local-6989586621679196113"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((b -&gt; r) -&gt; r) -&gt; Covector r b)
+-&gt; ((b -&gt; r) -&gt; r) -&gt; Covector r b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196112"><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196112"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196115"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; (a -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196111"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196111"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Covector r b -&gt; (b -&gt; r) -&gt; r
+forall r a. Covector r a -&gt; (a -&gt; r) -&gt; r
+</span><a href="Linear.Covector.html#runCovector"><span class="hs-identifier hs-var hs-var">runCovector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Covector r b
+</span><a href="#local-6989586621679196113"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679196111"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b -&gt; r
+</span><a href="#local-6989586621679196112"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679196110"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196104"><span id="local-6989586621679196106"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679196110"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196110"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196102"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196102"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679196101"><span class="annot"><span class="annottext">&lt;!&gt; :: Covector r a -&gt; Covector r a -&gt; Covector r a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;!&gt;</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196099"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196099"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; r) -&gt; r) -&gt; Covector r a)
+-&gt; ((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196098"><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196098"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196102"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196098"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196099"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196098"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679196096"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679196096"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196096"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679196092"><span class="annot"><span class="annottext">zero :: Covector r a
+</span><a href="#local-6989586621679196092"><span class="hs-identifier hs-var hs-var hs-var hs-var">zero</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; (a -&gt; r) -&gt; r
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679196090"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679196083"><span id="local-6989586621679196085"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679196090"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196090"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196081"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196081"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679196080"><span class="annot"><span class="annottext">&lt;|&gt; :: Covector r a -&gt; Covector r a -&gt; Covector r a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;|&gt;</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196078"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196078"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; r) -&gt; r) -&gt; Covector r a)
+-&gt; ((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196077"><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196077"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196081"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196077"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196078"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196077"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679196076"><span class="annot"><span class="annottext">empty :: Covector r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">empty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; (a -&gt; r) -&gt; r
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span id="local-6989586621679196074"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679196074"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196074"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196068"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196068"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679196067"><span class="annot"><span class="annottext">mplus :: Covector r a -&gt; Covector r a -&gt; Covector r a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`mplus`</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196065"><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196065"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((a -&gt; r) -&gt; r) -&gt; Covector r a)
+-&gt; ((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196064"><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196064"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196068"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196064"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196065"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; r
+</span><a href="#local-6989586621679196064"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679196063"><span class="annot"><span class="annottext">mzero :: Covector r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mzero</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; r) -&gt; r) -&gt; Covector r a
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; (a -&gt; r) -&gt; r
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679196060"><span id="local-6989586621679196061"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Linear.Algebra.html#Coalgebra"><span class="hs-identifier hs-type">Coalgebra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196061"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196061"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679196060"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196051"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196051"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679196050"><span class="annot"><span class="annottext">+ :: Covector r m -&gt; Covector r m -&gt; Covector r m
+</span><a href="#local-6989586621679196050"><span class="hs-operator hs-var hs-var hs-var hs-var">+</span></a></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196049"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196049"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((m -&gt; r) -&gt; r) -&gt; Covector r m)
+-&gt; ((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196048"><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196048"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196051"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196048"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196049"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196048"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196047"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196047"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679196046"><span class="annot"><span class="annottext">- :: Covector r m -&gt; Covector r m -&gt; Covector r m
+</span><span class="hs-glyph hs-var hs-var hs-var hs-var">-</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196045"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196045"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((m -&gt; r) -&gt; r) -&gt; Covector r m)
+-&gt; ((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196044"><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196044"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196047"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196044"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196045"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196044"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196043"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196043"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679196042"><span class="annot"><span class="annottext">* :: Covector r m -&gt; Covector r m -&gt; Covector r m
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">*</span></span></span><span> </span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196040"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196040"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((m -&gt; r) -&gt; r) -&gt; Covector r m)
+-&gt; ((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196039"><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196039"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196043"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; (m -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196038"><span class="annot"><span class="annottext">m
+</span><a href="#local-6989586621679196038"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196040"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; (m -&gt; r) -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; m -&gt; m -&gt; r
+forall r m. Coalgebra r m =&gt; (m -&gt; r) -&gt; m -&gt; m -&gt; r
+</span><a href="Linear.Algebra.html#comult"><span class="hs-identifier hs-var">comult</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196039"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">m
+</span><a href="#local-6989586621679196038"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679196036"><span class="annot"><span class="annottext">negate :: Covector r m -&gt; Covector r m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-type">Covector</span></a></span><span> </span><span id="local-6989586621679196035"><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196035"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((m -&gt; r) -&gt; r) -&gt; Covector r m)
+-&gt; ((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679196034"><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196034"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+</span><a href="#local-6989586621679196035"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196034"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679196033"><span class="annot"><span class="annottext">abs :: Covector r m -&gt; Covector r m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">abs</span></span></span><span> </span><span class="annot"><span class="annottext">Covector r m
+</span><span class="hs-identifier">_</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Covector r m
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Covector.abs: undefined&quot;</span></span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679196030"><span class="annot"><span class="annottext">signum :: Covector r m -&gt; Covector r m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">signum</span></span></span><span> </span><span class="annot"><span class="annottext">Covector r m
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Covector r m
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Covector.signum: undefined&quot;</span></span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679196028"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; Covector r m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span id="local-6989586621679196027"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679196027"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall r a. ((a -&gt; r) -&gt; r) -&gt; Covector r a
+</span><a href="Linear.Covector.html#Covector"><span class="hs-identifier hs-var">Covector</span></a></span><span> </span><span class="annot"><span class="annottext">(((m -&gt; r) -&gt; r) -&gt; Covector r m)
+-&gt; ((m -&gt; r) -&gt; r) -&gt; Covector r m
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679196026"><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196026"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; r
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679196027"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">(m -&gt; r) -&gt; r
+forall r m. Coalgebra r m =&gt; (m -&gt; r) -&gt; r
+</span><a href="Linear.Algebra.html#counital"><span class="hs-identifier hs-var">counital</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; r
+</span><a href="#local-6989586621679196026"><span class="hs-identifier hs-var">k</span></a></span></span></span><span>
+</span><span id="line-74"></span></pre></body></html>

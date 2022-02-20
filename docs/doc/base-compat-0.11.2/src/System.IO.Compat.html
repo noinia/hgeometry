@@ -31,10 +31,10 @@
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span class="annot"><a href="System.IO.Compat.html#readFile%27"><span class="hs-identifier hs-type">readFile'</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-30"></span><span id="readFile%27"><span class="annot"><span class="annottext">readFile' :: String -&gt; IO String
-</span><a href="System.IO.Compat.html#readFile%27"><span class="hs-identifier hs-var hs-var">readFile'</span></a></span></span><span> </span><span id="local-6989586621679059859"><span class="annot"><span class="annottext">name :: String
-</span><a href="#local-6989586621679059859"><span class="hs-identifier hs-var">name</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">String -&gt; IOMode -&gt; IO Handle
+</span><a href="System.IO.Compat.html#readFile%27"><span class="hs-identifier hs-var hs-var">readFile'</span></a></span></span><span> </span><span id="local-6989586621679038904"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679038904"><span class="hs-identifier hs-var">name</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">String -&gt; IOMode -&gt; IO Handle
 </span><span class="hs-identifier hs-var">openFile</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679059859"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><a href="#local-6989586621679038904"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
 </span><span class="hs-identifier hs-var">ReadMode</span></span><span> </span><span class="annot"><span class="annottext">IO Handle -&gt; (Handle -&gt; IO String) -&gt; IO String
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO String
@@ -47,21 +47,20 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span id="line-36"></span><span>
 </span><span id="line-37"></span><span class="annot"><a href="System.IO.Compat.html#hGetContents%27"><span class="hs-identifier hs-type">hGetContents'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handle</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-38"></span><span id="hGetContents%27"><span class="annot"><span class="annottext">hGetContents' :: Handle -&gt; IO String
-</span><a href="System.IO.Compat.html#hGetContents%27"><span class="hs-identifier hs-var hs-var">hGetContents'</span></a></span></span><span> </span><span id="local-6989586621679059856"><span class="annot"><span class="annottext">h :: Handle
-</span><a href="#local-6989586621679059856"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Handle -&gt; IO String
+</span><a href="System.IO.Compat.html#hGetContents%27"><span class="hs-identifier hs-var hs-var">hGetContents'</span></a></span></span><span> </span><span id="local-6989586621679038901"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679038901"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Handle -&gt; IO String
 </span><span class="hs-identifier hs-var">hGetContents</span></span><span> </span><span class="annot"><span class="annottext">Handle
-</span><a href="#local-6989586621679059856"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">IO String -&gt; (String -&gt; IO String) -&gt; IO String
+</span><a href="#local-6989586621679038901"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">IO String -&gt; (String -&gt; IO String) -&gt; IO String
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
-</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679059854"><span class="annot"><span class="annottext">s :: String
-</span><a href="#local-6989586621679059854"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Int
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679038899"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679038899"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679059854"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO String -&gt; IO String
-forall a b. a -&gt; b -&gt; b
+</span><a href="#local-6989586621679038899"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO String -&gt; IO String
 </span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO String
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679059854"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679038899"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-39"></span><span> </span><span class="hs-comment">-- NB: The actual implementation of hGetContents' in `base` uses a lot of</span><span>
 </span><span id="line-40"></span><span> </span><span class="hs-comment">-- low-level code from GHC.IO.Handle.Text. What's worse, a lot of this</span><span>
 </span><span id="line-41"></span><span> </span><span class="hs-comment">-- low-level code isn't exported, so we'd have to reimplement large chunks</span><span>

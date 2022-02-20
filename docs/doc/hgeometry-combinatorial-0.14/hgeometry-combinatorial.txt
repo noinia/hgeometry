@@ -48,8 +48,8 @@ binarySearch :: Integral a => (a -> Bool) -> a -> a -> a
 --   </pre>
 binarySearchUntil :: (Fractional r, Ord r) => r -> (r -> Bool) -> r -> r -> r
 class BinarySearch v where {
-    type family Index v :: *;
-    type family Elem v :: *;
+    type family Index v :: Type;
+    type family Elem v :: Type;
 }
 
 -- | Given a monotonic predicate p and a data structure v, find the element
@@ -549,9 +549,9 @@ module Data.DynamicOrd
 
 -- | Values of type '<tt>a</tt>' in our dynamically constructed <a>Ord</a>
 --   instance
-newtype O (s :: *) (a :: *)
-O :: a -> O (s :: *) (a :: *)
-[runO] :: O (s :: *) (a :: *) -> a
+newtype O (s :: Type) (a :: Type)
+O :: a -> O (s :: Type) (a :: Type)
+[runO] :: O (s :: Type) (a :: Type) -> a
 
 -- | An Ord Dictionary
 newtype OrdDict a
@@ -1463,20 +1463,6 @@ Elem :: a -> Elem a
 -- | Things that have a size
 data Sized a
 Sized :: {-# UNPACK #-} !Size -> a -> Sized a
-instance GHC.Generics.Generic (Data.Measured.Size.Sized a)
-instance Data.Traversable.Traversable Data.Measured.Size.Sized
-instance Data.Foldable.Foldable Data.Measured.Size.Sized
-instance GHC.Base.Functor Data.Measured.Size.Sized
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Measured.Size.Sized a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Measured.Size.Sized a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Measured.Size.Sized a)
-instance Data.Traversable.Traversable Data.Measured.Size.Elem
-instance Data.Foldable.Foldable Data.Measured.Size.Elem
-instance GHC.Base.Functor Data.Measured.Size.Elem
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Measured.Size.Elem a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Measured.Size.Elem a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Measured.Size.Elem a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Measured.Size.Elem a)
 instance Control.DeepSeq.NFData Data.Measured.Size.Size
 instance GHC.Generics.Generic Data.Measured.Size.Size
 instance GHC.Classes.Ord Data.Measured.Size.Size
@@ -1487,6 +1473,20 @@ instance GHC.Num.Num Data.Measured.Size.Size
 instance GHC.Classes.Eq Data.Measured.Size.Size
 instance GHC.Read.Read Data.Measured.Size.Size
 instance GHC.Show.Show Data.Measured.Size.Size
+instance Data.Traversable.Traversable Data.Measured.Size.Elem
+instance Data.Foldable.Foldable Data.Measured.Size.Elem
+instance GHC.Base.Functor Data.Measured.Size.Elem
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Measured.Size.Elem a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Measured.Size.Elem a)
+instance GHC.Read.Read a => GHC.Read.Read (Data.Measured.Size.Elem a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Measured.Size.Elem a)
+instance GHC.Generics.Generic (Data.Measured.Size.Sized a)
+instance Data.Traversable.Traversable Data.Measured.Size.Sized
+instance Data.Foldable.Foldable Data.Measured.Size.Sized
+instance GHC.Base.Functor Data.Measured.Size.Sized
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Measured.Size.Sized a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Measured.Size.Sized a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Measured.Size.Sized a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Measured.Size.Sized a)
 instance GHC.Base.Semigroup a => GHC.Base.Semigroup (Data.Measured.Size.Sized a)
 instance GHC.Base.Monoid a => GHC.Base.Monoid (Data.Measured.Size.Sized a)
@@ -1586,15 +1586,15 @@ maxView :: OrdSeq a -> Maybe (a, OrdSeq a)
 
 -- | &lt;math&gt;
 lookupMax :: OrdSeq a -> Maybe a
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.OrdSeq a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.OrdSeq.Key a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Key a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.Key a)
 instance GHC.Base.Functor Data.OrdSeq.Elem
 instance Data.Foldable.Foldable Data.OrdSeq.Elem
 instance Data.Traversable.Traversable Data.OrdSeq.Elem
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.OrdSeq.Elem a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Elem a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.OrdSeq.Key a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Key a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.Key a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.OrdSeq a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.OrdSeq a)
 instance GHC.Base.Semigroup (Data.OrdSeq.OrdSeq a)
 instance GHC.Base.Monoid (Data.OrdSeq.OrdSeq a)
@@ -1620,8 +1620,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aLpC a_aLIr. Lens (Permutation a_aLpC) (Permutation a_aLIr) (Vector (Orbit a_aLpC)) (Vector (Orbit a_aLIr))
-indexes :: forall a_aLpC. Lens' (Permutation a_aLpC) (Vector (Int, Int))
+orbits :: forall a_avJL a_avTl. Lens (Permutation a_avJL) (Permutation a_avTl) (Vector (Orbit a_avJL)) (Vector (Orbit a_avTl))
+indexes :: forall a_avJL. Lens' (Permutation a_avJL) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1694,16 +1694,16 @@ Face :: (Int, Int) -> f -> Face f
 -- | an edge (u,v) s.t. the face is right from (u,v)
 [incidentEdge] :: Face f -> (Int, Int)
 [fData] :: Face f -> f
+instance (GHC.Classes.Eq v, GHC.Classes.Eq f) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Gr v f)
+instance (GHC.Show.Show v, GHC.Show.Show f) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Gr v f)
+instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Gr v f)
+instance (GHC.Classes.Eq e, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Vtx v e)
+instance (GHC.Show.Show e, GHC.Show.Show v) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Vtx v e)
+instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Vtx v e)
 instance GHC.Classes.Eq f => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Face f)
 instance GHC.Show.Show f => GHC.Show.Show (Data.PlanarGraph.AdjRep.Face f)
 instance GHC.Base.Functor Data.PlanarGraph.AdjRep.Face
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Face f)
-instance (GHC.Classes.Eq e, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Vtx v e)
-instance (GHC.Show.Show e, GHC.Show.Show v) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Vtx v e)
-instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Vtx v e)
-instance (GHC.Classes.Eq v, GHC.Classes.Eq f) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Gr v f)
-instance (GHC.Show.Show v, GHC.Show.Show f) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Gr v f)
-instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Gr v f)
 instance Data.Aeson.Types.ToJSON.ToJSON f => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.FromJSON.FromJSON f => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Bifunctor.Bifunctor Data.PlanarGraph.AdjRep.Vtx
@@ -1763,20 +1763,20 @@ isPositive :: Dart s -> Bool
 -- | Enumerates all darts such that allDarts !! i = d <a>=</a> i ==
 --   fromEnum d
 allDarts :: [Dart s]
-instance forall k (s :: k). GHC.Generics.Generic (Data.PlanarGraph.Dart.Dart s)
-instance forall k (s :: k). GHC.Classes.Ord (Data.PlanarGraph.Dart.Dart s)
-instance forall k (s :: k). GHC.Classes.Eq (Data.PlanarGraph.Dart.Dart s)
-instance GHC.Generics.Generic Data.PlanarGraph.Dart.Direction
-instance GHC.Enum.Enum Data.PlanarGraph.Dart.Direction
-instance GHC.Enum.Bounded Data.PlanarGraph.Dart.Direction
-instance GHC.Classes.Ord Data.PlanarGraph.Dart.Direction
-instance GHC.Classes.Eq Data.PlanarGraph.Dart.Direction
 instance forall k (s :: k). Control.DeepSeq.NFData (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Generics.Generic (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Enum.Bounded (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Enum.Enum (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Classes.Ord (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Classes.Eq (Data.PlanarGraph.Dart.Arc s)
+instance GHC.Generics.Generic Data.PlanarGraph.Dart.Direction
+instance GHC.Enum.Enum Data.PlanarGraph.Dart.Direction
+instance GHC.Enum.Bounded Data.PlanarGraph.Dart.Direction
+instance GHC.Classes.Ord Data.PlanarGraph.Dart.Direction
+instance GHC.Classes.Eq Data.PlanarGraph.Dart.Direction
+instance forall k (s :: k). GHC.Generics.Generic (Data.PlanarGraph.Dart.Dart s)
+instance forall k (s :: k). GHC.Classes.Ord (Data.PlanarGraph.Dart.Dart s)
+instance forall k (s :: k). GHC.Classes.Eq (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). Control.DeepSeq.NFData (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). GHC.Show.Show (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). Test.QuickCheck.Arbitrary.Arbitrary (Data.PlanarGraph.Dart.Dart s)
@@ -2751,10 +2751,10 @@ faceBoundary :: Face s -> ST s (CircularVector (Vertex s))
 --   </pre>
 --   
 pgConnectVertices :: HalfEdge s -> HalfEdge s -> ST s (Edge s)
-instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Face s)
-instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Vertex s)
-instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Edge s)
 instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.HalfEdge s)
+instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Edge s)
+instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Vertex s)
+instance GHC.Classes.Eq (Data.PlanarGraph.Mutable.Face s)
 instance GHC.Show.Show (Data.PlanarGraph.Mutable.Face s)
 instance GHC.Show.Show (Data.PlanarGraph.Mutable.Vertex s)
 instance Data.Hashable.Class.Hashable (Data.PlanarGraph.Mutable.Vertex s)
@@ -3850,16 +3850,16 @@ pgUnsafeFreeze :: PlanarGraph s -> ST s PlanarGraph
 
 -- | &lt;math&gt;
 tutteEmbedding :: PlanarGraph -> Vector (V2 Double)
-instance GHC.Classes.Eq Data.PlanarGraph.Immutable.PlanarGraph
+instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.HalfEdge
+instance GHC.Classes.Eq Data.PlanarGraph.Immutable.HalfEdge
+instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.Edge
+instance GHC.Classes.Eq Data.PlanarGraph.Immutable.Edge
+instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.Vertex
+instance GHC.Classes.Eq Data.PlanarGraph.Immutable.Vertex
 instance GHC.Show.Show Data.PlanarGraph.Immutable.Face
 instance GHC.Read.Read Data.PlanarGraph.Immutable.Face
 instance GHC.Classes.Eq Data.PlanarGraph.Immutable.Face
-instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.Vertex
-instance GHC.Classes.Eq Data.PlanarGraph.Immutable.Vertex
-instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.Edge
-instance GHC.Classes.Eq Data.PlanarGraph.Immutable.Edge
-instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.HalfEdge
-instance GHC.Classes.Eq Data.PlanarGraph.Immutable.HalfEdge
+instance GHC.Classes.Eq Data.PlanarGraph.Immutable.PlanarGraph
 instance Data.Hashable.Class.Hashable Data.PlanarGraph.Immutable.PlanarGraph
 instance GHC.Show.Show Data.PlanarGraph.Immutable.Vertex
 instance GHC.Read.Read Data.PlanarGraph.Immutable.Vertex
@@ -4070,18 +4070,18 @@ shiftLeft :: Num r => r -> Range r -> Range r
 --   "(25,35)"
 --   </pre>
 shiftRight :: Num r => r -> Range r -> Range r
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Range.Range a)
-instance GHC.Generics.Generic (Data.Range.Range a)
-instance Data.Traversable.Traversable Data.Range.Range
-instance Data.Foldable.Foldable Data.Range.Range
-instance GHC.Base.Functor Data.Range.Range
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Range.Range a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Range.EndPoint a)
 instance GHC.Generics.Generic (Data.Range.EndPoint a)
 instance Data.Traversable.Traversable Data.Range.EndPoint
 instance Data.Foldable.Foldable Data.Range.EndPoint
 instance GHC.Base.Functor Data.Range.EndPoint
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Range.EndPoint a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Range.Range a)
+instance GHC.Generics.Generic (Data.Range.Range a)
+instance Data.Traversable.Traversable Data.Range.Range
+instance Data.Foldable.Foldable Data.Range.Range
+instance GHC.Base.Functor Data.Range.Range
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Range.Range a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Range.Range a)
 instance Data.Functor.Classes.Show1 Data.Range.Range
 instance GHC.Read.Read a => GHC.Read.Read (Data.Range.Range a)
@@ -4133,8 +4133,6 @@ fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 
 -- | (Kind) This is the kind of type-level natural numbers.
 data Nat
-instance GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
-instance Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
 instance Control.DeepSeq.NFData (Data.RealNumber.Rational.RealNumber p)
 instance Data.Aeson.Types.FromJSON.FromJSON (Data.RealNumber.Rational.RealNumber p)
 instance Data.Aeson.Types.ToJSON.ToJSON (Data.RealNumber.Rational.RealNumber p)
@@ -4147,6 +4145,8 @@ instance GHC.Num.Num (Data.RealNumber.Rational.RealNumber p)
 instance GHC.TypeNats.KnownNat p => Data.Data.Data (Data.RealNumber.Rational.RealNumber p)
 instance GHC.Classes.Ord (Data.RealNumber.Rational.RealNumber p)
 instance GHC.Classes.Eq (Data.RealNumber.Rational.RealNumber p)
+instance forall k (p :: k). GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
+instance forall k (p :: k). Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
 instance GHC.TypeNats.KnownNat p => GHC.Show.Show (Data.RealNumber.Rational.RealNumber p)
 instance GHC.TypeNats.KnownNat p => Data.Fixed.HasResolution (Data.RealNumber.Rational.NatPrec p)
 instance GHC.TypeNats.KnownNat p => GHC.Read.Read (Data.RealNumber.Rational.RealNumber p)
@@ -4396,10 +4396,10 @@ findNodes :: (Tree a -> Bool) -> Tree a -> [[a]]
 --   
 --   running time: &lt;math&gt;
 levels :: Tree a -> NonEmpty (NonEmpty a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Tree.Util.Zipper a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Tree.Util.Zipper a)
 instance (GHC.Classes.Eq v, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Tree.Util.TreeNode v a)
 instance (GHC.Show.Show v, GHC.Show.Show a) => GHC.Show.Show (Data.Tree.Util.TreeNode v a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Tree.Util.Zipper a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Tree.Util.Zipper a)
 instance Data.Bifunctor.Bifunctor Data.Tree.Util.TreeNode
 instance Data.Bifoldable.Bifoldable Data.Tree.Util.TreeNode
 instance Data.Bitraversable.Bitraversable Data.Tree.Util.TreeNode
@@ -4461,6 +4461,12 @@ toRoseTree' :: BinaryTree a -> Maybe (Tree a)
 
 -- | Draw a binary tree.
 drawTree' :: Show a => BinaryTree a -> String
+instance GHC.Generics.Generic (Data.BinaryTree.BinLeafTree v a)
+instance GHC.Base.Functor (Data.BinaryTree.BinLeafTree v)
+instance (GHC.Classes.Ord a, GHC.Classes.Ord v) => GHC.Classes.Ord (Data.BinaryTree.BinLeafTree v a)
+instance (GHC.Classes.Eq a, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.BinaryTree.BinLeafTree v a)
+instance (GHC.Read.Read a, GHC.Read.Read v) => GHC.Read.Read (Data.BinaryTree.BinLeafTree v a)
+instance (GHC.Show.Show a, GHC.Show.Show v) => GHC.Show.Show (Data.BinaryTree.BinLeafTree v a)
 instance GHC.Generics.Generic (Data.BinaryTree.BinaryTree a)
 instance Data.Traversable.Traversable Data.BinaryTree.BinaryTree
 instance Data.Foldable.Foldable Data.BinaryTree.BinaryTree
@@ -4469,12 +4475,6 @@ instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.BinaryTree.BinaryTree a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.BinaryTree.BinaryTree a)
 instance GHC.Read.Read a => GHC.Read.Read (Data.BinaryTree.BinaryTree a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.BinaryTree.BinaryTree a)
-instance GHC.Generics.Generic (Data.BinaryTree.BinLeafTree v a)
-instance GHC.Base.Functor (Data.BinaryTree.BinLeafTree v)
-instance (GHC.Classes.Ord a, GHC.Classes.Ord v) => GHC.Classes.Ord (Data.BinaryTree.BinLeafTree v a)
-instance (GHC.Classes.Eq a, GHC.Classes.Eq v) => GHC.Classes.Eq (Data.BinaryTree.BinLeafTree v a)
-instance (GHC.Read.Read a, GHC.Read.Read v) => GHC.Read.Read (Data.BinaryTree.BinLeafTree v a)
-instance (GHC.Show.Show a, GHC.Show.Show v) => GHC.Show.Show (Data.BinaryTree.BinLeafTree v a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.BinaryTree.BinaryTree a)
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.BinaryTree.BinaryTree a)
 instance (Control.DeepSeq.NFData v, Control.DeepSeq.NFData a) => Control.DeepSeq.NFData (Data.BinaryTree.BinLeafTree v a)
@@ -4637,11 +4637,13 @@ _Val :: Prism (UnBounded a) (UnBounded b) a b
 --   Nothing
 --   </pre>
 unBoundedToMaybe :: UnBounded a -> Maybe a
-instance Data.Traversable.Traversable Data.UnBounded.UnBounded
-instance Data.Foldable.Foldable Data.UnBounded.UnBounded
-instance GHC.Base.Functor Data.UnBounded.UnBounded
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.UnBounded.UnBounded a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.UnBounded a)
+instance Data.Functor.Classes.Eq1 Data.UnBounded.Top
+instance GHC.Base.Monad Data.UnBounded.Top
+instance GHC.Base.Applicative Data.UnBounded.Top
+instance Data.Traversable.Traversable Data.UnBounded.Top
+instance Data.Foldable.Foldable Data.UnBounded.Top
+instance GHC.Base.Functor Data.UnBounded.Top
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.Top a)
 instance Data.Functor.Classes.Ord1 Data.UnBounded.Bottom
 instance Data.Functor.Classes.Eq1 Data.UnBounded.Bottom
 instance GHC.Base.Monad Data.UnBounded.Bottom
@@ -4651,13 +4653,11 @@ instance Data.Foldable.Foldable Data.UnBounded.Bottom
 instance GHC.Base.Functor Data.UnBounded.Bottom
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.UnBounded.Bottom a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.Bottom a)
-instance Data.Functor.Classes.Eq1 Data.UnBounded.Top
-instance GHC.Base.Monad Data.UnBounded.Top
-instance GHC.Base.Applicative Data.UnBounded.Top
-instance Data.Traversable.Traversable Data.UnBounded.Top
-instance Data.Foldable.Foldable Data.UnBounded.Top
-instance GHC.Base.Functor Data.UnBounded.Top
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.Top a)
+instance Data.Traversable.Traversable Data.UnBounded.UnBounded
+instance Data.Foldable.Foldable Data.UnBounded.UnBounded
+instance GHC.Base.Functor Data.UnBounded.UnBounded
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.UnBounded.UnBounded a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.UnBounded a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.UnBounded.UnBounded a)
 instance GHC.Num.Num a => GHC.Num.Num (Data.UnBounded.UnBounded a)
 instance GHC.Real.Fractional a => GHC.Real.Fractional (Data.UnBounded.UnBounded a)
@@ -4702,16 +4702,16 @@ uniquePairs :: [a] -> [Two a]
 
 -- | A version of List.tails in which we remove the emptylist
 nonEmptyTails :: [a] -> [[a]]
-instance GHC.Generics.Generic (Data.Util.SP a b)
-instance GHC.Base.Functor (Data.Util.SP a)
-instance (GHC.Classes.Ord a, GHC.Classes.Ord b) => GHC.Classes.Ord (Data.Util.SP a b)
-instance (GHC.Classes.Eq a, GHC.Classes.Eq b) => GHC.Classes.Eq (Data.Util.SP a b)
-instance (GHC.Show.Show a, GHC.Show.Show b) => GHC.Show.Show (Data.Util.SP a b)
 instance GHC.Generics.Generic (Data.Util.STR a b c)
 instance GHC.Base.Functor (Data.Util.STR a b)
 instance (GHC.Classes.Ord a, GHC.Classes.Ord b, GHC.Classes.Ord c) => GHC.Classes.Ord (Data.Util.STR a b c)
 instance (GHC.Classes.Eq a, GHC.Classes.Eq b, GHC.Classes.Eq c) => GHC.Classes.Eq (Data.Util.STR a b c)
 instance (GHC.Show.Show a, GHC.Show.Show b, GHC.Show.Show c) => GHC.Show.Show (Data.Util.STR a b c)
+instance GHC.Generics.Generic (Data.Util.SP a b)
+instance GHC.Base.Functor (Data.Util.SP a)
+instance (GHC.Classes.Ord a, GHC.Classes.Ord b) => GHC.Classes.Ord (Data.Util.SP a b)
+instance (GHC.Classes.Eq a, GHC.Classes.Eq b) => GHC.Classes.Eq (Data.Util.SP a b)
+instance (GHC.Show.Show a, GHC.Show.Show b) => GHC.Show.Show (Data.Util.SP a b)
 instance (GHC.Base.Semigroup a, GHC.Base.Semigroup b) => GHC.Base.Semigroup (Data.Util.SP a b)
 instance (GHC.Base.Semigroup a, GHC.Base.Semigroup b, GHC.Base.Monoid a, GHC.Base.Monoid b) => GHC.Base.Monoid (Data.Util.SP a b)
 instance (Control.DeepSeq.NFData a, Control.DeepSeq.NFData b) => Control.DeepSeq.NFData (Data.Util.SP a b)
@@ -4806,11 +4806,11 @@ delete :: Index -> IDLListMonad s ()
 
 -- | For debugging purposes, dump the values and the cells
 dump :: IDLListMonad s (Vector Cell)
+instance GHC.Classes.Eq Data.IndexedDoublyLinkedList.Bare.Cell
+instance GHC.Show.Show Data.IndexedDoublyLinkedList.Bare.Cell
 instance GHC.Base.Monad (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
 instance GHC.Base.Applicative (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
 instance GHC.Base.Functor (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
-instance GHC.Classes.Eq Data.IndexedDoublyLinkedList.Bare.Cell
-instance GHC.Show.Show Data.IndexedDoublyLinkedList.Bare.Cell
 instance Control.Monad.Primitive.PrimMonad (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
 instance Control.Monad.Reader.Class.MonadReader (Data.IndexedDoublyLinkedList.Bare.IDLList s) (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
 
@@ -4903,11 +4903,11 @@ delete :: Index -> DLListMonad s b (Maybe Index, Maybe Index)
 
 -- | For debugging purposes, dump the values and the cells
 dump :: DLListMonad s a (Vector a, Vector Cell)
+instance GHC.Classes.Eq Data.IndexedDoublyLinkedList.Cell
+instance GHC.Show.Show Data.IndexedDoublyLinkedList.Cell
 instance GHC.Base.Monad (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance GHC.Base.Applicative (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance GHC.Base.Functor (Data.IndexedDoublyLinkedList.DLListMonad s b)
-instance GHC.Classes.Eq Data.IndexedDoublyLinkedList.Cell
-instance GHC.Show.Show Data.IndexedDoublyLinkedList.Cell
 instance Control.Monad.Primitive.PrimMonad (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance Control.Monad.Reader.Class.MonadReader (Data.IndexedDoublyLinkedList.DLList s b) (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance GHC.Base.Functor (Data.IndexedDoublyLinkedList.DLList s)

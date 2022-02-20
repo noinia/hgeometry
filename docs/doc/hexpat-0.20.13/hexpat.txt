@@ -107,10 +107,10 @@ XMLParseLocation :: Int64 -> Int64 -> Int64 -> Int64 -> XMLParseLocation
 
 -- | The number of bytes in the event
 [xmlByteCount] :: XMLParseLocation -> Int64
-instance GHC.Show.Show Text.XML.Expat.Internal.IO.XMLParseError
-instance GHC.Classes.Eq Text.XML.Expat.Internal.IO.XMLParseError
 instance GHC.Show.Show Text.XML.Expat.Internal.IO.XMLParseLocation
 instance GHC.Classes.Eq Text.XML.Expat.Internal.IO.XMLParseLocation
+instance GHC.Show.Show Text.XML.Expat.Internal.IO.XMLParseError
+instance GHC.Classes.Eq Text.XML.Expat.Internal.IO.XMLParseError
 instance Control.DeepSeq.NFData Text.XML.Expat.Internal.IO.XMLParseError
 instance Control.DeepSeq.NFData Text.XML.Expat.Internal.IO.XMLParseLocation
 
@@ -222,10 +222,10 @@ gxTail :: GenericXMLString s => s -> s
 gxBreakOn :: GenericXMLString s => Char -> s -> (s, s)
 gxFromByteString :: GenericXMLString s => ByteString -> s
 gxToByteString :: GenericXMLString s => s -> ByteString
-instance GHC.Show.Show Text.XML.Expat.SAX.XMLParseException
-instance GHC.Classes.Eq Text.XML.Expat.SAX.XMLParseException
 instance (GHC.Show.Show text, GHC.Show.Show tag) => GHC.Show.Show (Text.XML.Expat.SAX.SAXEvent tag text)
 instance (GHC.Classes.Eq text, GHC.Classes.Eq tag) => GHC.Classes.Eq (Text.XML.Expat.SAX.SAXEvent tag text)
+instance GHC.Show.Show Text.XML.Expat.SAX.XMLParseException
+instance GHC.Classes.Eq Text.XML.Expat.SAX.XMLParseException
 instance GHC.Exception.Type.Exception Text.XML.Expat.SAX.XMLParseException
 instance (Control.DeepSeq.NFData tag, Control.DeepSeq.NFData text) => Control.DeepSeq.NFData (Text.XML.Expat.SAX.SAXEvent tag text)
 instance Text.XML.Expat.SAX.GenericXMLString GHC.Base.String
@@ -515,10 +515,10 @@ modifyXMLDeclaration :: DocumentClass d c => (Maybe (XMLDeclaration text) -> May
 modifyDocumentTypeDeclaration :: DocumentClass d c => (Maybe (DocumentTypeDeclaration c tag text) -> Maybe (DocumentTypeDeclaration c tag text)) -> d c tag text -> d c tag text
 modifyTopLevelMiscs :: DocumentClass d c => (c (Misc text) -> c (Misc text)) -> d c tag text -> d c tag text
 modifyRoot :: DocumentClass d c => (NodeType d c tag text -> NodeType d c tag text) -> d c tag text -> d c tag text
-instance GHC.Show.Show (Text.XML.Expat.Internal.DocumentClass.DocumentTypeDeclaration c tag text)
-instance GHC.Classes.Eq (Text.XML.Expat.Internal.DocumentClass.DocumentTypeDeclaration c tag text)
 instance GHC.Show.Show text => GHC.Show.Show (Text.XML.Expat.Internal.DocumentClass.XMLDeclaration text)
 instance GHC.Classes.Eq text => GHC.Classes.Eq (Text.XML.Expat.Internal.DocumentClass.XMLDeclaration text)
+instance GHC.Show.Show (Text.XML.Expat.Internal.DocumentClass.DocumentTypeDeclaration c tag text)
+instance GHC.Classes.Eq (Text.XML.Expat.Internal.DocumentClass.DocumentTypeDeclaration c tag text)
 instance GHC.Show.Show text => GHC.Show.Show (Text.XML.Expat.Internal.DocumentClass.Misc text)
 instance GHC.Classes.Eq text => GHC.Classes.Eq (Text.XML.Expat.Internal.DocumentClass.Misc text)
 instance Control.DeepSeq.NFData text => Control.DeepSeq.NFData (Text.XML.Expat.Internal.DocumentClass.Misc text)

@@ -6,14 +6,14 @@
  spawning it in parallel overshadows the benefits obtained by
  running it in parallel.</p><p>Note that actual parallelism is only supported by certain
  implementations (GHC with the <code>-threaded</code> option, and GPH, for
- now).  On other implementations, <code>par a b = b</code>.</p></div></div><div class="top"><p class="src"><a id="v:pseq" class="def">pseq</a> :: a -&gt; b -&gt; b <span class="fixity">infixr 0</span><span class="rightedge"></span> <a href="src/Control.Parallel.html#pseq" class="link">Source</a> <a href="#v:pseq" class="selflink">#</a></p><div class="doc"><p>Semantically identical to <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">seq</a></code>, but with a subtle operational
- difference: <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">seq</a></code> is strict in both its arguments, so the compiler
- may, for example, rearrange <code>a <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> b</code> into <code>b <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> a <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> b</code>.
- This is normally no problem when using <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">seq</a></code> to express strictness,
+ now).  On other implementations, <code>par a b = b</code>.</p></div></div><div class="top"><p class="src"><a id="v:pseq" class="def">pseq</a> :: a -&gt; b -&gt; b <span class="fixity">infixr 0</span><span class="rightedge"></span> <a href="src/Control.Parallel.html#pseq" class="link">Source</a> <a href="#v:pseq" class="selflink">#</a></p><div class="doc"><p>Semantically identical to <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">seq</a></code>, but with a subtle operational
+ difference: <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">seq</a></code> is strict in both its arguments, so the compiler
+ may, for example, rearrange <code>a <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> b</code> into <code>b <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> a <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">`seq`</a></code> b</code>.
+ This is normally no problem when using <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">seq</a></code> to express strictness,
  but it can be a problem when annotating code for parallelism,
  because we need more control over the order of evaluation; we may
  want to evaluate <code>a</code> before <code>b</code>, because we know that <code>b</code> has
- already been sparked in parallel with <code><a href="Control-Parallel.html#v:par" title="Control.Parallel">par</a></code>.</p><p>This is why we have <code><a href="Control-Parallel.html#v:pseq" title="Control.Parallel">pseq</a></code>.  In contrast to <code><a href="../base-4.13.0.0/Prelude.html#v:seq" title="Prelude">seq</a></code>, <code><a href="Control-Parallel.html#v:pseq" title="Control.Parallel">pseq</a></code> is only
+ already been sparked in parallel with <code><a href="Control-Parallel.html#v:par" title="Control.Parallel">par</a></code>.</p><p>This is why we have <code><a href="Control-Parallel.html#v:pseq" title="Control.Parallel">pseq</a></code>.  In contrast to <code><a href="../base-4.14.3.0/Prelude.html#v:seq" title="Prelude">seq</a></code>, <code><a href="Control-Parallel.html#v:pseq" title="Control.Parallel">pseq</a></code> is only
  strict in its first argument (as far as the compiler is concerned),
  which restricts the transformations that the compiler can do, and
- ensures that the user can retain control of the evaluation order.</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.23.0</p></div></body></html>
+ ensures that the user can retain control of the evaluation order.</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.24.2</p></div></body></html>

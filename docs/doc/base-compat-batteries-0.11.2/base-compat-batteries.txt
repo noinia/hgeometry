@@ -94,6 +94,14 @@ guard :: Alternative f => Bool -> f ()
 --   is used to remove one level of monadic structure, projecting its bound
 --   argument into the outer level.
 --   
+--   '<tt><a>join</a> bss</tt>' can be understood as the <tt>do</tt>
+--   expression
+--   
+--   <pre>
+--   do bs &lt;- bss
+--      bs
+--   </pre>
+--   
 --   <h4><b>Examples</b></h4>
 --   
 --   A common use of <a>join</a> is to run an <a>IO</a> computation
@@ -145,7 +153,8 @@ join :: Monad m => m (m a) -> m a
 --   
 --   <ul>
 --   <li><pre><a>pure</a> = <a>return</a></pre></li>
---   <li><pre>(<a>&lt;*&gt;</a>) = <a>ap</a></pre></li>
+--   <li><pre>m1 <a>&lt;*&gt;</a> m2 = m1 <a>&gt;&gt;=</a> (x1 -&gt; m2
+--   <a>&gt;&gt;=</a> (x2 -&gt; <a>return</a> (x1 x2)))</pre></li>
 --   </ul>
 --   
 --   The above laws imply:
@@ -165,11 +174,27 @@ class Applicative m => Monad (m :: Type -> Type)
 
 -- | Sequentially compose two actions, passing any value produced by the
 --   first as an argument to the second.
+--   
+--   '<tt>as <a>&gt;&gt;=</a> bs</tt>' can be understood as the <tt>do</tt>
+--   expression
+--   
+--   <pre>
+--   do a &lt;- as
+--      bs a
+--   </pre>
 (>>=) :: Monad m => m a -> (a -> m b) -> m b
 
 -- | Sequentially compose two actions, discarding any value produced by the
 --   first, like sequencing operators (such as the semicolon) in imperative
 --   languages.
+--   
+--   '<tt>as <a>&gt;&gt;</a> bs</tt>' can be understood as the <tt>do</tt>
+--   expression
+--   
+--   <pre>
+--   do as
+--      bs
+--   </pre>
 (>>) :: Monad m => m a -> m b -> m b
 
 -- | Inject a value into the monadic type.
@@ -193,7 +218,33 @@ infixl 1 >>
 --   <a>fmap</a> and the first law, so you need only check that the former
 --   condition holds.
 class Functor (f :: Type -> Type)
+
+-- | Using <tt>ApplicativeDo</tt>: '<tt><a>fmap</a> f as</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do a &lt;- as
+--      pure (f a)
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 fmap :: Functor f => (a -> b) -> f a -> f b
+
+-- | Replace all locations in the input with the same value. The default
+--   definition is <tt><a>fmap</a> . <a>const</a></tt>, but this may be
+--   overridden with a more efficient version.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt>a <a>&lt;$</a> bs</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do bs
+--      pure a
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
+(<$) :: Functor f => a -> f b -> f a
+infixl 4 <$
 
 -- | When a value is bound in <tt>do</tt>-notation, the pattern on the left
 --   hand side of <tt>&lt;-</tt> might not match. In this case, this class
@@ -261,6 +312,20 @@ replicateM_ :: Applicative m => Int -> m a -> m ()
 
 -- | <tt><a>replicateM</a> n act</tt> performs the action <tt>n</tt> times,
 --   gathering the results.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt><a>replicateM</a> 5 as</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do a1 &lt;- as
+--      a2 &lt;- as
+--      a3 &lt;- as
+--      a4 &lt;- as
+--      a5 &lt;- as
+--      pure [a1,a2,a3,a4,a5]
+--   </pre>
+--   
+--   Note the <tt>Applicative</tt> constraint.
 replicateM :: Applicative m => Int -> m a -> m [a]
 
 -- | Like <a>foldM</a>, but discards the result.
@@ -305,6 +370,17 @@ mapAndUnzipM :: Applicative m => (a -> m (b, c)) -> [a] -> m ([b], [c])
 
 -- | Repeat an action indefinitely.
 --   
+--   Using <tt>ApplicativeDo</tt>: '<tt><a>forever</a> as</tt>' can be
+--   understood as the pseudo-<tt>do</tt> expression
+--   
+--   <pre>
+--   do as
+--      as
+--      ..
+--   </pre>
+--   
+--   with <tt>as</tt> repeating.
+--   
 --   <h4><b>Examples</b></h4>
 --   
 --   A common use of <a>forever</a> is to process input from network
@@ -341,6 +417,14 @@ forever :: Applicative f => f a -> f b
 infixr 1 <=<
 
 -- | Left-to-right composition of Kleisli arrows.
+--   
+--   '<tt>(bs <a>&gt;=&gt;</a> cs) a</tt>' can be understood as the
+--   <tt>do</tt> expression
+--   
+--   <pre>
+--   do b &lt;- bs a
+--      cs b
+--   </pre>
 (>=>) :: Monad m => (a -> m b) -> (b -> m c) -> a -> m c
 infixr 1 >=>
 
@@ -381,6 +465,16 @@ mapM_ :: (Foldable t, Monad m) => (a -> m b) -> t a -> m ()
 
 -- | <tt><a>void</a> value</tt> discards or ignores the result of
 --   evaluation, such as the return value of an <a>IO</a> action.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt><a>void</a> as</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do as
+--      pure ()
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 --   
 --   <h4><b>Examples</b></h4>
 --   
@@ -621,15 +715,45 @@ module Data.Functor.Compat
 --   <a>fmap</a> and the first law, so you need only check that the former
 --   condition holds.
 class Functor (f :: Type -> Type)
+
+-- | Using <tt>ApplicativeDo</tt>: '<tt><a>fmap</a> f as</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do a &lt;- as
+--      pure (f a)
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 fmap :: Functor f => (a -> b) -> f a -> f b
 
 -- | Replace all locations in the input with the same value. The default
 --   definition is <tt><a>fmap</a> . <a>const</a></tt>, but this may be
 --   overridden with a more efficient version.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt>a <a>&lt;$</a> bs</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do bs
+--      pure a
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 (<$) :: Functor f => a -> f b -> f a
 infixl 4 <$
 
 -- | Flipped version of <a>&lt;$</a>.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt>as <a>$&gt;</a> b</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do as
+--      pure b
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 --   
 --   <h4><b>Examples</b></h4>
 --   
@@ -674,6 +798,16 @@ infixl 4 $>
 
 -- | <tt><a>void</a> value</tt> discards or ignores the result of
 --   evaluation, such as the return value of an <a>IO</a> action.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt><a>void</a> as</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do as
+--      pure ()
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 --   
 --   <h4><b>Examples</b></h4>
 --   
@@ -1141,13 +1275,21 @@ module Data.Monoid.Compat
 class Semigroup a => Monoid a
 
 -- | Identity of <a>mappend</a>
+--   
+--   <pre>
+--   &gt;&gt;&gt; "Hello world" &lt;&gt; mempty
+--   "Hello world"
+--   </pre>
 mempty :: Monoid a => a
 
 -- | An associative operation
 --   
 --   <b>NOTE</b>: This method is redundant and has the default
 --   implementation <tt><a>mappend</a> = (<a>&lt;&gt;</a>)</tt> since
---   <i>base-4.11.0.0</i>.
+--   <i>base-4.11.0.0</i>. Should it be implemented manually, since
+--   <a>mappend</a> is a synonym for (<a>&lt;&gt;</a>), it is expected that
+--   the two functions are defined the same way. In a future GHC release
+--   <a>mappend</a> will be removed from <a>Monoid</a>.
 mappend :: Monoid a => a -> a -> a
 
 -- | Fold a list using the monoid.
@@ -1155,6 +1297,11 @@ mappend :: Monoid a => a -> a -> a
 --   For most types, the default definition for <a>mconcat</a> will be
 --   used, but the function is included in the class definition so that an
 --   optimized version can be provided for specific types.
+--   
+--   <pre>
+--   &gt;&gt;&gt; mconcat ["Hello", " ", "Haskell", "!"]
+--   "Hello Haskell!"
+--   </pre>
 mconcat :: Monoid a => [a] -> a
 
 -- | Maybe monoid returning the leftmost non-Nothing value.
@@ -1287,11 +1434,26 @@ Product :: a -> Product a
 [getProduct] :: Product a -> a
 
 -- | Monoid under <a>&lt;|&gt;</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; getAlt (Alt (Just 12) &lt;&gt; Alt (Just 24))
+--   Just 12
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; getAlt $ Alt Nothing &lt;&gt; Alt (Just 24)
+--   Just 24
+--   </pre>
 newtype Alt (f :: k -> Type) (a :: k)
 Alt :: f a -> Alt (f :: k -> Type) (a :: k)
 [getAlt] :: Alt (f :: k -> Type) (a :: k) -> f a
 
 -- | An associative operation.
+--   
+--   <pre>
+--   &gt;&gt;&gt; [1,2,3] &lt;&gt; [4,5,6]
+--   [1,2,3,4,5,6]
+--   </pre>
 (<>) :: Semigroup a => a -> a -> a
 infixr 6 <>
 
@@ -1330,12 +1492,24 @@ module Data.Semigroup.Compat
 class Semigroup a
 
 -- | An associative operation.
+--   
+--   <pre>
+--   &gt;&gt;&gt; [1,2,3] &lt;&gt; [4,5,6]
+--   [1,2,3,4,5,6]
+--   </pre>
 (<>) :: Semigroup a => a -> a -> a
 
 -- | Reduce a non-empty list with <a>&lt;&gt;</a>
 --   
 --   The default definition should be sufficient, but this can be
 --   overridden for efficiency.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import Data.List.NonEmpty
+--   
+--   &gt;&gt;&gt; sconcat $ "Hello" :| [" ", "Haskell", "!"]
+--   "Hello Haskell!"
+--   </pre>
 sconcat :: Semigroup a => NonEmpty a -> a
 
 -- | Repeat a value <tt>n</tt> times.
@@ -1345,9 +1519,14 @@ sconcat :: Semigroup a => NonEmpty a -> a
 --   so.
 --   
 --   By making this a member of the class, idempotent semigroups and
---   monoids can upgrade this to execute in <i>O(1)</i> by picking
+--   monoids can upgrade this to execute in &lt;math&gt; by picking
 --   <tt>stimes = <a>stimesIdempotent</a></tt> or <tt>stimes =
 --   <a>stimesIdempotentMonoid</a></tt> respectively.
+--   
+--   <pre>
+--   &gt;&gt;&gt; stimes 4 [1]
+--   [1,1,1,1]
+--   </pre>
 stimes :: (Semigroup a, Integral b) => b -> a -> a
 infixr 6 <>
 
@@ -1361,14 +1540,14 @@ stimesMonoid :: (Integral b, Monoid a) => b -> a -> a
 --   <a>Semigroup</a>.
 --   
 --   When <tt>x &lt;&gt; x = x</tt>, this definition should be preferred,
---   because it works in <i>O(1)</i> rather than <i>O(log n)</i>.
+--   because it works in &lt;math&gt; rather than &lt;math&gt;.
 stimesIdempotent :: Integral b => b -> a -> a
 
 -- | This is a valid definition of <a>stimes</a> for an idempotent
 --   <a>Monoid</a>.
 --   
 --   When <tt>mappend x x = x</tt>, this definition should be preferred,
---   because it works in <i>O(1)</i> rather than <i>O(log n)</i>
+--   because it works in &lt;math&gt; rather than &lt;math&gt;
 stimesIdempotentMonoid :: (Integral b, Monoid a) => b -> a -> a
 
 -- | Repeat a value <tt>n</tt> times.
@@ -1629,6 +1808,16 @@ absurd :: Void -> a
 
 -- | If <a>Void</a> is uninhabited then any <a>Functor</a> that holds only
 --   values of type <a>Void</a> is holding no values.
+--   
+--   Using <tt>ApplicativeDo</tt>: '<tt><a>vacuous</a> theVoid</tt>' can be
+--   understood as the <tt>do</tt> expression
+--   
+--   <pre>
+--   do void &lt;- theVoid
+--      pure (absurd void)
+--   </pre>
+--   
+--   with an inferred <tt>Functor</tt> constraint.
 vacuous :: Functor f => f Void -> f a
 
 

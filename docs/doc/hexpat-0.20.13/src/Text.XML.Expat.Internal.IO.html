@@ -30,75 +30,86 @@
 </span><span id="line-30"></span><span class="hs-keyword">data</span><span> </span><span id="Encoding"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier hs-var">Encoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ASCII"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ASCII"><span class="hs-identifier hs-var">ASCII</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="UTF8"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#UTF8"><span class="hs-identifier hs-var">UTF8</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="UTF16"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#UTF16"><span class="hs-identifier hs-var">UTF16</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="ISO88591"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ISO88591"><span class="hs-identifier hs-var">ISO88591</span></a></span></span><span>
 </span><span id="line-31"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-type">encodingToString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier hs-type">Encoding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-32"></span><span id="encodingToString"><span class="annot"><span class="annottext">encodingToString :: Encoding -&gt; String
-</span><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var hs-var">encodingToString</span></a></span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ASCII"><span class="hs-identifier hs-type">ASCII</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;US-ASCII&quot;</span></span><span>
-</span><span id="line-33"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#UTF8"><span class="hs-identifier hs-type">UTF8</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;UTF-8&quot;</span></span><span>
-</span><span id="line-34"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#UTF16"><span class="hs-identifier hs-type">UTF16</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;UTF-16&quot;</span></span><span>
-</span><span id="line-35"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ISO88591"><span class="hs-identifier hs-type">ISO88591</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;ISO-8859-1&quot;</span></span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var hs-var">encodingToString</span></a></span></span><span> </span><span class="annot"><span class="annottext">Encoding
+</span><a href="Text.XML.Expat.Internal.IO.html#ASCII"><span class="hs-identifier hs-var">ASCII</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;US-ASCII&quot;</span></span><span>
+</span><span id="line-33"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><span class="annottext">Encoding
+</span><a href="Text.XML.Expat.Internal.IO.html#UTF8"><span class="hs-identifier hs-var">UTF8</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UTF-8&quot;</span></span><span>
+</span><span id="line-34"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><span class="annottext">Encoding
+</span><a href="Text.XML.Expat.Internal.IO.html#UTF16"><span class="hs-identifier hs-var">UTF16</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UTF-16&quot;</span></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><span class="annottext">Encoding
+</span><a href="Text.XML.Expat.Internal.IO.html#ISO88591"><span class="hs-identifier hs-var">ISO88591</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ISO-8859-1&quot;</span></span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span id="local-6989586621679112126"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-type">withOptEncoding</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier hs-type">Encoding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679112126"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679112126"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-37"></span><span id="local-6989586621679077527"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-type">withOptEncoding</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#Encoding"><span class="hs-identifier hs-type">Encoding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679077527"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679077527"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-38"></span><span id="withOptEncoding"><span class="annot"><span class="annottext">withOptEncoding :: Maybe Encoding -&gt; (CString -&gt; IO a) -&gt; IO a
-</span><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-var hs-var">withOptEncoding</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>    </span><span id="local-6989586621679112086"><span class="annot"><span class="annottext">f :: CString -&gt; IO a
-</span><a href="#local-6989586621679112086"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO a
-</span><a href="#local-6989586621679112086"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-var hs-var">withOptEncoding</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe Encoding
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>    </span><span id="local-6989586621679077487"><span class="annot"><span class="annottext">CString -&gt; IO a
+</span><a href="#local-6989586621679077487"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO a
+</span><a href="#local-6989586621679077487"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">CString
 forall a. Ptr a
 </span><span class="hs-identifier hs-var">nullPtr</span></span><span>
-</span><span id="line-39"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-var">withOptEncoding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679112084"><span class="annot"><span class="annottext">enc :: Encoding
-</span><a href="#local-6989586621679112084"><span class="hs-identifier hs-var">enc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679112083"><span class="annot"><span class="annottext">f :: CString -&gt; IO a
-</span><a href="#local-6989586621679112083"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; (CString -&gt; IO a) -&gt; IO a
+</span><span id="line-39"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-var">withOptEncoding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077485"><span class="annot"><span class="annottext">Encoding
+</span><a href="#local-6989586621679077485"><span class="hs-identifier hs-var">enc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679077484"><span class="annot"><span class="annottext">CString -&gt; IO a
+</span><a href="#local-6989586621679077484"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; (CString -&gt; IO a) -&gt; IO a
 forall a. String -&gt; (CString -&gt; IO a) -&gt; IO a
 </span><span class="hs-identifier hs-var">withCString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Encoding -&gt; String
 </span><a href="Text.XML.Expat.Internal.IO.html#encodingToString"><span class="hs-identifier hs-var">encodingToString</span></a></span><span> </span><span class="annot"><span class="annottext">Encoding
-</span><a href="#local-6989586621679112084"><span class="hs-identifier hs-var">enc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO a
-</span><a href="#local-6989586621679112083"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621679077485"><span class="hs-identifier hs-var">enc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO a
+</span><a href="#local-6989586621679077484"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- ByteString.useAsCStringLen is almost what we need, but C2HS wants a CInt</span><span>
 </span><span id="line-42"></span><span class="hs-comment">-- instead of an Int.</span><span>
-</span><span id="line-43"></span><span id="local-6989586621679112113"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-type">withBStringLen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679112113"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679112113"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679077514"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-type">withBStringLen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679077514"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679077514"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-44"></span><span id="withBStringLen"><span class="annot"><span class="annottext">withBStringLen :: ByteString -&gt; ((CString, CInt) -&gt; IO a) -&gt; IO a
-</span><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-var hs-var">withBStringLen</span></a></span></span><span> </span><span id="local-6989586621679112080"><span class="annot"><span class="annottext">bs :: ByteString
-</span><a href="#local-6989586621679112080"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span id="local-6989586621679112079"><span class="annot"><span class="annottext">f :: (CString, CInt) -&gt; IO a
-</span><a href="#local-6989586621679112079"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-var hs-var">withBStringLen</span></a></span></span><span> </span><span id="local-6989586621679077481"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077481"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span id="local-6989586621679077480"><span class="annot"><span class="annottext">(CString, CInt) -&gt; IO a
+</span><a href="#local-6989586621679077480"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">ByteString -&gt; (CStringLen -&gt; IO a) -&gt; IO a
 forall a. ByteString -&gt; (CStringLen -&gt; IO a) -&gt; IO a
 </span><span class="hs-identifier hs-var">B.useAsCStringLen</span></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679112080"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">((CStringLen -&gt; IO a) -&gt; IO a) -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+</span><a href="#local-6989586621679077481"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">((CStringLen -&gt; IO a) -&gt; IO a) -&gt; (CStringLen -&gt; IO a) -&gt; IO a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679112077"><span class="annot"><span class="annottext">str :: CString
-</span><a href="#local-6989586621679112077"><span class="hs-identifier hs-var">str</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679112076"><span class="annot"><span class="annottext">len :: Int
-</span><a href="#local-6989586621679112076"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(CString, CInt) -&gt; IO a
-</span><a href="#local-6989586621679112079"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679112077"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; CInt
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679077478"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077478"><span class="hs-identifier hs-var">str</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077477"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077477"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(CString, CInt) -&gt; IO a
+</span><a href="#local-6989586621679077480"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077478"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; CInt
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679112076"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077477"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span>
 </span><span id="line-47"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-type">unStatus</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-48"></span><span id="unStatus"><span class="annot"><span class="annottext">unStatus :: CInt -&gt; Bool
-</span><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var hs-var">unStatus</span></a></span></span><span> </span><span class="hs-number">0</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var hs-var">unStatus</span></a></span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-49"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var">unStatus</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-49"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var">unStatus</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#getError"><span class="hs-identifier hs-type">getError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ParserPtr"><span class="hs-identifier hs-type">ParserPtr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span>
 </span><span id="line-52"></span><span id="getError"><span class="annot"><span class="annottext">getError :: ParserPtr -&gt; IO XMLParseError
-</span><a href="Text.XML.Expat.Internal.IO.html#getError"><span class="hs-identifier hs-var hs-var">getError</span></a></span></span><span> </span><span id="local-6989586621679112073"><span class="annot"><span class="annottext">pp :: ParserPtr
-</span><a href="#local-6989586621679112073"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-53"></span><span>    </span><span id="local-6989586621679112072"><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679112072"><span class="hs-identifier hs-var">code</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CInt
+</span><a href="Text.XML.Expat.Internal.IO.html#getError"><span class="hs-identifier hs-var hs-var">getError</span></a></span></span><span> </span><span id="local-6989586621679077474"><span class="annot"><span class="annottext">ParserPtr
+</span><a href="#local-6989586621679077474"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679077473"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077473"><span class="hs-identifier hs-var">code</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CInt
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlGetErrorCode"><span class="hs-identifier hs-var">xmlGetErrorCode</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112073"><span class="hs-identifier hs-var">pp</span></a></span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621679112070"><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679112070"><span class="hs-identifier hs-var">cerr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; IO CString
+</span><a href="#local-6989586621679077474"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679077471"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077471"><span class="hs-identifier hs-var">cerr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; IO CString
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlErrorString"><span class="hs-identifier hs-var">xmlErrorString</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679112072"><span class="hs-identifier hs-var">code</span></a></span><span>
-</span><span id="line-55"></span><span>    </span><span id="local-6989586621679112068"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679112068"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO String
+</span><a href="#local-6989586621679077473"><span class="hs-identifier hs-var">code</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679077469"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077469"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO String
 </span><span class="hs-identifier hs-var">peekCString</span></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679112070"><span class="hs-identifier hs-var">cerr</span></a></span><span>
-</span><span id="line-56"></span><span>    </span><span id="local-6989586621679112066"><span class="annot"><span class="annottext">XMLParseLocation
-</span><a href="#local-6989586621679112066"><span class="hs-identifier hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseLocation
+</span><a href="#local-6989586621679077471"><span class="hs-identifier hs-var">cerr</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679077467"><span class="annot"><span class="annottext">XMLParseLocation
+</span><a href="#local-6989586621679077467"><span class="hs-identifier hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseLocation
 </span><a href="Text.XML.Expat.Internal.IO.html#getParseLocation"><span class="hs-identifier hs-var">getParseLocation</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112073"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><a href="#local-6989586621679077474"><span class="hs-identifier hs-var">pp</span></a></span><span>
 </span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">XMLParseError -&gt; IO XMLParseError
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(XMLParseError -&gt; IO XMLParseError)
@@ -106,19 +117,19 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; XMLParseLocation -&gt; XMLParseError
 </span><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-var">XMLParseError</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679112068"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">XMLParseLocation
-</span><a href="#local-6989586621679112066"><span class="hs-identifier hs-var">loc</span></a></span><span>
+</span><a href="#local-6989586621679077469"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">XMLParseLocation
+</span><a href="#local-6989586621679077467"><span class="hs-identifier hs-var">loc</span></a></span><span>
 </span><span id="line-58"></span><span>
 </span><span id="line-59"></span><span class="hs-comment">-- |Obtain C value from Haskell 'Bool'.</span><span>
 </span><span id="line-60"></span><span class="hs-comment">--</span><span>
-</span><span id="line-61"></span><span id="local-6989586621679112063"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-type">cFromBool</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679112063"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679112063"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679077464"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-type">cFromBool</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679077464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077464"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-62"></span><span id="cFromBool"><span class="annot"><span class="annottext">cFromBool :: Bool -&gt; a
 </span><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-var hs-var">cFromBool</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; a
 forall a. Num a =&gt; Bool -&gt; a
 </span><span class="hs-identifier hs-var">fromBool</span></span><span>
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span class="hs-comment">-- | Parse error, consisting of message text and error location</span><span>
-</span><span id="line-65"></span><span class="hs-keyword">data</span><span> </span><span id="XMLParseError"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-var">XMLParseError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="XMLParseError"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-var">XMLParseError</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679112057"><span id="local-6989586621679112059"><span class="annot"><span class="annottext">XMLParseError -&gt; XMLParseError -&gt; Bool
+</span><span id="line-65"></span><span class="hs-keyword">data</span><span> </span><span id="XMLParseError"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-var">XMLParseError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="XMLParseError"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-var">XMLParseError</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077458"><span id="local-6989586621679077460"><span class="annot"><span class="annottext">XMLParseError -&gt; XMLParseError -&gt; Bool
 (XMLParseError -&gt; XMLParseError -&gt; Bool)
 -&gt; (XMLParseError -&gt; XMLParseError -&gt; Bool) -&gt; Eq XMLParseError
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -126,7 +137,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: XMLParseError -&gt; XMLParseError -&gt; Bool
 == :: XMLParseError -&gt; XMLParseError -&gt; Bool
 $c== :: XMLParseError -&gt; XMLParseError -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679112050"><span id="local-6989586621679112052"><span id="local-6989586621679112054"><span class="annot"><span class="annottext">Int -&gt; XMLParseError -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077451"><span id="local-6989586621679077453"><span id="local-6989586621679077455"><span class="annot"><span class="annottext">Int -&gt; XMLParseError -&gt; ShowS
 [XMLParseError] -&gt; ShowS
 XMLParseError -&gt; String
 (Int -&gt; XMLParseError -&gt; ShowS)
@@ -144,14 +155,14 @@ $cshowsPrec :: Int -&gt; XMLParseError -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-68"></span><span>    </span><span id="local-6989586621679112046"><span class="annot"><span class="annottext">rnf :: XMLParseError -&gt; ()
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span> </span><span id="local-6989586621679112044"><span class="annot"><span class="annottext">msg :: String
-</span><a href="#local-6989586621679112044"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span id="local-6989586621679112043"><span class="annot"><span class="annottext">loc :: XMLParseLocation
-</span><a href="#local-6989586621679112043"><span class="hs-identifier hs-var">loc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String, XMLParseLocation) -&gt; ()
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679077447"><span class="annot"><span class="annottext">rnf :: XMLParseError -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseError"><span class="hs-identifier hs-type">XMLParseError</span></a></span><span> </span><span id="local-6989586621679077445"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679077445"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span id="local-6989586621679077444"><span class="annot"><span class="annottext">XMLParseLocation
+</span><a href="#local-6989586621679077444"><span class="hs-identifier hs-var">loc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String, XMLParseLocation) -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
 </span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679112044"><span class="hs-identifier hs-var">msg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">XMLParseLocation
-</span><a href="#local-6989586621679112043"><span class="hs-identifier hs-var">loc</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077445"><span class="hs-identifier hs-var">msg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">XMLParseLocation
+</span><a href="#local-6989586621679077444"><span class="hs-identifier hs-var">loc</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>
 </span><span id="line-70"></span><span class="hs-comment">-- | Specifies a location of an event within the input text</span><span>
 </span><span id="line-71"></span><span class="hs-keyword">data</span><span> </span><span id="XMLParseLocation"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-var">XMLParseLocation</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="XMLParseLocation"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-var">XMLParseLocation</span></a></span></span><span> </span><span class="hs-special">{</span><span>
@@ -164,7 +175,7 @@ forall a. NFData a =&gt; a -&gt; ()
 </span><span id="line-75"></span><span>        </span><span id="xmlByteCount"><span class="annot"><span class="annottext">XMLParseLocation -&gt; Int64
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlByteCount"><span class="hs-identifier hs-var hs-var">xmlByteCount</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span>   </span><span class="hs-comment">-- ^ The number of bytes in the event</span><span>
 </span><span id="line-76"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-77"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679112034"><span id="local-6989586621679112036"><span class="annot"><span class="annottext">XMLParseLocation -&gt; XMLParseLocation -&gt; Bool
+</span><span id="line-77"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077435"><span id="local-6989586621679077437"><span class="annot"><span class="annottext">XMLParseLocation -&gt; XMLParseLocation -&gt; Bool
 (XMLParseLocation -&gt; XMLParseLocation -&gt; Bool)
 -&gt; (XMLParseLocation -&gt; XMLParseLocation -&gt; Bool)
 -&gt; Eq XMLParseLocation
@@ -173,7 +184,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: XMLParseLocation -&gt; XMLParseLocation -&gt; Bool
 == :: XMLParseLocation -&gt; XMLParseLocation -&gt; Bool
 $c== :: XMLParseLocation -&gt; XMLParseLocation -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679112028"><span id="local-6989586621679112030"><span id="local-6989586621679112032"><span class="annot"><span class="annottext">Int -&gt; XMLParseLocation -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077429"><span id="local-6989586621679077431"><span id="local-6989586621679077433"><span class="annot"><span class="annottext">Int -&gt; XMLParseLocation -&gt; ShowS
 [XMLParseLocation] -&gt; ShowS
 XMLParseLocation -&gt; String
 (Int -&gt; XMLParseLocation -&gt; ShowS)
@@ -191,66 +202,66 @@ $cshowsPrec :: Int -&gt; XMLParseLocation -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679112026"><span class="annot"><span class="annottext">rnf :: XMLParseLocation -&gt; ()
-</span><a href="#local-6989586621679112026"><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span id="local-6989586621679112025"><span class="annot"><span class="annottext">lin :: Int64
-</span><a href="#local-6989586621679112025"><span class="hs-identifier hs-var">lin</span></a></span></span><span> </span><span id="local-6989586621679112024"><span class="annot"><span class="annottext">col :: Int64
-</span><a href="#local-6989586621679112024"><span class="hs-identifier hs-var">col</span></a></span></span><span> </span><span id="local-6989586621679112023"><span class="annot"><span class="annottext">ind :: Int64
-</span><a href="#local-6989586621679112023"><span class="hs-identifier hs-var">ind</span></a></span></span><span> </span><span id="local-6989586621679112022"><span class="annot"><span class="annottext">cou :: Int64
-</span><a href="#local-6989586621679112022"><span class="hs-identifier hs-var">cou</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int64, Int64, Int64, Int64) -&gt; ()
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679077427"><span class="annot"><span class="annottext">rnf :: XMLParseLocation -&gt; ()
+</span><a href="#local-6989586621679077427"><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span id="local-6989586621679077426"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077426"><span class="hs-identifier hs-var">lin</span></a></span></span><span> </span><span id="local-6989586621679077425"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077425"><span class="hs-identifier hs-var">col</span></a></span></span><span> </span><span id="local-6989586621679077424"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077424"><span class="hs-identifier hs-var">ind</span></a></span></span><span> </span><span id="local-6989586621679077423"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077423"><span class="hs-identifier hs-var">cou</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int64, Int64, Int64, Int64) -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
 </span><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679112025"><span class="hs-identifier hs-var">lin</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679112024"><span class="hs-identifier hs-var">col</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679112023"><span class="hs-identifier hs-var">ind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
-</span><a href="#local-6989586621679112022"><span class="hs-identifier hs-var">cou</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077426"><span class="hs-identifier hs-var">lin</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077425"><span class="hs-identifier hs-var">col</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077424"><span class="hs-identifier hs-var">ind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679077423"><span class="hs-identifier hs-var">cou</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-81"></span><span>
 </span><span id="line-82"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#getParseLocation"><span class="hs-identifier hs-type">getParseLocation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#ParserPtr"><span class="hs-identifier hs-type">ParserPtr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span>
 </span><span id="line-83"></span><span id="getParseLocation"><span class="annot"><span class="annottext">getParseLocation :: ParserPtr -&gt; IO XMLParseLocation
-</span><a href="Text.XML.Expat.Internal.IO.html#getParseLocation"><span class="hs-identifier hs-var hs-var">getParseLocation</span></a></span></span><span> </span><span id="local-6989586621679112021"><span class="annot"><span class="annottext">pp :: ParserPtr
-</span><a href="#local-6989586621679112021"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-84"></span><span>    </span><span id="local-6989586621679112020"><span class="annot"><span class="annottext">CULong
-</span><a href="#local-6989586621679112020"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CULong
+</span><a href="Text.XML.Expat.Internal.IO.html#getParseLocation"><span class="hs-identifier hs-var hs-var">getParseLocation</span></a></span></span><span> </span><span id="local-6989586621679077422"><span class="annot"><span class="annottext">ParserPtr
+</span><a href="#local-6989586621679077422"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>    </span><span id="local-6989586621679077421"><span class="annot"><span class="annottext">CULong
+</span><a href="#local-6989586621679077421"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CULong
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlGetCurrentLineNumber"><span class="hs-identifier hs-var">xmlGetCurrentLineNumber</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112021"><span class="hs-identifier hs-var">pp</span></a></span><span>
-</span><span id="line-85"></span><span>    </span><span id="local-6989586621679112018"><span class="annot"><span class="annottext">CULong
-</span><a href="#local-6989586621679112018"><span class="hs-identifier hs-var">col</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CULong
+</span><a href="#local-6989586621679077422"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679077419"><span class="annot"><span class="annottext">CULong
+</span><a href="#local-6989586621679077419"><span class="hs-identifier hs-var">col</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CULong
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlGetCurrentColumnNumber"><span class="hs-identifier hs-var">xmlGetCurrentColumnNumber</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112021"><span class="hs-identifier hs-var">pp</span></a></span><span>
-</span><span id="line-86"></span><span>    </span><span id="local-6989586621679112016"><span class="annot"><span class="annottext">CLong
-</span><a href="#local-6989586621679112016"><span class="hs-identifier hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CLong
+</span><a href="#local-6989586621679077422"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679077417"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679077417"><span class="hs-identifier hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CLong
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlGetCurrentByteIndex"><span class="hs-identifier hs-var">xmlGetCurrentByteIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112021"><span class="hs-identifier hs-var">pp</span></a></span><span>
-</span><span id="line-87"></span><span>    </span><span id="local-6989586621679112014"><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679112014"><span class="hs-identifier hs-var">count</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CInt
+</span><a href="#local-6989586621679077422"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679077415"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077415"><span class="hs-identifier hs-var">count</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO CInt
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlGetCurrentByteCount"><span class="hs-identifier hs-var">xmlGetCurrentByteCount</span></a></span><span> </span><span class="annot"><span class="annottext">ParserPtr
-</span><a href="#local-6989586621679112021"><span class="hs-identifier hs-var">pp</span></a></span><span>
+</span><a href="#local-6989586621679077422"><span class="hs-identifier hs-var">pp</span></a></span><span>
 </span><span id="line-88"></span><span>    </span><span class="annot"><span class="annottext">XMLParseLocation -&gt; IO XMLParseLocation
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(XMLParseLocation -&gt; IO XMLParseLocation)
 -&gt; XMLParseLocation -&gt; IO XMLParseLocation
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">XMLParseLocation :: Int64 -&gt; Int64 -&gt; Int64 -&gt; Int64 -&gt; XMLParseLocation
-</span><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type hs-type">XMLParseLocation</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#XMLParseLocation"><span class="hs-identifier hs-type">XMLParseLocation</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-89"></span><span>            </span><span class="annot"><span class="annottext">xmlLineNumber :: Int64
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlLineNumber"><span class="hs-identifier hs-var">xmlLineNumber</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CULong -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">CULong
-</span><a href="#local-6989586621679112020"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679077421"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-90"></span><span>            </span><span class="annot"><span class="annottext">xmlColumnNumber :: Int64
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlColumnNumber"><span class="hs-identifier hs-var">xmlColumnNumber</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CULong -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">CULong
-</span><a href="#local-6989586621679112018"><span class="hs-identifier hs-var">col</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679077419"><span class="hs-identifier hs-var">col</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-91"></span><span>            </span><span class="annot"><span class="annottext">xmlByteIndex :: Int64
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlByteIndex"><span class="hs-identifier hs-var">xmlByteIndex</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">CLong
-</span><a href="#local-6989586621679112016"><span class="hs-identifier hs-var">index</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679077417"><span class="hs-identifier hs-var">index</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-92"></span><span>            </span><span class="annot"><span class="annottext">xmlByteCount :: Int64
 </span><a href="Text.XML.Expat.Internal.IO.html#xmlByteCount"><span class="hs-identifier hs-var">xmlByteCount</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; Int64
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679112014"><span class="hs-identifier hs-var">count</span></a></span><span>
+</span><a href="#local-6989586621679077415"><span class="hs-identifier hs-var">count</span></a></span><span>
 </span><span id="line-93"></span><span>        </span><span class="hs-special">}</span><span>
 </span><span id="line-94"></span><span>
 </span><span id="line-95"></span><span class="hs-comment">-- Note on word sizes:</span><span>
@@ -309,24 +320,24 @@ forall a b. (Integral a, Num b) =&gt; a -&gt; b
 -&gt; Maybe (ByteString -&gt; Maybe ByteString)
 -&gt; Bool
 -&gt; IO (HParser, IO XMLParseLocation)
-</span><a href="Text.XML.Expat.Internal.IO.html#hexpatNewParser"><span class="hs-identifier hs-var hs-var">hexpatNewParser</span></a></span></span><span> </span><span id="local-6989586621679112007"><span class="annot"><span class="annottext">enc :: Maybe Encoding
-</span><a href="#local-6989586621679112007"><span class="hs-identifier hs-var">enc</span></a></span></span><span> </span><span id="local-6989586621679112006"><span class="annot"><span class="annottext">mDecoder :: Maybe (ByteString -&gt; Maybe ByteString)
-</span><a href="#local-6989586621679112006"><span class="hs-identifier hs-var">mDecoder</span></a></span></span><span> </span><span id="local-6989586621679112005"><span class="annot"><span class="annottext">locations :: Bool
-</span><a href="#local-6989586621679112005"><span class="hs-identifier hs-var">locations</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#hexpatNewParser"><span class="hs-identifier hs-var hs-var">hexpatNewParser</span></a></span></span><span> </span><span id="local-6989586621679077409"><span class="annot"><span class="annottext">Maybe Encoding
+</span><a href="#local-6989586621679077409"><span class="hs-identifier hs-var">enc</span></a></span></span><span> </span><span id="local-6989586621679077408"><span class="annot"><span class="annottext">Maybe (ByteString -&gt; Maybe ByteString)
+</span><a href="#local-6989586621679077408"><span class="hs-identifier hs-var">mDecoder</span></a></span></span><span> </span><span id="local-6989586621679077407"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077407"><span class="hs-identifier hs-var">locations</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-148"></span><span>    </span><span class="annot"><span class="annottext">Maybe Encoding
 -&gt; (CString -&gt; IO (HParser, IO XMLParseLocation))
 -&gt; IO (HParser, IO XMLParseLocation)
 forall a. Maybe Encoding -&gt; (CString -&gt; IO a) -&gt; IO a
 </span><a href="Text.XML.Expat.Internal.IO.html#withOptEncoding"><span class="hs-identifier hs-var">withOptEncoding</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Encoding
-</span><a href="#local-6989586621679112007"><span class="hs-identifier hs-var">enc</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO (HParser, IO XMLParseLocation))
+</span><a href="#local-6989586621679077409"><span class="hs-identifier hs-var">enc</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO (HParser, IO XMLParseLocation))
  -&gt; IO (HParser, IO XMLParseLocation))
 -&gt; (CString -&gt; IO (HParser, IO XMLParseLocation))
 -&gt; IO (HParser, IO XMLParseLocation)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679112004"><span class="annot"><span class="annottext">cEnc :: CString
-</span><a href="#local-6989586621679112004"><span class="hs-identifier hs-var">cEnc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-149"></span><span>        </span><span id="local-6989586621679112003"><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679112003"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr MyParser_struct
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077406"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077406"><span class="hs-identifier hs-var">cEnc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-149"></span><span>        </span><span id="local-6989586621679077405"><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
+</span><a href="#local-6989586621679077405"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr MyParser_struct
 -&gt; Ptr MyParser_struct -&gt; IO (ForeignPtr MyParser_struct)
 forall a. FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
 </span><span class="hs-identifier hs-var">newForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr MyParser_struct
@@ -335,40 +346,41 @@ forall a. FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
 </span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">CString -&gt; CInt -&gt; IO (Ptr MyParser_struct)
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatNewParser"><span class="hs-identifier hs-var">_hexpatNewParser</span></a></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679112004"><span class="hs-identifier hs-var">cEnc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
+</span><a href="#local-6989586621679077406"><span class="hs-identifier hs-var">cEnc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
 forall a. Num a =&gt; Bool -&gt; a
 </span><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-var">cFromBool</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679112005"><span class="hs-identifier hs-var">locations</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077407"><span class="hs-identifier hs-var">locations</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-150"></span><span>        </span><span class="annot"><span class="annottext">(HParser, IO XMLParseLocation) -&gt; IO (HParser, IO XMLParseLocation)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct -&gt; HParser
-</span><a href="#local-6989586621679112000"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679112003"><span class="hs-identifier hs-var">parser</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
+</span><a href="#local-6989586621679077402"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
+</span><a href="#local-6989586621679077405"><span class="hs-identifier hs-var">parser</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
 -&gt; (Ptr MyParser_struct -&gt; IO XMLParseLocation)
 -&gt; IO XMLParseLocation
 forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679112003"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct -&gt; IO XMLParseLocation)
+</span><a href="#local-6989586621679077405"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct -&gt; IO XMLParseLocation)
  -&gt; IO XMLParseLocation)
 -&gt; (Ptr MyParser_struct -&gt; IO XMLParseLocation)
 -&gt; IO XMLParseLocation
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111998"><span class="annot"><span class="annottext">mp :: Ptr MyParser_struct
-</span><a href="#local-6989586621679111998"><span class="hs-identifier hs-var">mp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseLocation
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077400"><span class="annot"><span class="annottext">Ptr MyParser_struct
+</span><a href="#local-6989586621679077400"><span class="hs-identifier hs-var">mp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseLocation
 </span><a href="Text.XML.Expat.Internal.IO.html#getParseLocation"><span class="hs-identifier hs-var">getParseLocation</span></a></span><span> </span><span class="annot"><span class="annottext">(ParserPtr -&gt; IO XMLParseLocation)
 -&gt; ParserPtr -&gt; IO XMLParseLocation
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct -&gt; ParserPtr
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatGetParser"><span class="hs-identifier hs-var">_hexpatGetParser</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111998"><span class="hs-identifier hs-var">mp</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077400"><span class="hs-identifier hs-var">mp</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-152"></span><span>    </span><span id="local-6989586621679112000"><span class="annot"><span class="annottext">parse :: ForeignPtr MyParser_struct -&gt; HParser
-</span><a href="#local-6989586621679112000"><span class="hs-identifier hs-var hs-var">parse</span></a></span></span><span> </span><span id="local-6989586621679111997"><span class="annot"><span class="annottext">parser :: ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679111997"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe (ByteString -&gt; Maybe ByteString)
-</span><a href="#local-6989586621679112006"><span class="hs-identifier hs-var">mDecoder</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-153"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111996"><span class="annot"><span class="annottext">text :: ByteString
-</span><a href="#local-6989586621679111996"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span id="local-6989586621679111995"><span class="annot"><span class="annottext">final :: Bool
-</span><a href="#local-6989586621679111995"><span class="hs-identifier hs-var">final</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-152"></span><span>    </span><span id="local-6989586621679077402"><span class="annot"><span class="annottext">parse :: ForeignPtr MyParser_struct -&gt; HParser
+</span><a href="#local-6989586621679077402"><span class="hs-identifier hs-var hs-var">parse</span></a></span></span><span> </span><span id="local-6989586621679077399"><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
+</span><a href="#local-6989586621679077399"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe (ByteString -&gt; Maybe ByteString)
+</span><a href="#local-6989586621679077408"><span class="hs-identifier hs-var">mDecoder</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-153"></span><span>        </span><span class="annot"><span class="annottext">Maybe (ByteString -&gt; Maybe ByteString)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077398"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077398"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span id="local-6989586621679077397"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077397"><span class="hs-identifier hs-var">final</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-154"></span><span>            </span><span class="annot"><span class="annottext">(Ptr (Ptr Word8)
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
@@ -380,8 +392,8 @@ forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111993"><span class="annot"><span class="annottext">ppData :: Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111993"><span class="hs-identifier hs-var">ppData</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077395"><span class="annot"><span class="annottext">Ptr (Ptr Word8)
+</span><a href="#local-6989586621679077395"><span class="hs-identifier hs-var">ppData</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-155"></span><span>            </span><span class="annot"><span class="annottext">(Ptr CInt -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
@@ -390,41 +402,41 @@ forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
 -&gt; (Ptr CInt -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111992"><span class="annot"><span class="annottext">pLen :: Ptr CInt
-</span><a href="#local-6989586621679111992"><span class="hs-identifier hs-var">pLen</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077394"><span class="annot"><span class="annottext">Ptr CInt
+</span><a href="#local-6989586621679077394"><span class="hs-identifier hs-var">pLen</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-156"></span><span>            </span><span class="annot"><span class="annottext">ByteString
 -&gt; ((CString, CInt)
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a. ByteString -&gt; ((CString, CInt) -&gt; IO a) -&gt; IO a
 </span><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-var">withBStringLen</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679111996"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">(((CString, CInt)
+</span><a href="#local-6989586621679077398"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">(((CString, CInt)
   -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; ((CString, CInt)
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679111991"><span class="annot"><span class="annottext">textBuf :: CString
-</span><a href="#local-6989586621679111991"><span class="hs-identifier hs-var">textBuf</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679111990"><span class="annot"><span class="annottext">textLen :: CInt
-</span><a href="#local-6989586621679111990"><span class="hs-identifier hs-var">textLen</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679077393"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077393"><span class="hs-identifier hs-var">textBuf</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077392"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077392"><span class="hs-identifier hs-var">textLen</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-157"></span><span>            </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
 -&gt; (Ptr MyParser_struct
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679111997"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct
+</span><a href="#local-6989586621679077399"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct
   -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; (Ptr MyParser_struct
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111989"><span class="annot"><span class="annottext">pp :: Ptr MyParser_struct
-</span><a href="#local-6989586621679111989"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-158"></span><span>                </span><span id="local-6989586621679111988"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111988"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; Bool
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077391"><span class="annot"><span class="annottext">Ptr MyParser_struct
+</span><a href="#local-6989586621679077391"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-158"></span><span>                </span><span id="local-6989586621679077390"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077390"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; Bool
 </span><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var">unStatus</span></a></span><span> </span><span class="annot"><span class="annottext">(CInt -&gt; Bool) -&gt; IO CInt -&gt; IO Bool
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
@@ -435,27 +447,27 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; Ptr CInt
 -&gt; IO CInt
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatParseUnsafe"><span class="hs-identifier hs-var">_hexpatParseUnsafe</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111989"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111991"><span class="hs-identifier hs-var">textBuf</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111990"><span class="hs-identifier hs-var">textLen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
+</span><a href="#local-6989586621679077391"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077393"><span class="hs-identifier hs-var">textBuf</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077392"><span class="hs-identifier hs-var">textLen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
 forall a. Num a =&gt; Bool -&gt; a
 </span><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-var">cFromBool</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111995"><span class="hs-identifier hs-var">final</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111993"><span class="hs-identifier hs-var">ppData</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
-</span><a href="#local-6989586621679111992"><span class="hs-identifier hs-var">pLen</span></a></span><span>
-</span><span id="line-159"></span><span>                </span><span id="local-6989586621679111985"><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111985"><span class="hs-identifier hs-var">pData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8) -&gt; IO (Ptr Word8)
+</span><a href="#local-6989586621679077397"><span class="hs-identifier hs-var">final</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
+</span><a href="#local-6989586621679077395"><span class="hs-identifier hs-var">ppData</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
+</span><a href="#local-6989586621679077394"><span class="hs-identifier hs-var">pLen</span></a></span><span>
+</span><span id="line-159"></span><span>                </span><span id="local-6989586621679077387"><span class="annot"><span class="annottext">Ptr Word8
+</span><a href="#local-6989586621679077387"><span class="hs-identifier hs-var">pData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8) -&gt; IO (Ptr Word8)
 forall a. Storable a =&gt; Ptr a -&gt; IO a
 </span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111993"><span class="hs-identifier hs-var">ppData</span></a></span><span>
-</span><span id="line-160"></span><span>                </span><span id="local-6989586621679111983"><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111983"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CInt -&gt; IO CInt
+</span><a href="#local-6989586621679077395"><span class="hs-identifier hs-var">ppData</span></a></span><span>
+</span><span id="line-160"></span><span>                </span><span id="local-6989586621679077385"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077385"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CInt -&gt; IO CInt
 forall a. Storable a =&gt; Ptr a -&gt; IO a
 </span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
-</span><a href="#local-6989586621679111992"><span class="hs-identifier hs-var">pLen</span></a></span><span>
-</span><span id="line-161"></span><span>                </span><span id="local-6989586621679111982"><span class="annot"><span class="annottext">Maybe XMLParseError
-</span><a href="#local-6989586621679111982"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111988"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><a href="#local-6989586621679077394"><span class="hs-identifier hs-var">pLen</span></a></span><span>
+</span><span id="line-161"></span><span>                </span><span id="local-6989586621679077384"><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679077384"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077390"><span class="hs-identifier hs-var">ok</span></a></span><span>
 </span><span id="line-162"></span><span>                    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError -&gt; IO (Maybe XMLParseError)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
@@ -469,24 +481,24 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseError
 </span><a href="Text.XML.Expat.Internal.IO.html#getError"><span class="hs-identifier hs-var">getError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr MyParser_struct -&gt; ParserPtr
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatGetParser"><span class="hs-identifier hs-var">_hexpatGetParser</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111989"><span class="hs-identifier hs-var">pp</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-164"></span><span>                </span><span id="local-6989586621679111981"><span class="annot"><span class="annottext">ForeignPtr Word8
-</span><a href="#local-6989586621679111981"><span class="hs-identifier hs-var">fpData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8 -&gt; Ptr Word8 -&gt; IO (ForeignPtr Word8)
+</span><a href="#local-6989586621679077391"><span class="hs-identifier hs-var">pp</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>                </span><span id="local-6989586621679077383"><span class="annot"><span class="annottext">ForeignPtr Word8
+</span><a href="#local-6989586621679077383"><span class="hs-identifier hs-var">fpData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8 -&gt; Ptr Word8 -&gt; IO (ForeignPtr Word8)
 forall a. FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
 </span><span class="hs-identifier hs-var">newForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8
 </span><a href="Text.XML.Expat.Internal.IO.html#funPtrFree"><span class="hs-identifier hs-var">funPtrFree</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111985"><span class="hs-identifier hs-var">pData</span></a></span><span>
+</span><a href="#local-6989586621679077387"><span class="hs-identifier hs-var">pData</span></a></span><span>
 </span><span id="line-165"></span><span>                </span><span class="annot"><span class="annottext">(ForeignPtr Word8, CInt, Maybe XMLParseError)
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ForeignPtr Word8
-</span><a href="#local-6989586621679111981"><span class="hs-identifier hs-var">fpData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111983"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
-</span><a href="#local-6989586621679111982"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-166"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679111979"><span class="annot"><span class="annottext">decoder :: ByteString -&gt; Maybe ByteString
-</span><a href="#local-6989586621679111979"><span class="hs-identifier hs-var">decoder</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111978"><span class="annot"><span class="annottext">text :: ByteString
-</span><a href="#local-6989586621679111978"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span id="local-6989586621679111977"><span class="annot"><span class="annottext">final :: Bool
-</span><a href="#local-6989586621679111977"><span class="hs-identifier hs-var">final</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679077383"><span class="hs-identifier hs-var">fpData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077385"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679077384"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077381"><span class="annot"><span class="annottext">ByteString -&gt; Maybe ByteString
+</span><a href="#local-6989586621679077381"><span class="hs-identifier hs-var">decoder</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077380"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077380"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span id="local-6989586621679077379"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077379"><span class="hs-identifier hs-var">final</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-167"></span><span>            </span><span class="annot"><span class="annottext">(Ptr (Ptr Word8)
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
@@ -498,8 +510,8 @@ forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111976"><span class="annot"><span class="annottext">ppData :: Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111976"><span class="hs-identifier hs-var">ppData</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077378"><span class="annot"><span class="annottext">Ptr (Ptr Word8)
+</span><a href="#local-6989586621679077378"><span class="hs-identifier hs-var">ppData</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-168"></span><span>            </span><span class="annot"><span class="annottext">(Ptr CInt -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
@@ -508,41 +520,41 @@ forall a b. Storable a =&gt; (Ptr a -&gt; IO b) -&gt; IO b
 -&gt; (Ptr CInt -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111975"><span class="annot"><span class="annottext">pLen :: Ptr CInt
-</span><a href="#local-6989586621679111975"><span class="hs-identifier hs-var">pLen</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077377"><span class="annot"><span class="annottext">Ptr CInt
+</span><a href="#local-6989586621679077377"><span class="hs-identifier hs-var">pLen</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-169"></span><span>            </span><span class="annot"><span class="annottext">ByteString
 -&gt; ((CString, CInt)
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a. ByteString -&gt; ((CString, CInt) -&gt; IO a) -&gt; IO a
 </span><a href="Text.XML.Expat.Internal.IO.html#withBStringLen"><span class="hs-identifier hs-var">withBStringLen</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679111978"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">(((CString, CInt)
+</span><a href="#local-6989586621679077380"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">(((CString, CInt)
   -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; ((CString, CInt)
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679111974"><span class="annot"><span class="annottext">textBuf :: CString
-</span><a href="#local-6989586621679111974"><span class="hs-identifier hs-var">textBuf</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679111973"><span class="annot"><span class="annottext">textLen :: CInt
-</span><a href="#local-6989586621679111973"><span class="hs-identifier hs-var">textLen</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679077376"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077376"><span class="hs-identifier hs-var">textBuf</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077375"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077375"><span class="hs-identifier hs-var">textLen</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-170"></span><span>            </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
 -&gt; (Ptr MyParser_struct
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr MyParser_struct
-</span><a href="#local-6989586621679111997"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct
+</span><a href="#local-6989586621679077399"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr MyParser_struct
   -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
  -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; (Ptr MyParser_struct
     -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError))
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111972"><span class="annot"><span class="annottext">pp :: Ptr MyParser_struct
-</span><a href="#local-6989586621679111972"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-171"></span><span>                </span><span id="local-6989586621679111971"><span class="annot"><span class="annottext">FunPtr CEntityHandler
-</span><a href="#local-6989586621679111971"><span class="hs-identifier hs-var">eh</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CEntityHandler -&gt; IO (FunPtr CEntityHandler)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077374"><span class="annot"><span class="annottext">Ptr MyParser_struct
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-171"></span><span>                </span><span id="local-6989586621679077373"><span class="annot"><span class="annottext">FunPtr CEntityHandler
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var">eh</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CEntityHandler -&gt; IO (FunPtr CEntityHandler)
 </span><a href="Text.XML.Expat.Internal.IO.html#mkCEntityHandler"><span class="hs-identifier hs-var">mkCEntityHandler</span></a></span><span> </span><span class="annot"><span class="annottext">(CEntityHandler -&gt; IO (FunPtr CEntityHandler))
 -&gt; ((ByteString -&gt; Maybe ByteString) -&gt; CEntityHandler)
 -&gt; (ByteString -&gt; Maybe ByteString)
@@ -553,13 +565,13 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; (ByteString -&gt; Maybe ByteString) -&gt; IO (FunPtr CEntityHandler)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Maybe ByteString
-</span><a href="#local-6989586621679111979"><span class="hs-identifier hs-var">decoder</span></a></span><span>
+</span><a href="#local-6989586621679077381"><span class="hs-identifier hs-var">decoder</span></a></span><span>
 </span><span id="line-172"></span><span>                </span><span class="annot"><span class="annottext">Ptr MyParser_struct -&gt; FunPtr CEntityHandler -&gt; IO ()
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatSetEntityHandler"><span class="hs-identifier hs-var">_hexpatSetEntityHandler</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111972"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">FunPtr CEntityHandler
-</span><a href="#local-6989586621679111971"><span class="hs-identifier hs-var">eh</span></a></span><span>
-</span><span id="line-173"></span><span>                </span><span id="local-6989586621679111966"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111966"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; Bool
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">FunPtr CEntityHandler
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var">eh</span></a></span><span>
+</span><span id="line-173"></span><span>                </span><span id="local-6989586621679077368"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077368"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; Bool
 </span><a href="Text.XML.Expat.Internal.IO.html#unStatus"><span class="hs-identifier hs-var">unStatus</span></a></span><span> </span><span class="annot"><span class="annottext">(CInt -&gt; Bool) -&gt; IO CInt -&gt; IO Bool
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
@@ -570,31 +582,31 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; Ptr CInt
 -&gt; IO CInt
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatParseSafe"><span class="hs-identifier hs-var">_hexpatParseSafe</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111972"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111974"><span class="hs-identifier hs-var">textBuf</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111973"><span class="hs-identifier hs-var">textLen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077376"><span class="hs-identifier hs-var">textBuf</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077375"><span class="hs-identifier hs-var">textLen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; CInt
 forall a. Num a =&gt; Bool -&gt; a
 </span><a href="Text.XML.Expat.Internal.IO.html#cFromBool"><span class="hs-identifier hs-var">cFromBool</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111977"><span class="hs-identifier hs-var">final</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111976"><span class="hs-identifier hs-var">ppData</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
-</span><a href="#local-6989586621679111975"><span class="hs-identifier hs-var">pLen</span></a></span><span>
+</span><a href="#local-6989586621679077379"><span class="hs-identifier hs-var">final</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
+</span><a href="#local-6989586621679077378"><span class="hs-identifier hs-var">ppData</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
+</span><a href="#local-6989586621679077377"><span class="hs-identifier hs-var">pLen</span></a></span><span>
 </span><span id="line-174"></span><span>                </span><span class="annot"><span class="annottext">FunPtr CEntityHandler -&gt; IO ()
 forall a. FunPtr a -&gt; IO ()
 </span><span class="hs-identifier hs-var">freeHaskellFunPtr</span></span><span> </span><span class="annot"><span class="annottext">FunPtr CEntityHandler
-</span><a href="#local-6989586621679111971"><span class="hs-identifier hs-var">eh</span></a></span><span>
-</span><span id="line-175"></span><span>                </span><span id="local-6989586621679111963"><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111963"><span class="hs-identifier hs-var">pData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8) -&gt; IO (Ptr Word8)
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var">eh</span></a></span><span>
+</span><span id="line-175"></span><span>                </span><span id="local-6989586621679077365"><span class="annot"><span class="annottext">Ptr Word8
+</span><a href="#local-6989586621679077365"><span class="hs-identifier hs-var">pData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8) -&gt; IO (Ptr Word8)
 forall a. Storable a =&gt; Ptr a -&gt; IO a
 </span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr Word8)
-</span><a href="#local-6989586621679111976"><span class="hs-identifier hs-var">ppData</span></a></span><span>
-</span><span id="line-176"></span><span>                </span><span id="local-6989586621679111962"><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111962"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CInt -&gt; IO CInt
+</span><a href="#local-6989586621679077378"><span class="hs-identifier hs-var">ppData</span></a></span><span>
+</span><span id="line-176"></span><span>                </span><span id="local-6989586621679077364"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077364"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CInt -&gt; IO CInt
 forall a. Storable a =&gt; Ptr a -&gt; IO a
 </span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">Ptr CInt
-</span><a href="#local-6989586621679111975"><span class="hs-identifier hs-var">pLen</span></a></span><span>
-</span><span id="line-177"></span><span>                </span><span id="local-6989586621679111961"><span class="annot"><span class="annottext">Maybe XMLParseError
-</span><a href="#local-6989586621679111961"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679111966"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><a href="#local-6989586621679077377"><span class="hs-identifier hs-var">pLen</span></a></span><span>
+</span><span id="line-177"></span><span>                </span><span id="local-6989586621679077363"><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679077363"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679077368"><span class="hs-identifier hs-var">ok</span></a></span><span>
 </span><span id="line-178"></span><span>                    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError -&gt; IO (Maybe XMLParseError)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
@@ -608,20 +620,20 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParserPtr -&gt; IO XMLParseError
 </span><a href="Text.XML.Expat.Internal.IO.html#getError"><span class="hs-identifier hs-var">getError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr MyParser_struct -&gt; ParserPtr
 </span><a href="Text.XML.Expat.Internal.IO.html#_hexpatGetParser"><span class="hs-identifier hs-var">_hexpatGetParser</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr MyParser_struct
-</span><a href="#local-6989586621679111972"><span class="hs-identifier hs-var">pp</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-180"></span><span>                </span><span id="local-6989586621679111960"><span class="annot"><span class="annottext">ForeignPtr Word8
-</span><a href="#local-6989586621679111960"><span class="hs-identifier hs-var">fpData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8 -&gt; Ptr Word8 -&gt; IO (ForeignPtr Word8)
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">pp</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-180"></span><span>                </span><span id="local-6989586621679077362"><span class="annot"><span class="annottext">ForeignPtr Word8
+</span><a href="#local-6989586621679077362"><span class="hs-identifier hs-var">fpData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8 -&gt; Ptr Word8 -&gt; IO (ForeignPtr Word8)
 forall a. FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
 </span><span class="hs-identifier hs-var">newForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr Word8
 </span><a href="Text.XML.Expat.Internal.IO.html#funPtrFree"><span class="hs-identifier hs-var">funPtrFree</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111963"><span class="hs-identifier hs-var">pData</span></a></span><span>
+</span><a href="#local-6989586621679077365"><span class="hs-identifier hs-var">pData</span></a></span><span>
 </span><span id="line-181"></span><span>                </span><span class="annot"><span class="annottext">(ForeignPtr Word8, CInt, Maybe XMLParseError)
 -&gt; IO (ForeignPtr Word8, CInt, Maybe XMLParseError)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ForeignPtr Word8
-</span><a href="#local-6989586621679111960"><span class="hs-identifier hs-var">fpData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679111962"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
-</span><a href="#local-6989586621679111961"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077362"><span class="hs-identifier hs-var">fpData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679077364"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe XMLParseError
+</span><a href="#local-6989586621679077363"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-182"></span><span>
 </span><span id="line-183"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-keyword">unsafe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hexpatParse&quot;</span></span><span>
 </span><span id="line-184"></span><span>  </span><span id="_hexpatParseUnsafe"><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#_hexpatParseUnsafe"><span class="hs-identifier hs-var">_hexpatParseUnsafe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#MyParserPtr"><span class="hs-identifier hs-type">MyParserPtr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CChar</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span>
@@ -638,100 +650,103 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span id="line-195"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#peekByteStringLen"><span class="hs-identifier hs-type">peekByteStringLen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CStringLen</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span>
 </span><span id="line-196"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#peekByteStringLen"><span class="hs-pragma hs-type">peekByteStringLen</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-197"></span><span id="peekByteStringLen"><span class="annot"><span class="annottext">peekByteStringLen :: CStringLen -&gt; IO ByteString
-</span><a href="Text.XML.Expat.Internal.IO.html#peekByteStringLen"><span class="hs-identifier hs-var hs-var">peekByteStringLen</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679111958"><span class="annot"><span class="annottext">cstr :: CString
-</span><a href="#local-6989586621679111958"><span class="hs-identifier hs-var">cstr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679111957"><span class="annot"><span class="annottext">len :: Int
-</span><a href="#local-6989586621679111957"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#peekByteStringLen"><span class="hs-identifier hs-var hs-var">peekByteStringLen</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077360"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077360"><span class="hs-identifier hs-var">cstr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077359"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077359"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-198"></span><span>    </span><span class="annot"><span class="annottext">Int -&gt; (Ptr Word8 -&gt; IO ()) -&gt; IO ByteString
 </span><span class="hs-identifier hs-var">I.create</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111957"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Ptr Word8 -&gt; IO ()) -&gt; IO ByteString)
+</span><a href="#local-6989586621679077359"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Ptr Word8 -&gt; IO ()) -&gt; IO ByteString)
 -&gt; (Ptr Word8 -&gt; IO ()) -&gt; IO ByteString
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111955"><span class="annot"><span class="annottext">ptr :: Ptr Word8
-</span><a href="#local-6989586621679111955"><span class="hs-identifier hs-var">ptr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077357"><span class="annot"><span class="annottext">Ptr Word8
+</span><a href="#local-6989586621679077357"><span class="hs-identifier hs-var">ptr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-199"></span><span>        </span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Ptr Word8 -&gt; Int -&gt; IO ()
 </span><span class="hs-identifier hs-var">I.memcpy</span></span><span> </span><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111955"><span class="hs-identifier hs-var">ptr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString -&gt; Ptr Word8
+</span><a href="#local-6989586621679077357"><span class="hs-identifier hs-var">ptr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString -&gt; Ptr Word8
 forall a b. Ptr a -&gt; Ptr b
 </span><span class="hs-identifier hs-var">castPtr</span></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111958"><span class="hs-identifier hs-var">cstr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="#local-6989586621679077360"><span class="hs-identifier hs-var">cstr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111957"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077359"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-200"></span><span>
 </span><span id="line-201"></span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#wrapCEntityHandler"><span class="hs-identifier hs-type">wrapCEntityHandler</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Text.XML.Expat.Internal.IO.html#CEntityHandler"><span class="hs-identifier hs-type">CEntityHandler</span></a></span><span>
 </span><span id="line-202"></span><span id="wrapCEntityHandler"><span class="annot"><span class="annottext">wrapCEntityHandler :: (ByteString -&gt; Maybe ByteString) -&gt; CEntityHandler
-</span><a href="Text.XML.Expat.Internal.IO.html#wrapCEntityHandler"><span class="hs-identifier hs-var hs-var">wrapCEntityHandler</span></a></span></span><span> </span><span id="local-6989586621679111952"><span class="annot"><span class="annottext">handler :: ByteString -&gt; Maybe ByteString
-</span><a href="#local-6989586621679111952"><span class="hs-identifier hs-var">handler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CEntityHandler
-</span><a href="#local-6989586621679111951"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><a href="Text.XML.Expat.Internal.IO.html#wrapCEntityHandler"><span class="hs-identifier hs-var hs-var">wrapCEntityHandler</span></a></span></span><span> </span><span id="local-6989586621679077354"><span class="annot"><span class="annottext">ByteString -&gt; Maybe ByteString
+</span><a href="#local-6989586621679077354"><span class="hs-identifier hs-var">handler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CEntityHandler
+</span><a href="#local-6989586621679077353"><span class="hs-identifier hs-var">h</span></a></span><span>
 </span><span id="line-203"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-204"></span><span>    </span><span id="local-6989586621679111951"><span class="annot"><span class="annottext">h :: CEntityHandler
-</span><a href="#local-6989586621679111951"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679111950"><span class="annot"><span class="annottext">cname :: CString
-</span><a href="#local-6989586621679111950"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-205"></span><span>        </span><span id="local-6989586621679111949"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111949"><span class="hs-identifier hs-var">sz</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CSize -&gt; Int
+</span><span id="line-204"></span><span>    </span><span id="local-6989586621679077353"><span class="annot"><span class="annottext">h :: CEntityHandler
+</span><a href="#local-6989586621679077353"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679077352"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-205"></span><span>        </span><span id="local-6989586621679077351"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077351"><span class="hs-identifier hs-var">sz</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CSize -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(CSize -&gt; Int) -&gt; IO CSize -&gt; IO Int
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO CSize
 </span><span class="hs-identifier hs-var">I.c_strlen</span></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111950"><span class="hs-identifier hs-var">cname</span></a></span><span>
-</span><span id="line-206"></span><span>        </span><span id="local-6989586621679111947"><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679111947"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CStringLen -&gt; IO ByteString
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">cname</span></a></span><span>
+</span><span id="line-206"></span><span>        </span><span id="local-6989586621679077349"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077349"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CStringLen -&gt; IO ByteString
 </span><a href="Text.XML.Expat.Internal.IO.html#peekByteStringLen"><span class="hs-identifier hs-var">peekByteStringLen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111950"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111949"><span class="hs-identifier hs-var">sz</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077351"><span class="hs-identifier hs-var">sz</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-207"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Maybe ByteString
-</span><a href="#local-6989586621679111952"><span class="hs-identifier hs-var">handler</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679111947"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-208"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679111946"><span class="annot"><span class="annottext">text :: ByteString
-</span><a href="#local-6989586621679111946"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-209"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679111945"><span class="annot"><span class="annottext">fp :: ForeignPtr Word8
-</span><a href="#local-6989586621679111945"><span class="hs-identifier hs-var">fp</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679111944"><span class="annot"><span class="annottext">offset :: Int
-</span><a href="#local-6989586621679111944"><span class="hs-identifier hs-var">offset</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679111943"><span class="annot"><span class="annottext">len :: Int
-</span><a href="#local-6989586621679111943"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (ForeignPtr Word8, Int, Int)
+</span><a href="#local-6989586621679077354"><span class="hs-identifier hs-var">handler</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077349"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-208"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077348"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679077348"><span class="hs-identifier hs-var">text</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-209"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077347"><span class="annot"><span class="annottext">ForeignPtr Word8
+</span><a href="#local-6989586621679077347"><span class="hs-identifier hs-var">fp</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077346"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077346"><span class="hs-identifier hs-var">offset</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679077345"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679077345"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (ForeignPtr Word8, Int, Int)
 </span><span class="hs-identifier hs-var">I.toForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679111946"><span class="hs-identifier hs-var">text</span></a></span><span>
+</span><a href="#local-6989586621679077348"><span class="hs-identifier hs-var">text</span></a></span><span>
 </span><span id="line-210"></span><span>                </span><span class="annot"><span class="annottext">ForeignPtr Word8 -&gt; (Ptr Word8 -&gt; IO CString) -&gt; IO CString
 forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr Word8
-</span><a href="#local-6989586621679111945"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr Word8 -&gt; IO CString) -&gt; IO CString)
+</span><a href="#local-6989586621679077347"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr Word8 -&gt; IO CString) -&gt; IO CString)
 -&gt; (Ptr Word8 -&gt; IO CString) -&gt; IO CString
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679111941"><span class="annot"><span class="annottext">ctextBS :: Ptr Word8
-</span><a href="#local-6989586621679111941"><span class="hs-identifier hs-var">ctextBS</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-211"></span><span>                    </span><span id="local-6989586621679111940"><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111940"><span class="hs-identifier hs-var">ctext</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO CString
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679077343"><span class="annot"><span class="annottext">Ptr Word8
+</span><a href="#local-6989586621679077343"><span class="hs-identifier hs-var">ctextBS</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-211"></span><span>                    </span><span id="local-6989586621679077342"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679077342"><span class="hs-identifier hs-var">ctext</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO CString
 forall a. Int -&gt; IO (Ptr a)
 </span><span class="hs-identifier hs-var">mallocBytes</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111943"><span class="hs-identifier hs-var">len</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679077345"><span class="hs-identifier hs-var">len</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span>
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span>
 </span><span id="line-212"></span><span>                    </span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Ptr Word8 -&gt; Int -&gt; IO ()
 </span><span class="hs-identifier hs-var">I.memcpy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString -&gt; Ptr Word8
 forall a b. Ptr a -&gt; Ptr b
 </span><span class="hs-identifier hs-var">castPtr</span></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111940"><span class="hs-identifier hs-var">ctext</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Word8
-</span><a href="#local-6989586621679111941"><span class="hs-identifier hs-var">ctextBS</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Int -&gt; Ptr Word8
+</span><a href="#local-6989586621679077342"><span class="hs-identifier hs-var">ctext</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Word8
+</span><a href="#local-6989586621679077343"><span class="hs-identifier hs-var">ctextBS</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Int -&gt; Ptr Word8
 forall a b. Ptr a -&gt; Int -&gt; Ptr b
 </span><span class="hs-operator hs-var">`plusPtr`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111944"><span class="hs-identifier hs-var">offset</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="#local-6989586621679077346"><span class="hs-identifier hs-var">offset</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111943"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077345"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-213"></span><span>                    </span><span class="annot"><span class="annottext">CString -&gt; CChar -&gt; IO ()
 forall a. Storable a =&gt; Ptr a -&gt; a -&gt; IO ()
 </span><span class="hs-identifier hs-var">poke</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111940"><span class="hs-identifier hs-var">ctext</span></a></span><span> </span><span class="annot"><span class="annottext">CString -&gt; Int -&gt; CString
+</span><a href="#local-6989586621679077342"><span class="hs-identifier hs-var">ctext</span></a></span><span> </span><span class="annot"><span class="annottext">CString -&gt; Int -&gt; CString
 forall a b. Ptr a -&gt; Int -&gt; Ptr b
 </span><span class="hs-operator hs-var">`plusPtr`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679111943"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CChar</span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679077345"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CChar
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CChar</span></span><span class="hs-special">)</span><span>
 </span><span id="line-214"></span><span>                    </span><span class="annot"><span class="annottext">CEntityHandler
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679111940"><span class="hs-identifier hs-var">ctext</span></a></span><span>
-</span><span id="line-215"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CEntityHandler
+</span><a href="#local-6989586621679077342"><span class="hs-identifier hs-var">ctext</span></a></span><span>
+</span><span id="line-215"></span><span>            </span><span class="annot"><span class="annottext">Maybe ByteString
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CEntityHandler
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">CString
 forall a. Ptr a

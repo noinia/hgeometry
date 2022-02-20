@@ -436,7 +436,7 @@ instance forall k1 k2 (a :: k1) (b :: k2). Control.DeepSeq.NFData (a Data.Type.E
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Functor.Identity.Identity a)
 instance Control.DeepSeq.NFData Data.Void.Void
 instance Control.DeepSeq.NFData GHC.Natural.Natural
-instance Control.DeepSeq.NFData (Data.Fixed.Fixed a)
+instance forall k (a :: k). Control.DeepSeq.NFData (Data.Fixed.Fixed a)
 instance Control.DeepSeq.NFData (a -> b)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (GHC.Real.Ratio a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Complex.Complex a)

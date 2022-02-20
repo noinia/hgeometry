@@ -55,22 +55,22 @@ TransparentBackground :: Background
 data Crop
 NoCrop :: Crop
 Crop :: Crop
-instance GHC.Classes.Ord Ipe.IpeRender.Options
-instance GHC.Classes.Eq Ipe.IpeRender.Options
-instance GHC.Show.Show Ipe.IpeRender.Options
-instance GHC.Enum.Enum Ipe.IpeRender.Crop
-instance GHC.Classes.Ord Ipe.IpeRender.Crop
-instance GHC.Classes.Eq Ipe.IpeRender.Crop
-instance GHC.Read.Read Ipe.IpeRender.Crop
-instance GHC.Show.Show Ipe.IpeRender.Crop
+instance GHC.Enum.Enum Ipe.IpeRender.FileType
+instance GHC.Classes.Ord Ipe.IpeRender.FileType
+instance GHC.Classes.Eq Ipe.IpeRender.FileType
 instance GHC.Enum.Enum Ipe.IpeRender.Background
 instance GHC.Classes.Ord Ipe.IpeRender.Background
 instance GHC.Classes.Eq Ipe.IpeRender.Background
 instance GHC.Read.Read Ipe.IpeRender.Background
 instance GHC.Show.Show Ipe.IpeRender.Background
-instance GHC.Enum.Enum Ipe.IpeRender.FileType
-instance GHC.Classes.Ord Ipe.IpeRender.FileType
-instance GHC.Classes.Eq Ipe.IpeRender.FileType
+instance GHC.Enum.Enum Ipe.IpeRender.Crop
+instance GHC.Classes.Ord Ipe.IpeRender.Crop
+instance GHC.Classes.Eq Ipe.IpeRender.Crop
+instance GHC.Read.Read Ipe.IpeRender.Crop
+instance GHC.Show.Show Ipe.IpeRender.Crop
+instance GHC.Classes.Ord Ipe.IpeRender.Options
+instance GHC.Classes.Eq Ipe.IpeRender.Options
+instance GHC.Show.Show Ipe.IpeRender.Options
 instance GHC.Show.Show Ipe.IpeRender.FileType
 
 
@@ -110,7 +110,7 @@ module Ipe.Path
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_asvc r_aDCo. Iso (Path r_asvc) (Path r_aDCo) (LSeq 1 (PathSegment r_asvc)) (LSeq 1 (PathSegment r_aDCo))
+pathSegments :: forall r_akue r_apU1. Iso (Path r_akue) (Path r_apU1) (LSeq 1 (PathSegment r_akue)) (LSeq 1 (PathSegment r_apU1))
 
 -- | Paths
 --   
@@ -125,14 +125,14 @@ EllipseSegment :: Ellipse r -> PathSegment r
 ArcSegment :: PathSegment r
 SplineSegment :: PathSegment r
 ClosedSplineSegment :: PathSegment r
-_PolyLineSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) (PolyLine 2 () r_aqqp)
-_PolygonPath :: forall r_aqqp. Prism' (PathSegment r_aqqp) (SimplePolygon () r_aqqp)
-_CubicBezierSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) (BezierSpline 3 2 r_aqqp)
-_QuadraticBezierSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) (BezierSpline 2 2 r_aqqp)
-_EllipseSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) (Ellipse r_aqqp)
-_ArcSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) ()
-_SplineSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) ()
-_ClosedSplineSegment :: forall r_aqqp. Prism' (PathSegment r_aqqp) ()
+_PolyLineSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) (PolyLine 2 () r_ajrh)
+_PolygonPath :: forall r_ajrh. Prism' (PathSegment r_ajrh) (SimplePolygon () r_ajrh)
+_CubicBezierSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) (BezierSpline 3 2 r_ajrh)
+_QuadraticBezierSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) (BezierSpline 2 2 r_ajrh)
+_EllipseSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) (Ellipse r_ajrh)
+_ArcSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) ()
+_SplineSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) ()
+_ClosedSplineSegment :: forall r_ajrh. Prism' (PathSegment r_ajrh) ()
 
 -- | type that represents a path in ipe.
 data Operation r
@@ -145,15 +145,15 @@ ClosedSpline :: [Point 2 r] -> Operation r
 ClosePath :: Operation r
 CurveTo :: Point 2 r -> Point 2 r -> Point 2 r -> Operation r
 QCurveTo :: Point 2 r -> Point 2 r -> Operation r
-_MoveTo :: forall r_aDCB. Prism' (Operation r_aDCB) (Point 2 r_aDCB)
-_LineTo :: forall r_aDCB. Prism' (Operation r_aDCB) (Point 2 r_aDCB)
-_CurveTo :: forall r_aDCB. Prism' (Operation r_aDCB) (Point 2 r_aDCB, Point 2 r_aDCB, Point 2 r_aDCB)
-_QCurveTo :: forall r_aDCB. Prism' (Operation r_aDCB) (Point 2 r_aDCB, Point 2 r_aDCB)
-_Ellipse :: forall r_aDCB. Prism' (Operation r_aDCB) (Matrix 3 3 r_aDCB)
-_ArcTo :: forall r_aDCB. Prism' (Operation r_aDCB) (Matrix 3 3 r_aDCB, Point 2 r_aDCB)
-_Spline :: forall r_aDCB. Prism' (Operation r_aDCB) [Point 2 r_aDCB]
-_ClosedSpline :: forall r_aDCB. Prism' (Operation r_aDCB) [Point 2 r_aDCB]
-_ClosePath :: forall r_aDCB. Prism' (Operation r_aDCB) ()
+_MoveTo :: forall r_apUe. Prism' (Operation r_apUe) (Point 2 r_apUe)
+_LineTo :: forall r_apUe. Prism' (Operation r_apUe) (Point 2 r_apUe)
+_CurveTo :: forall r_apUe. Prism' (Operation r_apUe) (Point 2 r_apUe, Point 2 r_apUe, Point 2 r_apUe)
+_QCurveTo :: forall r_apUe. Prism' (Operation r_apUe) (Point 2 r_apUe, Point 2 r_apUe)
+_Ellipse :: forall r_apUe. Prism' (Operation r_apUe) (Matrix 3 3 r_apUe)
+_ArcTo :: forall r_apUe. Prism' (Operation r_apUe) (Matrix 3 3 r_apUe, Point 2 r_apUe)
+_Spline :: forall r_apUe. Prism' (Operation r_apUe) [Point 2 r_apUe]
+_ClosedSpline :: forall r_apUe. Prism' (Operation r_apUe) [Point 2 r_apUe]
+_ClosePath :: forall r_apUe. Prism' (Operation r_apUe) ()
 instance Data.Traversable.Traversable Ipe.Path.Operation
 instance Data.Foldable.Foldable Ipe.Path.Operation
 instance GHC.Base.Functor Ipe.Path.Operation
@@ -210,7 +210,7 @@ instance (GHC.Classes.Eq l, GHC.Classes.Eq r) => GHC.Classes.Eq (Ipe.PathParser.
 instance (GHC.Show.Show l, GHC.Show.Show r) => GHC.Show.Show (Ipe.PathParser.Either' l r)
 instance (GHC.Base.Semigroup l, GHC.Base.Semigroup r) => GHC.Base.Semigroup (Ipe.PathParser.Either' l r)
 instance (GHC.Base.Semigroup l, GHC.Base.Semigroup r, GHC.Base.Monoid r) => GHC.Base.Monoid (Ipe.PathParser.Either' l r)
-instance Data.Fixed.HasResolution p => Ipe.PathParser.Coordinate (Data.Fixed.Fixed p)
+instance forall k (p :: k). Data.Fixed.HasResolution p => Ipe.PathParser.Coordinate (Data.Fixed.Fixed p)
 instance Ipe.PathParser.Coordinate GHC.Types.Double
 instance Ipe.PathParser.Coordinate GHC.Types.Float
 instance Ipe.PathParser.Coordinate (GHC.Real.Ratio GHC.Integer.Type.Integer)
@@ -308,45 +308,45 @@ Opacity :: AttributeUniverse
 Tiling :: AttributeUniverse
 Gradient :: AttributeUniverse
 Clip :: AttributeUniverse
-type LayerSym0 = 'Layer
-type MatrixSym0 = 'Matrix
-type PinSym0 = 'Pin
-type TransformationsSym0 = 'Transformations
-type StrokeSym0 = 'Stroke
-type FillSym0 = 'Fill
-type PenSym0 = 'Pen
-type SizeSym0 = 'Size
-type DashSym0 = 'Dash
-type LineCapSym0 = 'LineCap
-type LineJoinSym0 = 'LineJoin
-type FillRuleSym0 = 'FillRule
-type ArrowSym0 = 'Arrow
-type RArrowSym0 = 'RArrow
-type StrokeOpacitySym0 = 'StrokeOpacity
-type OpacitySym0 = 'Opacity
-type TilingSym0 = 'Tiling
-type GradientSym0 = 'Gradient
-type ClipSym0 = 'Clip
-data SAttributeUniverse :: AttributeUniverse -> Type
-[SLayer] :: SAttributeUniverse 'Layer
-[SMatrix] :: SAttributeUniverse 'Matrix
-[SPin] :: SAttributeUniverse 'Pin
-[STransformations] :: SAttributeUniverse 'Transformations
-[SStroke] :: SAttributeUniverse 'Stroke
-[SFill] :: SAttributeUniverse 'Fill
-[SPen] :: SAttributeUniverse 'Pen
-[SSize] :: SAttributeUniverse 'Size
-[SDash] :: SAttributeUniverse 'Dash
-[SLineCap] :: SAttributeUniverse 'LineCap
-[SLineJoin] :: SAttributeUniverse 'LineJoin
-[SFillRule] :: SAttributeUniverse 'FillRule
-[SArrow] :: SAttributeUniverse 'Arrow
-[SRArrow] :: SAttributeUniverse 'RArrow
-[SStrokeOpacity] :: SAttributeUniverse 'StrokeOpacity
-[SOpacity] :: SAttributeUniverse 'Opacity
-[STiling] :: SAttributeUniverse 'Tiling
-[SGradient] :: SAttributeUniverse 'Gradient
-[SClip] :: SAttributeUniverse 'Clip
+type LayerSym0 = 'Layer :: AttributeUniverse
+type MatrixSym0 = 'Matrix :: AttributeUniverse
+type PinSym0 = 'Pin :: AttributeUniverse
+type TransformationsSym0 = 'Transformations :: AttributeUniverse
+type StrokeSym0 = 'Stroke :: AttributeUniverse
+type FillSym0 = 'Fill :: AttributeUniverse
+type PenSym0 = 'Pen :: AttributeUniverse
+type SizeSym0 = 'Size :: AttributeUniverse
+type DashSym0 = 'Dash :: AttributeUniverse
+type LineCapSym0 = 'LineCap :: AttributeUniverse
+type LineJoinSym0 = 'LineJoin :: AttributeUniverse
+type FillRuleSym0 = 'FillRule :: AttributeUniverse
+type ArrowSym0 = 'Arrow :: AttributeUniverse
+type RArrowSym0 = 'RArrow :: AttributeUniverse
+type StrokeOpacitySym0 = 'StrokeOpacity :: AttributeUniverse
+type OpacitySym0 = 'Opacity :: AttributeUniverse
+type TilingSym0 = 'Tiling :: AttributeUniverse
+type GradientSym0 = 'Gradient :: AttributeUniverse
+type ClipSym0 = 'Clip :: AttributeUniverse
+data SAttributeUniverse z_aLsX
+[SLayer] :: SAttributeUniverse ('Layer :: AttributeUniverse)
+[SMatrix] :: SAttributeUniverse ('Matrix :: AttributeUniverse)
+[SPin] :: SAttributeUniverse ('Pin :: AttributeUniverse)
+[STransformations] :: SAttributeUniverse ('Transformations :: AttributeUniverse)
+[SStroke] :: SAttributeUniverse ('Stroke :: AttributeUniverse)
+[SFill] :: SAttributeUniverse ('Fill :: AttributeUniverse)
+[SPen] :: SAttributeUniverse ('Pen :: AttributeUniverse)
+[SSize] :: SAttributeUniverse ('Size :: AttributeUniverse)
+[SDash] :: SAttributeUniverse ('Dash :: AttributeUniverse)
+[SLineCap] :: SAttributeUniverse ('LineCap :: AttributeUniverse)
+[SLineJoin] :: SAttributeUniverse ('LineJoin :: AttributeUniverse)
+[SFillRule] :: SAttributeUniverse ('FillRule :: AttributeUniverse)
+[SArrow] :: SAttributeUniverse ('Arrow :: AttributeUniverse)
+[SRArrow] :: SAttributeUniverse ('RArrow :: AttributeUniverse)
+[SStrokeOpacity] :: SAttributeUniverse ('StrokeOpacity :: AttributeUniverse)
+[SOpacity] :: SAttributeUniverse ('Opacity :: AttributeUniverse)
+[STiling] :: SAttributeUniverse ('Tiling :: AttributeUniverse)
+[SGradient] :: SAttributeUniverse ('Gradient :: AttributeUniverse)
+[SClip] :: SAttributeUniverse ('Clip :: AttributeUniverse)
 
 -- | IpeObjects may have attributes. Essentially attributes are (key,value)
 --   pairs. The key is some name. Which attributes an object can have
@@ -377,7 +377,7 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 newtype Attr (f :: TyFun u * -> *) (label :: u)
 GAttr :: Maybe (Apply f label) -> Attr (f :: TyFun u * -> *) (label :: u)
 [_getAttr] :: Attr (f :: TyFun u * -> *) (label :: u) -> Maybe (Apply f label)
-getAttr :: forall f_a1aE7 label_a1aE8 f_a1bRs label_a1bRt. Iso (Attr f_a1aE7 label_a1aE8) (Attr f_a1bRs label_a1bRt) (Maybe (Apply f_a1aE7 label_a1aE8)) (Maybe (Apply f_a1bRs label_a1bRt))
+getAttr :: forall f_aLtM label_aLtN f_aMEe label_aMEf. Iso (Attr f_aLtM label_aLtN) (Attr f_aMEe label_aMEf) (Maybe (Apply f_aLtM label_aLtN)) (Maybe (Apply f_aMEe label_aMEf))
 
 -- | Constructor for constructing an Attr given an actual value.
 pattern Attr :: Apply f label -> Attr f label
@@ -470,8 +470,8 @@ data IpeArrow r
 IpeArrow :: Text -> IpeSize r -> IpeArrow r
 [_arrowName] :: IpeArrow r -> Text
 [_arrowSize] :: IpeArrow r -> IpeSize r
-arrowSize :: forall r_a1bSc r_a1egd. Lens (IpeArrow r_a1bSc) (IpeArrow r_a1egd) (IpeSize r_a1bSc) (IpeSize r_a1egd)
-arrowName :: forall r_a1bSc. Lens' (IpeArrow r_a1bSc) Text
+arrowSize :: forall r_aMEY r_aOOM. Lens (IpeArrow r_aMEY) (IpeArrow r_aOOM) (IpeSize r_aMEY) (IpeSize r_aOOM)
+arrowName :: forall r_aMEY. Lens' (IpeArrow r_aMEY) Text
 
 -- | A normal arrow
 normalArrow :: IpeArrow r
@@ -502,37 +502,37 @@ instance Ipe.Attributes.IpeAttrName 'Ipe.Attributes.Opacity
 instance Ipe.Attributes.IpeAttrName 'Ipe.Attributes.Tiling
 instance Ipe.Attributes.IpeAttrName 'Ipe.Attributes.Gradient
 instance Ipe.Attributes.IpeAttrName 'Ipe.Attributes.Clip
-instance Data.Traversable.Traversable Ipe.Attributes.IpeArrow
-instance Data.Foldable.Foldable Ipe.Attributes.IpeArrow
-instance GHC.Base.Functor Ipe.Attributes.IpeArrow
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpeArrow r)
-instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpeArrow r)
-instance GHC.Classes.Eq Ipe.Attributes.FillType
-instance GHC.Read.Read Ipe.Attributes.FillType
-instance GHC.Show.Show Ipe.Attributes.FillType
-instance Data.Traversable.Traversable Ipe.Attributes.IpeDash
-instance Data.Foldable.Foldable Ipe.Attributes.IpeDash
-instance GHC.Base.Functor Ipe.Attributes.IpeDash
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpeDash r)
-instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpeDash r)
-instance Data.Traversable.Traversable Ipe.Attributes.IpePen
-instance Data.Foldable.Foldable Ipe.Attributes.IpePen
-instance GHC.Base.Functor Ipe.Attributes.IpePen
-instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Attributes.IpePen r)
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpePen r)
-instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpePen r)
+instance GHC.Read.Read Ipe.Attributes.PinType
+instance GHC.Show.Show Ipe.Attributes.PinType
+instance GHC.Classes.Eq Ipe.Attributes.PinType
+instance GHC.Classes.Eq Ipe.Attributes.TransformationTypes
+instance GHC.Read.Read Ipe.Attributes.TransformationTypes
+instance GHC.Show.Show Ipe.Attributes.TransformationTypes
 instance Data.Traversable.Traversable Ipe.Attributes.IpeSize
 instance Data.Foldable.Foldable Ipe.Attributes.IpeSize
 instance GHC.Base.Functor Ipe.Attributes.IpeSize
 instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Attributes.IpeSize r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpeSize r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpeSize r)
-instance GHC.Classes.Eq Ipe.Attributes.TransformationTypes
-instance GHC.Read.Read Ipe.Attributes.TransformationTypes
-instance GHC.Show.Show Ipe.Attributes.TransformationTypes
-instance GHC.Read.Read Ipe.Attributes.PinType
-instance GHC.Show.Show Ipe.Attributes.PinType
-instance GHC.Classes.Eq Ipe.Attributes.PinType
+instance Data.Traversable.Traversable Ipe.Attributes.IpePen
+instance Data.Foldable.Foldable Ipe.Attributes.IpePen
+instance GHC.Base.Functor Ipe.Attributes.IpePen
+instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Attributes.IpePen r)
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpePen r)
+instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpePen r)
+instance Data.Traversable.Traversable Ipe.Attributes.IpeDash
+instance Data.Foldable.Foldable Ipe.Attributes.IpeDash
+instance GHC.Base.Functor Ipe.Attributes.IpeDash
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpeDash r)
+instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpeDash r)
+instance GHC.Classes.Eq Ipe.Attributes.FillType
+instance GHC.Read.Read Ipe.Attributes.FillType
+instance GHC.Show.Show Ipe.Attributes.FillType
+instance Data.Traversable.Traversable Ipe.Attributes.IpeArrow
+instance Data.Foldable.Foldable Ipe.Attributes.IpeArrow
+instance GHC.Base.Functor Ipe.Attributes.IpeArrow
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Attributes.IpeArrow r)
+instance GHC.Show.Show r => GHC.Show.Show (Ipe.Attributes.IpeArrow r)
 instance forall u (ats :: [u]) (f :: Data.Singletons.Internal.TyFun u * -> *). (Data.Vinyl.Core.RMap ats, Data.Vinyl.Core.ReifyConstraint GHC.Show.Show (Ipe.Attributes.Attr f) ats, Data.Vinyl.Core.RecordToList ats, Data.Vinyl.TypeLevel.RecAll (Ipe.Attributes.Attr f) ats GHC.Show.Show) => GHC.Show.Show (Ipe.Attributes.Attributes f ats)
 instance forall u (f :: Data.Singletons.Internal.TyFun u * -> *) (ats :: [u]). (Data.Vinyl.Core.ReifyConstraint GHC.Classes.Eq (Ipe.Attributes.Attr f) ats, Data.Vinyl.Core.RecordToList ats, Data.Vinyl.TypeLevel.RecAll (Ipe.Attributes.Attr f) ats GHC.Classes.Eq) => GHC.Classes.Eq (Ipe.Attributes.Attributes f ats)
 instance forall u (ats :: [u]) (f :: Data.Singletons.Internal.TyFun u * -> *). Data.Vinyl.Core.RecApplicative ats => GHC.Base.Monoid (Ipe.Attributes.Attributes f ats)
@@ -572,8 +572,8 @@ module Ipe.Content
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_a1l9x. Lens' (Image r_a1l9x) ()
-rect :: forall r_a1l9x r_a1ljz. Lens (Image r_a1l9x) (Image r_a1ljz) (Rectangle () r_a1l9x) (Rectangle () r_a1ljz)
+imageData :: forall r_aVsk. Lens' (Image r_aVsk) ()
+rect :: forall r_aVsk r_aVA0. Lens (Image r_aVsk) (Image r_aVA0) (Rectangle () r_aVsk) (Rectangle () r_aVA0)
 
 -- | Text Objects
 data TextLabel r
@@ -587,13 +587,13 @@ width :: MiniPage t -> t
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_a1ljT r_a1m5Z. Lens (IpeSymbol r_a1ljT) (IpeSymbol r_a1m5Z) (Point 2 r_a1ljT) (Point 2 r_a1m5Z)
-symbolName :: forall r_a1ljT. Lens' (IpeSymbol r_a1ljT) Text
+symbolPoint :: forall r_aVAk r_aWmb. Lens (IpeSymbol r_aVAk) (IpeSymbol r_aWmb) (Point 2 r_aVAk) (Point 2 r_aWmb)
+symbolName :: forall r_aVAk. Lens' (IpeSymbol r_aVAk) Text
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_asvc r_aDCo. Iso (Path r_asvc) (Path r_aDCo) (LSeq 1 (PathSegment r_asvc)) (LSeq 1 (PathSegment r_aDCo))
+pathSegments :: forall r_akue r_apU1. Iso (Path r_akue) (Path r_apU1) (LSeq 1 (PathSegment r_akue)) (LSeq 1 (PathSegment r_apU1))
 
 -- | Paths
 --   
@@ -624,12 +624,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpeGroup :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Group r_a1mdn)
-_IpeImage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Image r_a1mdn)
-_IpeTextLabel :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' TextLabel r_a1mdn)
-_IpeMiniPage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' MiniPage r_a1mdn)
-_IpeUse :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' IpeSymbol r_a1mdn)
-_IpePath :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Path r_a1mdn)
+_IpeGroup :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Group r_aWsP)
+_IpeImage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Image r_aWsP)
+_IpeTextLabel :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' TextLabel r_aWsP)
+_IpeMiniPage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' MiniPage r_aWsP)
+_IpeUse :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' IpeSymbol r_aWsP)
+_IpePath :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Path r_aWsP)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -640,15 +640,15 @@ class ToObject i
 mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 type IpeAttributes g r = Attributes' r (AttributesOf g)
 
--- | Attributes' :: * -&gt; [AttributeUniverse] -&gt; *
+-- | Attributes' :: Type -&gt; [AttributeUniverse] -&gt; Type
 type Attributes' r = Attributes (AttrMapSym1 r)
-type family AttributesOf (t :: * -> *) :: [AttributeUniverse]
+type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 
 -- | The mapping between the labels of the the attributes and the types of
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
-type family AttrMap (r :: *) (l :: AttributeUniverse) :: *
-data AttrMapSym1 (r6989586621679333071 :: Type) :: (~>) AttributeUniverse Type
+type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
+data AttrMapSym1 a6989586621679234505 a6989586621679234506
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes
@@ -663,7 +663,6 @@ instance Ipe.Content.ToObject Ipe.Content.TextLabel
 instance Ipe.Content.ToObject Ipe.Content.MiniPage
 instance Ipe.Content.ToObject Ipe.Content.IpeSymbol
 instance Ipe.Content.ToObject Ipe.Path.Path
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeObject r)
 instance Data.Traversable.Traversable Ipe.Content.Group
 instance Data.Foldable.Foldable Ipe.Content.Group
 instance GHC.Base.Functor Ipe.Content.Group
@@ -671,6 +670,7 @@ instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.Group r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.Group r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.IpeObject r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.IpeObject r)
+instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeObject r)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Group r)
 instance GHC.Base.Functor Ipe.Content.IpeObject
 instance Data.Foldable.Foldable Ipe.Content.IpeObject
@@ -695,26 +695,26 @@ instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Tiling
 instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Gradient
 instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Clip
 instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings Ipe.Content.AttrMapSym0
-instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings (Ipe.Content.AttrMapSym1 r6989586621679333071)
+instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings (Ipe.Content.AttrMapSym1 a6989586621679234505)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeSymbol r)
-instance Data.Traversable.Traversable Ipe.Content.IpeSymbol
-instance Data.Foldable.Foldable Ipe.Content.IpeSymbol
-instance GHC.Base.Functor Ipe.Content.IpeSymbol
-instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.IpeSymbol r)
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.IpeSymbol r)
-instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.IpeSymbol r)
-instance Data.Traversable.Traversable Ipe.Content.MiniPage
-instance Data.Foldable.Foldable Ipe.Content.MiniPage
-instance GHC.Base.Functor Ipe.Content.MiniPage
-instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.MiniPage r)
-instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.MiniPage r)
-instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.MiniPage r)
 instance Data.Traversable.Traversable Ipe.Content.TextLabel
 instance Data.Foldable.Foldable Ipe.Content.TextLabel
 instance GHC.Base.Functor Ipe.Content.TextLabel
 instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.TextLabel r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.TextLabel r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.TextLabel r)
+instance Data.Traversable.Traversable Ipe.Content.MiniPage
+instance Data.Foldable.Foldable Ipe.Content.MiniPage
+instance GHC.Base.Functor Ipe.Content.MiniPage
+instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.MiniPage r)
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.MiniPage r)
+instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.MiniPage r)
+instance Data.Traversable.Traversable Ipe.Content.IpeSymbol
+instance Data.Foldable.Foldable Ipe.Content.IpeSymbol
+instance GHC.Base.Functor Ipe.Content.IpeSymbol
+instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.IpeSymbol r)
+instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.IpeSymbol r)
+instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.IpeSymbol r)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.MiniPage r)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.TextLabel r)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Image r)
@@ -732,9 +732,9 @@ module Ipe.Types
 -- | A complete ipe file
 data IpeFile r
 IpeFile :: Maybe IpePreamble -> [IpeStyle] -> NonEmpty (IpePage r) -> IpeFile r
-preamble :: forall r_a1yDK. Lens' (IpeFile r_a1yDK) (Maybe IpePreamble)
-styles :: forall r_a1yDK. Lens' (IpeFile r_a1yDK) [IpeStyle]
-pages :: forall r_a1yDK r_a1yXZ. Lens (IpeFile r_a1yDK) (IpeFile r_a1yXZ) (NonEmpty (IpePage r_a1yDK)) (NonEmpty (IpePage r_a1yXZ))
+preamble :: forall r_a18Wi. Lens' (IpeFile r_a18Wi) (Maybe IpePreamble)
+styles :: forall r_a18Wi. Lens' (IpeFile r_a18Wi) [IpeStyle]
+pages :: forall r_a18Wi r_a19aU. Lens (IpeFile r_a18Wi) (IpeFile r_a19aU) (NonEmpty (IpePage r_a18Wi)) (NonEmpty (IpePage r_a19aU))
 
 -- | Convenience constructor for creating an ipe file without preamble and
 --   with the default stylesheet.
@@ -751,9 +751,9 @@ singlePageFromContent :: [IpeObject r] -> IpeFile r
 --   a list of views.
 data IpePage r
 IpePage :: [LayerName] -> [View] -> [IpeObject r] -> IpePage r
-layers :: forall r_a1yzy. Lens' (IpePage r_a1yzy) [LayerName]
-views :: forall r_a1yzy. Lens' (IpePage r_a1yzy) [View]
-content :: forall r_a1yzy r_a1yDh. Lens (IpePage r_a1yzy) (IpePage r_a1yDh) [IpeObject r_a1yzy] [IpeObject r_a1yDh]
+layers :: forall r_a18Sb. Lens' (IpePage r_a18Sb) [LayerName]
+views :: forall r_a18Sb. Lens' (IpePage r_a18Sb) [View]
+content :: forall r_a18Sb r_a18VP. Lens (IpePage r_a18Sb) (IpePage r_a18VP) [IpeObject r_a18Sb] [IpeObject r_a18VP]
 
 -- | Creates an empty page with one layer and view.
 emptyPage :: IpePage r
@@ -801,12 +801,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpeGroup :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Group r_a1mdn)
-_IpeImage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Image r_a1mdn)
-_IpeTextLabel :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' TextLabel r_a1mdn)
-_IpeMiniPage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' MiniPage r_a1mdn)
-_IpeUse :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' IpeSymbol r_a1mdn)
-_IpePath :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Path r_a1mdn)
+_IpeGroup :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Group r_aWsP)
+_IpeImage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Image r_aWsP)
+_IpeTextLabel :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' TextLabel r_aWsP)
+_IpeMiniPage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' MiniPage r_aWsP)
+_IpeUse :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' IpeSymbol r_aWsP)
+_IpePath :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Path r_aWsP)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -819,7 +819,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_asvc r_aDCo. Iso (Path r_asvc) (Path r_aDCo) (LSeq 1 (PathSegment r_asvc)) (LSeq 1 (PathSegment r_aDCo))
+pathSegments :: forall r_akue r_apU1. Iso (Path r_akue) (Path r_apU1) (LSeq 1 (PathSegment r_akue)) (LSeq 1 (PathSegment r_apU1))
 
 -- | Paths
 --   
@@ -840,8 +840,8 @@ ClosedSplineSegment :: PathSegment r
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_a1ljT r_a1m5Z. Lens (IpeSymbol r_a1ljT) (IpeSymbol r_a1m5Z) (Point 2 r_a1ljT) (Point 2 r_a1m5Z)
-symbolName :: forall r_a1ljT. Lens' (IpeSymbol r_a1ljT) Text
+symbolPoint :: forall r_aVAk r_aWmb. Lens (IpeSymbol r_aVAk) (IpeSymbol r_aWmb) (Point 2 r_aVAk) (Point 2 r_aWmb)
+symbolName :: forall r_aVAk. Lens' (IpeSymbol r_aVAk) Text
 
 -- | Groups and Objects
 --   
@@ -862,20 +862,20 @@ width :: MiniPage t -> t
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_a1l9x. Lens' (Image r_a1l9x) ()
-rect :: forall r_a1l9x r_a1ljz. Lens (Image r_a1l9x) (Image r_a1ljz) (Rectangle () r_a1l9x) (Rectangle () r_a1ljz)
+imageData :: forall r_aVsk. Lens' (Image r_aVsk) ()
+rect :: forall r_aVsk r_aVA0. Lens (Image r_aVsk) (Image r_aVA0) (Rectangle () r_aVsk) (Rectangle () r_aVA0)
 type IpeBitmap = Text
 type IpeAttributes g r = Attributes' r (AttributesOf g)
 
--- | Attributes' :: * -&gt; [AttributeUniverse] -&gt; *
+-- | Attributes' :: Type -&gt; [AttributeUniverse] -&gt; Type
 type Attributes' r = Attributes (AttrMapSym1 r)
-type family AttributesOf (t :: * -> *) :: [AttributeUniverse]
+type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 
 -- | The mapping between the labels of the the attributes and the types of
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
-type family AttrMap (r :: *) (l :: AttributeUniverse) :: *
-data AttrMapSym1 (r6989586621679333071 :: Type) :: (~>) AttributeUniverse Type
+type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
+data AttrMapSym1 a6989586621679234505 a6989586621679234506
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes
@@ -1167,7 +1167,7 @@ iO' :: HasDefaultIpeOut g => g -> IpeObject (NumType g)
 -- | Class that specifies a default conversion from a geometry type g into
 --   an ipe object.
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where {
-    type family DefaultIpeOut g :: * -> *;
+    type family DefaultIpeOut g :: Type -> Type;
 }
 defIO :: HasDefaultIpeOut g => IpeOut g (DefaultIpeOut g) (NumType g)
 ipeMark :: Text -> IpeOut (Point 2 r) IpeSymbol r
@@ -1327,7 +1327,7 @@ instance Ipe.Writer.IpeWriteText GHC.Types.Float
 instance Ipe.Writer.IpeWriteText GHC.Types.Int
 instance Ipe.Writer.IpeWriteText GHC.Integer.Type.Integer
 instance Ipe.Writer.IpeWriteText (Data.RealNumber.Rational.RealNumber p)
-instance Data.Fixed.HasResolution p => Ipe.Writer.IpeWriteText (Data.Fixed.Fixed p)
+instance forall k (p :: k). Data.Fixed.HasResolution p => Ipe.Writer.IpeWriteText (Data.Fixed.Fixed p)
 instance GHC.Real.Integral a => Ipe.Writer.IpeWriteText (GHC.Real.Ratio a)
 instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.Point.Internal.Point 2 r)
 instance Ipe.Writer.IpeWriteText v => Ipe.Writer.IpeWriteText (Ipe.Value.IpeValue v)
@@ -1395,21 +1395,21 @@ Options :: Export -> PageRange -> Maybe (PageNumber, ViewNumber) -> MarkedView -
 [runLatex] :: Options -> Bool
 [nozip] :: Options -> NoZip
 defaultOptions :: Options
-instance GHC.Classes.Eq Ipe.IpeToIpe.Options
-instance GHC.Show.Show Ipe.IpeToIpe.Options
-instance GHC.Classes.Eq Ipe.IpeToIpe.PageRange
-instance GHC.Show.Show Ipe.IpeToIpe.PageRange
-instance GHC.Enum.Enum Ipe.IpeToIpe.NoZip
-instance GHC.Classes.Eq Ipe.IpeToIpe.NoZip
-instance GHC.Show.Show Ipe.IpeToIpe.NoZip
-instance GHC.Enum.Enum Ipe.IpeToIpe.MarkedView
-instance GHC.Classes.Eq Ipe.IpeToIpe.MarkedView
-instance GHC.Show.Show Ipe.IpeToIpe.MarkedView
+instance GHC.Enum.Enum Ipe.IpeToIpe.FileType
+instance GHC.Classes.Eq Ipe.IpeToIpe.FileType
 instance GHC.Enum.Enum Ipe.IpeToIpe.Export
 instance GHC.Classes.Eq Ipe.IpeToIpe.Export
 instance GHC.Show.Show Ipe.IpeToIpe.Export
-instance GHC.Enum.Enum Ipe.IpeToIpe.FileType
-instance GHC.Classes.Eq Ipe.IpeToIpe.FileType
+instance GHC.Enum.Enum Ipe.IpeToIpe.MarkedView
+instance GHC.Classes.Eq Ipe.IpeToIpe.MarkedView
+instance GHC.Show.Show Ipe.IpeToIpe.MarkedView
+instance GHC.Enum.Enum Ipe.IpeToIpe.NoZip
+instance GHC.Classes.Eq Ipe.IpeToIpe.NoZip
+instance GHC.Show.Show Ipe.IpeToIpe.NoZip
+instance GHC.Classes.Eq Ipe.IpeToIpe.PageRange
+instance GHC.Show.Show Ipe.IpeToIpe.PageRange
+instance GHC.Classes.Eq Ipe.IpeToIpe.Options
+instance GHC.Show.Show Ipe.IpeToIpe.Options
 instance GHC.Show.Show Ipe.IpeToIpe.FileType
 
 
@@ -1419,9 +1419,9 @@ module Ipe
 -- | A complete ipe file
 data IpeFile r
 IpeFile :: Maybe IpePreamble -> [IpeStyle] -> NonEmpty (IpePage r) -> IpeFile r
-preamble :: forall r_a1yDK. Lens' (IpeFile r_a1yDK) (Maybe IpePreamble)
-styles :: forall r_a1yDK. Lens' (IpeFile r_a1yDK) [IpeStyle]
-pages :: forall r_a1yDK r_a1yXZ. Lens (IpeFile r_a1yDK) (IpeFile r_a1yXZ) (NonEmpty (IpePage r_a1yDK)) (NonEmpty (IpePage r_a1yXZ))
+preamble :: forall r_a18Wi. Lens' (IpeFile r_a18Wi) (Maybe IpePreamble)
+styles :: forall r_a18Wi. Lens' (IpeFile r_a18Wi) [IpeStyle]
+pages :: forall r_a18Wi r_a19aU. Lens (IpeFile r_a18Wi) (IpeFile r_a19aU) (NonEmpty (IpePage r_a18Wi)) (NonEmpty (IpePage r_a19aU))
 
 -- | Convenience constructor for creating an ipe file without preamble and
 --   with the default stylesheet.
@@ -1487,9 +1487,9 @@ toIpeSelectionXML :: IpeWrite t => t -> Maybe ByteString
 --   a list of views.
 data IpePage r
 IpePage :: [LayerName] -> [View] -> [IpeObject r] -> IpePage r
-layers :: forall r_a1yzy. Lens' (IpePage r_a1yzy) [LayerName]
-views :: forall r_a1yzy. Lens' (IpePage r_a1yzy) [View]
-content :: forall r_a1yzy r_a1yDh. Lens (IpePage r_a1yzy) (IpePage r_a1yDh) [IpeObject r_a1yzy] [IpeObject r_a1yDh]
+layers :: forall r_a18Sb. Lens' (IpePage r_a18Sb) [LayerName]
+views :: forall r_a18Sb. Lens' (IpePage r_a18Sb) [View]
+content :: forall r_a18Sb r_a18VP. Lens (IpePage r_a18Sb) (IpePage r_a18VP) [IpeObject r_a18Sb] [IpeObject r_a18VP]
 
 -- | Creates an empty page with one layer and view.
 emptyPage :: IpePage r
@@ -1537,12 +1537,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpePath :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Path r_a1mdn)
-_IpeUse :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' IpeSymbol r_a1mdn)
-_IpeGroup :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Group r_a1mdn)
-_IpeTextLabel :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' TextLabel r_a1mdn)
-_IpeMiniPage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' MiniPage r_a1mdn)
-_IpeImage :: forall r_a1mdn. Prism' (IpeObject r_a1mdn) (IpeObject' Image r_a1mdn)
+_IpePath :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Path r_aWsP)
+_IpeUse :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' IpeSymbol r_aWsP)
+_IpeGroup :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Group r_aWsP)
+_IpeTextLabel :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' TextLabel r_aWsP)
+_IpeMiniPage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' MiniPage r_aWsP)
+_IpeImage :: forall r_aWsP. Prism' (IpeObject r_aWsP) (IpeObject' Image r_aWsP)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -1555,7 +1555,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_asvc r_aDCo. Iso (Path r_asvc) (Path r_aDCo) (LSeq 1 (PathSegment r_asvc)) (LSeq 1 (PathSegment r_aDCo))
+pathSegments :: forall r_akue r_apU1. Iso (Path r_akue) (Path r_apU1) (LSeq 1 (PathSegment r_akue)) (LSeq 1 (PathSegment r_apU1))
 
 -- | Paths
 --   
@@ -1576,8 +1576,8 @@ ClosedSplineSegment :: PathSegment r
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_a1ljT r_a1m5Z. Lens (IpeSymbol r_a1ljT) (IpeSymbol r_a1m5Z) (Point 2 r_a1ljT) (Point 2 r_a1m5Z)
-symbolName :: forall r_a1ljT. Lens' (IpeSymbol r_a1ljT) Text
+symbolPoint :: forall r_aVAk r_aWmb. Lens (IpeSymbol r_aVAk) (IpeSymbol r_aWmb) (Point 2 r_aVAk) (Point 2 r_aWmb)
+symbolName :: forall r_aVAk. Lens' (IpeSymbol r_aVAk) Text
 
 -- | Groups and Objects
 --   
@@ -1598,20 +1598,20 @@ width :: MiniPage t -> t
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_a1l9x. Lens' (Image r_a1l9x) ()
-rect :: forall r_a1l9x r_a1ljz. Lens (Image r_a1l9x) (Image r_a1ljz) (Rectangle () r_a1l9x) (Rectangle () r_a1ljz)
+imageData :: forall r_aVsk. Lens' (Image r_aVsk) ()
+rect :: forall r_aVsk r_aVA0. Lens (Image r_aVsk) (Image r_aVA0) (Rectangle () r_aVsk) (Rectangle () r_aVA0)
 type IpeBitmap = Text
 type IpeAttributes g r = Attributes' r (AttributesOf g)
 
--- | Attributes' :: * -&gt; [AttributeUniverse] -&gt; *
+-- | Attributes' :: Type -&gt; [AttributeUniverse] -&gt; Type
 type Attributes' r = Attributes (AttrMapSym1 r)
-type family AttributesOf (t :: * -> *) :: [AttributeUniverse]
+type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 
 -- | The mapping between the labels of the the attributes and the types of
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
-type family AttrMap (r :: *) (l :: AttributeUniverse) :: *
-data AttrMapSym1 (r6989586621679333071 :: Type) :: (~>) AttributeUniverse Type
+type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
+data AttrMapSym1 a6989586621679234505 a6989586621679234506
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes
