@@ -11,6 +11,11 @@
   Fractional constraint; Num is sufficient. However, in turn we now do
   need Ord rather than just Eq. That seemed a worthwile tradeoff though.
 - Cleaning up the public API by hiding several internal modules.
+- Introduced the 'HasSquaredEuclideanDistance' class describing
+  geometry types for which we can compute the squared distance from a
+  point to a geometry, and added instances for some of the basic
+  geometries.
+- Fixed a bug in computing lengths to open line segments.
 
 ** 0.13
 
