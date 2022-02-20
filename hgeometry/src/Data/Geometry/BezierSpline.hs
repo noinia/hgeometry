@@ -362,7 +362,7 @@ flat :: (KnownNat n, Arity d, Ord r, Fractional r) => r -> BezierSpline n d r ->
 flat r b = let p = fst $ endPoints b
                q = snd $ endPoints b
                s = ClosedLineSegment (p :+ ()) (q :+ ())
-               e t = sqDistanceToSeg (evaluate b t) s < r ^ 2
+               e t = squaredEuclideanDistTo (evaluate b t) s < r ^ 2
            in qdA p q < r ^ 2 || all e [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 -- seems this is now covered by approximate
@@ -394,7 +394,7 @@ flat r b = let p = fst $ endPoints b
 --   twice the given tolerance. May return false negatives but not false positives.
 colinear :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> Bool
 colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
-  where ld = flip sqDistanceTo (lineThrough a d)
+  where ld = flip squaredEuclideanDistTo (lineThrough a d)
         sameSide = ccw a d b == ccw a d c
         maxDist = max (ld b) (ld c)
         sqBound
@@ -426,13 +426,13 @@ parameterInterior treshold b p | sqrad (F.toList $ view controlPoints b) < (0.5 
       recurse2 = 0.5 + 0.5 * parameterInterior treshold b2 p
       chb1     = _simplePolygon $ convexHullB b1
       chb2     = _simplePolygon $ convexHullB b2
-      in1      = sqDistanceToPolygon p chb1 < treshold^2
-      in2      = sqDistanceToPolygon p chb2 < treshold^2
+      in1      = squaredEuclideanDistTo p chb1 < treshold^2
+      in2      = squaredEuclideanDistTo p chb2 < treshold^2
       result |     in1 &&     in2 = betterFit b p recurse1 recurse2
              |     in2 && not in2 = recurse1
              | not in2 &&     in2 = recurse2
-             | sqDistanceToPolygon p chb1 < sqDistanceToPolygon p chb2 = recurse1
-             | otherwise                                               = recurse2
+             | squaredEuclideanDistTo p chb1 < squaredEuclideanDistTo p chb2 = recurse1
+             | otherwise                                                     = recurse2
   in result
 
 -- | Given a point on (or close to) the extension of a Bezier curve, return the corresponding
@@ -458,16 +458,6 @@ betterFit b p t u =
   let q = evaluate b t
       r = evaluate b u
   in if qdA q p < qdA r p then t else u
-
-sqDistanceToPolygon :: (Ord r, Fractional r) => Point 2 r -> SimplePolygon p r -> r
-sqDistanceToPolygon point poly | insidePolygon point poly = 0
-                               | otherwise = minimum $ map (sqDistanceToSeg point) $ listEdges poly
-
-
---------------------------------------------------------------------------------
-
-
-
 
 --------------------------------------------------------------------------------
 

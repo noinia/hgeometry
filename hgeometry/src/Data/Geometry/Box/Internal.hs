@@ -298,3 +298,26 @@ instance IsBoxable (Box d p r) where
 
 instance IsBoxable c => IsBoxable (c :+ e) where
   boundingBox = boundingBox . view core
+
+--------------------------------------------------------------------------------
+-- * Distances
+
+instance (Num r, Ord r) => HasSquaredEuclideanDistance (Box 2 p r) where
+  pointClosestToWithDistance q bx =
+      case ((q^.xCoord) `R.inRange` hor, (q^.yCoord) `R.inRange` ver) of
+                      (False,False) -> if q^.yCoord < b
+                                       then closest (Point2 l b) (Point2 r b)
+                                       else closest (Point2 l t) (Point2 r t)
+                      (True, False) -> if q^.yCoord < b
+                                       then (q&yCoord .~ b, sq $ q^.yCoord - b)
+                                       else (q&yCoord .~ t, sq $ q^.yCoord - t)
+                      (False, True) -> if q^.xCoord < l
+                                       then (q&yCoord .~ l, sq $ q^.xCoord - l)
+                                       else (q&yCoord .~ r, sq $ q^.xCoord - r)
+                      (True, True)  -> (q, 0) -- point lies inside the box
+    where
+      Vector2 hor@(R.Range' l r) ver@(R.Range' b t) = extent bx
+      sq x = x*x
+      closest p1 p2 = let d1 = squaredEuclideanDist q p1
+                          d2 = squaredEuclideanDist q p2
+                      in if d1 < d2 then (p1, d1) else (p2, d2)
