@@ -29,21 +29,22 @@ import           Control.Lens hiding (views)
 import           Data.Bitraversable
 import           Data.Ext
 import           Data.Geometry.Box (Rectangle)
-import qualified Ipe.Attributes as AT
-import           Ipe.Attributes hiding (Matrix)
-import           Ipe.Color
-import           Ipe.Layer
-import           Ipe.Path
 import           Data.Geometry.Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Kind
 import           Data.Proxy
 import           Data.Singletons.TH (genDefunSymbols)
 import           Data.Text (Text)
 import           Data.Traversable
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.TypeLevel (AllConstrained)
+import qualified Ipe.Attributes as AT
+import           Ipe.Attributes hiding (Matrix)
+import           Ipe.Color
+import           Ipe.Layer
+import           Ipe.Path
 
 --------------------------------------------------------------------------------
 -- | Image Objects
@@ -123,7 +124,7 @@ instance Fractional r => IsTransformable (IpeSymbol r) where
 -- | The mapping between the labels of the the attributes and the types of the
 -- attributes with these labels. For example, the 'Matrix' label/attribute should
 -- have a value of type 'Matrix 3 3 r'.
-type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
+type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type where
   AttrMap r 'Layer          = LayerName
   AttrMap r AT.Matrix       = Matrix 3 3 r
   AttrMap r Pin             = PinType
@@ -195,7 +196,7 @@ instance TraverseIpeAttr Clip     where traverseIpeAttr f = traverseAttr (traver
 -- | Group Attributes
 
 -- -- | Now that we know what a Path is we can define the Attributes of a Group.
--- type family GroupAttrElf (r :: *) (s :: GroupAttributeUniverse) :: * where
+-- type family GroupAttrElf (r :: Type) (s :: GroupAttributeUniverse) :: Type where
 --   GroupAttrElf r Clip = Path r -- strictly we event want this to be a closed path I guess
 
 -- genDefunSymbols [''GroupAttrElf]
@@ -209,11 +210,20 @@ newtype Group r = Group [IpeObject r] deriving (Show,Eq,Functor,Foldable,Travers
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
 
+instance Fractional r => IsTransformable (IpeObject r) where
+  transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
+  transformBy t (IpeImage i)     = IpeImage     $ i&core %~ transformBy t
+  transformBy t (IpeTextLabel i) = IpeTextLabel $ i&core %~ transformBy t
+  transformBy t (IpeMiniPage i)  = IpeMiniPage  $ i&core %~ transformBy t
+  transformBy t (IpeUse i)       = IpeUse       $ i&core %~ transformBy t
+  transformBy t (IpePath i)      = IpePath      $ i&core %~ transformBy t
+
 instance Fractional r => IsTransformable (Group r) where
   transformBy t (Group s) = Group $ fmap (transformBy t) s
 
 
-type family AttributesOf (t :: * -> *) :: [AttributeUniverse] where
+
+type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse] where
   AttributesOf Group     = GroupAttributes
   AttributesOf Image     = CommonAttributes
   AttributesOf TextLabel = CommonAttributes
@@ -222,7 +232,7 @@ type family AttributesOf (t :: * -> *) :: [AttributeUniverse] where
   AttributesOf Path      = PathAttributes
 
 
--- | Attributes' :: * -> [AttributeUniverse] -> *
+-- | Attributes' :: Type -> [AttributeUniverse] -> Type
 type Attributes' r = Attributes (AttrMapSym1 r)
 
 type IpeAttributes g r = Attributes' r (AttributesOf g)
@@ -303,13 +313,6 @@ instance ToObject MiniPage   where mkIpeObject = IpeMiniPage
 instance ToObject IpeSymbol  where mkIpeObject = IpeUse
 instance ToObject Path       where mkIpeObject = IpePath
 
-instance Fractional r => IsTransformable (IpeObject r) where
-  transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
-  transformBy t (IpeImage i)     = IpeImage     $ i&core %~ transformBy t
-  transformBy t (IpeTextLabel i) = IpeTextLabel $ i&core %~ transformBy t
-  transformBy t (IpeMiniPage i)  = IpeMiniPage  $ i&core %~ transformBy t
-  transformBy t (IpeUse i)       = IpeUse       $ i&core %~ transformBy t
-  transformBy t (IpePath i)      = IpePath      $ i&core %~ transformBy t
 
 -- | Shorthand for constructing ipeObjects
 ipeObject'     :: ToObject i => i r -> IpeAttributes i r -> IpeObject r

@@ -101,7 +101,7 @@ fromPoints = fmap PolyLine . LSeq.eval @2 . LSeq.fromList
 
 -- | pre: The input list contains at least two points
 fromPointsUnsafe :: [Point d r :+ p] -> PolyLine d p r
-fromPointsUnsafe = PolyLine . LSeq.forceLSeq (C @ 2) . LSeq.fromList
+fromPointsUnsafe = PolyLine . LSeq.forceLSeq (C @2) . LSeq.fromList
 
 -- | pre: The input list contains at least two points. All extra vields are
 -- initialized with mempty.
