@@ -1,3 +1,4 @@
+{-# LANGUAGE  AllowAmbiguousTypes  #-}
 module Data.Geometry.Point.Class where
 
 import           Control.Lens
@@ -28,14 +29,14 @@ vector' = asAPoint . lens Internal.toVec (const Internal.Point)
 
 -- | Get the coordinate in a given dimension
 --
--- >>> Point3 1 2 3 ^. coord (C :: C 2)
+-- >>> Point3 1 2 3 ^. coord @2
 -- 2
--- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
+-- >>> Point3 1 2 3 & coord @1 .~ 10
 -- Point3 10 2 3
--- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
+-- >>> Point3 1 2 3 & coord @3 %~ (+1)
 -- Point3 1 2 4
-coord   :: (1 <= i, i <= d, KnownNat i, Arity d, AsAPoint p) => proxy i -> Lens' (p d r) r
-coord i = asAPoint.Internal.coord i
+coord :: forall i p d r. (1 <= i, i <= d, KnownNat i, Arity d, AsAPoint p) => Lens' (p d r) r
+coord = asAPoint.Internal.coord @i
 
 -- | Get the coordinate in a given dimension. This operation is unsafe in the
 -- sense that no bounds are checked. Consider using `coord` instead.
@@ -60,7 +61,7 @@ instance AsAPoint Point where
 -- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 10 2
 xCoord :: (1 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
-xCoord = coord (C :: C 1)
+xCoord = coord @1
 {-# INLINABLE xCoord #-}
 
 -- | Shorthand to access the second coordinate C 2
@@ -70,7 +71,7 @@ xCoord = coord (C :: C 1)
 -- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 1 3 3
 yCoord :: (2 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
-yCoord = coord (C :: C 2)
+yCoord = coord @2
 {-# INLINABLE yCoord #-}
 
 -- | Shorthand to access the third coordinate C 3
@@ -80,5 +81,5 @@ yCoord = coord (C :: C 2)
 -- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 1 2 4
 zCoord :: (3 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
-zCoord = coord (C :: C 3)
+zCoord = coord @3
 {-# INLINABLE zCoord #-}

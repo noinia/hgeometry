@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Point
@@ -175,15 +176,15 @@ unsafeCoord i = vector . singular (ix (i-1))
 
 -- | Get the coordinate in a given dimension
 --
--- >>> Point3 1 2 3 ^. coord (C :: C 2)
+-- >>> Point3 1 2 3 ^. coord @2
 -- 2
--- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
+-- >>> Point3 1 2 3 & coord @1 .~ 10
 -- Point3 10 2 3
--- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
+-- >>> Point3 1 2 3 & coord @3 %~ (+1)
 -- Point3 1 2 4
-coord   :: forall proxy i d r. (1 <= i, i <= d, Arity d, KnownNat i)
-        => proxy i -> Lens' (Point d r) r
-coord _ = unsafeCoord $ fromIntegral (natVal $ C @i)
+coord :: forall i d r. (1 <= i, i <= d, Arity d, KnownNat i)
+      => Lens' (Point d r) r
+coord = unsafeCoord $ fromIntegral (natVal $ C @i)
 {-# INLINABLE coord #-}
 
  -- somehow these rules don't fire

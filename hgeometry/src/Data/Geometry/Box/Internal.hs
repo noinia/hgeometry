@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE InstanceSigs  #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Box.Internal
@@ -225,13 +226,13 @@ size = fmap R.width . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
--- >>> widthIn (C :: C 1) (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn @1 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- 1
--- >>> widthIn (C :: C 3) (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn @3 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- 3
-widthIn   :: forall proxy p i d r. (Arity d, Arity (i - 1), Num r, ((i-1)+1) <= d)
-          => proxy i -> Box d p r -> r
-widthIn _ = view (V.element (C :: C (i - 1))) . size
+widthIn :: forall i p d r. (Arity d, Arity (i - 1), Num r, ((i-1)+1) <= d)
+        => Box d p r -> r
+widthIn = view (V.element @(i-1)) . size
 
 
 -- | Same as 'widthIn' but with a runtime int instead of a static dimension.
@@ -257,7 +258,7 @@ type Rectangle = Box 2
 -- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0
 width :: Num r => Rectangle p r -> r
-width = widthIn (C :: C 1)
+width = widthIn @1
 
 -- |
 -- >>> height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
@@ -265,7 +266,7 @@ width = widthIn (C :: C 1)
 -- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0
 height :: Num r => Rectangle p r -> r
-height = widthIn (C :: C 2)
+height = widthIn @2
 
 
 --------------------------------------------------------------------------------

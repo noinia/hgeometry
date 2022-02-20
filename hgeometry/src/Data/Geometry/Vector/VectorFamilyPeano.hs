@@ -19,6 +19,7 @@ import           Control.Applicative (liftA2)
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
 import           Data.Aeson (FromJSON(..),ToJSON(..))
+import           Data.Kind
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
@@ -67,11 +68,11 @@ instance ImplicitPeano d => ImplicitPeano (S d) where
 -- | Datatype representing d dimensional vectors. The default implementation is
 -- based n VectorFixed. However, for small vectors we automatically select a
 -- more efficient representation.
-newtype VectorFamily (d :: PeanoNum) (r :: *) =
+newtype VectorFamily (d :: PeanoNum) (r :: Type) =
   VectorFamily { _unVF :: VectorFamilyF d r }
 
 -- | Mapping between the implementation type, and the actual implementation.
-type family VectorFamilyF (d :: PeanoNum) :: * -> * where
+type family VectorFamilyF (d :: PeanoNum) :: Type -> Type where
   VectorFamilyF Z        = Const ()
   VectorFamilyF One      = Identity
   VectorFamilyF Two      = L2.V2

@@ -189,6 +189,6 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
 asSingleton   :: (1 <= d, Arity d)
               => PointSet (LSeq 1) d p r
               -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
-asSingleton v = case v^.element (C :: C 0) of
+asSingleton v = case v^.element @0 of
                   (p :<| s) | null s -> Left p -- only one lement
                   _                  -> Right $ unsafeCoerce v

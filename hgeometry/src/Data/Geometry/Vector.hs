@@ -174,7 +174,7 @@ sameDirection u v = and $ FV.zipWith (\ux vx -> signum ux == signum vx) u v
 -- >>> Vector2 1 2 & xComponent .~ 10
 -- Vector2 10 2
 xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
-xComponent = element (C :: C 0)
+xComponent = element @0
 {-# INLINABLE xComponent #-}
 
 -- | Shorthand to access the second component
@@ -184,7 +184,7 @@ xComponent = element (C :: C 0)
 -- >>> Vector2 1 2 & yComponent .~ 10
 -- Vector2 1 10
 yComponent :: (2 <= d, Arity d) => Lens' (Vector d r) r
-yComponent = element (C :: C 1)
+yComponent = element @1
 {-# INLINABLE yComponent #-}
 
 -- | Shorthand to access the third component
@@ -194,5 +194,5 @@ yComponent = element (C :: C 1)
 -- >>> Vector3 1 2 3 & zComponent .~ 10
 -- Vector3 1 2 10
 zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
-zComponent = element (C :: C 2)
+zComponent = element @2
 {-# INLINABLE zComponent #-}

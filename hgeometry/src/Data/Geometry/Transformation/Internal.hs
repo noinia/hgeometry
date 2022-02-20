@@ -15,7 +15,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
-import           Data.Proxy
 import           GHC.TypeLits
 
 {- $setup
@@ -174,7 +173,7 @@ scaleUniformlyBy = transformBy  . uniformScaling
 
 transRow     :: forall n r. (Arity n, Arity (n + 1), Num r)
              => Int -> r -> Vector (n + 1) r
-transRow i x = set (V.element (Proxy :: Proxy n)) x $ mkRow i 1
+transRow i x = set (V.element @n) x $ mkRow i 1
 
 --------------------------------------------------------------------------------
 -- * 3D Rotations
