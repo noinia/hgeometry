@@ -75,7 +75,7 @@ Tree (EMST), based on computing the Delaunay Triangulation,
 polygons,
 * an *O(1/εᵈn log n)* time algorithm for constructing a Well-Separated pair
   decomposition,
-* the classic (optimal) *O(n log n)* time divide and conquer algorithm to
+* the classical *O(n log n)* time divide and conquer algorithm to
   compute the closest pair among a set of *n* points in ℝ²,
 * an *O(nm)* time algorithm to compute the discrete Fréchet
   distance of two sequences of points (curves) of length *n* and
@@ -93,8 +93,9 @@ structures. In particular,
 * A one dimensional Segment Tree. The base tree is static.
 * A one dimensional Interval Tree. The base tree is static.
 * A KD-Tree. The base tree is static.
-* An *O(n log n)* size planar point location data structure supporting
-  *O(log n)* queries.
+* An *O(n log n)* size data structure for *O(log n)* time vertical ray
+  shooting queries. This then essentially gives us the same space and
+  query time for planar point location queries.
 
 There is also support for working with planar subdivisions. As a
 result, [hgeometry-combinatorial] also includes a data structure for
