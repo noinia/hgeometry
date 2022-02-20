@@ -23,6 +23,7 @@ module Ipe.PathParser
 import           Data.Bifunctor
 import           Data.Char (isSpace)
 import           Data.Ext (ext)
+import           Data.Fixed
 import           Data.Functor (($>))
 import           Data.Geometry.Box
 import           Data.Geometry.Matrix
@@ -57,6 +58,7 @@ defaultFromSeq x (Just (l,y)) = let x'          = fromInteger x
                                     z           = if x' < 0 then (-1) else 1
                                 in z * (abs x' + asDecimal y')
 
+instance HasResolution p => Coordinate (Fixed p)
 instance Coordinate Double
 instance Coordinate Float
 instance Coordinate (Ratio Integer)

@@ -9,7 +9,7 @@
 --
 -- Ear clipping triangulation algorithms. The baseline algorithm runs in \( O(n^2) \)
 -- but has a low constant factor overhead. The z-order hashed variant runs in
--- \( O(n \log n) \).
+-- \( O(n \log n) \) time.
 --
 -- References:
 --

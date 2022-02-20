@@ -32,6 +32,7 @@ spec =
         intersects3 = intersects
         intersects2 :: Point 2 R -> LineSegment 2 () R -> Bool
         intersects2 = intersects
+    testI
 
     -- it "handles zero length segments correctly" $ do
     --   let zeroSegment = ClosedLineSegment (Point2 0 0 :+ ()) (Point2 0 0 :+ ())
@@ -104,3 +105,23 @@ arrowAsOpen ((LineSegment' (p :+ a) (q :+ b)) :+ ats) =
     f x = case ats^?_Attr x of
             Just _  -> Open
             Nothing -> Closed
+
+
+
+test1,test2,test3,test4 :: LineSegment 2 () Int
+test1 = ClosedLineSegment (ext $ Point2 0 10) (ext $ Point2 0 20)
+
+test2 = OpenLineSegment (ext $ Point2 0 5) (ext $ Point2 0 20)
+
+test3 = ClosedLineSegment (ext $ Point2 0 21) (ext $ Point2 0 5)
+
+test4 = LineSegment (Open $ ext $ Point2 0 10) (Closed $ ext $ Point2 0 9)
+
+-- test = withRank (Vector2 0 1) test1 test4
+
+
+testI = describe "some manual intersection tests" $ do
+          it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
+          it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True

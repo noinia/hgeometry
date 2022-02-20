@@ -27,6 +27,7 @@ module Data.Geometry.Point.Internal
   , cmpByDistanceTo
   , cmpByDistanceTo'
   , squaredEuclideanDist, euclideanDist
+  , HasSquaredEuclideanDistance(..)
   ) where
 
 import           Control.DeepSeq
@@ -242,6 +243,12 @@ instance PointFunctor (Point d) where
   pmap f = f
 
 
+
+--------------------------------------------------------------------------------
+
+
+
+
 --------------------------------------------------------------------------------
 -- * Functions specific to Two Dimensional points
 
@@ -256,7 +263,6 @@ cmpByDistanceTo'  :: (Ord r, Num r, Arity d)
 cmpByDistanceTo' c p q = cmpByDistanceTo (c^.core) (p^.core) (q^.core)
 
 
-
 -- | Squared Euclidean distance between two points
 squaredEuclideanDist :: (Num r, Arity d) => Point d r -> Point d r -> r
 squaredEuclideanDist = qdA
@@ -264,3 +270,33 @@ squaredEuclideanDist = qdA
 -- | Euclidean distance between two points
 euclideanDist :: (Floating r, Arity d) => Point d r -> Point d r -> r
 euclideanDist = distanceA
+
+
+--------------------------------------------------------------------------------
+-- * Distances
+
+class HasSquaredEuclideanDistance g where
+  -- | Given a point q and a geometry g, the squared Euclidean distance between q and g.
+  squaredEuclideanDistTo   :: (Num (NumType g), Arity (Dimension g))
+                           => Point (Dimension g) (NumType g) -> g -> NumType g
+  squaredEuclideanDistTo q = snd . pointClosestToWithDistance q
+
+  -- | Given q and g, computes the point p in g closest to q according
+  -- to the Squared Euclidean distance.
+  pointClosestTo   :: (Num (NumType g), Arity (Dimension g))
+                   => Point (Dimension g) (NumType g) -> g
+                   -> Point (Dimension g) (NumType g)
+  pointClosestTo q = fst . pointClosestToWithDistance q
+
+  -- | Given q and g, computes the point p in g closest to q according
+  -- to the Squared Euclidean distance. Returns both the point and the
+  -- distance realized by this point.
+  pointClosestToWithDistance     :: (Num (NumType g), Arity (Dimension g))
+                                 => Point (Dimension g) (NumType g) -> g
+                                 -> (Point (Dimension g) (NumType g), NumType g)
+  pointClosestToWithDistance q g = let p = pointClosestTo q g
+                                   in (p, squaredEuclideanDist p q)
+  {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}
+
+instance (Num r, Arity d) => HasSquaredEuclideanDistance (Point d r) where
+  pointClosestTo _ p = p

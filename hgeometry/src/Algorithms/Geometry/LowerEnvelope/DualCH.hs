@@ -36,7 +36,7 @@ type UpperHullAlgorithm a r = NonEmpty (Point 2 r :+ a) -> NonEmpty (Point 2 r :
 -- the upper convex hull. It uses the given algorithm to do so
 --
 -- running time: O(time required by the given upper hull algorithm)
-lowerEnvelopeWith        :: (Fractional r, Eq r)
+lowerEnvelopeWith        :: (Fractional r, Ord r)
                          => UpperHullAlgorithm (Line 2 r :+ a) r
                          -> NonEmpty (Line 2 r :+ a) -> Envelope a r
 lowerEnvelopeWith chAlgo = fromPts . chAlgo . toPts

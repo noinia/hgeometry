@@ -6,31 +6,31 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  David Himmelstrup
 --
--- \( O(n \log n) \) algorithm for determining if any two line segments overlap.
+-- \( O(n \log n) \) algorithm for determining if any two sets of line segments intersect.
 --
 -- Shamos and Hoey.
 --
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
   ( hasIntersections
-  , segmentsOverlap
   ) where
 
-import           Control.Lens              hiding (contains)
+import           Control.Lens hiding (contains)
 import           Data.Ext
 import           Data.Geometry.Interval
-import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Triangle
-import qualified Data.List                 as L
+
+import           Data.Intersection
+import qualified Data.List as L
 import           Data.Maybe
-import           Data.Ord                  (Down (..), comparing)
-import qualified Data.Set                  as SS
-import qualified Data.Set.Util             as SS
+import           Data.Ord (Down (..), comparing)
+import qualified Data.Set as SS
+import qualified Data.Set.Util as SS
 
 -- import           Data.RealNumber.Rational
--- import Debug.Trace
+import Debug.Trace
+import Data.Geometry.Polygon
 
 --------------------------------------------------------------------------------
 
@@ -57,6 +57,7 @@ asEventPts s =
 
 -- | The actual event consists of a point and its type
 data Event p r = Insert (LineSegment 2 p r) | Delete (LineSegment 2 p r)
+               deriving (Show)
 
 eventPoint :: Event p r -> Point 2 r
 eventPoint (Insert l) = l^.start.core
@@ -92,7 +93,7 @@ sweep (Delete l:eq) ss =
   where
     p = l^.end.core
     (before,_contains,after) = splitBeforeAfter p ss
-    overlaps = fromMaybe False (segmentsOverlap <$> sl <*> sr)
+    overlaps = fromMaybe False (intersects <$> sl <*> sr)
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` after
@@ -101,13 +102,21 @@ sweep (Insert l@(LineSegment startPoint _endPoint):eq) ss =
   where
     p = l^.start.core
     (before,contains,after) = splitBeforeAfter p ss
-    endOverlap =
-      (not (null contains) && isClosed startPoint)
-    overlaps = or [ fromMaybe False (segmentsOverlap l <$> sl)
-                  , fromMaybe False (segmentsOverlap l <$> sr) ]
+
+    -- Check whether the endpoint is contained in one of the existing
+    -- segments. The only segments that could qualify are the ones in
+    -- 'contains'. Hence check only those. Note that it is not
+    -- sufficient just to check whether 'contains' is empty or not,
+    -- since there may be segments whose endpoint is open and coincides with p.
+    endOverlap = isClosed startPoint && any (p `intersects`) contains
+
+    overlaps =
+      or [ fromMaybe False (intersects l <$> sl)
+                  , fromMaybe False (intersects l <$> sr) ]
     sl = SS.lookupMax before
     sr = SS.lookupMin after
     ss' = before `SS.join` SS.singleton l `SS.join` after
+
 
 -- | split the status structure around p.
 -- the result is (before,contains,after)
@@ -139,33 +148,43 @@ endsAt p (LineSegment _ b) = fmap (view core) b == Open p
 --------------------------------------------------------------------------------
 -- * Finding New events
 
-segmentsOverlap :: (Num r, Ord r) => LineSegment 2 p r -> LineSegment 2 p r -> Bool
-segmentsOverlap a@(LineSegment aStart aEnd) b =
-    (isClosed aStart && (aStart^.unEndPoint.core) `onSegment2` b) ||
-    (isClosed aEnd && (aEnd^.unEndPoint.core) `onSegment2` b) ||
-    (opposite (ccw' (a^.start) (b^.start) (a^.end)) (ccw' (a^.start) (b^.end) (a^.end)) &&
-    not (onTriangleRelaxed (a^.end.core) t1) &&
-    not (onTriangleRelaxed (a^.start.core) t2))
-  where
-    opposite CW CCW = True
-    opposite CCW CW = True
-    opposite _ _    = False
-    t1 = Triangle (a^.start) (b^.start) (b^.end)
-    t2 = Triangle (a^.end) (b^.start) (b^.end)
+-- -- | Given two segments test if they intersect. Why don't we simply use 'intersect'
+-- segmentsOverlap :: (Num r, Ord r) => LineSegment 2 p r -> LineSegment 2 p r -> Bool
+-- segmentsOverlap a@(LineSegment aStart aEnd) b =
+--     (isClosed aStart && (aStart^.unEndPoint.core) `intersects` b) ||
+--     (isClosed aEnd && (aEnd^.unEndPoint.core) `intersects` b) ||
+--     (opposite (ccw' (a^.start) (b^.start) (a^.end)) (ccw' (a^.start) (b^.end) (a^.end)) &&
+--     not (onTriangleRelaxed (a^.end.core) t1) &&
+--     not (onTriangleRelaxed (a^.start.core) t2))
+--   where
+--     opposite CW CCW = True
+--     opposite CCW CW = True
+--     opposite _ _    = False
+--     t1 = Triangle (a^.start) (b^.start) (b^.end)
+--     t2 = Triangle (a^.end) (b^.start) (b^.end)
 
--- Copied from Data.Geometry.LineSegment.Internal. Delete when PR#62 is merged.
-onSegment2                          :: (Ord r, Num r)
-                                    => Point 2 r -> LineSegment 2 p r -> Bool
-p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEndPoint) of
-    CoLinear -> let su = p `onSide` lu
-                    sv = p `onSide` lv
-                in su /= sv
-                && ((su == OnLine) `implies` isClosed u)
-                && ((sv == OnLine) `implies` isClosed v)
-    _        -> False
-  where
-    (Line _ w) = perpendicularTo $ supportingLine s
-    lu = Line (u^.unEndPoint.core) w
-    lv = Line (v^.unEndPoint.core) w
 
-    a `implies` b = b || not a
+bug' = hasIntersections $ listEdges bug
+
+bug :: SimplePolygon () Int
+bug = fromPoints . map ext $ [
+  Point2 144 592
+  , Point2 336 624
+  , Point2 320 544
+  , Point2 240 624
+  ]
+
+s1, s2 :: LineSegment 2 () Int
+s1 = read "LineSegment (Closed (Point2 240 620 :+ ())) (Open (Point2 320 544 :+ ()))"
+s2 = read "LineSegment (Closed (Point2 144 592 :+ ())) (Open (Point2 336 624 :+ ()))"
+
+tr s x = traceShow (s <> " : ", x) x
+
+edges' :: [LineSegment 2 () Int]
+edges' = [ LineSegment (Closed (Point2 240 624 :+ ())) (Open (Point2 320 544 :+ ()))
+--         , LineSegment (Closed (Point2 320 544 :+ ())) (Open (Point2 336 624 :+ ()))
+         , LineSegment (Closed (Point2 336 624 :+ ())) (Open (Point2 144 592 :+ ()))
+         , LineSegment (Closed (Point2 144 592 :+ ())) (Open (Point2 240 624 :+ ()))
+         ]
+
+-- ah, I guess it selects the wrong predecessor/successor seg, since they overlap at the endpoint.

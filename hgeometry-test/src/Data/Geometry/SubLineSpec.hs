@@ -67,4 +67,4 @@ seg2 = OpenLineSegment (ext (Point2 1 1)) (ext (Point2 5 5))
 -- | Original def of onSubline
 onSubLineOrig                 :: (Ord r, Fractional r, Arity d)
                           => Point d r -> SubLine d p r r -> Bool
-onSubLineOrig p (SubLine l r) = toOffset' p l `inInterval` r
+onSubLineOrig p (SubLine l r) = toOffset' p l `intersectsInterval` r

@@ -24,6 +24,7 @@ module Algorithms.Geometry.VisibilityPolygon.Lee
   , compareAroundEndPoint
   ) where
 
+import           Algorithms.Geometry.RayShooting.Naive
 import           Control.Lens
 import           Control.Monad ((<=<))
 import           Data.Bifunctor (first)
@@ -38,9 +39,9 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
 import           Data.Intersection
 import qualified Data.List as List
-import qualified Data.List.Util as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List.Util as List
 import           Data.Maybe (mapMaybe, isJust)
 import           Data.Ord (comparing)
 import           Data.RealNumber.Rational
@@ -416,13 +417,6 @@ initialIntersection q ray s =
       Just z  -> Just $ squaredEuclideanDist q z
   where
     seg = first (const ()) s
-
--- | Labels the segments with the distance from q to their
--- intersection point with the ray.
-labelWithDistances       :: (Ord r, Fractional r)
-                         => Point 2 r -> HalfLine 2 r -> [LineSegment 2 p r :+ b]
-                         -> [LineSegment 2 p r :+ (Maybe r, b)]
-labelWithDistances q ray = map (\(s :+ e) -> s :+ (initialIntersection q ray s, e))
 
 --------------------------------------------------------------------------------
 -- * Comparators for the rotating ray

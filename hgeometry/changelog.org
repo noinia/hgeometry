@@ -10,6 +10,15 @@
 - Removed proxy arguments to PlaneGraph and PlanarSubdivision
 - Computing the OuterFaceDart in a PlaneGraph now only requires an ~Num r~
   constraint rather than a ~Fractional r~ constraint.
+- Testing if lines and/or line segments intersect no longer requires a
+  Fractional constraint; Num is sufficient. However, in turn we now do
+  need Ord rather than just Eq. That seemed a worthwile tradeoff though.
+- Cleaning up the public API by hiding several internal modules.
+- Introduced the 'HasSquaredEuclideanDistance' class describing
+  geometry types for which we can compute the squared distance from a
+  point to a geometry, and added instances for some of the basic
+  geometries.
+- Fixed a bug in computing lengths to open line segments.
 
 ** 0.13
 

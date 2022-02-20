@@ -13,15 +13,13 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
   ( intersections
   , interiorIntersections
-    -- FIXME: Move ordAt and xCoordAt to Data.Geometry.LineSegment?
-  , ordAt
-  , xCoordAt
   ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Function (on)
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -32,9 +30,9 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
+import qualified Data.Set as EQ -- event queue
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set.Util as SS -- status struct
-import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 
@@ -55,7 +53,7 @@ intersections ss = merge $ sweep pts SS.empty
 --  \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 interiorIntersections :: (Ord r, Fractional r)
                        => [LineSegment 2 p r] -> Intersections p r
-interiorIntersections = M.filter (not . isEndPointIntersection) . intersections
+interiorIntersections = M.filter isInteriorIntersection . intersections
 
 -- | Computes the event points for a given line segment
 asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
@@ -63,7 +61,7 @@ asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
                in [Event p (Start $ s :| []), Event q (End s)]
 
 -- | Group the segments with the intersection points
-merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
+merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r] -> Intersections p r
 merge = foldr (\(IntersectionPoint p a) -> M.insertWith (<>) p a) M.empty
 
 -- | Group the startpoints such that segments with the same start point
@@ -73,8 +71,10 @@ groupStarts []                       = []
 groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
   where
     (ss',rest) = L.span sameStart es
-    -- sort the segs on lower endpoint
-    ss         = let (x:|xs) = s in x :| (xs ++ concatMap startSegs ss')
+    -- FIXME: this seems to keep the segments on decreasing y, increasing x. shouldn't we
+    -- sort them cyclically around p instead?
+    ss         = let (x:|xs) = s
+                 in x :| (xs ++ concatMap startSegs ss')
 
     sameStart (Event q (Start _)) = p == q
     sameStart _                   = False
@@ -109,10 +109,6 @@ instance Ord r => Ord (Event p r) where
                                         EQ -> s `compare` t
                                         x  -> x
 
--- | An ordering that is decreasing on y, increasing on x
-ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
-ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
-
 -- | Get the segments that start at the given event point
 startSegs   :: Event p r -> [LineSegment 2 p r]
 startSegs e = case eventType e of
@@ -121,24 +117,6 @@ startSegs e = case eventType e of
 
 --------------------------------------------------------------------------------
 
--- | Compare based on the x-coordinate of the intersection with the horizontal
--- line through y
-ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
-ordAt y = comparing (xCoordAt y)
-
--- | Given a y coord and a line segment that intersects the horizontal line
--- through y, compute the x-coordinate of this intersection point.
---
--- note that we will pretend that the line segment is closed, even if it is not
-xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
-      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
-                                    -- precondition it intersects the sweep
-                                    -- line, we return the x-coord of the
-                                    -- rightmost endpoint.
-      | otherwise    = px + alpha * (qx - px)
-  where
-    alpha = (y - py) / (qy - py)
 
 --------------------------------------------------------------------------------
 -- * The Main Sweep
@@ -158,6 +136,202 @@ isClosedStart p (LineSegment s e)
   | p == s^.unEndPoint.core       = isClosed s
   | otherwise                     = isClosed e
 
+
+-- data AssocKind b a = Start b a | End b a | Neighter a
+
+-- -- | test if the given segment has p as its endpoint, an construct the
+-- -- appropriate associated representing that.
+-- mkAssociated                :: Point 2 r -> LineSegment 2 p r -> AssocKind (LineSegment 2 p r)
+-- mkAssociated p s@(LineSegment a b)
+--   | p == a^.unEndPoint.core = Start a s
+--   | p == b^.unEndPoint.core = End b s
+--   | otherwise               = Neighter s
+
+-- -- -- | We need to report a segment as an segment for starting point p if
+-- -- -- it is a closed segment starting at p, or an open segment starting
+-- -- -- at p that intersects with some other segment.  since the segments
+-- -- -- are given in sorted order around s, we can just look at the next
+-- -- -- segment to see if we should report such an open-ended segment.
+-- -- shouldReportStart   :: Point 2 r -> [LineSegment 2 p r] -> Associated p r
+-- -- shouldReportStart p = go . map (categorize p)
+-- --   where
+-- --     go []     = mempty
+-- --     go (s:ss) = let (xs,ys) = List.span overlapsWith s ss
+-- --                 in case s of
+-- --                      Start (Closed _) s' -> Asso
+
+
+
+
+
+
+-- --     (s@(LineSegment a b):ss)
+-- --         | p == a^.unEndPoint.core =
+
+
+-- --           if isClosed a || overlapsWithNext ss
+-- --                                     then Associated [s] [] [] <> go ss
+-- --         -- | p == b^.unEndPoint.core = Associated [] [s] []
+
+
+
+
+
+
+
+--     _  []                  = mempty
+--     go certainlyReport (s:ss) = let x  = mkAssociated p s
+--                                     x' = then x else mempty
+--                                 in
+
+
+
+--       case shouldReport mp s of
+
+
+
+
+
+--       mkAssociated mp s <> go (Just s) ss
+
+
+--     mkAsscoiated _ s@(LineSegment a b)
+--       | p == a^.unEndPoint.core = if isClosed a ||
+
+
+
+--       = Associated [s] [] []
+--       | p == b^.unEndPoint.core = Associated [] [s] []
+--       | otherwise               = mempty
+
+-- _ []     = []
+
+
+
+-- shouldReportStart _ []     = []
+-- shouldReportStart p (s:ss) = case hasStartingPoint p s of
+--                                Nothing            -> shouldReportStart ss -- don't report the seg
+--                                Just (Closed _, s) -> s : shouldReportStart ss
+--                                Just (Open _, )
+
+
+-- -- [s] | isClosedStart p s = [s]
+-- --                         | otherwise         = []
+-- -- shouldReportStart p (s:s':ss) | isStart p s =
+
+
+
+-- (s:ss) = isClosedStart p s ||
+
+
+-- shouldReport   :: Eq r => Point 2 r -> [LineSegment 2 p r] -> Associated p r
+-- shouldReport p = foldMap (\(s,c) -> case c of
+--                                       Start'   -> Associated [s] [] []
+--                                       End'     -> Associated [] [s] []
+--                                       Neighter -> Associated [] [] [s]
+--                          )
+--                . overlapsOr (\(LineSegment a b,c) -> case c of
+--                                              Start'   -> isClosed a
+--                                              End'     -> isClosed b
+--                                              Neighter -> False
+--                               ) (overlap p)
+--                . map (\s -> (s, categorize p s))
+
+overlap :: Point 2 r -> (LineSegment 2 q r, Cat) -> (LineSegment 2 q r, Cat) -> Bool
+overlap p s1 s2 = go (toStart s1) (toStart s2)
+  where
+    toStart (s@(LineSegment a b),c) = case c of
+                                        Start' -> (s,False)
+                                        End'   -> (LineSegment b a,False) -- flip to start
+                                        Neighter -> (s, True)
+    go = undefined
+
+
+
+
+data Cat = Start' | End' | Neighter
+
+categorize p (LineSegment a b)
+  | p == a^.unEndPoint.core = Start'
+  | p == b^.unEndPoint.core = End'
+  | otherwise               = Neighter
+
+
+
+overlapsOr     :: (a -> Bool)
+               -> (a -> a -> Bool)
+               -> [a]
+               -> [a]
+overlapsOr p q = map fst . filter snd . map (\((a,b),b') -> (a, b || b'))
+               . overlapsWithNeighbour (q `on` fst)
+               . map (\x -> (x, p x))
+
+overlapsWithNeighbour   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithNeighbour p = go0
+  where
+    go0 = \case
+      []     -> []
+      (x:xs) -> go x False xs
+
+    go x b = \case
+      []     -> []
+      (y:ys) -> let b' = p x y
+                in (x,b || b') : go y b' ys
+
+
+
+
+
+
+
+
+
+annotateReport   :: (a -> Bool) -> [a] -> [(a,Bool)]
+annotateReport p = map (\x -> (x, p x))
+
+
+overlapsWithNext'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithNext' p = go
+  where
+    go = \case
+      []           -> []
+      [x]          -> [(x,False)]
+      (x:xs@(y:_)) -> (x,p x y) : go xs
+
+overlapsWithPrev'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithPrev' p = go0
+  where
+    go0 = \case
+      []     -> []
+      (x:xs) -> (x,False) : go x xs
+
+    go x = \case
+      []     -> []
+      (y:ys) -> (y,p x y) : go y ys
+
+
+
+
+
+
+overlapsWithNeighbour2 p = map (\((a,b),b') -> (a, b || b'))
+                         . overlapsWithNext' (p `on` fst)
+                         . overlapsWithPrev' p
+
+shouldBe :: Eq a => a -> a -> Bool
+shouldBe = (==)
+
+propSameAsSeparate p xs = overlapsWithNeighbour p xs `shouldBe` overlapsWithNeighbour2 p xs
+
+test' = overlapsWithNeighbour (==) testOverlapNext
+testOverlapNext = [1,2,3,3,3,5,6,6,8,10,11,34,2,2,3]
+
+-- reportOverlappingBy :: Eq a => (a -> Bool) -> [a] -> [a]
+-- reportOverlappingBy p = \case
+--   []     -> []
+--   (x:xs) -> L.span
+
+
 -- | Handle an event point
 handle                           :: forall r p. (Ord r, Fractional r)
                                  => Event p r -> EventQueue p r -> StatusStructure p r
@@ -168,14 +342,28 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     (before,contains',after) = extractContains p ss
     (ends,contains)          = L.partition (endsAt p) contains'
     -- starting segments, exluding those that have an open starting point
-    starts'  = filter (isClosedStart p) starts
-    toReport = case starts' ++ contains' of
-                 (_:_:_) -> [IntersectionPoint p $ associated (starts' <> ends) contains]
+    starts' = filter (isClosedStart p) starts
+
+
+    -- starts'' = shouldReport p . SS.toAscList $ newSegs
+    -- FIXME: we should look at the starts in-order (around p).
+    -- closed endpoints we should report anyway. For an open endpoint
+    -- we should check if it overlaps with a sucessor or predecessor
+    -- to see if we have to report it.
+
+    -- I think we could get those from the 'toStatusStruct' structure below
+
+    -- any (closed) ending segments at this event point.
+    closedEnds = filter (isClosedStart p) ends
+
+    toReport = case starts' <> contains' of
+                 (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) contains]
                  _       -> []
 
     -- new status structure
     ss' = before `SS.join` newSegs `SS.join` after
     newSegs = toStatusStruct p $ starts ++ contains
+
 
     -- the new eeventqueue
     eq' = foldr EQ.insert eq es
@@ -211,7 +399,7 @@ toStatusStruct p xs = ss `SS.join` hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs
-    ss           = SS.fromListBy (ordAt $ maxY xs) rest
+    ss           = SS.fromListBy (ordAtY $ maxY xs) rest
     hors         = SS.fromListBy (comparing rightEndpoint) hors'
 
     isHorizontal s  = s^.start.core.yCoord == s^.end.core.yCoord
@@ -242,3 +430,11 @@ findNewEvent p l r = match (l `intersect` r) $
   :& H (const Nothing) -- full segment intersectsions are handled
                        -- at insertion time
   :& RNil
+
+
+
+type R = Rational
+
+seg1, seg2 :: LineSegment 2 () R
+seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
+seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 5)

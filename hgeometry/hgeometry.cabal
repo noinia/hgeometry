@@ -50,17 +50,14 @@ library
                     Data.Geometry.Vector
                     Data.Geometry.Vector.VectorFixed
                     Data.Geometry.Vector.VectorFamily
-                    Data.Geometry.Vector.VectorFamilyPeano
 
                     Data.Geometry.Matrix
 
                     -- Data.Geometry.Vector.Vinyl
                     Data.Geometry.Interval
-                    Data.Geometry.Interval.Util
                     Data.Geometry.Point
 
                     Data.Geometry.Line
-                    Data.Geometry.Line.Internal
                     Data.Geometry.LineSegment
                     Data.Geometry.LineSegment.Internal
                     Data.Geometry.SubLine
@@ -96,13 +93,10 @@ library
 
                     Data.Geometry.PlanarSubdivision
                     Data.Geometry.PlanarSubdivision.Raw
-                    Data.Geometry.PlanarSubdivision.Basic
-                    Data.Geometry.PlanarSubdivision.Merge
                     Data.Geometry.PlanarSubdivision.Dynamic
                     Data.Geometry.PlanarSubdivision.TreeRep
 
                     Data.Geometry.Arrangement
-                    Data.Geometry.Arrangement.Internal
 
                     Data.Geometry.RangeTree
                     Data.Geometry.RangeTree.Measure
@@ -186,9 +180,10 @@ library
                     Algorithms.Geometry.SSSP
                     Algorithms.Geometry.SSSP.Naive
 
+                    Algorithms.Geometry.RayShooting.Naive
+
                     -- * Embedded Planar Graphs
                     Data.PlaneGraph
-                    Data.PlaneGraph.Core
                     Data.PlaneGraph.AdjRep
                     Data.PlaneGraph.IO
 
@@ -210,11 +205,18 @@ library
 
                     Algorithms.Geometry.WSPD.Types
 
+                    Data.Geometry.Vector.VectorFamilyPeano
+
                     Data.Geometry.Point.Internal
                     Data.Geometry.Point.Orientation
                     Data.Geometry.Point.Quadrants
                     Data.Geometry.Point.Orientation.Degenerate
                     Data.Geometry.Point.Class
+
+                    Data.Geometry.Line.Internal
+
+
+                    Data.Geometry.Interval.Util
 
                     Algorithms.Geometry.SoS.Expr
                     Algorithms.Geometry.SoS.AsPoint
@@ -223,7 +225,12 @@ library
                     Algorithms.Geometry.SoS.Determinant
                     Algorithms.Geometry.SoS.Sign
 
+                    Data.PlaneGraph.Core
 
+                    Data.Geometry.Arrangement.Internal
+
+                    Data.Geometry.PlanarSubdivision.Basic
+                    Data.Geometry.PlanarSubdivision.Merge
 
   -- other-extensions:
   build-depends:
@@ -233,6 +240,7 @@ library
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
+              -- , multi-containers        >= 0.2
               , dlist                   >= 0.7
               , lens                    >= 4.2
               , semigroupoids           >= 5
@@ -300,6 +308,8 @@ library
                     , DeriveFoldable
                     , DeriveTraversable
                     , DeriveGeneric
+                    , DerivingStrategies
+                    , DerivingVia
 
 
                     , FlexibleInstances
@@ -329,7 +339,7 @@ benchmark benchmarks
                  Algorithms.Geometry.ConvexHull.Bench
                  Algorithms.Geometry.ConvexHull.GrahamV2
                  Algorithms.Geometry.ConvexHull.GrahamFam
-                 Algorithms.Geometry.ConvexHull.GrahamFamPeano
+                 -- Algorithms.Geometry.ConvexHull.GrahamFamPeano
                  Algorithms.Geometry.ConvexHull.GrahamFixed
                  Data.Geometry.Vector.VectorFamily6
                  Algorithms.Geometry.ConvexHull.GrahamFam6

@@ -215,7 +215,7 @@ instance (NFData r, ImplicitArity d) => NFData (VectorFamily d r) where
   {-# INLINE rnf #-}
 
 
-instance (ImplicitPeano d, Hashable r) => Hashable (VectorFamily d r) where
+instance (ImplicitArity d, Hashable r) => Hashable (VectorFamily d r) where
   hashWithSalt = case (implicitPeano :: SingPeano d) of
                    SZ                         -> hashWithSalt
                    (SS SZ)                    -> hashWithSalt
