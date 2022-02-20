@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.RangeTree.Measure
@@ -53,11 +52,11 @@ type (:*:) l r = Product l r
 instance (LabeledMeasure l, LabeledMeasure r) => LabeledMeasure (l :*: r) where
   labeledMeasure xs = Pair (labeledMeasure xs) (labeledMeasure xs)
 
-instance (Semigroup (l a), Semigroup (r a)) => Semigroup ((l :*: r) a) where
-  (Pair l r) <> (Pair l' r') = Pair (l <> l') (r <> r')
+-- instance (Semigroup (l a), Semigroup (r a)) => Semigroup ((l :*: r) a) where
+--   (Pair l r) <> (Pair l' r') = Pair (l <> l') (r <> r')
 
-instance (Monoid (l a), Monoid (r a)) => Monoid ((l :*: r) a) where
-  mempty = Pair mempty mempty
+-- instance (Monoid (l a), Monoid (r a)) => Monoid ((l :*: r) a) where
+--   mempty = Pair mempty mempty
 
 
 
