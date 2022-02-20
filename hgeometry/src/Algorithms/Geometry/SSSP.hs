@@ -38,7 +38,6 @@ import           Data.PlaneGraph                 (FaceId (..), PlaneGraph, Verte
                                                   VertexId, VertexId', dual, graph, incidentEdges,
                                                   leftFace, vertices)
 import qualified Data.PlaneGraph                 as PlaneGraph
-import           Data.Proxy
 import           Data.Tree                       (Tree (Node))
 import qualified Data.Vector                     as V
 import qualified Data.Vector.Circular            as CV
@@ -69,10 +68,11 @@ type SSSP = Vector Int
 --        we're running 'unsafeFromPoints . toPoints' to reset the polygon.
 --        Super silly. Please fix.
 -- | \( O(n \log n) \)
-triangulate :: (Ord r, Fractional r) => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
+triangulate   :: forall s p r. (Ord r, Fractional r)
+              => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
 triangulate p =
   let poly' = snd $ bimapAccumL (\a _ -> (a+1,a)) (,) 0 $ unsafeFromPoints $ toPoints p
-  in triangulate' Proxy poly'
+  in triangulate' @s poly'
 
 -- | \( O(n) \) Single-Source shortest path.
 sssp :: (Ord r, Fractional r)

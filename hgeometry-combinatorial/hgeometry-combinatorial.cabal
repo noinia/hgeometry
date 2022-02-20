@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry-combinatorial
-version:             0.12.0.3
+version:             0.14
 synopsis:            Data structures, and Data types.
 description:
     The Non-geometric data types and algorithms used in HGeometry.
@@ -46,6 +46,7 @@ library
                     -- * Algorithmic Strategies
                     Algorithms.DivideAndConquer
                     Algorithms.BinarySearch
+                    Algorithms.LogarithmicMethod
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
@@ -55,6 +56,9 @@ library
 
 
                     Algorithms.StringSearch.KMP
+
+
+
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
@@ -72,7 +76,7 @@ library
                     Data.Range
 
                     Data.Ext
-                    Data.Ext.Multi
+                    -- Data.Ext.Multi
 
                     Data.LSeq
                     Data.CircularSeq
@@ -106,10 +110,8 @@ library
                     Data.PlanarGraph.Immutable
                     Data.PlanarGraph.AdjRep
                     Data.PlanarGraph.IO
-                    Data.PlanarGraph.Dart
-                    Data.PlanarGraph.Core
-                    Data.PlanarGraph.Dual
                     Data.PlanarGraph.EdgeOracle
+                    Data.PlanarGraph.Dart
 
                     -- * Other
                     System.Random.Shuffle
@@ -121,6 +123,9 @@ library
                     Data.Yaml.Util
 
   other-modules:    Data.PlanarGraph.Internal
+                    Data.PlanarGraph.Core
+                    Data.PlanarGraph.Dual
+
 
   -- other-extensions:
   build-depends:
@@ -129,6 +134,7 @@ library
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
+              -- , data-default
               , dlist                   >= 0.7
               , lens                    >= 4.18
               , contravariant           >= 1.5
@@ -223,6 +229,7 @@ test-suite hspec
 
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
+                 Algorithms.LogarithmicMethodSpec
                  Algorithms.Graph.DFSSpec
                  Algorithms.Graph.BFSSpec
                  Data.RangeSpec
@@ -254,6 +261,7 @@ test-suite hspec
                       , directory
                       , yaml
                       , MonadRandom
+                      , semigroupoids
   -- -- Such a mess:
   -- if impl(ghc == 9.*)
   --   build-depends:      singletons              == 3.*

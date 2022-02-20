@@ -20,11 +20,11 @@ import qualified Data.ByteString.Lazy.Char8 as B8
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Types
-import qualified Data.Geometry.Ipe.Types as Ipe
-import           Data.Geometry.Ipe.Value (IpeValue(..))
+import qualified Ipe.Attributes as IA
+import           Ipe.Color (IpeColor(..))
+import           Ipe.Types
+import qualified Ipe.Types as Ipe
+import           Ipe.Value (IpeValue(..))
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon
@@ -226,7 +226,8 @@ instance IpeToSvgAttr IA.LineJoin   where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.FillRule   where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.Arrow      where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.RArrow     where attrSvg _ = Nothing
-instance IpeToSvgAttr IA.Opacity    where attrSvg _ = Just A.opacity
+instance IpeToSvgAttr IA.StrokeOpacity    where attrSvg _ = Just A.strokeOpacity
+instance IpeToSvgAttr IA.Opacity    where attrSvg _ = Just A.fillOpacity
 instance IpeToSvgAttr IA.Tiling     where attrSvg _ = Nothing
 instance IpeToSvgAttr IA.Gradient   where attrSvg _ = Nothing
 

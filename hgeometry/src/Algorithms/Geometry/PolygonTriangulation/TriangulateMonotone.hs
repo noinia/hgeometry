@@ -47,10 +47,9 @@ data LR = L | R deriving (Show,Eq)
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate        :: (Ord r, Fractional r)
-                   => proxy s -> MonotonePolygon p r
-                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-triangulate px pg' = constructSubdivision px e es (computeDiagonals pg)
+triangulate     :: forall s p r. (Ord r, Fractional r)
+                => MonotonePolygon p r -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+triangulate pg' = constructSubdivision e es (computeDiagonals pg)
   where
     pg     = toCounterClockWiseOrder pg'
     (e:es) = listEdges pg
@@ -59,10 +58,9 @@ triangulate px pg' = constructSubdivision px e es (computeDiagonals pg)
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate'        :: (Ord r, Fractional r)
-                    => proxy s -> MonotonePolygon p r
-                    -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
-triangulate' px pg' = constructGraph px e es (computeDiagonals pg)
+triangulate'     :: forall s p r. (Ord r, Fractional r)
+                 => MonotonePolygon p r-> PlaneGraph s p PolygonEdgeType PolygonFaceData r
+triangulate' pg' = constructGraph e es (computeDiagonals pg)
   where
     pg     = toCounterClockWiseOrder pg'
     (e:es) = listEdges pg

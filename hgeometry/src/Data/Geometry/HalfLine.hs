@@ -120,6 +120,7 @@ type instance IntersectionOf (Point d r) (HalfLine d r) = [ NoIntersection
                                                           , Point d r
                                                           ]
 
+instance (Ord r, Fractional r) => HalfLine 2 r `HasIntersectionWith` Line 2 r
 
 instance (Ord r, Fractional r) => HalfLine 2 r `IsIntersectableWith` Line 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -130,6 +131,7 @@ instance (Ord r, Fractional r) => HalfLine 2 r `IsIntersectableWith` Line 2 r wh
     :& RNil
 
 
+instance (Ord r, Fractional r) => HalfLine 2 r `HasIntersectionWith` HalfLine 2 r
 
 instance (Ord r, Fractional r) => HalfLine 2 r `IsIntersectableWith` HalfLine 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -155,6 +157,8 @@ instance (Ord r, Fractional r) => HalfLine 2 r `IsIntersectableWith` HalfLine 2 
            )
       :& RNil
 
+instance (Ord r, Fractional r) => LineSegment 2 () r `HasIntersectionWith` HalfLine 2 r
+
 instance (Ord r, Fractional r) => LineSegment 2 () r `IsIntersectableWith` HalfLine 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -173,9 +177,11 @@ instance (Ord r, Fractional r) => LineSegment 2 () r `IsIntersectableWith` HalfL
       :& RNil
 
 
+instance (Ord r, Fractional r, Arity d) => Point d r `HasIntersectionWith` HalfLine d r where
+  intersects = onHalfLine
+
 instance (Ord r, Fractional r, Arity d) => Point d r `IsIntersectableWith` HalfLine d r where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  intersects = onHalfLine
   p `intersect` hl | p `intersects` hl = coRec p
                    | otherwise         = coRec NoIntersection
 
@@ -188,6 +194,8 @@ type instance IntersectionOf (HalfLine 2 r) (Rectangle p r) = [ NoIntersection
                                                               , Point 2 r
                                                               , LineSegment 2 () r
                                                               ]
+instance (Ord r, Fractional r)
+         => HalfLine 2 r `HasIntersectionWith` Boundary (Rectangle p r)
 
 instance (Ord r, Fractional r)
          => HalfLine 2 r `IsIntersectableWith` Boundary (Rectangle p r) where
@@ -207,6 +215,8 @@ instance (Ord r, Fractional r)
                       (True,False)  -> coRec $ ClosedLineSegment (ext o) p
                       (True,True)   -> coRec s)
     :& RNil
+instance (Ord r, Fractional r)
+         => HalfLine 2 r `HasIntersectionWith` Rectangle p r
 
 instance (Ord r, Fractional r)
          => HalfLine 2 r `IsIntersectableWith` Rectangle p r where

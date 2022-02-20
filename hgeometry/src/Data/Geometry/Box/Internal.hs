@@ -22,7 +22,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
+import           Data.Geometry.Transformation.Internal
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
@@ -106,6 +106,8 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
+instance (Ord r, Arity d) => Box d p r `HasIntersectionWith` Box d q r
+
 instance (Ord r, Arity d) => Box d p r `IsIntersectableWith` Box d q r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -144,6 +146,9 @@ instance Arity d => Bitraversable (Box d) where
 
 
 type instance IntersectionOf (Point d r) (Box d p r) = '[ NoIntersection, Point d r]
+
+instance (Arity d, Ord r) => Point d r `HasIntersectionWith` Box d p r where
+  intersects = inBox
 
 instance (Arity d, Ord r) => Point d r `IsIntersectableWith` Box d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -199,7 +204,6 @@ insideBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `insideBox` b = FV.and . FV.zipWith R.inRange (toVec p) . fmap toOpenRange . extent $ b
   where
     toOpenRange (R.Range' l r) = R.OpenRange l r
-
 
 -- | Get a vector with the extent of the box in each dimension. Note that the
 -- resulting vector is 0 indexed whereas one would normally count dimensions

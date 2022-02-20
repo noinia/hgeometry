@@ -12,7 +12,11 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld where
 
-import           Algorithms.Geometry.LineSegmentIntersection
+import           Algorithms.Geometry.LineSegmentIntersection( Intersections
+                                                            , IntersectionPoint(..)
+                                                            , Associated(..)
+                                                            , mkIntersectionPoint
+                                                            )
 import           Control.Lens hiding (contains)
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -48,7 +52,11 @@ intersections ss = merge $ sweep pts mempty
 --  \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 interiorIntersections :: (Ord r, Fractional r)
                        => [LineSegment 2 p r] -> Intersections p r
-interiorIntersections = M.filter (not . isEndPointIntersection) . intersections
+interiorIntersections = M.filter isInteriorIntersection . intersections
+
+isInteriorIntersection :: Associated p r -> Bool
+isInteriorIntersection = not . null . _interiorTo
+
 
 -- | Computes the event points for a given line segment
 asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
@@ -56,7 +64,7 @@ asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
                in [Event p (Start $ s :| []), Event q (End s)]
 
 -- | Group the segments with the intersection points
-merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
+merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r] -> Intersections p r
 merge = foldr (\(IntersectionPoint p a) -> M.insertWith (<>) p a) M.empty
 
 -- | Group the startpoints such that segments with the same start point
@@ -113,27 +121,6 @@ startSegs e = case eventType e of
                 _        -> []
 
 --------------------------------------------------------------------------------
-
--- | Compare based on the x-coordinate of the intersection with the horizontal
--- line through y
-ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
-ordAt y = comparing (xCoordAt y)
-
--- | Given a y coord and a line segment that intersects the horizontal line
--- through y, compute the x-coordinate of this intersection point.
---
--- note that we will pretend that the line segment is closed, even if it is not
-xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
-      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
-                                    -- precondition it intersects the sweep
-                                    -- line, we return the x-coord of the
-                                    -- rightmost endpoint.
-      | otherwise    = px + alpha * (qx - px)
-  where
-    alpha = (y - py) / (qy - py)
-
---------------------------------------------------------------------------------
 -- * The Main Sweep
 
 type EventQueue      p r = EQ.Set (Event p r)
@@ -163,7 +150,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     -- starting segments, exluding those that have an open starting point
     starts'  = filter (isClosedStart p) starts
     toReport = case starts' ++ contains' of
-                 (_:_:_) -> [IntersectionPoint p $ associated (starts' <> ends) contains]
+                 (_:_:_) -> [mkIntersectionPoint p (starts' <> ends) contains]
                  _       -> []
 
     -- new status structure
@@ -203,7 +190,7 @@ toStatusStruct p xs = ss <> hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs
-    ss           = SS.fromListBy (ordAt $ maxY xs) rest
+    ss           = SS.fromListBy (ordAtY $ maxY xs) rest
     hors         = SS.fromListBy (comparing rightEndpoint) hors'
 
     isHorizontal s  = s^.start.core.yCoord == s^.end.core.yCoord

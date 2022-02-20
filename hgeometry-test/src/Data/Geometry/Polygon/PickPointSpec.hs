@@ -6,7 +6,7 @@ import Control.Lens
 import Data.Geometry
 import Data.Geometry.Polygon
 import Data.Geometry.Boundary
-import Data.Geometry.Ipe
+import Ipe
 import Test.Hspec
 import           Paths_hgeometry_test
 

@@ -9,15 +9,18 @@ import           Control.Lens
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
 import qualified Data.Map as Map
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup
 import           Options.Applicative
+import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 data Options = Options { _inPath    :: FilePath
                        , _outFile   :: FilePath
@@ -44,18 +47,19 @@ mainWith                          :: Options -> IO ()
 mainWith (Options inFile outFile) = do
     ePage <- readSinglePageFile inFile
     case ePage of
-      Left err                         -> print err
-      Right (page :: IpePage Rational) -> runPage page
+      Left err                  -> print err
+      Right (page :: IpePage R) -> runPage page
   where
     runPage page = do
-      let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asSimplePolygon
+      let polies  :: [SimplePolygon () R :+ IpeAttributes Path R]
+          polies  = readAll page
           polies' = filter (not . hasSelfIntersections . (^.core)) polies
           intersections' = concatMap (Map.keys . interiorIntersections
                                       . listEdges . (^.core)) polies
-          subdivs = map (\(pg :+ _) -> triangulate (Identity PX) pg) polies'
+          subdivs = map (\(pg :+ _) -> triangulate @PX pg) polies'
           triangles' = mapMaybe (^?_2.core._Left)
-                     . concatMap (F.toList.rawFacePolygons) $ subdivs
-          ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
+                     . concatMap (F.toList. internalFacePolygons) $ subdivs
+          -- ofs = map (\s -> faceBoundary (outerFaceId s) s) subdivs
           segs    = map (^._2.core) . concatMap (F.toList . edgeSegments) $ subdivs
           out     = mconcat [ [ iO' pg | pg <- polies ]
                             , [ iO' s  | s  <- segs ]

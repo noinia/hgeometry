@@ -57,27 +57,32 @@ instance Bifunctor (Slab o) where
   bimap f g (Slab i) = Slab $ bimap f g i
 
 
-type instance IntersectionOf (Slab o a r)          (Slab o a r) =
-  [NoIntersection, Slab o a r]
-type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical a r) =
-  '[Rectangle (a,a) r]
+type instance IntersectionOf (Slab o a r) (Slab o b r) =
+  [NoIntersection, Slab o (Either a b) r]
+type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical b r) =
+  '[Rectangle (a,b) r]
 
 
-instance Ord r => Slab o a r `IsIntersectableWith` Slab o a r where
+instance Ord r => Slab o a r `HasIntersectionWith` Slab o b r
+
+instance Ord r => Slab o a r `IsIntersectableWith` Slab o b r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Slab i) `intersect` (Slab i') = match (i `intersect` i') $
-        H (\NoIntersection -> coRec NoIntersection)
-     :& H (\i''            -> coRec (Slab i'' :: Slab o a r))
+        H (\NoIntersection                   -> coRec NoIntersection)
+     :& H (\i''                              -> coRec $ (Slab i'' :: Slab o (Either a b) r))
      :& RNil
 
-instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical a r where
+instance Slab Horizontal a r `HasIntersectionWith` Slab Vertical b r where
+  _ `intersects` _ = True
+
+instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical b r where
   nonEmptyIntersection _ _ _ = True
 
   (Slab h) `intersect` (Slab v) = coRec $ box low high
     where
-      low  = Point2 (v^.start.core) (h^.start.core) :+ (v^.start.extra, h^.start.extra)
-      high = Point2 (v^.end.core)   (h^.end.core)   :+ (v^.end.extra,   h^.end.extra)
+      low  = Point2 (v^.start.core) (h^.start.core) :+ (h^.start.extra, v^.start.extra)
+      high = Point2 (v^.end.core)   (h^.end.core)   :+ (h^.end.extra, v^.end.extra)
 
 
 
@@ -92,17 +97,20 @@ class HasBoundingLines (o :: Orthogonal) where
 instance HasBoundingLines Horizontal where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ horizontalLine
 
-  p `inSlab` (Slab i) = (p^.yCoord) `inInterval` i
+  p `inSlab` (Slab i) = (p^.yCoord) `intersectsInterval` i
 
 
 instance HasBoundingLines Vertical where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ verticalLine
 
-  p `inSlab` (Slab i) = (p^.xCoord) `inInterval` i
+  p `inSlab` (Slab i) = (p^.xCoord) `intersectsInterval` i
 
 
 type instance IntersectionOf (Line 2 r) (Slab o a r) =
   [NoIntersection, Line 2 r, LineSegment 2 a r]
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
+         Line 2 r `HasIntersectionWith` Slab o a r
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
          Line 2 r `IsIntersectableWith` Slab o a r where
@@ -132,6 +140,9 @@ type instance IntersectionOf (SubLine 2 p s r) (Slab o a r) =
   [NoIntersection, SubLine 2 () s r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
+         SubLine 2 a r r `HasIntersectionWith` Slab o a r
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
          SubLine 2 a r r `IsIntersectableWith` Slab o a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -151,6 +162,9 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
 
 type instance IntersectionOf (LineSegment 2 p r) (Slab o a r) =
   [NoIntersection, LineSegment 2 () r]
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
+         LineSegment 2 a r `HasIntersectionWith` Slab o a r
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
          LineSegment 2 a r `IsIntersectableWith` Slab o a r where

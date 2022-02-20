@@ -48,6 +48,9 @@ type instance NumType   (Cell r) = r
 
 type instance IntersectionOf (Point 2 r) (Cell r) = '[ NoIntersection, Point 2 r]
 
+instance (Ord r, Fractional r) => Point 2 r `HasIntersectionWith` Cell r where
+  p `intersects` c = p `intersects` toBox c
+
 instance (Ord r, Fractional r) => Point 2 r `IsIntersectableWith` Cell r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` c = p `intersect` toBox c

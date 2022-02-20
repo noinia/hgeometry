@@ -10,7 +10,7 @@ import Control.Applicative
 import Data.Fixed
 import qualified Data.Text as T
 import Data.Maybe
-import Data.Geometry.Ipe
+import Ipe
 import Data.Geometry
 import Data.Geometry.PolyLine(fromPoints')
 import System.Environment

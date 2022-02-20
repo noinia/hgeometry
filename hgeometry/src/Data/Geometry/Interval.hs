@@ -14,7 +14,7 @@ module Data.Geometry.Interval(
                                -- * querying the start and end of intervals
                              , HasStart(..), HasEnd(..)
                              -- * Working with intervals
-                             , inInterval
+                             , intersectsInterval, inInterval
                              , shiftLeft'
 
                              , asProperInterval, flipInterval
@@ -23,18 +23,19 @@ module Data.Geometry.Interval(
                              ) where
 
 import           Control.DeepSeq
-import           Control.Lens             (Iso', Lens', iso, (%~), (&), (^.))
+import           Control.Lens (Iso', Lens', iso, (%~), (&), (^.))
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable            as F
+import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
 import           Data.Geometry.Properties
 import           Data.Range
-import           Data.Semigroup           (Arg (..))
-import qualified Data.Traversable         as T
+import           Data.Semigroup (Arg (..))
+import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           GHC.Generics             (Generic)
+import           GHC.Generics (Generic)
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
@@ -80,12 +81,37 @@ instance Bifunctor Interval where
   bimap f g (GInterval r) = GInterval $ fmap (bimap g f) r
 
 
+-- type instance IntersectionOf r (Interval b r) = [NoIntersection, r]
+-- -- somehow: GHC does not understand the r here cannot be 'Interval a r' itself :(
+
+-- instance Ord r => r `HasIntersectionWith` Interval b r where
+--   x `intersects` r = x `inRange` fmap (^.core) (r^._Range )
+
+
+-- instance Ord r => r `IsIntersectableWith` Interval b r where
+--   x `intersect` r | x `intersects` r = coRec x
+--                   | otherwise        = coRec NoIntersection
 
 -- | Test if a value lies in an interval. Note that the difference between
 --  inInterval and inRange is that the extra value is *not* used in the
 --  comparison with inInterval, whereas it is in inRange.
-inInterval       :: Ord r => r -> Interval a r -> Bool
-x `inInterval` r = x `inRange` fmap (^.core) (r^._Range )
+intersectsInterval       :: Ord r => r -> Interval a r -> Bool
+x `intersectsInterval` r = x `inRange` fmap (^.core) (r^._Range )
+
+
+-- | Compute where the given query value is with respect to the interval.
+--
+-- Note that even if the boundary of the interval is open we may
+-- return "OnBoundary".
+inInterval :: Ord r => r -> Interval a r -> PointLocationResult
+x `inInterval` (Interval l r) =
+  case x `compare` (l^.unEndPoint.core) of
+    LT -> Outside
+    EQ -> OnBoundary
+    GT -> case x `compare` (r^.unEndPoint.core) of
+            LT -> Inside
+            EQ -> OnBoundary
+            GT -> Outside
 
 
 pattern OpenInterval       :: (r :+ a) -> (r :+ a) -> Interval a r
@@ -127,9 +153,11 @@ type instance Dimension (Interval a r) = 1
 type instance NumType   (Interval a r) = r
 
 
-type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
+type instance IntersectionOf (Interval a r) (Interval b r)
+  = [NoIntersection, Interval (Either a b) r]
 
-instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
+instance Ord r => Interval a r `HasIntersectionWith` Interval b r
+instance Ord r => Interval a r `IsIntersectableWith` Interval b r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -139,9 +167,10 @@ instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
                                                          (u&unEndPoint %~ g) )
       :& RNil
     where
-      f x = Arg (x^.core) x
-      r' = fmap f r
-      s' = fmap f s
+      r' :: Range (Arg r (r :+ Either a b))
+      r' = fmap (\(x :+ a) -> Arg x (x :+ Left a))  r
+      s' :: Range (Arg r (r :+ Either a b))
+      s' = fmap (\(x :+ b) -> Arg x (x :+ Right b)) s
 
       g (Arg _ x) = x
 

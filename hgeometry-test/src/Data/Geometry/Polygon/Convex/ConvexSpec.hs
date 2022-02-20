@@ -14,7 +14,7 @@ import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box            (boundingBox)
 import           Data.Geometry.BoxSpec        (arbitraryPointInBoundingBox)
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.PolygonSpec    ()
 import qualified Data.List.NonEmpty           as NonEmpty

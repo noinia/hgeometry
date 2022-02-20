@@ -35,17 +35,19 @@ type family IntersectionOf g h :: [*]
 coRec :: (a ∈ as) => a -> CoRec Identity as
 coRec = CoRec . Identity
 
--- | Class relationship between intersectable geometric objects.
-class IsIntersectableWith g h where
-  intersect :: g -> h -> Intersection g h
-
+class HasIntersectionWith g h where
   -- | g `intersects` h  <=> The intersection of g and h is non-empty.
   --
   -- The default implementation computes the intersection of g and h,
   -- and uses nonEmptyIntersection to determine if the intersection is
   -- non-empty.
   intersects :: g -> h -> Bool
+  default intersects :: IsIntersectableWith g h => g -> h -> Bool
   g `intersects` h = nonEmptyIntersection (Identity g) (Identity h) $ g `intersect` h
+
+-- | Class relationship between intersectable geometric objects.
+class HasIntersectionWith g h => IsIntersectableWith g h where
+  intersect :: g -> h -> Intersection g h
 
   -- | Helper to implement `intersects`.
   nonEmptyIntersection :: proxy g -> proxy h -> Intersection g h -> Bool

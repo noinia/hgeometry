@@ -7,38 +7,37 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
-                                                            , computeDiagonals
+module Algorithms.Geometry.PolygonTriangulation.MakeMonotone
+  ( makeMonotone
+  , computeDiagonals
 
 
-                                                            , VertexType(..)
-                                                            , classifyVertices
-                                                            ) where
+  , VertexType(..)
+  , classifyVertices
+  ) where
 
-import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
-import Algorithms.Geometry.PolygonTriangulation.Types
-
+import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
-import           Control.Monad.Writer                  (WriterT, execWriterT, tell)
+import           Control.Monad.Writer (WriterT, execWriterT, tell)
 import           Data.Bifunctor
-import qualified Data.DList                            as DList
+import qualified Data.DList as DList
 import           Data.Ext
-import qualified Data.Foldable                         as F
+import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.IntMap                           as IntMap
-import qualified Data.List.NonEmpty                    as NonEmpty
-import           Data.Ord                              (Down (..), comparing)
-import qualified Data.Set                              as SS
-import qualified Data.Set.Util                         as SS
+import qualified Data.IntMap as IntMap
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Ord (Down (..), comparing)
+import qualified Data.Set as SS
+import qualified Data.Set.Util as SS
 import           Data.Util
-import qualified Data.Vector                           as V
-import qualified Data.Vector.Circular                  as CV
-import qualified Data.Vector.Mutable                   as MV
+import qualified Data.Vector as V
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Mutable as MV
 
 
 -- import Debug.Trace
@@ -162,11 +161,11 @@ computeDiagonals p' = map f . sweep
 -- pre: the polygon boundary is given in counterClockwise order.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r)
-                  => proxy s -> Polygon t p r
-                  -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-makeMonotone px pg = let (e:es) = listEdges pg
-                     in constructSubdivision px e es (computeDiagonals pg)
+makeMonotone    :: forall s t p r. (Fractional r, Ord r)
+                => Polygon t p r
+                -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+makeMonotone pg = let (e:es) = listEdges pg
+                  in constructSubdivision e es (computeDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)
@@ -199,11 +198,11 @@ handle e = let i = getIdx e in getEventType e >>= \case
 
 insertAt   :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
            -> SS.Set (LineSegment 2 q r) -> SS.Set (LineSegment 2 q r)
-insertAt v = SS.insertBy (ordAt $ v^.yCoord)
+insertAt v = SS.insertBy (ordAtY $ v^.yCoord)
 
 deleteAt   :: (Fractional r, Ord r) => Point 2 r -> LineSegment 2 p r
            -> SS.Set (LineSegment 2 p r) -> SS.Set (LineSegment 2 p r)
-deleteAt v = SS.deleteAllBy (ordAt $ v^.yCoord)
+deleteAt v = SS.deleteAllBy (ordAtY $ v^.yCoord)
 
 
 handleStart              :: (Fractional r, Ord r)

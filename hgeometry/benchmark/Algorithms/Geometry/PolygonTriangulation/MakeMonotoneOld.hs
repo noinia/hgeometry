@@ -2,7 +2,6 @@
 {-# LANGUAGE TemplateHaskell     #-}
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld where
 
-import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
 import Algorithms.Geometry.PolygonTriangulation.Types
 
 import           Control.Lens
@@ -16,7 +15,7 @@ import qualified Data.DList                            as DList
 import           Data.Ext
 import qualified Data.Foldable                         as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
+import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.IntMap                           as IntMap
@@ -144,11 +143,11 @@ computeDiagonals p' = map f . sweep
 -- pieces.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r)
+makeMonotone      :: forall proxy s t p r. (Fractional r, Ord r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-makeMonotone px pg = let (e:es) = listEdges pg
-                     in constructSubdivision px e es (computeDiagonals pg)
+makeMonotone _ pg = let (e:es) = listEdges pg
+                    in constructSubdivision @s e es (computeDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)
@@ -181,11 +180,11 @@ handle e = let i = getIdx e in getEventType e >>= \case
 
 insertAt   :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
            -> OrdSeq (LineSegment 2 q r) -> OrdSeq (LineSegment 2 q r)
-insertAt v = SS.insertBy (ordAt $ v^.yCoord)
+insertAt v = SS.insertBy (ordAtY $ v^.yCoord)
 
 deleteAt   :: (Fractional r, Ord r) => Point 2 r -> LineSegment 2 p r
            -> OrdSeq (LineSegment 2 p r) -> OrdSeq (LineSegment 2 p r)
-deleteAt v = SS.deleteAllBy (ordAt $ v^.yCoord)
+deleteAt v = SS.deleteAllBy (ordAtY $ v^.yCoord)
 
 
 handleStart              :: (Fractional r, Ord r)

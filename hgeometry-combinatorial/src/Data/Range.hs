@@ -23,6 +23,7 @@ module Data.Range( EndPoint(..)
                  , shiftLeft, shiftRight
                  ) where
 
+import Control.Monad((<=<))
 import Control.DeepSeq
 import Control.Lens
 import Control.Applicative
@@ -208,14 +209,16 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
 
 type instance IntersectionOf (Range a) (Range a) = [ NoIntersection, Range a]
 
+instance Ord a => Range a `HasIntersectionWith` Range a
 instance Ord a => Range a `IsIntersectableWith` Range a where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   -- The intersection is empty, if after clipping, the order of the end points is inverted
   -- or if the endpoints are the same, but both are open.
-  (Range l u) `intersect` s = let i = clipLower' l . clipUpper' u $ s
-                              in if isValidRange i then coRec i else coRec NoIntersection
+  (Range l u) `intersect` s = case (clipLower l <=< clipUpper u $ s) of
+                                Nothing -> coRec NoIntersection
+                                Just i  -> coRec i
 
 -- | Get the width of the interval
 --
@@ -257,63 +260,45 @@ clampTo (Range' l u) x = (x `max` l) `min` u
 -- | Clip the interval from below. I.e. intersect with the interval {l,infty),
 -- where { is either open, (, orr closed, [.
 clipLower     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
-clipLower l r = let r' = clipLower' l r in if isValidRange r' then Just r' else Nothing
+clipLower p rr@(Range l r) = case (p^.unEndPoint) `compare` (r^.unEndPoint) of
+                               GT                        -> Nothing
+                               EQ | isOpen r || isOpen p -> Nothing
+                               _                         -> Just $
+                                 case (p^.unEndPoint) `compare` (l^.unEndPoint) of
+                                   LT -> rr
+                                   EQ -> if isOpen p then Range p r else rr
+                                   GT -> Range p r
 
 -- | Clip the interval from above. I.e. intersect with (-\infty, u}, where } is
 -- either open, ), or closed, ],
 clipUpper     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
-clipUpper u r = let r' = clipUpper' u r in if isValidRange r' then Just r' else Nothing
+clipUpper p (Range l r) = case (p^.unEndPoint) `compare` (l^.unEndPoint) of
+                            LT                        -> Nothing
+                            EQ | isOpen l || isOpen p -> Nothing
+                            _                         -> Just $ Range l (p `min` r)
+
 
 -- | Wether or not the first range completely covers the second one
 covers       :: forall a. Ord a => Range a -> Range a -> Bool
 x `covers` y = (== Just y) . asA @(Range a) $ x `intersect` y
 
-
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is
 -- indeed smaller than the right endpoint. Note that we treat empty open-ranges
 -- as invalid as well.
+--
+-- >>> isValidRange $ Range (Open 4) (Closed 4)
+-- False
+-- >>> isValidRange $ Range (Open 5) (Closed 4)
+-- False
+-- >>> isValidRange $ Range (Open 4) (Closed 5)
+-- True
+-- >>> isValidRange $ Range (Closed 5) (Closed 40)
+-- True
 isValidRange             :: Ord a => Range a -> Bool
 isValidRange (Range l u) = case _unEndPoint l `compare` _unEndPoint u of
                              LT                            -> True
-                             EQ | isClosed l || isClosed u -> True
+                             EQ | isClosed l && isClosed u -> True
                              _                             -> False
-
--- operation is unsafe, as it may produce an invalid range (where l > u)
-clipLower'                  :: Ord a => EndPoint a -> Range a -> Range a
-clipLower' l' r@(Range l u) = case l' `cmpLower` l of
-                                GT -> Range l' u
-                                _  -> r
--- operation is unsafe, as it may produce an invalid range (where l > u)
-clipUpper'                  :: Ord a => EndPoint a -> Range a -> Range a
-clipUpper' u' r@(Range l u) = case u' `cmpUpper` u of
-                                LT -> Range l u'
-                                _  -> r
-
--- | Compare end points, Closed < Open
-cmpLower     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpLower a b = case _unEndPoint a `compare` _unEndPoint b of
-                 LT -> LT
-                 GT -> GT
-                 EQ -> case (a,b) of
-                         (Open _,   Open _)   -> EQ  -- if both are same type, report EQ
-                         (Closed _, Closed _) -> EQ
-                         (Open _,  _)         -> GT  -- otherwise, choose the Closed one
-                         (Closed _,_)         -> LT  -- is the *smallest*
-
-
--- | Compare the end points, Open < Closed
-cmpUpper     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpUpper a b = case _unEndPoint a `compare` _unEndPoint b of
-                 LT -> LT
-                 GT -> GT
-                 EQ -> case (a,b) of
-                         (Open _,   Open _)   -> EQ  -- if both are same type, report EQ
-                         (Closed _, Closed _) -> EQ
-                         (Open _,  _)         -> LT  -- otherwise, choose the Closed one
-                         (Closed _,_)         -> GT  -- is the *largest*
-
-
-
 
 --------------------------------------------------------------------------------
 

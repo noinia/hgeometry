@@ -9,7 +9,7 @@ import Data.Monoid
 import Data.Function(on)
 import Control.Lens hiding (only)
 import Data.Geometry
-import Data.Geometry.Ipe
+import Ipe
 import GHC.Exts
 import Data.List(sortBy)
 

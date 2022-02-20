@@ -45,6 +45,7 @@ module Data.PlanarGraph( -- $setup
                        , tailOf, headOf, endPoints
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
                        , nextIncidentEdge, prevIncidentEdge
+                       , nextIncidentEdgeFrom, prevIncidentEdgeFrom
 
                        -- * Associated Data
 
@@ -69,10 +70,12 @@ import           Data.PlanarGraph.IO
 
 --------------------------------------------------------------------------------
 -- $setup
+-- >>> import qualified Data.Vector as V
+-- >>> import Control.Lens
 -- >>> :{
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---     myGraph :: PlanarGraph () Primal () String ()
+--     myGraph :: PlanarGraph () Primal String String String
 --     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")
@@ -89,7 +92,10 @@ import           Data.PlanarGraph.IO
 --                             ]
 --                           , [ (Dart aG Negative, "g-")
 --                             ]
---                           ]
+--                           ] & vertexData .~ V.fromList ["u","v","w","x"]
+--                             & faceData   .~ V.fromList ["f_3", "f_infty","f_1","f_2"]
+--     showWithData     :: HasDataOf s i => s -> i -> (i, DataOf s i)
+--     showWithData g i = (i, g^.dataOf i)
 -- :}
 --
 --
@@ -97,8 +103,6 @@ import           Data.PlanarGraph.IO
 -- arrows are just to indicate what the Positive direction of the darts is.
 --
 -- ![myGraph](docs/Data/PlanarGraph/testG.png)
-
-
 
 
 --------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 name:                hgeometry-test
-version:             0.12.0.0
+version:             0.13
 synopsis:            HGeometry testsuite (hack)
 description:
   Extended testsuite for HGeometry
@@ -72,7 +72,7 @@ executable fromgeojson
                       , data-clist
                       , directory
                       , filepath
-                      , hgeometry                >= 0.12.0.0
+                      , hgeometry                >= 0.13
                       , hgeometry-combinatorial
                       , hgeometry-ipe
                       , hspec                >= 2.1
@@ -148,6 +148,7 @@ test-suite hspec
                  Data.Geometry.KDTreeSpec
                  Data.Geometry.IntervalSpec
                  Data.Geometry.BoxSpec
+                 Data.Geometry.BallSpec
                  Data.Geometry.LineSpec
                  Data.Geometry.SubLineSpec
                  Data.Geometry.PlanarSubdivisionSpec
@@ -177,12 +178,10 @@ test-suite hspec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
                  Algorithms.Geometry.ClosestPair.ClosestPairSpec
-
                  Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec
                  Algorithms.Geometry.RedBlueSeparator.RICSpec
-
+                 Algorithms.Geometry.RayShooting.NaiveSpec
                  Algorithms.Geometry.FrechetDistance.DiscreteSpec
-
                  Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
                  Algorithms.Geometry.SSSPSpec
                  Algorithms.Geometry.PolyLineSimplificationSpec
@@ -200,6 +199,8 @@ test-suite hspec
                  Data.Geometry.Polygon.Convex.LowerTangent
 
                  Algorithms.Geometry.ConvexHull.OldDivideAndConquer
+
+                 Data.Geometry.IntersectionSpec
 
   build-depends:        MonadRandom
                       , hspec                >= 2.2

@@ -12,7 +12,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Monotone
 import           Data.Geometry.Triangle

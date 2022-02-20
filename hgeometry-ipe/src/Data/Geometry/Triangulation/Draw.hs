@@ -2,7 +2,7 @@ module Data.Geometry.Triangulation.Draw where
 
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Ipe
+import           Ipe
 
 --------------------------------------------------------------------------------
 

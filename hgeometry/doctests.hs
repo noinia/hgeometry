@@ -32,6 +32,8 @@ ghcExts = map ("-X" ++)
           , "DeriveGeneric"
           , "FlexibleInstances"
           , "FlexibleContexts"
+          , "DerivingStrategies"
+          , "DerivingVia"
           ]
 
 files :: [String]

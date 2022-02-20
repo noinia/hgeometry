@@ -16,13 +16,13 @@ module Data.Geometry.VerticalRayShooting.PersistentSweep
   , segmentAbove, segmentAboveOrOn
   , findSlab
   , lookupAbove, lookupAboveOrOn, searchInSlab
-  , ordAt, yCoordAt
   ) where
 
 import           Algorithms.BinarySearch (binarySearchIn)
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
 import           Data.Foldable (toList)
+import           Data.Function (on)
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -30,16 +30,15 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
-import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set.Util as SS
 import qualified Data.Vector as V
 
 
-import           Data.RealNumber.Rational
+-- import           Data.RealNumber.Rational
 
-type R = RealNumber 5
+-- type R = RealNumber 5
 --------------------------------------------------------------------------------
 
 -- | The vertical ray shooting data structure
@@ -138,9 +137,14 @@ handle                :: (Ord r, Fractional r)
                       -> r :+ StatusStructure p e r
 handle ss ( l :+ acts
           , r :+ _)   = let mid               = (l+r)/2
-                            runActionAt x act = interpret act (ordAt x)
+                            runActionAt x act = interpret act (ordAtX' x)
                         in r :+ foldr (runActionAt mid) ss (orderActs acts)
                            -- run deletions first
+
+-- | order by x coord
+ordAtX'   :: (Ord r, Fractional r)
+          => r -> LineSegment 2 p r :+ a -> LineSegment 2 p r :+ a -> Ordering
+ordAtX' x = ordAtX x `on` view core
 
 -- | orders the actions to put insertions first and then all deletions
 orderActs      :: NonEmpty (Action a) -> NonEmpty (Action a)
@@ -207,24 +211,3 @@ searchInSlab p = binarySearchIn (p . supportingLine . view core)
 
 
 ----------------------------------------------------------------------------------
-
-type Compare a = a -> a -> Ordering
-
--- | Compare based on the y-coordinate of the intersection with the horizontal
--- line through y
-ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r :+ e)
-ordAt x = comparing (yCoordAt x)
-
-
--- | Given an x-coordinate and a line segment that intersects the vertical line
--- through x, compute the y-coordinate of this intersection point.
---
--- note that we will pretend that the line segment is closed, even if it is not
-yCoordAt :: (Fractional r, Ord r) => r -> LineSegment 2 p r :+ e -> r
-yCoordAt x (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _) :+ _)
-    | px == qx  = py `max` qy -- s is vertical, since by the precondition it
-                              -- intersects we return the y-coord of the topmost
-                              -- endpoint.
-    | otherwise = py + alpha * (qy - py)
-  where
-    alpha = (x - px) / (qx - px)

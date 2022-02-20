@@ -2,6 +2,32 @@
 
 * Changelog
 
+** 0.14
+
+- Allow the associated/extra data of linesegments and intervals to
+  differ when testing for intersections.
+- Intersection testing between line segments and rectangles
+- Testing if lines and/or line segments intersect no longer requires a
+  Fractional constraint; Num is sufficient. However, in turn we now do
+  need Ord rather than just Eq. That seemed a worthwile tradeoff though.
+- Cleaning up the public API by hiding several internal modules.
+
+** 0.13
+
+- Moved 'intersects' from the HasIntersectionWith class into a new
+  class IsIntersectableWith. This allows separate (weaker) constraints
+  for checking *if* geometries intersect rather than computing exact
+  intersections.
+- New BezierSpline features.
+- "Zoom to fit" transformation.
+- Many fixes related to PlaneGraph/PlanarSubdivison; i.e. bugs in
+  which order the vertices/darts where reported when traversing a
+  face. The polygon representing the outer boundary now is some area
+  inside a bounding polygon.
+- Fixed a bug in the DelaunayTriangulation.
+- Preliminary implementations for updating planar subdivisions
+  (e.g. subdividing edges).
+
 ** 0.12
 
 - New website: https://hgeometry.org/

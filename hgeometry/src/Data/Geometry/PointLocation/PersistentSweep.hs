@@ -32,7 +32,6 @@ import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Proxy
 import           Data.Util (SP(..))
 import qualified Data.Vector as V
 
@@ -153,7 +152,7 @@ type InPolygonDS v r = PointLocationDS Dummy (SP Int v) () InOut  r
 -- type Vertex v r = Int :+ (Point 2 r :+ v)
 
 inPolygonDS    :: (Fractional r, Ord r) => SimplePolygon v r -> InPolygonDS v r
-inPolygonDS pg = pointLocationDS $ fromSimplePolygon (Proxy @Dummy) (numberVertices pg) In Out
+inPolygonDS pg = pointLocationDS $ fromSimplePolygon @Dummy (numberVertices pg) In Out
 
 -- | Finds the edge on or above the query point, if it exists
 --

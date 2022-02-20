@@ -8,8 +8,8 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Box
 import           Data.Geometry.Web.OrphanInstances ()
-import qualified Data.Geometry.Ipe as Ipe
-import qualified Data.Geometry.Ipe.Attributes as IA
+import qualified Ipe as Ipe
+import qualified Ipe.Attributes as IA
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
@@ -305,6 +305,7 @@ instance IpeToMisoAttr IA.LineJoin   where attrSvg _ = Nothing
 instance IpeToMisoAttr IA.FillRule   where attrSvg _ = Nothing
 instance IpeToMisoAttr IA.Arrow      where attrSvg _ = Nothing
 instance IpeToMisoAttr IA.RArrow     where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.StrokeOpacity where attrSvg _ = Just strokeOpacity_
 instance IpeToMisoAttr IA.Opacity    where attrSvg _ = Just fillOpacity_
 instance IpeToMisoAttr IA.Tiling     where attrSvg _ = Nothing
 instance IpeToMisoAttr IA.Gradient   where attrSvg _ = Nothing

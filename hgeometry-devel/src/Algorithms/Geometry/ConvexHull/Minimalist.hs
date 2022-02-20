@@ -44,7 +44,7 @@ import           Prelude hiding (Either(..))
 
 
 import           Algorithms.Geometry.ConvexHull.DebugMinimalist
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.RealNumber.Rational
 
 import           Debug.Trace (traceShow)

@@ -19,8 +19,8 @@ import           Data.Semigroup (sconcat)
 import           Data.UnBounded
 import qualified Data.Vector as V
 
-import           Data.Geometry.Ipe
-import           Data.Geometry.Ipe.Color
+import           Ipe
+import           Ipe.Color
 
 
 import           Control.Monad.Reader.Class

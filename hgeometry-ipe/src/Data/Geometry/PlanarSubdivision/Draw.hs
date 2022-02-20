@@ -1,30 +1,33 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PlanarSubdivision.Draw
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper functions to draw a PlanarSubdivision in ipe
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision.Draw where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Ipe
+import           Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
 import           Data.Maybe (mapMaybe)
 import qualified Data.Vector as V
 
-
-drawColoredPlanarSubdivision  ::  IpeOut (PlanarSubdivision s v e (Maybe (IpeColor r)) r)
-                                          Group r
-drawColoredPlanarSubdivision ps = drawPlanarSubdivision
-    (ps&vertexData.traverse  .~ Just mempty
-       &dartData.traverse._2 .~ Just mempty
-       &faceData.traverse    %~ fmap (attr SFill)
-    )
+--------------------------------------------------------------------------------
 
 -- | Draws only the values for which we have a Just attribute
-drawPlanarSubdivision :: forall s r.
+drawPlanarSubdivision :: forall s r. (Num r, Ord r) =>
                          IpeOut (PlanarSubdivision s (Maybe (IpeAttributes IpeSymbol r))
                                                      (Maybe (IpeAttributes Path      r))
                                                      (Maybe (IpeAttributes Path      r))
                                 r) Group r
-drawPlanarSubdivision = drawPlanarSubdivisionWith fv fe ff
+drawPlanarSubdivision = drawPlanarSubdivisionWith fv fe ff ff
   where
     fv                     :: (VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
                            -> Maybe (IpeObject' IpeSymbol r)
@@ -34,21 +37,25 @@ drawPlanarSubdivision = drawPlanarSubdivisionWith fv fe ff
 
 
 -- | Draw everything using the defaults
-drawPlanarSubdivision'    :: forall s v e f r. IpeOut (PlanarSubdivision s v e f r) Group r
+drawPlanarSubdivision'    :: forall s v e f r. (Num r, Ord r)
+                          => IpeOut (PlanarSubdivision s v e f r) Group r
 drawPlanarSubdivision' ps = drawPlanarSubdivision
-  (ps&vertexData.traverse   .~ Just (mempty :: IpeAttributes IpeSymbol r)
-     &dartData.traverse._2  .~ Just (mempty :: IpeAttributes Path      r)
-     &faceData.traverse     .~ Just (mempty :: IpeAttributes Path      r))
+  (ps&vertexData.traverse   ?~ (mempty :: IpeAttributes IpeSymbol r)
+     &dartData.traverse._2  ?~ (mempty :: IpeAttributes Path      r)
+     &faceData.traverse     ?~ (mempty :: IpeAttributes Path      r))
 
-type MIO g i r = g -> Maybe (IpeObject' i r)
 
-drawPlanarSubdivisionWith            :: (ToObject vi, ToObject ei, ToObject fi)
-                                     => MIO (VertexId' s, VertexData r v)          vi r
-                                     -> MIO (Dart s,      LineSegment 2 v r :+ e)  ei r
-                                     -> MIO (FaceId' s,   SomePolygon v r :+ f)    fi r
-                                     -> IpeOut (PlanarSubdivision s v e f r) Group r
-drawPlanarSubdivisionWith fv fe ff g = ipeGroup . concat $ [vs, es, fs]
+-- | Function to draw a planar subdivision by giving functions that
+-- specify how to render vertices, edges, the internal faces, and the outer face.
+drawPlanarSubdivisionWith                 :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r)
+                                          => IpeOut' Maybe (VertexId' s, VertexData r v)          vi r
+                                          -> IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  ei r
+                                          -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    fi r
+                                          -> IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f)    fi r
+                                          -> IpeOut (PlanarSubdivision s v e f r) Group r
+drawPlanarSubdivisionWith fv fe fi fo g = ipeGroup . concat $ [o <> fs, es, vs]
   where
-    vs = mapMaybe (fmap iO . fv) . V.toList . vertices        $ g
-    es = mapMaybe (fmap iO . fe) . V.toList . edgeSegments    $ g
-    fs = mapMaybe (fmap iO . ff) . V.toList . rawFacePolygons $ g
+    vs = mapMaybe (fmap iO . fv)  . V.toList . vertices     $ g
+    es = mapMaybe (fmap iO . fe)  . V.toList . edgeSegments $ g
+    fs = mapMaybe (fmap iO . fi) . V.toList . internalFacePolygons $ g
+    o  = mapMaybe (fmap iO . fo) [(outerFaceId g, outerFacePolygon g)]

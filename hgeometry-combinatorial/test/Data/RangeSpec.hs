@@ -18,6 +18,11 @@ spec = do
     it "closed cap open, disjoint" $ do
       ((ClosedRange (1::Int) 10) `intersect` (OpenRange 50 (60 :: Int)))
       `shouldBe` (coRec NoIntersection)
+    it "endpoints overlap but open/closed" $ do
+      let r1, r2 :: Range Int
+          r1 = ClosedRange 3 6
+          r2 = Range (Open 1) (Open 3)
+        in (r1 `intersects` r2) `shouldBe` False
     -- it "closed intersect open" $
     --   ((OpenRange 1 (10 :: Int)) `intersect` (ClosedRange 10 (12 :: Int)))
     --   `shouldBe` (coRec NoIntersection)

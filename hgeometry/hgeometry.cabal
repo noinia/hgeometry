@@ -1,5 +1,6 @@
+cabal-version:       2.4
 name:                hgeometry
-version:             0.12.0.4
+version:             0.14
 synopsis:            Geometric Algorithms, Data structures, and Data types.
 description:
   HGeometry provides some basic geometry types, and geometric algorithms and
@@ -8,7 +9,7 @@ description:
   asymptotic running time guarantees. Note that HGeometry is still highly experimental, don't be surprised to find bugs.
 
 homepage:            https://fstaals.net/software/hgeometry
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
@@ -23,10 +24,8 @@ extra-source-files:  README.md
                      changelog
                      changelog.org
 
-Extra-doc-files:     docs/Data/PlaneGraph/small.png
-                     -- docs/**/*.png
-
-cabal-version:       2.0
+Extra-doc-files:     docs/**/*.png
+                     docs/**/*.jpg
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -51,17 +50,14 @@ library
                     Data.Geometry.Vector
                     Data.Geometry.Vector.VectorFixed
                     Data.Geometry.Vector.VectorFamily
-                    Data.Geometry.Vector.VectorFamilyPeano
 
                     Data.Geometry.Matrix
 
                     -- Data.Geometry.Vector.Vinyl
                     Data.Geometry.Interval
-                    Data.Geometry.Interval.Util
                     Data.Geometry.Point
 
                     Data.Geometry.Line
-                    Data.Geometry.Line.Internal
                     Data.Geometry.LineSegment
                     Data.Geometry.LineSegment.Internal
                     Data.Geometry.SubLine
@@ -97,11 +93,10 @@ library
 
                     Data.Geometry.PlanarSubdivision
                     Data.Geometry.PlanarSubdivision.Raw
-                    Data.Geometry.PlanarSubdivision.Basic
-                    Data.Geometry.PlanarSubdivision.Merge
+                    Data.Geometry.PlanarSubdivision.Dynamic
+                    Data.Geometry.PlanarSubdivision.TreeRep
 
                     Data.Geometry.Arrangement
-                    Data.Geometry.Arrangement.Internal
 
                     Data.Geometry.RangeTree
                     Data.Geometry.RangeTree.Measure
@@ -156,7 +151,7 @@ library
                     Algorithms.Geometry.Diameter.ConvexHull
 
                     -- Algorithms.Geometry.Sweep
-
+                    Algorithms.Geometry.PolygonTriangulation
                     Algorithms.Geometry.PolygonTriangulation.Types
                     Algorithms.Geometry.PolygonTriangulation.Triangulate
                     Algorithms.Geometry.PolygonTriangulation.MakeMonotone
@@ -185,9 +180,10 @@ library
                     Algorithms.Geometry.SSSP
                     Algorithms.Geometry.SSSP.Naive
 
+                    Algorithms.Geometry.RayShooting.Naive
+
                     -- * Embedded Planar Graphs
                     Data.PlaneGraph
-                    Data.PlaneGraph.Core
                     Data.PlaneGraph.AdjRep
                     Data.PlaneGraph.IO
 
@@ -197,6 +193,7 @@ library
 
   other-modules:
                     Data.Geometry.Matrix.Internal
+                    Data.Geometry.Transformation.Internal
 
                     -- * Implementation Internals of Polygons
                     Data.Geometry.Polygon.Core
@@ -208,11 +205,18 @@ library
 
                     Algorithms.Geometry.WSPD.Types
 
+                    Data.Geometry.Vector.VectorFamilyPeano
+
                     Data.Geometry.Point.Internal
                     Data.Geometry.Point.Orientation
                     Data.Geometry.Point.Quadrants
                     Data.Geometry.Point.Orientation.Degenerate
                     Data.Geometry.Point.Class
+
+                    Data.Geometry.Line.Internal
+
+
+                    Data.Geometry.Interval.Util
 
                     Algorithms.Geometry.SoS.Expr
                     Algorithms.Geometry.SoS.AsPoint
@@ -221,16 +225,22 @@ library
                     Algorithms.Geometry.SoS.Determinant
                     Algorithms.Geometry.SoS.Sign
 
+                    Data.PlaneGraph.Core
 
+                    Data.Geometry.Arrangement.Internal
+
+                    Data.Geometry.PlanarSubdivision.Basic
+                    Data.Geometry.PlanarSubdivision.Merge
 
   -- other-extensions:
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.12.0.3
+              , hgeometry-combinatorial >= 0.13
 
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
+              -- , multi-containers        >= 0.2
               , dlist                   >= 0.7
               , lens                    >= 4.2
               , semigroupoids           >= 5
@@ -298,6 +308,8 @@ library
                     , DeriveFoldable
                     , DeriveTraversable
                     , DeriveGeneric
+                    , DerivingStrategies
+                    , DerivingVia
 
 
                     , FlexibleInstances
@@ -327,7 +339,7 @@ benchmark benchmarks
                  Algorithms.Geometry.ConvexHull.Bench
                  Algorithms.Geometry.ConvexHull.GrahamV2
                  Algorithms.Geometry.ConvexHull.GrahamFam
-                 Algorithms.Geometry.ConvexHull.GrahamFamPeano
+                 -- Algorithms.Geometry.ConvexHull.GrahamFamPeano
                  Algorithms.Geometry.ConvexHull.GrahamFixed
                  Data.Geometry.Vector.VectorFamily6
                  Algorithms.Geometry.ConvexHull.GrahamFam6

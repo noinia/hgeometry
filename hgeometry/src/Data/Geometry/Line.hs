@@ -16,12 +16,13 @@ module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line.Internal
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Data.Geometry.Point.Internal
 import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
@@ -48,24 +49,26 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) wh
 type instance IntersectionOf (Point d r) (Line d r) = [NoIntersection, Point d r]
 
 
-instance (Eq r, Fractional r, Arity d) => Point d r `IsIntersectableWith` Line d r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
+instance (Eq r, Fractional r, Arity d)      => Point d r `HasIntersectionWith` Line d r where
   intersects = onLine
-  p `intersect` l | p `intersects` l = coRec p
-                  | otherwise        = coRec NoIntersection
-
-instance {-# OVERLAPPING #-} (Ord r, Num r)
-        => Point 2 r `IsIntersectableWith` Line 2 r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Point 2 r `HasIntersectionWith` Line 2 r where
   intersects = onLine2
+
+instance (Eq r, Fractional r, Arity d)      => Point d r `IsIntersectableWith` Line d r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` l | p `intersects` l = coRec p
                   | otherwise        = coRec NoIntersection
 
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Point 2 r `IsIntersectableWith` Line 2 r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  p `intersect` l | p `intersects` l = coRec p
+                  | otherwise        = coRec NoIntersection
 
 type instance IntersectionOf (Line 2 r) (Boundary (Rectangle p r)) =
   [ NoIntersection, Point 2 r, (Point 2 r, Point 2 r) , LineSegment 2 () r]
 
-
+instance (Ord r, Fractional r)
+         => Line 2 r `HasIntersectionWith` Boundary (Rectangle p r)
 instance (Ord r, Fractional r)
          => Line 2 r `IsIntersectableWith` Boundary (Rectangle p r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -73,7 +76,7 @@ instance (Ord r, Fractional r)
   line' `intersect` (Boundary rect)  = case asAP segP of
       [sl'] -> case fromUnbounded sl' of
         Nothing   -> error "intersect: line x boundary rect; unbounded line? absurd"
-        Just sl'' -> coRec $ sl''^.re _SubLine
+        Just sl'' -> coRec $ first (either id id) $ sl''^.re _SubLine
       []    -> case nub' $ asAP pointP of
         [p]   -> coRec p
         [p,q] -> coRec (p,q)
@@ -95,14 +98,15 @@ instance (Ord r, Fractional r)
              => proxy t -> [t]
       asAP _ = mapMaybe (asA @t) ints
 
-      segP   = Proxy :: Proxy (SubLine 2 () (UnBounded r) r)
+      segP   = Proxy :: Proxy (SubLine 2 (Either () ()) (UnBounded r) r)
       pointP = Proxy :: Proxy (Point 2 r)
 
 
 type instance IntersectionOf (Line 2 r) (Rectangle p r) =
   [ NoIntersection, Point 2 r, LineSegment 2 () r]
 
-
+instance (Ord r, Fractional r)
+         => Line 2 r `HasIntersectionWith` Rectangle p r
 instance (Ord r, Fractional r)
          => Line 2 r `IsIntersectableWith` Rectangle p r where
   nonEmptyIntersection = defaultNonEmptyIntersection

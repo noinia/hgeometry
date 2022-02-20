@@ -111,8 +111,8 @@ instance Hashable (Vertex s) where
 data Face s = Face FaceId (PlanarGraph s) | Boundary FaceId (PlanarGraph s)
   deriving Eq
 instance Show (Face s) where
-  showsPrec d (Face fId _)     = showString "Face " . shows fId
-  showsPrec d (Boundary fId _) = showString "Boundary " . shows fId
+  showsPrec _ (Face fId _)     = showString "Face " . shows fId
+  showsPrec _ (Boundary fId _) = showString "Boundary " . shows fId
 
 -------------------------------------------------------------------------------
 -- Planar graph
@@ -139,26 +139,28 @@ empty nFaces nVertices nEdges = PlanarGraph
   <*> newVector nFaces
   <*> newVector 0
 
-{-
-  For all boundary vertices:
-    vertex.half-edge.face == interior
-    vertex.half-edge.twin.face == exterior
-  Boundary face: 0
+-- {-
+--   For all boundary vertices:
+--     vertex.half-edge.face == interior
+--     vertex.half-edge.twin.face == exterior
+--   Boundary face: 0
 
-  create N
--}
--- | O(n)
---   Create a planar graph with N boundary vertices.
-new :: Int -> ST s (PlanarGraph s)
-new n | n < 0 = panic "new" "Cannot contain negative vertices."
-new 0 = empty 0 0 0
-new 1 = undefined
-new 2 = undefined
-new n = pgFromFaces [[0..n-1]]
+--   create N
+-- -}
+-- -- | O(n)
+-- --   Create a planar graph with N boundary vertices.
+-- new :: Int -> ST s (PlanarGraph s)
+-- new n | n < 0 = panic "new" "Cannot contain negative vertices."
+-- new 0 = empty 0 0 0
+-- new 1 = undefined
+-- new 2 = undefined
+-- new n = pgFromFaces [[0..n-1]]
 
 -- $setup
 --
 -- >>> import Control.Monad.ST
+
+-- Disabled since hashes are not stable across different versions of hashable.
 -- >>> runST $ pgFromFaces [[0,1,2]] >>= pgHash
 -- 2959979592048325618
 -- >>> runST $ pgFromFaces [[0,1,2,3]] >>= pgHash
@@ -320,12 +322,12 @@ vertexNeighbours vertex = CV.mapM halfEdgeVertex =<< vertexIncomingHalfEdges ver
 -- vertexAdjacentVertices :: Vertex -> PlanarGraph -> [Vertex]
 -- vertexAdjacentFaces :: Vertex -> PlanarGraph -> [Face]
 
--- O(1), internal function.
-vertexNew :: PlanarGraph s -> ST s (Vertex s)
-vertexNew pg = do
-  vId <- readSTRef (pgNextVertexId pg)
-  writeSTRef (pgNextVertexId pg) (vId+1)
-  return (Vertex vId pg)
+-- -- O(1), internal function.
+-- vertexNew :: PlanarGraph s -> ST s (Vertex s)
+-- vertexNew pg = do
+--   vId <- readSTRef (pgNextVertexId pg)
+--   writeSTRef (pgNextVertexId pg) (vId+1)
+--   return (Vertex vId pg)
 
 vertexSetHalfEdge :: Vertex s -> HalfEdge s -> ST s ()
 vertexSetHalfEdge (Vertex vId pg) (HalfEdge eId pg') = eqCheck "vertexSetHalfEdge" pg pg' $
@@ -346,9 +348,9 @@ edgeToId (Edge e _) = e
 edgeFromHalfEdge :: HalfEdge s -> Edge s
 edgeFromHalfEdge (HalfEdge he pg) = Edge (he `div` 2) pg
 
--- | O(1)
-edgeToHalfEdges :: Edge s -> (HalfEdge s, HalfEdge s)
-edgeToHalfEdges (Edge e pg) = (HalfEdge (e*2) pg, HalfEdge (e*2+1) pg)
+-- -- | O(1)
+-- edgeToHalfEdges :: Edge s -> (HalfEdge s, HalfEdge s)
+-- edgeToHalfEdges (Edge e pg) = (HalfEdge (e*2) pg, HalfEdge (e*2+1) pg)
 
 -------------------------------------------------------------------------------
 -- Half-edges
@@ -357,9 +359,9 @@ edgeToHalfEdges (Edge e pg) = (HalfEdge (e*2) pg, HalfEdge (e*2+1) pg)
 halfEdgePlanarGraph :: HalfEdge s -> PlanarGraph s
 halfEdgePlanarGraph (HalfEdge _ pg) = pg
 
--- | O(1)
-halfEdgeIsValid :: HalfEdge s -> Bool
-halfEdgeIsValid (HalfEdge eId _) = eId >= 0
+-- -- | O(1)
+-- halfEdgeIsValid :: HalfEdge s -> Bool
+-- halfEdgeIsValid (HalfEdge eId _) = eId >= 0
 
 -- | O(1)
 halfEdgeFromId :: HalfEdgeId -> PlanarGraph s -> HalfEdge s

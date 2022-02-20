@@ -8,8 +8,8 @@ import Data.Maybe(mapMaybe)
 import Control.Lens hiding (below)
 import Data.Ext
 import Data.Geometry
-import Data.Geometry.Ipe
-import Data.Geometry.Ipe.Color(named)
+import Ipe
+import Ipe.Color(named)
 import Data.Geometry.HalfSpace
 import Data.List.NonEmpty(NonEmpty)
 import Data.Ratio

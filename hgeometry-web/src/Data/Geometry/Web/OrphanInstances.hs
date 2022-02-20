@@ -5,10 +5,10 @@ module Data.Geometry.Web.OrphanInstances where
 
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Fixed
-import qualified Data.Geometry.Ipe as Ipe
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Value
+import qualified Ipe as Ipe
+import qualified Ipe.Attributes as IA
+import           Ipe.Color (IpeColor(..))
+import           Ipe.Value
 import           Data.Geometry.Matrix (Matrix)
 import qualified Data.List as List
 import           Data.Singletons (Apply)

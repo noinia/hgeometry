@@ -26,7 +26,7 @@ import Data.Geometry.Line
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.PolyLine hiding (fromPoints)
-import Data.Geometry.Polygon hiding (fromPoints, maximumBy, minimumBy)
+import Data.Geometry.Polygon hiding (fromPoints)
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 -- import Linear.Affine hiding (Point, Vector, origin)
