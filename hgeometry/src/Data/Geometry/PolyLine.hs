@@ -24,6 +24,7 @@ import           Data.Geometry.Vector
 import           Data.LSeq (LSeq, pattern (:<|))
 import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE
+import           Data.Ord (comparing)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 
@@ -89,7 +90,7 @@ instance HasEnd (PolyLine d p r) where
   end = points.last1
 
 instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (PolyLine d p r) where
-  pointClosestToWithDistance q = minimumBy (comparing snd)
+  pointClosestToWithDistance q = F.minimumBy (comparing snd)
                                . fmap (pointClosestToWithDistance q)
                                . edgeSegments
 
