@@ -7,10 +7,10 @@
 </span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-comment">-- | Draws a triangulation</span><span>
-</span><span id="line-10"></span><span id="local-6989586621679546002"><span id="local-6989586621679546003"><span class="annot"><a href="Data.Geometry.Triangulation.Draw.html#drawTriangulation"><span class="hs-identifier hs-type">drawTriangulation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangulation</span></span><span> </span><span class="annot"><a href="#local-6989586621679546003"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679546002"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679546002"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-10"></span><span id="local-6989586621679546056"><span id="local-6989586621679546057"><span class="annot"><a href="Data.Geometry.Triangulation.Draw.html#drawTriangulation"><span class="hs-identifier hs-type">drawTriangulation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangulation</span></span><span> </span><span class="annot"><a href="#local-6989586621679546057"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679546056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679546056"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
 </span><span id="line-11"></span><span id="drawTriangulation"><span class="annot"><span class="annottext">drawTriangulation :: IpeOut (Triangulation p r) Group r
-</span><a href="Data.Geometry.Triangulation.Draw.html#drawTriangulation"><span class="hs-identifier hs-var hs-var">drawTriangulation</span></a></span></span><span> </span><span id="local-6989586621679546000"><span class="annot"><span class="annottext">tr :: Triangulation p r
-</span><a href="#local-6989586621679546000"><span class="hs-identifier hs-var">tr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Data.Geometry.Triangulation.Draw.html#drawTriangulation"><span class="hs-identifier hs-var hs-var">drawTriangulation</span></a></span></span><span> </span><span id="local-6989586621679546054"><span class="annot"><span class="annottext">tr :: Triangulation p r
+</span><a href="#local-6989586621679546054"><span class="hs-identifier hs-var">tr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-12"></span><span>  </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
 forall (f :: * -&gt; *) r.
 Foldable f =&gt;
@@ -23,9 +23,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IpeOut (LineSegment 2 p r) Path r
 forall p r. IpeOut (LineSegment 2 p r) Path r
 </span><a href="Ipe.IpeOut.html#ipeLineSegment"><span class="hs-identifier hs-var">ipeLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679545996"><span class="hs-identifier hs-var">e</span></a></span><span>
-</span><span id="line-13"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679545996"><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679545996"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p, Point 2 r :+ p) -&gt; LineSegment 2 p r)
+</span><a href="#local-6989586621679546050"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-13"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679546050"><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679546050"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p, Point 2 r :+ p) -&gt; LineSegment 2 p r)
 -&gt; [(Point 2 r :+ p, Point 2 r :+ p)] -&gt; [LineSegment 2 p r]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; LineSegment 2 p r)
@@ -45,6 +45,6 @@ forall p r. Triangulation p r -&gt; [(Point 2 r :+ p, Point 2 r :+ p)]
 -&gt; Triangulation p r -&gt; [LineSegment 2 p r]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Triangulation p r
-</span><a href="#local-6989586621679546000"><span class="hs-identifier hs-var">tr</span></a></span><span>
+</span><a href="#local-6989586621679546054"><span class="hs-identifier hs-var">tr</span></a></span><span>
 </span><span id="line-14"></span><span>           </span><span class="hs-special">]</span><span>
 </span><span id="line-15"></span></pre></body></html>
