@@ -34,6 +34,7 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
                           , cmpByDistanceTo, cmpByDistanceTo', cmpInDirection
 
                           , squaredEuclideanDist, euclideanDist
+                          , HasSquaredEuclideanDistance(..)
 
                           , coord, unsafeCoord
                           ) where

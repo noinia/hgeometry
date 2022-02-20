@@ -23,7 +23,7 @@ module Data.Geometry.LineSegment.Internal
   , orderedEndPoints
   , segmentLength
   , sqSegmentLength
-  , sqDistanceToSeg, sqDistanceToSegArg
+  , sqDistanceToSeg, sqDistanceToSegArg -- todo, at some point remove these. They are superfluous
   , flipSegment
 
   , interpolate
@@ -39,7 +39,6 @@ import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable as F
-
 import           Data.Geometry.Box.Internal
 import           Data.Geometry.Interval hiding (width, midPoint)
 import           Data.Geometry.Line.Internal
@@ -49,6 +48,7 @@ import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation.Internal
 import           Data.Geometry.Vector
 import           Data.Ord (comparing)
+import           Data.Tuple (swap)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
@@ -212,11 +212,14 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (LineSegment 
 instance Arity d => Bifunctor (LineSegment d) where
   bimap f g (GLineSegment i) = GLineSegment $ bimap f (fmap g) i
 
+-- | Transform a segment into a closed line segment
+toClosedSegment                    :: LineSegment d p r -> LineSegment d p r
+toClosedSegment (LineSegment' s t) = ClosedLineSegment s t
 
 
 -- ** Converting between Lines and LineSegments
 
--- | Directly convert a line into a line segment.
+-- | Directly convert a line into a Closed line segment.
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
 toLineSegment (Line p v) = ClosedLineSegment (p       :+ mempty)
                                              (p .+^ v :+ mempty)
@@ -422,26 +425,41 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
 
+-- | Squared length of a line segment.
 sqSegmentLength                     :: (Arity d, Num r) => LineSegment d p r -> r
 sqSegmentLength ~(LineSegment' p q) = qdA (p^.core) (q^.core)
 
 -- | Squared distance from the point to the Segment s. The same remark as for
 -- the 'sqDistanceToSegArg' applies here.
+{-# DEPRECATED sqDistanceToSeg "use squaredEuclideanDistTo instead" #-}
 sqDistanceToSeg   :: (Arity d, Fractional r, Ord r) => Point d r -> LineSegment d p r -> r
 sqDistanceToSeg p = fst . sqDistanceToSegArg p
 
-
 -- | Squared distance from the point to the Segment s, and the point on s
--- realizing it.  Note that if the segment is *open*, the closest point
--- returned may be one of the (open) end points, even though technically the
--- end point does not lie on the segment. (The true closest point then lies
--- arbitrarily close to the end point).
-sqDistanceToSegArg     :: (Arity d, Fractional r, Ord r)
-                       => Point d r -> LineSegment d p r -> (r, Point d r)
-sqDistanceToSegArg p s = let m  = sqDistanceToArg p (supportingLine s)
-                             xs = m : map (\(q :+ _) -> (qdA p q, q)) [s^.start, s^.end]
-                         in   F.minimumBy (comparing fst)
-                            . filter (flip onSegment s . snd) $ xs
+-- realizing it.
+--
+-- Note that if the segment is *open*, the closest point returned may
+-- be one of the (open) end points, even though technically the end
+-- point does not lie on the segment. (The true closest point then
+-- lies arbitrarily close to the end point).
+--
+-- >>> :{
+-- let ls = OpenLineSegment (Point2 0 0 :+ ()) (Point2 1 0 :+ ())
+--     p  = Point2 2 0
+-- in  snd (sqDistanceToSegArg p ls) == Point2 1 0
+-- :}
+-- True
+sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r)
+                                            => Point d r -> LineSegment d p r -> (r, Point d r)
+sqDistanceToSegArg p (toClosedSegment -> s) =
+  let m  = sqDistanceToArg p (supportingLine s)
+      xs = m : map (\(q :+ _) -> (qdA p q, q)) [s^.start, s^.end]
+  in   F.minimumBy (comparing fst)
+     . filter (flip onSegment s . snd) $ xs
+
+instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (LineSegment d p r) where
+  pointClosestToWithDistance q = swap . sqDistanceToSegArg q
+
 
 -- | flips the start and end point of the segment
 flipSegment   :: LineSegment d p r -> LineSegment d p r

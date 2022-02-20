@@ -85,14 +85,15 @@ import           Control.Lens hiding (Simple)
 import           Control.Monad.Random.Class
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
 import           Data.Geometry.HalfSpace (rightOf)
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Boundary
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Polygon.Extremes
 import           Data.Geometry.Properties
+import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 
 --------------------------------------------------------------------------------
@@ -141,3 +142,13 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
   --   where
   --     unpack (CoRec x) = x
   --     f = undefined
+
+instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Boundary (Polygon t p r)) where
+  pointClosestToWithDistance q = F.minimumBy (comparing snd)
+                               . fmap (pointClosestToWithDistance q)
+                               . listEdges . review _Boundary
+
+instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Polygon t p r) where
+  pointClosestToWithDistance q pg
+    | q `intersects` pg = (q, 0)
+    | otherwise         = pointClosestToWithDistance q (Boundary pg)

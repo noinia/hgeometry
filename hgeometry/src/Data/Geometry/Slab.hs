@@ -26,11 +26,13 @@ import           Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------
 
+-- | Orthogonal directions
 data Orthogonal = Horizontal | Vertical
                 deriving (Show,Eq,Read)
 
 
-
+-- | An strip between two parallel lines. The lines can be either
+-- horizontal or vertical.
 newtype Slab (o :: Orthogonal) a r = Slab { _unSlab :: Interval a r }
                                      deriving (Show,Eq)
 makeLenses ''Slab
@@ -88,9 +90,8 @@ instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical b r where
 
 class HasBoundingLines (o :: Orthogonal) where
   -- | The two bounding lines of the slab, first the lower one, then the higher one:
-  --
   boundingLines :: Num r => Slab o a r -> (Line 2 r :+ a, Line 2 r :+ a)
-
+  -- | Test if a point lies inside a slab.
   inSlab :: Ord r => Point 2 r -> Slab o a r -> Bool
 
 

@@ -84,7 +84,7 @@ import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable                                              as F
+import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box                                          (IsBoxable (..),
                                                                              boundingBoxList')
@@ -98,18 +98,18 @@ import           Data.Geometry.Triangle                                     (Tri
 import           Data.Geometry.Vector                                       (Additive (zero, (^+^)),
                                                                              Affine ((.+^), (.-.)),
                                                                              (*^), (^*), (^/))
-import qualified Data.List                                                  as List
-import qualified Data.List.NonEmpty                                         as NonEmpty
-import           Data.Maybe                                                 (catMaybes)
-import           Data.Ord                                                   (comparing)
-import           Data.Semigroup                                             (sconcat)
+import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (catMaybes)
+import           Data.Ord (comparing)
+import           Data.Semigroup (sconcat)
 import           Data.Semigroup.Foldable
 import           Data.Util
-import           Data.Vector                                                (Vector)
-import qualified Data.Vector                                                as V
-import           Data.Vector.Circular                                       (CircularVector)
-import qualified Data.Vector.Circular                                       as CV
-import qualified Data.Vector.Circular.Util                                  as CV
+import           Data.Vector (Vector)
+import qualified Data.Vector as V
+import           Data.Vector.Circular (CircularVector)
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
 
 
 -- import Data.RealNumber.Rational
@@ -271,8 +271,6 @@ instance (FromJSON r, Eq r, Num r, FromJSON p) => FromJSON (Polygon Multi p r) w
     where
       pMulti  o = (\vs hs -> MultiPolygon (fromPoints vs) (map fromPoints hs))
                <$> o .: "outerBoundary" <*> o .: "holes"
-
-
 
 -- * Functions on Polygons
 
