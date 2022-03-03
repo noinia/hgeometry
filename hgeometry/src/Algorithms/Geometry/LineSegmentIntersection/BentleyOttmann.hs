@@ -42,7 +42,7 @@ import           Data.Vinyl.CoRec
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 intersections    :: (Ord r, Fractional r)
-                 => [LineSegment 2 p r] -> Intersections p r
+                 => [LineSegment 2 p r :+ e] -> Intersections p r e
 intersections ss = merge $ sweep pts SS.empty
   where
     pts = EQ.fromAscList . groupStarts . L.sort . concatMap asEventPts $ ss
@@ -52,21 +52,30 @@ intersections ss = merge $ sweep pts SS.empty
 --
 --  \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 interiorIntersections :: (Ord r, Fractional r)
-                       => [LineSegment 2 p r] -> Intersections p r
+                       => [LineSegment 2 p r :+ e] -> Intersections p r e
 interiorIntersections = M.filter isInteriorIntersection . intersections
 
+--------------------------------------------------------------------------------
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
 -- | Computes the event points for a given line segment
-asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
-asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
+asEventPts   :: Ord r => LineSegment 2 p r :+ e -> [Event p r e]
+asEventPts s = let [p,q] = L.sortBy ordPoints [s^.core.start.core,s^.core.end.core]
                in [Event p (Start $ s :| []), Event q (End s)]
 
 -- | Group the segments with the intersection points
-merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r] -> Intersections p r
+merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r e] -> Intersections p r e
 merge = foldr (\(IntersectionPoint p a) -> M.insertWith (<>) p a) M.empty
 
 -- | Group the startpoints such that segments with the same start point
 -- correspond to one event.
-groupStarts                          :: Eq r => [Event p r] -> [Event p r]
+groupStarts                          :: Eq r => [Event p r e] -> [Event p r e]
 groupStarts []                       = []
 groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
   where
@@ -99,18 +108,18 @@ instance Ord (EventType s) where
   (End _)      `compare` _            = GT
 
 -- | The actual event consists of a point and its type
-data Event p r = Event { eventPoint :: !(Point 2 r)
-                       , eventType  :: !(EventType (LineSegment 2 p r))
-                       } deriving (Show,Eq)
+data Event p r e = Event { eventPoint :: !(Point 2 r)
+                         , eventType  :: !(EventType (LineSegment 2 p r :+ e))
+                         } deriving (Show,Eq)
 
-instance Ord r => Ord (Event p r) where
+instance Ord r => Ord (Event p r e) where
   -- decreasing on the y-coord, then increasing on x-coord, and increasing on event-type
   (Event p s) `compare` (Event q t) = case ordPoints p q of
                                         EQ -> s `compare` t
                                         x  -> x
 
 -- | Get the segments that start at the given event point
-startSegs   :: Event p r -> [LineSegment 2 p r]
+startSegs   :: Event p r e -> [LineSegment 2 p r :+ e]
 startSegs e = case eventType e of
                 Start ss -> NonEmpty.toList ss
                 _        -> []
@@ -121,18 +130,18 @@ startSegs e = case eventType e of
 --------------------------------------------------------------------------------
 -- * The Main Sweep
 
-type EventQueue      p r = EQ.Set (Event p r)
-type StatusStructure p r = SS.Set (LineSegment 2 p r)
+type EventQueue      p r e = EQ.Set (Event p r e)
+type StatusStructure p r e = SS.Set (LineSegment 2 p r :+ e)
 
 -- | Run the sweep handling all events
 sweep       :: (Ord r, Fractional r)
-            => EventQueue p r -> StatusStructure p r -> [IntersectionPoint p r]
+            => EventQueue p r e -> StatusStructure p r e -> [IntersectionPoint p r e]
 sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
 
-isClosedStart                     :: Eq r => Point 2 r -> LineSegment 2 p r -> Bool
-isClosedStart p (LineSegment s e)
+isClosedStart                     :: Eq r => Point 2 r -> LineSegment 2 p r :+ e -> Bool
+isClosedStart p (LineSegment s e :+ _)
   | p == s^.unEndPoint.core       = isClosed s
   | otherwise                     = isClosed e
 
@@ -333,9 +342,9 @@ testOverlapNext = [1,2,3,3,3,5,6,6,8,10,11,34,2,2,3]
 
 
 -- | Handle an event point
-handle                           :: forall r p. (Ord r, Fractional r)
-                                 => Event p r -> EventQueue p r -> StatusStructure p r
-                                 -> [IntersectionPoint p r]
+handle                           :: forall r p e. (Ord r, Fractional r)
+                                 => Event p r e -> EventQueue p r e -> StatusStructure p r e
+                                 -> [IntersectionPoint p r e]
 handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
   where
     starts                   = startSegs e
@@ -382,48 +391,50 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 -- | split the status structure, extracting the segments that contain p.
 -- the result is (before,contains,after)
 extractContains      :: (Fractional r, Ord r)
-                     => Point 2 r -> StatusStructure p r
-                     -> (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
+                     => Point 2 r -> StatusStructure p r e
+                     -> (StatusStructure p r e, [LineSegment 2 p r :+ e], StatusStructure p r e)
 extractContains p ss = (before, F.toList mid1 <> F.toList mid2, after)
   where
-    (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
+    (before, mid1, after') = SS.splitOn (xCoordAt' $ p^.yCoord) (p^.xCoord) ss
     -- Make sure to also select the horizontal segments containing p
-    (mid2, after) = SS.spanAntitone (intersects p) after'
-
+    (mid2, after) = SS.spanAntitone (intersects p . view core) after'
+    xCoordAt' y sa = xCoordAt y (sa^.core)
 
 -- | Given a point and the linesegements that contain it. Create a piece of
 -- status structure for it.
 toStatusStruct      :: (Fractional r, Ord r)
-                    => Point 2 r -> [LineSegment 2 p r] -> StatusStructure p r
+                    => Point 2 r -> [LineSegment 2 p r :+ e] -> StatusStructure p r e
 toStatusStruct p xs = ss `SS.join` hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs
-    ss           = SS.fromListBy (ordAtY $ maxY xs) rest
+    ss           = SS.fromListBy (ordAtY' $ maxY xs) rest
     hors         = SS.fromListBy (comparing rightEndpoint) hors'
 
-    isHorizontal s  = s^.start.core.yCoord == s^.end.core.yCoord
+    isHorizontal s  = s^.core.start.core.yCoord == s^.core.end.core.yCoord
+
+    ordAtY' q sa sb = ordAtY q (sa^.core) (sb^.core)
 
     -- find the y coord of the first interesting thing below the sweep at y
     maxY = maximum . filter (< p^.yCoord)
-         . concatMap (\s -> [s^.start.core.yCoord,s^.end.core.yCoord])
+         . concatMap (\s -> [s^.core.start.core.yCoord,s^.core.end.core.yCoord])
 
 -- | Get the right endpoint of a segment
-rightEndpoint   :: Ord r => LineSegment 2 p r -> r
-rightEndpoint s = (s^.start.core.xCoord) `max` (s^.end.core.xCoord)
+rightEndpoint   :: Ord r => LineSegment 2 p r :+ e -> r
+rightEndpoint s = (s^.core.start.core.xCoord) `max` (s^.core.end.core.xCoord)
 
 -- | Test if a segment ends at p
-endsAt                      :: Ord r => Point 2 r -> LineSegment 2 p r -> Bool
-endsAt p (LineSegment' a b) = all (\q -> ordPoints (q^.core) p /= GT) [a,b]
+endsAt                           :: Ord r => Point 2 r -> LineSegment 2 p r :+ e -> Bool
+endsAt p (LineSegment' a b :+ _) = all (\q -> ordPoints (q^.core) p /= GT) [a,b]
 
 --------------------------------------------------------------------------------
 -- * Finding New events
 
 -- | Find all events
 findNewEvent       :: (Ord r, Fractional r)
-                   => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r
-                   -> Maybe (Event p r)
-findNewEvent p l r = match (l `intersect` r) $
+                   => Point 2 r -> LineSegment 2 p r :+ e -> LineSegment 2 p r :+ e
+                   -> Maybe (Event p r e)
+findNewEvent p l r = match ((l^.core) `intersect` (r^.core)) $
      H (const Nothing) -- NoIntersection
   :& H (\q -> if ordPoints q p == GT then Just (Event q Intersection)
                                      else Nothing)

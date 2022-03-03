@@ -22,9 +22,9 @@ testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 type R = RealNumber 5
 
-open,closed :: R -> R -> R -> R -> LineSegment 2 () R
-open x1 y1 x2 y2 = OpenLineSegment (ext $ Point2 x1 y1) (ext $ Point2 x2 y2)
-closed x1 y1 x2 y2 = ClosedLineSegment (ext $ Point2 x1 y1) (ext $ Point2 x2 y2)
+open,closed :: R -> R -> R -> R -> LineSegment 2 () R :+ ()
+open x1 y1 x2 y2 = OpenLineSegment (ext $ Point2 x1 y1) (ext $ Point2 x2 y2) :+ ()
+closed x1 y1 x2 y2 = ClosedLineSegment (ext $ Point2 x1 y1) (ext $ Point2 x2 y2) :+ ()
 
 line1  = closed 0 0       1 0
 line2  = closed 0 0       0 1
@@ -71,10 +71,10 @@ spec = do
   it "horizontal near overlap" $
     Sweep.hasIntersections [line13, line14] `shouldBe` False
   it "matches naive" $
-    property $ \(lst :: [LineSegment 2 () R]) ->
+    property $ \(lst :: [LineSegment 2 () R :+ ()]) ->
       Sweep.hasIntersections lst === (not . null . BO.interiorIntersections $ lst)
   it "matches boolean hasInterior" $
-    property $ \(lst :: [LineSegment 2 () R]) ->
+    property $ \(lst :: [LineSegment 2 () R :+ ()]) ->
       Sweep.hasIntersections lst === not (null $ Naive.intersections lst)
   describe "Self Intersecting Polygon Tests" $ do
     siTestCases (testPath <> "selfIntersections.ipe")
