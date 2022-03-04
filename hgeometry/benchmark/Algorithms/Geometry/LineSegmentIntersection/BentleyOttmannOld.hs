@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld where
 
-import           Algorithms.Geometry.LineSegmentIntersection( Intersections
+import           Algorithms.Geometry.LineSegmentIntersection.TypesNoExt( Intersections
                                                             , IntersectionPoint(..)
                                                             , Associated(..)
                                                             , mkIntersectionPoint
@@ -36,6 +36,8 @@ import           Data.Vinyl
 import           Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------
+
+-- todo; use an old copy of the imports as well.
 
 -- | Compute all intersections
 --
