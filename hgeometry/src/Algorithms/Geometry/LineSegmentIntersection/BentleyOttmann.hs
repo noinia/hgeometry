@@ -57,6 +57,7 @@ interiorIntersections :: (Ord r, Fractional r)
 interiorIntersections = M.filter isInteriorIntersection . intersections
 
 --------------------------------------------------------------------------------
+-- * Flipping and unflipping
 
 data Flipped = NotFlipped | Flipped deriving (Show,Eq)
 
@@ -185,107 +186,6 @@ sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
 
-isClosedStart                     :: Eq r => Point 2 r -> LineSegment 2 p r :+ e -> Bool
-isClosedStart p (LineSegment s e :+ _)
-  | p == s^.unEndPoint.core       = isClosed s
-  | otherwise                     = isClosed e
-
-
-
-overlap :: Point 2 r -> (LineSegment 2 q r, Cat) -> (LineSegment 2 q r, Cat) -> Bool
-overlap p s1 s2 = go (toStart s1) (toStart s2)
-  where
-    toStart (s@(LineSegment a b),c) = case c of
-                                        Start' -> (s,False)
-                                        End'   -> (LineSegment b a,False) -- flip to start
-                                        Neighter -> (s, True)
-    go = undefined
-
-
-
-
-data Cat = Start' | End' | Neighter
-
-categorize p (LineSegment a b)
-  | p == a^.unEndPoint.core = Start'
-  | p == b^.unEndPoint.core = End'
-  | otherwise               = Neighter
-
-
-
-overlapsOr     :: (a -> Bool)
-               -> (a -> a -> Bool)
-               -> [a]
-               -> [a]
-overlapsOr p q = map fst . filter snd . map (\((a,b),b') -> (a, b || b'))
-               . overlapsWithNeighbour (q `on` fst)
-               . map (\x -> (x, p x))
-
-overlapsWithNeighbour   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
-overlapsWithNeighbour p = go0
-  where
-    go0 = \case
-      []     -> []
-      (x:xs) -> go x False xs
-
-    go x b = \case
-      []     -> []
-      (y:ys) -> let b' = p x y
-                in (x,b || b') : go y b' ys
-
-
-
-
-
-
-
-
-
-annotateReport   :: (a -> Bool) -> [a] -> [(a,Bool)]
-annotateReport p = map (\x -> (x, p x))
-
-
-overlapsWithNext'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
-overlapsWithNext' p = go
-  where
-    go = \case
-      []           -> []
-      [x]          -> [(x,False)]
-      (x:xs@(y:_)) -> (x,p x y) : go xs
-
-overlapsWithPrev'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
-overlapsWithPrev' p = go0
-  where
-    go0 = \case
-      []     -> []
-      (x:xs) -> (x,False) : go x xs
-
-    go x = \case
-      []     -> []
-      (y:ys) -> (y,p x y) : go y ys
-
-
-
-
-
-
-overlapsWithNeighbour2 p = map (\((a,b),b') -> (a, b || b'))
-                         . overlapsWithNext' (p `on` fst)
-                         . overlapsWithPrev' p
-
-shouldBe :: Eq a => a -> a -> Bool
-shouldBe = (==)
-
-propSameAsSeparate p xs = overlapsWithNeighbour p xs `shouldBe` overlapsWithNeighbour2 p xs
-
-test' = overlapsWithNeighbour (==) testOverlapNext
-testOverlapNext = [1,2,3,3,3,5,6,6,8,10,11,34,2,2,3]
-
--- reportOverlappingBy :: Eq a => (a -> Bool) -> [a] -> [a]
--- reportOverlappingBy p = \case
---   []     -> []
---   (x:xs) -> L.span
-
 
 -- | Handle an event point
 handle                           :: forall r p e. (Ord r, Fractional r)
@@ -297,19 +197,11 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     (before,contains',after) = extractContains p ss
     (ends,contains)          = L.partition (endsAt p) contains'
     -- starting segments, exluding those that have an open starting point
-    starts' = filter (isClosedStart p) starts
-
-
-    -- starts'' = shouldReport p . SS.toAscList $ newSegs
-    -- FIXME: we should look at the starts in-order (around p).
-    -- closed endpoints we should report anyway. For an open endpoint
-    -- we should check if it overlaps with a sucessor or predecessor
-    -- to see if we have to report it.
-
-    -- I think we could get those from the 'toStatusStruct' structure below
+    -- starts' = filter (isClosedStart p) starts
+    starts' = shouldReport p $ SS.toAscList newSegs
 
     -- any (closed) ending segments at this event point.
-    closedEnds = filter (isClosedStart p) ends
+    closedEnds = filter (\(LineSegment _ e :+ _) -> isClosed e) ends
 
     toReport = case starts' <> contains' of
                  (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) contains]
@@ -333,6 +225,21 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     sr = SS.lookupMin after
 
     app f x y = do { x' <- x ; y' <- y ; f x' y'}
+
+-- | given the starting point p, and the segments that either start in
+-- p, or continue in p, in left to right order along a line just
+-- epsilon below p, figure out which segments we should report as
+-- intersecting at p.
+--
+-- in partcular; those that:
+-- - have a closed endpoint at p
+-- - those that have an open endpoint at p and have an intersection
+--   with a segment eps below p. Those segments thus overlap wtih
+--   their predecessor or successor in the cyclic order.
+shouldReport   :: (Ord r, Num r)
+               => Point 2 r -> [LineSegment 2 p r :+ e] -> [LineSegment 2 p r :+ e]
+shouldReport _ = overlapsOr (\(LineSegment s _ :+ _) -> isClosed s)
+                            (\(s :+ _) (s2 :+ _) -> s `intersects` s2)
 
 -- | split the status structure, extracting the segments that contain p.
 -- the result is (before,contains,after)
@@ -370,8 +277,9 @@ rightEndpoint   :: Ord r => LineSegment 2 p r :+ e -> r
 rightEndpoint s = (s^.core.start.core.xCoord) `max` (s^.core.end.core.xCoord)
 
 -- | Test if a segment ends at p
-endsAt                           :: Ord r => Point 2 r -> LineSegment 2 p r :+ e -> Bool
-endsAt p (LineSegment' a b :+ _) = all (\q -> ordPoints (q^.core) p /= GT) [a,b]
+endsAt                                  :: Eq r => Point 2 r -> LineSegment 2 p r :+ e -> Bool
+endsAt p (LineSegment' _ (b :+ _) :+ _) = p == b
+  -- all (\q -> ordPoints (q^.core) p /= GT) [a,b]
 
 --------------------------------------------------------------------------------
 -- * Finding New events
@@ -395,3 +303,68 @@ type R = Rational
 seg1, seg2 :: LineSegment 2 () R
 seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
 seg2 = ClosedLineSegment (ext $ Point2 0 1) (ext $ Point2 0 5)
+
+
+
+--------------------------------------------------------------------------------
+-- *
+
+-- | Given a predicate p on elements, and a predicate q on
+-- (neighbouring) pairs of elements, filter the elements that satisfy
+-- p, or together with one of their neighbours satisfy q.
+overlapsOr     :: (a -> Bool)
+               -> (a -> a -> Bool)
+               -> [a]
+               -> [a]
+overlapsOr p q = map fst . filter snd . map (\((a,b),b') -> (a, b || b'))
+               . overlapsWithNeighbour (q `on` fst)
+               . map (\x -> (x, p x))
+
+-- | Given a predicate, test and a list, annotate each element whether
+-- it, together with one of its neighbors satisifies the predicate.
+overlapsWithNeighbour   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithNeighbour p = go0
+  where
+    go0 = \case
+      []     -> []
+      (x:xs) -> go x False xs
+
+    go x b = \case
+      []     -> []
+      (y:ys) -> let b' = p x y
+                in (x,b || b') : go y b' ys
+
+-- annotateReport   :: (a -> Bool) -> [a] -> [(a,Bool)]
+-- annotateReport p = map (\x -> (x, p x))
+
+overlapsWithNext'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithNext' p = go
+  where
+    go = \case
+      []           -> []
+      [x]          -> [(x,False)]
+      (x:xs@(y:_)) -> (x,p x y) : go xs
+
+overlapsWithPrev'   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
+overlapsWithPrev' p = go0
+  where
+    go0 = \case
+      []     -> []
+      (x:xs) -> (x,False) : go x xs
+
+    go x = \case
+      []     -> []
+      (y:ys) -> (y,p x y) : go y ys
+
+
+overlapsWithNeighbour2 p = map (\((a,b),b') -> (a, b || b'))
+                         . overlapsWithNext' (p `on` fst)
+                         . overlapsWithPrev' p
+
+shouldBe :: Eq a => a -> a -> Bool
+shouldBe = (==)
+
+propSameAsSeparate p xs = overlapsWithNeighbour p xs `shouldBe` overlapsWithNeighbour2 p xs
+
+test' = overlapsWithNeighbour (==) testOverlapNext
+testOverlapNext = [1,2,3,3,3,5,6,6,8,10,11,34,2,2,3]
