@@ -37,7 +37,7 @@ import           Data.Intersection
 
 
 -- | Assumes that two segments have the same start point
-newtype AroundStart a = AroundStart a deriving (Show,Read,NFData)
+newtype AroundStart a = AroundStart a deriving (Show,Read,NFData,Functor)
 
 instance Eq r => Eq (AroundStart (LineSegment 2 p r :+ e)) where
   -- | equality on endpoint
@@ -51,7 +51,7 @@ instance (Ord r, Num r) => Ord (AroundStart (LineSegment 2 p r :+ e)) where
 ----------------------------------------
 
 -- | Assumes that two segments have the same end point
-newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData)
+newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData,Functor)
 
 instance Eq r => Eq (AroundEnd (LineSegment 2 p r :+ e)) where
   -- | equality on endpoint
@@ -65,7 +65,7 @@ instance (Ord r, Num r) => Ord (AroundEnd (LineSegment 2 p r :+ e)) where
 --------------------------------------------------------------------------------
 
 -- | Assumes that two segments intersect in a single point.
-newtype AroundIntersection a = AroundIntersection a deriving (Show,Read,NFData)
+newtype AroundIntersection a = AroundIntersection a deriving (Show,Read,NFData,Functor)
 
 instance Eq r => Eq (AroundIntersection (LineSegment 2 p r :+ e)) where
   -- | equality ignores the p and the e types
@@ -117,6 +117,13 @@ data Associated p r e =
 
 makeLenses ''Associated
 
+instance Functor (Associated p r) where
+  fmap f (Associated ss es is) = Associated (Set.mapMonotonic (g f) ss)
+                                            (Set.mapMonotonic (g f) es)
+                                            (Set.mapMonotonic (g f) is)
+    where
+      g   :: forall f c e b. Functor f => (e -> b) -> f (c :+ e) -> f (c :+ b)
+      g f' = fmap (&extra %~ f')
 
 
 -- | Reports whether this associated has any interior intersections
@@ -164,7 +171,7 @@ type Intersections p r e = Map.Map (Point 2 r) (Associated p r e)
 data IntersectionPoint p r e =
   IntersectionPoint { _intersectionPoint :: !(Point 2 r)
                     , _associatedSegs    :: !(Associated p r e)
-                    } deriving (Show,Read,Eq,Generic)
+                    } deriving (Show,Read,Eq,Generic,Functor)
 makeLenses ''IntersectionPoint
 
 instance (NFData p, NFData r, NFData e) => NFData (IntersectionPoint p r e)

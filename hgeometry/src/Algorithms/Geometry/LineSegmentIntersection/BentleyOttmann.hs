@@ -17,6 +17,7 @@ module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
@@ -32,20 +33,20 @@ import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
 import qualified Data.Set as EQ -- event queue
 import qualified Data.Set as SS -- status struct
+import qualified Data.Set as Set
 import qualified Data.Set.Util as SS -- status struct
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-
 --------------------------------------------------------------------------------
 
 -- | Compute all intersections
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
-intersections    :: (Ord r, Fractional r)
+intersections    :: forall p r e. (Ord r, Fractional r)
                  => [LineSegment 2 p r :+ e] -> Intersections p r e
-intersections ss = merge $ sweep pts SS.empty
+intersections ss = fmap unflipSegs . merge $ sweep pts SS.empty
   where
-    pts = EQ.fromAscList . groupStarts . L.sort . concatMap asEventPts $ ss
+    pts = EQ.fromAscList . groupStarts . L.sort . concatMap (asEventPts . tagFlipped) $ ss
 
 -- | Computes all intersection points p s.t. p lies in the interior of at least
 -- one of the segments.
@@ -57,17 +58,61 @@ interiorIntersections = M.filter isInteriorIntersection . intersections
 
 --------------------------------------------------------------------------------
 
+data Flipped = NotFlipped | Flipped deriving (Show,Eq)
 
+-- | Make sure the 'start' endpoint occurs before the end-endpoints in
+-- terms of the sweep order.
+tagFlipped   :: Ord r => LineSegment 2 p r :+ e -> LineSegment 2 p r :+ (e :+ Flipped)
+tagFlipped s = case (s^.core.start.core) `ordPoints` (s^.core.end.core) of
+                 GT -> s&core  %~ flipSeg
+                        &extra %~ (:+ Flipped)
+                 _  -> s&extra %~ (:+ NotFlipped)
 
+-- | Flips the segment
+flipSeg     :: LineSegment d p r -> LineSegment d p r
+flipSeg seg = seg&start .~ (seg^.end)
+                 &end   .~ (seg^.start)
 
+-- | Unflips the segments in an associated.
+unflipSegs                       :: (Fractional r, Ord r)
+                                 => Associated p r (e :+ Flipped) -> Associated p r e
+unflipSegs (Associated ss es is) =
+    Associated (dropFlipped ss1 <> unflipSegs' es')
+               (dropFlipped es1 <> unflipSegs' ss')
+               (dropFlipped is1 <> unflipSegs' is')
+  where
+    (ss',ss1) = Set.partition (\(AroundEnd          s) -> isFlipped s) ss
+    (es',es1) = Set.partition (\(AroundStart        s) -> isFlipped s) es
+    (is',is1) = Set.partition (\(AroundIntersection s) -> isFlipped s) is
 
+    isFlipped s = Flipped == s^.extra.extra
+
+    -- | For segments that are not acutally flipped, we can just drop the flipped bit
+    dropFlipped :: Functor f
+                => Set.Set (f (LineSegment 2 p r :+ (e :+ Flipped)))
+                -> Set.Set (f (LineSegment 2 p r :+ e))
+    dropFlipped = Set.mapMonotonic (fmap dropFlip)
+
+    -- For flipped segs we unflip them (and appropriately coerce the
+    -- so that they remain in the same order. I.e. if they were sorted
+    -- around the start point they are now sorted around the endpoint.
+    unflipSegs' :: ( Functor f
+                   , Coercible (f (LineSegment 2 p r :+ e)) (g (LineSegment 2 p r :+ e))
+                   )
+                => Set.Set (f (LineSegment 2 p r :+ (e :+ Flipped)))
+                -> Set.Set (g (LineSegment 2 p r :+ e))
+    unflipSegs' = Set.mapMonotonic (coerce . fmap unflip)
+
+    unflip   (s :+ (e :+ _)) = flipSeg s :+ e
+    dropFlip (s :+ (e :+ _)) = s :+ e
 
 --------------------------------------------------------------------------------
 
 -- | Computes the event points for a given line segment
-asEventPts   :: Ord r => LineSegment 2 p r :+ e -> [Event p r e]
-asEventPts s = let [p,q] = L.sortBy ordPoints [s^.core.start.core,s^.core.end.core]
-               in [Event p (Start $ s :| []), Event q (End s)]
+asEventPts   :: LineSegment 2 p r :+ e -> [Event p r e]
+asEventPts s = [ Event (s^.core.start.core) (Start $ s :| [])
+               , Event (s^.core.end.core)   (End s)
+               ]
 
 -- | Group the segments with the intersection points
 merge :: (Ord r, Fractional r) =>  [IntersectionPoint p r e] -> Intersections p r e
@@ -146,105 +191,6 @@ isClosedStart p (LineSegment s e :+ _)
   | otherwise                     = isClosed e
 
 
--- data AssocKind b a = Start b a | End b a | Neighter a
-
--- -- | test if the given segment has p as its endpoint, an construct the
--- -- appropriate associated representing that.
--- mkAssociated                :: Point 2 r -> LineSegment 2 p r -> AssocKind (LineSegment 2 p r)
--- mkAssociated p s@(LineSegment a b)
---   | p == a^.unEndPoint.core = Start a s
---   | p == b^.unEndPoint.core = End b s
---   | otherwise               = Neighter s
-
--- -- -- | We need to report a segment as an segment for starting point p if
--- -- -- it is a closed segment starting at p, or an open segment starting
--- -- -- at p that intersects with some other segment.  since the segments
--- -- -- are given in sorted order around s, we can just look at the next
--- -- -- segment to see if we should report such an open-ended segment.
--- -- shouldReportStart   :: Point 2 r -> [LineSegment 2 p r] -> Associated p r
--- -- shouldReportStart p = go . map (categorize p)
--- --   where
--- --     go []     = mempty
--- --     go (s:ss) = let (xs,ys) = List.span overlapsWith s ss
--- --                 in case s of
--- --                      Start (Closed _) s' -> Asso
-
-
-
-
-
-
--- --     (s@(LineSegment a b):ss)
--- --         | p == a^.unEndPoint.core =
-
-
--- --           if isClosed a || overlapsWithNext ss
--- --                                     then Associated [s] [] [] <> go ss
--- --         -- | p == b^.unEndPoint.core = Associated [] [s] []
-
-
-
-
-
-
-
---     _  []                  = mempty
---     go certainlyReport (s:ss) = let x  = mkAssociated p s
---                                     x' = then x else mempty
---                                 in
-
-
-
---       case shouldReport mp s of
-
-
-
-
-
---       mkAssociated mp s <> go (Just s) ss
-
-
---     mkAsscoiated _ s@(LineSegment a b)
---       | p == a^.unEndPoint.core = if isClosed a ||
-
-
-
---       = Associated [s] [] []
---       | p == b^.unEndPoint.core = Associated [] [s] []
---       | otherwise               = mempty
-
--- _ []     = []
-
-
-
--- shouldReportStart _ []     = []
--- shouldReportStart p (s:ss) = case hasStartingPoint p s of
---                                Nothing            -> shouldReportStart ss -- don't report the seg
---                                Just (Closed _, s) -> s : shouldReportStart ss
---                                Just (Open _, )
-
-
--- -- [s] | isClosedStart p s = [s]
--- --                         | otherwise         = []
--- -- shouldReportStart p (s:s':ss) | isStart p s =
-
-
-
--- (s:ss) = isClosedStart p s ||
-
-
--- shouldReport   :: Eq r => Point 2 r -> [LineSegment 2 p r] -> Associated p r
--- shouldReport p = foldMap (\(s,c) -> case c of
---                                       Start'   -> Associated [s] [] []
---                                       End'     -> Associated [] [s] []
---                                       Neighter -> Associated [] [] [s]
---                          )
---                . overlapsOr (\(LineSegment a b,c) -> case c of
---                                              Start'   -> isClosed a
---                                              End'     -> isClosed b
---                                              Neighter -> False
---                               ) (overlap p)
---                . map (\s -> (s, categorize p s))
 
 overlap :: Point 2 r -> (LineSegment 2 q r, Cat) -> (LineSegment 2 q r, Cat) -> Bool
 overlap p s1 s2 = go (toStart s1) (toStart s2)
