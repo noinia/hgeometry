@@ -54,7 +54,7 @@ mainWith (Options inFile outFile) = do
       let polies  :: [SimplePolygon () R :+ IpeAttributes Path R]
           polies  = readAll page
           polies' = filter (not . hasSelfIntersections . (^.core)) polies
-          intersections' = concatMap (Map.keys . interiorIntersections
+          intersections' = concatMap (Map.keys . interiorIntersections . map ext
                                       . listEdges . (^.core)) polies
           subdivs = map (\(pg :+ _) -> triangulate @PX pg) polies'
           triangles' = mapMaybe (^?_2.core._Left)

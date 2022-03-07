@@ -32,7 +32,7 @@ testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
 ipeSpec = do testCases (testPath <> "manual.ipe")
-             -- testCases (testPath <> "open.ipe")
+             testCases (testPath <> "open.ipe")
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
@@ -47,10 +47,10 @@ readInput fp = fmap f <$> readSinglePageFile fp
   where
     f page = [TestCase (fp^.filename) segs]
       where
-        segs = map (view core . arrowAsOpen) . readAll $ page
+        segs = map (ext . view core . arrowAsOpen) . readAll $ page
 
 
-data TestCase r = TestCase { _name :: String, _segments :: [LineSegment 2 () r]
+data TestCase r = TestCase { _name :: String, _segments :: [LineSegment 2 () r :+ ()]
                            } deriving (Show,Eq)
 
 
@@ -64,8 +64,8 @@ samePointsAsNaive segs = it "Same points as Naive" $ do
   (Map.keys $ Sweep.intersections segs) `shouldBe` (Map.keys $ Naive.intersections segs)
 
 -- | Test if they every intersection point has the right segments
-sameAsNaive      :: (Fractional r, Ord r, Eq p
+sameAsNaive      :: (Fractional r, Ord r, Eq p, Show e
                     , Show p, Show r
-                    ) => [LineSegment 2 p r] -> Spec
+                    ) => [LineSegment 2 p r :+ e] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do
     (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)

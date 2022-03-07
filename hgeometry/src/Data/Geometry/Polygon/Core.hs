@@ -384,7 +384,7 @@ polygonVertices (MultiPolygon vs hs) =
 -- | \( O(n \log n) \) Check if a polygon has any holes, duplicate points, or
 --   self-intersections.
 isSimple :: (Ord r, Fractional r) => Polygon p t r -> Bool
-isSimple p@SimplePolygon{}   = null . BO.interiorIntersections $ listEdges p
+isSimple p@SimplePolygon{}   = null . BO.interiorIntersections . map ext $ listEdges p
 isSimple (MultiPolygon b []) = isSimple b
 isSimple MultiPolygon{}      = False
 
@@ -427,7 +427,7 @@ simpleFromCircularVector :: forall p r. (Ord r, Fractional r)
   => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 simpleFromCircularVector v =
   let p = fromCircularVector v
-      hasInteriorIntersections = not . null . BO.interiorIntersections
+      hasInteriorIntersections = not . null . BO.interiorIntersections . map ext
   in if hasInteriorIntersections (listEdges p)
       then error "Data.Geometry.Polygon.simpleFromCircularVector: \
                  \Found self-intersections or repeated vertices."

@@ -38,14 +38,14 @@ import Data.Geometry.Polygon
 --
 -- \(O(n\log n)\)
 hasIntersections    :: (Ord r, Num r)
-                 => [LineSegment 2 p r] -> Bool
+                 => [LineSegment 2 p r :+ e] -> Bool
 hasIntersections ss = sweep pts SS.empty
   where
     pts = L.sortBy ordEvents . concatMap asEventPts $ ss
 
 -- | Computes the event points for a given line segment
-asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
-asEventPts s =
+asEventPts          :: Ord r => LineSegment 2 p r :+ e -> [Event p r]
+asEventPts (s :+ _) =
   case ordPoints (s^.start.core) (s^.end.core) of
     LT -> [Insert s, Delete s]
     _  -> let LineSegment a b = s
@@ -164,7 +164,7 @@ endsAt p (LineSegment _ b) = fmap (view core) b == Open p
 --     t2 = Triangle (a^.end) (b^.start) (b^.end)
 
 
-bug' = hasIntersections $ listEdges bug
+bug' = hasIntersections $ map ext $ listEdges bug
 
 bug :: SimplePolygon () Int
 bug = fromPoints . map ext $ [
