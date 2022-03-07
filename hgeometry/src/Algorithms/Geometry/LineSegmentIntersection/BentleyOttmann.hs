@@ -186,7 +186,6 @@ sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
 
-
 -- | Handle an event point
 handle                           :: forall r p e. (Ord r, Fractional r)
                                  => Event p r e -> EventQueue p r e -> StatusStructure p r e
@@ -200,11 +199,16 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     -- starts' = filter (isClosedStart p) starts
     starts' = shouldReport p $ SS.toAscList newSegs
 
-    -- any (closed) ending segments at this event point.
-    closedEnds = filter (\(LineSegment _ e :+ _) -> isClosed e) ends
+    -- If we just inserted open-ended segments that start here, then
+    -- don't consider them to be "contained" segments.
+    pureContains = filter (\(LineSegment s _ :+ _) ->
+                              not $ isOpen s && p == s^.unEndPoint.core) contains
 
-    toReport = case starts' <> contains' of
-                 (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) contains]
+    -- any (closed) ending segments at this event point.
+    closedEnds = filter (\(LineSegment _ e' :+ _) -> isClosed e') ends
+
+    toReport = case starts' <> closedEnds <> pureContains of
+                 (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) pureContains]
                  _       -> []
 
     -- new status structure

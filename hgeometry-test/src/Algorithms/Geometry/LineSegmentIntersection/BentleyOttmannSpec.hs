@@ -32,7 +32,7 @@ testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
 ipeSpec = do testCases (testPath <> "manual.ipe")
-             -- testCases (testPath <> "open.ipe")
+             testCases (testPath <> "open.ipe")
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
