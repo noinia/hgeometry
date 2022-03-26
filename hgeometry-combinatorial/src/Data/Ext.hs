@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE FunctionalDependencies  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE OverloadedStrings  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -102,3 +104,26 @@ extra = lens _extra (\(c :+ _) e -> c :+ e)
 ext   :: a -> a :+ ()
 ext x = x :+ ()
 {-# INLINABLE ext #-}
+
+
+--------------------------------------------------------------------------------
+
+-- | A class for types that can behave as a c. Mostly for types t that
+-- "extend" a 'core' type c.
+class AsA t c | t -> c where
+  -- | Get the core from the t.
+  asCore :: t -> c
+
+-- | infifx shorthand for AsA
+type t :~ c = t `AsA` c
+
+-- | Pattern to get the core.
+pattern AsA  :: t :~ c => c -> t
+pattern AsA c <- (asCore -> c)
+
+-- | Everything can act as itself
+instance (t ~ c)          => AsA t        c where
+  asCore = id
+-- | An Ext can act as its core.
+instance {-# OVERLAPPING #-} AsA (c :+ e) c where
+  asCore = view core
