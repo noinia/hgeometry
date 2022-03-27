@@ -121,7 +121,7 @@ process v stack@(u:ws)
 
 -- | test if m does not block the line segment from v to u
 isInside          :: (Ord r, Num r) => P p r -> (P p r, P p r) -> Bool
-isInside v (u, m) = case ccw' v m u of
+isInside v (u, m) = case ccw v m u of
                      CoLinear -> False
                      CCW      -> chainOf v == R
                      CW       -> chainOf v == L

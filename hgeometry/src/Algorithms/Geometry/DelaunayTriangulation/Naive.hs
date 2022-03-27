@@ -65,7 +65,7 @@ toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
 -- CW order around u.
 -- running time: \( O(m log m) \), where m=|vs| is the number of vertices to sort.
 sortAroundMapping               :: (Num r, Ord r)
-                          => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
+                                => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
 sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround' (f u) (map f vs)
   where
     f v = (ptsV V.! v)&extra .~ v

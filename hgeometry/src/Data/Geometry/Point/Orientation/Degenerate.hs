@@ -2,7 +2,7 @@ module Data.Geometry.Point.Orientation.Degenerate(
     CCW(..)
   , pattern CCW, pattern CW, pattern CoLinear
 
-  , ccw, ccw'
+  , ccw
 
   , isCoLinear
 
@@ -66,8 +66,11 @@ instance Show CCW where
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
 -- CoLinear
 --
-ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
+ccw                         :: (Ord r, Num r, pointP :~ Point 2 r
+                               , pointQ :~ Point 2 r, pointR :~ Point 2 r
+                               )
+                            => pointP -> pointQ -> pointR -> CCW
+ccw (AsA p) (AsA q) (AsA r) = CCWWrap $ (ux*vy) `compare` (uy*vx)
 -- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
                                        -- I've added a testcase that fails if comparing against 0.
             -- case z `compare` 0 of
@@ -88,9 +91,9 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
 
--- | Given three points p q and r determine the orientation when going from p to r via q.
-ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
-ccw' p q r = ccw (p^.core) (q^.core) (r^.core)
+-- -- | Given three points p q and r determine the orientation when going from p to r via q.
+-- ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
+-- ccw' = ccw -- p q r = ccw (p^.core) (q^.core) (r^.core)
 
 -- | \( O(n log n) \)
 -- Sort the points arround the given point p in counter clockwise order with

@@ -156,7 +156,7 @@ convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
     findStartingPoint nth = do
       let vPrev = NE.unsafeIndex vs (nth-1)
           vNth = NE.unsafeIndex vs nth
-      case ccw' v1 vPrev vNth of
+      case ccw v1 vPrev vNth of
         CoLinear -> findStartingPoint (nth+1)
         CCW -> do
           dequePush v1 >> dequePush vPrev
@@ -170,18 +170,18 @@ convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
     v1 = NE.unsafeIndex vs 0
     vs = CV.vector (p^.outerBoundaryVector)
     build v = do
-      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
-      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      botTurn <- ccw <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw <$> dequeTop 1 <*> dequeTop 0    <*> pure v
       when (botTurn == CW || topTurn == CW) $ do
         backtrackTop v; dequePush v
         backtrackBot v; dequeInsert v
     backtrackTop v = do
-      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      turn <- ccw <$> dequeTop 1 <*> dequeTop 0 <*> pure v
       unless (turn == CCW) $ do
         dequePop
         backtrackTop v
     backtrackBot v = do
-      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      turn <- ccw <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
       unless (turn == CCW) $ do
         dequeRemove
         backtrackBot v
@@ -197,7 +197,7 @@ isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
 isConvex s =
     CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
   where
-    f a b c = ccw' a b c == CCW
+    f a b c = ccw a b c == CCW
     vs = s ^. outerBoundaryVector
 
 -- | \( O(n) \) Verify that a convex polygon is strictly convex.
@@ -421,7 +421,7 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isRight' []    _ _ = False
-    isRight' (x:_) l r = ccw' l r x /= CCW
+    isRight' (x:_) l r = ccw l r x /= CCW
 
     go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
                              | isRight' ls l r = go (ne ls) rh
@@ -467,7 +467,7 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isLeft' []    _ _ = False
-    isLeft' (x:_) l r = ccw' l r x /= CW
+    isLeft' (x:_) l r = ccw l r x /= CW
 
     go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
                              | isLeft' ls l r = go (ne ls) rh
@@ -536,8 +536,8 @@ inConvex p (ConvexPolygon poly)
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside
               then Outside
               else Inside
-      | ccw' point0 (point c) p' == CCW = worker c b
-      | otherwise                       = worker a c
+      | ccw point0 (point c) p' == CCW = worker c b
+      | otherwise                      = worker a c
       where c = (a+b) `div` 2
     point x = poly ^. outerVertex x
 
