@@ -16,13 +16,15 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.Chan where
 
+
 import           Algorithms.DivideAndConquer
+import           Control.Lens
+import           Data.Geometry.Point (xCoord, yCoord, zCoord)
 import qualified Data.Geometry.Point as Point
-import           Data.Geometry.Point (xCoord,yCoord,zCoord)
-import           Data.List.Util
-import           Data.Ord (comparing)
--- import           Data.Geometry.Polygon.Convex (lowerTangent')
+import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Properties
+import           Data.List.Util
+import           Data.Ord (comparing, Down(..))
 -- import           Data.Geometry.Triangle
 -- import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -43,7 +45,7 @@ type ConvexHull point = [Triangle' point]
 
 lowerHull :: Point point
           => NonEmpty point -> ConvexHull point
-lowerHull = fromSimulation . divideAndConquer1 simulation . NonEmpty.sortBy cmpXYZ
+lowerHull = fromSimulation . divideAndConquer1 (simulation @Hull'). NonEmpty.sortBy cmpXYZ
 
 --------------------------------------------------------------------------------
 
@@ -55,40 +57,46 @@ toPt2                                :: Point point
                                      => Time point -> point -> Point.Point 2 (NumType point)
 toPt2 t (toPt3 -> Point.Point3 x y z) = Point.Point2 x (z - t*y)
 
---------------------------------------------------------------------------------
 
+instance (Ord r, Fractional r) => Point (Point.Point 3 r) where
+  toPt3 = id
+
+compareX :: Point point => point -> point -> Ordering
+compareX = comparing (view xCoord . toPt3)
+
+--------------------------------------------------------------------------------
 
 class Hull (hull :: Type -> Type) where
   singleton :: point -> hull point
 
-  fromBridge :: Bridge hull point -> hull point
+  focus :: hull point -> point
+  goLeft  :: hull point -> hull point
+  goRight :: hull point -> hull point
 
-  default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
-  fromBridge (Bridge ll l _ _ r rr) = ll <> singleton l <> singleton r <> rr
+  predOf :: point -> hull point -> Maybe point
+  succOf :: point -> hull point -> Maybe point
+
+  -- fromBridge :: Bridge hull point -> hull point
+  -- default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
+  -- fromBridge (Bridge ll l _ _ r rr) = ll <> singleton l <> singleton r <> rr
 
   bridgeOf :: hull point -> hull point -> Bridge hull point
 
   delete :: point -> hull point -> hull point
   insert :: point -> hull point -> hull point
 
-  predOf :: point -> hull point -> Maybe point
-  succOf :: point -> hull point -> Maybe point
-
-  extractPred :: point -> hull point -> Maybe (hull point, point)
-  extractSucc :: point -> hull point -> Maybe (point, hull point)
-
-
---------------------------------------------------------------------------------
+  -- extractPred :: point -> hull point -> Maybe (hull point, point)
+  -- extractSucc :: point -> hull point -> Maybe (point, hull point)
 
 type Hull' = NonEmpty
 
--- type Hull' = Set.Set
--- data Hull' point = Singleton !point
---                  | Bridged (Bridge (Seq point) point)
---                  deriving (Show,Eq)
+--------------------------------------------------------------------------------
 
-data Bridge hull point = Bridge (hull point) !point (hull point)
-                                (hull point) !point (hull point)
+
+fromBridge :: Bridge hull point -> hull point
+fromBridge = undefined
+
+data Bridge hull point = Bridge (hull point) (hull point)
                        deriving (Show,Eq)
 
 -- toSeq                    :: Bridge Set a -> Seq a
@@ -134,7 +142,9 @@ data Bridge hull point = Bridge (hull point) !point (hull point)
 
 instance Hull NonEmpty where
   singleton = (:| [])
-  bridgeOf = undefined
+  bridgeOf lh rh = undefined
+
+
 
 
 
@@ -158,32 +168,56 @@ deriving instance (Eq   (Time point), Eq   point) => Eq   (Event point)
 --------------------------------------------------------------------------------
 
 -- | The simulation
-data Simulation point = Sim { _initialHull :: Hull' point
-                            , _events      :: [Event point]
-                            }
-deriving instance (Show (Time point), Show point) => Show (Simulation point)
-deriving instance (Eq (Time point), Eq point)     => Eq   (Simulation point)
+data Simulation hull point = Sim { _initialHull :: hull point
+                                 , _events      :: [Event point]
+                                 }
+deriving instance (Show (Time point), Show point, Show (hull point))
+                  => Show (Simulation hull point)
+deriving instance (Eq (Time point), Eq point, Eq (hull point))
+                  => Eq   (Simulation hull point)
 
-simulation   :: point -> Simulation point
+-- | Creates a singleton simulation
+simulation   :: forall hull point. Hull hull => point -> Simulation hull point
 simulation p = Sim (singleton p) []
 
-
-instance Point point => Semigroup (Simulation point) where
+instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
   (Sim l el) <> (Sim r er) = Sim (fromBridge b) events
     where
       b      = bridgeOf l r
       events = runSim minInftyT b (mergeSortedListsBy (comparing eventTime) el er)
       minInftyT = Nothing
 
+-- | Runs the simulation; producing a list of events
+runSim                                       :: (Hull hull, Point point)
+                                             => Maybe (Time point) -- ^ current time
+                                             -> Bridge hull point -- ^ current bridge
+                                             -> [Event point]     -- ^ future events
+                                             -> [Event point]
+runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
+    None                    -> []
+    BridgeEvent  e          -> runSim (Just $ eventTime e) (apply e b) events
+    ExistingEvent e events' -> runSim (Just $ eventTime e) (apply e b) events'
+  where
+    bridgeEvents = mapMaybe (\e -> if now < Just (eventTime e) then Just e else Nothing)
+                 . concat $
+                   [ bridgeEventL l (focus r)
+                   , bridgeEventR (focus l) r
+                   ]
+      -- TODO: if we make the Bottom into a type class we may be able
+      -- to avoid creating explit ValB's all the time. That should save allocations
+
 data NextEvent point = None
-                     | BridgeEvent   (Event point)
-                     | ExistingEvent (Event point) [Event point]
+                     | BridgeEvent   !(Event point)
+                     | ExistingEvent !(Event point) [Event point]
 
 deriving instance (Show (Time point), Show point) => Show (NextEvent point)
 deriving instance (Eq (Time point), Eq point)     => Eq   (NextEvent point)
 
+-- | Computes the first event that will happen.
 firstEvent              :: Ord (Time point)
-                        => [Event point] -> [Event point] -> NextEvent point
+                        => [Event point] -- ^ bridge events
+                        -> [Event point] -- ^ existing events
+                        -> NextEvent point
 firstEvent bridgeEvents = \case
   []       -> case firstEvent' bridgeEvents of
                 Nothing -> None
@@ -199,27 +233,6 @@ firstEvent bridgeEvents = \case
     firstEvent' = minimum1By cmp
 
 
-runSim                                       :: (Hull hull, Point point)
-                                             => Maybe (Time point)
-                                             -> Bridge hull point
-                                             -> [Event point]
-                                             -> [Event point]
-runSim now b@(Bridge ll l lr rl r rr) events = case firstEvent bridgeEvents events of
-    None                    -> []
-    BridgeEvent  e          -> runSim (Just $ eventTime e) (apply e b) events
-    ExistingEvent e events' -> runSim (Just $ eventTime e) (apply e b) events'
-  where
-    bridgeEvents = mapMaybe (\e -> if now < Just (eventTime e) then Just e else Nothing)
-                 . concat $
-                   [ bridgeEventL ll l lr r
-                   , bridgeEventR l rl r rr
-                   ]
-      -- TODO: if we make the Bottom into a type class we may be able
-      -- to avoid creating explit ValB's all the time. That should save allocations
-
-compareX :: point -> point -> Ordering
-compareX = undefined
-
 data ApplyWhere = NoWhere
                 | LeftHull
                 | LeftBridgePoint
@@ -227,17 +240,19 @@ data ApplyWhere = NoWhere
                 | RightHull
                 deriving (Show,Eq)
 
-applyWhere                        :: point -> Bridge hull point -> ApplyWhere
-applyWhere q (Bridge _ l _ _ r _) = case q `compareX` l of
+applyWhere                        :: (Point point, Hull hull)
+                                  => point -> Bridge hull point -> ApplyWhere
+applyWhere q (Bridge l r) = case q `compareX` (focus l) of
     LT -> LeftHull
     EQ -> LeftBridgePoint
-    GT -> case q `compareX` r of
+    GT -> case q `compareX` (focus r) of
             LT -> NoWhere
             EQ -> RightBridgePoint
             GT -> RightHull
 
-apply                           :: Event point -> Bridge hull point -> Bridge hull point
-apply e b@(Bridge ll l _ _ r rr) = case applyWhere (eventPoint e) b of
+apply                            :: (Point point, Hull hull)
+                                 => Event point -> Bridge hull point -> Bridge hull point
+apply e b@(Bridge l r) = case applyWhere (eventPoint e) b of
     NoWhere          -> b
   --   LeftHull         -> Bridge (apply' e ll) l r rr
   --   RightHull        -> Bridge ll l r (apply' e rr)
@@ -258,29 +273,31 @@ apply e b@(Bridge ll l _ _ r rr) = case applyWhere (eventPoint e) b of
   --   InsertBefore _ p q -> undefined -- case Seq.Seq.insertAt ()
 
 
-bridgeEventL           :: ( Hull hull, Point point)
-                       => hull point -> point -> hull point -> point -> [Event point]
-bridgeEventL ll l lr r = catMaybes
-  [ do p <- predOf l ll
-       t <- colinearTime p l r
-       pure $ Event Delete t l
-  , do p <- succOf l lr
-       t <- colinearTime l p r
-       pure $ Event Insert t p -- verify that this should not be an insert
-  ]
+bridgeEventL      :: ( Hull hull, Point point)
+                  => hull point -> point -> [Event point]
+bridgeEventL hl r = let l = focus hl
+                    in catMaybes
+                      [ do p <- predOf l hl
+                           t <- colinearTime p l r
+                           pure $ Event Delete t l
+                      , do p <- succOf l hl
+                           t <- colinearTime l p r
+                           pure $ Event Insert t p -- verify that this should not be an insert
+                      ]
 
 bridgeEventR           :: (Hull hull, Point point)
-                       => point -> hull point -> point -> hull point -> [Event point]
-bridgeEventR l rl r rr = catMaybes
-  [ do p <- predOf r rl
-       t <- colinearTime l p r
-       pure $ Event Insert t p
-  , do p <- succOf r rr
-       t <- colinearTime l r p
-       pure $ Event Delete t r  -- verify that this should not be an insert
-  ]
+                       => point -> hull point -> [Event point]
+bridgeEventR l hr = let r = focus hr
+                    in catMaybes
+                       [ do p <- predOf r hr
+                            t <- colinearTime l p r
+                            pure $ Event Insert t p
+                       , do p <- succOf r hr
+                            t <- colinearTime l r p
+                            pure $ Event Delete t r  -- verify that this should not be an insert
+                       ]
 
-fromSimulation :: Simulation point -> ConvexHull point
+fromSimulation :: Simulation hull point -> ConvexHull point
 fromSimulation = undefined
 
 --------------------------------------------------------------------------------
@@ -299,16 +316,9 @@ fromSimulation = undefined
 -- the lower envelope of these lines (using the duality and upper
 -- hull) we don't have to re-sort the points. See 'simulateLeaf'' for
 -- details.
-cmpXYZ  :: point -> point -> Ordering
-cmpXYZ = undefined
-
--- (Point3 px py pz :+ _) (Point3 qx qy qz :+ _) =
---   compare px qx <> compare (Down py) (Down qy) <> compare pz qz
-
-
-safeHead :: [a] -> Maybe a
-safeHead = listToMaybe
-
+cmpXYZ  :: Point point => point -> point -> Ordering
+cmpXYZ (toPt3 -> Point.Point3 px py pz) (toPt3 -> Point.Point3 qx qy qz) =
+  compare px qx <> compare (Down py) (Down qy) <> compare pz qz
 
 -- | compute the time at which r becomes colinear with the line through
 -- p and q.
