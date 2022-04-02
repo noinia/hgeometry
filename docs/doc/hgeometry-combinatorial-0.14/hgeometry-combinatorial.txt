@@ -619,6 +619,19 @@ extra :: Lens (core :+ extra) (core :+ extra') extra extra'
 
 -- | Tag a value with the unit type.
 ext :: a -> a :+ ()
+
+-- | A class for types that can behave as a c. Mostly for types t that
+--   "extend" a <a>core</a> type c.
+class AsA t c | t -> c
+
+-- | Get the core from the t.
+asCore :: AsA t c => t -> c
+
+-- | infifx shorthand for AsA
+type t :~ c = t `AsA` c
+
+-- | Pattern to get the core.
+pattern AsA :: t :~ c => c -> t
 instance (Control.DeepSeq.NFData core, Control.DeepSeq.NFData extra) => Control.DeepSeq.NFData (core Data.Ext.:+ extra)
 instance GHC.Generics.Generic (core Data.Ext.:+ extra)
 instance (GHC.Enum.Bounded core, GHC.Enum.Bounded extra) => GHC.Enum.Bounded (core Data.Ext.:+ extra)
@@ -626,6 +639,8 @@ instance (GHC.Classes.Ord core, GHC.Classes.Ord extra) => GHC.Classes.Ord (core 
 instance (GHC.Classes.Eq core, GHC.Classes.Eq extra) => GHC.Classes.Eq (core Data.Ext.:+ extra)
 instance (GHC.Read.Read core, GHC.Read.Read extra) => GHC.Read.Read (core Data.Ext.:+ extra)
 instance (GHC.Show.Show core, GHC.Show.Show extra) => GHC.Show.Show (core Data.Ext.:+ extra)
+instance (t GHC.Types.~ c) => Data.Ext.AsA t c
+instance Data.Ext.AsA (c Data.Ext.:+ e) c
 instance Data.Bifunctor.Bifunctor (Data.Ext.:+)
 instance Data.Functor.Bind.Class.Biapply (Data.Ext.:+)
 instance Data.Biapplicative.Biapplicative (Data.Ext.:+)
@@ -1620,8 +1635,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_avJL a_avTl. Lens (Permutation a_avJL) (Permutation a_avTl) (Vector (Orbit a_avJL)) (Vector (Orbit a_avTl))
-indexes :: forall a_avJL. Lens' (Permutation a_avJL) (Vector (Int, Int))
+orbits :: forall a_avOs a_avY2. Lens (Permutation a_avOs) (Permutation a_avY2) (Vector (Orbit a_avOs)) (Vector (Orbit a_avY2))
+indexes :: forall a_avOs. Lens' (Permutation a_avOs) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
