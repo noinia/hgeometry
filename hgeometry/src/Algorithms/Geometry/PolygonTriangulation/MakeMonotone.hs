@@ -79,7 +79,7 @@ classifyVertices' poly =
   where
     vs = poly ^. outerBoundaryVector
     -- is the angle larger than > 180 degrees
-    largeInteriorAngle p c n = case ccw (p^.core) (c^.core) (n^.core) of
+    largeInteriorAngle p c n = case ccw p c n of
            CCW -> False
            CW  -> True
            _   -> error "classifyVertices -> largeInteriorAngle: colinear points"

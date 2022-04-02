@@ -398,7 +398,7 @@ instance (Ord r, Fractional r) =>
 -- True
 onSegment2                          :: (Ord r, Num r)
                                     => Point 2 r -> LineSegment 2 p r -> Bool
-p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEndPoint) of
+p `onSegment2` s@(LineSegment u v) = case ccw p (u^.unEndPoint) (v^.unEndPoint) of
     CoLinear -> let su = p `onSide` lu
                     sv = p `onSide` lv
                 in su /= sv

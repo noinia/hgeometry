@@ -33,7 +33,7 @@ import           Control.Monad.ST.Unsafe      (unsafeInterleaveST)
 import           Data.Bits
 import           Data.Ext
 import           Data.Geometry.Boundary       (PointLocationResult (Outside))
-import           Data.Geometry.Point          (Point (Point2), ccw', pattern CCW)
+import           Data.Geometry.Point          (Point (Point2), ccw, pattern CCW)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Box
 import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangleRelaxed)
@@ -471,7 +471,7 @@ earCheck vertices a b c = do
         case inTriangleRelaxed point trig of
           Outside -> loop =<< mutListNext vertices elt
           _       -> pure False
-  if ccw' pointA pointB pointC == CCW
+  if ccw pointA pointB pointC == CCW
     then loop =<< mutListNext vertices c
     else pure False
 
@@ -520,6 +520,6 @@ earCheckHashed hasher vertices zHashes a b c = do
           downZ = mutListIndex zHashes down
           pointUp = mutListIndex vertices up ^. core
           pointDown = mutListIndex vertices down ^. core
-  if ccw' pointA pointB pointC == CCW
+  if ccw pointA pointB pointC == CCW
     then bidirectional b b
     else pure False
