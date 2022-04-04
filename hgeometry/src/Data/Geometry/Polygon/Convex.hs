@@ -414,14 +414,13 @@ lowerTangent lp rp = ClosedLineSegment l r
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-lowerTangent'       :: (Ord r, Num r, Foldable1 f)
-                    => f (Point 2 r :+ p) -> f (Point 2 r :+ p)
-                    -> Two ((Point 2 r :+ p) :+ [Point 2 r :+ p])
+lowerTangent'       :: forall point r f. (Ord r, Num r, Foldable1 f, ToAPoint point 2 r)
+                    => f point -> f point -> Two (point :+ [point])
 lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isRight' []    _ _ = False
-    isRight' (x:_) l r = ccw l r x /= CCW
+    isRight' (x:_) l r = ccw (l^.toPoint) (r^.toPoint) (x^.toPoint) /= CCW
 
     go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
                              | isRight' ls l r = go (ne ls) rh
@@ -460,14 +459,13 @@ upperTangent lp rp = ClosedLineSegment l r
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-upperTangent'       :: (Ord r, Num r, Foldable1 f)
-                    => f (Point 2 r :+ p) -> f (Point 2 r :+ p)
-                    -> Two ((Point 2 r :+ p) :+ [Point 2 r :+ p])
+upperTangent'       :: (Ord r, Num r, Foldable1 f, ToAPoint point 2 r)
+                    => f point -> f point -> Two (point :+ [point])
 upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isLeft' []    _ _ = False
-    isLeft' (x:_) l r = ccw l r x /= CW
+    isLeft' (x:_) l r = ccw (l^.toPoint) (r^.toPoint) (x^.toPoint) /= CW
 
     go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
                              | isLeft' ls l r = go (ne ls) rh
