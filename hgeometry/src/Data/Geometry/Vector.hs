@@ -20,7 +20,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , scalarMultiple, sameDirection
                            -- reexports
                            , FV.replicate
-                           , xComponent, yComponent, zComponent
+                           , xComponent, yComponent, zComponent, wComponent
                            ) where
 
 import           Control.Applicative               (liftA2)
@@ -196,3 +196,13 @@ yComponent = element @1
 zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
 zComponent = element @2
 {-# INLINABLE zComponent #-}
+
+-- | Shorthand to access the forth component
+--
+-- >>> Vector4 1 2 3 4 ^. wComponent
+-- 4
+-- >>> Vector4 1 2 3 4 & wComponent .~ 10
+-- Vector3 1 2 3 10
+wComponent :: (4 <= d, Arity d) => Lens' (Vector d r) r
+wComponent = element @3
+{-# INLINABLE wComponent #-}
