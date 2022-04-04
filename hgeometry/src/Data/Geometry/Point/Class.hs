@@ -1,8 +1,10 @@
 {-# LANGUAGE  AllowAmbiguousTypes  #-}
+{-# LANGUAGE  FunctionalDependencies  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Data.Geometry.Point.Class where
 
 import           Control.Lens
+import           Data.Ext
 import           Data.Geometry.Point.Internal (Point)
 import qualified Data.Geometry.Point.Internal as Internal
 import           Data.Geometry.Vector
@@ -15,8 +17,8 @@ import           Linear.V4
 -- $setup
 -- >>> import Data.Geometry.Point.Internal (pattern Point2, pattern Point3, origin)
 
-class ToAPoint point d r where
-  toPoint   :: Getter (point d r) (Point d r)
+class ToAPoint point d r | point -> r where
+  toPoint   :: Getter point (Point d r)
 
 class AsAPoint p where
   asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
@@ -50,8 +52,11 @@ coord = asAPoint.Internal.coord @i
 unsafeCoord   :: (Arity d, AsAPoint p) => Int -> Lens' (p d r) r
 unsafeCoord i = asAPoint.Internal.unsafeCoord i
 
-instance ToAPoint Point d r where
+instance ToAPoint (Point d r) d r where
   toPoint = to id
+
+instance ToAPoint (Point d r :+ p) d r where
+  toPoint = core
 
 instance AsAPoint Point where
   asAPoint = id
