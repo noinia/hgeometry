@@ -23,6 +23,7 @@ module Data.Geometry.Point.Internal
   , pattern Point1
   , pattern Point2
   , pattern Point3
+  , pattern Point4
   , PointFunctor(..)
 
   , cmpByDistanceTo
@@ -229,6 +230,11 @@ pattern Point2 x y = Point (Vector2 x y)
 pattern Point3       :: r -> r -> r -> Point 3 r
 pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}
+
+-- | A bidirectional pattern synonym for 4 dimensional points.
+pattern Point4         :: r -> r -> r -> r -> Point 4 r
+pattern Point4 x y z w = (Point (Vector4 x y z w))
+{-# COMPLETE Point4 #-}
 
 --------------------------------------------------------------------------------
 -- * Point Functors
