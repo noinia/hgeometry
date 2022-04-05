@@ -10,10 +10,13 @@ module Algorithms.Geometry.LineSegmentIntersection
   , BO.intersections
   , BO.interiorIntersections
   , Intersections
-  , Associated(..)
+  , Associated(..), startPointOf, endPointOf, interiorTo
   , IntersectionPoint(..), mkIntersectionPoint
+  , intersectionPoint, associatedSegs
   -- , isInteriorIntersection
   , hasSelfIntersections
+
+  , AroundStart(..), AroundEnd(..), AroundIntersection(..)
   ) where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
