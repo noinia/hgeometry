@@ -2745,8 +2745,8 @@ data Cell r
 Cell :: {-# UNPACK #-} !WidthIndex -> !Point 2 r -> Cell r
 [_cellWidthIndex] :: Cell r -> {-# UNPACK #-} !WidthIndex
 [_lowerLeft] :: Cell r -> !Point 2 r
-lowerLeft :: forall r_a20Wg r_a217f. Lens (Cell r_a20Wg) (Cell r_a217f) (Point 2 r_a20Wg) (Point 2 r_a217f)
-cellWidthIndex :: forall r_a20Wg. Lens' (Cell r_a20Wg) WidthIndex
+lowerLeft :: forall r_a215w r_a21gv. Lens (Cell r_a215w) (Cell r_a21gv) (Point 2 r_a215w) (Point 2 r_a21gv)
+cellWidthIndex :: forall r_a215w. Lens' (Cell r_a215w) WidthIndex
 
 -- | Computes a cell that contains the given rectangle
 fitsRectangle :: (RealFrac r, Ord r) => Rectangle p r -> Cell r
@@ -2823,8 +2823,8 @@ module Data.Geometry.QuadTree.Split
 data Split i v p
 No :: !p -> Split i v p
 Yes :: !v -> Quadrants i -> Split i v p
-_Yes :: forall i_a24oi v_a24oj p_a24ok i_a24uF v_a24uG. Prism (Split i_a24uF v_a24uG p_a24ok) (Split i_a24oi v_a24oj p_a24ok) (v_a24uG, Quadrants i_a24uF) (v_a24oj, Quadrants i_a24oi)
-_No :: forall i_a24oi v_a24oj p_a24ok p_a24uz. Prism (Split i_a24oi v_a24oj p_a24uz) (Split i_a24oi v_a24oj p_a24ok) p_a24uz p_a24ok
+_Yes :: forall i_a24xy v_a24xz p_a24xA i_a24DV v_a24DW. Prism (Split i_a24DV v_a24DW p_a24xA) (Split i_a24xy v_a24xz p_a24xA) (v_a24DW, Quadrants i_a24DV) (v_a24xz, Quadrants i_a24xy)
+_No :: forall i_a24xy v_a24xz p_a24xA p_a24DP. Prism (Split i_a24xy v_a24xz p_a24DP) (Split i_a24xy v_a24xz p_a24xA) p_a24DP p_a24xA
 
 -- | A splitter is a function that determines weather or not we should the
 --   given cell corresponding to the given input (i).
@@ -2849,8 +2849,8 @@ module Data.Geometry.QuadTree.Tree
 data Tree v p
 Leaf :: !p -> Tree v p
 Node :: !v -> Quadrants (Tree v p) -> Tree v p
-_Node :: forall v_a25o8 p_a25o9 v_a25rx. Prism (Tree v_a25rx p_a25o9) (Tree v_a25o8 p_a25o9) (v_a25rx, Quadrants (Tree v_a25rx p_a25o9)) (v_a25o8, Quadrants (Tree v_a25o8 p_a25o9))
-_Leaf :: forall v_a25o8 p_a25o9. Prism' (Tree v_a25o8 p_a25o9) p_a25o9
+_Node :: forall v_a25xo p_a25xp v_a25AN. Prism (Tree v_a25AN p_a25xp) (Tree v_a25xo p_a25xp) (v_a25AN, Quadrants (Tree v_a25AN p_a25xp)) (v_a25xo, Quadrants (Tree v_a25xo p_a25xp))
+_Leaf :: forall v_a25xo p_a25xp. Prism' (Tree v_a25xo p_a25xp) p_a25xp
 
 -- | Fold on the Tree type.
 foldTree :: (p -> b) -> (v -> Quadrants b -> b) -> Tree v p -> b
@@ -2896,8 +2896,8 @@ data QuadTree v p r
 QuadTree :: !Cell r -> !Tree v p -> QuadTree v p r
 [_startingCell] :: QuadTree v p r -> !Cell r
 [_tree] :: QuadTree v p r -> !Tree v p
-tree :: forall v_a26Fz p_a26FA r_a26FB v_a26RH p_a26RI. Lens (QuadTree v_a26Fz p_a26FA r_a26FB) (QuadTree v_a26RH p_a26RI r_a26FB) (Tree v_a26Fz p_a26FA) (Tree v_a26RH p_a26RI)
-startingCell :: forall v_a26Fz p_a26FA r_a26FB r_a26RG. Lens (QuadTree v_a26Fz p_a26FA r_a26FB) (QuadTree v_a26Fz p_a26FA r_a26RG) (Cell r_a26FB) (Cell r_a26RG)
+tree :: forall v_a26OP p_a26OQ r_a26OR v_a270X p_a270Y. Lens (QuadTree v_a26OP p_a26OQ r_a26OR) (QuadTree v_a270X p_a270Y r_a26OR) (Tree v_a26OP p_a26OQ) (Tree v_a270X p_a270Y)
+startingCell :: forall v_a26OP p_a26OQ r_a26OR r_a270W. Lens (QuadTree v_a26OP p_a26OQ r_a26OR) (QuadTree v_a26OP p_a26OQ r_a270W) (Cell r_a26OR) (Cell r_a270W)
 withCells :: (Fractional r, Ord r) => QuadTree v p r -> QuadTree (v :+ Cell r) (p :+ Cell r) r
 withCellsTree :: (Fractional r, Ord r) => QuadTree v p r -> Tree (v :+ Cell r) (p :+ Cell r)
 leaves :: QuadTree v p r -> NonEmpty p
@@ -3220,7 +3220,7 @@ Vertical :: Orthogonal
 newtype Slab (o :: Orthogonal) a r
 Slab :: Interval a r -> Slab (o :: Orthogonal) a r
 [_unSlab] :: Slab (o :: Orthogonal) a r -> Interval a r
-unSlab :: forall o_a2eAH a_a2eAI r_a2eAJ o_a2eGj a_a2eGk r_a2eGl. Iso (Slab o_a2eAH a_a2eAI r_a2eAJ) (Slab o_a2eGj a_a2eGk r_a2eGl) (Interval a_a2eAI r_a2eAJ) (Interval a_a2eGk r_a2eGl)
+unSlab :: forall o_a2eJX a_a2eJY r_a2eJZ o_a2ePz a_a2ePA r_a2ePB. Iso (Slab o_a2eJX a_a2eJY r_a2eJZ) (Slab o_a2ePz a_a2ePA r_a2ePB) (Interval a_a2eJY r_a2eJZ) (Interval a_a2ePA r_a2ePB)
 
 -- | Smart consturctor for creating a horizontal slab
 horizontalSlab :: (r :+ a) -> (r :+ a) -> Slab Horizontal a r
@@ -3265,8 +3265,8 @@ data HyperPlane (d :: Nat) (r :: Type)
 HyperPlane :: !Point d r -> !Vector d r -> HyperPlane (d :: Nat) (r :: Type)
 [_inPlane] :: HyperPlane (d :: Nat) (r :: Type) -> !Point d r
 [_normalVec] :: HyperPlane (d :: Nat) (r :: Type) -> !Vector d r
-normalVec :: forall d_a2hMo r_a2hMp. Lens' (HyperPlane d_a2hMo r_a2hMp) (Vector d_a2hMo r_a2hMp)
-inPlane :: forall d_a2hMo r_a2hMp. Lens' (HyperPlane d_a2hMo r_a2hMp) (Point d_a2hMo r_a2hMp)
+normalVec :: forall d_a2hVE r_a2hVF. Lens' (HyperPlane d_a2hVE r_a2hVF) (Vector d_a2hVE r_a2hVF)
+inPlane :: forall d_a2hVE r_a2hVF. Lens' (HyperPlane d_a2hVE r_a2hVF) (Point d_a2hVE r_a2hVF)
 type Plane = HyperPlane 3
 pattern Plane :: Point 3 r -> Vector 3 r -> Plane r
 
@@ -3385,8 +3385,8 @@ module Data.Geometry.HalfLine
 -- | &lt;math&gt;-dimensional Half-Lines
 data HalfLine d r
 HalfLine :: Point d r -> Vector d r -> HalfLine d r
-startPoint :: forall d_a2lLm r_a2lLn. Lens' (HalfLine d_a2lLm r_a2lLn) (Point d_a2lLm r_a2lLn)
-halfLineDirection :: forall d_a2lLm r_a2lLn. Lens' (HalfLine d_a2lLm r_a2lLn) (Vector d_a2lLm r_a2lLn)
+startPoint :: forall d_a2lUC r_a2lUD. Lens' (HalfLine d_a2lUC r_a2lUD) (Point d_a2lUC r_a2lUD)
+halfLineDirection :: forall d_a2lUC r_a2lUD. Lens' (HalfLine d_a2lUC r_a2lUD) (Vector d_a2lUC r_a2lUD)
 
 -- | Transform a LineSegment into a half-line, by forgetting the second
 --   endpoint. Note that this also forgets about if the starting point was
@@ -3428,7 +3428,7 @@ module Data.Geometry.HalfSpace
 newtype HalfSpace d r
 HalfSpace :: HyperPlane d r -> HalfSpace d r
 [_boundingPlane] :: HalfSpace d r -> HyperPlane d r
-boundingPlane :: forall d_a2qRJ r_a2qRK d_a2qTC r_a2qTD. Iso (HalfSpace d_a2qRJ r_a2qRK) (HalfSpace d_a2qTC r_a2qTD) (HyperPlane d_a2qRJ r_a2qRK) (HyperPlane d_a2qTC r_a2qTD)
+boundingPlane :: forall d_a2r0Z r_a2r10 d_a2r2S r_a2r2T. Iso (HalfSpace d_a2r0Z r_a2r10) (HalfSpace d_a2r2S r_a2r2T) (HyperPlane d_a2r0Z r_a2r10) (HyperPlane d_a2r2S r_a2r2T)
 type HalfPlane = HalfSpace 2
 
 -- | Get the halfplane left of a line (i.e. "above") a line
@@ -3472,8 +3472,8 @@ data Ball d p r
 Ball :: !Point d r :+ p -> !r -> Ball d p r
 [_center] :: Ball d p r -> !Point d r :+ p
 [_squaredRadius] :: Ball d p r -> !r
-squaredRadius :: forall d_a2taY p_a2taZ r_a2tb0. Lens' (Ball d_a2taY p_a2taZ r_a2tb0) r_a2tb0
-center :: forall d_a2taY p_a2taZ r_a2tb0 d_a2tdC p_a2tdD. Lens (Ball d_a2taY p_a2taZ r_a2tb0) (Ball d_a2tdC p_a2tdD r_a2tb0) ((:+) (Point d_a2taY r_a2tb0) p_a2taZ) ((:+) (Point d_a2tdC r_a2tb0) p_a2tdD)
+squaredRadius :: forall d_a2tke p_a2tkf r_a2tkg. Lens' (Ball d_a2tke p_a2tkf r_a2tkg) r_a2tkg
+center :: forall d_a2tke p_a2tkf r_a2tkg d_a2tmS p_a2tmT. Lens (Ball d_a2tke p_a2tkf r_a2tkg) (Ball d_a2tmS p_a2tmT r_a2tkg) ((:+) (Point d_a2tke r_a2tkg) p_a2tkf) ((:+) (Point d_a2tmS r_a2tkg) p_a2tmT)
 
 -- | A lens to get/set the radius of a Ball
 radius :: Floating r => Lens' (Ball d p r) r
@@ -3823,7 +3823,7 @@ module Data.Geometry.Ellipse
 -- | A type representing planar ellipses
 newtype Ellipse r
 Ellipse :: Transformation 2 r -> Ellipse r
-affineTransformation :: forall r_a2Pqs r_a2PT8. Iso (Ellipse r_a2Pqs) (Ellipse r_a2PT8) (Transformation 2 r_a2Pqs) (Transformation 2 r_a2PT8)
+affineTransformation :: forall r_a2PzI r_a2Q2o. Iso (Ellipse r_a2PzI) (Ellipse r_a2Q2o) (Transformation 2 r_a2PzI) (Transformation 2 r_a2Q2o)
 ellipseMatrix :: Iso (Ellipse r) (Ellipse s) (Matrix 3 3 r) (Matrix 3 3 s)
 
 -- | Ellipse representing the unit circle
@@ -3857,9 +3857,9 @@ NodeData :: !Int -> !Box d () r -> !a -> NodeData d r a
 [_splitDim] :: NodeData d r a -> !Int
 [_bBox] :: NodeData d r a -> !Box d () r
 [_nodeData] :: NodeData d r a -> !a
-splitDim :: forall d_a2SSB r_a2SSC a_a2SSD. Lens' (NodeData d_a2SSB r_a2SSC a_a2SSD) Int
-nodeData :: forall d_a2SSB r_a2SSC a_a2SSD a_a2SXk. Lens (NodeData d_a2SSB r_a2SSC a_a2SSD) (NodeData d_a2SSB r_a2SSC a_a2SXk) a_a2SSD a_a2SXk
-bBox :: forall d_a2SSB r_a2SSC a_a2SSD d_a2SXi r_a2SXj. Lens (NodeData d_a2SSB r_a2SSC a_a2SSD) (NodeData d_a2SXi r_a2SXj a_a2SSD) (Box d_a2SSB () r_a2SSC) (Box d_a2SXi () r_a2SXj)
+splitDim :: forall d_a2T1R r_a2T1S a_a2T1T. Lens' (NodeData d_a2T1R r_a2T1S a_a2T1T) Int
+nodeData :: forall d_a2T1R r_a2T1S a_a2T1T a_a2T6A. Lens (NodeData d_a2T1R r_a2T1S a_a2T1T) (NodeData d_a2T1R r_a2T1S a_a2T6A) a_a2T1T a_a2T6A
+bBox :: forall d_a2T1R r_a2T1S a_a2T1T d_a2T6y r_a2T6z. Lens (NodeData d_a2T1R r_a2T1S a_a2T1T) (NodeData d_a2T6y r_a2T6z a_a2T1T) (Box d_a2T1R () r_a2T1S) (Box d_a2T6y () r_a2T6z)
 
 -- | Non-empty sequence of points.
 type PointSeq d p r = LSeq 1 (Point d r :+ p)
@@ -3879,9 +3879,9 @@ FAC :: !Seq (Point d r :+ p) -> !Seq (Point d r :+ p) -> !ShortSide -> FindAndCo
 [_leftPart] :: FindAndCompact d r p -> !Seq (Point d r :+ p)
 [_rightPart] :: FindAndCompact d r p -> !Seq (Point d r :+ p)
 [_shortSide] :: FindAndCompact d r p -> !ShortSide
-shortSide :: forall d_a2T9v r_a2T9w p_a2T9x. Lens' (FindAndCompact d_a2T9v r_a2T9w p_a2T9x) ShortSide
-rightPart :: forall d_a2T9v r_a2T9w p_a2T9x. Lens' (FindAndCompact d_a2T9v r_a2T9w p_a2T9x) (Seq ((:+) (Point d_a2T9v r_a2T9w) p_a2T9x))
-leftPart :: forall d_a2T9v r_a2T9w p_a2T9x. Lens' (FindAndCompact d_a2T9v r_a2T9w p_a2T9x) (Seq ((:+) (Point d_a2T9v r_a2T9w) p_a2T9x))
+shortSide :: forall d_a2TiL r_a2TiM p_a2TiN. Lens' (FindAndCompact d_a2TiL r_a2TiM p_a2TiN) ShortSide
+rightPart :: forall d_a2TiL r_a2TiM p_a2TiN. Lens' (FindAndCompact d_a2TiL r_a2TiM p_a2TiN) (Seq ((:+) (Point d_a2TiL r_a2TiM) p_a2TiN))
+leftPart :: forall d_a2TiL r_a2TiM p_a2TiN. Lens' (FindAndCompact d_a2TiL r_a2TiM p_a2TiN) (Seq ((:+) (Point d_a2TiL r_a2TiM) p_a2TiN))
 
 
 -- | Algorithm to construct a well separated pair decomposition (wspd).
@@ -3902,7 +3902,7 @@ data NodeData d r a
 NodeData :: !Int -> !Box d () r -> !a -> NodeData d r a
 type WSP d p r a = (PointSet d p r a, PointSet d p r a)
 type SplitTree d p r a = BinLeafTree (NodeData d r a) (Point d r :+ p)
-nodeData :: forall d_a2SSB r_a2SSC a_a2SSD a_a2SXk. Lens (NodeData d_a2SSB r_a2SSC a_a2SSD) (NodeData d_a2SSB r_a2SSC a_a2SXk) a_a2SSD a_a2SXk
+nodeData :: forall d_a2T1R r_a2T1S a_a2T1T a_a2T6A. Lens (NodeData d_a2T1R r_a2T1S a_a2T1T) (NodeData d_a2T1R r_a2T1S a_a2T6A) a_a2T1T a_a2T6A
 data Level
 Level :: Int -> Maybe Int -> Level
 [_unLevel] :: Level -> Int
@@ -4071,15 +4071,15 @@ data LPSolution d r
 NoSolution :: LPSolution d r
 Single :: !Point d r -> LPSolution d r
 UnBounded :: HalfLine d r -> LPSolution d r
-_UnBounded :: forall d_a2XED r_a2XEE. Prism' (LPSolution d_a2XED r_a2XEE) (HalfLine d_a2XED r_a2XEE)
-_Single :: forall d_a2XED r_a2XEE. Prism' (LPSolution d_a2XED r_a2XEE) (Point d_a2XED r_a2XEE)
-_NoSolution :: forall d_a2XED r_a2XEE. Prism' (LPSolution d_a2XED r_a2XEE) ()
+_UnBounded :: forall d_a2XNT r_a2XNU. Prism' (LPSolution d_a2XNT r_a2XNU) (HalfLine d_a2XNT r_a2XNU)
+_Single :: forall d_a2XNT r_a2XNU. Prism' (LPSolution d_a2XNT r_a2XNU) (Point d_a2XNT r_a2XNU)
+_NoSolution :: forall d_a2XNT r_a2XNU. Prism' (LPSolution d_a2XNT r_a2XNU) ()
 data LinearProgram d r
 LinearProgram :: !Vector d r -> [HalfSpace d r] -> LinearProgram d r
 [_objective] :: LinearProgram d r -> !Vector d r
 [_constraints] :: LinearProgram d r -> [HalfSpace d r]
-objective :: forall d_a2XFP r_a2XFQ. Lens' (LinearProgram d_a2XFP r_a2XFQ) (Vector d_a2XFP r_a2XFQ)
-constraints :: forall d_a2XFP r_a2XFQ. Lens' (LinearProgram d_a2XFP r_a2XFQ) [HalfSpace d_a2XFP r_a2XFQ]
+objective :: forall d_a2XP5 r_a2XP6. Lens' (LinearProgram d_a2XP5 r_a2XP6) (Vector d_a2XP5 r_a2XP6)
+constraints :: forall d_a2XP5 r_a2XP6. Lens' (LinearProgram d_a2XP5 r_a2XP6) [HalfSpace d_a2XP5 r_a2XP6]
 instance Data.Geometry.Vector.VectorFamily.Arity d => GHC.Base.Functor (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d)
 instance (Data.Geometry.Vector.VectorFamily.Arity d, GHC.Show.Show r) => GHC.Show.Show (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d r)
 instance (Data.Geometry.Vector.VectorFamily.Arity d, GHC.Real.Fractional r, GHC.Classes.Eq r) => GHC.Classes.Eq (Algorithms.Geometry.LinearProgramming.Types.LinearProgram d r)
@@ -5251,8 +5251,8 @@ data DiskResult p r
 DiskResult :: Disk () r -> TwoOrThree (Point 2 r :+ p) -> DiskResult p r
 [_enclosingDisk] :: DiskResult p r -> Disk () r
 [_definingPoints] :: DiskResult p r -> TwoOrThree (Point 2 r :+ p)
-enclosingDisk :: forall p_a32nG r_a32nH. Lens' (DiskResult p_a32nG r_a32nH) (Disk () r_a32nH)
-definingPoints :: forall p_a32nG r_a32nH p_a32Gm. Lens (DiskResult p_a32nG r_a32nH) (DiskResult p_a32Gm r_a32nH) (TwoOrThree ((:+) (Point 2 r_a32nH) p_a32nG)) (TwoOrThree ((:+) (Point 2 r_a32nH) p_a32Gm))
+enclosingDisk :: forall p_a32wW r_a32wX. Lens' (DiskResult p_a32wW r_a32wX) (Disk () r_a32wX)
+definingPoints :: forall p_a32wW r_a32wX p_a32PC. Lens (DiskResult p_a32wW r_a32wX) (DiskResult p_a32PC r_a32wX) (TwoOrThree ((:+) (Point 2 r_a32wX) p_a32wW)) (TwoOrThree ((:+) (Point 2 r_a32wX) p_a32PC))
 
 -- | List of two or three elements
 data TwoOrThree a
@@ -5479,6 +5479,9 @@ Associated :: Set (AroundEnd (LineSegment 2 p r :+ e)) -> Set (AroundStart (Line
 --   s^.end.core == p)
 [_endPointOf] :: Associated p r e -> Set (AroundStart (LineSegment 2 p r :+ e))
 [_interiorTo] :: Associated p r e -> Set (AroundIntersection (LineSegment 2 p r :+ e))
+startPointOf :: forall p_a1OJ7 r_a1OJ8 e_a1OJ9. Lens' (Associated p_a1OJ7 r_a1OJ8 e_a1OJ9) (Set (AroundEnd ((:+) (LineSegment 2 p_a1OJ7 r_a1OJ8) e_a1OJ9)))
+endPointOf :: forall p_a1OJ7 r_a1OJ8 e_a1OJ9. Lens' (Associated p_a1OJ7 r_a1OJ8 e_a1OJ9) (Set (AroundStart ((:+) (LineSegment 2 p_a1OJ7 r_a1OJ8) e_a1OJ9)))
+interiorTo :: forall p_a1OJ7 r_a1OJ8 e_a1OJ9. Lens' (Associated p_a1OJ7 r_a1OJ8 e_a1OJ9) (Set (AroundIntersection ((:+) (LineSegment 2 p_a1OJ7 r_a1OJ8) e_a1OJ9)))
 
 -- | An intersection point together with all segments intersecting at this
 --   point.
@@ -5490,11 +5493,25 @@ IntersectionPoint :: !Point 2 r -> !Associated p r e -> IntersectionPoint p r e
 -- | Given a point p, and a bunch of segments that suposedly intersect at
 --   p, correctly categorize them.
 mkIntersectionPoint :: (Ord r, Fractional r) => Point 2 r -> [LineSegment 2 p r :+ e] -> [LineSegment 2 p r :+ e] -> IntersectionPoint p r e
+intersectionPoint :: forall p_a1OV2 r_a1OV3 e_a1OV4. Lens' (IntersectionPoint p_a1OV2 r_a1OV3 e_a1OV4) (Point 2 r_a1OV3)
+associatedSegs :: forall p_a1OV2 r_a1OV3 e_a1OV4 p_a1PfE e_a1PfF. Lens (IntersectionPoint p_a1OV2 r_a1OV3 e_a1OV4) (IntersectionPoint p_a1PfE r_a1OV3 e_a1PfF) (Associated p_a1OV2 r_a1OV3 e_a1OV4) (Associated p_a1PfE r_a1OV3 e_a1PfF)
 
 -- | Test if the polygon has self intersections.
 --   
 --   &lt;math&gt;
 hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
+
+-- | Assumes that two segments have the same start point
+newtype AroundStart a
+AroundStart :: a -> AroundStart a
+
+-- | Assumes that two segments have the same end point
+newtype AroundEnd a
+AroundEnd :: a -> AroundEnd a
+
+-- | Assumes that two segments intersect in a single point.
+newtype AroundIntersection a
+AroundIntersection :: a -> AroundIntersection a
 
 
 module Algorithms.Geometry.ConvexHull.QuickHull
@@ -5928,8 +5945,8 @@ module Data.Geometry.VerticalRayShooting.PersistentSweep
 data VerticalRayShootingStructure p e r
 VerticalRayShootingStructure :: r -> Vector (r :+ StatusStructure p e r) -> VerticalRayShootingStructure p e r
 type StatusStructure p e r = Set (LineSegment 2 p r :+ e)
-leftMost :: forall p_a3fKq e_a3fKr r_a3fKs. Getter (VerticalRayShootingStructure p_a3fKq e_a3fKr r_a3fKs) r_a3fKs
-sweepStruct :: forall p_a3fKq e_a3fKr r_a3fKs. Getter (VerticalRayShootingStructure p_a3fKq e_a3fKr r_a3fKs) (Vector ((:+) r_a3fKs (StatusStructure p_a3fKq e_a3fKr r_a3fKs)))
+leftMost :: forall p_a3fTG e_a3fTH r_a3fTI. Getter (VerticalRayShootingStructure p_a3fTG e_a3fTH r_a3fTI) r_a3fTI
+sweepStruct :: forall p_a3fTG e_a3fTH r_a3fTI. Getter (VerticalRayShootingStructure p_a3fTG e_a3fTH r_a3fTI) (Vector ((:+) r_a3fTI (StatusStructure p_a3fTG e_a3fTH r_a3fTI)))
 
 -- | Given a set of &lt;math&gt; interiorly pairwise disjoint *closed*
 --   segments, compute a vertical ray shooting data structure. (i.e. the
@@ -6103,7 +6120,7 @@ module Data.PlaneGraph
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r
 PlaneGraph :: PlanarGraph s Primal (VertexData r v) e f -> PlaneGraph s v e f r
-graph :: forall s_a3qo1 v_a3qo2 e_a3qo3 f_a3qo4 r_a3qo5 s_a3qz0 v_a3qz1 e_a3qz2 f_a3qz3 r_a3qz4. Iso (PlaneGraph s_a3qo1 v_a3qo2 e_a3qo3 f_a3qo4 r_a3qo5) (PlaneGraph s_a3qz0 v_a3qz1 e_a3qz2 f_a3qz3 r_a3qz4) (PlanarGraph s_a3qo1 'Primal (VertexData r_a3qo5 v_a3qo2) e_a3qo3 f_a3qo4) (PlanarGraph s_a3qz0 'Primal (VertexData r_a3qz4 v_a3qz1) e_a3qz2 f_a3qz3)
+graph :: forall s_a3qxh v_a3qxi e_a3qxj f_a3qxk r_a3qxl s_a3qIg v_a3qIh e_a3qIi f_a3qIj r_a3qIk. Iso (PlaneGraph s_a3qxh v_a3qxi e_a3qxj f_a3qxk r_a3qxl) (PlaneGraph s_a3qIg v_a3qIh e_a3qIi f_a3qIj r_a3qIk) (PlanarGraph s_a3qxh 'Primal (VertexData r_a3qxl v_a3qxi) e_a3qxj f_a3qxk) (PlanarGraph s_a3qIg 'Primal (VertexData r_a3qIk v_a3qIh) e_a3qIi f_a3qIj)
 
 -- | A *connected* Planar graph with bidirected edges. I.e. the edges
 --   (darts) are directed, however, for every directed edge, the edge in
@@ -6119,8 +6136,8 @@ data PlanarGraph (s :: k) (w :: World) v e f
 -- | Note that the functor instance is in v
 data VertexData r v
 VertexData :: !Point 2 r -> !v -> VertexData r v
-vData :: forall r_a3q97 v_a3q98 v_a3qnM. Lens (VertexData r_a3q97 v_a3q98) (VertexData r_a3q97 v_a3qnM) v_a3q98 v_a3qnM
-location :: forall r_a3q97 v_a3q98 r_a3qnL. Lens (VertexData r_a3q97 v_a3q98) (VertexData r_a3qnL v_a3q98) (Point 2 r_a3q97) (Point 2 r_a3qnL)
+vData :: forall r_a3qin v_a3qio v_a3qx2. Lens (VertexData r_a3qin v_a3qio) (VertexData r_a3qin v_a3qx2) v_a3qio v_a3qx2
+location :: forall r_a3qin v_a3qio r_a3qx1. Lens (VertexData r_a3qin v_a3qio) (VertexData r_a3qx1 v_a3qio) (Point 2 r_a3qin) (Point 2 r_a3qx1)
 
 -- | Convert to an Ext
 vtxDataToExt :: VertexData r v -> Point 2 r :+ v
@@ -6784,8 +6801,8 @@ data FaceData h f
 FaceData :: Seq h -> !f -> FaceData h f
 [_holes] :: FaceData h f -> Seq h
 [_fData] :: FaceData h f -> !f
-holes :: forall h_a3zpB f_a3zpC h_a3Afl. Lens (FaceData h_a3zpB f_a3zpC) (FaceData h_a3Afl f_a3zpC) (Seq h_a3zpB) (Seq h_a3Afl)
-fData :: forall h_a3zpB f_a3zpC f_a3Afk. Lens (FaceData h_a3zpB f_a3zpC) (FaceData h_a3zpB f_a3Afk) f_a3zpC f_a3Afk
+holes :: forall h_a3zyR f_a3zyS h_a3AoB. Lens (FaceData h_a3zyR f_a3zyS) (FaceData h_a3AoB f_a3zyS) (Seq h_a3zyR) (Seq h_a3AoB)
+fData :: forall h_a3zyR f_a3zyS f_a3AoA. Lens (FaceData h_a3zyR f_a3zyS) (FaceData h_a3zyR f_a3AoA) f_a3zyS f_a3AoA
 
 -- | Face data, if the face is an inner face, store the component and
 --   faceId of it. If not, this face must be the outer face (and thus we
@@ -6794,8 +6811,8 @@ data RawFace s f
 RawFace :: !Maybe (ComponentId s, FaceId' (Wrap s)) -> !FaceData (Dart s) f -> RawFace s f
 [_faceIdx] :: RawFace s f -> !Maybe (ComponentId s, FaceId' (Wrap s))
 [_faceDataVal] :: RawFace s f -> !FaceData (Dart s) f
-faceIdx :: forall s_a3AfA f_a3AfB. Lens' (RawFace s_a3AfA f_a3AfB) (Maybe (ComponentId s_a3AfA, FaceId' (Wrap s_a3AfA)))
-faceDataVal :: forall s_a3AfA f_a3AfB f_a3Avi. Lens (RawFace s_a3AfA f_a3AfB) (RawFace s_a3AfA f_a3Avi) (FaceData (Dart s_a3AfA) f_a3AfB) (FaceData (Dart s_a3AfA) f_a3Avi)
+faceIdx :: forall s_a3AoQ f_a3AoR. Lens' (RawFace s_a3AoQ f_a3AoR) (Maybe (ComponentId s_a3AoQ, FaceId' (Wrap s_a3AoQ)))
+faceDataVal :: forall s_a3AoQ f_a3AoR f_a3AEy. Lens (RawFace s_a3AoQ f_a3AoR) (RawFace s_a3AoQ f_a3AEy) (FaceData (Dart s_a3AoQ) f_a3AoR) (FaceData (Dart s_a3AoQ) f_a3AEy)
 instance forall k (s :: k) f. GHC.Generics.Generic (Data.Geometry.PlanarSubdivision.Raw.RawFace s f)
 instance forall k (s :: k). Data.Traversable.Traversable (Data.Geometry.PlanarSubdivision.Raw.RawFace s)
 instance forall k (s :: k). Data.Foldable.Foldable (Data.Geometry.PlanarSubdivision.Raw.RawFace s)
@@ -6845,14 +6862,14 @@ type FaceId' (s :: k) = FaceId s 'Primal
 -- | Note that the functor instance is in v
 data VertexData r v
 VertexData :: !Point 2 r -> !v -> VertexData r v
-vData :: forall r_a3q97 v_a3q98 v_a3qnM. Lens (VertexData r_a3q97 v_a3q98) (VertexData r_a3q97 v_a3qnM) v_a3q98 v_a3qnM
-location :: forall r_a3q97 v_a3q98 r_a3qnL. Lens (VertexData r_a3q97 v_a3q98) (VertexData r_a3qnL v_a3q98) (Point 2 r_a3q97) (Point 2 r_a3qnL)
+vData :: forall r_a3qin v_a3qio v_a3qx2. Lens (VertexData r_a3qin v_a3qio) (VertexData r_a3qin v_a3qx2) v_a3qio v_a3qx2
+location :: forall r_a3qin v_a3qio r_a3qx1. Lens (VertexData r_a3qin v_a3qio) (VertexData r_a3qx1 v_a3qio) (Point 2 r_a3qin) (Point 2 r_a3qx1)
 
 -- | The Face data consists of the data itself and a list of holes
 data FaceData h f
 FaceData :: Seq h -> !f -> FaceData h f
-holes :: forall h_a3zpB f_a3zpC h_a3Afl. Lens (FaceData h_a3zpB f_a3zpC) (FaceData h_a3Afl f_a3zpC) (Seq h_a3zpB) (Seq h_a3Afl)
-fData :: forall h_a3zpB f_a3zpC f_a3Afk. Lens (FaceData h_a3zpB f_a3zpC) (FaceData h_a3zpB f_a3Afk) f_a3zpC f_a3Afk
+holes :: forall h_a3zyR f_a3zyS h_a3AoB. Lens (FaceData h_a3zyR f_a3zyS) (FaceData h_a3AoB f_a3zyS) (Seq h_a3zyR) (Seq h_a3AoB)
+fData :: forall h_a3zyR f_a3zyS f_a3AoA. Lens (FaceData h_a3zyR f_a3zyS) (FaceData h_a3zyR f_a3AoA) f_a3zyS f_a3AoA
 
 -- | A planarsubdivision is essentially a bunch of plane-graphs; one for
 --   every connected component. These graphs store the global ID's (darts,
@@ -6966,7 +6983,7 @@ numDarts :: PlanarSubdivision s v e f r -> Int
 
 -- | Get the dual graph of this graph.
 dual :: forall k (s :: k) (w :: World) v e f. Getter (PlanarGraph s w v e f) (PlanarGraph s (DualOf w) f e v)
-components :: forall s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt r_a3FZy. Lens (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt) (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FZy) (Vector (Component s_a3FMp r_a3FMt)) (Vector (Component s_a3FMp r_a3FZy))
+components :: forall s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ r_a3G8O. Lens (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ) (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3G8O) (Vector (Component s_a3FVF r_a3FVJ)) (Vector (Component s_a3FVF r_a3G8O))
 
 -- | Lens to access a particular component of the planar subdivision.
 component :: ComponentId s -> Lens' (PlanarSubdivision s v e f r) (Component s r)
@@ -7261,9 +7278,9 @@ data Dart (s :: k)
 data World
 Primal :: World
 Dual :: World
-rawVertexData :: forall s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt v_a3FZB. Lens (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt) (PlanarSubdivision s_a3FMp v_a3FZB e_a3FMr f_a3FMs r_a3FMt) (Vector (Raw s_a3FMp (VertexId' (Wrap s_a3FMp)) v_a3FMq)) (Vector (Raw s_a3FMp (VertexId' (Wrap s_a3FMp)) v_a3FZB))
-rawDartData :: forall s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt e_a3FZz. Lens (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt) (PlanarSubdivision s_a3FMp v_a3FMq e_a3FZz f_a3FMs r_a3FMt) (Vector (Raw s_a3FMp (Dart (Wrap s_a3FMp)) e_a3FMr)) (Vector (Raw s_a3FMp (Dart (Wrap s_a3FMp)) e_a3FZz))
-rawFaceData :: forall s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt f_a3FZA. Lens (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FMs r_a3FMt) (PlanarSubdivision s_a3FMp v_a3FMq e_a3FMr f_a3FZA r_a3FMt) (Vector (RawFace s_a3FMp f_a3FMs)) (Vector (RawFace s_a3FMp f_a3FZA))
+rawVertexData :: forall s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ v_a3G8R. Lens (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ) (PlanarSubdivision s_a3FVF v_a3G8R e_a3FVH f_a3FVI r_a3FVJ) (Vector (Raw s_a3FVF (VertexId' (Wrap s_a3FVF)) v_a3FVG)) (Vector (Raw s_a3FVF (VertexId' (Wrap s_a3FVF)) v_a3G8R))
+rawDartData :: forall s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ e_a3G8P. Lens (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ) (PlanarSubdivision s_a3FVF v_a3FVG e_a3G8P f_a3FVI r_a3FVJ) (Vector (Raw s_a3FVF (Dart (Wrap s_a3FVF)) e_a3FVH)) (Vector (Raw s_a3FVF (Dart (Wrap s_a3FVF)) e_a3G8P))
+rawFaceData :: forall s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ f_a3G8Q. Lens (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3FVI r_a3FVJ) (PlanarSubdivision s_a3FVF v_a3FVG e_a3FVH f_a3G8Q r_a3FVJ) (Vector (RawFace s_a3FVF f_a3FVI)) (Vector (RawFace s_a3FVF f_a3G8Q))
 
 -- | Lens to the facedata of the vertexdata themselves. The indices
 --   correspond to the vertexId's
@@ -7348,9 +7365,9 @@ module Data.Geometry.PointLocation.PersistentSweep
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r
 PointLocationDS :: VerticalRayShootingStructure v (Dart s) r -> PlanarSubdivision s v e f r -> FaceId' s -> PointLocationDS s v e f r
-verticalRayShootingStructure :: forall s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj. Getter (PointLocationDS s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj) (VerticalRayShootingStructure v_a3Qpg (Dart s_a3Qpf) r_a3Qpj)
-subdivision :: forall s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj. Getter (PointLocationDS s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj) (PlanarSubdivision s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj)
-outerFace :: forall s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj. Getter (PointLocationDS s_a3Qpf v_a3Qpg e_a3Qph f_a3Qpi r_a3Qpj) (FaceId' s_a3Qpf)
+verticalRayShootingStructure :: forall s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz. Getter (PointLocationDS s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz) (VerticalRayShootingStructure v_a3Qyw (Dart s_a3Qyv) r_a3Qyz)
+subdivision :: forall s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz. Getter (PointLocationDS s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz) (PlanarSubdivision s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz)
+outerFace :: forall s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz. Getter (PointLocationDS s_a3Qyv v_a3Qyw e_a3Qyx f_a3Qyy r_a3Qyz) (FaceId' s_a3Qyv)
 
 -- | Builds a pointlocation data structure on the planar subdivision with
 --   &lt;math&gt; vertices.
@@ -7439,10 +7456,10 @@ Arrangement :: Vector (Line 2 r :+ l) -> PlanarSubdivision s v e f r -> Rectangl
 [_subdivision] :: Arrangement s l v e f r -> PlanarSubdivision s v e f r
 [_boundedArea] :: Arrangement s l v e f r -> Rectangle () r
 [_unboundedIntersections] :: Arrangement s l v e f r -> ArrangementBoundary s l r
-inputLines :: forall s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl. Lens' (Arrangement s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl) (Vector ((:+) (Line 2 r_a3Vbl) l_a3Vbh))
-subdivision :: forall s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl v_a3ViX e_a3ViY f_a3ViZ. Lens (Arrangement s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl) (Arrangement s_a3Vbg l_a3Vbh v_a3ViX e_a3ViY f_a3ViZ r_a3Vbl) (PlanarSubdivision s_a3Vbg v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl) (PlanarSubdivision s_a3Vbg v_a3ViX e_a3ViY f_a3ViZ r_a3Vbl)
-boundedArea :: forall s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl. Lens' (Arrangement s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl) (Rectangle () r_a3Vbl)
-unboundedIntersections :: forall s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl. Lens' (Arrangement s_a3Vbg l_a3Vbh v_a3Vbi e_a3Vbj f_a3Vbk r_a3Vbl) (ArrangementBoundary s_a3Vbg l_a3Vbh r_a3Vbl)
+inputLines :: forall s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB. Lens' (Arrangement s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB) (Vector ((:+) (Line 2 r_a3VkB) l_a3Vkx))
+subdivision :: forall s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB v_a3Vsd e_a3Vse f_a3Vsf. Lens (Arrangement s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB) (Arrangement s_a3Vkw l_a3Vkx v_a3Vsd e_a3Vse f_a3Vsf r_a3VkB) (PlanarSubdivision s_a3Vkw v_a3Vky e_a3Vkz f_a3VkA r_a3VkB) (PlanarSubdivision s_a3Vkw v_a3Vsd e_a3Vse f_a3Vsf r_a3VkB)
+boundedArea :: forall s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB. Lens' (Arrangement s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB) (Rectangle () r_a3VkB)
+unboundedIntersections :: forall s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB. Lens' (Arrangement s_a3Vkw l_a3Vkx v_a3Vky e_a3Vkz f_a3VkA r_a3VkB) (ArrangementBoundary s_a3Vkw l_a3Vkx r_a3VkB)
 type ArrangementBoundary s e r = Vector (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
 
 -- | Builds an arrangement of &lt;math&gt; lines
