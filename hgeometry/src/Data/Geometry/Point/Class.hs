@@ -56,35 +56,49 @@ unsafeCoord i = asAPoint.Internal.unsafeCoord i
 
 instance ToAPoint (Point d r) d r where
   toPoint = to id
+  {-# INLINABLE toPoint #-}
 
 instance ToAPoint (Point d r :+ p) d r where
   toPoint = core
+  {-# INLINABLE toPoint #-}
 
 instance AsAPoint Point where
   asAPoint = id
+  {-# INLINABLE asAPoint #-}
 
 instance (1 <= d, Arity d) => R1 (Point d) where
   _x = coord @1
+  {-# INLINABLE _x #-}
+
 instance (2 <= d, Arity d, 1 <= d) => R2 (Point d) where
   _y  = coord @2
+  {-# INLINABLE _y #-}
   _xy = lens (\p -> V2 (p^._x) (p^._y)) (\p (V2 x y) -> p&_x .~ x
                                                          &_y .~ y
-                                                )
+
+                                        )
+  {-# INLINABLE _xy #-}
+
 instance (3 <= d, Arity d, 1 <= d, 2 <= d) => R3 (Point d) where
   _z = coord @3
+  {-# INLINABLE _z #-}
   _xyz = lens (\p -> V3 (p^._x) (p^._y) (p^._z))
               (\p (V3 x y z) -> p&_x .~ x
                                  &_y .~ y
                                  &_z .~ z
               )
+  {-# INLINABLE _xyz #-}
+
 instance (4 <= d, Arity d, 1 <= d, 2 <= d, 3 <= d) => R4 (Point d) where
   _w = coord @4
+  {-# INLINABLE _w #-}
   _xyzw = lens (\p -> V4 (p^._x) (p^._y) (p^._z) (p^._w))
                (\p (V4 x y z w) -> p&_x .~ x
                                     &_y .~ y
                                     &_z .~ z
                                     &_w .~ w
                )
+  {-# INLINABLE _xyzw #-}
 
 -- | Shorthand to access the first coordinate
 --
