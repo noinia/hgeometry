@@ -40,86 +40,22 @@ import qualified Data.Set as Set
 import           Data.Maybe
 import           Data.Kind
 
-import Data.RealNumber.Rational
-
+import           Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
-
-
 type Triangle' point = (point,point,point)
 type ConvexHull point = [Triangle' point]
 
+--------------------------------------------------------------------------------
 
 lowerHull :: Point point => NonEmpty point -> ConvexHull point
 lowerHull = fromSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
 
 
-
-
 --------------------------------------------------------------------------------
-
-
---------------------------------------------------------------------------------
-
-
---------------------------------------------------------------------------------
-
-
-
-
-
---------------------------------------------------------------------------------
-
-
--- toSeq                    :: Bridge Set a -> Seq a
--- toSeq (Bridge ll l r rr) = ll <> Seq.singleton l <> Seq.singleton r <> rr
-
--- tangentR   :: point -> Hull' point -> Hull' point
--- tangentR q = dropWhile2L (isLeftTurn q)
-
--- tangentL   :: point -> Hull' point -> Hull' point
--- tangentL q = dropWhile2R (isLeftTurn q)
-
--- isLeftTurn :: point -> point -> point -> Bool
--- isLeftTurn = undefined
-
--- dropWhile2L   :: (a -> a -> Bool) -> Hull' a -> Hull' a
--- dropWhile2L p = go
---   where
---     go = \case
---       (x :<| xs@(y :<| _)) | p x y -> go xs
---       s                            -> s
-
--- dropWhile2R   :: (a -> a -> Bool) -> Seq a -> Seq a
--- dropWhile2R p = go
---   where
---     go = \case
---       (xs@(_ :|> y) :|> x) | p x y -> go xs
---       s                            -> s
-
-
--- instance Semigroup (Hull' point) where
---   (Singleton p)         <> (Singleton q) = Bridged $ Bridge mempty p q mempty
---   (Singleton p)         <> hr            = let r :<| rr = tangentR p hr
---                                            in Bridged $ Bridge mempty p r rr
---   hl                    <> (Singleton q) = let ll :|> l = tangentL q hl
---                                            in Bridged $ Bridge ll l q mempty
---   (toSeq -> (hl :|> l)) <> (toSeq -> hr) = undefined
-
-    -- goL hl l hr
-    -- where
-    --   goL hl l hr = let (r :<| rr) = tangentR l hr
-    --                 in goR hl r rr
-    --   goR hl r rr = let (ll :|> l)
-
-
-
-
-
-
 
 
 --------------------------------------------------------------------------------
@@ -160,14 +96,13 @@ simulation p = Sim (singleton p) []
 
 
 instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
-  (Sim l el) <> (Sim r er) = Sim (fromBridge b) events
+  (Sim l el) <> (Sim r er) = Sim (fromBridge b) (reverse events)
     where
       b      = bridgeOf l r
       events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
       merge = mergeSortedListsBy (comparing eventTime')
       -- minInftyT = Nothing
       minInftyT = -10000 -- FIXME
-
 
 -- | Runs the simulation; producing a list of events
 runSim                                       :: (Hull hull, Point point)
@@ -185,8 +120,6 @@ runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
                    [ Left  <$> bridgeEventL l (focus r)
                    , Right <$> bridgeEventR (focus l) r
                    ]
-      -- TODO: if we make the Bottom into a type class we may be able
-      -- to avoid creating explit ValB's all the time. That should save allocations
 
 -- | Apply the event on the bridge
 apply                 :: (Point point, Hull hull)
@@ -280,10 +213,10 @@ bridgeEventL      :: ( Hull hull, Point point)
                   => hull point -> point -> [Event point]
 bridgeEventL hl r = let l = focus hl
                     in catMaybes
-                      [ do p <- predOf l hl
+                      [ do p <- predOf hl
                            t <- colinearTime p l r
                            pure $ Event Delete t l
-                      , do p <- succOf l hl
+                      , do p <- succOf hl
                            t <- colinearTime l p r
                            pure $ Event Insert t p -- verify that this should not be an insert
                       ]
@@ -292,10 +225,10 @@ bridgeEventR           :: (Hull hull, Point point)
                        => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
                     in catMaybes
-                       [ do p <- predOf r hr
+                       [ do p <- predOf hr
                             t <- colinearTime l p r
                             pure $ Event Insert t p
-                       , do p <- succOf r hr
+                       , do p <- succOf hr
                             t <- colinearTime l r p
                             pure $ Event Delete t r  -- verify that this should not be an insert
                        ]
@@ -350,6 +283,10 @@ simulate = divideAndConquer1 simulation . NonEmpty.sortBy cmpXYZ
 hulls :: Point point => NonEmpty point -> HullZ point
 hulls = divideAndConquer1 singleton . NonEmpty.sortBy cmpXYZ
 
+
+
+
+
 --------------------------------------------------------------------------------
 
 myPoints :: NonEmpty (Point.Point 3 R)
@@ -361,7 +298,11 @@ myPoints = NonEmpty.fromList
            , Point.Point3 22 20 1
            ]
 
-test = hulls myPoints
+test :: ConvexHull _
+test = lowerHull myPoints
+
+testHull :: HullZ _
+testHull = hulls myPoints
 
 
 testSim :: Simulation HullZ _

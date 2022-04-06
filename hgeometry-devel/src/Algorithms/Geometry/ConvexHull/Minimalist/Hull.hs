@@ -32,8 +32,14 @@ class Hull (hull :: Type -> Type) where
   -- | moves the focus right
   goRight :: Point point => hull point -> hull point
 
-  predOf :: Point point => point -> hull point -> Maybe point
-  succOf :: Point point => point -> hull point -> Maybe point
+  -- | Get the predecessor of the focus
+  predOf :: Point point => hull point -> Maybe point
+  -- | Get the successor of the focus
+  succOf :: Point point => hull point -> Maybe point
+
+  -- predOf :: Point point => point -> hull point -> Maybe point
+  -- succOf :: Point point => point -> hull point -> Maybe point
+
 
   fromBridge :: Point point => Bridge hull point -> hull point
   -- default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
@@ -96,14 +102,16 @@ instance Hull HullZ where
                               Nothing      -> error "HullZ.goRight: cannot go right"
                               Just (X p',rr') -> HullZ (Set.insert (X p) ll) p' rr'
 
+  succOf (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
+  predOf (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
   bridgeOf l0 r0 = go (leftMost l0) (rightMost r0)
     where
-      go l r | isRight' (next' r) l r = go l          (goRight r)
-             | isRight' (prev' l) l r = go (goLeft l) r
-             | otherwise              = Bridge l r
+      go l r | isRight' (succOf r) l r = go l          (goRight r)
+             | isRight' (predOf l) l r = go (goLeft l) r
+             | otherwise               = Bridge l r
 
 
       isRight' Nothing  _ _ = False
@@ -113,8 +121,6 @@ instance Hull HullZ where
 
       t = -100000000 -- FIXME: hack
 
-      next' (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
-      prev' (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
 
   delete q (HullZ ll p rr) = case q `compareX` p of
