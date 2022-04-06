@@ -21,6 +21,7 @@ import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
 import           Data.Geometry.Point.Internal
+import           Data.Geometry.Point.Class
 import           Data.Geometry.Vector
 import qualified Data.List as L
 
@@ -55,7 +56,7 @@ instance Show CCW where
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 --
--- Be vary of numerical instability:
+-- Be wary of numerical instability:
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Double))
 -- CCW
 --
@@ -66,11 +67,11 @@ instance Show CCW where
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
 -- CoLinear
 --
-ccw                         :: (Ord r, Num r, pointP :~ Point 2 r
-                               , pointQ :~ Point 2 r, pointR :~ Point 2 r
-                               )
-                            => pointP -> pointQ -> pointR -> CCW
-ccw (AsA p) (AsA q) (AsA r) = CCWWrap $ (ux*vy) `compare` (uy*vx)
+ccw        :: (Ord r, Num r, ToAPoint pointP 2 r, ToAPoint pointQ 2 r, ToAPoint pointR 2 r)
+           => pointP -> pointQ -> pointR -> CCW
+ccw (view toPoint -> p)
+    (view toPoint -> q)
+    (view toPoint -> r) = CCWWrap $ (ux*vy) `compare` (uy*vx)
 -- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
                                        -- I've added a testcase that fails if comparing against 0.
             -- case z `compare` 0 of
@@ -81,6 +82,8 @@ ccw (AsA p) (AsA q) (AsA r) = CCWWrap $ (ux*vy) `compare` (uy*vx)
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
       --  _z             = ux * vy - uy * vx
+{-# SPECIALIZE INLINE ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW #-}
+{-# SPECIALIZE INLINE ccw :: (Ord r, Num r) => (Point 2 r :+ a) -> (Point 2 r :+ b) -> (Point 2 r :+ c) -> CCW #-}
 
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
 --
@@ -91,7 +94,7 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
 
--- -- | Given three points p q and r determine the orientation when going from p to r via q.
+-- -- Given three points p q and r determine the orientation when going from p to r via q.
 -- ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
 -- ccw' = ccw -- p q r = ccw (p^.core) (q^.core) (r^.core)
 

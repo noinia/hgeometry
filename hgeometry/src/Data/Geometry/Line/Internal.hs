@@ -329,8 +329,8 @@ bisector p q = let v = q .-. p
 -- GT
 -- >>> (Line origin (Vector2 5 1)) `cmpSlope` (Line origin (Vector2 0 1))
 -- LT
-cmpSlope :: (Num r, Ord r) => Line 2 r -> Line 2 r -> Ordering
-(Line _ u) `cmpSlope` (Line _ v) = case ccw origin (f u) (f v) of
+cmpSlope :: forall r. (Num r, Ord r) => Line 2 r -> Line 2 r -> Ordering
+(Line _ u) `cmpSlope` (Line _ v) = case ccw (origin :: Point 2 r) (f u) (f v) of
                                      CCW      -> LT
                                      CW       -> GT
                                      CoLinear -> EQ

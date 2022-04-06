@@ -124,6 +124,9 @@ pattern AsA c <- (asCore -> c)
 -- | Everything can act as itself
 instance (t ~ c)          => AsA t        c where
   asCore = id
+  {-# INLINABLE asCore #-}
+
 -- | An Ext can act as its core.
 instance {-# OVERLAPPING #-} AsA (c :+ e) c where
   asCore = view core
+  {-# INLINABLE asCore #-}
