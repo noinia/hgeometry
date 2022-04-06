@@ -1,12 +1,9 @@
 module Algorithms.Geometry.ConvexHull.Minimalist.Hull where
 
 import           Algorithms.BinarySearch
-import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens ((^.), view)
-import           Data.Geometry.Point (xCoord, yCoord, zCoord)
-import qualified Data.Geometry.Point as Point
-import           Data.Geometry.Polygon.Convex (lowerTangent')
+import           Data.Geometry.Point (xCoord, yCoord, zCoord, ccw, CCW(..), pattern CCW)
 import           Data.Geometry.Properties
 import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
@@ -18,64 +15,138 @@ import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq(..), ViewL(..), ViewR(..))
 import qualified Data.OrdSeq as OrdSeq
 import qualified Data.Set as Set
+import           Data.Set (Set)
 import           Data.Maybe
 import           Data.Kind
 
 --------------------------------------------------------------------------------
 
 class Hull (hull :: Type -> Type) where
+  -- | Creates a singleton hull
   singleton :: point -> hull point
 
-  focus :: hull point -> point
-  goLeft  :: hull point -> hull point
-  goRight :: hull point -> hull point
+  focus :: Point point => hull point -> point
 
-  predOf :: point -> hull point -> Maybe point
-  succOf :: point -> hull point -> Maybe point
+  -- | moves the focus left
+  goLeft  :: Point point => hull point -> hull point
+  -- | moves the focus right
+  goRight :: Point point => hull point -> hull point
 
-  fromBridge :: Bridge hull point -> hull point
+  predOf :: Point point => point -> hull point -> Maybe point
+  succOf :: Point point => point -> hull point -> Maybe point
+
+  fromBridge :: Point point => Bridge hull point -> hull point
   -- default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
   -- fromBridge (Bridge ll l _ _ r rr) = ll <> singleton l <> singleton r <> rr
 
-  bridgeOf :: hull point -> hull point -> Bridge hull point
+
+  -- | Constructs the bridge of the two hulls, i.e. computes the lower
+  -- tangent.
+  bridgeOf :: Point point => hull point -> hull point -> Bridge hull point
 
   delete :: Point point => point -> hull point -> hull point
   insert :: Point point => point -> hull point -> hull point
 
 --------------------------------------------------------------------------------
 
+-- | Bridge ; so that (focus l, focus r) represents the actual bridge.
 data Bridge hull point = Bridge (hull point) (hull point)
                        deriving (Show,Eq)
 
 --------------------------------------------------------------------------------
 
-data HullZ point = HullZ (Seq point) point (Seq point)
+newtype X point = X point deriving Show
+
+instance Point point => Eq (X point) where
+  p == q = p `compare` q == EQ
+instance Point point => Ord (X point) where
+  (X p) `compare` (X q) = compareX p q
+
+-- | hull zipper
+data HullZ point = HullZ (Set (X point)) point (Set (X point))
                  deriving (Show,Eq)
 
+
+
+instance Point point => Semigroup (HullZ point) where
+  l <> r = fromBridge $ bridgeOf l r
+
+-- | Moves focus to rightmost point
+rightMost                   :: Point point => HullZ point -> HullZ point
+rightMost h@(HullZ ll p rr) = case Set.maxView rr of
+                               Nothing        -> h
+                               Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
+
+-- | Moves focus to leftmost point
+leftMost                    :: Point point => HullZ point -> HullZ point
+leftMost h@(HullZ ll p rr) = case Set.minView ll of
+                               Nothing        -> h
+                               Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
+
+
 instance Hull HullZ where
-  singleton p = HullZ mempty p mempty
+  singleton p = HullZ Set.empty p Set.empty
   focus (HullZ _ p _) = p
 
-  goLeft (HullZ ll p rr) = case Seq.viewr ll of
-                             EmptyR   -> error "cannot go left"
-                             ll' :> l -> HullZ ll' l (p :<| rr)
-  goRight (HullZ ll p rr) = case Seq.viewl rr of
-                              EmptyL    -> error "cannot go right"
-                              r :< rr' -> HullZ (ll :|> p) r rr'
+  goLeft (HullZ ll p rr) = case Set.maxView ll of
+                             Nothing         -> error "HullZ.goLeft: cannot go left"
+                             Just (X p',ll') -> HullZ ll' p' (Set.insert (X p) rr)
+
+  goRight (HullZ ll p rr) = case Set.minView rr of
+                              Nothing      -> error "HullZ.goRight: cannot go right"
+                              Just (X p',rr') -> HullZ (Set.insert (X p) ll) p' rr'
 
 
-  fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (r :<| rr)
+  fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
-  bridgeOf l r = undefined
+  bridgeOf l0 r0 = go (leftMost l0) (rightMost r0)
+    where
+      go l r | isRight' (next' r) l r = go l          (goRight r)
+             | isRight' (prev' l) l r = go (goLeft l) r
+             | otherwise              = Bridge l r
+
+
+      isRight' Nothing  _ _ = False
+      isRight' (Just x) l r = ccw (toPt l) (toPt r) (toPt2 t x) /= CCW
+
+      toPt h = toPt2 t (focus h)
+
+      t = -100000000 -- FIXME: hack
+
+      next' (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
+      prev' (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
+
 
   delete q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> HullZ (delete' q ll) p rr
-                               EQ -> undefined
-                               GT -> HullZ ll p (delete' q rr)
+                               LT -> HullZ (Set.delete (X q) ll) p rr
+                               EQ -> error "HullZ: trying to delete focus point"
+                                 -- TODO: this is probably actually possible.
+                               GT -> HullZ ll p (Set.delete (X q) rr)
+  insert q (HullZ ll p rr) = case q `compareX` p of
+                               LT -> HullZ (Set.insert (X q) ll) p rr
+                               EQ -> error "HullZ: trying to insert existing point"
+                               GT -> HullZ ll p (Set.insert (X q) rr)
 
-delete' = undefined
+
+
 
   -- extractPred :: point -> hull point -> Maybe (hull point, point)
   -- extractSucc :: point -> hull point -> Maybe (point, hull point)
 
-type Hull' = NonEmpty
+--------------------------------------------------------------------------------
+
+  -- goLeft (HullZ ll p rr) = case Seq.viewr ll of
+  --                            EmptyR   -> error "cannot go left"
+  --                            ll' :> l -> HullZ ll' l (p :<| rr)
+  -- goRight (HullZ ll p rr) = case Seq.viewl rr of
+  --                             EmptyL    -> error "cannot go right"
+  --                             r :< rr' -> HullZ (ll :|> p) r rr'
+
+
+--------------------------------------------------------------------------------
+
+-- type Hull' = NonEmpty
+
+-- instance Hull NonEmpty where
+--   singleton = (:| [])
+--   bridgeOf lh rh = undefined

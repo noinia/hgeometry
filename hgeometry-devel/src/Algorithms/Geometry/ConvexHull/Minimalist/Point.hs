@@ -1,25 +1,11 @@
 module Algorithms.Geometry.ConvexHull.Minimalist.Point where
 
 
-import           Algorithms.BinarySearch
-import           Algorithms.DivideAndConquer
-import           Control.Lens((^.), view)
-import           Data.Geometry.Point (xCoord, yCoord, zCoord)
+import           Control.Lens (view)
+import           Data.Geometry.Point (xCoord)
 import qualified Data.Geometry.Point as Point
-import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Properties
-import           Data.List.Util
-import           Data.Ord (comparing, Down(..))
--- import           Data.Geometry.Triangle
--- import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Sequence as Seq
-import           Data.Sequence(Seq(..), ViewL(..), ViewR(..))
-import qualified Data.OrdSeq as OrdSeq
-import qualified Data.Set as Set
-import           Data.Maybe
-import           Data.Kind
+import           Data.Ord (comparing)
 
 --------------------------------------------------------------------------------
 
