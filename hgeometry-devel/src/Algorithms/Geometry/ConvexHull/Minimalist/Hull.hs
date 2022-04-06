@@ -1,7 +1,9 @@
+{-# LANGUAGE DerivingStrategies #-}
 module Algorithms.Geometry.ConvexHull.Minimalist.Hull where
 
 import           Algorithms.BinarySearch
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
+import           Control.Applicative ((<|>))
 import           Control.Lens ((^.), view)
 import           Data.Geometry.Point (xCoord, yCoord, zCoord, ccw, CCW(..), pattern CCW)
 import           Data.Geometry.Properties
@@ -33,13 +35,14 @@ class Hull (hull :: Type -> Type) where
   goRight :: Point point => hull point -> hull point
 
   -- | Get the predecessor of the focus
-  predOf :: Point point => hull point -> Maybe point
+  predOfF :: Point point => hull point -> Maybe point
+  predOfF h = predOf (focus h) h
   -- | Get the successor of the focus
-  succOf :: Point point => hull point -> Maybe point
+  succOfF :: Point point => hull point -> Maybe point
+  succOfF h = succOf (focus h) h
 
-  -- predOf :: Point point => point -> hull point -> Maybe point
-  -- succOf :: Point point => point -> hull point -> Maybe point
-
+  predOf :: Point point => point -> hull point -> Maybe point
+  succOf :: Point point => point -> hull point -> Maybe point
 
   fromBridge :: Point point => Bridge hull point -> hull point
   -- default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
@@ -61,7 +64,7 @@ data Bridge hull point = Bridge (hull point) (hull point)
 
 --------------------------------------------------------------------------------
 
-newtype X point = X point deriving Show
+newtype X point = X { unX :: point } deriving newtype Show
 
 instance Point point => Eq (X point) where
   p == q = p `compare` q == EQ
@@ -102,16 +105,24 @@ instance Hull HullZ where
                               Nothing      -> error "HullZ.goRight: cannot go right"
                               Just (X p',rr') -> HullZ (Set.insert (X p) ll) p' rr'
 
-  succOf (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
-  predOf (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
+  succOf q (HullZ ll p rr) = case q `compareX` p of
+                               LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
+                               _  -> (unX <$> Set.lookupGT (X q) rr)
+
+  predOf q (HullZ ll p rr) = case q `compareX` p of
+                               GT -> (unX <$> Set.lookupLT (X q) rr) <|> Just p
+                               _  -> (unX <$> Set.lookupLT (X q) ll)
+
+  succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
+  predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
   bridgeOf l0 r0 = go (leftMost l0) (rightMost r0)
     where
-      go l r | isRight' (succOf r) l r = go l          (goRight r)
-             | isRight' (predOf l) l r = go (goLeft l) r
-             | otherwise               = Bridge l r
+      go l r | isRight' (succOfF r) l r = go l          (goRight r)
+             | isRight' (predOfF l) l r = go (goLeft l) r
+             | otherwise                = Bridge l r
 
 
       isRight' Nothing  _ _ = False

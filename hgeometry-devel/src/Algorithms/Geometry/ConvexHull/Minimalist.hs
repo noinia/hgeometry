@@ -21,12 +21,15 @@ import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens ((^.), view)
+import           Control.Monad.Writer.Class
 import           Data.Geometry.Point (xCoord, yCoord, zCoord)
 import qualified Data.Geometry.Point as Point
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Properties
+import qualified Data.List as List
 import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
+import           Data.Util
 -- import           Data.Geometry.Triangle
 -- import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -46,7 +49,7 @@ import           Data.RealNumber.Rational
 
 type R = RealNumber 5
 
-type Triangle' point = (point,point,point)
+type Triangle' point = Three point
 type ConvexHull point = [Triangle' point]
 
 --------------------------------------------------------------------------------
@@ -63,10 +66,18 @@ lowerHull = fromSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sor
 
 data EventKind = Insert | Delete deriving (Show,Eq,Ord)
 
+
+
 data Event point = Event { eventKind  :: !EventKind
                          , eventTime  :: !(Time point)
                          , eventPoint :: !point
                          }
+
+apply   :: (Point point, Hull hull) => Event point -> hull point -> hull point
+apply e = case eventKind e of
+            Insert -> insert (eventPoint e)
+            Delete -> delete (eventPoint e)
+
 
 deriving instance (Show (Time point), Show point) => Show (Event point)
 deriving instance (Eq   (Time point), Eq   point) => Eq   (Event point)
@@ -112,8 +123,8 @@ runSim                                       :: (Hull hull, Point point)
                                              -> [Event point]
 runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
     None                    -> []
-    BridgeEvent  e          -> toEvent e   : runSim (eventTime' e) (apply e b) events
-    ExistingEvent e events' -> output e b <> runSim (eventTime' e) (apply e b) events'
+    BridgeEvent  e          -> toEvent e   : runSim (eventTime' e) (applyB e b) events
+    ExistingEvent e events' -> output e b <> runSim (eventTime' e) (applyB e b) events'
   where
     bridgeEvents = mapMaybe (\e -> if now < eventTime' e then Just e else Nothing)
                  . concat $
@@ -122,17 +133,14 @@ runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
                    ]
 
 -- | Apply the event on the bridge
-apply                 :: (Point point, Hull hull)
+applyB                 :: (Point point, Hull hull)
                       => Existing (Event point) -> Bridge hull point -> Bridge hull point
-apply el (Bridge l r) = case el of
-    Left e  -> Bridge (applyE e l) r
-    Right e -> Bridge l (applyE e r)
+applyB el (Bridge l r) = case el of
+    Left e  -> Bridge (apply e l) r
+    Right e -> Bridge l (apply e r)
   -- FIXME: I guess this may change the bride points; so we may have to rotate here I guess
   -- I guess that is only when we are at a bridge event.
   where
-    applyE e = case eventKind e of
-                 Insert -> insert (eventPoint e)
-                 Delete -> delete (eventPoint e)
 
 -- | Should we output this event
 output                 :: (Point point, Hull hull)
@@ -172,69 +180,39 @@ firstEvent bridgeEvents = \case
     firstEvent' = minimum1By cmp
 
 
-data ApplyWhere = NoWhere
-                | LeftHull
-                | LeftBridgePoint
-                | RightBridgePoint
-                | RightHull
-                deriving (Show,Eq)
-
-applyWhere                        :: (Point point, Hull hull)
-                                  => point -> Bridge hull point -> ApplyWhere
-applyWhere q (Bridge l r) = case q `compareX` (focus l) of
-    LT -> LeftHull
-    EQ -> LeftBridgePoint
-    GT -> case q `compareX` (focus r) of
-            LT -> NoWhere
-            EQ -> RightBridgePoint
-            GT -> RightHull
-
-
-  --   LeftHull         -> Bridge (apply' e ll) l r rr
-  --   RightHull        -> Bridge ll l r (apply' e rr)
-  --   LeftBridgePoint  -> undefined
-  --   RightBridgePoint -> undefined
-  -- where
-  --   apply' = undefined
-
-
-  --     let (ll',l') = extractMax ll
-  --                     in Bridge ll' l' r rr
-
-
-
-  -- case e of
-  --   Delete _ p         ->
-
-  --   InsertBefore _ p q -> undefined -- case Seq.Seq.insertAt ()
-
-
-bridgeEventL      :: ( Hull hull, Point point)
-                  => hull point -> point -> [Event point]
+bridgeEventL      :: ( Hull hull, Point point) => hull point -> point -> [Event point]
 bridgeEventL hl r = let l = focus hl
                     in catMaybes
-                      [ do p <- predOf hl
+                      [ do p <- predOfF hl
                            t <- colinearTime p l r
                            pure $ Event Delete t l
-                      , do p <- succOf hl
+                      , do p <- succOfF hl
                            t <- colinearTime l p r
                            pure $ Event Insert t p -- verify that this should not be an insert
                       ]
 
-bridgeEventR           :: (Hull hull, Point point)
-                       => point -> hull point -> [Event point]
+bridgeEventR           :: (Hull hull, Point point) => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
                     in catMaybes
-                       [ do p <- predOf hr
+                       [ do p <- predOfF hr
                             t <- colinearTime l p r
                             pure $ Event Insert t p
-                       , do p <- succOf hr
+                       , do p <- succOfF hr
                             t <- colinearTime l r p
                             pure $ Event Delete t r  -- verify that this should not be an insert
                        ]
 
-fromSimulation :: Simulation hull point -> ConvexHull point
-fromSimulation = undefined
+--------------------------------------------------------------------------------
+
+-- | Run the simulation, producing the appropriate triangles
+fromSimulation                 :: (Point point, Hull hull)
+                               => Simulation hull point -> ConvexHull point
+fromSimulation (Sim h0 events) = snd $ List.foldl' handle (h0,[]) events
+  where
+    handle (h,out) e = (apply e h, t <> out)
+      where
+        t = let p = eventPoint e
+            in maybeToList $ (\l r -> Three l p r) <$> predOf p h <*> succOf p h
 
 --------------------------------------------------------------------------------
 
