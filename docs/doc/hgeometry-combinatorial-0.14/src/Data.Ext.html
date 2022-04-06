@@ -493,14 +493,17 @@ forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><span id="line-126"></span><span>  </span><span id="local-6989586621679256932"><span class="annot"><span class="annottext">asCore :: t -&gt; c
 </span><a href="#local-6989586621679256932"><span class="hs-identifier hs-var hs-var hs-var hs-var">asCore</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t -&gt; c
 forall a. a -&gt; a
-</span><span class="hs-identifier hs-var">id</span></span></span></span><span>
-</span><span id="line-127"></span><span class="hs-comment">-- | An Ext can act as its core.</span><span>
-</span><span id="line-128"></span><span id="local-6989586621679256929"><span id="local-6989586621679256930"><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="annot"><a href="Data.Ext.html#AsA"><span class="hs-identifier hs-type">AsA</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679256930"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679256929"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679256930"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-129"></span><span>  </span><span id="local-6989586621679256927"><span class="annot"><span class="annottext">asCore :: (c :+ e) -&gt; c
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#asCore"><span class="hs-pragma hs-type">asCore</span></a></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- | An Ext can act as its core.</span><span>
+</span><span id="line-130"></span><span id="local-6989586621679256929"><span id="local-6989586621679256930"><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="annot"><a href="Data.Ext.html#AsA"><span class="hs-identifier hs-type">AsA</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679256930"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679256929"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679256930"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-131"></span><span>  </span><span id="local-6989586621679256927"><span class="annot"><span class="annottext">asCore :: (c :+ e) -&gt; c
 </span><a href="#local-6989586621679256927"><span class="hs-identifier hs-var hs-var hs-var hs-var">asCore</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting c (c :+ e) c -&gt; (c :+ e) -&gt; c
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
 </span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting c (c :+ e) c
 forall core extra core'.
 Lens (core :+ extra) (core' :+ extra) core core'
-</span><a href="Data.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span></span></span><span>
-</span><span id="line-130"></span></pre></body></html>
+</span><a href="Data.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#asCore"><span class="hs-pragma hs-type">asCore</span></a></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-133"></span></pre></body></html>
