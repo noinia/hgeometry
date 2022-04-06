@@ -191,7 +191,7 @@ bridgeEventL hl r = let l = focus hl
                            pure $ Event Insert t p -- verify that this should not be an insert
                       ]
 
-bridgeEventR           :: (Hull hull, Point point) => point -> hull point -> [Event point]
+bridgeEventR      :: (Hull hull, Point point) => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
                     in catMaybes
                        [ do p <- predOfF hr

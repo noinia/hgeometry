@@ -34,6 +34,21 @@ class Hull (hull :: Type -> Type) where
   -- | moves the focus right
   goRight :: Point point => hull point -> hull point
 
+  predOf :: Point point => point -> hull point -> Maybe point
+  succOf :: Point point => point -> hull point -> Maybe point
+
+  fromBridge :: Point point => Bridge hull point -> hull point
+
+  delete :: Point point => point -> hull point -> hull point
+  insert :: Point point => point -> hull point -> hull point
+
+  -- | Moves focus to rightmost point
+  goRightMost :: Point point => hull point -> hull point
+  -- TODO: add a default impl
+  -- | Moves focus to leftmost point
+  goLeftMost :: Point point => hull point -> hull point
+  -- TODO: add a default impl
+
   -- | Get the predecessor of the focus
   predOfF :: Point point => hull point -> Maybe point
   predOfF h = predOf (focus h) h
@@ -41,20 +56,6 @@ class Hull (hull :: Type -> Type) where
   succOfF :: Point point => hull point -> Maybe point
   succOfF h = succOf (focus h) h
 
-  predOf :: Point point => point -> hull point -> Maybe point
-  succOf :: Point point => point -> hull point -> Maybe point
-
-  fromBridge :: Point point => Bridge hull point -> hull point
-  -- default fromBridge :: (Semigroup (hull point)) => Bridge hull point -> hull point
-  -- fromBridge (Bridge ll l _ _ r rr) = ll <> singleton l <> singleton r <> rr
-
-
-  -- | Constructs the bridge of the two hulls, i.e. computes the lower
-  -- tangent.
-  bridgeOf :: Point point => hull point -> hull point -> Bridge hull point
-
-  delete :: Point point => point -> hull point -> hull point
-  insert :: Point point => point -> hull point -> hull point
 
 --------------------------------------------------------------------------------
 
@@ -71,27 +72,13 @@ instance Point point => Eq (X point) where
 instance Point point => Ord (X point) where
   (X p) `compare` (X q) = compareX p q
 
+
 -- | hull zipper
 data HullZ point = HullZ (Set (X point)) point (Set (X point))
                  deriving (Show,Eq)
 
-
-
 instance Point point => Semigroup (HullZ point) where
   l <> r = fromBridge $ bridgeOf l r
-
--- | Moves focus to rightmost point
-rightMost                   :: Point point => HullZ point -> HullZ point
-rightMost h@(HullZ ll p rr) = case Set.maxView rr of
-                               Nothing        -> h
-                               Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
-
--- | Moves focus to leftmost point
-leftMost                    :: Point point => HullZ point -> HullZ point
-leftMost h@(HullZ ll p rr) = case Set.minView ll of
-                               Nothing        -> h
-                               Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
-
 
 instance Hull HullZ where
   singleton p = HullZ Set.empty p Set.empty
@@ -113,12 +100,37 @@ instance Hull HullZ where
                                GT -> (unX <$> Set.lookupLT (X q) rr) <|> Just p
                                _  -> (unX <$> Set.lookupLT (X q) ll)
 
-  succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
-  predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
-  bridgeOf l0 r0 = go (leftMost l0) (rightMost r0)
+  delete q (HullZ ll p rr) = case q `compareX` p of
+                               LT -> HullZ (Set.delete (X q) ll) p rr
+                               EQ -> error "HullZ: trying to delete focus point"
+                                 -- TODO: this is probably actually possible.
+                               GT -> HullZ ll p (Set.delete (X q) rr)
+
+  insert q (HullZ ll p rr) = case q `compareX` p of
+                               LT -> HullZ (Set.insert (X q) ll) p rr
+                               EQ -> error "HullZ: trying to insert existing point"
+                               GT -> HullZ ll p (Set.insert (X q) rr)
+
+
+  succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
+  predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
+
+  goRightMost h@(HullZ ll p rr) = case Set.maxView rr of
+    Nothing        -> h
+    Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
+
+  goLeftMost h@(HullZ ll p rr) = case Set.minView ll of
+    Nothing        -> h
+    Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
+
+
+-- | Computes the bridge of the two given hulls
+bridgeOf       :: (Hull hull, Point point)
+               => hull point -> hull point -> Bridge hull point
+bridgeOf l0 r0 = go (goLeftMost l0) (goRightMost r0)
     where
       go l r | isRight' (succOfF r) l r = go l          (goRight r)
              | isRight' (predOfF l) l r = go (goLeft l) r
@@ -132,23 +144,6 @@ instance Hull HullZ where
 
       t = -100000000 -- FIXME: hack
 
-
-
-  delete q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> HullZ (Set.delete (X q) ll) p rr
-                               EQ -> error "HullZ: trying to delete focus point"
-                                 -- TODO: this is probably actually possible.
-                               GT -> HullZ ll p (Set.delete (X q) rr)
-  insert q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> HullZ (Set.insert (X q) ll) p rr
-                               EQ -> error "HullZ: trying to insert existing point"
-                               GT -> HullZ ll p (Set.insert (X q) rr)
-
-
-
-
-  -- extractPred :: point -> hull point -> Maybe (hull point, point)
-  -- extractSucc :: point -> hull point -> Maybe (point, hull point)
 
 --------------------------------------------------------------------------------
 
