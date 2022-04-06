@@ -7,6 +7,7 @@ import           Control.Applicative ((<|>))
 import           Control.Lens ((^.), view)
 import           Data.Geometry.Point (xCoord, yCoord, zCoord, ccw, CCW(..), pattern CCW)
 import           Data.Geometry.Properties
+import qualified Data.List as List
 import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
 -- import           Data.Geometry.Triangle
@@ -30,9 +31,9 @@ class Hull (hull :: Type -> Type) where
   focus :: Point point => hull point -> point
 
   -- | moves the focus left
-  goLeft  :: Point point => hull point -> hull point
+  goLeft  :: Point point => hull point -> Maybe (hull point)
   -- | moves the focus right
-  goRight :: Point point => hull point -> hull point
+  goRight :: Point point => hull point -> Maybe (hull point)
 
   predOf :: Point point => point -> hull point -> Maybe point
   succOf :: Point point => point -> hull point -> Maybe point
@@ -43,11 +44,11 @@ class Hull (hull :: Type -> Type) where
   insert :: Point point => point -> hull point -> hull point
 
   -- | Moves focus to rightmost point
-  goRightMost :: Point point => hull point -> hull point
-  -- TODO: add a default impl
+  goRightMost   :: Point point => hull point -> hull point
+  goRightMost h = maybe h goRightMost $ goRight h
   -- | Moves focus to leftmost point
-  goLeftMost :: Point point => hull point -> hull point
-  -- TODO: add a default impl
+  goLeftMost   :: Point point => hull point -> hull point
+  goLeftMost h = maybe h goLeftMost $ goLeft h
 
   -- | Get the predecessor of the focus
   predOfF :: Point point => hull point -> Maybe point
@@ -56,6 +57,9 @@ class Hull (hull :: Type -> Type) where
   succOfF :: Point point => hull point -> Maybe point
   succOfF h = succOf (focus h) h
 
+
+toList :: (Hull hull, Point point) => hull point -> [point]
+toList = List.unfoldr (fmap (\h -> (focus h, goRight h))) . Just . goLeftMost
 
 --------------------------------------------------------------------------------
 
@@ -84,13 +88,11 @@ instance Hull HullZ where
   singleton p = HullZ Set.empty p Set.empty
   focus (HullZ _ p _) = p
 
-  goLeft (HullZ ll p rr) = case Set.maxView ll of
-                             Nothing         -> error "HullZ.goLeft: cannot go left"
-                             Just (X p',ll') -> HullZ ll' p' (Set.insert (X p) rr)
+  goLeft (HullZ ll p rr) =
+    (\(X p',ll') -> HullZ ll' p' (Set.insert (X p) rr)) <$> Set.maxView ll
 
-  goRight (HullZ ll p rr) = case Set.minView rr of
-                              Nothing      -> error "HullZ.goRight: cannot go right"
-                              Just (X p',rr') -> HullZ (Set.insert (X p) ll) p' rr'
+  goRight (HullZ ll p rr) =
+    (\(X p',rr') -> HullZ (Set.insert (X p) ll) p' rr') <$> Set.minView rr
 
   succOf q (HullZ ll p rr) = case q `compareX` p of
                                LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
@@ -132,13 +134,15 @@ bridgeOf       :: (Hull hull, Point point)
                => hull point -> hull point -> Bridge hull point
 bridgeOf l0 r0 = go (goLeftMost l0) (goRightMost r0)
     where
-      go l r | isRight' (succOfF r) l r = go l          (goRight r)
-             | isRight' (predOfF l) l r = go (goLeft l) r
+      go l r | isRight' (succOfF r) l r = go l          (goRight' r)
+             | isRight' (predOfF l) l r = go (goLeft' l) r
              | otherwise                = Bridge l r
-
 
       isRight' Nothing  _ _ = False
       isRight' (Just x) l r = ccw (toPt l) (toPt r) (toPt2 t x) /= CCW
+
+      goLeft'  = fromMaybe (error "goLeft': no left") . goLeft
+      goRight' = fromMaybe (error "goRight': no right") . goRight
 
       toPt h = toPt2 t (focus h)
 

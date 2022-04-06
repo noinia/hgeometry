@@ -188,8 +188,9 @@ bridgeEventL hl r = let l = focus hl
                            pure $ Event Delete t l
                       , do p <- succOfF hl
                            t <- colinearTime l p r
-                           pure $ Event Insert t p -- verify that this should not be an insert
+                           pure $ Event Insert t p
                       ]
+
 
 bridgeEventR      :: (Hull hull, Point point) => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
@@ -199,7 +200,7 @@ bridgeEventR l hr = let r = focus hr
                             pure $ Event Insert t p
                        , do p <- succOfF hr
                             t <- colinearTime l r p
-                            pure $ Event Delete t r  -- verify that this should not be an insert
+                            pure $ Event Delete t r
                        ]
 
 --------------------------------------------------------------------------------
