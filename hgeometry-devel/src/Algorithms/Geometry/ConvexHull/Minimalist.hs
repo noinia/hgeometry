@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 --------------------------------------------------------------------------------
 -- |
@@ -22,8 +23,10 @@ import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens ((^.), view)
 import           Control.Monad.Writer.Class
+import           Data.Ext
 import           Data.Geometry.Point (xCoord, yCoord, zCoord)
 import qualified Data.Geometry.Point as Point
+import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Properties
 import qualified Data.List as List
@@ -43,6 +46,9 @@ import qualified Data.Set as Set
 import           Data.Maybe
 import           Data.Kind
 
+import qualified Data.Text as Text
+import           Ipe
+
 import           Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
@@ -54,9 +60,8 @@ type ConvexHull point = [Triangle' point]
 
 --------------------------------------------------------------------------------
 
-lowerHull :: Point point => NonEmpty point -> ConvexHull point
-lowerHull = fromSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
-
+-- lowerHull :: Point point => NonEmpty point -> ConvexHull point
+lowerHull = runSimulation' . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
 
 --------------------------------------------------------------------------------
 
@@ -107,7 +112,7 @@ simulation p = Sim (singleton p) []
 
 
 instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
-  (Sim l el) <> (Sim r er) = Sim (fromBridge b) (reverse events)
+  (Sim l el) <> (Sim r er) = Sim (fromBridge b) events
     where
       b      = bridgeOf l r
       events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
@@ -116,11 +121,11 @@ instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
       minInftyT = -10000 -- FIXME
 
 -- | Runs the simulation; producing a list of events
-runSim                                       :: (Hull hull, Point point)
-                                             => Time point -- ^ current time
-                                             -> Bridge hull point -- ^ current bridge
-                                             -> [Existing (Event point)]     -- ^ future events
-                                             -> [Event point]
+runSim                           :: (Hull hull, Point point)
+                                 => Time point -- ^ current time
+                                 -> Bridge hull point -- ^ current bridge
+                                 -> [Existing (Event point)]     -- ^ future events
+                                 -> [Event point]
 runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
     None                    -> []
     BridgeEvent  e          -> toEvent e   : runSim (eventTime' e) (applyB e b) events
@@ -134,7 +139,7 @@ runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
 
 -- | Apply the event on the bridge
 applyB                 :: (Point point, Hull hull)
-                      => Existing (Event point) -> Bridge hull point -> Bridge hull point
+                       => Existing (Event point) -> Bridge hull point -> Bridge hull point
 applyB el (Bridge l r) = case el of
     Left e  -> Bridge (apply e l) r
     Right e -> Bridge l (apply e r)
@@ -179,7 +184,7 @@ firstEvent bridgeEvents = \case
     cmp = comparing eventTime'
     firstEvent' = minimum1By cmp
 
-
+-- | computes the bridge event on the left
 bridgeEventL      :: ( Hull hull, Point point) => hull point -> point -> [Event point]
 bridgeEventL hl r = let l = focus hl
                     in catMaybes
@@ -191,7 +196,7 @@ bridgeEventL hl r = let l = focus hl
                            pure $ Event Insert t p
                       ]
 
-
+-- | computes the bridge event on the right
 bridgeEventR      :: (Hull hull, Point point) => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
                     in catMaybes
@@ -206,14 +211,26 @@ bridgeEventR l hr = let r = focus hr
 --------------------------------------------------------------------------------
 
 -- | Run the simulation, producing the appropriate triangles
-fromSimulation                 :: (Point point, Hull hull)
-                               => Simulation hull point -> ConvexHull point
-fromSimulation (Sim h0 events) = snd $ List.foldl' handle (h0,[]) events
+runSimulation                 :: (Point point, Hull hull)
+                              => Simulation hull point -> ConvexHull point
+runSimulation (Sim h0 events) = snd $ List.foldl' handle (h0,[]) events
+
+-- | runs the entire simulation, prdoducing all intermediate results
+-- in increasing order of time.
+runSimulation'                 :: (Point point, Hull hull)
+                               => Simulation hull point
+                               -> NonEmpty ( Maybe (Time point), hull point , ConvexHull point)
+runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
+                                                  (Nothing :| ((Just . eventTime) <$> events))
+                               . NonEmpty.fromList $ List.scanl handle (h0,[]) events
+
+-- | Runs a single step of the simulation
+handle           :: (Hull hull, Point point)
+                 => (hull point, [Three point]) -> Event point -> (hull point, [Three point])
+handle (h,out) e = (apply e h, t <> out)
   where
-    handle (h,out) e = (apply e h, t <> out)
-      where
-        t = let p = eventPoint e
-            in maybeToList $ (\l r -> Three l p r) <$> predOf p h <*> succOf p h
+    t = let p = eventPoint e
+        in maybeToList $ (\l r -> Three l p r) <$> predOf p h <*> succOf p h
 
 --------------------------------------------------------------------------------
 
@@ -274,11 +291,33 @@ myPoints = NonEmpty.fromList
            , Point.Point3 1 1 10
            , Point.Point3 5 5 0
            , Point.Point3 12 1 1
-           , Point.Point3 22 20 1
+           -- , Point.Point3 22 20 1
            ]
 
-test :: ConvexHull _
-test = lowerHull myPoints
+-- test :: ConvexHull _
+test = mapM_ print $ fmap (\(t,h,_) -> (t,h)) $ lowerHull myPoints
+
+
+--------------------------------------------------------------------------------
+-- * Properties
+
+propIncreasingTime :: (Point point, Hull hull) => Simulation hull point -> Bool
+propIncreasingTime = isIncreasing . fmap (\(t,_,_) -> t) . runSimulation'
+
+isIncreasing           :: Ord a => NonEmpty a -> Bool
+isIncreasing (x :| xs) = case NonEmpty.nonEmpty xs of
+                           Nothing           -> True
+                           Just xs'@(y :| _) -> x < y && isIncreasing xs'
+
+propIncreasingEvents :: (Point point, Hull hull) => Simulation hull point -> Bool
+propIncreasingEvents = maybe True isIncreasing . NonEmpty.nonEmpty . fmap eventTime . _events
+
+
+propAllHullsConvex :: (Point point, Hull hull) => Simulation hull point -> Bool
+propAllHullsConvex = undefined
+
+--------------------------------------------------------------------------------
+
 
 testHull :: HullZ _
 testHull = hulls myPoints
@@ -286,3 +325,28 @@ testHull = hulls myPoints
 
 testSim :: Simulation HullZ _
 testSim = simulate myPoints
+
+
+--------------------------------------------------------------------------------
+
+renderIpe :: ( Point point
+             , Hull hull
+             , IpeWriteText (NumType point)
+             ) => FilePath -> Simulation hull point -> IO ()
+renderIpe fp = writeIpeFile fp . render
+
+render :: ( Point point
+          , Hull hull
+          , IpeWriteText (NumType point)
+          ) => Simulation hull point -> IpeFile (NumType point)
+render = ipeFile . fmap (\(mt,h,_) -> fromMaybe emptyPage $ do t  <- mt
+                                                               pl <- hullAt t h
+                                                               pure $ draw t pl
+                        ) . runSimulation'
+
+
+
+draw      :: (IpeWriteText r, Num r) => r -> PolyLine.PolyLine 2 () r -> IpePage r
+draw t pl = fromContent [ iO $ ipeLabel (fromMaybe "?" (ipeWriteText t) :+ Point.origin)
+                        , iO $ defIO pl
+                        ]

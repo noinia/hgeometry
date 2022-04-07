@@ -5,7 +5,9 @@ import           Algorithms.BinarySearch
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Applicative ((<|>))
 import           Control.Lens ((^.), view)
+import           Data.Ext
 import           Data.Geometry.Point (xCoord, yCoord, zCoord, ccw, CCW(..), pattern CCW)
+import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
 import qualified Data.List as List
 import           Data.List.Util
@@ -57,9 +59,14 @@ class Hull (hull :: Type -> Type) where
   succOfF :: Point point => hull point -> Maybe point
   succOfF h = succOf (focus h) h
 
-
+-- | turn a hull into a list of points
 toList :: (Hull hull, Point point) => hull point -> [point]
 toList = List.unfoldr (fmap (\h -> (focus h, goRight h))) . Just . goLeftMost
+
+-- | renders the hull at a particular time.
+hullAt   :: (Hull hull, Point point) => Time point -> hull point
+         -> Maybe (PolyLine.PolyLine 2 () (NumType point))
+hullAt t = PolyLine.fromPoints . fmap (ext . toPt2 t) . toList
 
 --------------------------------------------------------------------------------
 
