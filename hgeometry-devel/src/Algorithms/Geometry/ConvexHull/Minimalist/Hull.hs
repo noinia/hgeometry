@@ -26,11 +26,6 @@ import           Data.Kind
 
 --------------------------------------------------------------------------------
 
-type Tagged e = Either e e
-
-unTag :: Tagged e -> e
-unTag = either id id
-
 --------------------------------------------------------------------------------
 
 class Hull (hull :: Type -> Type) where
@@ -49,11 +44,9 @@ class Hull (hull :: Type -> Type) where
 
   fromBridge :: Point point => Bridge hull point -> hull point
 
-  -- | delete the point from the hull. If the point to be removed is
-  -- the focus, the tag indicates which direction to rotate in; i.e.
-  -- if the point is Tagged left, the new focus is taken from the
-  -- left. If the point is tagged right we rotate right.
-  delete :: Point point => Tagged point -> hull point -> hull point
+  -- | delete the point from the hull.
+  -- pre: the to be deleted point is not the focus
+  delete :: Point point => point -> hull point -> hull point
   insert :: Point point => point -> hull point -> hull point
 
   -- | Moves focus to rightmost point
@@ -97,7 +90,14 @@ instance Point point => Ord (X point) where
 
 -- | hull zipper
 data HullZ point = HullZ (Set (X point)) point (Set (X point))
-                 deriving (Show,Eq)
+                 deriving (Eq)
+
+instance Show point => Show (HullZ point) where
+  showsPrec d (HullZ ll p rr) = showParen (d > app_prec) $ showString "HullZ "
+      .  showList (Set.toAscList ll)
+      .  showString " " .  showsPrec (app_prec+1) p .  showString " "
+      .  showList (Set.toAscList rr)
+    where app_prec = 10
 
 instance Point point => Semigroup (HullZ point) where
   l <> r = fromBridge $ bridgeOf l r
@@ -123,15 +123,16 @@ instance Hull HullZ where
 
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
-  delete tq (HullZ ll p rr) = let q = unTag tq in case q `compareX` p of
+  delete q (HullZ ll p rr) = case q `compareX` p of
       LT -> HullZ (Set.delete (X q) ll) p rr
-      EQ -> case tq of
-              Left _  -> case Set.maxView ll of
-                           Nothing         -> error "HullZ: deleteL with foucs but empty"
-                           Just (X p',ll') -> HullZ ll' p' rr
-              Right _ -> case Set.minView rr of
-                           Nothing         -> error "HullZ: deleteR with foucs but empty"
-                           Just (X p',rr') -> HullZ ll p' rr'
+      EQ -> error "HullZ: trying to delete the focus"
+        -- case tq of
+        --       Left _  -> case Set.maxView ll of
+        --                    Nothing         -> error "HullZ: deleteL with foucs but empty"
+        --                    Just (X p',ll') -> HullZ ll' p' rr
+        --       Right _ -> case Set.minView rr of
+        --                    Nothing         -> error "HullZ: deleteR with foucs but empty"
+        --                    Just (X p',rr') -> HullZ ll p' rr'
       GT -> HullZ ll p (Set.delete (X q) rr)
 
   insert q (HullZ ll p rr) = case q `compareX` p of
@@ -164,7 +165,7 @@ bridgeOf l0 r0 = go (goLeftMost l0) (goRightMost r0)
       isRight' Nothing  _ _ = False
       isRight' (Just x) l r = ccw (toPt l) (toPt r) (toPt2 t x) /= CCW
 
-      goLeft'  = fromMaybe (error "goLeft': no left") . goLeft
+      goLeft'  = fromMaybe (error "goLeft': no left")   . goLeft
       goRight' = fromMaybe (error "goRight': no right") . goRight
 
       toPt h = toPt2 t (focus h)
