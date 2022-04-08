@@ -26,6 +26,13 @@ import           Data.Kind
 
 --------------------------------------------------------------------------------
 
+type Tagged e = Either e e
+
+unTag :: Tagged e -> e
+unTag = either id id
+
+--------------------------------------------------------------------------------
+
 class Hull (hull :: Type -> Type) where
   -- | Creates a singleton hull
   singleton :: point -> hull point
@@ -42,7 +49,11 @@ class Hull (hull :: Type -> Type) where
 
   fromBridge :: Point point => Bridge hull point -> hull point
 
-  delete :: Point point => point -> hull point -> hull point
+  -- | delete the point from the hull. If the point to be removed is
+  -- the focus, the tag indicates which direction to rotate in; i.e.
+  -- if the point is Tagged left, the new focus is taken from the
+  -- left. If the point is tagged right we rotate right.
+  delete :: Point point => Tagged point -> hull point -> hull point
   insert :: Point point => point -> hull point -> hull point
 
   -- | Moves focus to rightmost point
@@ -112,11 +123,16 @@ instance Hull HullZ where
 
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
-  delete q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> HullZ (Set.delete (X q) ll) p rr
-                               EQ -> error "HullZ: trying to delete focus point"
-                                 -- TODO: this is probably actually possible.
-                               GT -> HullZ ll p (Set.delete (X q) rr)
+  delete tq (HullZ ll p rr) = let q = unTag tq in case q `compareX` p of
+      LT -> HullZ (Set.delete (X q) ll) p rr
+      EQ -> case tq of
+              Left _  -> case Set.maxView ll of
+                           Nothing         -> error "HullZ: deleteL with foucs but empty"
+                           Just (X p',ll') -> HullZ ll' p' rr
+              Right _ -> case Set.minView rr of
+                           Nothing         -> error "HullZ: deleteR with foucs but empty"
+                           Just (X p',rr') -> HullZ ll p' rr'
+      GT -> HullZ ll p (Set.delete (X q) rr)
 
   insert q (HullZ ll p rr) = case q `compareX` p of
                                LT -> HullZ (Set.insert (X q) ll) p rr
