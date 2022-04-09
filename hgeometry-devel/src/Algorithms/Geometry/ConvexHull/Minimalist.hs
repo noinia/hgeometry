@@ -1,9 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.ConvexHull.Minimalist
@@ -25,6 +23,7 @@ import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
+import           Data.Geometry.Triangle
 import qualified Data.Geometry.Point as Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
@@ -45,17 +44,29 @@ import           Debug.Trace
 
 import           Data.RealNumber.Rational
 
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
-type Triangle' point = Three point
-type ConvexHull point = [Triangle' point]
+
+type LowerHull point = [Three point]
 
 --------------------------------------------------------------------------------
 
--- lowerHull :: Point point => NonEmpty point -> ConvexHull point
-lowerHull = runSimulation' . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
+-- | Computes the lower hull of a *set* of points
+--
+-- pre: the points are assumed to be in general position, i.e.
+-- no four coplanar points, all unique x,y,z coordinates.
+lowerHull :: Point point => NonEmpty point -> LowerHull point
+lowerHull = runSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
+
+
+lowerHull' :: Point point => NonEmpty point -> [Triangle 3 () (NumType point)]
+lowerHull' = map toTriangle . lowerHull
+
+toTriangle               :: Point point => Three point -> Triangle 3 () (NumType point)
+toTriangle (Three p q r) = Triangle' (toPt3 p) (toPt3 q) (toPt3 r)
 
 --------------------------------------------------------------------------------
 
@@ -240,7 +251,7 @@ runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
 
 -- | Run the simulation, producing the appropriate triangles
 runSimulation                 :: (Point point, Hull hull)
-                              => Simulation hull point -> ConvexHull point
+                              => Simulation hull point -> LowerHull point
 runSimulation (Sim h0 events) = snd $ List.foldl' handle (h0,[]) events
 
 -- | Runs a single step of the simulation
@@ -257,7 +268,7 @@ handle (h,out) e = (apply e h, t <> out)
 -- in increasing order of time.
 runSimulation'                 :: (Point point, Hull hull)
                                => Simulation hull point
-                               -> NonEmpty ( Maybe (Time point), hull point , ConvexHull point)
+                               -> NonEmpty ( Maybe (Time point), hull point , LowerHull point)
 runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
                                                   (Nothing :| ((Just . eventTime) <$> events))
                                . NonEmpty.fromList $ List.scanl handle (h0,[]) events
@@ -319,17 +330,28 @@ hulls = divideAndConquer1 singleton . NonEmpty.sortBy cmpXYZ
 
 --------------------------------------------------------------------------------
 
+
+
+
+
+--------------------------------------------------------------------------------
+
 myPoints :: NonEmpty (Point.Point 3 R)
 myPoints = NonEmpty.fromList
            [ Point.Point3 0 10 20
            , Point.Point3 1 1 10
            , Point.Point3 5 5 0
            , Point.Point3 12 1 1
-           -- , Point.Point3 22 20 1
+           , Point.Point3 22 20 1
            ]
 
--- test :: ConvexHull _
-test = mapM_ print $ fmap (\(t,h,_) -> (t,h)) $ lowerHull myPoints
+
+
+
+
+
+-- test :: LowerHull _
+test = lowerHull myPoints
 
 
 

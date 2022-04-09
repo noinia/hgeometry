@@ -1,8 +1,8 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
-import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
+-- import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
 import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
-import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
+-- import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
