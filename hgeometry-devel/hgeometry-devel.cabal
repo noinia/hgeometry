@@ -90,7 +90,7 @@ common devel-setup
 
 library
   import: devel-setup
-  hs-source-dirs:      src test
+  hs-source-dirs: src
   build-depends: hspec                   >= 2.7
                , hspec-core
                , QuickCheck, quickcheck-instances
@@ -101,6 +101,7 @@ library
                    Algorithms.Geometry.ConvexHull.Minimalist
 
                    Data.Geometry.Point.Random
+                   PLY.Writer
   other-modules:
                    Algorithms.Geometry.ConvexHull.Minimalist.Hull
                    Algorithms.Geometry.ConvexHull.Minimalist.Point

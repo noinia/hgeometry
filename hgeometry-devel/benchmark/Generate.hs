@@ -8,5 +8,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-genPoints   :: (Ord r, Fractional r, Arbitrary r) => Int -> IO (NonEmpty (Point 3 r :+ ()))
-genPoints n = generate (NonEmpty.fromList . fmap (ext . unGP) <$> vectorOf n arbitrary)
+genPoints   :: (Ord r, Fractional r, Arbitrary r) => Int -> IO (NonEmpty (Point 3 r :+ Int))
+genPoints n = generate (NonEmpty.fromList . withIndices . fmap unGP <$> vectorOf n arbitrary)
+  where
+    withIndices xs = zipWith (:+) xs [0..]
