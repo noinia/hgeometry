@@ -110,7 +110,7 @@ module Ipe.Path
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akvj r_apUW. Iso (Path r_akvj) (Path r_apUW) (LSeq 1 (PathSegment r_akvj)) (LSeq 1 (PathSegment r_apUW))
+pathSegments :: forall r_akvm r_apV2. Iso (Path r_akvm) (Path r_apV2) (LSeq 1 (PathSegment r_akvm)) (LSeq 1 (PathSegment r_apV2))
 
 -- | Paths
 --   
@@ -125,14 +125,14 @@ EllipseSegment :: Ellipse r -> PathSegment r
 ArcSegment :: PathSegment r
 SplineSegment :: PathSegment r
 ClosedSplineSegment :: PathSegment r
-_PolyLineSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) (PolyLine 2 () r_ajrV)
-_PolygonPath :: forall r_ajrV. Prism' (PathSegment r_ajrV) (SimplePolygon () r_ajrV)
-_CubicBezierSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) (BezierSpline 3 2 r_ajrV)
-_QuadraticBezierSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) (BezierSpline 2 2 r_ajrV)
-_EllipseSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) (Ellipse r_ajrV)
-_ArcSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) ()
-_SplineSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) ()
-_ClosedSplineSegment :: forall r_ajrV. Prism' (PathSegment r_ajrV) ()
+_PolyLineSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) (PolyLine 2 () r_ajrY)
+_PolygonPath :: forall r_ajrY. Prism' (PathSegment r_ajrY) (SimplePolygon () r_ajrY)
+_CubicBezierSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) (BezierSpline 3 2 r_ajrY)
+_QuadraticBezierSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) (BezierSpline 2 2 r_ajrY)
+_EllipseSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) (Ellipse r_ajrY)
+_ArcSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) ()
+_SplineSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) ()
+_ClosedSplineSegment :: forall r_ajrY. Prism' (PathSegment r_ajrY) ()
 
 -- | type that represents a path in ipe.
 data Operation r
@@ -145,15 +145,15 @@ ClosedSpline :: [Point 2 r] -> Operation r
 ClosePath :: Operation r
 CurveTo :: Point 2 r -> Point 2 r -> Point 2 r -> Operation r
 QCurveTo :: Point 2 r -> Point 2 r -> Operation r
-_MoveTo :: forall r_apV9. Prism' (Operation r_apV9) (Point 2 r_apV9)
-_LineTo :: forall r_apV9. Prism' (Operation r_apV9) (Point 2 r_apV9)
-_CurveTo :: forall r_apV9. Prism' (Operation r_apV9) (Point 2 r_apV9, Point 2 r_apV9, Point 2 r_apV9)
-_QCurveTo :: forall r_apV9. Prism' (Operation r_apV9) (Point 2 r_apV9, Point 2 r_apV9)
-_Ellipse :: forall r_apV9. Prism' (Operation r_apV9) (Matrix 3 3 r_apV9)
-_ArcTo :: forall r_apV9. Prism' (Operation r_apV9) (Matrix 3 3 r_apV9, Point 2 r_apV9)
-_Spline :: forall r_apV9. Prism' (Operation r_apV9) [Point 2 r_apV9]
-_ClosedSpline :: forall r_apV9. Prism' (Operation r_apV9) [Point 2 r_apV9]
-_ClosePath :: forall r_apV9. Prism' (Operation r_apV9) ()
+_MoveTo :: forall r_apVf. Prism' (Operation r_apVf) (Point 2 r_apVf)
+_LineTo :: forall r_apVf. Prism' (Operation r_apVf) (Point 2 r_apVf)
+_CurveTo :: forall r_apVf. Prism' (Operation r_apVf) (Point 2 r_apVf, Point 2 r_apVf, Point 2 r_apVf)
+_QCurveTo :: forall r_apVf. Prism' (Operation r_apVf) (Point 2 r_apVf, Point 2 r_apVf)
+_Ellipse :: forall r_apVf. Prism' (Operation r_apVf) (Matrix 3 3 r_apVf)
+_ArcTo :: forall r_apVf. Prism' (Operation r_apVf) (Matrix 3 3 r_apVf, Point 2 r_apVf)
+_Spline :: forall r_apVf. Prism' (Operation r_apVf) [Point 2 r_apVf]
+_ClosedSpline :: forall r_apVf. Prism' (Operation r_apVf) [Point 2 r_apVf]
+_ClosePath :: forall r_apVf. Prism' (Operation r_apVf) ()
 instance Data.Traversable.Traversable Ipe.Path.Operation
 instance Data.Foldable.Foldable Ipe.Path.Operation
 instance GHC.Base.Functor Ipe.Path.Operation
@@ -327,7 +327,7 @@ type OpacitySym0 = 'Opacity :: AttributeUniverse
 type TilingSym0 = 'Tiling :: AttributeUniverse
 type GradientSym0 = 'Gradient :: AttributeUniverse
 type ClipSym0 = 'Clip :: AttributeUniverse
-data SAttributeUniverse z_aLtX
+data SAttributeUniverse z_aLu3
 [SLayer] :: SAttributeUniverse ('Layer :: AttributeUniverse)
 [SMatrix] :: SAttributeUniverse ('Matrix :: AttributeUniverse)
 [SPin] :: SAttributeUniverse ('Pin :: AttributeUniverse)
@@ -377,7 +377,7 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 newtype Attr (f :: TyFun u * -> *) (label :: u)
 GAttr :: Maybe (Apply f label) -> Attr (f :: TyFun u * -> *) (label :: u)
 [_getAttr] :: Attr (f :: TyFun u * -> *) (label :: u) -> Maybe (Apply f label)
-getAttr :: forall f_aLuM label_aLuN f_aMFe label_aMFf. Iso (Attr f_aLuM label_aLuN) (Attr f_aMFe label_aMFf) (Maybe (Apply f_aLuM label_aLuN)) (Maybe (Apply f_aMFe label_aMFf))
+getAttr :: forall f_aLuS label_aLuT f_aMFk label_aMFl. Iso (Attr f_aLuS label_aLuT) (Attr f_aMFk label_aMFl) (Maybe (Apply f_aLuS label_aLuT)) (Maybe (Apply f_aMFk label_aMFl))
 
 -- | Constructor for constructing an Attr given an actual value.
 pattern Attr :: Apply f label -> Attr f label
@@ -470,8 +470,8 @@ data IpeArrow r
 IpeArrow :: Text -> IpeSize r -> IpeArrow r
 [_arrowName] :: IpeArrow r -> Text
 [_arrowSize] :: IpeArrow r -> IpeSize r
-arrowSize :: forall r_aMFY r_aOPM. Lens (IpeArrow r_aMFY) (IpeArrow r_aOPM) (IpeSize r_aMFY) (IpeSize r_aOPM)
-arrowName :: forall r_aMFY. Lens' (IpeArrow r_aMFY) Text
+arrowSize :: forall r_aMG4 r_aOPS. Lens (IpeArrow r_aMG4) (IpeArrow r_aOPS) (IpeSize r_aMG4) (IpeSize r_aOPS)
+arrowName :: forall r_aMG4. Lens' (IpeArrow r_aMG4) Text
 
 -- | A normal arrow
 normalArrow :: IpeArrow r
@@ -572,8 +572,8 @@ module Ipe.Content
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_aVtm. Lens' (Image r_aVtm) ()
-rect :: forall r_aVtm r_aVB2. Lens (Image r_aVtm) (Image r_aVB2) (Rectangle () r_aVtm) (Rectangle () r_aVB2)
+imageData :: forall r_aVts. Lens' (Image r_aVts) ()
+rect :: forall r_aVts r_aVB8. Lens (Image r_aVts) (Image r_aVB8) (Rectangle () r_aVts) (Rectangle () r_aVB8)
 
 -- | Text Objects
 data TextLabel r
@@ -587,13 +587,13 @@ width :: MiniPage t -> t
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_aVBm r_aWnd. Lens (IpeSymbol r_aVBm) (IpeSymbol r_aWnd) (Point 2 r_aVBm) (Point 2 r_aWnd)
-symbolName :: forall r_aVBm. Lens' (IpeSymbol r_aVBm) Text
+symbolPoint :: forall r_aVBs r_aWnj. Lens (IpeSymbol r_aVBs) (IpeSymbol r_aWnj) (Point 2 r_aVBs) (Point 2 r_aWnj)
+symbolName :: forall r_aVBs. Lens' (IpeSymbol r_aVBs) Text
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akvj r_apUW. Iso (Path r_akvj) (Path r_apUW) (LSeq 1 (PathSegment r_akvj)) (LSeq 1 (PathSegment r_apUW))
+pathSegments :: forall r_akvm r_apV2. Iso (Path r_akvm) (Path r_apV2) (LSeq 1 (PathSegment r_akvm)) (LSeq 1 (PathSegment r_apV2))
 
 -- | Paths
 --   
@@ -624,12 +624,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpeGroup :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Group r_aWtR)
-_IpeImage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Image r_aWtR)
-_IpeTextLabel :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' TextLabel r_aWtR)
-_IpeMiniPage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' MiniPage r_aWtR)
-_IpeUse :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' IpeSymbol r_aWtR)
-_IpePath :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Path r_aWtR)
+_IpeGroup :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Group r_aWtX)
+_IpeImage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Image r_aWtX)
+_IpeTextLabel :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' TextLabel r_aWtX)
+_IpeMiniPage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' MiniPage r_aWtX)
+_IpeUse :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' IpeSymbol r_aWtX)
+_IpePath :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Path r_aWtX)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -648,7 +648,7 @@ type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
-data AttrMapSym1 a6989586621679234569 a6989586621679234570
+data AttrMapSym1 a6989586621679234575 a6989586621679234576
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes
@@ -695,7 +695,7 @@ instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Tiling
 instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Gradient
 instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Clip
 instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings Ipe.Content.AttrMapSym0
-instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings (Ipe.Content.AttrMapSym1 a6989586621679234569)
+instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings (Ipe.Content.AttrMapSym1 a6989586621679234575)
 instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeSymbol r)
 instance Data.Traversable.Traversable Ipe.Content.TextLabel
 instance Data.Foldable.Foldable Ipe.Content.TextLabel
@@ -732,9 +732,9 @@ module Ipe.Types
 -- | A complete ipe file
 data IpeFile r
 IpeFile :: Maybe IpePreamble -> [IpeStyle] -> NonEmpty (IpePage r) -> IpeFile r
-preamble :: forall r_a18Xk. Lens' (IpeFile r_a18Xk) (Maybe IpePreamble)
-styles :: forall r_a18Xk. Lens' (IpeFile r_a18Xk) [IpeStyle]
-pages :: forall r_a18Xk r_a19bW. Lens (IpeFile r_a18Xk) (IpeFile r_a19bW) (NonEmpty (IpePage r_a18Xk)) (NonEmpty (IpePage r_a19bW))
+preamble :: forall r_a18Xq. Lens' (IpeFile r_a18Xq) (Maybe IpePreamble)
+styles :: forall r_a18Xq. Lens' (IpeFile r_a18Xq) [IpeStyle]
+pages :: forall r_a18Xq r_a19c2. Lens (IpeFile r_a18Xq) (IpeFile r_a19c2) (NonEmpty (IpePage r_a18Xq)) (NonEmpty (IpePage r_a19c2))
 
 -- | Convenience constructor for creating an ipe file without preamble and
 --   with the default stylesheet.
@@ -751,9 +751,9 @@ singlePageFromContent :: [IpeObject r] -> IpeFile r
 --   a list of views.
 data IpePage r
 IpePage :: [LayerName] -> [View] -> [IpeObject r] -> IpePage r
-layers :: forall r_a18Td. Lens' (IpePage r_a18Td) [LayerName]
-views :: forall r_a18Td. Lens' (IpePage r_a18Td) [View]
-content :: forall r_a18Td r_a18WR. Lens (IpePage r_a18Td) (IpePage r_a18WR) [IpeObject r_a18Td] [IpeObject r_a18WR]
+layers :: forall r_a18Tj. Lens' (IpePage r_a18Tj) [LayerName]
+views :: forall r_a18Tj. Lens' (IpePage r_a18Tj) [View]
+content :: forall r_a18Tj r_a18WX. Lens (IpePage r_a18Tj) (IpePage r_a18WX) [IpeObject r_a18Tj] [IpeObject r_a18WX]
 
 -- | Creates an empty page with one layer and view.
 emptyPage :: IpePage r
@@ -801,12 +801,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpeGroup :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Group r_aWtR)
-_IpeImage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Image r_aWtR)
-_IpeTextLabel :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' TextLabel r_aWtR)
-_IpeMiniPage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' MiniPage r_aWtR)
-_IpeUse :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' IpeSymbol r_aWtR)
-_IpePath :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Path r_aWtR)
+_IpeGroup :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Group r_aWtX)
+_IpeImage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Image r_aWtX)
+_IpeTextLabel :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' TextLabel r_aWtX)
+_IpeMiniPage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' MiniPage r_aWtX)
+_IpeUse :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' IpeSymbol r_aWtX)
+_IpePath :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Path r_aWtX)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -819,7 +819,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akvj r_apUW. Iso (Path r_akvj) (Path r_apUW) (LSeq 1 (PathSegment r_akvj)) (LSeq 1 (PathSegment r_apUW))
+pathSegments :: forall r_akvm r_apV2. Iso (Path r_akvm) (Path r_apV2) (LSeq 1 (PathSegment r_akvm)) (LSeq 1 (PathSegment r_apV2))
 
 -- | Paths
 --   
@@ -840,8 +840,8 @@ ClosedSplineSegment :: PathSegment r
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_aVBm r_aWnd. Lens (IpeSymbol r_aVBm) (IpeSymbol r_aWnd) (Point 2 r_aVBm) (Point 2 r_aWnd)
-symbolName :: forall r_aVBm. Lens' (IpeSymbol r_aVBm) Text
+symbolPoint :: forall r_aVBs r_aWnj. Lens (IpeSymbol r_aVBs) (IpeSymbol r_aWnj) (Point 2 r_aVBs) (Point 2 r_aWnj)
+symbolName :: forall r_aVBs. Lens' (IpeSymbol r_aVBs) Text
 
 -- | Groups and Objects
 --   
@@ -862,8 +862,8 @@ width :: MiniPage t -> t
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_aVtm. Lens' (Image r_aVtm) ()
-rect :: forall r_aVtm r_aVB2. Lens (Image r_aVtm) (Image r_aVB2) (Rectangle () r_aVtm) (Rectangle () r_aVB2)
+imageData :: forall r_aVts. Lens' (Image r_aVts) ()
+rect :: forall r_aVts r_aVB8. Lens (Image r_aVts) (Image r_aVB8) (Rectangle () r_aVts) (Rectangle () r_aVB8)
 type IpeBitmap = Text
 type IpeAttributes g r = Attributes' r (AttributesOf g)
 
@@ -875,7 +875,7 @@ type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
-data AttrMapSym1 a6989586621679234569 a6989586621679234570
+data AttrMapSym1 a6989586621679234575 a6989586621679234576
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes
@@ -1419,9 +1419,9 @@ module Ipe
 -- | A complete ipe file
 data IpeFile r
 IpeFile :: Maybe IpePreamble -> [IpeStyle] -> NonEmpty (IpePage r) -> IpeFile r
-preamble :: forall r_a18Xk. Lens' (IpeFile r_a18Xk) (Maybe IpePreamble)
-styles :: forall r_a18Xk. Lens' (IpeFile r_a18Xk) [IpeStyle]
-pages :: forall r_a18Xk r_a19bW. Lens (IpeFile r_a18Xk) (IpeFile r_a19bW) (NonEmpty (IpePage r_a18Xk)) (NonEmpty (IpePage r_a19bW))
+preamble :: forall r_a18Xq. Lens' (IpeFile r_a18Xq) (Maybe IpePreamble)
+styles :: forall r_a18Xq. Lens' (IpeFile r_a18Xq) [IpeStyle]
+pages :: forall r_a18Xq r_a19c2. Lens (IpeFile r_a18Xq) (IpeFile r_a19c2) (NonEmpty (IpePage r_a18Xq)) (NonEmpty (IpePage r_a19c2))
 
 -- | Convenience constructor for creating an ipe file without preamble and
 --   with the default stylesheet.
@@ -1487,9 +1487,9 @@ toIpeSelectionXML :: IpeWrite t => t -> Maybe ByteString
 --   a list of views.
 data IpePage r
 IpePage :: [LayerName] -> [View] -> [IpeObject r] -> IpePage r
-layers :: forall r_a18Td. Lens' (IpePage r_a18Td) [LayerName]
-views :: forall r_a18Td. Lens' (IpePage r_a18Td) [View]
-content :: forall r_a18Td r_a18WR. Lens (IpePage r_a18Td) (IpePage r_a18WR) [IpeObject r_a18Td] [IpeObject r_a18WR]
+layers :: forall r_a18Tj. Lens' (IpePage r_a18Tj) [LayerName]
+views :: forall r_a18Tj. Lens' (IpePage r_a18Tj) [View]
+content :: forall r_a18Tj r_a18WX. Lens (IpePage r_a18Tj) (IpePage r_a18WX) [IpeObject r_a18Tj] [IpeObject r_a18WX]
 
 -- | Creates an empty page with one layer and view.
 emptyPage :: IpePage r
@@ -1537,12 +1537,12 @@ IpeTextLabel :: IpeObject' TextLabel r -> IpeObject r
 IpeMiniPage :: IpeObject' MiniPage r -> IpeObject r
 IpeUse :: IpeObject' IpeSymbol r -> IpeObject r
 IpePath :: IpeObject' Path r -> IpeObject r
-_IpePath :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Path r_aWtR)
-_IpeUse :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' IpeSymbol r_aWtR)
-_IpeGroup :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Group r_aWtR)
-_IpeTextLabel :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' TextLabel r_aWtR)
-_IpeMiniPage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' MiniPage r_aWtR)
-_IpeImage :: forall r_aWtR. Prism' (IpeObject r_aWtR) (IpeObject' Image r_aWtR)
+_IpePath :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Path r_aWtX)
+_IpeUse :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' IpeSymbol r_aWtX)
+_IpeGroup :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Group r_aWtX)
+_IpeTextLabel :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' TextLabel r_aWtX)
+_IpeMiniPage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' MiniPage r_aWtX)
+_IpeImage :: forall r_aWtX. Prism' (IpeObject r_aWtX) (IpeObject' Image r_aWtX)
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
@@ -1555,7 +1555,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akvj r_apUW. Iso (Path r_akvj) (Path r_apUW) (LSeq 1 (PathSegment r_akvj)) (LSeq 1 (PathSegment r_apUW))
+pathSegments :: forall r_akvm r_apV2. Iso (Path r_akvm) (Path r_apV2) (LSeq 1 (PathSegment r_akvm)) (LSeq 1 (PathSegment r_apV2))
 
 -- | Paths
 --   
@@ -1576,8 +1576,8 @@ ClosedSplineSegment :: PathSegment r
 --   A symbol (point) in ipe
 data IpeSymbol r
 Symbol :: Point 2 r -> Text -> IpeSymbol r
-symbolPoint :: forall r_aVBm r_aWnd. Lens (IpeSymbol r_aVBm) (IpeSymbol r_aWnd) (Point 2 r_aVBm) (Point 2 r_aWnd)
-symbolName :: forall r_aVBm. Lens' (IpeSymbol r_aVBm) Text
+symbolPoint :: forall r_aVBs r_aWnj. Lens (IpeSymbol r_aVBs) (IpeSymbol r_aWnj) (Point 2 r_aVBs) (Point 2 r_aWnj)
+symbolName :: forall r_aVBs. Lens' (IpeSymbol r_aVBs) Text
 
 -- | Groups and Objects
 --   
@@ -1598,8 +1598,8 @@ width :: MiniPage t -> t
 -- | Image Objects
 data Image r
 Image :: () -> Rectangle () r -> Image r
-imageData :: forall r_aVtm. Lens' (Image r_aVtm) ()
-rect :: forall r_aVtm r_aVB2. Lens (Image r_aVtm) (Image r_aVB2) (Rectangle () r_aVtm) (Rectangle () r_aVB2)
+imageData :: forall r_aVts. Lens' (Image r_aVts) ()
+rect :: forall r_aVts r_aVB8. Lens (Image r_aVts) (Image r_aVB8) (Rectangle () r_aVts) (Rectangle () r_aVB8)
 type IpeBitmap = Text
 type IpeAttributes g r = Attributes' r (AttributesOf g)
 
@@ -1611,7 +1611,7 @@ type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse]
 --   the attributes with these labels. For example, the <a>Matrix</a>
 --   label/attribute should have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type
-data AttrMapSym1 a6989586621679234569 a6989586621679234570
+data AttrMapSym1 a6989586621679234575 a6989586621679234576
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 
 -- | traverse for ipe attributes

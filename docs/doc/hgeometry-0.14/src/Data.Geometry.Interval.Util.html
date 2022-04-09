@@ -16,8 +16,8 @@
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- | Open on left endpoint; so Closed before open</span><span>
-</span><span id="line-19"></span><span id="local-6989586621680018820"><span id="local-6989586621680018821"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="L"><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span id="local-6989586621680018835"><span class="annot"><a href="#local-6989586621680018835"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="L"><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unL"><span class="annot"><span class="annottext">L r -&gt; EndPoint r
-</span><a href="Data.Geometry.Interval.Util.html#_unL"><span class="hs-identifier hs-var hs-var">_unL</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EndPoint</span></span><span> </span><span class="annot"><a href="#local-6989586621680018835"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680018812"><span id="local-6989586621680018814"><span id="local-6989586621680018816"><span class="annot"><span class="annottext">Int -&gt; L r -&gt; ShowS
+</span><span id="line-19"></span><span id="local-6989586621680020667"><span id="local-6989586621680020668"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="L"><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span id="local-6989586621680020682"><span class="annot"><a href="#local-6989586621680020682"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="L"><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unL"><span class="annot"><span class="annottext">L r -&gt; EndPoint r
+</span><a href="Data.Geometry.Interval.Util.html#_unL"><span class="hs-identifier hs-var hs-var">_unL</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EndPoint</span></span><span> </span><span class="annot"><a href="#local-6989586621680020682"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680020659"><span id="local-6989586621680020661"><span id="local-6989586621680020663"><span class="annot"><span class="annottext">Int -&gt; L r -&gt; ShowS
 [L r] -&gt; ShowS
 L r -&gt; String
 (Int -&gt; L r -&gt; ShowS)
@@ -33,7 +33,7 @@ show :: L r -&gt; String
 $cshow :: forall r. Show r =&gt; L r -&gt; String
 showsPrec :: Int -&gt; L r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; Int -&gt; L r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018807"><span id="local-6989586621680018809"><span class="annot"><span class="annottext">L r -&gt; L r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680020654"><span id="local-6989586621680020656"><span class="annot"><span class="annottext">L r -&gt; L r -&gt; Bool
 (L r -&gt; L r -&gt; Bool) -&gt; (L r -&gt; L r -&gt; Bool) -&gt; Eq (L r)
 forall r. Eq r =&gt; L r -&gt; L r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -51,45 +51,45 @@ forall r x. Rep (L r) x -&gt; L r
 forall r x. L r -&gt; Rep (L r) x
 $cto :: forall r x. Rep (L r) x -&gt; L r
 $cfrom :: forall r x. L r -&gt; Rep (L r) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680018801"><span class="annot"><span class="annottext">L r -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680020648"><span class="annot"><span class="annottext">L r -&gt; ()
 (L r -&gt; ()) -&gt; NFData (L r)
 forall r. NFData r =&gt; L r -&gt; ()
 forall a. (a -&gt; ()) -&gt; NFData a
 rnf :: L r -&gt; ()
 $crnf :: forall r. NFData r =&gt; L r -&gt; ()
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span id="unL"><span id="local-6989586621680018799"><span id="local-6989586621680018835"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">L</span></span></span></span><span>
-</span><span id="line-21"></span><span id="local-6989586621680018797"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680018783"><span id="local-6989586621680018785"><span id="local-6989586621680018787"><span id="local-6989586621680018789"><span id="local-6989586621680018791"><span id="local-6989586621680018793"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680018797"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-type">L</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680018797"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-22"></span><span>  </span><span id="local-6989586621680018781"><span class="annot"><span class="annottext">L r
-</span><a href="#local-6989586621680018781"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680018780"><span class="annot"><span class="annottext">compare :: L r -&gt; L r -&gt; Ordering
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span id="local-6989586621680018778"><span class="annot"><span class="annottext">L r
-</span><a href="#local-6989586621680018778"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; (r, Bool)
+</span><span id="line-20"></span><span id="unL"><span id="local-6989586621680020646"><span id="local-6989586621680020682"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">L</span></span></span></span><span>
+</span><span id="line-21"></span><span id="local-6989586621680020644"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680020630"><span id="local-6989586621680020632"><span id="local-6989586621680020634"><span id="local-6989586621680020636"><span id="local-6989586621680020638"><span id="local-6989586621680020640"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680020644"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-type">L</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680020644"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621680020628"><span class="annot"><span class="annottext">L r
+</span><a href="#local-6989586621680020628"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680020627"><span class="annot"><span class="annottext">compare :: L r -&gt; L r -&gt; Ordering
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span id="local-6989586621680020625"><span class="annot"><span class="annottext">L r
+</span><a href="#local-6989586621680020625"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; (r, Bool)
 forall a. EndPoint a -&gt; (a, Bool)
-</span><a href="#local-6989586621680018777"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">L r -&gt; EndPoint r
+</span><a href="#local-6989586621680020624"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">L r -&gt; EndPoint r
 forall r. L r -&gt; EndPoint r
 </span><a href="Data.Geometry.Interval.Util.html#_unL"><span class="hs-identifier hs-var hs-var">_unL</span></a></span><span> </span><span class="annot"><span class="annottext">L r
-</span><a href="#local-6989586621680018781"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(r, Bool) -&gt; (r, Bool) -&gt; Ordering
+</span><a href="#local-6989586621680020628"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(r, Bool) -&gt; (r, Bool) -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; (r, Bool)
 forall a. EndPoint a -&gt; (a, Bool)
-</span><a href="#local-6989586621680018777"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">L r -&gt; EndPoint r
+</span><a href="#local-6989586621680020624"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">L r -&gt; EndPoint r
 forall r. L r -&gt; EndPoint r
 </span><a href="Data.Geometry.Interval.Util.html#_unL"><span class="hs-identifier hs-var hs-var">_unL</span></a></span><span> </span><span class="annot"><span class="annottext">L r
-</span><a href="#local-6989586621680018778"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680020625"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-24"></span><span>      </span><span id="local-6989586621680018777"><span class="annot"><span class="annottext">f :: EndPoint a -&gt; (a, Bool)
-</span><a href="#local-6989586621680018777"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Open</span></span><span> </span><span id="local-6989586621680018775"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680018775"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680018775"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span id="line-24"></span><span>      </span><span id="local-6989586621680020624"><span class="annot"><span class="annottext">f :: EndPoint a -&gt; (a, Bool)
+</span><a href="#local-6989586621680020624"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Open</span></span><span> </span><span id="local-6989586621680020622"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680020622"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680020622"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
-</span><span id="line-25"></span><span>      </span><span class="annot"><a href="#local-6989586621680018777"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Closed</span></span><span> </span><span id="local-6989586621680018773"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680018773"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680018773"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span id="line-25"></span><span>      </span><span class="annot"><a href="#local-6989586621680020624"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Closed</span></span><span> </span><span id="local-6989586621680020620"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680020620"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680020620"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span></span><span>
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span class="hs-comment">-- | Order on right endpoint; so Open before Closed</span><span>
-</span><span id="line-28"></span><span id="local-6989586621680018771"><span id="local-6989586621680018772"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="R"><span class="annot"><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span id="local-6989586621680018770"><span class="annot"><a href="#local-6989586621680018770"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="R"><span class="annot"><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unR"><span class="annot"><span class="annottext">R r -&gt; EndPoint r
-</span><a href="Data.Geometry.Interval.Util.html#_unR"><span class="hs-identifier hs-var hs-var">_unR</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EndPoint</span></span><span> </span><span class="annot"><a href="#local-6989586621680018770"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680018762"><span id="local-6989586621680018764"><span id="local-6989586621680018766"><span class="annot"><span class="annottext">Int -&gt; R r -&gt; ShowS
+</span><span id="line-28"></span><span id="local-6989586621680020618"><span id="local-6989586621680020619"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="R"><span class="annot"><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span id="local-6989586621680020617"><span class="annot"><a href="#local-6989586621680020617"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="R"><span class="annot"><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unR"><span class="annot"><span class="annottext">R r -&gt; EndPoint r
+</span><a href="Data.Geometry.Interval.Util.html#_unR"><span class="hs-identifier hs-var hs-var">_unR</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EndPoint</span></span><span> </span><span class="annot"><a href="#local-6989586621680020617"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680020609"><span id="local-6989586621680020611"><span id="local-6989586621680020613"><span class="annot"><span class="annottext">Int -&gt; R r -&gt; ShowS
 [R r] -&gt; ShowS
 R r -&gt; String
 (Int -&gt; R r -&gt; ShowS)
@@ -105,7 +105,7 @@ show :: R r -&gt; String
 $cshow :: forall r. Show r =&gt; R r -&gt; String
 showsPrec :: Int -&gt; R r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; Int -&gt; R r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018758"><span id="local-6989586621680018760"><span class="annot"><span class="annottext">R r -&gt; R r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680020605"><span id="local-6989586621680020607"><span class="annot"><span class="annottext">R r -&gt; R r -&gt; Bool
 (R r -&gt; R r -&gt; Bool) -&gt; (R r -&gt; R r -&gt; Bool) -&gt; Eq (R r)
 forall r. Eq r =&gt; R r -&gt; R r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -113,7 +113,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall r. Eq r =&gt; R r -&gt; R r -&gt; Bool
 == :: R r -&gt; R r -&gt; Bool
 $c== :: forall r. Eq r =&gt; R r -&gt; R r -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680018743"><span id="local-6989586621680018745"><span id="local-6989586621680018747"><span id="local-6989586621680018749"><span id="local-6989586621680018751"><span id="local-6989586621680018753"><span id="local-6989586621680018755"><span class="annot"><span class="annottext">Eq (R r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680020590"><span id="local-6989586621680020592"><span id="local-6989586621680020594"><span id="local-6989586621680020596"><span id="local-6989586621680020598"><span id="local-6989586621680020600"><span id="local-6989586621680020602"><span class="annot"><span class="annottext">Eq (R r)
 Eq (R r)
 -&gt; (R r -&gt; R r -&gt; Ordering)
 -&gt; (R r -&gt; R r -&gt; Bool)
@@ -165,12 +165,12 @@ forall r x. Rep (R r) x -&gt; R r
 forall r x. R r -&gt; Rep (R r) x
 $cto :: forall r x. Rep (R r) x -&gt; R r
 $cfrom :: forall r x. R r -&gt; Rep (R r) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680018739"><span class="annot"><span class="annottext">R r -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621680020586"><span class="annot"><span class="annottext">R r -&gt; ()
 (R r -&gt; ()) -&gt; NFData (R r)
 forall r. NFData r =&gt; R r -&gt; ()
 forall a. (a -&gt; ()) -&gt; NFData a
 rnf :: R r -&gt; ()
 $crnf :: forall r. NFData r =&gt; R r -&gt; ()
-</span><a href="#local-6989586621680018739"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span id="unR"><span id="local-6989586621680018738"><span id="local-6989586621680018770"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">R</span></span></span></span><span>
+</span><a href="#local-6989586621680020586"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span id="unR"><span id="local-6989586621680020585"><span id="local-6989586621680020617"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">R</span></span></span></span><span>
 </span><span id="line-30"></span></pre></body></html>
