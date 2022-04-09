@@ -163,7 +163,6 @@ instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
              . runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
       merge = mergeSortedListsBy (comparing eventTime')
       -- minInftyT = Nothing
-      minInftyT = -10000 -- FIXME
 
 -- | Runs the simulation; producing a list of events
 runSim                           :: (Hull hull, Point point)
@@ -283,7 +282,7 @@ runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
       b      = bridgeOf l r
       events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
       merge = mergeSortedListsBy (comparing eventTime')
-      minInftyT = -10000 -- FIXME
+
 
 --------------------------------------------------------------------------------
 
@@ -455,7 +454,7 @@ testHull = hulls myPoints
 
 
 testSim :: Simulation HullZ _
-testSim = simulate myPoints
+testSim = simulate buggyPoints
 
 
 -- | Run a simulation up to a certain time to compute the hull at that time.
@@ -560,3 +559,23 @@ instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ 
 instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ NumType point
          ) => RenderAt (Simulation hull point) where
   renderAt t = renderAt t . computeHullAt t
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+-- bug?
+
+buggyPoints :: NonEmpty (Point.Point 3 R)
+buggyPoints =  NonEmpty.fromList
+               [ Point.Point3 48.3650451071 7.4563367715 19.1569282618
+               , Point.Point3 20.4118494655 19.5372323335 92.2346920363
+               , Point.Point3 8.0610955116 24.8896480153 28.0685516681
+               , Point.Point3 30.5286900395 45.7603258350 87.5193514446
+               ]
+       -- expected: HalfSpacesOf [Triangle (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0) (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2),Triangle (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0) (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2) (Point3 30.5286900395~ 45.7603258350~ 87.5193514446~ :+ 3)]
+       --  but got: HalfSpacesOf [Triangle (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 30.5286900395~ 45.7603258350~ 87.5193514446~ :+ 3) (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0),Triangle (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2) (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0)]

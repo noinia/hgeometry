@@ -6,7 +6,7 @@ import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
-import           Control.Monad (forM, forM_, replicateM)
+import           Control.Monad (forM, forM_)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
@@ -25,11 +25,16 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
-import           Data.Word
-import           System.Random.Stateful
+import           Data.Geometry.Point.Random
 
 --------------------------------------------------------------------------------
 
+-- test :: Fractional r => IO [Triangle 3 Int r]
+-- test = Minimalist.lowerHull' <$> samplePoints
+
+
+-- samplePoints :: IO (NonEmpty (Point 3 R :+ Int))
+-- samplePoints = (\pts -> withIndices (unGP <$> pts)) . NonEmpty.fromList <$> sample' arbitrary
 
 
 --------------------------------------------------------------------------------
@@ -66,6 +71,7 @@ inputs =
   [ ("myPts",myPts)
   , ("myPts'",myPts')
   , ("buggyPoints6",buggyPoints6)
+  , ("buggyPoints",buggyPointsN)
   ]
   -- -- I've uncommented the ones below fow now, since they involve degeneracies.
   -- [ ("buggyPoints",buggyPoints)
@@ -81,29 +87,8 @@ inputs =
   -- , ("buggy11",mkBuggy buggy11)
   -- ]
 
---------------------------------------------------------------------------------
-
--- * Some attempt at producing point sets more or less in general position
-
-newtype GeneralPos point = GeneralPos { unGP :: point }
-  deriving newtype (Show,Eq,Ord)
-
-instance (Fractional r, Arity d) => Arbitrary (GeneralPos (Point d r)) where
-  arbitrary = GeneralPos
-            . fmap (\x -> myUpper * (fromIntegral x / fromIntegral (maxBound @Word64)))
-              <$> choose @(Point d Word64) (pure 0,maxBound)
-    where
-      myUpper = 100
-
--- testPoints = sample
 
 
-test :: IO [Triangle 3 Int R]
-test = Minimalist.lowerHull' <$> samplePoints
-
-
-samplePoints :: IO (NonEmpty (Point 3 R :+ Int))
-samplePoints = (\pts -> withIndices (unGP <$> pts)) . NonEmpty.fromList <$> sample' arbitrary
 
 
 
@@ -114,7 +99,7 @@ samplePoints = (\pts -> withIndices (unGP <$> pts)) . NonEmpty.fromList <$> samp
 --------------------------------------------------------------------------------
 
 spec' = describe "test" $ do
-  it "same as naive on buggyPoints " $ sameAsNaive Minimalist.lowerHull' buggyPoints3
+  it "same as naive on buggyPoints " $ sameAsNaive Minimalist.lowerHull' buggyPointsN
 
 specShrink = describe "shrink" $ forM_ sets $ \(_:+i,pts) ->
                it ("same as Naive " <> show i) $ sameAsNaive Minimalist.lowerHull' (mkBuggy pts)
@@ -207,6 +192,23 @@ myHull' = H . map (toTri myPts') $ [ Three 1 2 3
                                    , Three 0 1 2
                                    , Three 0 2 3
                                    ]
+
+
+
+
+
+
+
+
+buggyPointsN :: NonEmpty (Point 3 R :+ Int)
+buggyPointsN =  NonEmpty.fromList
+               [ Point3 48.3650451071 7.4563367715  19.1569282618 :+ 0
+               , Point3 20.4118494655 19.5372323335 92.2346920363 :+ 1
+               , Point3 8.0610955116  24.8896480153 28.0685516681 :+ 2
+               , Point3 30.5286900395 45.7603258350 87.5193514446 :+ 3
+               ]
+
+
 
 
 --------------------------------------------------------------------------------

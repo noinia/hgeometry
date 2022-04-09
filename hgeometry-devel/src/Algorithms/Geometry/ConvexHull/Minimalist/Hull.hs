@@ -25,6 +25,9 @@ import           Data.Kind
 
 --------------------------------------------------------------------------------
 
+minInftyT :: Num r => r
+minInftyT = -1000000000 -- FIXME
+
 --------------------------------------------------------------------------------
 
 class Hull (hull :: Type -> Type) where
@@ -174,9 +177,7 @@ bridgeOf l0 r0 = go (goRightMost l0) (goLeftMost r0)
       goRight' = fromMaybe (error "goRight': no right") . goRight
 
       toPt h = toPt2 t (focus h)
-
-      t = -1000 -- 0 -- 1 ---10 -- FIXME: hack
-
+      t = minInftyT
 
 --------------------------------------------------------------------------------
 

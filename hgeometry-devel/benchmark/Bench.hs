@@ -1,8 +1,8 @@
 module Main where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as CH2D
-import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivideAndConquer
-import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as Minimalist
+-- import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivideAndConquer
+import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
 
 -- import           Benchmark.Util
 import           Control.DeepSeq
@@ -40,7 +40,7 @@ benchmark = bgroup "convexHullBench"
 --------------------------------------------------------------------------------
 
 genPts     :: (Ord r, Arbitrary r) => proxy r -> Int -> IO (NonEmpty (Point 3 r :+ ()))
-genPts _ n = generate (NonEmpty.fromList <$> vectorOf n arbitrary)
+genPts _ n = generate (NonEmpty.fromList . fmap unGP <$> vectorOf n arbitrary)
 
 -- | Benchmark building the convexHull
 benchBuild    :: (Ord r, Fractional r, NFData r
