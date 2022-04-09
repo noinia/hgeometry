@@ -1,4 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
 module Algorithms.Geometry.ConvexHull.Minimalist.Hull where
 
 import           Algorithms.BinarySearch
@@ -95,9 +94,10 @@ instance Point point => Ord (X point) where
 
 -- | hull zipper
 data HullZ point = HullZ (Set (X point)) point (Set (X point))
-                 deriving (Eq)
 
 type instance NumType (HullZ point) = NumType point
+
+
 
 
 instance Show point => Show (HullZ point) where
