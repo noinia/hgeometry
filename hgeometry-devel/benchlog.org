@@ -57,3 +57,29 @@ Up to date
 
 cabal run devel-prof vd_points_10k.json +RTS -s  11.56s user 0.08s system 99% cpu 11.647 total
 frank@Arya# time cabal run devel-prof vd_points_10k.json +RTS -s -p
+
+* with inlinable on colinearTime
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+  12,462,394,928 bytes allocated in the heap
+     420,774,664 bytes copied during GC
+      21,775,184 bytes maximum residency (17 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     11991 colls,     0 par    0.319s   0.323s     0.0000s    0.0010s
+  Gen  1        17 colls,     0 par    0.138s   0.138s     0.0081s    0.0196s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   11.007s  ( 11.010s elapsed)
+  GC      time    0.456s  (  0.461s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   11.463s  ( 11.471s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    1,132,259,511 bytes per MUT second
+
+  Productivity  96.0% of total user, 96.0% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  11.43s user 0.04s system 99% cpu 11.479 total

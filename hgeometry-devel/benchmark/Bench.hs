@@ -10,10 +10,10 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.RealNumber.Rational
 import           Generate
 import           Ipe
 import           Test.QuickCheck.Instances ()
-import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ benchmark = bgroup "convexHullBench"
 -- | Benchmark building the convexHull
 benchBuild    :: (Ord r, Fractional r, NFData r
                  , Show r, IpeWriteText r
-                 ) => NonEmpty (Point 3 r :+ ()) -> Benchmark
+                 ) => NonEmpty (Point 3 r :+ Int) -> Benchmark
 benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
                                | n <- sizes' ps
                                ]

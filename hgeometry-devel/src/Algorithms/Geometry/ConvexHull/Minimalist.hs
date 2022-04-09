@@ -351,8 +351,7 @@ colinearTime (toPt3 -> Point.Point3 px py pz)
     b = ux*(ry - py)  - vx*(qy - py)
   -- b == zero means the three points are on a vertical plane. This corresponds
   -- to t = -\infty.
-
-
+{-# INLINABLE  colinearTime #-}
 
 --------------------------------------------------------------------------------
 
