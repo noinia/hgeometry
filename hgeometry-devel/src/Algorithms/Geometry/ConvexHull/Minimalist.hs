@@ -262,6 +262,11 @@ runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
                                                   (Nothing :| ((Just . eventTime) <$> events))
                                . NonEmpty.fromList $ List.scanl handle (h0,[]) events
 
+runSimulation''                 :: (Point point, Hull hull)
+                               => Simulation hull point
+                               -> NonEmpty ( Maybe (Time point), hull point)
+runSimulation'' = fmap (\(t,h,_) -> (t,h)) . runSimulation'
+
 --------------------------------------------------------------------------------
 
 
@@ -406,39 +411,41 @@ computeHullAt t = go . runSimulation'
 renderIpe :: ( Point point
              , Hull hull
              , IpeWriteText (NumType point)
+             , NumType (hull point) ~ NumType point
+             , RenderAt (hull point), RenderAt point
              ) => FilePath -> (Simulation hull point, NonEmpty point) -> IO ()
 renderIpe fp = writeIpeFile fp . render
 
 render :: ( Point point
           , Hull hull
           , IpeWriteText (NumType point)
+          , NumType (hull point) ~ NumType point
+          , RenderAt (hull point), RenderAt point
           ) => (Simulation hull point, NonEmpty point) -> IpeFile (NumType point)
-render (s,pts) = ipeFile . fmap (\(mt,h,_) -> fromMaybe emptyPage $
-                                              do t  <- mt
-                                                 pl <- hullAt t h
-                                                 pure $ draw t pl (toPt2 t <$> pts)
-                        ) . runSimulation' $ s
-
-draw          :: (IpeWriteText r, Num r, Foldable f, Functor f)
-              => r -> PolyLine.PolyLine 2 () r
-              -> f (Point.Point 2 r) -> IpePage r
-draw t pl pts = fromContent $ [ iO $ ipeLabel (fromMaybe "?" (ipeWriteText t) :+ Point.origin)
-                              , iO $ defIO pl
-                              ] <> F.toList (fmap (iO . defIO) pts)
+render (s,pts) = ipeFile . fmap (\(t,h,_) -> fromContent [ drawTime t
+                                                         , renderAt' t h
+                                                         , renderAt' t pts
+                                                         ]
+                           )
+                 . runSimulation' $ s
 
 --------------------------------------------------------------------------------
 
 renderMergeIpe        :: ( Point point
                          , Hull hull
                          , IpeWriteText (NumType point)
+                         , NumType (hull point) ~ NumType point
+                         , RenderAt (hull point), RenderAt point
                          ) => FilePath
                       -> (Simulation hull point, NonEmpty point)
                       -> (Simulation hull point, NonEmpty point) -> IO ()
 renderMergeIpe fp l r = writeIpeFile fp $ renderMerge l r
 
-renderMerge     :: ( Point point
+renderMerge     :: forall point hull. ( Point point
                    , Hull hull
                    , IpeWriteText (NumType point)
+                   , NumType (hull point) ~ NumType point
+                   , RenderAt (hull point), RenderAt point
                    )
                 => (Simulation hull point, NonEmpty point)
                 -> (Simulation hull point, NonEmpty point)
@@ -446,38 +453,29 @@ renderMerge     :: ( Point point
 renderMerge (l,lp) (r,rp) = ipeFile $ initialHull :| simPages
   where
      (h0,evs) = runMerge l r
-     initialT = -1000
-     initialHull = fromMaybe emptyPage $ do let t = -1000
-                                            pl <- hullAt t h0
-                                            pure $ draw t pl (toPt2 t <$> (lp <> rp))
+     initialHull = fromContent [ renderAt (-1000) h0
+                               , renderAt (-1000) (lp <> rp)
+                               ]
+     simPages = flip map evs $ \(e,b) -> let t = eventTime e in
+                                           fromContent [ renderAt t b
+                                                       , renderAt t (lp <> rp)
+                                                       ]
 
+drawTime   :: (Num r, IpeWriteText r) => Maybe r -> IpeObject r
+drawTime t = iO . ipeLabel $ (fromMaybe "?" $ ipeWriteText =<< t) :+ Point.origin
 
-
-     simPages = flip map evs $ \(e,Bridge l' r') ->
-                  fromMaybe emptyPage $ do let t = eventTime e
-                                           pl <- hullAt t l'
-                                           pr <- hullAt t r'
-                                           pure $ draw' t pl pr (seg t l' r')
-
-     seg t l' r' = ClosedLineSegment (ext $ toPt2 t (focus l')) (ext $ toPt2 t (focus r'))
-
-
-draw'           :: (IpeWriteText r, Num r)
-                => r -> PolyLine.PolyLine 2 () r
-                -> PolyLine.PolyLine 2 () r
-                -> LineSegment 2 () r -> IpePage r
-draw' t pl pr s = fromContent
-  [ iO $ ipeLabel (fromMaybe "?" (ipeWriteText t) :+ Point.origin)
-  , iO $ defIO pl
-  , iO $ defIO pr
-  , iO $ defIO s ! attr SStroke red
-  ]
-
--- (hull point, [(Event point, Bridge hull point)])
+renderAt' :: (RenderAt t, Num (NumType t)) => Maybe (NumType t) -> t -> IpeObject (NumType t)
+renderAt' = \case
+  Nothing -> const . iO $ ipeLabel ("?" :+ Point.origin)
+  Just t  -> renderAt t
 
 
 class RenderAt t where
   renderAt :: NumType t -> t -> IpeObject (NumType t)
+
+type instance NumType (NonEmpty t) = NumType t
+instance RenderAt t =>  RenderAt (NonEmpty t) where
+  renderAt t = iO . ipeGroup . map (renderAt t) . NonEmpty.toList
 
 instance RenderAt (Point.Point 3 R) where
   renderAt t = iO . defIO . toPt2 t

@@ -44,8 +44,11 @@ class Hull (hull :: Type -> Type) where
 
   fromBridge :: Point point => Bridge hull point -> hull point
 
-  -- | delete the point from the hull.
-  -- pre: the to be deleted point is not the focus
+  -- | delete the point from the hull. If we delete the focus, try to
+  -- take from the right first, if that does not work, take the new
+  -- focus from the left instead.
+  --
+  -- pre : the hull remains non-empty
   delete :: Point point => point -> hull point -> hull point
   insert :: Point point => point -> hull point -> hull point
 
@@ -130,14 +133,11 @@ instance Hull HullZ where
 
   delete q (HullZ ll p rr) = case q `compareX` p of
       LT -> HullZ (Set.delete (X q) ll) p rr
-      EQ -> error "HullZ: trying to delete the focus"
-        -- case tq of
-        --       Left _  -> case Set.maxView ll of
-        --                    Nothing         -> error "HullZ: deleteL with foucs but empty"
-        --                    Just (X p',ll') -> HullZ ll' p' rr
-        --       Right _ -> case Set.minView rr of
-        --                    Nothing         -> error "HullZ: deleteR with foucs but empty"
-        --                    Just (X p',rr') -> HullZ ll p' rr'
+      EQ -> case Set.minView rr of
+              Nothing         -> case Set.maxView ll of
+                Nothing         -> error "HullZ: delete hull is now empty?"
+                Just (X p',ll') -> HullZ ll' p' rr
+              Just (X p',rr') -> HullZ ll p' rr'
       GT -> HullZ ll p (Set.delete (X q) rr)
 
   insert q (HullZ ll p rr) = case q `compareX` p of
