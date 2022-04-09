@@ -1,7 +1,7 @@
 module Algorithms.Geometry.ConvexHull.Minimalist.Point where
 
-
 import           Control.Lens (view)
+import           Data.Ext
 import           Data.Geometry.Point (xCoord)
 import qualified Data.Geometry.Point as Point
 import           Data.Geometry.Properties
@@ -21,6 +21,9 @@ toPt2 t (toPt3 -> Point.Point3 x y z) = Point.Point2 x (z - t*y)
 
 
 instance (Ord r, Fractional r) => Point (Point.Point 3 r)
+
+instance (Ord r, Fractional r) => Point (Point.Point 3 r :+ p)
+
 
 compareX :: Point point => point -> point -> Ordering
 compareX = comparing (view xCoord . toPt3)

@@ -20,13 +20,14 @@ module Algorithms.Geometry.ConvexHull.Minimalist where
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
+import           Control.Lens (Iso', iso, (^.), view)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Triangle
 import qualified Data.Geometry.Point as Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
+import           Data.Geometry.Triangle
 import qualified Data.List as List
 import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
@@ -62,14 +63,37 @@ lowerHull :: Point point => NonEmpty point -> LowerHull point
 lowerHull = runSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
 
 
-lowerHull' :: Point point => NonEmpty point -> [Triangle 3 () (NumType point)]
+lowerHull' :: (Point point, AsExt point, CoreOf point ~ Point.Point 3 r, ExtraOf point ~ e
+              , r ~ NumType point
+              ) => NonEmpty point -> [Triangle 3 e r]
 lowerHull' = map toTriangle . lowerHull
 
-toTriangle               :: Point point => Three point -> Triangle 3 () (NumType point)
-toTriangle (Three p q r) = Triangle' (toPt3 p) (toPt3 q) (toPt3 r)
+
+toTriangle               :: ( Point point, AsExt point
+                            , CoreOf point ~ Point.Point 3 r
+                            , r ~ NumType point
+                            , ExtraOf point ~ e
+                            )
+                         => Three point -> Triangle 3 e r
+toTriangle (Three p q r) = Triangle (p^._Ext) (q^._Ext) (r^._Ext)
 
 --------------------------------------------------------------------------------
 
+class AsExt t where
+  type CoreOf t
+  type ExtraOf t
+  -- | Convert into a core.
+  _Ext :: Iso' t (CoreOf t :+ ExtraOf t)
+
+instance AsExt (c :+ e) where
+  type CoreOf (c :+ e) = c
+  type ExtraOf (c :+ e) = e
+  _Ext = iso id id
+
+instance AsExt (Point.Point 3 r) where
+  type CoreOf (Point.Point 3 r) = Point.Point 3 r
+  type ExtraOf (Point.Point 3 r) = ()
+  _Ext = iso ext (view core)
 
 --------------------------------------------------------------------------------
 
