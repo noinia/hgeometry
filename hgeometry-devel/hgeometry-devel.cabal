@@ -111,15 +111,17 @@ benchmark benchmarks
   -- main-is: Benchmarks.hs
   main-is: Bench.hs
   type: exitcode-stdio-1.0
-
-  -- other-modules:
+  other-modules: Generate
   build-depends: hgeometry-devel
                , random                  >= 1.2
                , criterion               >= 1.5
 
--- executable hgeometry-devel-prof
---   main-is: Prof.hs
---   hs-source-dirs: benchmark
+executable devel-prof
+  import: devel-setup
+  main-is: Prof.hs
+  hs-source-dirs: benchmark
+  other-modules: Generate
+  build-depends: hgeometry-devel
 
 test-suite hspec
   import: devel-setup

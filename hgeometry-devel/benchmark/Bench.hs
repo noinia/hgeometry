@@ -8,22 +8,16 @@ import           Criterion.Main
 import           Criterion.Types
 import           Data.Ext
 import           Data.Geometry.Point
-import           Data.Geometry.Point.Random
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Proxy
+import           Generate
 import           Ipe
-import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
-
--- import           Data.Semigroup.Foldable
--- import Data.BinaryTree
--- import Data.Geometry.Polygon.Convex
--- import Control.Lens
--- import Data.Geometry.Polygon
--- import           Data.Function (on)
+import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 main :: IO ()
 main = defaultMainWith cfg [ benchmark ]
@@ -32,14 +26,11 @@ main = defaultMainWith cfg [ benchmark ]
 
 benchmark :: Benchmark
 benchmark = bgroup "convexHullBench"
-    [ env (genPts (Proxy :: Proxy Rational) 10000) benchBuild
+    [ env (genPoints @R 10000) benchBuild
     ]
 
 --------------------------------------------------------------------------------
 
-genPts     :: (Ord r, Fractional r, Arbitrary r)
-           => proxy r -> Int -> IO (NonEmpty (Point 3 r :+ ()))
-genPts _ n = generate (NonEmpty.fromList . fmap (ext . unGP) <$> vectorOf n arbitrary)
 
 -- | Benchmark building the convexHull
 benchBuild    :: (Ord r, Fractional r, NFData r
