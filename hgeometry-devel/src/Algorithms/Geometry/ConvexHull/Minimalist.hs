@@ -79,10 +79,24 @@ toTriangle (Three p q r) = Triangle (p^._Ext) (q^._Ext) (r^._Ext)
 
 --------------------------------------------------------------------------------
 
+-- type VoronoiDiagamRep' point = [Three point]
+
+-- voronoiDiagram :: ( Point.ToAPoint point 2 r
+--                   , Ord r, Fractional r
+--                   ) => NonEmpty point -> VoronoiDiagamRep' (Point.Point 3 r)
+-- voronoiDiagram = lowerHull . fmap lift
+--   where
+--     lift p = let Point.Point2 x y = p^.Point.toPoint
+--              in Point.Point3 x y (x*x + y*y)
+
+--------------------------------------------------------------------------------
+
+
+-- | Types that can be decomposed into an Ext
 class AsExt t where
   type CoreOf t
   type ExtraOf t
-  -- | Convert into a core.
+  -- | Convert between this type and an Ext
   _Ext :: Iso' t (CoreOf t :+ ExtraOf t)
 
 instance AsExt (c :+ e) where

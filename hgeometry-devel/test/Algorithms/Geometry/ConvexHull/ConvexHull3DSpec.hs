@@ -52,8 +52,14 @@ specAlg alg = do
   describe "same as naive on manual samples" $ do
     forM_ inputs $ \(msg,pts) ->
       it msg $ (sameAsNaive alg) pts
+  -- modifyMaxSuccess (const 1000) $
+  --   it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
   modifyMaxSuccess (const 1000) $
-    it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
+    it "same as naive quickcheck" $ property $ \pts ->
+       sameAsNaive alg (withIndices (unGP <$> pts))
+
+withIndices    :: NonEmpty a -> NonEmpty (a :+ Int)
+withIndices xs = NonEmpty.zipWith (:+) xs (NonEmpty.fromList [0..])
 
 inputs :: [(String, NonEmpty (Point 3 R :+ Int))]
 inputs =
@@ -79,18 +85,17 @@ inputs =
 
 -- * Some attempt at producing point sets more or less in general position
 
--- uniformIn :: (Arity d) => Vector d r ->
-
-newtype GeneralPos point = GP point deriving (Show,Eq,Ord)
+newtype GeneralPos point = GeneralPos { unGP :: point }
+  deriving newtype (Show,Eq,Ord)
 
 instance (Fractional r, Arity d) => Arbitrary (GeneralPos (Point d r)) where
-  arbitrary = GP
+  arbitrary = GeneralPos
             . fmap (\x -> myUpper * (fromIntegral x / fromIntegral (maxBound @Word64)))
               <$> choose @(Point d Word64) (pure 0,maxBound)
     where
       myUpper = 100
 
-
+-- testPoints = sample
 
 
 
