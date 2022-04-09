@@ -24,7 +24,7 @@ import           Data.Util
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
-
+import           Data.Word
 import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
@@ -81,18 +81,14 @@ inputs =
 
 -- uniformIn :: (Arity d) => Vector d r ->
 
--- newtype GeneralPos point = GP point deriving (Show,Eq,Ord)
+newtype GeneralPos point = GP point deriving (Show,Eq,Ord)
 
--- instance (Fractional r, Arity d) => UniformRange (GeneralPos (Point d r)) where
---   uniformRM (GP (Point low),(GP Point high)) gen =
---     GP . Point . fmap (scaleToRange . fromIntegral)
---       <$> pure (uniformWord64R maxBound gen)
---     where
---       scaleToRange   :: r -> r
---       scaleToRange x = low + (x / (high - low))
-
-
-
+instance (Fractional r, Arity d) => Arbitrary (GeneralPos (Point d r)) where
+  arbitrary = GP
+            . fmap (\x -> myUpper * (fromIntegral x / fromIntegral (maxBound @Word64)))
+              <$> choose @(Point d Word64) (pure 0,maxBound)
+    where
+      myUpper = 100
 
 
 
