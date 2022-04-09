@@ -23,6 +23,7 @@ import           Data.Util
 -- import           Algorithms.Util
 import           Test.Hspec
 import           Test.QuickCheck
+import           Test.QuickCheck.Instances ()
 import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import           Data.Word
 import           System.Random.Stateful
@@ -54,7 +55,6 @@ specAlg alg = do
       it msg $ (sameAsNaive alg) pts
   -- modifyMaxSuccess (const 1000) $
   --   it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
-  modifyMaxSuccess (const 1000) $
     it "same as naive quickcheck" $ property $ \pts ->
        sameAsNaive alg (withIndices (unGP <$> pts))
 
@@ -98,9 +98,12 @@ instance (Fractional r, Arity d) => Arbitrary (GeneralPos (Point d r)) where
 -- testPoints = sample
 
 
+test :: IO [Triangle 3 Int R]
+test = Minimalist.lowerHull' <$> samplePoints
 
 
-
+samplePoints :: IO (NonEmpty (Point 3 R :+ Int))
+samplePoints = (\pts -> withIndices (unGP <$> pts)) . NonEmpty.fromList <$> sample' arbitrary
 
 
 
@@ -143,6 +146,9 @@ instance Arbitrary HullInput where
 
 -- sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
 
+sameAsNaive         :: (Show r, Show p, Ord r, Fractional r)
+                    => (NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r)
+                    -> NonEmpty (Point 3 r :+ p) -> Expectation
 sameAsNaive alg pts = (HalfSpacesOf $ alg pts)
                       `shouldBe`
                       (HalfSpacesOf $ Naive.lowerHull' pts)
