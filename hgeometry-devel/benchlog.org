@@ -1,29 +1,30 @@
 * 3D Convex Hull Minimalist
-**  : Baseline
-frank@Arya# time cabal run devel-prof +RTS -s
+**  : 81bc098d Baseline
+
+frank@Arya# time cabal run devel-prof points_10k.json +RTS -s
 Up to date
-     606,999,576 bytes allocated in the heap
-     157,946,792 bytes copied during GC
-      33,026,104 bytes maximum residency (10 sample(s))
-         614,344 bytes maximum slop
-              64 MiB total memory in use (0 MB lost due to fragmentation)
+     611,106,520 bytes allocated in the heap
+     157,453,712 bytes copied during GC
+      31,823,960 bytes maximum residency (11 sample(s))
+         591,784 bytes maximum slop
+              61 MiB total memory in use (0 MB lost due to fragmentation)
 
                                      Tot time (elapsed)  Avg pause  Max pause
-  Gen  0       565 colls,     0 par    0.124s   0.125s     0.0002s    0.0021s
-  Gen  1        10 colls,     0 par    0.137s   0.137s     0.0137s    0.0412s
+  Gen  0       569 colls,     0 par    0.068s   0.069s     0.0001s    0.0006s
+  Gen  1        11 colls,     0 par    0.076s   0.076s     0.0069s    0.0268s
 
   TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
 
   SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
 
   INIT    time    0.002s  (  0.002s elapsed)
-  MUT     time    0.206s  (  0.756s elapsed)
-  GC      time    0.261s  (  0.261s elapsed)
-  EXIT    time    0.001s  (  0.001s elapsed)
-  Total   time    0.469s  (  1.020s elapsed)
+  MUT     time    0.115s  (  2.039s elapsed)
+  GC      time    0.144s  (  0.145s elapsed)
+  EXIT    time    0.001s  (  0.006s elapsed)
+  Total   time    0.262s  (  2.191s elapsed)
 
-  Alloc rate    2,953,446,718 bytes per MUT second
+  Alloc rate    5,331,533,851 bytes per MUT second
 
-  Productivity  43.8% of total user, 74.1% of total elapsed
+  Productivity  43.8% of total user, 93.1% of total elapsed
 
-cabal run devel-prof +RTS -s  1.00s user 0.04s system 100% cpu 1.027 total
+cabal run devel-prof points_10k.json +RTS -s  2.14s user 0.06s system 99% cpu 2.197 total
