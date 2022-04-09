@@ -409,6 +409,8 @@ testz = let Bridge l r = initialBridge
 --------------------------------------------------------------------------------
 -- * Properties
 
+-- TODO: move to a separate testing module
+
 propIncreasingTime :: (Point point, Hull hull) => Simulation hull point -> Bool
 propIncreasingTime = isIncreasing . fmap (\(t,_,_) -> t) . runSimulation'
 
