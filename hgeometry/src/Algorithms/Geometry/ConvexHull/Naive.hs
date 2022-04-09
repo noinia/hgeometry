@@ -39,8 +39,10 @@ lowerHull' :: forall r p. (Ord r, Fractional r, Show r)
            => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' = filter (not . isVertical) . lowerHullAll
   where
-    isVertical (Triangle p q r) =
-      ccw (p&core %~ projectPoint) (q&core %~ projectPoint) (r&core %~ projectPoint) == CoLinear
+    toPt2   :: Point 3 r :+ p ->  Point 2 r :+ p
+    toPt2 p = p&core %~ projectPoint
+
+    isVertical (Triangle p q r) = ccw (toPt2 p) (toPt2 q) (toPt2 r) == CoLinear
 
 -- | Generates a set of triangles to be used to construct a complete
 -- convex hull. In particular, it may contain vertical triangles.

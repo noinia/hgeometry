@@ -48,6 +48,7 @@ instance (Ord r, Num r) => Ord (AroundStart (LineSegment 2 p r :+ e)) where
   (AroundStart s) `compare` (AroundStart s') =
     ccwCmpAround (s^.core.start.core) (s^.core.end.core)  (s'^.core.end.core)
 
+makeWrapped ''AroundStart
 ----------------------------------------
 
 -- | Assumes that two segments have the same end point
@@ -61,6 +62,8 @@ instance (Ord r, Num r) => Ord (AroundEnd (LineSegment 2 p r :+ e)) where
   -- | ccw ordered around their suposed common end point
   (AroundEnd s) `compare` (AroundEnd s') =
     ccwCmpAround (s^.core.end.core) (s^.core.start.core)  (s'^.core.start.core)
+
+makeWrapped ''AroundEnd
 
 --------------------------------------------------------------------------------
 
@@ -92,6 +95,8 @@ cmpAroundP        :: (Ord r, Num r) => Point 2 r -> LineSegment 2 p r -> LineSeg
 cmpAroundP p s s' = ccwCmpAround p (s^.start.core)  (s'^.start.core)
 
 
+makeWrapped ''AroundIntersection
+
 -- seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
 -- seg2 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
 
@@ -116,6 +121,13 @@ data Associated p r e =
              } deriving stock (Show, Read, Generic, Eq)
 
 makeLenses ''Associated
+
+-- -- | Fold over the segments associated with the intersection.
+-- associatedSegments :: Fold (Associated p r e) (LineSegment 2 p r :+ e)
+-- associatedSegments = startPointOf . folded . _Wrapped <>
+--                      endPointOf   . folded . _Wrapped <>
+--                      interiorTo   . folded . _Wrapped
+
 
 instance Functor (Associated p r) where
   fmap f (Associated ss es is) = Associated (Set.mapMonotonic (g f) ss)

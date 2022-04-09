@@ -420,7 +420,7 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isRight' []    _ _ = False
-    isRight' (x:_) l r = ccw (l^.toPoint) (r^.toPoint) (x^.toPoint) /= CCW
+    isRight' (x:_) l r = ccw l r x /= CCW
 
     go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
                              | isRight' ls l r = go (ne ls) rh
@@ -465,7 +465,7 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
     isLeft' []    _ _ = False
-    isLeft' (x:_) l r = ccw (l^.toPoint) (r^.toPoint) (x^.toPoint) /= CW
+    isLeft' (x:_) l r = ccw l r x /= CW
 
     go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
                              | isLeft' ls l r = go (ne ls) rh
