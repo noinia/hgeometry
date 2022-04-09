@@ -130,6 +130,7 @@ deriving instance (Arity d, Arbitrary r)    => Arbitrary (Point d r)
 deriving instance Arity d                   => Arbitrary1 (Point d)
 deriving instance (Arity d, Hashable r)     => Hashable (Point d r)
 deriving instance (Arity d, Random r)       => Random (Point d r)
+deriving instance (Bounded r, Arity d)      => Bounded (Point d r)
 
 instance (Arity d, UniformRange r) => UniformRange (Point d r) where
   uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen

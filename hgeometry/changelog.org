@@ -4,17 +4,21 @@
 
 ** 0.15
 
-- Using the new ~AsA~ mechanism for ~ccw~; this function now accepts
-  both ~Point 2 r~, as well as ~Point 2 r :+ extra~. This means the ~ccw'~
-  function was removed as it is now no longer useful; just use ~ccw~
-  directly.
 - Export the ~ToAPoint~ and ~AsAPoint~ classes
 - ~R1~ to ~R4~ instances for ~Point~, so you can now also write ~p^._x~
   rather than ~p^.xCoord~ like, and also added a ~wCoord~ and
   ~wComponent~ lens to access the forth coordinate resp component of a
   point and vector. Also exported a ~Point4~ pattern.
+- Using the new ~ToAPoint~ classes for ~ccw~; this function now
+  accepts anything of the ~ToAPoint~ class, so in particular both
+  ~Point 2 r~ and  ~Point 2 r :+ extra~. This means the ~ccw'~
+  function was removed as it is now no longer useful; just use ~ccw~
+  directly.
 - Generalized ~lowerTangent'~ and ~upperTangent'~ functions in
   Polygon.Convex to use the ~ToAPoint~ classes.
+- Added ~Uniform~, ~UniformRange~, and ~Bounded~ instances for
+  ~Vector~ and ~Point~. This thus bumps the minimum required version
+  of random to 1.2.
 
 ** 0.14
 

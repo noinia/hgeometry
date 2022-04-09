@@ -65,6 +65,10 @@ instance (UniformRange r, Arity d) => UniformRange (Vector d r) where
 instance (Uniform r, Arity d) => Uniform (Vector d r) where
   uniformM gen = FV.replicateM (uniformM gen)
 
+instance (Bounded r, Arity d) => Bounded (Vector d r) where
+  minBound = pure minBound
+  maxBound = pure maxBound
+
 
 -- | 'isScalarmultipleof u v' test if v is a scalar multiple of u.
 --
