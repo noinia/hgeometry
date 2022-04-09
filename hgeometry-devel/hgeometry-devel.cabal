@@ -117,11 +117,16 @@ benchmark benchmarks
                , random                  >= 1.2
                , criterion               >= 1.5
 
+executable generate-points
+  import: devel-setup
+  main-is: Generate.hs
+  hs-source-dirs: benchmark
+  build-depends: hgeometry-devel
+
 executable devel-prof
   import: devel-setup
   main-is: Prof.hs
   hs-source-dirs: benchmark
-  other-modules: Generate
   build-depends: hgeometry-devel
 
 test-suite hspec
