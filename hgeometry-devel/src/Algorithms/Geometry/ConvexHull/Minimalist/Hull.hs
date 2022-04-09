@@ -78,6 +78,8 @@ hullAt t = PolyLine.fromPoints . fmap (ext . toPt2 t) . toList
 data Bridge hull point = Bridge (hull point) (hull point)
                        deriving (Show,Eq)
 
+type instance NumType (Bridge hull point) = NumType point
+
 --------------------------------------------------------------------------------
 
 newtype X point = X { unX :: point } deriving newtype Show
@@ -91,6 +93,9 @@ instance Point point => Ord (X point) where
 -- | hull zipper
 data HullZ point = HullZ (Set (X point)) point (Set (X point))
                  deriving (Eq)
+
+type instance NumType (HullZ point) = NumType point
+
 
 instance Show point => Show (HullZ point) where
   showsPrec d (HullZ ll p rr) = showParen (d > app_prec) $ showString "HullZ "
@@ -156,7 +161,7 @@ instance Hull HullZ where
 -- | Computes the bridge of the two given hulls
 bridgeOf       :: (Hull hull, Point point)
                => hull point -> hull point -> Bridge hull point
-bridgeOf l0 r0 = go (goLeftMost l0) (goRightMost r0)
+bridgeOf l0 r0 = go (goRightMost l0) (goLeftMost r0)
     where
       go l r | isRight' (succOfF r) l r = go l          (goRight' r)
              | isRight' (predOfF l) l r = go (goLeft' l) r
@@ -170,7 +175,7 @@ bridgeOf l0 r0 = go (goLeftMost l0) (goRightMost r0)
 
       toPt h = toPt2 t (focus h)
 
-      t = -100000000 -- FIXME: hack
+      t = -1000 -- 0 -- 1 ---10 -- FIXME: hack
 
 
 --------------------------------------------------------------------------------

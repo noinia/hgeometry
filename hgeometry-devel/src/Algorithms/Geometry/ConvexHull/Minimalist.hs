@@ -2,6 +2,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.ConvexHull.Minimalist
@@ -21,10 +23,11 @@ import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.LineSegment
 import qualified Data.Geometry.Point as Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
-import           Data.Geometry.LineSegment
 import qualified Data.List as List
 import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
@@ -96,6 +99,8 @@ deriving instance (Show (Time point), Show point, Show (hull point))
                   => Show (Simulation hull point)
 deriving instance (Eq (Time point), Eq point, Eq (hull point))
                   => Eq   (Simulation hull point)
+
+type instance NumType (Simulation hull point) = NumType point
 
 -- | Creates a singleton simulation
 simulation   :: forall hull point. Hull hull => point -> Simulation hull point
@@ -173,6 +178,7 @@ data NextEvent point = None
 
 deriving instance (Show (Time point), Show point) => Show (NextEvent point)
 deriving instance (Eq (Time point), Eq point)     => Eq   (NextEvent point)
+
 
 -- | Computes the first event that will happen.
 firstEvent              :: Ord (Time point)
@@ -314,7 +320,7 @@ myPoints = NonEmpty.fromList
            , Point.Point3 1 1 10
            , Point.Point3 5 5 0
            , Point.Point3 12 1 1
-           , Point.Point3 22 20 1
+           -- , Point.Point3 22 20 1
            ]
 
 -- test :: ConvexHull _
@@ -323,19 +329,31 @@ test = mapM_ print $ fmap (\(t,h,_) -> (t,h)) $ lowerHull myPoints
 
 
 theLeft :: Simulation HullZ (Point.Point 3 R)
-theLeft = simulate . NonEmpty.fromList $
-           [ Point.Point3 0 10 20
-           , Point.Point3 1 1 10
-           ]
+theLeft = simulate theLeftP
+
+theLeftP = NonEmpty.fromList [ Point.Point3 0 10 20
+                             , Point.Point3 1 1 10
+                             ]
+
+
+
+
+
 
 theRight :: Simulation HullZ (Point.Point 3 R)
-theRight = simulate . NonEmpty.fromList $
-           [ Point.Point3 5 5 0
-           -- , Point.Point3 12 1 1
+theRight = simulate $ theRightP
+theRightP = NonEmpty.fromList [ Point.Point3 5 5 0
+           , Point.Point3 12 1 1
            ]
 
 testMerge = runMerge theLeft theRight
 
+initialBridge = bridgeOf (_initialHull theLeft) (_initialHull theRight)
+
+testz :: Bridge HullZ _
+testz = let Bridge l r = initialBridge
+            [e] = bridgeEventL l (focus r)
+        in applyBE (Left e) initialBridge
 
 --------------------------------------------------------------------------------
 -- * Properties
@@ -354,6 +372,13 @@ propIncreasingEvents = maybe True isIncreasing . NonEmpty.nonEmpty . fmap eventT
 
 propAllHullsConvex :: (Point point, Hull hull) => Simulation hull point -> Bool
 propAllHullsConvex = undefined
+
+
+allLeftTurnsAt   :: (Hull hull, Point point) => Time point -> hull point -> Bool
+allLeftTurnsAt t = go . fmap (toPt2 t) . toList
+  where
+    go (p:q:r:rest) = Point.ccw p q r == Point.CCW && go (q:r:rest)
+    go _            = True
 
 --------------------------------------------------------------------------------
 
@@ -381,25 +406,25 @@ computeHullAt t = go . runSimulation'
 renderIpe :: ( Point point
              , Hull hull
              , IpeWriteText (NumType point)
-             ) => FilePath -> Simulation hull point -> IO ()
+             ) => FilePath -> (Simulation hull point, NonEmpty point) -> IO ()
 renderIpe fp = writeIpeFile fp . render
-
-
 
 render :: ( Point point
           , Hull hull
           , IpeWriteText (NumType point)
-          ) => Simulation hull point -> IpeFile (NumType point)
-render = ipeFile . fmap (\(mt,h,_) -> fromMaybe emptyPage $ do t  <- mt
-                                                               pl <- hullAt t h
-                                                               pure $ draw t pl
-                        ) . runSimulation'
+          ) => (Simulation hull point, NonEmpty point) -> IpeFile (NumType point)
+render (s,pts) = ipeFile . fmap (\(mt,h,_) -> fromMaybe emptyPage $
+                                              do t  <- mt
+                                                 pl <- hullAt t h
+                                                 pure $ draw t pl (toPt2 t <$> pts)
+                        ) . runSimulation' $ s
 
-
-draw      :: (IpeWriteText r, Num r) => r -> PolyLine.PolyLine 2 () r -> IpePage r
-draw t pl = fromContent [ iO $ ipeLabel (fromMaybe "?" (ipeWriteText t) :+ Point.origin)
-                        , iO $ defIO pl
-                        ]
+draw          :: (IpeWriteText r, Num r, Foldable f, Functor f)
+              => r -> PolyLine.PolyLine 2 () r
+              -> f (Point.Point 2 r) -> IpePage r
+draw t pl pts = fromContent $ [ iO $ ipeLabel (fromMaybe "?" (ipeWriteText t) :+ Point.origin)
+                              , iO $ defIO pl
+                              ] <> F.toList (fmap (iO . defIO) pts)
 
 --------------------------------------------------------------------------------
 
@@ -407,23 +432,27 @@ renderMergeIpe        :: ( Point point
                          , Hull hull
                          , IpeWriteText (NumType point)
                          ) => FilePath
-                      -> Simulation hull point
-                      -> Simulation hull point -> IO ()
+                      -> (Simulation hull point, NonEmpty point)
+                      -> (Simulation hull point, NonEmpty point) -> IO ()
 renderMergeIpe fp l r = writeIpeFile fp $ renderMerge l r
 
 renderMerge     :: ( Point point
                    , Hull hull
                    , IpeWriteText (NumType point)
                    )
-                => Simulation hull point
-                -> Simulation hull point
+                => (Simulation hull point, NonEmpty point)
+                -> (Simulation hull point, NonEmpty point)
                 -> IpeFile (NumType point)
-renderMerge l r = ipeFile $ initialHull :| simPages
+renderMerge (l,lp) (r,rp) = ipeFile $ initialHull :| simPages
   where
      (h0,evs) = runMerge l r
+     initialT = -1000
      initialHull = fromMaybe emptyPage $ do let t = -1000
                                             pl <- hullAt t h0
-                                            pure $ draw t pl
+                                            pure $ draw t pl (toPt2 t <$> (lp <> rp))
+
+
+
      simPages = flip map evs $ \(e,Bridge l' r') ->
                   fromMaybe emptyPage $ do let t = eventTime e
                                            pl <- hullAt t l'
@@ -445,3 +474,29 @@ draw' t pl pr s = fromContent
   ]
 
 -- (hull point, [(Event point, Bridge hull point)])
+
+
+class RenderAt t where
+  renderAt :: NumType t -> t -> IpeObject (NumType t)
+
+instance RenderAt (Point.Point 3 R) where
+  renderAt t = iO . defIO . toPt2 t
+
+instance (Point point, RenderAt point) => RenderAt (HullZ point) where
+  renderAt t h = case hullAt t h of
+                   Nothing -> renderAt t (focus h)
+                   Just pl -> iO . defIO $ pl
+
+instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ NumType point
+         ) => RenderAt (Bridge hull point) where
+  renderAt t (Bridge l r) = iO $ ipeGroup [ renderAt t l
+                                          , renderAt t r
+                                          , iO $ defIO seg ! attr SStroke red
+                                          ]
+    where
+      seg = ClosedLineSegment (ext $ toPt2 t (focus l)) (ext $ toPt2 t (focus r))
+
+
+instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ NumType point
+         ) => RenderAt (Simulation hull point) where
+  renderAt t = renderAt t . computeHullAt t
