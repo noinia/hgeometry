@@ -37,20 +37,21 @@ import           Control.Lens
 import           Control.Monad
 import           Data.Aeson
 import           Data.Ext
-import qualified Data.Foldable                   as F
+import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector            as Vec
+import qualified Data.Geometry.Vector as Vec
 import           Data.Hashable
-import           Data.List                       (intersperse)
-import           Data.Ord                        (comparing)
+import           Data.List (intersperse)
+import           Data.Ord (comparing)
 import           Data.Proxy
-import           GHC.Generics                    (Generic)
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           System.Random                   (Random (..))
-import           Test.QuickCheck                 (Arbitrary, Arbitrary1)
-import           Text.Read                       (Read (..), readListPrecDefault)
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           Test.QuickCheck (Arbitrary, Arbitrary1)
+import           Text.Read (Read (..), readListPrecDefault)
 
 
 --------------------------------------------------------------------------------
@@ -77,7 +78,9 @@ import           Text.Read                       (Read (..), readListPrecDefault
 -- 3
 -- >>> let f (Point3 x y z) = z in f (Point $ Vector3 1 2 3)
 -- 3
-newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
+newtype Point d r = Point { toVec :: Vector d r }
+  deriving (Generic)
+
 
 instance (Show r, Arity d) => Show (Point d r) where
   showsPrec = liftShowsPrec showsPrec showList
@@ -115,19 +118,25 @@ instance (Arity d) => Read1 (Point d) where
 --               Just p -> pure p
 --               _      -> pfail
 
-deriving instance (Eq r, Arity d)        => Eq (Point d r)
-deriving instance Arity d                => Eq1 (Point d)
-deriving instance (Ord r, Arity d)       => Ord (Point d r)
-deriving instance Arity d                => Functor (Point d)
-deriving instance Arity d                => Applicative (Point d)
-deriving instance Arity d                => Foldable (Point d)
-deriving instance Arity d                => Traversable (Point d)
-deriving instance (Arity d, NFData r)    => NFData (Point d r)
-deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
-deriving instance Arity d                => Arbitrary1 (Point d)
-deriving instance (Arity d, Hashable r)  => Hashable (Point d r)
-deriving instance (Arity d, Random r)    => Random (Point d r)
+deriving instance (Eq r, Arity d)           => Eq (Point d r)
+deriving instance Arity d                   => Eq1 (Point d)
+deriving instance (Ord r, Arity d)          => Ord (Point d r)
+deriving instance Arity d                   => Functor (Point d)
+deriving instance Arity d                   => Applicative (Point d)
+deriving instance Arity d                   => Foldable (Point d)
+deriving instance Arity d                   => Traversable (Point d)
+deriving instance (Arity d, NFData r)       => NFData (Point d r)
+deriving instance (Arity d, Arbitrary r)    => Arbitrary (Point d r)
+deriving instance Arity d                   => Arbitrary1 (Point d)
+deriving instance (Arity d, Hashable r)     => Hashable (Point d r)
+deriving instance (Arity d, Random r)       => Random (Point d r)
+deriving instance (Bounded r, Arity d)      => Bounded (Point d r)
 
+instance (Arity d, UniformRange r) => UniformRange (Point d r) where
+  uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
+
+instance (Arity d, Uniform r) => Uniform (Point d r) where
+  uniformM gen = Point <$> uniformM gen
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d

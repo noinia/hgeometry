@@ -23,21 +23,22 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , xComponent, yComponent, zComponent, wComponent
                            ) where
 
-import           Control.Applicative               (liftA2)
-import           Control.Lens                      (Lens')
+import           Control.Applicative (liftA2)
+import           Control.Lens (Lens')
 import           Control.Monad.State
-import qualified Data.Foldable                     as F
+import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Vector.VectorFixed  (C (..))
-import qualified Data.Vector.Fixed                 as FV
+import           Data.Geometry.Vector.VectorFixed (C (..))
+import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
-import           Linear.Affine                     (Affine (..), distanceA, qdA)
-import           Linear.Metric                     (dot, norm, quadrance, signorm)
-import           Linear.Vector                     as LV hiding (E (..))
-import           System.Random                     (Random (..))
-import           Test.QuickCheck                   (Arbitrary (..), Arbitrary1 (..), infiniteList,
-                                                    infiniteListOf)
+import           Linear.Affine (Affine (..), distanceA, qdA)
+import           Linear.Metric (dot, norm, quadrance, signorm)
+import           Linear.Vector as LV hiding (E (..))
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           Test.QuickCheck (Arbitrary (..), Arbitrary1 (..), infiniteList,
+                                   infiniteListOf)
 
 --------------------------------------------------------------------------------
 
@@ -57,6 +58,17 @@ instance (Random r, Arity d) => Random (Vector d r) where
   randomR (lows,highs) g0 = flip runState g0 $
                             FV.zipWithM (\l h -> state $ randomR (l,h)) lows highs
   random g0 = flip runState g0 $ FV.replicateM (state random)
+
+instance (UniformRange r, Arity d) => UniformRange (Vector d r) where
+  uniformRM (lows,highs) gen = FV.zipWithM (\l h -> uniformRM (l,h) gen) lows highs
+
+instance (Uniform r, Arity d) => Uniform (Vector d r) where
+  uniformM gen = FV.replicateM (uniformM gen)
+
+instance (Bounded r, Arity d) => Bounded (Vector d r) where
+  minBound = pure minBound
+  maxBound = pure maxBound
+
 
 -- | 'isScalarmultipleof u v' test if v is a scalar multiple of u.
 --
