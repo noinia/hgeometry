@@ -114,7 +114,8 @@ benchmark benchmarks
 
   -- other-modules:
   build-depends: hgeometry-devel
-               , random              >= 1.2
+               , random                  >= 1.2
+               , criterion               >= 1.5
 
 -- executable hgeometry-devel-prof
 --   main-is: Prof.hs
@@ -134,5 +135,6 @@ test-suite hspec
   build-depends: hgeometry-devel
                , hspec                   >= 2.7
                , hspec-core
-               , QuickCheck, quickcheck-instances
+               , QuickCheck
+               , quickcheck-instances
                , random

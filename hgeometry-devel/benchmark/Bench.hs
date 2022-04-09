@@ -1,22 +1,20 @@
 module Main where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as CH2D
--- import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
-
--- import           Benchmark.Util
 import           Control.DeepSeq
-import           Criterion.Main
 import           Control.Lens
+import           Criterion.Main
 import           Criterion.Types
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Point.Random
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy
+import           Ipe
 import           Test.QuickCheck
-
-import Data.Geometry.Ipe
+import           Test.QuickCheck.Instances ()
 
 -- import           Data.Semigroup.Foldable
 -- import Data.BinaryTree
@@ -39,8 +37,9 @@ benchmark = bgroup "convexHullBench"
 
 --------------------------------------------------------------------------------
 
-genPts     :: (Ord r, Arbitrary r) => proxy r -> Int -> IO (NonEmpty (Point 3 r :+ ()))
-genPts _ n = generate (NonEmpty.fromList . fmap unGP <$> vectorOf n arbitrary)
+genPts     :: (Ord r, Fractional r, Arbitrary r)
+           => proxy r -> Int -> IO (NonEmpty (Point 3 r :+ ()))
+genPts _ n = generate (NonEmpty.fromList . fmap (ext . unGP) <$> vectorOf n arbitrary)
 
 -- | Benchmark building the convexHull
 benchBuild    :: (Ord r, Fractional r, NFData r
@@ -55,7 +54,7 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
 
     build pts = [ bench "sort"                 $ nf NonEmpty.sort pts
                 , bench "2D CH"                $ nf ch2d pts
-                , bench "3D CH"                $ nf DivideAndConquer.lowerHull' pts
+                -- , bench "3D CH"                $ nf DivideAndConquer.lowerHull' pts
                 , bench "3D CH Minim"          $ nf Minimalist.lowerHull' pts
                 -- , bench "Div&Conq Old"         $ nf oldDivAndConquer            pts
                 ]
