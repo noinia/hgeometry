@@ -28,6 +28,7 @@ minInftyT = -1000000000 -- FIXME
 
 --------------------------------------------------------------------------------
 
+-- | class modelling a zipper on a sequence type
 class Zipper zipper elem where
   -- | Creates a singleton zipper
   singleton :: elem -> zipper elem
@@ -45,7 +46,9 @@ class Zipper zipper elem where
   goLeftMost h = maybe h goLeftMost $ goLeft h
   {-# MINIMAL singleton, focus, goLeft, goRight #-}
 
-class (Zipper hull point, Point point) => SearchableZipper (hull :: Type -> Type) point where
+-- | Zipper that also supports prececessor/successor search and
+-- insertions and deletions at arbitrary positions.
+class (Zipper hull point, Point point) => RandomAccessZipper (hull :: Type -> Type) point where
   predOf :: Point point => point -> hull point -> Maybe point
   succOf :: Point point => point -> hull point -> Maybe point
 
@@ -65,7 +68,7 @@ class (Zipper hull point, Point point) => SearchableZipper (hull :: Type -> Type
   succOfF h = succOf (focus h) h
   {-# MINIMAL predOf, succOf, delete, insert #-}
 
-class (SearchableZipper hull point, Point point) => Hull (hull :: Type -> Type) point where
+class (RandomAccessZipper hull point, Point point) => Hull (hull :: Type -> Type) point where
   fromBridge :: Point point => Bridge hull point -> hull point
 
 
@@ -130,7 +133,7 @@ instance Point point => Zipper HullZ point where
     Nothing        -> h
     Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
 
-instance Point point => SearchableZipper HullZ point where
+instance Point point => RandomAccessZipper HullZ point where
   succOf q (HullZ ll p rr) = case q `compareX` p of
                                LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
                                _  -> unX <$> Set.lookupGT (X q) rr
