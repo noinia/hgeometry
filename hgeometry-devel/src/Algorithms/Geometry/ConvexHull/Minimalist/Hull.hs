@@ -90,7 +90,14 @@ data Bridge hull point = Bridge (hull point) (hull point)
 type instance NumType (Bridge hull point) = NumType point
 
 --------------------------------------------------------------------------------
+-- * Implementation of a Hull using Data.Set
 
+-- | The Hull data type
+data HullSet point = HullSet (Set (X point)) point (Set (X point))
+
+type instance NumType (HullSet point) = NumType point
+
+-- | Data type so that we can compare by the x-coordinate of a point
 newtype X point = X { unX :: point } deriving newtype Show
 
 instance Point point => Eq (X point) where
@@ -98,70 +105,65 @@ instance Point point => Eq (X point) where
 instance Point point => Ord (X point) where
   (X p) `compare` (X q) = compareX p q
 
--- | hull zipper
-
-data HullZ point = HullZ (Set (X point)) point (Set (X point))
-
-type instance NumType (HullZ point) = NumType point
 
 
-instance Show point => Show (HullZ point) where
-  showsPrec d (HullZ ll p rr) = showParen (d > app_prec) $ showString "HullZ "
+
+instance Show point => Show (HullSet point) where
+  showsPrec d (HullSet ll p rr) = showParen (d > app_prec) $ showString "HullSet "
       .  showList (Set.toAscList ll)
       .  showString " " .  showsPrec (app_prec+1) p .  showString " "
       .  showList (Set.toAscList rr)
     where app_prec = 10
 
-instance Point point => Semigroup (HullZ point) where
+instance Point point => Semigroup (HullSet point) where
   l <> r = fromBridge $ bridgeOf l r
 
-instance Point point => Zipper HullZ point where
-  singleton p = HullZ Set.empty p Set.empty
-  focus (HullZ _ p _) = p
+instance Point point => Zipper HullSet point where
+  singleton p = HullSet Set.empty p Set.empty
+  focus (HullSet _ p _) = p
 
-  goLeft (HullZ ll p rr) =
-    (\(X p',ll') -> HullZ ll' p' (Set.insert (X p) rr)) <$> Set.maxView ll
+  goLeft (HullSet ll p rr) =
+    (\(X p',ll') -> HullSet ll' p' (Set.insert (X p) rr)) <$> Set.maxView ll
 
-  goRight (HullZ ll p rr) =
-    (\(X p',rr') -> HullZ (Set.insert (X p) ll) p' rr') <$> Set.minView rr
+  goRight (HullSet ll p rr) =
+    (\(X p',rr') -> HullSet (Set.insert (X p) ll) p' rr') <$> Set.minView rr
 
-  goRightMost h@(HullZ ll p rr) = case Set.maxView rr of
+  goRightMost h@(HullSet ll p rr) = case Set.maxView rr of
     Nothing        -> h
-    Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
+    Just (X r,rr') -> HullSet (ll <> Set.insert (X p) rr') r Set.empty
 
-  goLeftMost h@(HullZ ll p rr) = case Set.minView ll of
+  goLeftMost h@(HullSet ll p rr) = case Set.minView ll of
     Nothing        -> h
-    Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
+    Just (X l,ll') -> HullSet Set.empty l (ll' <> Set.insert (X p) rr)
 
-instance Point point => RandomAccessZipper HullZ point where
-  succOf q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
-                               _  -> unX <$> Set.lookupGT (X q) rr
+instance Point point => RandomAccessZipper HullSet point where
+  succOf q (HullSet ll p rr) = case q `compareX` p of
+                                 LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
+                                 _  -> unX <$> Set.lookupGT (X q) rr
 
-  predOf q (HullZ ll p rr) = case q `compareX` p of
-                               GT -> (unX <$> Set.lookupLT (X q) rr) <|> Just p
-                               _  -> unX <$> Set.lookupLT (X q) ll
+  predOf q (HullSet ll p rr) = case q `compareX` p of
+                                 GT -> (unX <$> Set.lookupLT (X q) rr) <|> Just p
+                                 _  -> unX <$> Set.lookupLT (X q) ll
 
-  delete q (HullZ ll p rr) = case q `compareX` p of
-      LT -> HullZ (Set.delete (X q) ll) p rr
+  delete q (HullSet ll p rr) = case q `compareX` p of
+      LT -> HullSet (Set.delete (X q) ll) p rr
       EQ -> case Set.minView rr of
               Nothing         -> case Set.maxView ll of
-                Nothing         -> error "HullZ: delete hull is now empty?"
-                Just (X p',ll') -> HullZ ll' p' rr
-              Just (X p',rr') -> HullZ ll p' rr'
-      GT -> HullZ ll p (Set.delete (X q) rr)
+                Nothing         -> error "HullSet: delete hull is now empty?"
+                Just (X p',ll') -> HullSet ll' p' rr
+              Just (X p',rr') -> HullSet ll p' rr'
+      GT -> HullSet ll p (Set.delete (X q) rr)
 
-  insert q (HullZ ll p rr) = case q `compareX` p of
-                               LT -> HullZ (Set.insert (X q) ll) p rr
-                               EQ -> error "HullZ: trying to insert existing point"
-                               GT -> HullZ ll p (Set.insert (X q) rr)
+  insert q (HullSet ll p rr) = case q `compareX` p of
+                                 LT -> HullSet (Set.insert (X q) ll) p rr
+                                 EQ -> error "HullSet: trying to insert existing point"
+                                 GT -> HullSet ll p (Set.insert (X q) rr)
 
+  succOfF (HullSet _ _ rr) = unX <$> Set.lookupMin rr
+  predOfF (HullSet ll _ _) = unX <$> Set.lookupMax ll
 
-  succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
-  predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
-
-instance Point point => Hull HullZ point where
-  fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
+instance Point point => Hull HullSet point where
+  fromBridge (Bridge (HullSet ll l _) (HullSet _ r rr)) = HullSet ll l (Set.insert (X r) rr)
 
 
 -- | Computes the bridge of the two given hulls
@@ -184,12 +186,12 @@ bridgeOf l0 r0 = go (goRightMost l0) (goLeftMost r0)
 
 --------------------------------------------------------------------------------
 
-  -- goLeft (HullZ ll p rr) = case Seq.viewr ll of
+  -- goLeft (HullSet ll p rr) = case Seq.viewr ll of
   --                            EmptyR   -> error "cannot go left"
-  --                            ll' :> l -> HullZ ll' l (p :<| rr)
-  -- goRight (HullZ ll p rr) = case Seq.viewl rr of
+  --                            ll' :> l -> HullSet ll' l (p :<| rr)
+  -- goRight (HullSet ll p rr) = case Seq.viewl rr of
   --                             EmptyL    -> error "cannot go right"
-  --                             r :< rr' -> HullZ (ll :|> p) r rr'
+  --                             r :< rr' -> HullSet (ll :|> p) r rr'
 
 
 --------------------------------------------------------------------------------

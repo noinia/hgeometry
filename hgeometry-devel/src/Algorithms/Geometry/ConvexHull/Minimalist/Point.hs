@@ -28,6 +28,11 @@ instance (Ord r, Fractional r) => Point (Point.Point 3 r :+ p)
 compareX :: Point point => point -> point -> Ordering
 compareX = comparing (view xCoord . toPt3)
 
+-- compareX' :: forall point r.
+--              (Point.ToAPoint point 3 r, Ord r) => point -> point -> Ordering
+-- compareX' = comparing (view xCoord . id @(Point.Point 3 r) . view Point.toPoint)
+
+
 --------------------------------------------------------------------------------
 
 type Time point = NumType point

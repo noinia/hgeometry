@@ -58,7 +58,7 @@ type LowerHull point = [Three point]
 -- pre: the points are assumed to be in general position, i.e.
 -- no four coplanar points, all unique x,y,z coordinates.
 lowerHull :: Point point => NonEmpty point -> LowerHull point
-lowerHull = runSimulation . divideAndConquer1 (simulation @HullZ). NonEmpty.sortBy cmpXYZ
+lowerHull = runSimulation . divideAndConquer1 (simulation @HullSet). NonEmpty.sortBy cmpXYZ
 
 
 lowerHull' :: (Point point, AsExt point, CoreOf point ~ Point.Point 3 r, ExtraOf point ~ e
