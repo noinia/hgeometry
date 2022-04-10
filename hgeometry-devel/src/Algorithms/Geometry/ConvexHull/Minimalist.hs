@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.ConvexHull.Minimalist
@@ -22,10 +23,8 @@ import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens (Iso', iso, (^.), view)
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.Point as Point
-import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
@@ -38,13 +37,10 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 
-import qualified Data.Text as Text
 import           Ipe
 import           Ipe.Color
-import           Debug.Trace
-
+-- import           Debug.Trace
 import           Data.RealNumber.Rational
-
 
 --------------------------------------------------------------------------------
 
@@ -81,10 +77,10 @@ toTriangle (Three p q r) = Triangle (p^._Ext) (q^._Ext) (r^._Ext)
 
 -- type VoronoiDiagamRep' point = [Three point]
 
--- voronoiDiagram :: ( Point.ToAPoint point 2 r
+-- delaunayTriangulation :: ( Point.ToAPoint point 2 r
 --                   , Ord r, Fractional r
 --                   ) => NonEmpty point -> VoronoiDiagamRep' (Point.Point 3 r)
--- voronoiDiagram = lowerHull . fmap lift
+-- delaunayTriangulation = lowerHull . fmap lift
 --   where
 --     lift p = let Point.Point2 x y = p^.Point.toPoint
 --              in Point.Point3 x y (x*x + y*y)
@@ -283,7 +279,6 @@ runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
       events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
       merge = mergeSortedListsBy (comparing eventTime')
 
-
 --------------------------------------------------------------------------------
 
 -- | Run the simulation, producing the appropriate triangles
@@ -298,25 +293,26 @@ handle (h,out) e = (apply e h, t <> out)
   where
     t = let p = eventPoint e
         in maybeToList $ (\l r -> Three l p r) <$> predOf p h <*> succOf p h
+{-# HLINT ignore "Avoid lambda using `infix`" #-}
 
 ----------------------------------------
 
 -- | runs the entire simulation, prdoducing all intermediate results
--- in increasing order of time.
+-- in increasing order of time, as well as the output
 runSimulation'                 :: (Point point, Hull hull)
                                => Simulation hull point
                                -> NonEmpty ( Maybe (Time point), hull point , LowerHull point)
 runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
-                                                  (Nothing :| ((Just . eventTime) <$> events))
+                                                  (Nothing :| (Just . eventTime <$> events))
                                . NonEmpty.fromList $ List.scanl handle (h0,[]) events
 
-runSimulation''                 :: (Point point, Hull hull)
-                               => Simulation hull point
-                               -> NonEmpty ( Maybe (Time point), hull point)
+-- | runs the entire simulation, prdoducing all intermediate results
+-- in increasing order of time.
+runSimulation'' :: (Point point, Hull hull)
+                => Simulation hull point -> NonEmpty ( Maybe (Time point), hull point)
 runSimulation'' = fmap (\(t,h,_) -> (t,h)) . runSimulation'
 
 --------------------------------------------------------------------------------
-
 
 -- | Comparator for the points. We sort the points lexicographically
 -- on increasing x-coordiante, decreasing y-coordinate, and increasing
@@ -364,62 +360,11 @@ simulate = divideAndConquer1 simulation . NonEmpty.sortBy cmpXYZ
 hulls :: Point point => NonEmpty point -> HullZ point
 hulls = divideAndConquer1 singleton . NonEmpty.sortBy cmpXYZ
 
---------------------------------------------------------------------------------
-
-
-
-
 
 --------------------------------------------------------------------------------
-
-myPoints :: NonEmpty (Point.Point 3 R)
-myPoints = NonEmpty.fromList
-           [ Point.Point3 0 10 20
-           , Point.Point3 1 1 10
-           , Point.Point3 5 5 0
-           , Point.Point3 12 1 1
-           , Point.Point3 22 20 1
-           ]
-
-
-
-
-
-
--- test :: LowerHull _
-test = lowerHull myPoints
-
-
-
-theLeft :: Simulation HullZ (Point.Point 3 R)
-theLeft = simulate theLeftP
-
-theLeftP = NonEmpty.fromList [ Point.Point3 0 10 20
-                             , Point.Point3 1 1 10
-                             ]
-
-
-
-
-
-
-theRight :: Simulation HullZ (Point.Point 3 R)
-theRight = simulate $ theRightP
-theRightP = NonEmpty.fromList [ Point.Point3 5 5 0
-           , Point.Point3 12 1 1
-           ]
-
-testMerge = runMerge theLeft theRight
-
-initialBridge = bridgeOf (_initialHull theLeft) (_initialHull theRight)
-
-testz :: Bridge HullZ _
-testz = let Bridge l r = initialBridge
-            [e] = bridgeEventL l (focus r)
-        in applyBE (Left e) initialBridge
-
+-----  END OF THE Main implementation
 --------------------------------------------------------------------------------
--- * Properties
+-- * Properties to test
 
 -- TODO: move to a separate testing module
 
@@ -447,15 +392,6 @@ allLeftTurnsAt t = go . fmap (toPt2 t) . toList
 
 --------------------------------------------------------------------------------
 
-
-testHull :: HullZ _
-testHull = hulls myPoints
-
-
-testSim :: Simulation HullZ _
-testSim = simulate buggyPoints
-
-
 -- | Run a simulation up to a certain time to compute the hull at that time.
 computeHullAt   :: (Hull hull, Point point)
                 => Time point -> Simulation hull point -> hull point
@@ -467,6 +403,7 @@ computeHullAt t = go . runSimulation'
                                                     | otherwise   -> h
 
 --------------------------------------------------------------------------------
+-- * Drawing stuff to help debugging
 
 renderIpe :: ( Point point
              , Hull hull
@@ -489,7 +426,6 @@ render (s,pts) = ipeFile . fmap (\(t,h,_) -> fromContent [ drawTime t
                            )
                  . runSimulation' $ s
 
---------------------------------------------------------------------------------
 
 renderMergeIpe        :: ( Point point
                          , Hull hull
@@ -522,7 +458,7 @@ renderMerge (l,lp) (r,rp) = ipeFile $ initialHull :| simPages
                                                        ]
 
 drawTime   :: (Num r, IpeWriteText r) => Maybe r -> IpeObject r
-drawTime t = iO . ipeLabel $ (fromMaybe "?" $ ipeWriteText =<< t) :+ Point.origin
+drawTime t = iO . ipeLabel $ fromMaybe "?" (ipeWriteText =<< t) :+ Point.origin
 
 renderAt' :: (RenderAt t, Num (NumType t)) => Maybe (NumType t) -> t -> IpeObject (NumType t)
 renderAt' = \case
@@ -560,21 +496,46 @@ instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ 
   renderAt t = renderAt t . computeHullAt t
 
 
-
-
-
-
-
-
 --------------------------------------------------------------------------------
--- bug?
 
-buggyPoints :: NonEmpty (Point.Point 3 R)
-buggyPoints =  NonEmpty.fromList
-               [ Point.Point3 48.3650451071 7.4563367715 19.1569282618
-               , Point.Point3 20.4118494655 19.5372323335 92.2346920363
-               , Point.Point3 8.0610955116 24.8896480153 28.0685516681
-               , Point.Point3 30.5286900395 45.7603258350 87.5193514446
-               ]
-       -- expected: HalfSpacesOf [Triangle (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0) (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2),Triangle (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0) (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2) (Point3 30.5286900395~ 45.7603258350~ 87.5193514446~ :+ 3)]
-       --  but got: HalfSpacesOf [Triangle (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 30.5286900395~ 45.7603258350~ 87.5193514446~ :+ 3) (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0),Triangle (Point3 8.0610955116~ 24.8896480153~ 28.0685516681~ :+ 2) (Point3 20.4118494655~ 19.5372323335~ 92.2346920363~ :+ 1) (Point3 48.3650451071~ 7.4563367715~ 19.1569282618~ :+ 0)]
+-- myPoints :: NonEmpty (Point.Point 3 R)
+-- myPoints = NonEmpty.fromList
+--            [ Point.Point3 0 10 20
+--            , Point.Point3 1 1 10
+--            , Point.Point3 5 5 0
+--            , Point.Point3 12 1 1
+--            , Point.Point3 22 20 1
+--            ]
+
+-- testHull :: HullZ _
+-- testHull = hulls myPoints
+
+
+-- testSim :: Simulation HullZ _
+-- testSim = simulate myPoints
+
+-- test :: LowerHull _
+-- test = lowerHull myPoints
+
+-- theLeft :: Simulation HullZ (Point.Point 3 R)
+-- theLeft = simulate theLeftP
+
+-- theLeftP = NonEmpty.fromList [ Point.Point3 0 10 20
+--                              , Point.Point3 1 1 10
+--                              ]
+
+-- theRight = simulate theRightP
+
+-- theRightP :: NonEmpty (Point.Point 3 R)
+-- theRightP = NonEmpty.fromList [ Point.Point3 5 5 0
+--            , Point.Point3 12 1 1
+--            ]
+
+-- testMerge = runMerge theLeft theRight
+
+-- initialBridge = bridgeOf (_initialHull theLeft) (_initialHull theRight)
+
+-- testz :: Bridge HullZ _
+-- testz = let Bridge l r = initialBridge
+--             [e] = bridgeEventL l (focus r)
+--         in applyBE (Left e) initialBridge

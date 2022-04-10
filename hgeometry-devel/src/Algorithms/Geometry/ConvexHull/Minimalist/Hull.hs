@@ -1,23 +1,20 @@
 module Algorithms.Geometry.ConvexHull.Minimalist.Hull where
 
-import           Algorithms.BinarySearch
+-- import           Algorithms.BinarySearch
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Applicative ((<|>))
-import           Control.Lens ((^.), view)
 import           Data.Ext
-import           Data.Geometry.Point (xCoord, yCoord, zCoord, ccw, CCW(..), pattern CCW)
+import           Data.Geometry.Point (ccw, pattern CCW)
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Properties
 import qualified Data.List as List
-import           Data.List.Util
-import           Data.Ord (comparing, Down(..))
 -- import           Data.Geometry.Triangle
 -- import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Sequence as Seq
-import           Data.Sequence (Seq(..), ViewL(..), ViewR(..))
-import qualified Data.OrdSeq as OrdSeq
+-- import           Data.List.NonEmpty (NonEmpty(..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.Sequence as Seq
+-- import           Data.Sequence (Seq(..), ViewL(..), ViewR(..))
+-- import qualified Data.OrdSeq as OrdSeq
 import qualified Data.Set as Set
 import           Data.Set (Set)
 import           Data.Maybe
