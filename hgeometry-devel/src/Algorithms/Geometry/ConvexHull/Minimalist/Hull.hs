@@ -27,21 +27,28 @@ minInftyT = -1000000000 -- FIXME
 
 --------------------------------------------------------------------------------
 
-class Hull (hull :: Type -> Type) where
-  -- | Creates a singleton hull
-  singleton :: point -> hull point
+class Zipper zipper where
+  -- | Creates a singleton zipper
+  singleton :: point -> zipper point
 
-  focus :: Point point => hull point -> point
+  focus :: zipper point -> point
 
   -- | moves the focus left
-  goLeft  :: Point point => hull point -> Maybe (hull point)
+  goLeft  :: Point point => zipper point -> Maybe (zipper point)
   -- | moves the focus right
-  goRight :: Point point => hull point -> Maybe (hull point)
+  goRight :: Point point => zipper point -> Maybe (zipper point)
 
+  -- | Moves focus to rightmost point
+  goRightMost   :: Point point => zipper point -> zipper point
+  goRightMost h = maybe h goRightMost $ goRight h
+  -- | Moves focus to leftmost point
+  goLeftMost   :: Point point => zipper point -> zipper point
+  goLeftMost h = maybe h goLeftMost $ goLeft h
+
+
+class Zipper hull => SearchableZipper (hull :: Type -> Type) where
   predOf :: Point point => point -> hull point -> Maybe point
   succOf :: Point point => point -> hull point -> Maybe point
-
-  fromBridge :: Point point => Bridge hull point -> hull point
 
   -- | delete the point from the hull. If we delete the focus, try to
   -- take from the right first, if that does not work, take the new
@@ -51,19 +58,16 @@ class Hull (hull :: Type -> Type) where
   delete :: Point point => point -> hull point -> hull point
   insert :: Point point => point -> hull point -> hull point
 
-  -- | Moves focus to rightmost point
-  goRightMost   :: Point point => hull point -> hull point
-  goRightMost h = maybe h goRightMost $ goRight h
-  -- | Moves focus to leftmost point
-  goLeftMost   :: Point point => hull point -> hull point
-  goLeftMost h = maybe h goLeftMost $ goLeft h
-
   -- | Get the predecessor of the focus
   predOfF :: Point point => hull point -> Maybe point
   predOfF h = predOf (focus h) h
   -- | Get the successor of the focus
   succOfF :: Point point => hull point -> Maybe point
   succOfF h = succOf (focus h) h
+
+class SearchableZipper hull => Hull (hull :: Type -> Type) where
+  fromBridge :: Point point => Bridge hull point -> hull point
+
 
 -- | turn a hull into a list of points
 toList :: (Hull hull, Point point) => hull point -> [point]
@@ -91,13 +95,11 @@ instance Point point => Eq (X point) where
 instance Point point => Ord (X point) where
   (X p) `compare` (X q) = compareX p q
 
-
 -- | hull zipper
+
 data HullZ point = HullZ (Set (X point)) point (Set (X point))
 
 type instance NumType (HullZ point) = NumType point
-
-
 
 
 instance Show point => Show (HullZ point) where
@@ -110,7 +112,7 @@ instance Show point => Show (HullZ point) where
 instance Point point => Semigroup (HullZ point) where
   l <> r = fromBridge $ bridgeOf l r
 
-instance Hull HullZ where
+instance Zipper HullZ where
   singleton p = HullZ Set.empty p Set.empty
   focus (HullZ _ p _) = p
 
@@ -120,16 +122,22 @@ instance Hull HullZ where
   goRight (HullZ ll p rr) =
     (\(X p',rr') -> HullZ (Set.insert (X p) ll) p' rr') <$> Set.minView rr
 
+  goRightMost h@(HullZ ll p rr) = case Set.maxView rr of
+    Nothing        -> h
+    Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
+
+  goLeftMost h@(HullZ ll p rr) = case Set.minView ll of
+    Nothing        -> h
+    Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
+
+instance SearchableZipper HullZ where
   succOf q (HullZ ll p rr) = case q `compareX` p of
                                LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
-                               _  -> (unX <$> Set.lookupGT (X q) rr)
+                               _  -> unX <$> Set.lookupGT (X q) rr
 
   predOf q (HullZ ll p rr) = case q `compareX` p of
                                GT -> (unX <$> Set.lookupLT (X q) rr) <|> Just p
-                               _  -> (unX <$> Set.lookupLT (X q) ll)
-
-
-  fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
+                               _  -> unX <$> Set.lookupLT (X q) ll
 
   delete q (HullZ ll p rr) = case q `compareX` p of
       LT -> HullZ (Set.delete (X q) ll) p rr
@@ -149,13 +157,8 @@ instance Hull HullZ where
   succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
   predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
-  goRightMost h@(HullZ ll p rr) = case Set.maxView rr of
-    Nothing        -> h
-    Just (X r,rr') -> HullZ (ll <> Set.insert (X p) rr') r Set.empty
-
-  goLeftMost h@(HullZ ll p rr) = case Set.minView ll of
-    Nothing        -> h
-    Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
+instance Hull HullZ where
+  fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
 
 -- | Computes the bridge of the two given hulls
