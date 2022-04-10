@@ -1,15 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.TriangleSpec (spec) where
 
-import Data.Ext
 import Control.Lens
+import Data.Ext
 import Data.Geometry
-import Data.Geometry.Triangle
 import Data.Geometry.Boundary
-import Ipe
+import Data.Geometry.Triangle
 import Data.Proxy
+import Data.RealNumber.Rational
+import Ipe
+import Paths_hgeometry_test
 import Test.Hspec
-import           Paths_hgeometry_test
+import Test.QuickCheck
+import Test.QuickCheck.Instances ()
+
+--------------------------------------------------------------------------------
+
+type R = RealNumber 10
 
 spec :: Spec
 spec = do testCases "src/Data/Geometry/pointInTriangle.ipe"
@@ -26,6 +33,11 @@ spec = do testCases "src/Data/Geometry/pointInTriangle.ipe"
                 `shouldBe` (coRec $ Point2 10 (10 :: Rational))
               (hor 11 `intersect` t)
                 `shouldBe` (coRec NoIntersection)
+          it "inTriangle same as inTriangleFrac" $ property $ \q (t :: Triangle 2 () R) ->
+              (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
+          it "onTriangle same as onTriangleFrac" $ property $ \q (t :: Triangle 2 () R) ->
+              (q `onTriangle` t) `shouldBe` (q `onTriangleFrac` t)
+          -- TODO: this test probably does not produce many onBoundaries
 
 
 testCases    :: FilePath -> Spec
@@ -102,3 +114,20 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 
 
 -- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+
+--------------------------------------------------------------------------------
+
+inTriangleFrac     :: (Ord r, Fractional r)
+                 => Point 2 r -> Triangle 2 p r -> PointLocationResult
+inTriangleFrac q t
+    | all (`inRange` OpenRange   0 1) [a,b,c] = Inside
+    | all (`inRange` ClosedRange 0 1) [a,b,c] = OnBoundary
+    | otherwise                                 = Outside
+  where
+    Vector3 a b c = toBarricentric q t
+
+-- | Test if a point lies inside or on the boundary of a triangle
+onTriangleFrac       :: (Ord r, Fractional r)
+                 => Point 2 r -> Triangle 2 p r -> Bool
+q `onTriangleFrac` t = let Vector3 a b c = toBarricentric q t
+                       in all (`inRange` ClosedRange 0 1) [a,b,c]

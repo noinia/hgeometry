@@ -513,7 +513,7 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
 -- | \( O(\log n) \)
 --   Check if a point lies inside a convex polygon, on the boundary, or outside of the
 --   convex polygon.
-inConvex :: forall p r. (Fractional r, Ord r)
+inConvex :: forall p r. (Num r, Ord r)
          => Point 2 r -> ConvexPolygon p r
          -> PointLocationResult
 inConvex p (ConvexPolygon poly)
@@ -528,7 +528,7 @@ inConvex p (ConvexPolygon poly)
     rightEdge = ClosedLineSegment point0 (point 1)
     worker a b
       | a+1 == b                        =
-        if p `intersects` (ClosedLineSegment (point a) (point b))
+        if p `intersects` ClosedLineSegment (point a) (point b)
           then OnBoundary
           else
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside

@@ -3,31 +3,34 @@
 -- | Triangles in \(d\)-dimensional space.
 module Data.Geometry.Triangle where
 
-import           Control.DeepSeq              (NFData)
+import           Control.DeepSeq (NFData)
 import           Control.Lens
-import           Data.Bifoldable              (Bifoldable (bifoldMap))
-import           Data.Bifunctor               (Bifunctor (first))
+import           Data.Bifoldable (Bifoldable (bifoldMap))
+import           Data.Bifunctor (Bifunctor (first))
 import           Data.Bitraversable
-import           Data.Either                  (partitionEithers)
+import           Data.Either (partitionEithers)
 import           Data.Ext
-import           Data.Geometry.Ball           (Disk, disk)
-import           Data.Geometry.Boundary       (PointLocationResult (..))
-import           Data.Geometry.Box            (IsBoxable (..))
+import           Data.Geometry.Ball (Disk, disk)
+import           Data.Geometry.Boundary (PointLocationResult (..))
+import           Data.Geometry.Box (IsBoxable (..))
+import           Data.Geometry.HalfSpace
 import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line           (Line (Line))
+import           Data.Geometry.Line (Line (Line))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector         as V
-import qualified Data.List                    as List
-import           Data.Maybe                   (mapMaybe)
-import           Data.Util                    (Three, pattern Three)
-import           Data.Vinyl                   (Rec (RNil, (:&)))
-import           Data.Vinyl.CoRec             (Handler (H), match)
-import           GHC.Generics                 (Generic)
-import           GHC.TypeLits                 (type (+))
+import qualified Data.Geometry.Vector as V
+import qualified Data.List as List
+import           Data.Maybe (mapMaybe)
+import           Data.Semigroup.Foldable
+import           Data.Util (Three, pattern Three)
+import           Data.Vinyl (Rec (RNil, (:&)))
+import           Data.Vinyl.CoRec (Handler (H), match)
+import           GHC.Generics (Generic)
+import           GHC.TypeLits (type (+))
+import           Test.QuickCheck (Arbitrary(..), suchThat)
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +52,14 @@ instance Arity d => Bifoldable (Triangle d) where bifoldMap = bifoldMapDefault
 instance Arity d => Bitraversable (Triangle d) where
   bitraverse f g (Triangle p q r) = let tr = bitraverse (traverse g) f in
     Triangle <$> tr p <*> tr q <*> tr r
+
+instance (Arbitrary r, Num r, Ord r, Arbitrary p) => Arbitrary (Triangle 2 p r) where
+  arbitrary = do a <- arbitrary
+                 b <- arbitrary `suchThat` (/= a)
+                 c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b && ccw a b c' /= CoLinear)
+                 (ae,be,ce) <- arbitrary
+                 pure $ Triangle (a :+ ae) (b :+ be) (c :+ ce)
+
 
 -- instance Arity d => Functor (Triangle d p) where
 --   fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)
@@ -78,6 +89,17 @@ pattern Triangle' :: Point d r -> Point d r -> Point d r -> Triangle d () r
 pattern Triangle' p q r <- Triangle (p :+ ()) (q :+ ()) (r :+ ())
   where
     Triangle' p q r = Triangle (ext p) (ext q) (ext r)
+
+-- | the three halfspaces whose intersection is the input triangle
+-- pre: assumes the triangle is non-degenerate
+intersectingHalfSpaces :: (Num r, Ord r) => Triangle 2 p r -> Three (HalfSpace 2 r)
+intersectingHalfSpaces (Triangle p q r) = case ccw p q r of
+    CCW -> Three (halfSpace p q) (halfSpace q r) (halfSpace r p)
+    CW  -> Three (halfSpace p r) (halfSpace r q) (halfSpace q p)
+    _   -> error "halfSpaces: degenerate triangle!"
+  where
+    perp (Vector2 x y) = Vector2 (-y) x
+    halfSpace (a :+ _) (b :+ _) = HalfSpace (HyperPlane a (perp $ b .-. a))
 
 -- | Get the three line-segments that make up the sides of a triangle.
 sideSegments                  :: Triangle d p r -> [LineSegment d p r]
@@ -143,36 +165,22 @@ fromBarricentric (Vector3 a b c) (Triangle p q r) = let f = view (core.vector) i
 
 
 -- | Tests if a point lies inside a triangle, on its boundary, or outside the triangle
-inTriangle     :: (Ord r, Fractional r)
-                 => Point 2 r -> Triangle 2 p r -> PointLocationResult
-inTriangle q t
-    | all (`inRange` OpenRange   0 1) [a,b,c] = Inside
-    | all (`inRange` ClosedRange 0 1) [a,b,c] = OnBoundary
-    | otherwise                                 = Outside
-  where
-    Vector3 a b c = toBarricentric q t
+inTriangle   :: (Num r, Ord r)
+             => Point 2 r -> Triangle 2 p r -> PointLocationResult
+inTriangle q = unCombine . foldMap1 (Combine . (q `inHalfSpace`)) . intersectingHalfSpaces
 
-inTriangleRelaxed     :: (Ord r, Num r)
-                 => Point 2 r -> Triangle 2 p r -> PointLocationResult
-inTriangleRelaxed q (Triangle a b c)
-    | ab == CoLinear && bc == ca = OnBoundary
-    | bc == CoLinear && ca == ab = OnBoundary
-    | ca == CoLinear && bc == ab = OnBoundary
-    | ab == bc && bc == ca       = Inside
-    | otherwise                  = Outside
-  where
-    ab = ccw (a^.core) (b^.core) q
-    bc = ccw (b^.core) (c^.core) q
-    ca = ccw (c^.core) (a^.core) q
+newtype Combine = Combine { unCombine :: PointLocationResult } deriving (Show,Eq)
+instance Semigroup Combine where
+  (Combine a) <> (Combine b) = Combine $ a >< b
+    where
+      Outside    >< _          = Outside
+      _          >< Outside    = Outside
+      OnBoundary >< _          = OnBoundary
+      _          >< OnBoundary = OnBoundary
+      Inside     >< Inside     = Inside
 
--- | Test if a point lies inside or on the boundary of a triangle
-onTriangle       :: (Ord r, Fractional r)
-                 => Point 2 r -> Triangle 2 p r -> Bool
-q `onTriangle` t = let Vector3 a b c = toBarricentric q t
-                   in all (`inRange` ClosedRange 0 1) [a,b,c]
-
-onTriangleRelaxed :: (Ord r, Num r) => Point 2 r -> Triangle 2 p r -> Bool
-q `onTriangleRelaxed` t = inTriangleRelaxed q t /= Outside
+onTriangle :: (Ord r, Num r) => Point 2 r -> Triangle 2 p r -> Bool
+q `onTriangle` t = inTriangle q t /= Outside
 
 -- myQ :: Point 2 Rational
 -- myQ = read "Point2 [(-5985) % 16,(-14625) % 1]"
