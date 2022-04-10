@@ -2,7 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.ConvexHull.Minimalist
@@ -21,7 +23,7 @@ module Algorithms.Geometry.ConvexHull.Minimalist where
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
-import           Control.Lens (Iso', iso, (^.), view)
+import           Control.Lens ((^.), view)
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.Point as Point
@@ -86,19 +88,6 @@ toTriangle (Three p q r) = Triangle (p^._Ext) (q^._Ext) (r^._Ext)
 --              in Point.Point3 x y (x*x + y*y)
 
 --------------------------------------------------------------------------------
-
-
--- | Types that can be decomposed into an Ext
-class AsExt t where
-  type CoreOf t
-  type ExtraOf t
-  -- | Convert between this type and an Ext
-  _Ext :: Iso' t (CoreOf t :+ ExtraOf t)
-
-instance AsExt (c :+ e) where
-  type CoreOf (c :+ e) = c
-  type ExtraOf (c :+ e) = e
-  _Ext = iso id id
 
 instance AsExt (Point.Point 3 r) where
   type CoreOf (Point.Point 3 r) = Point.Point 3 r

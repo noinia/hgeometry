@@ -130,3 +130,17 @@ instance (t ~ c)          => AsA t        c where
 instance {-# OVERLAPPING #-} AsA (c :+ e) c where
   asCore = view core
   {-# INLINABLE asCore #-}
+
+--------------------------------------------------------------------------------
+
+-- | Types that can be decomposed into an Ext
+class AsExt t where
+  type CoreOf t
+  type ExtraOf t
+  -- | Convert between this type and an Ext
+  _Ext :: Iso' t (CoreOf t :+ ExtraOf t)
+
+instance AsExt (c :+ e) where
+  type CoreOf (c :+ e) = c
+  type ExtraOf (c :+ e) = e
+  _Ext = iso id id
