@@ -16,6 +16,7 @@ import qualified Data.List as List
 -- import           Data.Sequence (Seq(..), ViewL(..), ViewR(..))
 -- import qualified Data.OrdSeq as OrdSeq
 import qualified Data.Set as Set
+import qualified Data.IntMap as IntMap
 import           Data.Set (Set)
 import           Data.Maybe
 import           Data.Kind
@@ -27,26 +28,24 @@ minInftyT = -1000000000 -- FIXME
 
 --------------------------------------------------------------------------------
 
-class Zipper zipper where
+class Zipper zipper elem where
   -- | Creates a singleton zipper
-  singleton :: point -> zipper point
-
-  focus :: zipper point -> point
-
+  singleton :: elem -> zipper elem
+  -- | Gets the element under focus
+  focus :: zipper elem -> elem
   -- | moves the focus left
-  goLeft  :: Point point => zipper point -> Maybe (zipper point)
+  goLeft  :: zipper elem -> Maybe (zipper elem)
   -- | moves the focus right
-  goRight :: Point point => zipper point -> Maybe (zipper point)
-
-  -- | Moves focus to rightmost point
-  goRightMost   :: Point point => zipper point -> zipper point
+  goRight :: zipper elem -> Maybe (zipper elem)
+  -- | Moves focus to rightmost elem
+  goRightMost   :: zipper elem -> zipper elem
   goRightMost h = maybe h goRightMost $ goRight h
-  -- | Moves focus to leftmost point
-  goLeftMost   :: Point point => zipper point -> zipper point
+  -- | Moves focus to leftmost elem
+  goLeftMost   :: zipper elem -> zipper elem
   goLeftMost h = maybe h goLeftMost $ goLeft h
+  {-# MINIMAL singleton, focus, goLeft, goRight #-}
 
-
-class Zipper hull => SearchableZipper (hull :: Type -> Type) where
+class (Zipper hull point, Point point) => SearchableZipper (hull :: Type -> Type) point where
   predOf :: Point point => point -> hull point -> Maybe point
   succOf :: Point point => point -> hull point -> Maybe point
 
@@ -64,17 +63,18 @@ class Zipper hull => SearchableZipper (hull :: Type -> Type) where
   -- | Get the successor of the focus
   succOfF :: Point point => hull point -> Maybe point
   succOfF h = succOf (focus h) h
+  {-# MINIMAL predOf, succOf, delete, insert #-}
 
-class SearchableZipper hull => Hull (hull :: Type -> Type) where
+class (SearchableZipper hull point, Point point) => Hull (hull :: Type -> Type) point where
   fromBridge :: Point point => Bridge hull point -> hull point
 
 
 -- | turn a hull into a list of points
-toList :: (Hull hull, Point point) => hull point -> [point]
+toList :: (Hull hull point, Point point) => hull point -> [point]
 toList = List.unfoldr (fmap (\h -> (focus h, goRight h))) . Just . goLeftMost
 
 -- | renders the hull at a particular time.
-hullAt   :: (Hull hull, Point point) => Time point -> hull point
+hullAt   :: (Hull hull point, Point point) => Time point -> hull point
          -> Maybe (PolyLine.PolyLine 2 () (NumType point))
 hullAt t = PolyLine.fromPoints . fmap (ext . toPt2 t) . toList
 
@@ -112,7 +112,7 @@ instance Show point => Show (HullZ point) where
 instance Point point => Semigroup (HullZ point) where
   l <> r = fromBridge $ bridgeOf l r
 
-instance Zipper HullZ where
+instance Point point => Zipper HullZ point where
   singleton p = HullZ Set.empty p Set.empty
   focus (HullZ _ p _) = p
 
@@ -130,7 +130,7 @@ instance Zipper HullZ where
     Nothing        -> h
     Just (X l,ll') -> HullZ Set.empty l (ll' <> Set.insert (X p) rr)
 
-instance SearchableZipper HullZ where
+instance Point point => SearchableZipper HullZ point where
   succOf q (HullZ ll p rr) = case q `compareX` p of
                                LT -> (unX <$> Set.lookupGT (X q) ll) <|> Just p
                                _  -> unX <$> Set.lookupGT (X q) rr
@@ -157,12 +157,12 @@ instance SearchableZipper HullZ where
   succOfF (HullZ _ _ rr) = (\(X p) -> p) <$> Set.lookupMin rr
   predOfF (HullZ ll _ _) = (\(X p) -> p) <$> Set.lookupMax ll
 
-instance Hull HullZ where
+instance Point point => Hull HullZ point where
   fromBridge (Bridge (HullZ ll l _) (HullZ _ r rr)) = HullZ ll l (Set.insert (X r) rr)
 
 
 -- | Computes the bridge of the two given hulls
-bridgeOf       :: (Hull hull, Point point)
+bridgeOf       :: (Hull hull point, Point point)
                => hull point -> hull point -> Bridge hull point
 bridgeOf l0 r0 = go (goRightMost l0) (goLeftMost r0)
     where

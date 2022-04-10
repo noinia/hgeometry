@@ -98,7 +98,7 @@ instance AsExt (Point.Point 3 r) where
 
 data EventKind = Insert | Delete deriving (Show,Eq,Ord)
 
-eval :: (Hull hull, Point point) => EventKind -> point -> hull point -> hull point
+eval :: (Hull hull point, Point point) => EventKind -> point -> hull point -> hull point
 eval = \case
   Insert -> insert
   Delete -> delete
@@ -110,7 +110,7 @@ data Event point = Event { eventKind  :: !EventKind
 deriving instance (Show (Time point), Show point) => Show (Event point)
 deriving instance (Eq   (Time point), Eq   point) => Eq   (Event point)
 
-apply   :: (Point point, Hull hull) => Event point -> hull point -> hull point
+apply   :: (Point point, Hull hull point) => Event point -> hull point -> hull point
 apply e = eval (eventKind e) (eventPoint e)
 
 
@@ -137,10 +137,10 @@ deriving instance (Eq (Time point), Eq point, Eq (hull point))
 type instance NumType (Simulation hull point) = NumType point
 
 -- | Creates a singleton simulation
-simulation   :: forall hull point. Hull hull => point -> Simulation hull point
+simulation   :: forall hull point. Hull hull point => point -> Simulation hull point
 simulation p = Sim (singleton p) []
 
-instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
+instance (Point point, Hull hull point) => Semigroup (Simulation hull point) where
   (Sim l el) <> (Sim r er) = Sim (fromBridge b) events
     where
       b      = bridgeOf l r
@@ -150,7 +150,7 @@ instance (Point point, Hull hull) => Semigroup (Simulation hull point) where
       -- minInftyT = Nothing
 
 -- | Runs the simulation; producing a list of events
-runSim                           :: (Hull hull, Point point)
+runSim                           :: (Hull hull point, Point point)
                                  => Time point -- ^ current time
                                  -> Bridge hull point -- ^ current bridge
                                  -> [Tagged (Event point)]     -- ^ future events
@@ -171,7 +171,7 @@ runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
 
 
 -- | Apply the bridge event on the bridge
-applyBE                 :: (Point point, Hull hull)
+applyBE                 :: (Point point, Hull hull point)
                         => Tagged (Event point) -> Bridge hull point -> Bridge hull point
 applyBE el (Bridge l r) = case el of
     Left e  -> let p = eventPoint e in case eventKind e of
@@ -186,14 +186,14 @@ applyBE el (Bridge l r) = case el of
 
 
 -- | Apply the event on the bridge
-applyB                 :: (Point point, Hull hull)
+applyB                 :: (Point point, Hull hull point)
                        => Tagged (Event point) -> Bridge hull point -> Bridge hull point
 applyB el (Bridge l r) = case el of
     Left e  -> Bridge (apply e l) r
     Right e -> Bridge l (apply e r)
 
 -- | Should we output this event
-output                  :: (Point point, Hull hull)
+output                  :: (Point point, Hull hull point)
                         => Tagged (Event point) -> Bridge hull point
                         -- -> [Event point]
                         -> [(Event point, Bridge hull point)]
@@ -233,7 +233,7 @@ firstEvent bridgeEvents = \case
     firstEvent' = minimum1By cmp
 
 -- | computes the bridge event on the left
-bridgeEventL      :: ( Hull hull, Point point) => hull point -> point -> [Event point]
+bridgeEventL      :: ( Hull hull point, Point point) => hull point -> point -> [Event point]
 bridgeEventL hl r = let l = focus hl
                     in catMaybes
                       [ do p <- predOfF hl
@@ -245,7 +245,7 @@ bridgeEventL hl r = let l = focus hl
                       ]
 
 -- | computes the bridge event on the right
-bridgeEventR      :: (Hull hull, Point point) => point -> hull point -> [Event point]
+bridgeEventR      :: (Hull hull point, Point point) => point -> hull point -> [Event point]
 bridgeEventR l hr = let r = focus hr
                     in catMaybes
                        [ do p <- predOfF hr
@@ -259,7 +259,7 @@ bridgeEventR l hr = let r = focus hr
 ----------------------------------------
 -- | run the merge simulation, also producing all intermediate
 -- bridges.
-runMerge                       :: (Point point, Hull hull)
+runMerge                       :: (Point point, Hull hull point)
                                => Simulation hull point -> Simulation hull point
                                -> (hull point, [(Event point, Bridge hull point)])
 runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
@@ -271,12 +271,12 @@ runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
 --------------------------------------------------------------------------------
 
 -- | Run the simulation, producing the appropriate triangles
-runSimulation                 :: (Point point, Hull hull)
+runSimulation                 :: (Point point, Hull hull point)
                               => Simulation hull point -> LowerHull point
 runSimulation (Sim h0 events) = snd $ List.foldl' handle (h0,[]) events
 
 -- | Runs a single step of the simulation
-handle           :: (Hull hull, Point point)
+handle           :: (Hull hull point, Point point)
                  => (hull point, [Three point]) -> Event point -> (hull point, [Three point])
 handle (h,out) e = (apply e h, t <> out)
   where
@@ -288,7 +288,7 @@ handle (h,out) e = (apply e h, t <> out)
 
 -- | runs the entire simulation, prdoducing all intermediate results
 -- in increasing order of time, as well as the output
-runSimulation'                 :: (Point point, Hull hull)
+runSimulation'                 :: (Point point, Hull hull point)
                                => Simulation hull point
                                -> NonEmpty ( Maybe (Time point), hull point , LowerHull point)
 runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
@@ -297,7 +297,7 @@ runSimulation' (Sim h0 events) = NonEmpty.zipWith (\t (h,o) -> (t,h,o))
 
 -- | runs the entire simulation, prdoducing all intermediate results
 -- in increasing order of time.
-runSimulation'' :: (Point point, Hull hull)
+runSimulation'' :: (Point point, Hull hull point)
                 => Simulation hull point -> NonEmpty ( Maybe (Time point), hull point)
 runSimulation'' = fmap (\(t,h,_) -> (t,h)) . runSimulation'
 
@@ -341,7 +341,7 @@ colinearTime (toPt3 -> Point.Point3 px py pz)
 --------------------------------------------------------------------------------
 
 -- | Recursively computes the simulation.
-simulate :: forall hull point. (Point point, Hull hull)
+simulate :: forall hull point. (Point point, Hull hull point)
          => NonEmpty point -> Simulation hull point
 simulate = divideAndConquer1 simulation . NonEmpty.sortBy cmpXYZ
 
@@ -357,7 +357,7 @@ hulls = divideAndConquer1 singleton . NonEmpty.sortBy cmpXYZ
 
 -- TODO: move to a separate testing module
 
-propIncreasingTime :: (Point point, Hull hull) => Simulation hull point -> Bool
+propIncreasingTime :: (Point point, Hull hull point) => Simulation hull point -> Bool
 propIncreasingTime = isIncreasing . fmap (\(t,_,_) -> t) . runSimulation'
 
 isIncreasing           :: Ord a => NonEmpty a -> Bool
@@ -365,15 +365,15 @@ isIncreasing (x :| xs) = case NonEmpty.nonEmpty xs of
                            Nothing           -> True
                            Just xs'@(y :| _) -> x < y && isIncreasing xs'
 
-propIncreasingEvents :: (Point point, Hull hull) => Simulation hull point -> Bool
+propIncreasingEvents :: (Point point, Hull hull point) => Simulation hull point -> Bool
 propIncreasingEvents = maybe True isIncreasing . NonEmpty.nonEmpty . fmap eventTime . _events
 
 
-propAllHullsConvex :: (Point point, Hull hull) => Simulation hull point -> Bool
+propAllHullsConvex :: (Point point, Hull hull point) => Simulation hull point -> Bool
 propAllHullsConvex = undefined
 
 
-allLeftTurnsAt   :: (Hull hull, Point point) => Time point -> hull point -> Bool
+allLeftTurnsAt   :: (Hull hull point, Point point) => Time point -> hull point -> Bool
 allLeftTurnsAt t = go . fmap (toPt2 t) . toList
   where
     go (p:q:r:rest) = Point.ccw p q r == Point.CCW && go (q:r:rest)
@@ -382,7 +382,7 @@ allLeftTurnsAt t = go . fmap (toPt2 t) . toList
 --------------------------------------------------------------------------------
 
 -- | Run a simulation up to a certain time to compute the hull at that time.
-computeHullAt   :: (Hull hull, Point point)
+computeHullAt   :: (Hull hull point, Point point)
                 => Time point -> Simulation hull point -> hull point
 computeHullAt t = go . runSimulation'
   where
@@ -395,7 +395,7 @@ computeHullAt t = go . runSimulation'
 -- * Drawing stuff to help debugging
 
 renderIpe :: ( Point point
-             , Hull hull
+             , Hull hull point
              , IpeWriteText (NumType point)
              , NumType (hull point) ~ NumType point
              , RenderAt (hull point), RenderAt point
@@ -403,7 +403,7 @@ renderIpe :: ( Point point
 renderIpe fp = writeIpeFile fp . render
 
 render :: ( Point point
-          , Hull hull
+          , Hull hull point
           , IpeWriteText (NumType point)
           , NumType (hull point) ~ NumType point
           , RenderAt (hull point), RenderAt point
@@ -417,7 +417,7 @@ render (s,pts) = ipeFile . fmap (\(t,h,_) -> fromContent [ drawTime t
 
 
 renderMergeIpe        :: ( Point point
-                         , Hull hull
+                         , Hull hull point
                          , IpeWriteText (NumType point)
                          , NumType (hull point) ~ NumType point
                          , RenderAt (hull point), RenderAt point
@@ -427,7 +427,7 @@ renderMergeIpe        :: ( Point point
 renderMergeIpe fp l r = writeIpeFile fp $ renderMerge l r
 
 renderMerge     :: forall point hull. ( Point point
-                   , Hull hull
+                   , Hull hull point
                    , IpeWriteText (NumType point)
                    , NumType (hull point) ~ NumType point
                    , RenderAt (hull point), RenderAt point
@@ -470,7 +470,7 @@ instance (Point point, RenderAt point) => RenderAt (HullZ point) where
                    Nothing -> renderAt t (focus h)
                    Just pl -> iO . defIO $ pl
 
-instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ NumType point
+instance (Point point, Hull hull point, RenderAt (hull point), NumType (hull point) ~ NumType point
          ) => RenderAt (Bridge hull point) where
   renderAt t (Bridge l r) = iO $ ipeGroup [ renderAt t l
                                           , renderAt t r
@@ -480,7 +480,7 @@ instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ 
       seg = ClosedLineSegment (ext $ toPt2 t (focus l)) (ext $ toPt2 t (focus r))
 
 
-instance (Point point, Hull hull, RenderAt (hull point), NumType (hull point) ~ NumType point
+instance (Point point, Hull hull point, RenderAt (hull point), NumType (hull point) ~ NumType point
          ) => RenderAt (Simulation hull point) where
   renderAt t = renderAt t . computeHullAt t
 
