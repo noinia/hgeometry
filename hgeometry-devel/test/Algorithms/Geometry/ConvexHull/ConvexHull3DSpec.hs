@@ -100,7 +100,7 @@ allHaveTriangleBelow' lowerHull pts = all (hasTriangBelow ts . view core) pts
 -- | get all triangles stabbed by the vertical line through the query
 findStabbed   :: (Num r, Ord r) => Filterable f
               => Point 3 r -> f (Triangle 3 p r) -> f (Triangle 3 p r)
-findStabbed q = filter (\t -> projectPoint' q `onTriangleRelaxed` pmap' projectPoint' t)
+findStabbed q = filter (\t -> projectPoint' q `onTriangle` pmap' projectPoint' t)
   where
     projectPoint' :: Point 3 r -> Point 2 r
     projectPoint' = projectPoint
@@ -108,6 +108,8 @@ findStabbed q = filter (\t -> projectPoint' q `onTriangleRelaxed` pmap' projectP
 pmap'  :: (Point d r -> Point d' s) -> Triangle d extra r -> Triangle d' extra s
 pmap' f (Triangle p q' r) = Triangle (p&core %~ f) (q'&core %~ f) (r&core %~ f)
 
+-- | Test if there is a triangle intersecting the vertical line
+-- through q, and that actually all such all triangles are below q
 hasTriangBelow      :: (Filterable f, Foldable f, Ord r, Num r)
                     => f (Triangle 3 p r) -> Point 3 r -> Bool
 hasTriangBelow ts q = case F.toList $ findStabbed q ts of
@@ -115,6 +117,7 @@ hasTriangBelow ts q = case F.toList $ findStabbed q ts of
                         ts' -> all (\t -> q `inHalfSpace` toHalfspace t /= Outside) ts'
 
 
+-- | the halfspace above the triangle
 toHalfspace :: forall r p. (Num r, Ord r) => Triangle 3 p r -> HalfSpace 3 r
 toHalfspace = HalfSpace . supportingPlane . toCounterClockwiseTriangle
   where
@@ -123,15 +126,6 @@ toHalfspace = HalfSpace . supportingPlane . toCounterClockwiseTriangle
                                                   | otherwise           = Triangle p r q
       where
         Triangle p' q' r' = pmap' (projectPoint @2) t
-
-
-
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -262,7 +256,7 @@ myPts = NonEmpty.fromList [ Point3 5  5  0  :+ 2
                           ]
 
 toTri       :: Eq a =>  NonEmpty (Point d r :+ a) -> Three a -> Triangle d a r
-toTri pts t = let pt i = List.head $ NonEmpty.filter (\t -> t^.extra == i) pts
+toTri pts t = let pt i = List.head $ NonEmpty.filter (\t' -> t'^.extra == i) pts
               in (t&traverse %~ pt)^.from _TriangleThreePoints
 
 myHull :: Hull Int R
@@ -273,11 +267,11 @@ myHull = H . map (toTri myPts) $ [ Three 1 2 3
                                  ]
 
 myPts' :: NonEmpty (Point 3 R :+ Int)
-myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                             , Point3 1  1  10 :+ 1
-                             , Point3 0  10 20 :+ 0
-                             , Point3 12 1  1  :+ 3
-                             ]
+myPts' = NonEmpty.fromList [ Point3 5  5  0  :+ 2
+                           , Point3 1  1  10 :+ 1
+                           , Point3 0  10 20 :+ 0
+                           , Point3 12 1  1  :+ 3
+                           ]
 
 myHull' :: Hull Int R
 myHull' = H . map (toTri myPts') $ [ Three 1 2 3

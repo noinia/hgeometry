@@ -23,7 +23,7 @@ module Algorithms.Geometry.ConvexHull.Minimalist where
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
-import           Control.Lens ((^.), view)
+import           Control.Lens (iso, (^.), view)
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.Point as Point
