@@ -17,6 +17,14 @@ import           Data.RealNumber.Rational
 
 type R = RealNumber 5
 
+-- spec :: Spec
+-- spec = do
+--   it "sum (map area (earClip polygon)) == area polygon" $ do
+--     property $ \(poly :: SimplePolygon () R) ->
+--       let g = earClip poly
+--           trigs = map (polygonTrig poly) g
+--       in sum (map Triangle.area trigs) === area poly
+
 spec :: Spec
 spec = do
   it "sum (map area (earClip polygon)) == area polygon" $ do
@@ -37,11 +45,11 @@ spec = do
   --         trigs = map (polygonTrig poly) g
   --     in sum (map Triangle.area trigs) === area poly
 
-  it "sum (map area (earClipRandomHashed polygon)) == area polygon" $ do
-    property $ \(poly :: SimplePolygon () R) ->
-      let g = earClipRandomHashed poly
-          trigs = map (polygonTrig poly) g
-      in sum (map Triangle.area trigs) === area poly
+  -- it "sum (map area (earClipRandomHashed polygon)) == area polygon" $ do
+  --   property $ \(poly :: SimplePolygon () R) ->
+  --     let g = earClipRandomHashed poly
+  --         trigs = map (polygonTrig poly) g
+  --     in sum (map Triangle.area trigs) === area poly
 
   -- it "earClip == earClipHashed" $ do
   --   property $ \(poly :: SimplePolygon () R) ->
