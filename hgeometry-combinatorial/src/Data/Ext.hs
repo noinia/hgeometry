@@ -144,3 +144,4 @@ instance AsExt (c :+ e) where
   type CoreOf (c :+ e) = c
   type ExtraOf (c :+ e) = e
   _Ext = iso id id
+  {-# INLINE _Ext #-}
