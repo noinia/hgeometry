@@ -1,4 +1,6 @@
 * 3D Convex Hull Minimalist
+ cabal v2-update 'hackage.haskell.org,2022-02-20T15:04:37Z'
+
 **  : 81bc098d Baseline
 
 frank@Arya# time cabal run devel-prof points_10k.json +RTS -s
@@ -83,3 +85,64 @@ frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
   Productivity  96.0% of total user, 96.0% of total elapsed
 
 ./devel-prof vd_points_10k.json +RTS -s  11.43s user 0.04s system 99% cpu 11.479 total
+
+* updated cabal
+
+** 4d593379 some after refactoring
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+  12,376,064,120 bytes allocated in the heap
+     408,267,680 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     11909 colls,     0 par    0.314s   0.319s     0.0000s    0.0011s
+  Gen  1        16 colls,     0 par    0.136s   0.136s     0.0085s    0.0189s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   11.120s  ( 11.123s elapsed)
+  GC      time    0.450s  (  0.455s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   11.571s  ( 11.578s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    1,112,929,344 bytes per MUT second
+
+  Productivity  96.1% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  11.52s user 0.06s system 99% cpu 11.593 total
+
+
+** 037f52f9 using the intset implementation for the ordered sequence
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   9,266,835,536 bytes allocated in the heap
+     387,998,720 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8913 colls,     0 par    0.279s   0.283s     0.0000s    0.0012s
+  Gen  1        16 colls,     0 par    0.134s   0.142s     0.0089s    0.0229s
+
+  INIT    time    0.001s  (  0.001s elapsed)
+  MUT     time   10.233s  ( 10.243s elapsed)
+  GC      time    0.413s  (  0.425s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.647s  ( 10.669s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    905,553,552 bytes per MUT second
+
+  Productivity  96.1% of total user, 96.0% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.63s user 0.03s system 99% cpu 10.678 total
+
+I guess this slight perf increase may have two reasons; either the
+Intsets are better, and/or the comparisons on the "xOrder" now use
+comparisons on Ints, which are faster than the comparions on arbitrary
+rational numbers.
