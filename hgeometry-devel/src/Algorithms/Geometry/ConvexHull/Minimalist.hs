@@ -30,7 +30,6 @@ import qualified Data.Geometry.Point as Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
-import           Data.List.Util
 import           Data.Ord (comparing, Down(..))
 import           Data.Util
 -- import           Data.Geometry.Triangle
@@ -166,19 +165,38 @@ runSim                           :: (Hull hull point, Point point)
                                  -> [Tagged (Event point)]     -- ^ future events
                                  -- -> [Event point]
                                  -> [(Event point, Bridge hull point)]
-runSim now b@(Bridge l r) events = case firstEvent bridgeEvents events of
+runSim now b@(Bridge l r) events = case firstEvent bridgeEvent events of
     None                    -> []
     BridgeEvent  e          -> unTag' e     : runSim (eventTime' e) (applyBE e b) events
     ExistingEvent e events' -> output e b <> runSim (eventTime' e) (applyB e b)  events'
   where
-    bridgeEvents = mapMaybe (\e -> if now < eventTime' e then Just e else Nothing)
-                 . concat $
-                   [ Left  <$> bridgeEventL l (focus r)
-                   , Right <$> bridgeEventR (focus l) r
-                   ]
+    bridgeEvent = liftMin (minBy $ comparing eventTime')
+                          (Left  <$> bridgeEventL now l         (focus r))
+                          (Right <$> bridgeEventR now (focus l) r)
 
     unTag' e = (unTag e,b)
 
+-- | Computes the minimum using the given comparator
+minBy                           :: (p -> p -> Ordering) -> p -> p -> p
+minBy cmp a b | a `cmp` b == GT = b
+              | otherwise       = a
+
+-- | Computes the first event, giving pref to the leftmost event on equal
+minEvent :: Ord (Time point)
+         => Maybe (Event point) -> Maybe (Event point) -> Maybe (Event point)
+minEvent = liftMin (minBy $ comparing eventTime)
+
+-- | If both maybe's are Justs, then applies the given binary operator
+-- to compute a 'Just result'. If either one is a Nothing, just return
+-- the other one.
+liftMin      :: (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
+liftMin f m1 = maybe m1 $ \e2 -> Just $ case m1 of
+                                          Nothing -> e2
+                                          Just e1 -> f e1 e2
+
+-- | Make sure the given event occurs after the given time.
+after       :: Ord (Time point) => Time point -> Event point -> Maybe (Event point)
+after now e = if now < eventTime e then Just e else Nothing
 
 -- | Apply the bridge event on the bridge
 applyBE                 :: (Point point, Hull hull point)
@@ -224,47 +242,44 @@ deriving instance (Eq (Time point), Eq point)     => Eq   (NextEvent point)
 
 
 -- | Computes the first event that will happen.
-firstEvent              :: Ord (Time point)
-                        => [Tagged (Event point)] -- ^ bridge events
-                        -> [Tagged (Event point)] -- ^ existing events
-                        -> NextEvent point
-firstEvent bridgeEvents = \case
-  []       -> case firstEvent' bridgeEvents of
-                Nothing -> None
-                Just e  -> BridgeEvent e
-  (e : es) -> case firstEvent' bridgeEvents of
+firstEvent             :: Ord (Time point)
+                       => Maybe (Tagged (Event point)) -- ^ first bridge event
+                       -> [Tagged (Event point)] -- ^ existing events
+                       -> NextEvent point
+firstEvent bridgeEvent = \case
+  []       -> maybe None BridgeEvent bridgeEvent
+  (e : es) -> case bridgeEvent of
                 Nothing -> ExistingEvent e es
-                Just be -> case be `cmp` e of
+                Just be -> case comparing eventTime' be e of
                              LT -> BridgeEvent be
-                             EQ -> error "simulatneous event; this better not happen"
+                             EQ -> error "simultaneous event; this better not happen"
                              GT -> ExistingEvent e es
+
+-- | computes the first bridge event on the left
+bridgeEventL          :: ( Hull hull point, Point point)
+                      => Time point -> hull point -> point -> Maybe (Event point)
+bridgeEventL now hl r = e1 `minEvent` e2
   where
-    cmp = comparing eventTime'
-    firstEvent' = minimum1By cmp
+    l = focus hl
+    e1 = do p <- predOfF hl
+            t <- colinearTime p l r
+            after now $ Event Delete t l
+    e2 = do p <- succOfF hl
+            t <- colinearTime l p r
+            after now $ Event Insert t p
 
--- | computes the bridge event on the left
-bridgeEventL      :: ( Hull hull point, Point point) => hull point -> point -> [Event point]
-bridgeEventL hl r = let l = focus hl
-                    in catMaybes
-                      [ do p <- predOfF hl
-                           t <- colinearTime p l r
-                           pure $ Event Delete t l
-                      , do p <- succOfF hl
-                           t <- colinearTime l p r
-                           pure $ Event Insert t p
-                      ]
-
--- | computes the bridge event on the right
-bridgeEventR      :: (Hull hull point, Point point) => point -> hull point -> [Event point]
-bridgeEventR l hr = let r = focus hr
-                    in catMaybes
-                       [ do p <- predOfF hr
-                            t <- colinearTime l p r
-                            pure $ Event Insert t p
-                       , do p <- succOfF hr
-                            t <- colinearTime l r p
-                            pure $ Event Delete t r
-                       ]
+-- | computes the first bridge event on the right
+bridgeEventR          :: (Hull hull point, Point point)
+                      => Time point -> point -> hull point -> Maybe (Event point)
+bridgeEventR now l hr = e1 `minEvent` e2
+  where
+    r = focus hr
+    e1 = do p <- predOfF hr
+            t <- colinearTime l p r
+            after now $ Event Insert t p
+    e2 = do p <- succOfF hr
+            t <- colinearTime l r p
+            after now $ Event Delete t r
 
 ----------------------------------------
 -- | run the merge simulation, also producing all intermediate
