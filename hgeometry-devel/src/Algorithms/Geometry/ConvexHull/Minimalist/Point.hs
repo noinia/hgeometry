@@ -17,6 +17,9 @@ class ( Ord (NumType point), Fractional (NumType point)
   toPt3 :: point -> Point.Point 3 (NumType point)
   toPt3 = view Point.toPoint
   {-# INLINE toPt3 #-}
+  compareX :: point -> point -> Ordering
+  compareX = comparing (view xCoord . toPt3)
+  {-# INLINE compareX #-}
 
 toPt2                                :: Point point
                                      => Time point -> point -> Point.Point 2 (NumType point)
@@ -28,9 +31,6 @@ instance (Ord r, Fractional r) => Point (Point.Point 3 r)
 instance (Ord r, Fractional r) => Point (Point.Point 3 r :+ p)
 
 
-compareX :: Point point => point -> point -> Ordering
-compareX = comparing (view xCoord . toPt3)
-{-# INLINABLE compareX #-}
 
 -- compareX' :: forall point r.
 --              (Point.ToAPoint point 3 r, Ord r) => point -> point -> Ordering
@@ -49,8 +49,10 @@ type Index = Int
 class HasIndex a where
   indexOf :: a -> Index
 
-compareIdx :: HasIndex a => a -> a -> Ordering
+-- | comapre on indices
+compareIdx :: HasIndex point => point -> point -> Ordering
 compareIdx = comparing indexOf
+{-# INLINE compareIdx #-}
 
 data WithIndex a = WithIndex {-# UNPACK #-} !Index a
                      deriving (Show)
@@ -64,10 +66,13 @@ instance HasIndex (WithIndex a) where
 instance Eq (WithIndex a) where
   (==) = (==) `on` indexOf
 instance Ord (WithIndex a) where
-  compare = compare `on` indexOf
+  compare = compareIdx
 
 instance Point.ToAPoint point d r => Point.ToAPoint (WithIndex point) d r where
   toPoint = to $ view Point.toPoint . (\(WithIndex _ p) -> p)
   {-# INLINE Point.toPoint #-}
 
-instance Point point => Point (WithIndex point)
+instance Point point => Point (WithIndex point) where
+  -- ^ Assumes the indices are assigned in increasing x-coordinates.
+  compareX = compareIdx
+  {-# INLINE compareX #-}
