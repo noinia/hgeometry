@@ -146,3 +146,30 @@ I guess this slight perf increase may have two reasons; either the
 Intsets are better, and/or the comparisons on the "xOrder" now use
 comparisons on Ints, which are faster than the comparions on arbitrary
 rational numbers.
+
+** c0fcdc25 use compareIdx for output as well
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,763,378,576 bytes allocated in the heap
+     386,594,848 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8429 colls,     0 par    0.276s   0.280s     0.0000s    0.0013s
+  Gen  1        16 colls,     0 par    0.130s   0.138s     0.0086s    0.0196s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   10.183s  ( 10.191s elapsed)
+  GC      time    0.406s  (  0.418s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.590s  ( 10.609s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    860,555,571 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.57s user 0.03s system 99% cpu 10.620 total
