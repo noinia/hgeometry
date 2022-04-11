@@ -58,10 +58,10 @@ type LowerHull point = [Three point]
 -- pre: the points are assumed to be in general position, i.e.
 -- no four coplanar points, all unique x,y,z coordinates.
 lowerHull :: Point point => NonEmpty point -> LowerHull point
-lowerHull = runSimulation . divideAndConquer1 (simulation @HullSet). NonEmpty.sortBy cmpXYZ
--- lowerHull = dropIndices
---           . runSimulation . divideAndConquer1 (simulation @HullIntMap)
---           . withIndices . NonEmpty.sortBy cmpXYZ
+-- lowerHull = runSimulation . divideAndConquer1 (simulation @HullSet). NonEmpty.sortBy cmpXYZ
+lowerHull = dropIndices
+          . runSimulation . divideAndConquer1 (simulation @HullIntMap)
+          . withIndices . NonEmpty.sortBy cmpXYZ
 
 -- | Attach indices
 withIndices :: NonEmpty a -> NonEmpty (WithIndex a)
