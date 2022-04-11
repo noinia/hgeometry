@@ -18,7 +18,11 @@
 -- by Timothy M. Chan
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.ConvexHull.Minimalist where
+module Algorithms.Geometry.ConvexHull.Minimalist
+  ( lowerHull
+  , lowerHull'
+  , LowerHull
+  ) where
 
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
@@ -185,6 +189,7 @@ minBy cmp a b | a `cmp` b == GT = b
 minEvent :: Ord (Time point)
          => Maybe (Event point) -> Maybe (Event point) -> Maybe (Event point)
 minEvent = liftMin (minBy $ comparing eventTime)
+{-# INLINABLE minEvent #-}
 
 -- | If both maybe's are Justs, then applies the given binary operator
 -- to compute a 'Just result'. If either one is a Nothing, just return
@@ -193,10 +198,12 @@ liftMin      :: (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
 liftMin f m1 = maybe m1 $ \e2 -> Just $ case m1 of
                                           Nothing -> e2
                                           Just e1 -> f e1 e2
+{-# INLINABLE liftMin #-}
 
 -- | Make sure the given event occurs after the given time.
 after       :: Ord (Time point) => Time point -> Event point -> Maybe (Event point)
 after now e = if now < eventTime e then Just e else Nothing
+{-# INLINABLE after #-}
 
 -- | Apply the bridge event on the bridge
 applyBE                 :: (Point point, Hull hull point)
