@@ -157,8 +157,7 @@ instance (Point point, Hull hull point) => Semigroup (Simulation hull point) whe
   (Sim l el) <> (Sim r er) = Sim (fromBridge b) events
     where
       b      = bridgeOf l r
-      events = map fst
-             . runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
+      events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
       merge = mergeSortedListsBy (comparing eventTime')
       -- minInftyT = Nothing
 
@@ -167,18 +166,18 @@ runSim                           :: (Hull hull point, Point point)
                                  => Time point -- ^ current time
                                  -> Bridge hull point -- ^ current bridge
                                  -> [Tagged (Event point)]     -- ^ future events
-                                 -- -> [Event point]
-                                 -> [(Event point, Bridge hull point)]
+                                 -> [Event point]
+                                 -- -> [(Event point, Bridge hull point)]
 runSim now b@(Bridge l r) events = case firstEvent bridgeEvent events of
     None                    -> []
-    BridgeEvent  e          -> unTag' e     : runSim (eventTime' e) (applyBE e b) events
+    BridgeEvent  e          -> unTag e     : runSim (eventTime' e) (applyBE e b) events
     ExistingEvent e events' -> output e b <> runSim (eventTime' e) (applyB e b)  events'
   where
     bridgeEvent = liftMin (minBy $ comparing eventTime')
                           (Left  <$> bridgeEventL now l         (focus r))
                           (Right <$> bridgeEventR now (focus l) r)
 
-    unTag' e = (unTag e,b)
+    -- unTag' e = (unTag e,b)
 
 -- | Computes the minimum using the given comparator
 minBy                           :: (p -> p -> Ordering) -> p -> p -> p
@@ -230,15 +229,15 @@ applyB el (Bridge l r) = case el of
 -- | Should we output this event
 output                  :: (Point point, Hull hull point)
                         => Tagged (Event point) -> Bridge hull point
-                        -- -> [Event point]
-                        -> [(Event point, Bridge hull point)]
+                        -> [Event point]
+                        -- -> [(Event point, Bridge hull point)]
 output ee b@(Bridge l r) = case ee of
     Left e  -> case eventPoint e `compareX` focus l of
                  GT -> []
-                 _  -> [(e,b)]
+                 _  -> [e] -- [(e,b)]
     Right e -> case eventPoint e `compareX` focus r of
                  LT -> []
-                 _  -> [(e,b)]
+                 _  -> [e] -- [(e,b)]
 
 data NextEvent point = None
                      | BridgeEvent   !(Tagged (Event point))
@@ -291,14 +290,14 @@ bridgeEventR now l hr = e1 `minEvent` e2
 ----------------------------------------
 -- | run the merge simulation, also producing all intermediate
 -- bridges.
-runMerge                       :: (Point point, Hull hull point)
-                               => Simulation hull point -> Simulation hull point
-                               -> (hull point, [(Event point, Bridge hull point)])
-runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
-    where
-      b      = bridgeOf l r
-      events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
-      merge = mergeSortedListsBy (comparing eventTime')
+-- runMerge                       :: (Point point, Hull hull point)
+--                                => Simulation hull point -> Simulation hull point
+--                                -> (hull point, [(Event point, Bridge hull point)])
+-- runMerge (Sim l el) (Sim r er) = (fromBridge b, events)
+--     where
+--       b      = bridgeOf l r
+--       events = runSim minInftyT b $ merge (Left <$> el) (Right <$> er)
+--       merge = mergeSortedListsBy (comparing eventTime')
 
 --------------------------------------------------------------------------------
 
@@ -448,35 +447,35 @@ render (s,pts) = ipeFile . fmap (\(t,h,_) -> fromContent [ drawTime t
                  . runSimulation' $ s
 
 
-renderMergeIpe        :: ( Point point
-                         , Hull hull point
-                         , IpeWriteText (NumType point)
-                         , NumType (hull point) ~ NumType point
-                         , RenderAt (hull point), RenderAt point
-                         ) => FilePath
-                      -> (Simulation hull point, NonEmpty point)
-                      -> (Simulation hull point, NonEmpty point) -> IO ()
-renderMergeIpe fp l r = writeIpeFile fp $ renderMerge l r
+-- renderMergeIpe        :: ( Point point
+--                          , Hull hull point
+--                          , IpeWriteText (NumType point)
+--                          , NumType (hull point) ~ NumType point
+--                          , RenderAt (hull point), RenderAt point
+--                          ) => FilePath
+--                       -> (Simulation hull point, NonEmpty point)
+--                       -> (Simulation hull point, NonEmpty point) -> IO ()
+-- renderMergeIpe fp l r = writeIpeFile fp $ renderMerge l r
 
-renderMerge     :: forall point hull. ( Point point
-                   , Hull hull point
-                   , IpeWriteText (NumType point)
-                   , NumType (hull point) ~ NumType point
-                   , RenderAt (hull point), RenderAt point
-                   )
-                => (Simulation hull point, NonEmpty point)
-                -> (Simulation hull point, NonEmpty point)
-                -> IpeFile (NumType point)
-renderMerge (l,lp) (r,rp) = ipeFile $ initialHull :| simPages
-  where
-     (h0,evs) = runMerge l r
-     initialHull = fromContent [ renderAt (-1000) h0
-                               , renderAt (-1000) (lp <> rp)
-                               ]
-     simPages = flip map evs $ \(e,b) -> let t = eventTime e in
-                                           fromContent [ renderAt t b
-                                                       , renderAt t (lp <> rp)
-                                                       ]
+-- renderMerge     :: forall point hull. ( Point point
+--                    , Hull hull point
+--                    , IpeWriteText (NumType point)
+--                    , NumType (hull point) ~ NumType point
+--                    , RenderAt (hull point), RenderAt point
+--                    )
+--                 => (Simulation hull point, NonEmpty point)
+--                 -> (Simulation hull point, NonEmpty point)
+--                 -> IpeFile (NumType point)
+-- renderMerge (l,lp) (r,rp) = ipeFile $ initialHull :| simPages
+--   where
+--      (h0,evs) = runMerge l r
+--      initialHull = fromContent [ renderAt (-1000) h0
+--                                , renderAt (-1000) (lp <> rp)
+--                                ]
+--      simPages = flip map evs $ \(e,b) -> let t = eventTime e in
+--                                            fromContent [ renderAt t b
+--                                                        , renderAt t (lp <> rp)
+--                                                        ]
 
 drawTime   :: (Num r, IpeWriteText r) => Maybe r -> IpeObject r
 drawTime t = iO . ipeLabel $ fromMaybe "?" (ipeWriteText =<< t) :+ Point.origin
