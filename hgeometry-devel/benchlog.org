@@ -256,3 +256,37 @@ frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
   Productivity  96.2% of total user, 96.1% of total elapsed
 
 ./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.06s system 99% cpu 10.416 total
+
+*** 550645dc collecting only the events, not the intermediate bridges
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,515,268,272 bytes allocated in the heap
+     335,554,320 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              51 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8187 colls,     0 par    0.227s   0.231s     0.0000s    0.0009s
+  Gen  1        16 colls,     0 par    0.102s   0.102s     0.0064s    0.0182s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.886s  (  9.884s elapsed)
+  GC      time    0.329s  (  0.333s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.216s  ( 10.217s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,305,040 bytes per MUT second
+
+  Productivity  96.8% of total user, 96.7% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.20s user 0.02s system 99% cpu 10.223 total
+
+I guess I would have expected a slightly bigger gain.
+
+Really most of the cost is in the colinearTime' computation. I guess
+if there are big gains to make, we should look for them
+there. Although adding simulation of simplicity will also certainly
+make an inpact.
