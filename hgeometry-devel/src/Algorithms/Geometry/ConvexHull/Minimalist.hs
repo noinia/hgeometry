@@ -231,7 +231,7 @@ output                  :: (Point point, Hull hull point)
                         => Tagged (Event point) -> Bridge hull point
                         -> [Event point]
                         -- -> [(Event point, Bridge hull point)]
-output ee b@(Bridge l r) = case ee of
+output ee (Bridge l r) = case ee of
     Left e  -> case eventPoint e `compareX` focus l of
                  GT -> []
                  _  -> [e] -- [(e,b)]
