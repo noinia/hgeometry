@@ -346,7 +346,7 @@ simulate :: forall hull point. (Point point, Hull hull point)
 simulate = divideAndConquer1 simulation . NonEmpty.sortBy cmpXYZ
 
 -- | computes all initial hulls
-hulls :: Point point => NonEmpty point -> HullZ point
+hulls :: Point point => NonEmpty point -> HullSet point
 hulls = divideAndConquer1 singleton . NonEmpty.sortBy cmpXYZ
 
 
@@ -465,7 +465,7 @@ instance RenderAt t =>  RenderAt (NonEmpty t) where
 instance RenderAt (Point.Point 3 R) where
   renderAt t = iO . defIO . toPt2 t
 
-instance (Point point, RenderAt point) => RenderAt (HullZ point) where
+instance (Point point, RenderAt point) => RenderAt (HullSet point) where
   renderAt t h = case hullAt t h of
                    Nothing -> renderAt t (focus h)
                    Just pl -> iO . defIO $ pl
@@ -496,17 +496,17 @@ instance (Point point, Hull hull point, RenderAt (hull point), NumType (hull poi
 --            , Point.Point3 22 20 1
 --            ]
 
--- testHull :: HullZ _
+-- testHull :: HullSet _
 -- testHull = hulls myPoints
 
 
--- testSim :: Simulation HullZ _
+-- testSim :: Simulation HullSet _
 -- testSim = simulate myPoints
 
 -- test :: LowerHull _
 -- test = lowerHull myPoints
 
--- theLeft :: Simulation HullZ (Point.Point 3 R)
+-- theLeft :: Simulation HullSet (Point.Point 3 R)
 -- theLeft = simulate theLeftP
 
 -- theLeftP = NonEmpty.fromList [ Point.Point3 0 10 20
@@ -524,7 +524,7 @@ instance (Point point, Hull hull point, RenderAt (hull point), NumType (hull poi
 
 -- initialBridge = bridgeOf (_initialHull theLeft) (_initialHull theRight)
 
--- testz :: Bridge HullZ _
+-- testz :: Bridge HullSet _
 -- testz = let Bridge l r = initialBridge
 --             [e] = bridgeEventL l (focus r)
 --         in applyBE (Left e) initialBridge

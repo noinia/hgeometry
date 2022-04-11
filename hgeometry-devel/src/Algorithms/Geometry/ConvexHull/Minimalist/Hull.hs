@@ -21,6 +21,7 @@ import           Data.Set (Set)
 import           Data.Maybe
 import           Data.Kind
 
+
 --------------------------------------------------------------------------------
 
 minInftyT :: Num r => r
@@ -48,27 +49,27 @@ class Zipper zipper elem where
 
 -- | Zipper that also supports prececessor/successor search and
 -- insertions and deletions at arbitrary positions.
-class (Zipper hull point, Point point) => RandomAccessZipper (hull :: Type -> Type) point where
-  predOf :: Point point => point -> hull point -> Maybe point
-  succOf :: Point point => point -> hull point -> Maybe point
+class (Zipper hull point) => RandomAccessZipper (hull :: Type -> Type) point where
+  predOf :: point -> hull point -> Maybe point
+  succOf :: point -> hull point -> Maybe point
 
   -- | delete the point from the hull. If we delete the focus, try to
   -- take from the right first, if that does not work, take the new
   -- focus from the left instead.
   --
   -- pre : the hull remains non-empty
-  delete :: Point point => point -> hull point -> hull point
-  insert :: Point point => point -> hull point -> hull point
+  delete :: point -> hull point -> hull point
+  insert :: point -> hull point -> hull point
 
   -- | Get the predecessor of the focus
-  predOfF :: Point point => hull point -> Maybe point
+  predOfF :: hull point -> Maybe point
   predOfF h = predOf (focus h) h
   -- | Get the successor of the focus
-  succOfF :: Point point => hull point -> Maybe point
+  succOfF :: hull point -> Maybe point
   succOfF h = succOf (focus h) h
   {-# MINIMAL predOf, succOf, delete, insert #-}
 
-class (RandomAccessZipper hull point, Point point) => Hull (hull :: Type -> Type) point where
+class (RandomAccessZipper hull point) => Hull (hull :: Type -> Type) point where
   fromBridge :: Point point => Bridge hull point -> hull point
 
 
@@ -104,9 +105,6 @@ instance Point point => Eq (X point) where
   p == q = p `compare` q == EQ
 instance Point point => Ord (X point) where
   (X p) `compare` (X q) = compareX p q
-
-
-
 
 instance Show point => Show (HullSet point) where
   showsPrec d (HullSet ll p rr) = showParen (d > app_prec) $ showString "HullSet "
@@ -186,13 +184,71 @@ bridgeOf l0 r0 = go (goRightMost l0) (goLeftMost r0)
 
 --------------------------------------------------------------------------------
 
-  -- goLeft (HullSet ll p rr) = case Seq.viewr ll of
-  --                            EmptyR   -> error "cannot go left"
-  --                            ll' :> l -> HullSet ll' l (p :<| rr)
-  -- goRight (HullSet ll p rr) = case Seq.viewl rr of
-  --                             EmptyL    -> error "cannot go right"
-  --                             r :< rr' -> HullSet (ll :|> p) r rr'
+-- | The Hull data type based on an IntMap implementation.
+data HullIntMap point = HullIntMap (IntMap.IntMap point) point (IntMap.IntMap point)
 
+type instance NumType (HullIntMap point) = NumType point
+
+
+instance Show point => Show (HullIntMap point) where
+  showsPrec d (HullIntMap ll p rr) = showParen (d > app_prec) $ showString "HullIntMap "
+      .  showList (IntMap.toAscList ll)
+      .  showString " " .  showsPrec (app_prec+1) p .  showString " "
+      .  showList (IntMap.toAscList rr)
+    where app_prec = 10
+
+instance (HasIndex point, Point point) => Semigroup (HullIntMap point) where
+  l <> r = fromBridge $ bridgeOf l r
+
+instance HasIndex point => Zipper HullIntMap point where
+  singleton p = HullIntMap mempty p mempty
+  -- | Gets the element under focus
+  focus (HullIntMap _ p _) = p
+  -- | moves the focus left
+  goLeft (HullIntMap ll p rr) =
+    (\(p',ll') -> HullIntMap ll' p' (IntMap.insert (indexOf p) p rr)) <$> IntMap.maxView ll
+
+  goRight (HullIntMap ll p rr) =
+    (\(p',rr') -> HullIntMap (IntMap.insert (indexOf p) p ll) p' rr') <$> IntMap.minView rr
+
+  goRightMost h@(HullIntMap ll p rr) = case IntMap.maxView rr of
+    Nothing      -> h
+    Just (r,rr') -> HullIntMap (ll <> IntMap.insert (indexOf p) p rr') r IntMap.empty
+
+  goLeftMost h@(HullIntMap ll p rr) = case IntMap.minView ll of
+    Nothing      -> h
+    Just (l,ll') -> HullIntMap IntMap.empty l (ll' <> IntMap.insert (indexOf p) p rr)
+
+
+instance HasIndex point => RandomAccessZipper HullIntMap point where
+  succOf q (HullIntMap ll p rr) = case q `compareIdx` p of
+                                 LT -> (snd <$> IntMap.lookupGT (indexOf q) ll) <|> Just p
+                                 _  -> snd <$> IntMap.lookupGT (indexOf q) rr
+
+  predOf q (HullIntMap ll p rr) = case q `compareIdx` p of
+                                 GT -> (snd <$> IntMap.lookupLT (indexOf q) rr) <|> Just p
+                                 _  -> snd <$> IntMap.lookupLT (indexOf q) ll
+
+  delete q (HullIntMap ll p rr) = case q `compareIdx` p of
+      LT -> HullIntMap (IntMap.delete (indexOf q) ll) p rr
+      EQ -> case IntMap.minView rr of
+              Nothing         -> case IntMap.maxView ll of
+                Nothing         -> error "HullIntMap: delete hull is now empty?"
+                Just (p',ll') -> HullIntMap ll' p' rr
+              Just (p',rr') -> HullIntMap ll p' rr'
+      GT -> HullIntMap ll p (IntMap.delete (indexOf q) rr)
+
+  insert q (HullIntMap ll p rr) = case q `compareIdx` p of
+                                 LT -> HullIntMap (IntMap.insert (indexOf q) q ll) p rr
+                                 EQ -> error "HullIntMap: trying to insert existing point"
+                                 GT -> HullIntMap ll p (IntMap.insert (indexOf q) q rr)
+
+  succOfF (HullIntMap _ _ rr) = snd <$> IntMap.lookupMin rr
+  predOfF (HullIntMap ll _ _) = snd <$> IntMap.lookupMax ll
+
+instance HasIndex point => Hull HullIntMap point where
+  fromBridge (Bridge (HullIntMap ll l _) (HullIntMap _ r rr)) =
+    HullIntMap ll l (IntMap.insert (indexOf r) r rr)
 
 --------------------------------------------------------------------------------
 
