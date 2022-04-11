@@ -173,3 +173,32 @@ frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
   Productivity  96.2% of total user, 96.1% of total elapsed
 
 ./devel-prof vd_points_10k.json +RTS -s  10.57s user 0.03s system 99% cpu 10.620 total
+
+** 0ce6dbbb making bridgeEventL and bridgeEventR return Maybe's instead.
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,595,102,128 bytes allocated in the heap
+     387,826,056 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8264 colls,     0 par    0.265s   0.268s     0.0000s    0.0014s
+  Gen  1        16 colls,     0 par    0.131s   0.131s     0.0082s    0.0193s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.978s  (  9.979s elapsed)
+  GC      time    0.396s  (  0.399s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.375s  ( 10.379s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,372,675 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.03s system 99% cpu 10.396 total
+
+minor gain :)
