@@ -202,3 +202,57 @@ frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
 ./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.03s system 99% cpu 10.396 total
 
 minor gain :)
+
+** added some inlinable pragma's, didn't really do anything
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,595,102,128 bytes allocated in the heap
+     387,847,064 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8264 colls,     0 par    0.264s   0.268s     0.0000s    0.0012s
+  Gen  1        16 colls,     0 par    0.131s   0.131s     0.0082s    0.0190s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.983s  (  9.987s elapsed)
+  GC      time    0.395s  (  0.399s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.378s  ( 10.386s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,003,921 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.2% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.36s user 0.02s system 99% cpu 10.392 total
+
+** da8b9062 Explicit export list
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,545,937,600 bytes allocated in the heap
+     386,062,448 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8217 colls,     0 par    0.271s   0.275s     0.0000s    0.0013s
+  Gen  1        16 colls,     0 par    0.127s   0.127s     0.0080s    0.0197s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.996s  ( 10.005s elapsed)
+  GC      time    0.399s  (  0.402s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.395s  ( 10.408s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    854,903,685 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.06s system 99% cpu 10.416 total
