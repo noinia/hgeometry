@@ -59,7 +59,17 @@ type LowerHull point = [Three point]
 -- no four coplanar points, all unique x,y,z coordinates.
 lowerHull :: Point point => NonEmpty point -> LowerHull point
 lowerHull = runSimulation . divideAndConquer1 (simulation @HullSet). NonEmpty.sortBy cmpXYZ
+-- lowerHull = dropIndices
+--           . runSimulation . divideAndConquer1 (simulation @HullIntMap)
+--           . withIndices . NonEmpty.sortBy cmpXYZ
 
+-- | Attach indices
+withIndices :: NonEmpty a -> NonEmpty (WithIndex a)
+withIndices = NonEmpty.zipWith WithIndex (NonEmpty.fromList [0..])
+
+-- | Drop indices
+dropIndices :: LowerHull (WithIndex point) -> LowerHull point
+dropIndices = fmap (fmap $ \(WithIndex _ p) -> p)
 
 lowerHull' :: (Point point, AsExt point, CoreOf point ~ Point.Point 3 r, ExtraOf point ~ e
               , r ~ NumType point
