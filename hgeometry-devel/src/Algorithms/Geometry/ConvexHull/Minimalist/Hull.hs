@@ -1,4 +1,18 @@
-module Algorithms.Geometry.ConvexHull.Minimalist.Hull where
+module Algorithms.Geometry.ConvexHull.Minimalist.Hull
+  ( Zipper(..)
+  , RandomAccessZipper(..)
+
+  , Hull(..)
+  , toList
+  , hullAt
+
+  , Bridge(..), bridgeOf
+
+  , HullSet
+  , HullIntMap
+
+  ,  minInftyT
+  ) where
 
 -- import           Algorithms.BinarySearch
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point

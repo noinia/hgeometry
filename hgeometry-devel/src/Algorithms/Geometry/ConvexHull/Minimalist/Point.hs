@@ -1,5 +1,10 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Algorithms.Geometry.ConvexHull.Minimalist.Point where
+module Algorithms.Geometry.ConvexHull.Minimalist.Point
+  ( Point(..), toPt2
+  , Time
+  , HasIndex(..)
+  , WithIndex(..), compareIdx
+  ) where
 
 import           Control.Lens (to, view)
 import           Data.Ext
