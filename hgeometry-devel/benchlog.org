@@ -290,3 +290,66 @@ Really most of the cost is in the colinearTime' computation. I guess
 if there are big gains to make, we should look for them
 there. Although adding simulation of simplicity will also certainly
 make an inpact.
+
+*** a2d0988e with Point and Hull modules also having explicit export lists.
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,515,268,272 bytes allocated in the heap
+     335,558,952 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              51 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8187 colls,     0 par    0.234s   0.237s     0.0000s    0.0009s
+  Gen  1        16 colls,     0 par    0.104s   0.104s     0.0065s    0.0186s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.900s  (  9.899s elapsed)
+  GC      time    0.338s  (  0.341s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.239s  ( 10.241s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    860,086,476 bytes per MUT second
+
+  Productivity  96.7% of total user, 96.7% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.22s user 0.03s system 99% cpu 10.249 total
+
+so no effect of this itself.
+
+*** quick benchmark using Double's rather than the Rationals:
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   2,574,368,424 bytes allocated in the heap
+     257,413,040 bytes copied during GC
+      21,775,184 bytes maximum residency (13 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      2466 colls,     0 par    0.135s   0.136s     0.0001s    0.0011s
+  Gen  1        13 colls,     0 par    0.084s   0.084s     0.0065s    0.0186s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    0.683s  (  0.690s elapsed)
+  GC      time    0.219s  (  0.220s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time    0.902s  (  0.910s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    3,770,325,955 bytes per MUT second
+
+  Productivity  75.7% of total user, 75.8% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  0.87s user 0.04s system 98% cpu 0.919 total
+
+
+since this is a about 10 times faster than anything else I've done so
+far, let's give priority to implementing some sort of double-filters
+first, rather than further optimizing the current implementation.
+
+First priority is still incorporating SoS though.

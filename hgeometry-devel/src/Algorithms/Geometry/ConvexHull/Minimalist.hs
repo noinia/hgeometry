@@ -102,10 +102,10 @@ toTriangle (Three p q r) = Triangle (p^._Ext) (q^._Ext) (r^._Ext)
 
 --------------------------------------------------------------------------------
 
-instance AsExt (Point.Point 3 r) where
-  type CoreOf (Point.Point 3 r) = Point.Point 3 r
-  type ExtraOf (Point.Point 3 r) = ()
-  _Ext = iso ext (view core)
+-- instance AsExt (Point.Point 3 r) where
+--   type CoreOf (Point.Point 3 r) = Point.Point 3 r
+--   type ExtraOf (Point.Point 3 r) = ()
+--   _Ext = iso ext (view core)
 
 --------------------------------------------------------------------------------
 

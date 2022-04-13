@@ -145,3 +145,11 @@ instance AsExt (c :+ e) where
   type ExtraOf (c :+ e) = e
   _Ext = iso id id
   {-# INLINE _Ext #-}
+
+-- newtype CoreOnly core = CoreOnly core
+--                       deriving newtype (Show,Read,Eq,Ord)
+
+-- instance AsExt (CoreOnly core) where
+--   type CoreOf (CoreOnly core) = core
+--   type ExtraOf (CoreOnly core) = ()
+--   _Ext = iso (\(CoreOnly c) -> ext c) (CoreOnly . view core)
