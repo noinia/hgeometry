@@ -632,6 +632,15 @@ type t :~ c = t `AsA` c
 
 -- | Pattern to get the core.
 pattern AsA :: t :~ c => c -> t
+
+-- | Types that can be decomposed into an Ext
+class AsExt t where {
+    type family CoreOf t;
+    type family ExtraOf t;
+}
+
+-- | Convert between this type and an Ext
+_Ext :: AsExt t => Iso' t (CoreOf t :+ ExtraOf t)
 instance (Control.DeepSeq.NFData core, Control.DeepSeq.NFData extra) => Control.DeepSeq.NFData (core Data.Ext.:+ extra)
 instance GHC.Generics.Generic (core Data.Ext.:+ extra)
 instance (GHC.Enum.Bounded core, GHC.Enum.Bounded extra) => GHC.Enum.Bounded (core Data.Ext.:+ extra)
@@ -639,6 +648,7 @@ instance (GHC.Classes.Ord core, GHC.Classes.Ord extra) => GHC.Classes.Ord (core 
 instance (GHC.Classes.Eq core, GHC.Classes.Eq extra) => GHC.Classes.Eq (core Data.Ext.:+ extra)
 instance (GHC.Read.Read core, GHC.Read.Read extra) => GHC.Read.Read (core Data.Ext.:+ extra)
 instance (GHC.Show.Show core, GHC.Show.Show extra) => GHC.Show.Show (core Data.Ext.:+ extra)
+instance Data.Ext.AsExt (c Data.Ext.:+ e)
 instance (t GHC.Types.~ c) => Data.Ext.AsA t c
 instance Data.Ext.AsA (c Data.Ext.:+ e) c
 instance Data.Bifunctor.Bifunctor (Data.Ext.:+)
@@ -1635,8 +1645,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_avOs a_avY2. Lens (Permutation a_avOs) (Permutation a_avY2) (Vector (Orbit a_avOs)) (Vector (Orbit a_avY2))
-indexes :: forall a_avOs. Lens' (Permutation a_avOs) (Vector (Int, Int))
+orbits :: forall a_avSv a_aw25. Lens (Permutation a_avSv) (Permutation a_aw25) (Vector (Orbit a_avSv)) (Vector (Orbit a_aw25))
+indexes :: forall a_avSv. Lens' (Permutation a_avSv) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 

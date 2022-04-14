@@ -27,18 +27,18 @@
 </span><span id="line-27"></span><span class="hs-comment">-- in adjacency list representation.</span><span>
 </span><span id="line-28"></span><span class="hs-comment">--</span><span>
 </span><span id="line-29"></span><span class="hs-comment">-- running time: \(O(V + E)\)</span><span>
-</span><span id="line-30"></span><span id="local-6989586621679254977"><span id="local-6989586621679254978"><span class="annot"><a href="Algorithms.Graph.BFS.html#bfs"><span class="hs-identifier hs-type">bfs</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679254978"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679254977"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679254978"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679254977"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-30"></span><span id="local-6989586621679255075"><span id="local-6989586621679255076"><span class="annot"><a href="Algorithms.Graph.BFS.html#bfs"><span class="hs-identifier hs-type">bfs</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679255076"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679255075"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679255076"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679255075"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
 </span><span id="line-31"></span><span id="bfs"><span class="annot"><span class="annottext">bfs :: Int -&gt; Vector (v, f Int) -&gt; Tree v
-</span><a href="Algorithms.Graph.BFS.html#bfs"><span class="hs-identifier hs-var hs-var">bfs</span></a></span></span><span> </span><span id="local-6989586621679254976"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254976"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679254975"><span class="annot"><span class="annottext">Vector (v, f Int)
-</span><a href="#local-6989586621679254975"><span class="hs-identifier hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; v) -&gt; Tree Int -&gt; Tree v
+</span><a href="Algorithms.Graph.BFS.html#bfs"><span class="hs-identifier hs-var hs-var">bfs</span></a></span></span><span> </span><span id="local-6989586621679255074"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255074"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679255073"><span class="annot"><span class="annottext">Vector (v, f Int)
+</span><a href="#local-6989586621679255073"><span class="hs-identifier hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; v) -&gt; Tree Int -&gt; Tree v
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(v, f Int) -&gt; v
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((v, f Int) -&gt; v) -&gt; (Int -&gt; (v, f Int)) -&gt; Int -&gt; v
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (v, f Int)
-</span><a href="#local-6989586621679254975"><span class="hs-identifier hs-var">gr</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (v, f Int) -&gt; Int -&gt; (v, f Int)
+</span><a href="#local-6989586621679255073"><span class="hs-identifier hs-var">gr</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (v, f Int) -&gt; Int -&gt; (v, f Int)
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Tree Int -&gt; Tree v)
 -&gt; (Vector (v, f Int) -&gt; Tree Int) -&gt; Vector (v, f Int) -&gt; Tree v
@@ -48,7 +48,7 @@ forall (f :: * -&gt; *).
 Foldable f =&gt;
 Int -&gt; Vector (f Int) -&gt; Tree Int
 </span><a href="Algorithms.Graph.BFS.html#bfs%27"><span class="hs-identifier hs-var">bfs'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254976"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector (f Int) -&gt; Tree Int)
+</span><a href="#local-6989586621679255074"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector (f Int) -&gt; Tree Int)
 -&gt; (Vector (v, f Int) -&gt; Vector (f Int))
 -&gt; Vector (v, f Int)
 -&gt; Tree Int
@@ -60,19 +60,19 @@ forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(Vector (v, f Int) -&gt; Tree v) -&gt; Vector (v, f Int) -&gt; Tree v
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector (v, f Int)
-</span><a href="#local-6989586621679254975"><span class="hs-identifier hs-var">gr</span></a></span><span>
+</span><a href="#local-6989586621679255073"><span class="hs-identifier hs-var">gr</span></a></span><span>
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- | Runs a BFS from the first vertex in the graph. The graph is given</span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- in adjacency list representation.</span><span>
 </span><span id="line-35"></span><span class="hs-comment">--</span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- running time: \(O(V + E)\)</span><span>
-</span><span id="line-37"></span><span id="local-6989586621679255027"><span class="annot"><a href="Algorithms.Graph.BFS.html#bfs%27"><span class="hs-identifier hs-type">bfs'</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679255027"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679255027"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-37"></span><span id="local-6989586621679255125"><span class="annot"><a href="Algorithms.Graph.BFS.html#bfs%27"><span class="hs-identifier hs-type">bfs'</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679255125"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679255125"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
 </span><span id="line-38"></span><span id="bfs%27"><span class="annot"><span class="annottext">bfs' :: Int -&gt; Vector (f Int) -&gt; Tree Int
-</span><a href="Algorithms.Graph.BFS.html#bfs%27"><span class="hs-identifier hs-var hs-var">bfs'</span></a></span></span><span> </span><span id="local-6989586621679254972"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254972"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679254971"><span class="annot"><span class="annottext">Vector (f Int)
-</span><a href="#local-6989586621679254971"><span class="hs-identifier hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector [Int] -&gt; Tree Int
+</span><a href="Algorithms.Graph.BFS.html#bfs%27"><span class="hs-identifier hs-var hs-var">bfs'</span></a></span></span><span> </span><span id="local-6989586621679255070"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255070"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679255069"><span class="annot"><span class="annottext">Vector (f Int)
+</span><a href="#local-6989586621679255069"><span class="hs-identifier hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector [Int] -&gt; Tree Int
 </span><a href="Algorithms.Graph.BFS.html#extract"><span class="hs-identifier hs-var">extract</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254972"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector [Int] -&gt; Tree Int) -&gt; Vector [Int] -&gt; Tree Int
+</span><a href="#local-6989586621679255070"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector [Int] -&gt; Tree Int) -&gt; Vector [Int] -&gt; Tree Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s [Int])) -&gt; Vector [Int]
 forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
@@ -80,27 +80,27 @@ forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
 </span><span id="line-39"></span><span>         </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s [Int])) -&gt; Vector [Int])
 -&gt; (forall s. ST s (MVector s [Int])) -&gt; Vector [Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679254968"><span class="annot"><span class="annottext">MVector s Bool
-</span><a href="#local-6989586621679254968"><span class="hs-identifier hs-var">st</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool -&gt; ST s (MVector (PrimState (ST s)) Bool)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679255066"><span class="annot"><span class="annottext">MVector s Bool
+</span><a href="#local-6989586621679255066"><span class="hs-identifier hs-var">st</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool -&gt; ST s (MVector (PrimState (ST s)) Bool)
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 Int -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">UMV.replicate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254966"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679255064"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-40"></span><span>              </span><span id="local-6989586621679254965"><span class="annot"><span class="annottext">MVector s [Int]
-</span><a href="#local-6989586621679254965"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) [Int])
+</span><span id="line-40"></span><span>              </span><span id="local-6989586621679255063"><span class="annot"><span class="annottext">MVector s [Int]
+</span><a href="#local-6989586621679255063"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) [Int])
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 Int -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">MV.new</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254966"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621679255064"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-41"></span><span>              </span><span class="annot"><span class="annottext">MVector s Bool -&gt; MVector s [Int] -&gt; Seq Int -&gt; ST s ()
 forall s. MVector s Bool -&gt; MVector s [Int] -&gt; Seq Int -&gt; ST s ()
-</span><a href="#local-6989586621679254963"><span class="hs-identifier hs-var">go0</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
-</span><a href="#local-6989586621679254968"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [Int]
-</span><a href="#local-6989586621679254965"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254972"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Seq Int -&gt; Seq Int
+</span><a href="#local-6989586621679255061"><span class="hs-identifier hs-var">go0</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
+</span><a href="#local-6989586621679255066"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [Int]
+</span><a href="#local-6989586621679255063"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255070"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Seq Int -&gt; Seq Int
 forall a. a -&gt; Seq a -&gt; Seq a
 </span><span class="hs-operator hs-var">:&lt;|</span></span><span> </span><span class="annot"><span class="annottext">Seq Int
 forall a. Monoid a =&gt; a
@@ -108,121 +108,121 @@ forall a. Monoid a =&gt; a
 </span><span id="line-42"></span><span>              </span><span class="annot"><span class="annottext">MVector s [Int] -&gt; ST s (MVector s [Int])
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s [Int]
-</span><a href="#local-6989586621679254965"><span class="hs-identifier hs-var">out</span></a></span><span>
+</span><a href="#local-6989586621679255063"><span class="hs-identifier hs-var">out</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>    </span><span id="local-6989586621679254966"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679254966"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (f Int) -&gt; Int
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679255064"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679255064"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (f Int) -&gt; Int
 forall a. Vector a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector (f Int)
-</span><a href="#local-6989586621679254971"><span class="hs-identifier hs-var">gr</span></a></span><span>
-</span><span id="line-45"></span><span>    </span><span class="annot"><a href="#local-6989586621679254963"><span class="hs-identifier hs-type">go0</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679255006"><span class="annot"><a href="#local-6989586621679255006"><span class="hs-identifier hs-type">s</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UMV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679255006"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679255006"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>
-</span><span id="line-46"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679255006"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621679254963"><span class="annot"><span class="annottext">go0 :: MVector s Bool -&gt; MVector s [Int] -&gt; Seq Int -&gt; ST s ()
-</span><a href="#local-6989586621679254963"><span class="hs-identifier hs-var hs-var">go0</span></a></span></span><span> </span><span id="local-6989586621679254960"><span class="annot"><span class="annottext">MVector s Bool
-</span><a href="#local-6989586621679254960"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span id="local-6989586621679254959"><span class="annot"><span class="annottext">MVector s [Int]
-</span><a href="#local-6989586621679254959"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq Int -&gt; ST s ()
-</span><a href="#local-6989586621679254958"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><a href="#local-6989586621679255069"><span class="hs-identifier hs-var">gr</span></a></span><span>
+</span><span id="line-45"></span><span>    </span><span class="annot"><a href="#local-6989586621679255061"><span class="hs-identifier hs-type">go0</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679255104"><span class="annot"><a href="#local-6989586621679255104"><span class="hs-identifier hs-type">s</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UMV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679255104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679255104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679255104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679255061"><span class="annot"><span class="annottext">go0 :: MVector s Bool -&gt; MVector s [Int] -&gt; Seq Int -&gt; ST s ()
+</span><a href="#local-6989586621679255061"><span class="hs-identifier hs-var hs-var">go0</span></a></span></span><span> </span><span id="local-6989586621679255058"><span class="annot"><span class="annottext">MVector s Bool
+</span><a href="#local-6989586621679255058"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span id="local-6989586621679255057"><span class="annot"><span class="annottext">MVector s [Int]
+</span><a href="#local-6989586621679255057"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq Int -&gt; ST s ()
+</span><a href="#local-6989586621679255056"><span class="hs-identifier hs-var">go</span></a></span><span>
 </span><span id="line-48"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>        </span><span id="local-6989586621679254957"><span class="annot"><span class="annottext">visit :: Int -&gt; ST s (Maybe Int)
-</span><a href="#local-6989586621679254957"><span class="hs-identifier hs-var hs-var">visit</span></a></span></span><span> </span><span id="local-6989586621679254956"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254956"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679254955"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679254955"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; Int -&gt; ST s Bool
+</span><span id="line-49"></span><span>        </span><span id="local-6989586621679255055"><span class="annot"><span class="annottext">visit :: Int -&gt; ST s (Maybe Int)
+</span><a href="#local-6989586621679255055"><span class="hs-identifier hs-var hs-var">visit</span></a></span></span><span> </span><span id="local-6989586621679255054"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255054"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679255053"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679255053"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; Int -&gt; ST s Bool
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m a
 </span><span class="hs-identifier hs-var">UMV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
 MVector (PrimState (ST s)) Bool
-</span><a href="#local-6989586621679254960"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254956"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621679255058"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255054"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-50"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; Int -&gt; Bool -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
 MVector (PrimState (ST s)) Bool
-</span><a href="#local-6989586621679254960"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254956"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679255058"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255054"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="hs-comment">-- mark i as visited</span><span>
 </span><span id="line-51"></span><span>                     </span><span class="annot"><span class="annottext">Maybe Int -&gt; ST s (Maybe Int)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Int -&gt; ST s (Maybe Int)) -&gt; Maybe Int -&gt; ST s (Maybe Int)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679254955"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679255053"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe Int
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe Int
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254956"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621679255054"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span>        </span><span class="annot"><a href="#local-6989586621679254958"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679255006"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>        </span><span id="local-6989586621679254958"><span class="annot"><span class="annottext">go :: Seq Int -&gt; ST s ()
-</span><a href="#local-6989586621679254958"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-53"></span><span>        </span><span class="annot"><a href="#local-6989586621679255056"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679255104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>        </span><span id="local-6989586621679255056"><span class="annot"><span class="annottext">go :: Seq Int -&gt; ST s ()
+</span><a href="#local-6989586621679255056"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-55"></span><span>          </span><span class="annot"><span class="annottext">Seq Int
 </span><span class="hs-identifier hs-var">Empty</span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; ST s ()
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679254951"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254951"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:&lt;|</span></span><span id="local-6989586621679254950"><span class="annot"><span class="annottext">Seq Int
-</span><a href="#local-6989586621679254950"><span class="hs-identifier hs-var">queue</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679254949"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679254949"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; ST s (Maybe Int)) -&gt; [Int] -&gt; ST s [Int]
+</span><span id="line-56"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679255049"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255049"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:&lt;|</span></span><span id="local-6989586621679255048"><span class="annot"><span class="annottext">Seq Int
+</span><a href="#local-6989586621679255048"><span class="hs-identifier hs-var">queue</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679255047"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679255047"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; ST s (Maybe Int)) -&gt; [Int] -&gt; ST s [Int]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Witherable t, Applicative f) =&gt;
 (a -&gt; f (Maybe b)) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">wither</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (Maybe Int)
-</span><a href="#local-6989586621679254957"><span class="hs-identifier hs-var">visit</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; ST s [Int]) -&gt; (f Int -&gt; [Int]) -&gt; f Int -&gt; ST s [Int]
+</span><a href="#local-6989586621679255055"><span class="hs-identifier hs-var">visit</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; ST s [Int]) -&gt; (f Int -&gt; [Int]) -&gt; f Int -&gt; ST s [Int]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f Int -&gt; [Int]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(f Int -&gt; ST s [Int]) -&gt; f Int -&gt; ST s [Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector (f Int)
-</span><a href="#local-6989586621679254971"><span class="hs-identifier hs-var">gr</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (f Int) -&gt; Int -&gt; f Int
+</span><a href="#local-6989586621679255069"><span class="hs-identifier hs-var">gr</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (f Int) -&gt; Int -&gt; f Int
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254951"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621679255049"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-57"></span><span>                            </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) [Int] -&gt; Int -&gt; [Int] -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s [Int]
 MVector (PrimState (ST s)) [Int]
-</span><a href="#local-6989586621679254959"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254951"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679254949"><span class="hs-identifier hs-var">ns</span></a></span><span> </span><span class="hs-comment">-- write that u's children are ns</span><span>
+</span><a href="#local-6989586621679255057"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255049"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679255047"><span class="hs-identifier hs-var">ns</span></a></span><span> </span><span class="hs-comment">-- write that u's children are ns</span><span>
 </span><span id="line-58"></span><span>                            </span><span class="annot"><span class="annottext">Seq Int -&gt; ST s ()
-</span><a href="#local-6989586621679254958"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq Int
-</span><a href="#local-6989586621679254950"><span class="hs-identifier hs-var">queue</span></a></span><span> </span><span class="annot"><span class="annottext">Seq Int -&gt; Seq Int -&gt; Seq Int
+</span><a href="#local-6989586621679255056"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq Int
+</span><a href="#local-6989586621679255048"><span class="hs-identifier hs-var">queue</span></a></span><span> </span><span class="annot"><span class="annottext">Seq Int -&gt; Seq Int -&gt; Seq Int
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Seq Int
 forall a. [a] -&gt; Seq a
 </span><span class="hs-identifier hs-var">Seq.fromList</span></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679254949"><span class="hs-identifier hs-var">ns</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679255047"><span class="hs-identifier hs-var">ns</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="hs-comment">-- | Give na root index and a vector s.t. v[i] lists the children of</span><span>
 </span><span id="line-62"></span><span class="hs-comment">-- node i, builds the acutal tree.</span><span>
 </span><span id="line-63"></span><span class="annot"><a href="Algorithms.Graph.BFS.html#extract"><span class="hs-identifier hs-type">extract</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-64"></span><span id="extract"><span class="annot"><span class="annottext">extract :: Int -&gt; Vector [Int] -&gt; Tree Int
-</span><a href="Algorithms.Graph.BFS.html#extract"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621679254944"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254944"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679254943"><span class="annot"><span class="annottext">Vector [Int]
-</span><a href="#local-6989586621679254943"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Tree Int
-</span><a href="#local-6989586621679254942"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254944"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="Algorithms.Graph.BFS.html#extract"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621679255042"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255042"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679255041"><span class="annot"><span class="annottext">Vector [Int]
+</span><a href="#local-6989586621679255041"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Tree Int
+</span><a href="#local-6989586621679255040"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255042"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-65"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-66"></span><span>    </span><span id="local-6989586621679254942"><span class="annot"><span class="annottext">go :: Int -&gt; Tree Int
-</span><a href="#local-6989586621679254942"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679254941"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254941"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Tree Int] -&gt; Tree Int
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679255040"><span class="annot"><span class="annottext">go :: Int -&gt; Tree Int
+</span><a href="#local-6989586621679255040"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679255039"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679255039"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Tree Int] -&gt; Tree Int
 forall a. a -&gt; [Tree a] -&gt; Tree a
 </span><span class="hs-identifier hs-var">Node</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254941"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; Tree Int) -&gt; [Int] -&gt; [Tree Int]
+</span><a href="#local-6989586621679255039"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; Tree Int) -&gt; [Int] -&gt; [Tree Int]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Tree Int
-</span><a href="#local-6989586621679254942"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; [Tree Int]) -&gt; [Int] -&gt; [Tree Int]
+</span><a href="#local-6989586621679255040"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; [Tree Int]) -&gt; [Int] -&gt; [Tree Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector [Int]
-</span><a href="#local-6989586621679254943"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Vector [Int] -&gt; Int -&gt; [Int]
+</span><a href="#local-6989586621679255041"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Vector [Int] -&gt; Int -&gt; [Int]
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254941"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679255039"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span></pre></body></html>
