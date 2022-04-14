@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Algorithms.Geometry.ConvexHull.RenderPLY where
+module PLY.Writer where
 
 import           Control.Lens
 import           Data.Ext
@@ -10,6 +10,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
+-- | Writes the the points and triangles to a file in PLY format.
 renderOutputToFile           :: Show r
                              => FilePath -> NonEmpty (Point 3 r :+ Int) -> [Triangle 3 Int r]
                              -> IO ()

@@ -36,7 +36,7 @@ import           Data.Geometry.Boundary       (PointLocationResult (Outside))
 import           Data.Geometry.Point          (Point (Point2), ccw, pattern CCW)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Box
-import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangleRelaxed)
+import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangle)
 import           Data.STRef
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
@@ -468,7 +468,7 @@ earCheck vertices a b c = do
   let loop elt | elt == a = pure True
       loop elt = do
         let point = mutListIndex vertices elt ^. core
-        case inTriangleRelaxed point trig of
+        case inTriangle point trig of
           Outside -> loop =<< mutListNext vertices elt
           _       -> pure False
   if ccw pointA pointB pointC == CCW
@@ -494,14 +494,14 @@ earCheckHashed hasher vertices zHashes a b c = do
 
   let upwards up
         | up == -1 || upZ > maxZ = pure True
-        | inTriangleRelaxed pointUp trig /= Outside = pure False
+        | inTriangle pointUp trig /= Outside = pure False
         | otherwise = upwards =<< mutListNext zHashes up
         where
           upZ = mutListIndex zHashes up
           pointUp = mutListIndex vertices up ^. core
       downwards down
         | down == -1 || downZ < minZ = pure True
-        | inTriangleRelaxed pointDown trig /= Outside = pure False
+        | inTriangle pointDown trig /= Outside = pure False
         | otherwise = downwards =<< mutListPrev zHashes down
         where
           downZ = mutListIndex zHashes down
@@ -509,8 +509,8 @@ earCheckHashed hasher vertices zHashes a b c = do
       bidirectional up down
         | up == -1   || upZ > maxZ   = downwards down
         | down == -1 || downZ < minZ = upwards up
-        | up /= a && up /= b && inTriangleRelaxed pointUp trig /= Outside = pure False
-        | down /= a && down /= b && inTriangleRelaxed pointDown trig /= Outside = pure False
+        | up /= a && up /= b && inTriangle pointUp trig /= Outside = pure False
+        | down /= a && down /= b && inTriangle pointDown trig /= Outside = pure False
         | otherwise = do
           up' <- mutListNext zHashes up
           down' <- mutListPrev zHashes down

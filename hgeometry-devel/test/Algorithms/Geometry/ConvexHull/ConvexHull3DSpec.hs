@@ -1,12 +1,19 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
-import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
+import           Data.Coerce
+import qualified Data.Foldable as F
+import           Data.Geometry.Boundary (PointLocationResult(..))
+import           Data.Geometry.HalfSpace
+import           Data.Geometry.HyperPlane
+import           Prelude hiding (filter)
+import           Witherable
+-- import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
 import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
-import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
+-- import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
-import           Control.Monad (forM, forM_)
+import           Control.Monad (forM_)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
@@ -23,7 +30,19 @@ import           Data.Util
 -- import           Algorithms.Util
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
+import           Test.QuickCheck.Instances ()
+-- import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
+import           Data.Geometry.Point.Random
+
+--------------------------------------------------------------------------------
+
+-- test :: Fractional r => IO [Triangle 3 Int r]
+-- test = Minimalist.lowerHull' <$> samplePoints
+
+
+-- samplePoints :: IO (NonEmpty (Point 3 R :+ Int))
+-- samplePoints = (\pts -> withIndices (unGP <$> pts)) . NonEmpty.fromList <$> sample' arbitrary
+
 
 --------------------------------------------------------------------------------
 
@@ -31,51 +50,147 @@ type R = RealNumber 10
 
 spec :: Spec
 spec = describe "3D ConvexHull tests" $ do
-         it "manual on myPts"  $ (H $ Naive.lowerHull' myPts)  `shouldBe` myHull
-         it "manual on myPts'" $ (H $ Naive.lowerHull' myPts') `shouldBe` myHull'
+         describe "Naive algorithm tests" $ do
+           it "manual on myPts"  $ H (Naive.lowerHull' myPts)  `shouldBe` myHull
+           it "manual on myPts'" $ H (Naive.lowerHull' myPts') `shouldBe` myHull'
+           allHaveTriangleBelowTests Naive.lowerHull'
 
-         -- describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
-
-         describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
-
+         describe "Minimalist Implementation" $ do
+           allHaveTriangleBelowTests Minimalist.lowerHull'
+           specAlg Minimalist.lowerHull'
          -- it "minimalist and Div&Conc quickcheck" $ property $ \(HI pts) ->
          --     DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
          -- it "Imperative minimalist and divide and conquer quickcheck" $ property $ \(HI pts) ->
          --     DivAndConc.lowerHull' pts == MinimalistImp.lowerHull' pts
+
+--------------------------------------------------------------------------------
+
+-- | Tests correctness of the lower hull
+allHaveTriangleBelowTests     :: (NonEmpty (Point 3 R :+ Int) -> ConvexHull 3 Int R)
+                              -> Spec
+allHaveTriangleBelowTests alg = do
+    allHaveTriangleBelow alg GeneralPos
+    allHaveTriangleBelow alg DelaunayP
+    allHaveTriangleBelow alg UniformInBall
+
+allHaveTriangleBelow             :: forall tagType.
+                                    ( Coercible tagType (Point 3 R)
+                                    , Arbitrary tagType, Show tagType
+                                    )
+                                 => (NonEmpty (Point 3 R :+ Int) -> ConvexHull 3 Int R)
+                                 -> (Point 3 R -> tagType)
+                                 -> Spec
+allHaveTriangleBelow lowerHull _ = it "allHaveTriangleBelow" $ property $ \p q r pts ->
+    allHaveTriangleBelow' lowerHull (withIndices $ unTag @tagType (p :| q : r : pts))
+
+unTag :: Coercible wrappedA a => NonEmpty wrappedA -> NonEmpty a
+unTag = coerce
+
+-- | Make sure that every point has a triangle below it (and that
+-- actually that the point in question is above or on all triangles
+-- that are stabbed by the vertical line through the point).
+allHaveTriangleBelow'               :: (Ord r, Num r)
+                                   => (NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r)
+                                   -> NonEmpty (Point 3 r :+ p)
+                                   -> Bool
+allHaveTriangleBelow' lowerHull pts = all (hasTriangBelow ts . view core) pts
   where
-    specAlg alg = do
-      describe "same as naive on manual samples" $ do
-        forM_ [ ("myPts",myPts)
-              , ("myPts'",myPts')
-              , ("buggyPoints",buggyPoints)
-              , ("buggyPoints2",buggyPoints2)
-              , ("buggyPoints3",buggyPoints3)
-              , ("buggyPoints6",buggyPoints6)
-              , ("buggyPointsSpeedup", NonEmpty.fromList buggySpeedup)
-              , ("buggyPoints9",NonEmpty.fromList buggy9)
-              , ("buggyPoints7SS", NonEmpty.fromList buggyPoints7SS)
-              , ("buggyPoints7S", NonEmpty.fromList buggyPoints7S)
-              , ("buggyPoints8",mkBuggy buggy8)
-              , ("buggy10S",mkBuggy buggy10S)
-              , ("buggy10",mkBuggy buggy10)
-              , ("buggy11",mkBuggy buggy11)
-              ] $ \(msg,pts) ->
-          it msg $ (sameAsNaive alg) pts
-      modifyMaxSuccess (const 1000) $
-        it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
+    ts = lowerHull pts
+
+-- | get all triangles stabbed by the vertical line through the query
+findStabbed   :: (Num r, Ord r) => Filterable f
+              => Point 3 r -> f (Triangle 3 p r) -> f (Triangle 3 p r)
+findStabbed q = filter (\t -> projectPoint' q `onTriangle` pmap' projectPoint' t)
+  where
+    projectPoint' :: Point 3 r -> Point 2 r
+    projectPoint' = projectPoint
+
+pmap'  :: (Point d r -> Point d' s) -> Triangle d extra r -> Triangle d' extra s
+pmap' f (Triangle p q' r) = Triangle (p&core %~ f) (q'&core %~ f) (r&core %~ f)
+
+-- | Test if there is a triangle intersecting the vertical line
+-- through q, and that actually all such all triangles are below q
+hasTriangBelow      :: (Filterable f, Foldable f, Ord r, Num r)
+                    => f (Triangle 3 p r) -> Point 3 r -> Bool
+hasTriangBelow ts q = case F.toList $ findStabbed q ts of
+                        []  -> False
+                        ts' -> all (\t -> q `inHalfSpace` toHalfspace t /= Outside) ts'
+
+
+-- | the halfspace above the triangle
+toHalfspace :: forall r p. (Num r, Ord r) => Triangle 3 p r -> HalfSpace 3 r
+toHalfspace = HalfSpace . supportingPlane . toCounterClockwiseTriangle
+  where
+    toCounterClockwiseTriangle :: Triangle 3 p r -> Triangle 3 p r
+    toCounterClockwiseTriangle t@(Triangle p q r) | ccw p' q' r' == CCW = t
+                                                  | otherwise           = Triangle p r q
+      where
+        Triangle p' q' r' = pmap' (projectPoint @2) t
+
+--------------------------------------------------------------------------------
+
+
+-- | Test if the given algorithm produces the same output as the naive algo
+specAlg     :: (NonEmpty (Point 3 R :+ Int) -> ConvexHull 3 Int R) -- ^ the algorithm
+            -> Spec
+specAlg alg = do
+  describe "same as naive on manual samples" $ do
+    forM_ inputs $ \(msg,pts) ->
+      it msg $ sameAsNaive alg pts
+  -- modifyMaxSuccess (const 1000) $
+  --   it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
+    describe "same as naive quickcheck" $ do
+      it "uniform in box" $ property $ \pts ->
+        sameAsNaive alg (withIndices (unGP <$> pts))
+      it "uniform in ball" $ property $ \pts ->
+        sameAsNaive alg (withIndices (unUniformInBall <$> pts))
+      it "delaunay set" $ property $ \pts ->
+        sameAsNaive alg (withIndices (unDelaunay <$> pts))
+
+withIndices    :: NonEmpty a -> NonEmpty (a :+ Int)
+withIndices xs = NonEmpty.zipWith (:+) xs (NonEmpty.fromList [0..])
+
+inputs :: [(String, NonEmpty (Point 3 R :+ Int))]
+inputs =
+  [ ("myPts",myPts)
+  , ("myPts'",myPts')
+  , ("buggyPoints6",buggyPoints6)
+  , ("buggyPoints",buggyPointsN)
+  ]
+  -- -- I've uncommented the ones below fow now, since they involve degeneracies.
+  -- [ ("buggyPoints",buggyPoints)
+  -- , ("buggyPoints2",buggyPoints2)
+  -- , ("buggyPoints3",buggyPoints3)
+  -- , ("buggyPointsSpeedup", NonEmpty.fromList buggySpeedup)
+  -- , ("buggyPoints9",NonEmpty.fromList buggy9)
+  -- , ("buggyPoints7SS", NonEmpty.fromList buggyPoints7SS)
+  -- , ("buggyPoints7S", NonEmpty.fromList buggyPoints7S)
+  -- , ("buggyPoints8",mkBuggy buggy8)
+  -- , ("buggy10S",mkBuggy buggy10S)
+  -- , ("buggy10",mkBuggy buggy10)
+  -- , ("buggy11",mkBuggy buggy11)
+  -- ]
 
 
 
 
 
 
+
+
+
+
+--------------------------------------------------------------------------------
+
+spec' :: Spec
 spec' = describe "test" $ do
-  it "same as naive on buggyPoints " $ sameAsNaive Minimalist.lowerHull' buggyPoints3
+  it "same as naive on buggyPoints " $ sameAsNaive Minimalist.lowerHull' buggyPointsN
 
-specShrink = describe "shrink" $ forM_ sets $ \(_:+i,pts) ->
+specShrink :: Spec
+specShrink = describe "shrink" $ forM_ sets' $ \(_:+i,pts) ->
                it ("same as Naive " <> show i) $ sameAsNaive Minimalist.lowerHull' (mkBuggy pts)
   where
-    sets = leaveOutOne buggy11S
+    sets' = leaveOutOne buggy11S
 
 
 
@@ -102,9 +217,12 @@ instance Arbitrary HullInput where
 
 -- sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
 
-sameAsNaive alg pts = (HalfSpacesOf $ alg pts)
+sameAsNaive         :: (Show r, Show p, Ord r, Fractional r)
+                    => (NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r)
+                    -> NonEmpty (Point 3 r :+ p) -> Expectation
+sameAsNaive alg pts = HalfSpacesOf (alg pts)
                       `shouldBe`
-                      (HalfSpacesOf $ Naive.lowerHull' pts)
+                      HalfSpacesOf (Naive.lowerHull' pts)
 
 newtype HalfSpaces p r = HalfSpacesOf (ConvexHull 3 p r) deriving Show
 
@@ -130,15 +248,15 @@ reorder (Triangle p q r) = let [p',q',r'] = List.sortOn (^.extra) [p,q,r] in Tri
 
 
 myPts :: NonEmpty (Point 3 R :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                            , Point3 1  1  10 :+ 1
-                            , Point3 0  10 20 :+ 0
-                            , Point3 12 1  1  :+ 3
-                            , Point3 22 20  1  :+ 4
-                            ]
+myPts = NonEmpty.fromList [ Point3 5  5  0  :+ 2
+                          , Point3 1  1  10 :+ 1
+                          , Point3 0  10 20 :+ 0
+                          , Point3 12 1  1  :+ 3
+                          , Point3 22 20  1  :+ 4
+                          ]
 
 toTri       :: Eq a =>  NonEmpty (Point d r :+ a) -> Three a -> Triangle d a r
-toTri pts t = let pt i = List.head $ NonEmpty.filter (\t -> t^.extra == i) pts
+toTri pts t = let pt i = List.head $ NonEmpty.filter (\t' -> t'^.extra == i) pts
               in (t&traverse %~ pt)^.from _TriangleThreePoints
 
 myHull :: Hull Int R
@@ -149,17 +267,34 @@ myHull = H . map (toTri myPts) $ [ Three 1 2 3
                                  ]
 
 myPts' :: NonEmpty (Point 3 R :+ Int)
-myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                             , Point3 1  1  10 :+ 1
-                             , Point3 0  10 20 :+ 0
-                             , Point3 12 1  1  :+ 3
-                             ]
+myPts' = NonEmpty.fromList [ Point3 5  5  0  :+ 2
+                           , Point3 1  1  10 :+ 1
+                           , Point3 0  10 20 :+ 0
+                           , Point3 12 1  1  :+ 3
+                           ]
 
 myHull' :: Hull Int R
 myHull' = H . map (toTri myPts') $ [ Three 1 2 3
                                    , Three 0 1 2
                                    , Three 0 2 3
                                    ]
+
+
+
+
+
+
+
+
+buggyPointsN :: NonEmpty (Point 3 R :+ Int)
+buggyPointsN =  NonEmpty.fromList
+               [ Point3 48.3650451071 7.4563367715  19.1569282618 :+ 0
+               , Point3 20.4118494655 19.5372323335 92.2346920363 :+ 1
+               , Point3 8.0610955116  24.8896480153 28.0685516681 :+ 2
+               , Point3 30.5286900395 45.7603258350 87.5193514446 :+ 3
+               ]
+
+
 
 
 --------------------------------------------------------------------------------
