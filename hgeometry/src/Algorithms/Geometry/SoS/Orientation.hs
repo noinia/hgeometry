@@ -1,16 +1,14 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Algorithms.Geometry.SoS.Orientation( SoS
-
                                           , sideTest
                                           , sideTest'
-
-                                          , toSymbolic
                                           ) where
 
+import Algorithms.Geometry.SoS.Index
 import Algorithms.Geometry.SoS.Determinant
 import Algorithms.Geometry.SoS.Sign
 import Algorithms.Geometry.SoS.Symbolic
 import Control.Lens hiding (snoc,cons)
-import Data.Ext
 import Data.Geometry.Matrix
 import Data.Geometry.Point
 import Data.Geometry.Vector
@@ -18,11 +16,17 @@ import GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
+instance ToAPoint point d r => ToAPoint (WithSoS point) d r where
+  toPoint = to (\(WithSoS _ p) -> p^.toPoint)
+with = flip WithSoS
 
+-- $setup
+-- let with = flip WithSoS
 
 -- | A dimension d has support for SoS when we can: compute a
 -- dterminant of a d+1 by d+1 dimensional matrix.
 type SoS d = (Arity d, HasDeterminant (d+1))
+
 
 -- | Given a query point q, and a vector of d points defining a
 -- hyperplane test if q lies above or below the hyperplane. Each point
@@ -31,41 +35,36 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 --
 -- some 1D examples:
 --
--- >>> sideTest (Point1 0 :+ 0) (Vector1 $ Point1 2 :+ 1)
+-- >>> sideTest (Point1 0 `with` 0) (Vector1 $ Point1 2 `with` 1)
 -- Negative
--- >>> sideTest (Point1 10 :+ 0) (Vector1 $ Point1 2 :+ 1)
+-- >>> sideTest (Point1 10 `with` 0) (Vector1 $ Point1 2 `with` 1)
 -- Positive
--- >>> sideTest (Point1 2 :+ 0) (Vector1 $ Point1 2 :+ 1)
+-- >>> sideTest (Point1 2 `with` 0) (Vector1 $ Point1 2 `with` 1)
 -- Positive
--- >>> sideTest (Point1 2 :+ 3) (Vector1 $ Point1 2 :+ 1)
+-- >>> sideTest (Point1 2 `with` 3) (Vector1 $ Point1 2 `with` 1)
 -- Negative
 --
 -- some 2D examples:
 --
--- >>> sideTest (Point2 1 2 :+ 0) $ Vector2 (Point2 0 0 :+ 1) (Point2 2 2 :+ 3)
+-- >>> sideTest (Point2 1 2 `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Positive
--- >>> sideTest (Point2 1 (-2) :+ 0) $ Vector2 (Point2 0 0 :+ 1) (Point2 2 2 :+ 3)
+-- >>> sideTest (Point2 1 (-2) `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Negative
--- >>> sideTest (Point2 1 1 :+ 0) $ Vector2 (Point2 0 0 :+ 1) (Point2 2 2 :+ 3)
+-- >>> sideTest (Point2 1 1 `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Positive
--- >>> sideTest (Point2 1 1 :+ 10) $ Vector2 (Point2 0 0 :+ 1) (Point2 2 2 :+ 3)
+-- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Negative
--- >>> sideTest (Point2 1 1 :+ 10) $ Vector2 (Point2 0 0 :+ 3) (Point2 2 2 :+ 1)
+-- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 3) (Point2 2 2 `with` 1)
 -- Negative
-sideTest      :: (SoS d, Num r, Ord r, Ord i)
-              => Point d r :+ i -> Vector d (Point d r :+ i) -> Sign
+sideTest      :: (SoS d, Num r, Ord r, ToAPoint point d r, HasSoSIndex point)
+              => point -> Vector d point -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
-
--- | Given an input point, transform its number type to include
--- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic          :: (Ord i, Arity d) => Point d r :+ i -> Point d (Symbolic (i,Int) r)
-toSymbolic (p :+ i) = p&vector %~ imap (\j x -> symbolic x (i,j))
 
 -- | Given a point q and a vector of d points defining a hyperplane,
 -- test on which side of the hyperplane q lies.
 --
 -- TODO: Specify what the sign means
-sideTest'      :: (Num r, Ord r, Ord i, HasDeterminant (d+1), Arity d, Arity (d+1))
+sideTest'      :: (Num r, Ord r, Ord i, SoS d, Arity (d+1))
                => Point d (Symbolic i r) -> Vector d (Point d (Symbolic i r)) -> Sign
 sideTest' q ps = sideTest'' $ cons q ps
 

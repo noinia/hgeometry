@@ -1,28 +1,39 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Algorithms.Geometry.SoS.Internal where
 
-import           Algorithms.Geometry.SoS.AsPoint
-import           Algorithms.Geometry.SoS.Orientation
-import           Control.CanAquire
-import           Data.Geometry.Point.Internal
+import Algorithms.Geometry.SoS.Symbolic
+import Control.Lens
+import Data.Geometry.Point.Class
+import Data.Geometry.Point.Internal
+import Data.Geometry.Vector
+import Data.Ord
+import Data.Proxy
+import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
--- simulateSimplicity :: forall t d r b. (Traversable t, SoSD d)
---                    => (forall p. ( AsPoint p, HasIndex p
---                                  , d ~ Dimension p, r ~ NumType p
---                                  ) => t p -> b)
---                    -> t (Point d r) -> b
--- simulateSimplicity = simulateSimplicity'
+
+--------------------------------------------------------------------------------
 
 
--- | The actual implementation of SoS
-simulateSimplicity'     :: forall t d r b. (Traversable t, SoS d)
-                        => (forall i. ( CanAquire i (Point d r)
-                                      , SoS d
-                                      ) => t (P i d r) -> b)
-                        -> t (Point d r) -> b
-simulateSimplicity' alg = runAcquire alg'
-  where
-    alg' :: forall i. CanAquire i (Point d r) => t i -> b
-    alg' = alg . fmap (P @i @d @r)
-      -- ideally the fmap would just be a coerce, but GHC does not want to do that.
+--------------------------------------------------------------------------------
+
+
+instance (ToAPoint point d r, Arity d)
+        => ToAPoint (WithSoS point) d (Symbolic SoSIndex r) where
+  toPoint = to (\(WithSoS i p) -> let Point v = p^.toPoint
+                                      d       = fromIntegral $ natVal (Proxy @d)
+                                  in Point $ imap (\j -> WithSoS (i*d+j)) v
+               )
+  {-# INLINE toPoint #-}
+
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Given an input point, transform its number type to include
+-- symbolic $\varepsilon$ expressions so that we can use SoS.
+toSymbolic          :: (Ord i, Arity d)
+                    => Point d r :+ i -> Point d (Symbolic (i,Int) r)
+toSymbolic (p :+ i) = p&vector %~ imap (\j x -> symbolic x (i,j))

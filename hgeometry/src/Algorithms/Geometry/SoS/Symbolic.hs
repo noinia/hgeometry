@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.SoS.Symbolic
@@ -20,15 +21,25 @@ module Algorithms.Geometry.SoS.Symbolic(
 
   , toTerms
   , signOf
+
+  , toSymbolic
+  , toSoSRational
+
+  , SoSI
   ) where
 
+import           Algorithms.Geometry.SoS.Index
 import           Algorithms.Geometry.SoS.Sign (Sign(..))
 import           Control.Lens
 import           Data.Foldable (toList)
+import           Data.Geometry.Point.Class
+import           Data.Geometry.Point.Internal
+import           Data.Geometry.Vector
 import qualified Data.List as List
-import qualified Data.Map as Map
 import qualified Data.Map.Merge.Strict as Map
+import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
+import qualified GHC.Real as Ratio
 import           Test.QuickCheck (Arbitrary(..), listOf)
 import           Test.QuickCheck.Instances ()
 
@@ -175,7 +186,7 @@ hasNoPertubation (Pi b) = null b
 --
 -- for a constant c and an arbitrarily small value \(\varepsilon\),
 -- parameterized by i.
-data Term i r = Term r (EpsFold i) deriving (Eq,Functor)
+data Term i r = Term !r (EpsFold i) deriving (Eq,Functor)
 
 -- | Lens to access the constant 'c' in the term.
 constantFactor :: Lens' (Term i r) r
@@ -357,3 +368,92 @@ maximum' (Bag m) = fmap fst . Map.lookupMax $ m
 -- | maximum multiplicity of an element in the bag
 maxMultiplicity         :: Bag a -> Int
 maxMultiplicity (Bag m) = maximum . (0:) . map (1+) . Map.elems $ m
+
+
+--------------------------------------------------------------------------------
+
+-- | Generalized Ratio type that accepts more general "base" types
+-- than just Integral ones. That does mean we cannot normalize the
+-- intermediate expressions, so expect the numbers to become big quite
+-- quickly!
+--
+-- invariant: the denominator is not zero
+data GRatio a = !a :% !a
+              deriving (Show)
+
+-- | smart constructor to construct a GRatio. Throws an exception if
+-- the denominator is zero.
+(%)   :: (Eq a, Num a) => a -> a -> GRatio a
+_ % 0 = Ratio.ratioZeroDenominatorError
+a % b = a :% b
+
+instance (Eq a, Num a) => Eq (GRatio a) where
+  (a :% b) == (c :% d) = a*d == b*c -- by invariant b and d are non-zero
+  {-# INLINABLE (==) #-}
+
+instance (Ord a, Num a) => Ord (GRatio a) where
+  (a :% b) `compare` (c :% d) = (a*d) `compare` (b*c) -- by invariant b and d are non-zero
+
+instance (Num a, Eq a) => Num (GRatio a) where
+  (a :% b) + (c :% d) = (a*d + b*c) :% (b*d)
+  -- since b and d where non-zero, b*d is also non-zero
+  negate (a :% b) = (negate a) :% b
+  -- b was non-zero, it remains non-zero
+  (a :% b) * (c :% d) = (a*c) :% (b*d)
+  -- since b and d where non-zero, b*d is also non-zero
+  fromInteger x = fromInteger x :% 1
+  signum (a :% b) = (signum a * signum b) :% 1
+  -- by invariant b cannot be zero, so signum b cannot be zero either.
+  abs x | signum x == -1 = (-1)*x
+        | otherwise      = x
+
+instance (Num a, Eq a) => Fractional (GRatio a) where
+  fromRational (a Ratio.:% b)= fromInteger a :% fromInteger b
+  (a :% b) / (c :% d) = (a*d) % (b*c)
+
+
+-- | Number type representing
+type SoSRational i r = GRatio (Symbolic i r)
+
+-- | Helper to construct sosRationals
+sosRational :: (Ord i, Eq r, Num r) => Symbolic i r -> Symbolic i r -> SoSRational i r
+sosRational = (%)
+
+-- test :: GRatio Double
+-- test = 15
+
+
+--------------------------------------------------------------------------------
+
+-- | the index type used to disambiguate the values
+data SoSI = MkSoS {-# UNPACK #-}!SoSIndex -- ^ original index
+                  {-# UNPACK #-}!Int -- ^ index of the coordinate in [0..(d-1)]
+          deriving (Show,Eq,Ord)
+
+-- for now I've kept the two components separtely, as to avoid blowing
+-- up the range required for the indices. Maybe it would be faster to
+-- just map the jth coordinate of point p_i to index i*d+j
+-- though. That way we can map to a Point d (Symoblic (WithIndex
+-- r)). Maybe that way we can use IntSets and so on to represent the
+-- Bags/Symbolic type rather than the arbitrary i as we currently
+-- have.
+
+--------------------------------------------------------------------------------
+
+-- | Given an input point, transform its number type to include
+-- symbolic $\varepsilon$ expressions so that we can use SoS.
+toSymbolic    :: (Arity d, ToAPoint point d r, HasSoSIndex point)
+              => point -> Point d (Symbolic SoSI r)
+toSymbolic p' = let p = p'^.toPoint
+                    i = sosIndex p'
+                in p&vector %~ imap (\j x -> symbolic x $ MkSoS i j)
+
+-- | Constructs an point whose numeric type uses SoSRational, so that
+-- we can use SoS.
+toSoSRational :: (Arity d, ToAPoint point d r, HasSoSIndex point, Eq r, Num r)
+              => point -> Point d (SoSRational SoSI r)
+toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
+
+-- instance (ToAPoint point d r, Arity d, HasSoSIndex point)
+--          => ToAPoint (WithSoS point) d (Symbolic SoSI r) where
+--   toPoint = to undefined -- toSymbolic
