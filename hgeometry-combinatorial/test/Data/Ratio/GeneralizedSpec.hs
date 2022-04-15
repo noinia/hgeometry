@@ -6,19 +6,6 @@ import           Test.Hspec
 import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
-type GRational = GRatio Integer
-
-(%%)   :: Integer -> Integer -> Rational
-a %% b = a Ratio.% b
-
-fromRational' :: Rational -> GRational
-fromRational' = fromRational
-
-
-itOp       :: String -> (forall a. Num a => a -> a -> a) -> Spec
-itOp str op = it str $ property $ \a b ->
-      fromRational' (a `op` b) `shouldBe` fromRational' a `op` fromRational' b
-
 spec :: Spec
 spec = do
   describe "GRatio tests" $ do
@@ -31,3 +18,17 @@ spec = do
     itOp "*" (*)
     it "/" $ property $ \a b -> b /= 0 ==>
       fromRational' (a / b) `shouldBe` fromRational' a / fromRational' b
+
+
+type GRational = GRatio Integer
+
+(%%)   :: Integer -> Integer -> Rational
+a %% b = a Ratio.% b
+
+fromRational' :: Rational -> GRational
+fromRational' = fromRational
+
+
+itOp       :: String -> (forall a. Num a => a -> a -> a) -> Spec
+itOp str op = it str $ property $ \a b ->
+      fromRational' (a `op` b) `shouldBe` fromRational' a `op` fromRational' b

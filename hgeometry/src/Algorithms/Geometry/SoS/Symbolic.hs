@@ -22,25 +22,21 @@ module Algorithms.Geometry.SoS.Symbolic(
   , toTerms
   , signOf
 
-  , toSymbolic
-  , toSoSRational
 
-  , SoSI
+  , SoSI(..)
+  , SoSRational, sosRational
   ) where
 
 import           Algorithms.Geometry.SoS.Index
 import           Algorithms.Geometry.SoS.Sign (Sign(..))
 import           Control.Lens
 import           Data.Foldable (toList)
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Vector
 import qualified Data.List as List
 import qualified Data.Map.Merge.Strict as Map
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
-import qualified GHC.Real as Ratio
-import           Test.QuickCheck (Arbitrary(..), listOf)
+import           Data.Ratio.Generalized (GRatio, (%))
+import           Test.QuickCheck (Arbitrary(..), listOf, suchThat)
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -334,11 +330,10 @@ perturb c i = Sum $ Map.fromAscList [ (mempty,c) , (eps i,1) ]
 
 -- | The word specifiies how many *duplicates* there are. I.e. If the
 -- Bag maps k to i, then k has multiplicity i+1.
-newtype Bag a = Bag (Map.Map a Int) deriving (Show,Eq,Ord,Arbitrary)
+newtype Bag a = Bag (Map.Map a Int) deriving (Show,Eq,Ord)
 
 singleton   :: k -> Bag k
 singleton x = Bag $ Map.singleton x 0
-
 
 instance Foldable Bag where
   -- ^ Takes multiplicity into account.
@@ -351,6 +346,11 @@ instance Ord k => Semigroup (Bag k) where
 
 instance Ord k => Monoid (Bag k) where
   mempty = Bag Map.empty
+
+
+instance (Arbitrary a, Ord a) => Arbitrary (Bag a) where
+  arbitrary = foldMap singleton <$> listOf arbitrary
+
 
 -- | Computes the difference of the two maps
 difference                   :: Ord a => Bag a -> Bag a -> Bag a
@@ -371,46 +371,6 @@ maxMultiplicity (Bag m) = maximum . (0:) . map (1+) . Map.elems $ m
 
 
 --------------------------------------------------------------------------------
-
--- | Generalized Ratio type that accepts more general "base" types
--- than just Integral ones. That does mean we cannot normalize the
--- intermediate expressions, so expect the numbers to become big quite
--- quickly!
---
--- invariant: the denominator is not zero
-data GRatio a = !a :% !a
-              deriving (Show)
-
--- | smart constructor to construct a GRatio. Throws an exception if
--- the denominator is zero.
-(%)   :: (Eq a, Num a) => a -> a -> GRatio a
-_ % 0 = Ratio.ratioZeroDenominatorError
-a % b = a :% b
-
-instance (Eq a, Num a) => Eq (GRatio a) where
-  (a :% b) == (c :% d) = a*d == b*c -- by invariant b and d are non-zero
-  {-# INLINABLE (==) #-}
-
-instance (Ord a, Num a) => Ord (GRatio a) where
-  (a :% b) `compare` (c :% d) = (a*d) `compare` (b*c) -- by invariant b and d are non-zero
-
-instance (Num a, Eq a) => Num (GRatio a) where
-  (a :% b) + (c :% d) = (a*d + b*c) :% (b*d)
-  -- since b and d where non-zero, b*d is also non-zero
-  negate (a :% b) = (negate a) :% b
-  -- b was non-zero, it remains non-zero
-  (a :% b) * (c :% d) = (a*c) :% (b*d)
-  -- since b and d where non-zero, b*d is also non-zero
-  fromInteger x = fromInteger x :% 1
-  signum (a :% b) = (signum a * signum b) :% 1
-  -- by invariant b cannot be zero, so signum b cannot be zero either.
-  abs x | signum x == -1 = (-1)*x
-        | otherwise      = x
-
-instance (Num a, Eq a) => Fractional (GRatio a) where
-  fromRational (a Ratio.:% b)= fromInteger a :% fromInteger b
-  (a :% b) / (c :% d) = (a*d) % (b*c)
-
 
 -- | Number type representing
 type SoSRational i r = GRatio (Symbolic i r)
@@ -438,22 +398,7 @@ data SoSI = MkSoS {-# UNPACK #-}!SoSIndex -- ^ original index
 -- Bags/Symbolic type rather than the arbitrary i as we currently
 -- have.
 
+instance Arbitrary SoSI where
+  arbitrary = MkSoS <$> arbitrary <*> arbitrary
+
 --------------------------------------------------------------------------------
-
--- | Given an input point, transform its number type to include
--- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: (Arity d, ToAPoint point d r, HasSoSIndex point)
-              => point -> Point d (Symbolic SoSI r)
-toSymbolic p' = let p = p'^.toPoint
-                    i = sosIndex p'
-                in p&vector %~ imap (\j x -> symbolic x $ MkSoS i j)
-
--- | Constructs an point whose numeric type uses SoSRational, so that
--- we can use SoS.
-toSoSRational :: (Arity d, ToAPoint point d r, HasSoSIndex point, Eq r, Num r)
-              => point -> Point d (SoSRational SoSI r)
-toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
-
--- instance (ToAPoint point d r, Arity d, HasSoSIndex point)
---          => ToAPoint (WithSoS point) d (Symbolic SoSI r) where
---   toPoint = to undefined -- toSymbolic

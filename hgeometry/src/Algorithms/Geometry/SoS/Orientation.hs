@@ -8,6 +8,7 @@ import Algorithms.Geometry.SoS.Index
 import Algorithms.Geometry.SoS.Determinant
 import Algorithms.Geometry.SoS.Sign
 import Algorithms.Geometry.SoS.Symbolic
+import Algorithms.Geometry.SoS.Point
 import Control.Lens hiding (snoc,cons)
 import Data.Geometry.Matrix
 import Data.Geometry.Point
