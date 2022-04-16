@@ -27,10 +27,6 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ellipse (Ellipse, circleToEllipse)
 import           Data.Geometry.HalfLine
-import           Ipe.Attributes
-import           Ipe.Color (IpeColor(..))
-import           Ipe.FromIpe
-import           Ipe.Types
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -38,8 +34,13 @@ import           Data.Geometry.PolyLine (PolyLine,fromLineSegment)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
+import           Data.Kind
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Ipe.Attributes
+import           Ipe.Color (IpeColor(..))
+import           Ipe.FromIpe
+import           Ipe.Types
 
 import           Data.Text (Text)
 import qualified Data.Text as Text
@@ -117,7 +118,7 @@ iO' = iO . defIO
 -- | Class that specifies a default conversion from a geometry type g into an
 -- ipe object.
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
-  type DefaultIpeOut g :: * -> *
+  type DefaultIpeOut g :: Type -> Type
 
   defIO :: IpeOut g (DefaultIpeOut g) (NumType g)
 

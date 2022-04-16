@@ -18,14 +18,16 @@ import Data.Geometry.Properties
 import Data.Geometry.Transformation
 import Data.Geometry.Vector
 import GHC.Generics (Generic)
+import Data.Kind
 import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
 -- | Hyperplanes embedded in a \(d\) dimensional space.
-data HyperPlane (d :: Nat) (r :: *) = HyperPlane { _inPlane   :: !(Point d r)
-                                                 , _normalVec :: !(Vector d r)
-                                                 } deriving Generic
+data HyperPlane (d :: Nat) (r :: Type) =
+  HyperPlane { _inPlane   :: !(Point d r)
+             , _normalVec :: !(Vector d r)
+             } deriving Generic
 makeLenses ''HyperPlane
 
 type instance Dimension (HyperPlane d r) = d

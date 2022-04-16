@@ -9,12 +9,12 @@
 module Algorithms.BinarySearch where
 
 import           Control.Applicative ((<|>))
+import           Data.Kind
 import           Data.Sequence (Seq, ViewL(..),ViewR(..))
 import qualified Data.Sequence as Seq
 import           Data.Set (Set)
 import qualified Data.Set.Internal as Set
 import qualified Data.Vector.Generic as V
-
 --------------------------------------------------------------------------------
 
 -- | Given a monotonic predicate p, a lower bound l, and an upper bound u, with:
@@ -69,8 +69,8 @@ binarySearchUntil eps p = go
 
 
 class BinarySearch v where
-  type Index v :: *
-  type Elem  v :: *
+  type Index v :: Type
+  type Elem  v :: Type
 
   -- | Given a monotonic predicate p and a data structure v, find the
   -- element v[h] such that that

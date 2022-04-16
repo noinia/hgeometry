@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE FunctionalDependencies  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE OverloadedStrings  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -102,3 +104,52 @@ extra = lens _extra (\(c :+ _) e -> c :+ e)
 ext   :: a -> a :+ ()
 ext x = x :+ ()
 {-# INLINABLE ext #-}
+
+
+--------------------------------------------------------------------------------
+
+-- | A class for types that can behave as a c. Mostly for types t that
+-- "extend" a 'core' type c.
+class AsA t c | t -> c where
+  -- | Get the core from the t.
+  asCore :: t -> c
+
+-- | infifx shorthand for AsA
+type t :~ c = t `AsA` c
+
+-- | Pattern to get the core.
+pattern AsA  :: t :~ c => c -> t
+pattern AsA c <- (asCore -> c)
+
+-- | Everything can act as itself
+instance (t ~ c)          => AsA t        c where
+  asCore = id
+  {-# INLINABLE asCore #-}
+
+-- | An Ext can act as its core.
+instance {-# OVERLAPPING #-} AsA (c :+ e) c where
+  asCore = view core
+  {-# INLINABLE asCore #-}
+
+--------------------------------------------------------------------------------
+
+-- | Types that can be decomposed into an Ext
+class AsExt t where
+  type CoreOf t
+  type ExtraOf t
+  -- | Convert between this type and an Ext
+  _Ext :: Iso' t (CoreOf t :+ ExtraOf t)
+
+instance AsExt (c :+ e) where
+  type CoreOf (c :+ e) = c
+  type ExtraOf (c :+ e) = e
+  _Ext = iso id id
+  {-# INLINE _Ext #-}
+
+-- newtype CoreOnly core = CoreOnly core
+--                       deriving newtype (Show,Read,Eq,Ord)
+
+-- instance AsExt (CoreOnly core) where
+--   type CoreOf (CoreOnly core) = core
+--   type ExtraOf (CoreOnly core) = ()
+--   _Ext = iso (\(CoreOnly c) -> ext c) (CoreOnly . view core)

@@ -151,7 +151,7 @@ cutEars p = map (cutEarAt p) ears
             cur  = CV.index vs n
             next = CV.index vs (n+1)
             triangle = Triangle prev cur next
-      , ccw' prev cur next == CCW -- left turn.
+      , ccw prev cur next == CCW -- left turn.
       , CV.all (\pt -> pt `elem` [prev,cur,next] || not (onTriangle (_core pt) triangle)) vs
       ]
     vs = p^.outerBoundaryVector

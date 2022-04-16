@@ -100,7 +100,7 @@ smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadiu
     -- right.  Note that centers still contains only those points (and
     -- disks) for which the three points are not colinear. So the
     -- points are either on the left or on the right.
-    (leftCenters,rightCenters) = List.partition (\(r :+ _) -> ccw' p q r == CCW) centers
+    (leftCenters,rightCenters) = List.partition (\(r :+ _) -> ccw p q r == CCW) centers
     -- note that we consider 'leftmost' with respect to going from p
     -- to q. This does not really have a global meaning.
 
@@ -110,7 +110,7 @@ smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadiu
     -- from p (or q). If there are no left-centers, we with to find
     -- the closest one among the right-centers.
     leftDist z = let c = z^.extra.center
-                     s = if ccw' p q c == CCW then 1 else -1
+                     s = if ccw p q c == CCW then 1 else -1
                  in s * squaredEuclideanDist (p^.core) (c^.core)
 
     dl = maximumOn leftDist leftCenters  -- disk that has the "leftmost" center

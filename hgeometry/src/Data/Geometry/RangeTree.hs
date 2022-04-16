@@ -18,7 +18,6 @@ import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Measured.Class
-import           Data.Proxy
 import           Data.Range
 import           GHC.TypeLits
 import           Prelude hiding (last,init,head)
@@ -115,7 +114,7 @@ createRangeTree2 :: forall v d r p. (Ord r, RTMeasure v d p r, Arity d, 2 <= d
                                     , 1 <= d -- this one is kind of silly
                  ) => NonEmpty (Point d r :+ p) -> RT 2 d v p r
 createRangeTree2 = RangeTree . GRT.createTree
-                 . fmap (\p -> p^.core.coord (Proxy :: Proxy 2) :+ Leaf [p])
+                 . fmap (\p -> p^.core.coord @2 :+ Leaf [p])
 
 --------------------------------------------------------------------------------
 -- * Querying
@@ -132,11 +131,11 @@ class (i <= d, Arity d) => Query i d where
 instance (1 <= d, Arity d) => Query 1 d where
   search' qr = map unAssoc . GRT.search' r . _unRangeTree
     where
-      r = qr^.element (Proxy :: Proxy 0)
+      r = qr^.element @0
 
 instance ( 1 <= d, i <= d, Query (i-1) d, Arity d
          , i ~ 2
          ) => Query 2 d where
   search' qr = concatMap (maybe [] (search' qr) . unAssoc) . GRT.search' r . _unRangeTree
     where
-      r = qr^.element (Proxy :: Proxy (i-1))
+      r = qr^.element @(i-1)

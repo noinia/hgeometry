@@ -1,0 +1,355 @@
+* 3D Convex Hull Minimalist
+ cabal v2-update 'hackage.haskell.org,2022-02-20T15:04:37Z'
+
+**  : 81bc098d Baseline
+
+frank@Arya# time cabal run devel-prof points_10k.json +RTS -s
+Up to date
+     611,106,520 bytes allocated in the heap
+     157,453,712 bytes copied during GC
+      31,823,960 bytes maximum residency (11 sample(s))
+         591,784 bytes maximum slop
+              61 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0       569 colls,     0 par    0.068s   0.069s     0.0001s    0.0006s
+  Gen  1        11 colls,     0 par    0.076s   0.076s     0.0069s    0.0268s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.002s  (  0.002s elapsed)
+  MUT     time    0.115s  (  2.039s elapsed)
+  GC      time    0.144s  (  0.145s elapsed)
+  EXIT    time    0.001s  (  0.006s elapsed)
+  Total   time    0.262s  (  2.191s elapsed)
+
+  Alloc rate    5,331,533,851 bytes per MUT second
+
+  Productivity  43.8% of total user, 93.1% of total elapsed
+
+cabal run devel-prof points_10k.json +RTS -s  2.14s user 0.06s system 99% cpu 2.197 total
+
+frank@Arya# time cabal run devel-prof vd_points_10k.json +RTS -s
+Up to date
+     610,345,152 bytes allocated in the heap
+     158,690,832 bytes copied during GC
+      32,751,216 bytes maximum residency (11 sample(s))
+         610,704 bytes maximum slop
+              63 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0       568 colls,     0 par    0.067s   0.068s     0.0001s    0.0006s
+  Gen  1        11 colls,     0 par    0.076s   0.076s     0.0069s    0.0281s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.002s  (  0.002s elapsed)
+  MUT     time    0.113s  ( 11.489s elapsed)
+  GC      time    0.144s  (  0.144s elapsed)
+  EXIT    time    0.001s  (  0.005s elapsed)
+  Total   time    0.260s  ( 11.640s elapsed)
+
+  Alloc rate    5,379,473,953 bytes per MUT second
+
+  Productivity  43.7% of total user, 98.7% of total elapsed
+
+cabal run devel-prof vd_points_10k.json +RTS -s  11.56s user 0.08s system 99% cpu 11.647 total
+frank@Arya# time cabal run devel-prof vd_points_10k.json +RTS -s -p
+
+* with inlinable on colinearTime
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+  12,462,394,928 bytes allocated in the heap
+     420,774,664 bytes copied during GC
+      21,775,184 bytes maximum residency (17 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     11991 colls,     0 par    0.319s   0.323s     0.0000s    0.0010s
+  Gen  1        17 colls,     0 par    0.138s   0.138s     0.0081s    0.0196s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   11.007s  ( 11.010s elapsed)
+  GC      time    0.456s  (  0.461s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   11.463s  ( 11.471s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    1,132,259,511 bytes per MUT second
+
+  Productivity  96.0% of total user, 96.0% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  11.43s user 0.04s system 99% cpu 11.479 total
+
+* updated cabal
+
+** 4d593379 some after refactoring
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+  12,376,064,120 bytes allocated in the heap
+     408,267,680 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     11909 colls,     0 par    0.314s   0.319s     0.0000s    0.0011s
+  Gen  1        16 colls,     0 par    0.136s   0.136s     0.0085s    0.0189s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   11.120s  ( 11.123s elapsed)
+  GC      time    0.450s  (  0.455s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   11.571s  ( 11.578s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    1,112,929,344 bytes per MUT second
+
+  Productivity  96.1% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  11.52s user 0.06s system 99% cpu 11.593 total
+
+
+** 037f52f9 using the intset implementation for the ordered sequence
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   9,266,835,536 bytes allocated in the heap
+     387,998,720 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8913 colls,     0 par    0.279s   0.283s     0.0000s    0.0012s
+  Gen  1        16 colls,     0 par    0.134s   0.142s     0.0089s    0.0229s
+
+  INIT    time    0.001s  (  0.001s elapsed)
+  MUT     time   10.233s  ( 10.243s elapsed)
+  GC      time    0.413s  (  0.425s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.647s  ( 10.669s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    905,553,552 bytes per MUT second
+
+  Productivity  96.1% of total user, 96.0% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.63s user 0.03s system 99% cpu 10.678 total
+
+I guess this slight perf increase may have two reasons; either the
+Intsets are better, and/or the comparisons on the "xOrder" now use
+comparisons on Ints, which are faster than the comparions on arbitrary
+rational numbers.
+
+** c0fcdc25 use compareIdx for output as well
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,763,378,576 bytes allocated in the heap
+     386,594,848 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8429 colls,     0 par    0.276s   0.280s     0.0000s    0.0013s
+  Gen  1        16 colls,     0 par    0.130s   0.138s     0.0086s    0.0196s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time   10.183s  ( 10.191s elapsed)
+  GC      time    0.406s  (  0.418s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.590s  ( 10.609s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    860,555,571 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.57s user 0.03s system 99% cpu 10.620 total
+
+** 0ce6dbbb making bridgeEventL and bridgeEventR return Maybe's instead.
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,595,102,128 bytes allocated in the heap
+     387,826,056 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8264 colls,     0 par    0.265s   0.268s     0.0000s    0.0014s
+  Gen  1        16 colls,     0 par    0.131s   0.131s     0.0082s    0.0193s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.978s  (  9.979s elapsed)
+  GC      time    0.396s  (  0.399s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.375s  ( 10.379s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,372,675 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.03s system 99% cpu 10.396 total
+
+minor gain :)
+
+** added some inlinable pragma's, didn't really do anything
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,595,102,128 bytes allocated in the heap
+     387,847,064 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8264 colls,     0 par    0.264s   0.268s     0.0000s    0.0012s
+  Gen  1        16 colls,     0 par    0.131s   0.131s     0.0082s    0.0190s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.983s  (  9.987s elapsed)
+  GC      time    0.395s  (  0.399s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.378s  ( 10.386s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,003,921 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.2% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.36s user 0.02s system 99% cpu 10.392 total
+
+** da8b9062 Explicit export list
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,545,937,600 bytes allocated in the heap
+     386,062,448 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8217 colls,     0 par    0.271s   0.275s     0.0000s    0.0013s
+  Gen  1        16 colls,     0 par    0.127s   0.127s     0.0080s    0.0197s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.996s  ( 10.005s elapsed)
+  GC      time    0.399s  (  0.402s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.395s  ( 10.408s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    854,903,685 bytes per MUT second
+
+  Productivity  96.2% of total user, 96.1% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.35s user 0.06s system 99% cpu 10.416 total
+
+*** 550645dc collecting only the events, not the intermediate bridges
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,515,268,272 bytes allocated in the heap
+     335,554,320 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              51 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8187 colls,     0 par    0.227s   0.231s     0.0000s    0.0009s
+  Gen  1        16 colls,     0 par    0.102s   0.102s     0.0064s    0.0182s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.886s  (  9.884s elapsed)
+  GC      time    0.329s  (  0.333s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.216s  ( 10.217s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    861,305,040 bytes per MUT second
+
+  Productivity  96.8% of total user, 96.7% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.20s user 0.02s system 99% cpu 10.223 total
+
+I guess I would have expected a slightly bigger gain.
+
+Really most of the cost is in the colinearTime' computation. I guess
+if there are big gains to make, we should look for them
+there. Although adding simulation of simplicity will also certainly
+make an inpact.
+
+*** a2d0988e with Point and Hull modules also having explicit export lists.
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   8,515,268,272 bytes allocated in the heap
+     335,558,952 bytes copied during GC
+      21,775,184 bytes maximum residency (16 sample(s))
+         456,880 bytes maximum slop
+              51 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8187 colls,     0 par    0.234s   0.237s     0.0000s    0.0009s
+  Gen  1        16 colls,     0 par    0.104s   0.104s     0.0065s    0.0186s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    9.900s  (  9.899s elapsed)
+  GC      time    0.338s  (  0.341s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time   10.239s  ( 10.241s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    860,086,476 bytes per MUT second
+
+  Productivity  96.7% of total user, 96.7% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  10.22s user 0.03s system 99% cpu 10.249 total
+
+so no effect of this itself.
+
+*** quick benchmark using Double's rather than the Rationals:
+
+frank@Arya# time ./devel-prof vd_points_10k.json +RTS -s
+   2,574,368,424 bytes allocated in the heap
+     257,413,040 bytes copied during GC
+      21,775,184 bytes maximum residency (13 sample(s))
+         456,880 bytes maximum slop
+              52 MiB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      2466 colls,     0 par    0.135s   0.136s     0.0001s    0.0011s
+  Gen  1        13 colls,     0 par    0.084s   0.084s     0.0065s    0.0186s
+
+  INIT    time    0.000s  (  0.000s elapsed)
+  MUT     time    0.683s  (  0.690s elapsed)
+  GC      time    0.219s  (  0.220s elapsed)
+  EXIT    time    0.000s  (  0.000s elapsed)
+  Total   time    0.902s  (  0.910s elapsed)
+
+  %GC     time       0.0%  (0.0% elapsed)
+
+  Alloc rate    3,770,325,955 bytes per MUT second
+
+  Productivity  75.7% of total user, 75.8% of total elapsed
+
+./devel-prof vd_points_10k.json +RTS -s  0.87s user 0.04s system 98% cpu 0.919 total
+
+
+since this is a about 10 times faster than anything else I've done so
+far, let's give priority to implementing some sort of double-filters
+first, rather than further optimizing the current implementation.
+
+First priority is still incorporating SoS though.

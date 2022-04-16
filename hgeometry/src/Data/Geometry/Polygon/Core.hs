@@ -384,7 +384,7 @@ polygonVertices (MultiPolygon vs hs) =
 -- | \( O(n \log n) \) Check if a polygon has any holes, duplicate points, or
 --   self-intersections.
 isSimple :: (Ord r, Fractional r) => Polygon p t r -> Bool
-isSimple p@SimplePolygon{}   = null . BO.interiorIntersections $ listEdges p
+isSimple p@SimplePolygon{}   = null . BO.interiorIntersections . map ext $ listEdges p
 isSimple (MultiPolygon b []) = isSimple b
 isSimple MultiPolygon{}      = False
 
@@ -427,7 +427,7 @@ simpleFromCircularVector :: forall p r. (Ord r, Fractional r)
   => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 simpleFromCircularVector v =
   let p = fromCircularVector v
-      hasInteriorIntersections = not . null . BO.interiorIntersections
+      hasInteriorIntersections = not . null . BO.interiorIntersections . map ext
   in if hasInteriorIntersections (listEdges p)
       then error "Data.Geometry.Polygon.simpleFromCircularVector: \
                  \Found self-intersections or repeated vertices."
@@ -713,7 +713,7 @@ rotateRight n = over unsafeOuterBoundaryVector (CV.rotateRight n)
 --
 -- \(O(1)\)
 isReflexVertex      :: (Ord r, Num r) => Int -> Polygon Simple p r -> Bool
-isReflexVertex i pg = ccw' u  v w == CW
+isReflexVertex i pg = ccw u v w == CW
   where
     u = pg^.outerVertex (i-1)
     v = pg^.outerVertex i
@@ -729,7 +729,7 @@ isConvexVertex i = not . isReflexVertex i
 --
 -- \(O(1)\)
 isStrictlyConvexVertex      :: (Ord r, Num r) => Int -> Polygon t p r -> Bool
-isStrictlyConvexVertex i pg = ccw' u  v w == CCW
+isStrictlyConvexVertex i pg = ccw u v w == CCW
   where
     u = pg^.outerVertex (i-1)
     v = pg^.outerVertex i
@@ -774,8 +774,8 @@ strictlyConvexVertices = \case
 reflexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 reflexVertices' = filterReflexConvexWorker asReflex
   where
-    asReflex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) == CW = Just v
-                   | otherwise                                   = Nothing
+    asReflex u v w | ccw (u^.extra) (v^.extra) (w^.extra) == CW = Just v
+                   | otherwise                                  = Nothing
 
 -- | Return (the indices of) all strictly convex vertices, in
 -- increasing order along the boundary.
@@ -784,8 +784,8 @@ reflexVertices' = filterReflexConvexWorker asReflex
 strictlyConvexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 strictlyConvexVertices' = filterReflexConvexWorker asStrictlyConvex
   where
-    asStrictlyConvex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) == CCW = Just v
-                           | otherwise                                    = Nothing
+    asStrictlyConvex u v w | ccw (u^.extra) (v^.extra) (w^.extra) == CCW = Just v
+                           | otherwise                                   = Nothing
 
 -- | Return (the indices of) all convex (= non-reflex) vertices, in increasing order
 -- along the boundary.
@@ -794,8 +794,8 @@ strictlyConvexVertices' = filterReflexConvexWorker asStrictlyConvex
 convexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 convexVertices' = filterReflexConvexWorker asConvex
   where
-    asConvex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) /= CW = Just v
-                   | otherwise                                   = Nothing
+    asConvex u v w | ccw (u^.extra) (v^.extra) (w^.extra) /= CW = Just v
+                   | otherwise                                  = Nothing
 
 -- | Helper function to implement convexVertices, reflexVertices, and
 -- strictlyConvexVertices

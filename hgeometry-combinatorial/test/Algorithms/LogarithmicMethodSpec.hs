@@ -33,13 +33,13 @@ newtype DummySucc a = Dummy (NonEmpty a)
 instance Ord a => LogarithmicMethodDS DummySucc a where
   build = Dummy . NonEmpty.sort
 
-successor'              :: Ord a => a -> DummySucc a -> Option (Min a)
+successor'              :: Ord a => a -> DummySucc a -> Maybe (Min a)
 successor' q (Dummy xs) = case NonEmpty.dropWhile (< q) xs of
-                            []    -> Option Nothing
-                            (s:_) -> Option (Just (Min s))
+                            []    -> Nothing
+                            (s:_) -> Just (Min s)
 
 successor   :: Ord a => a -> InsertionOnly DummySucc a -> Maybe a
-successor q = fmap getMin . getOption . queryWith (successor' q)
+successor q = fmap getMin . queryWith (successor' q)
 
 fromList :: Ord a => [a] -> InsertionOnly DummySucc a
 fromList = foldr insert empty

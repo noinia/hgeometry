@@ -62,7 +62,7 @@ fairSplitTree     :: (Fractional r, Ord r, Arity d, 1 <= d
 fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
   where
     pts' = imap sortOn . pure . g $ pts
-    n    = length $ pts'^.GV.element (C :: C 0)
+    n    = length $ pts'^.GV.element @0
 
     sortOn' i = NonEmpty.sortWith (^.core.unsafeCoord i)
     sortOn  i = LSeq.fromNonEmpty . sortOn' (i + 1)
@@ -130,7 +130,7 @@ fairSplitTree'       :: (Fractional r, Ord r, Arity d, 1 <= d
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
                      -> BinLeafTree Int (Point d r :+ p)
 fairSplitTree' n pts
-    | n <= 1    = let p = LSeq.head $ pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
+    | n <= 1    = let p = LSeq.head $ pts^.GV.element @0 in Leaf (dropIdx p)
     | otherwise = foldr node' (V.last path) $ V.zip nodeLevels (V.init path)
   where
     -- note that points may also be assigned level 'Nothing'.
@@ -156,7 +156,7 @@ fairSplitTree' n pts
     node' (lvl,lc) rc = case lvl^?widestDim._Just of
                           Nothing -> error "Unknown widest dimension"
                           Just j  -> Node lc j rc
-    recurse pts' = fairSplitTree' (length $ pts'^.GV.element (C :: C 0))
+    recurse pts' = fairSplitTree' (length $ pts'^.GV.element @0)
                                   (reIndexPoints pts')
 
 -- | Assign the points to their the correct class. The 'Nothing' class is
@@ -209,7 +209,7 @@ reIndexPoints      :: (Arity d, 1 <= d)
                    -> GV.Vector d (PointSeq d (Idx :+ p) r)
 reIndexPoints ptsV = fmap reIndex ptsV
   where
-    pts = ptsV^.GV.element (C :: C 0)
+    pts = ptsV^.GV.element @0
 
     reIndex = fmap (\p -> p&extra.core %~ fromJust . flip IntMap.lookup mapping')
     mapping' = IntMap.fromAscList $ zip (map (^.extra.core) . F.toList $ pts) [0..]

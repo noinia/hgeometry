@@ -10,7 +10,7 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
+module Data.Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
                           , origin, vector
                           , pointFromList
                           , projectPoint
@@ -19,7 +19,7 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
 
                           , PointFunctor(..)
 
-                          , CCW, ccw, ccw', isCoLinear
+                          , CCW, ccw, isCoLinear
                           , pattern CCW, pattern CW, pattern CoLinear
 
                           , ccwCmpAround, ccwCmpAround'
@@ -37,6 +37,8 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
                           , HasSquaredEuclideanDistance(..)
 
                           , coord, unsafeCoord
+
+                          , ToAPoint(..), AsAPoint(..)
                           ) where
 
 import Data.Geometry.Point.Class

@@ -13,10 +13,11 @@ import           Control.DeepSeq
 import           Control.Lens hiding (element)
 import           Data.Aeson
 import qualified Data.Foldable as F
-import           Data.Proxy
-import qualified Data.Vector.Fixed as V
-import           Data.Vector.Fixed (Arity)
 import           Data.Functor.Classes
+import           Data.Kind
+import           Data.Proxy
+import           Data.Vector.Fixed (Arity)
+import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Boxed
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
@@ -36,8 +37,8 @@ data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 
 -- | Datatype representing d dimensional vectors. Our implementation wraps the
 -- implementation provided by fixed-vector.
-newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec d r }
-                                    deriving (Generic)
+newtype Vector (d :: Nat)  (r :: Type) = Vector { _unV :: Vec d r }
+                                       deriving (Generic)
 
 unV :: Lens' (Vector d r) (Vec d r)
 unV = lens _unV (const Vector)

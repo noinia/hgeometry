@@ -1,10 +1,11 @@
+cabal-version:       2.4
 name:                hgeometry-test
 version:             0.13
 synopsis:            HGeometry testsuite (hack)
 description:
   Extended testsuite for HGeometry
 homepage:            https://fstaals.net/software/hgeometry
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
@@ -15,31 +16,12 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-data-files:          src/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
-                     src/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
-                     src/Algorithms/Geometry/LowerEnvelope/manual.ipe
-                     src/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
-                     src/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
-                     src/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
-                     src/Algorithms/Geometry/LinearProgramming/manual.ipe
-                     src/Algorithms/Geometry/RedBlueSeparator/manual.ipe
-                     src/Data/Geometry/pointInPolygon.ipe
-                     src/Data/Geometry/pointInTriangle.ipe
-                     src/Data/Geometry/Polygon/star_shaped.ipe
-                     src/Data/Geometry/Polygon/Convex/convexTests.ipe
-                     src/Data/Geometry/arrangement.ipe
-                     src/Data/Geometry/arrangement.ipe.out.ipe
-                     src/Data/PlaneGraph/myPlaneGraph.yaml
-                     src/Data/PlaneGraph/small.yaml
-                     src/Data/PlaneGraph/testsegs.png
+data-files:          src/Data/PlaneGraph/testsegs.png
                      data/polygons.simple
                      data/polygons.multi
+                     src/**/*.ipe
+                     src/**/*.yaml
 
-                     -- in the future (cabal >=2.4) we can use
-                     -- examples/**/*.in
-                     -- examples/**/*.out
-
-cabal-version:       2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -48,47 +30,39 @@ flag planargraph
   default: False
   manual: True
 
-executable fromgeojson
-  main-is: FromGeoJSON.hs
-  hs-source-dirs: src
+common setup
   default-language:     Haskell2010
-  build-depends:  base,
-                  containers,
-                  lens,
-                  aeson,
-                  bytestring,
-                  hashable,
-                  hgeometry,
-                  hgeometry-combinatorial,
-                  geojson,
-                  cereal,
-                  MonadRandom
-                      , QuickCheck           >= 2.5
-                      , approximate-equality >= 1.1.0.2
-                      , base
-                      , bytestring
-                      , cereal
-                      , containers
-                      , data-clist
-                      , directory
-                      , filepath
-                      , hgeometry                >= 0.13
-                      , hgeometry-combinatorial
-                      , hgeometry-ipe
-                      , hspec                >= 2.1
-                      , lens
-                      , linear
-                      , quickcheck-instances    >= 0.3
-                      , random
-                      , semigroups
-                      , singletons
-                      , singletons
-                      , vector
-                      , vector-circular      >= 0.1.1
-                      , vinyl
-                      , yaml
-                      , hspec
-                      , hgeometry-ipe
+  build-depends: base
+               , hgeometry                >= 0.13
+               , hgeometry-combinatorial
+               , hgeometry-ipe
+               , containers
+               , lens
+               , aeson
+               , bytestring
+               , hashable
+               , geojson
+               , cereal
+               , MonadRandom
+               , QuickCheck               >= 2.5
+               , approximate-equality     >= 1.1.0.2
+               , base
+               , bytestring
+               , cereal
+               , data-clist
+               , directory
+               , filepath
+               , hspec                    >= 2.1
+               , linear
+               , quickcheck-instances     >= 0.3
+               , random
+               , semigroups
+               , singletons
+               , vector
+               , vector-circular          >= 0.1.1
+               , nonempty-vector          >= 0.2
+               , vinyl
+               , yaml
 
   default-extensions: TypeFamilies
                     , GADTs
@@ -113,13 +87,19 @@ executable fromgeojson
                     , DeriveFunctor
                     , DeriveFoldable
                     , DeriveTraversable
+                    , DeriveGeneric
 
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
 
+executable fromgeojson
+  import: setup
+  main-is: FromGeoJSON.hs
+  hs-source-dirs: src
 
 test-suite hspec
+  import: setup
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
   hs-source-dirs:       src
@@ -134,7 +114,6 @@ test-suite hspec
                  -fno-warn-orphans
 
   build-tool-depends: hspec-discover:hspec-discover
-
 
   other-modules: Data.PlaneGraphSpec
                  Data.Geometry.PolygonSpec
@@ -164,6 +143,7 @@ test-suite hspec
 
                  Algorithms.Geometry.SoSSpec
                  -- Algorithms.Geometry.SoS.SortSpec
+                 Algorithms.Geometry.SoS.SymbolicSpec
                  Algorithms.Geometry.SoS.OrientationSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
@@ -203,63 +183,8 @@ test-suite hspec
 
                  Data.Geometry.IntersectionSpec
 
-  build-depends:        MonadRandom
-                      , hspec                >= 2.2
-                      , QuickCheck           >= 2.5
-                      , approximate-equality >= 1.1.0.2
-                      , base
-                      , bytestring
-                      , cereal
-                      , containers
-                      , data-clist
-                      , directory
-                      , filepath
-                      , hgeometry                >= 0.12.0.0
-                      , hgeometry-combinatorial
-                      , hgeometry-ipe
-                      , hspec                >= 2.1
-                      , lens
-                      , linear
-                      , quickcheck-instances    >= 0.3
-                      , random
-                      , semigroups
-                      , singletons
-                      , vector
-                      , vector-circular      >= 0.1.1
-                      , nonempty-vector
-                      , vinyl
-                      , yaml
-
-  default-extensions: TypeFamilies
-                    , GADTs
-                    , KindSignatures
-                    , DataKinds
-                    , TypeOperators
-                    , ConstraintKinds
-                    , PolyKinds
-                    , RankNTypes
-                    , TypeApplications
-                    , ScopedTypeVariables
-
-
-                    , PatternSynonyms
-                    , ViewPatterns
-                    , LambdaCase
-                    , TupleSections
-
-
-                    , StandaloneDeriving
-                    , GeneralizedNewtypeDeriving
-                    , DeriveFunctor
-                    , DeriveFoldable
-                    , DeriveTraversable
-
-                    , FlexibleInstances
-                    , FlexibleContexts
-                    , MultiParamTypeClasses
-
-
 executable planargraph
+  import: setup
   main-is: planargraph.hs
   if flag(planargraph)
     buildable: True

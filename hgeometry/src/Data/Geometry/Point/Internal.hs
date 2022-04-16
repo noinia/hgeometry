@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Point
@@ -22,6 +23,7 @@ module Data.Geometry.Point.Internal
   , pattern Point1
   , pattern Point2
   , pattern Point3
+  , pattern Point4
   , PointFunctor(..)
 
   , cmpByDistanceTo
@@ -35,20 +37,21 @@ import           Control.Lens
 import           Control.Monad
 import           Data.Aeson
 import           Data.Ext
-import qualified Data.Foldable                   as F
+import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector            as Vec
+import qualified Data.Geometry.Vector as Vec
 import           Data.Hashable
-import           Data.List                       (intersperse)
-import           Data.Ord                        (comparing)
+import           Data.List (intersperse)
+import           Data.Ord (comparing)
 import           Data.Proxy
-import           GHC.Generics                    (Generic)
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           System.Random                   (Random (..))
-import           Test.QuickCheck                 (Arbitrary, Arbitrary1)
-import           Text.Read                       (Read (..), readListPrecDefault)
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           Test.QuickCheck (Arbitrary, Arbitrary1)
+import           Text.Read (Read (..), readListPrecDefault)
 
 
 --------------------------------------------------------------------------------
@@ -75,7 +78,9 @@ import           Text.Read                       (Read (..), readListPrecDefault
 -- 3
 -- >>> let f (Point3 x y z) = z in f (Point $ Vector3 1 2 3)
 -- 3
-newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
+newtype Point d r = Point { toVec :: Vector d r }
+  deriving (Generic)
+
 
 instance (Show r, Arity d) => Show (Point d r) where
   showsPrec = liftShowsPrec showsPrec showList
@@ -113,19 +118,25 @@ instance (Arity d) => Read1 (Point d) where
 --               Just p -> pure p
 --               _      -> pfail
 
-deriving instance (Eq r, Arity d)        => Eq (Point d r)
-deriving instance Arity d                => Eq1 (Point d)
-deriving instance (Ord r, Arity d)       => Ord (Point d r)
-deriving instance Arity d                => Functor (Point d)
-deriving instance Arity d                => Applicative (Point d)
-deriving instance Arity d                => Foldable (Point d)
-deriving instance Arity d                => Traversable (Point d)
-deriving instance (Arity d, NFData r)    => NFData (Point d r)
-deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
-deriving instance Arity d                => Arbitrary1 (Point d)
-deriving instance (Arity d, Hashable r)  => Hashable (Point d r)
-deriving instance (Arity d, Random r)    => Random (Point d r)
+deriving instance (Eq r, Arity d)           => Eq (Point d r)
+deriving instance Arity d                   => Eq1 (Point d)
+deriving instance (Ord r, Arity d)          => Ord (Point d r)
+deriving instance Arity d                   => Functor (Point d)
+deriving instance Arity d                   => Applicative (Point d)
+deriving instance Arity d                   => Foldable (Point d)
+deriving instance Arity d                   => Traversable (Point d)
+deriving instance (Arity d, NFData r)       => NFData (Point d r)
+deriving instance (Arity d, Arbitrary r)    => Arbitrary (Point d r)
+deriving instance Arity d                   => Arbitrary1 (Point d)
+deriving instance (Arity d, Hashable r)     => Hashable (Point d r)
+deriving instance (Arity d, Random r)       => Random (Point d r)
+deriving instance (Bounded r, Arity d)      => Bounded (Point d r)
 
+instance (Arity d, UniformRange r) => UniformRange (Point d r) where
+  uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
+
+instance (Arity d, Uniform r) => Uniform (Point d r) where
+  uniformM gen = Point <$> uniformM gen
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
@@ -176,15 +187,15 @@ unsafeCoord i = vector . singular (ix (i-1))
 
 -- | Get the coordinate in a given dimension
 --
--- >>> Point3 1 2 3 ^. coord (C :: C 2)
+-- >>> Point3 1 2 3 ^. coord @2
 -- 2
--- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
+-- >>> Point3 1 2 3 & coord @1 .~ 10
 -- Point3 10 2 3
--- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
+-- >>> Point3 1 2 3 & coord @3 %~ (+1)
 -- Point3 1 2 4
-coord   :: forall proxy i d r. (1 <= i, i <= d, Arity d, KnownNat i)
-        => proxy i -> Lens' (Point d r) r
-coord _ = unsafeCoord $ fromIntegral (natVal $ C @i)
+coord :: forall i d r. (1 <= i, i <= d, Arity d, KnownNat i)
+      => Lens' (Point d r) r
+coord = unsafeCoord $ fromIntegral (natVal $ C @i)
 {-# INLINABLE coord #-}
 
  -- somehow these rules don't fire
@@ -228,6 +239,11 @@ pattern Point2 x y = Point (Vector2 x y)
 pattern Point3       :: r -> r -> r -> Point 3 r
 pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}
+
+-- | A bidirectional pattern synonym for 4 dimensional points.
+pattern Point4         :: r -> r -> r -> r -> Point 4 r
+pattern Point4 x y z w = (Point (Vector4 x y z w))
+{-# COMPLETE Point4 #-}
 
 --------------------------------------------------------------------------------
 -- * Point Functors

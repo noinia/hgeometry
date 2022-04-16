@@ -128,7 +128,7 @@ text_ (Point2 x y) ats t = Svg.g ! A.transform (mconcat [ "translate("
 -- pre: the coordinates given lie on the canvas
 realWorldCoordinates                 :: Fractional r => Canvas r -> Point 2 Int -> Point 2 r
 realWorldCoordinates cv (Point2 x y) =
-    applyViewBox cv $ Point2 x ((cv^.dimensions.element (C @ 1)) - y)
+    applyViewBox cv $ Point2 x ((cv^.dimensions.element @1) - y)
                       -- position relative to the outer viewbox
 
 -- | Applies the viewbox transformation

@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Vector.VectorFamily
@@ -15,29 +16,30 @@
 module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
-import           Control.Lens                           hiding (element)
+import           Control.Lens hiding (element)
 import           Control.Monad
 import           Data.Aeson
-import qualified Data.Foldable                          as F
+import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import           Data.Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
                                                          VectorFamilyF)
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
-import           Data.Geometry.Vector.VectorFixed       (C (..))
+import           Data.Geometry.Vector.VectorFixed (C (..))
 import           Data.Hashable
+import           Data.Kind
 import           Data.List
-import qualified Data.List                              as L
+import qualified Data.List as L
 import           Data.Proxy
-import qualified Data.Vector.Fixed                      as V
-import           Data.Vector.Fixed.Cont                 (Peano)
+import qualified Data.Vector.Fixed as V
+import           Data.Vector.Fixed.Cont (Peano)
 import           GHC.TypeLits
-import           Linear.Affine                          (Affine (..))
+import           Linear.Affine (Affine (..))
 import           Linear.Metric
-import qualified Linear.V2                              as L2
-import qualified Linear.V3                              as L3
-import qualified Linear.V4                              as L4
+import qualified Linear.V2 as L2
+import qualified Linear.V3 as L3
+import qualified Linear.V4 as L4
 import           Linear.Vector
-import           Text.Read                              (Read (..), readListPrecDefault)
+import           Text.Read (Read (..), readListPrecDefault)
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -46,7 +48,7 @@ import           Text.Read                              (Read (..), readListPrec
 -- | Datatype representing d dimensional vectors. The default implementation is
 -- based n VectorFixed. However, for small vectors we automatically select a
 -- more efficient representation.
-newtype Vector (d :: Nat) (r :: *) = MKVector { _unV :: VectorFamily (Peano d) r }
+newtype Vector (d :: Nat) (r :: Type) = MKVector { _unV :: VectorFamily (Peano d) r }
 
 type instance V.Dim   (Vector d)   = Fam.FromPeano (Peano d)
 -- the above definition is a bit convoluted, but it allows us to make Vector an instance of
@@ -196,17 +198,22 @@ destruct v = (L.head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
 
 -- | \( O(1) \) First element. Since arity is at least 1, this function is total.
 head   :: (Arity d, 1 <= d) => Vector d r -> r
-head = view $ element (C :: C 0)
+head = view $ element @0
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors
 
 -- | Lens into the i th element
-element   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
-          => proxy i -> Lens' (Vector d r) r
-element _ = singular . element' . fromInteger $ natVal (C :: C i)
+element :: forall i d r. (Arity d, KnownNat i, (i + 1) <= d)
+        => Lens' (Vector d r) r
+element = elementProxy (C @i)
 {-# INLINE element #-}
 
+-- | Lens into the i th element
+elementProxy   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
+               => proxy i -> Lens' (Vector d r) r
+elementProxy _ = singular $ element' $ fromInteger . natVal $ C @i
+{-# INLINE elementProxy #-}
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
@@ -235,7 +242,7 @@ init = vectorFromListUnsafe . L.init . F.toList
 
 -- | \( O(1) \) Last element. Since the vector is non-empty, runtime bounds checks are bypassed.
 last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
-last = view $ element (C :: C d)
+last = view $ element @d
 
 -- | Get a prefix of i elements of a vector
 prefix :: forall i d r. (Arity d, Arity i, i <= d)

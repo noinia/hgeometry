@@ -106,7 +106,7 @@ monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ lef
 
 -- for partitioning points
 toTheLeft :: (Ord r, Num r) => Point 2 r :+ () -> Point 2 r :+ () -> Point 2 r :+ () -> Bool
-toTheLeft min max x = ccw' min max x == CCW
+toTheLeft min max x = ccw min max x == CCW
 
 -- | \( O(1) \)
 --   Create a random 2D vector which has a non-zero magnitude.

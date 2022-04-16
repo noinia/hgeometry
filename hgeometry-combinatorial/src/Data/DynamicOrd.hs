@@ -8,6 +8,7 @@
 --------------------------------------------------------------------------------
 module Data.DynamicOrd where
 
+import Data.Kind
 import Data.Proxy
 import Data.Reflection
 import Unsafe.Coerce
@@ -18,7 +19,7 @@ import Unsafe.Coerce
 -- https://www.schoolofhaskell.com/user/thoughtpolice/using-reflection
 
 -- | Values of type '@a@' in our dynamically constructed 'Ord' instance
-newtype O (s :: *) (a :: *) = O { runO :: a } deriving (Show)
+newtype O (s :: Type) (a :: Type) = O { runO :: a } deriving (Show)
 
 -- | An Ord Dictionary
 newtype OrdDict a = OrdDict { compare_ :: a -> a -> Ordering }
