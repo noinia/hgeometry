@@ -19,18 +19,9 @@ import           Test.QuickCheck
 
 -- data Eps = Eps
 --
-evalEps           :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
-evalEps d eps' ef = eps' ^ (sum [ d ^ i | i <- toList $ factors ef])
 
+-- \(\prod_{0 \leq i \leq j} \varepsilon(i)^c > \varepsilon(k)\), for all \(1 \leq j < k\)
 
-newtype SmallInt = SI Int deriving (Show,Eq,Ord,Num,Enum,Real,Integral)
-
-instance Bounded SmallInt where
-  minBound = 0
-  maxBound = 10
-
-instance Arbitrary SmallInt where
-  arbitrary = arbitrarySizedBoundedIntegral
 
 -- unfortunately, it seems that this is not really feasilbe to explicitly evaluate thee things.
 spec :: Spec
