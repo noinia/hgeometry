@@ -10,6 +10,8 @@
 module Algorithms.Geometry.SoS.Symbolic(
     EpsFold
   , eps, mkEpsFold
+  , evalEps
+
   , hasNoPertubation
   , factors
   , suitableBase
@@ -21,7 +23,7 @@ module Algorithms.Geometry.SoS.Symbolic(
 
   , toTerms
   , signOf
-
+  , roundToConstant
 
   , SoSI(..)
   , SoSRational, sosRational
@@ -139,6 +141,19 @@ mkEpsFold = Pi . foldMap singleton
 suitableBase :: EpsFold i -> Int
 suitableBase = max 2 . (1+) . maxMultiplicity . factors
 
+
+-- | Evaluate an eps-fold using the choice of eps from the lemma above, i.e.
+-- \(\varepsilon(i) = \delta^{d^i}\)
+-- >>> evalEps 2 (1/2) $ mkEpsFold [1]
+-- 0.25
+-- >>> evalEps 2 (1/2) $ mkEpsFold [2]
+-- 6.25e-2
+-- >> evalEps 2 (1/2) $ mkEpsFold [1,2]
+-- 1.5625e-2
+evalEps            :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
+evalEps d delta ef = delta ^ sum [ d ^ i | i <- toList $ factors ef]
+
+
 instance Show i => Show (EpsFold i) where
   showsPrec d (Pi b) = showParen (d > app_prec) $
                          showString "Pi " . showsPrec d (toList b)
@@ -162,6 +177,9 @@ instance Ord i => Ord (EpsFold i) where
     --
     -- if e2 does have a term, let k be the largest one, then the
     -- biggest of those terms is the pair whose indices comes first.
+
+
+-- something goes wrong when the one of the epsfolds is empty.
 
 instance (Arbitrary i, Ord i) => Arbitrary (EpsFold i) where
   arbitrary = mkEpsFold . take 4 <$> listOf arbitrary
@@ -204,14 +222,24 @@ term r i = Term r $ eps i
 
 instance (Ord i, Ord r, Num r) => Ord (Term i r) where
   (Term c e1) `compare` (Term d e2) = case (hasNoPertubation e1, hasNoPertubation e2) of
-                                        (True,True) -> c    `compare` d
-                                        _           -> case (signum c, signum d) of
-                                                         (-1,-1) -> e2 `compare` e1
-                                                         (0,0)   -> e1 `compare` e2
-                                                         (1,1)   -> e1 `compare` e2
-                                                         (-1,_)  -> LT
-                                                         (_,-1)  -> GT
-                                                         _       -> error "SoS: Term.ord absurd"
+      (True,True) -> c    `compare` d
+      _           -> case (signum c, signum d) of
+                       (-1,-1) -> e2 `compare` e1 <> c `compare` d
+                         -- note that the e2 and e1 are flipped;
+                         -- i.e. if the numbers are negative this
+                         -- reverses the ordering of the eps-values
+                         -- involved.  (the c and d in the secondary
+                         -- comparison are not flipped since they
+                         -- should still incorporate the signs.)
+                       (0,0)   -> EQ -- both terms are zero.
+                       (1,1)   -> e1 `compare` e2 <> c `compare` d
+
+                       (-1,_)  -> LT
+                       (_,-1)  -> GT
+
+                       (0,1)   -> LT
+                       (1,_)   -> GT
+                       _       -> error "SoS: Term.ord absurd"
   -- If both the eps folds are zero, and thus we just have constants
   -- then we should compare the individual terms.
 
@@ -233,10 +261,12 @@ instance (Arbitrary r, Arbitrary (EpsFold i), Ord i) => Arbitrary (Term i r) whe
 --------------------------------------------------------------------------------
 -- * Symbolic
 
--- | Represents a Sum of terms, i.e. a value that has the form:
+-- | Represents a Sum of terms, i.e. given a sequence of terms Term
+-- \(c_i\) \(I_i\) s where \(c_i\) is a constant and \(I_i\) is a set
+-- of indices, a Symbolic represents an expression of the form:
 --
 -- \[
---   \sum c \Pi_i \varepsilon(i)
+--   \sum c_i \Pi_{j in I_i} \varepsilon(j)
 -- \]
 --
 -- The terms are represented in order of decreasing significance.
@@ -250,6 +280,7 @@ instance (Arbitrary r, Arbitrary (EpsFold i), Ord i) => Arbitrary (Term i r) whe
 --
 newtype Symbolic i r = Sum (Map.Map (EpsFold i) r) deriving (Functor)
 
+
 -- | Produces a list of terms, in decreasing order of significance
 toTerms         :: Symbolic i r -> [Term i r]
 toTerms (Sum m) = map (\(i,c) -> Term c i) . Map.toDescList $ m
@@ -260,6 +291,13 @@ signOf e = case List.dropWhile (== 0) . map (\(Term c _) -> signum c) $ toTerms 
              []     -> Nothing
              (-1:_) -> Just Negative
              _      -> Just Positive
+
+-- | Drops all the epsilon terms
+roundToConstant :: Num r => Symbolic i r -> r
+roundToConstant s = case toTerms s of
+                      (Term c e:_) | hasNoPertubation e -> c
+                      _                                 -> 0
+
 
 instance (Ord i, Eq r, Num r) => Eq (Symbolic i r) where
   e1 == e2 = isNothing $ signOf (e1 - e2)
@@ -310,6 +348,9 @@ instance (Show i, Show r) => Show (Symbolic i r) where
 instance (Arbitrary r, Ord i, Arbitrary (EpsFold i)) => Arbitrary (Symbolic i r) where
   arbitrary = Sum <$> arbitrary
 
+
+
+
 ----------------------------------------
 
 -- | Creates a constant symbolic value
@@ -323,8 +364,8 @@ symbolic r i = Sum $ Map.singleton (eps i) r
 -- | given the value c and the index i, creates the perturbed value
 -- \(c + \varepsilon(i)\)
 perturb      :: (Num r, Ord i) => r -> i -> Symbolic i r
-perturb c i = Sum $ Map.fromAscList [ (mempty,c) , (eps i,1) ]
-
+perturb c i = Sum $ Map.fromAscList [ (eps i,1) , (mempty,c) ]
+  -- note that the empty epsfold is more significant than any other epsfold
 
 --------------------------------------------------------------------------------
 
