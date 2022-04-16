@@ -216,7 +216,7 @@ testSegs3 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
 
 data Test = Test
 
-
+data Test1
 
 simplePg  :: PlanarSubdivision Test () () PolygonFaceData Rational
 simplePg  = fromSimplePolygon @Test simplePg' Inside Outside

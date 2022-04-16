@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Polygon.PickPointSpec where
 
-import Control.Lens
 import Data.Ext
+import Control.Lens
 import Data.Geometry
-import Data.Geometry.Boundary
 import Data.Geometry.Polygon
-import Paths_hgeometry
+import Data.Geometry.Boundary
 import Test.Hspec
+import           Paths_hgeometry
 
 --------------------------------------------------------------------------------
 
@@ -16,6 +16,12 @@ spec = do it "Pick point in polygon test"  $
             toSpec testPoly
           it "Pick point in polygon test"  $
             toSpec testPoly2
+
+data TestCase r = TestCase { _polygon    :: SimplePolygon () r }
+                  deriving (Show)
+
+toSpec                  :: TestCase Rational -> Expectation
+toSpec (TestCase  poly) = (pickPoint poly `inPolygon` poly) `shouldBe` Inside
 
 testPoly :: TestCase Rational
 testPoly = TestCase . toCounterClockWiseOrder. fromPoints . map ext

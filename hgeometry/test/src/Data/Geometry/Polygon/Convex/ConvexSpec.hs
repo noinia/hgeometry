@@ -19,7 +19,7 @@ import           Data.Geometry.PolygonSpec    ()
 import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular         as CV
-import           Paths_hgeometry_test
+import           Paths_hgeometry
 import           Test.Hspec
 import           Test.QuickCheck              (Arbitrary (..), choose, elements, forAll, property,
                                                sized, suchThat, (=/=), (===), (==>), (.&&.))

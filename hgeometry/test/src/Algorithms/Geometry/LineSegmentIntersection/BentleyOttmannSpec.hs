@@ -7,14 +7,12 @@ import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.LineSegment
-import           Data.Geometry.LineSegmentSpec (arrowAsOpen)
 import           Data.Geometry.Polygon
 import           Data.List (intercalate)
 import qualified Data.Map as Map
 import           Data.Proxy
 import           Data.RealNumber.Rational
-import           Ipe
-import           Paths_hgeometry_test
+import           Paths_hgeometry
 import           System.FilePath.Lens
 import           Test.Hspec
 

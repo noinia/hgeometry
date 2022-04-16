@@ -89,13 +89,6 @@ instance Arbitrary ZeroToOne where
 
 --------------------------------------------------------------------------------
 
-byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
-               => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
-byStrokeColour = map (map fst) . List.groupBy ((==) `on` snd) . List.sortOn snd
-               . map (\x -> (x,lookup' x))
-  where
-    lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats
-
 -- | Computes all elements on which the two lists differ
 difference :: Eq a => [a] -> [a] -> [a]
 difference xs ys = (xs List.\\ ys) ++ (ys List.\\ xs)

@@ -23,7 +23,7 @@ import           Data.Serialize
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
-import           Paths_hgeometry_test
+import           Paths_hgeometry
 import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
@@ -49,7 +49,7 @@ allSimplePolygons' = allSimplePolygonsWith realToFrac
 {-# NOINLINE allSimplePolygonsWith #-}
 allSimplePolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon () r]
 allSimplePolygonsWith f = unsafePerformIO $ do
-  inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
+  inp <- BS.readFile =<< getDataFileName "test/data/polygons.simple"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
@@ -66,7 +66,7 @@ allMultiPolygons' = allMultiPolygonsWith realToFrac
 {-# NOINLINE allMultiPolygonsWith #-}
 allMultiPolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [MultiPolygon () r]
 allMultiPolygonsWith f = unsafePerformIO $ do
-  inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
+  inp <- BS.readFile =<< getDataFileName "test/data/polygons.multi"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $

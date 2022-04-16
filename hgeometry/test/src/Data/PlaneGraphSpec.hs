@@ -30,7 +30,7 @@ spec = describe "PlaneGraph tests" $ do
            (fmap (\i -> myGraph^.locationOf i) $ boundaryVertices (outerFaceId myGraph) myGraph)
              `shouldBe` outerBoundaryVerticesTestSegs
          it "encode yaml test" $ do
-           b <- B.readFile "src/Data/PlaneGraph/myPlaneGraph.yaml"
+           b <- B.readFile "test/src/Data/PlaneGraph/myPlaneGraph.yaml"
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
            outerFaceId simplePgGraph `shouldBe` FaceId (VertexId 1)
@@ -50,7 +50,7 @@ spec = describe "PlaneGraph tests" $ do
     myGraph = fromConnectedSegments @Test1 testSegs
 
 
-data Test1 = Test1
+data Test1
 
 draw    :: (Ord r, Fractional r)
         => PlaneGraph s p e extra r -> V.Vector (FaceId' s, Polygon 'Simple p r :+ extra)
