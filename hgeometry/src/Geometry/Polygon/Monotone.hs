@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon.Monotone
+-- Module      :  Geometry.Polygon.Monotone
 -- Copyright   :  (C) 1ndy
 -- License     :  see the LICENSE file
 -- Maintainer  :  David Himmelstrup
@@ -10,7 +10,7 @@
 -- <https://en.wikipedia.org/wiki/Monotone_polygon>
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Monotone
+module Geometry.Polygon.Monotone
   ( isMonotone
   , randomMonotone
   , randomMonotoneDirected
@@ -21,12 +21,12 @@ module Data.Geometry.Polygon.Monotone
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable                  as F
-import           Data.Geometry.Line             (Line (..))
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
-import           Data.Geometry.Polygon.Extremes
-import           Data.Geometry.Vector
+import           Geometry.Line             (Line (..))
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon.Core
+import           Geometry.Polygon.Extremes
+import           Geometry.Vector
 import           Data.Intersection
 import           Data.List
 import           Data.Vinyl

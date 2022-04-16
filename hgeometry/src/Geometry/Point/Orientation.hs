@@ -1,10 +1,10 @@
-module Data.Geometry.Point.Orientation where
+module Geometry.Point.Orientation where
 
 import Algorithms.Geometry.SoS.Orientation
 import Algorithms.Geometry.SoS.Sign
 import Algorithms.Geometry.SoS.Index
-import Data.Geometry.Point.Class
-import Data.Geometry.Vector
+import Geometry.Point.Class
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 

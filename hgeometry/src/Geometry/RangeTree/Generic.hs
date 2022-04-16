@@ -1,17 +1,17 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.RangeTree.Generic
+-- Module      :  Geometry.RangeTree.Generic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.RangeTree.Generic where
+module Geometry.RangeTree.Generic where
 
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
-import           Data.Geometry.Properties
-import           Data.Geometry.RangeTree.Measure
+import           Geometry.Properties
+import           Geometry.RangeTree.Measure
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range

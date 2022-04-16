@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ellipse
+-- Module      :  Geometry.Ellipse
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Ellipse(
+module Geometry.Ellipse(
     Ellipse(Ellipse)
   , affineTransformation
   , ellipseMatrix
@@ -16,12 +16,12 @@ module Data.Geometry.Ellipse(
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry.Ball
-import Data.Geometry.Matrix
-import Data.Geometry.Transformation
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Vector
+import Geometry.Ball
+import Geometry.Matrix
+import Geometry.Transformation
+import Geometry.Point
+import Geometry.Properties
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 

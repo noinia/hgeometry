@@ -12,8 +12,8 @@ import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision.Basic
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.PlaneGraph as PG

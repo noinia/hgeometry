@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.IntervalTree
+-- Module      :  Geometry.IntervalTree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.IntervalTree( NodeData(..)
+module Geometry.IntervalTree( NodeData(..)
                                  , splitPoint, intervalsLeft, intervalsRight
                                  , IntervalTree(..), unIntervalTree
                                  , IntervalLike(..)
@@ -21,9 +21,9 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
-import           Data.Geometry.Interval
-import           Data.Geometry.Interval.Util
-import           Data.Geometry.Properties
+import           Geometry.Interval
+import           Geometry.Interval.Util
+import           Geometry.Properties
 import qualified Data.List as List
 import qualified Data.Map as M
 import           GHC.Generics (Generic)

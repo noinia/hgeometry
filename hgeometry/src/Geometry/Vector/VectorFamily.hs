@@ -3,7 +3,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Vector.VectorFamily
+-- Module      :  Geometry.Vector.VectorFamily
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -13,7 +13,7 @@
 -- vectors.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector.VectorFamily where
+module Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
@@ -21,10 +21,10 @@ import           Control.Monad
 import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
-import           Data.Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
+import           Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
                                                          VectorFamilyF)
-import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
-import           Data.Geometry.Vector.VectorFixed (C (..))
+import qualified Geometry.Vector.VectorFamilyPeano as Fam
+import           Geometry.Vector.VectorFixed (C (..))
 import           Data.Hashable
 import           Data.Kind
 import           Data.List
@@ -137,7 +137,7 @@ instance (Arity d) => Read1 (Vector d) where
       readUnaryWith (replicateM d rp) constr $ \rs ->
         case vectorFromList rs of
           Just p -> p
-          _      -> error "internal error in Data.Geometry.Vector read instance."
+          _      -> error "internal error in Geometry.Vector read instance."
     where
       d = fromIntegral (natVal (Proxy :: Proxy d))
       constr = "Vector" <> show d

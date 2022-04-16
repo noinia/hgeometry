@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.Vector.Induction(
+module Geometry.Vector.Induction(
     induction
   , induction'
 
@@ -10,7 +10,7 @@ module Data.Geometry.Vector.Induction(
   , All, AllPeano
   ) where
 
-import           Data.Geometry.Vector.VectorFamilyPeano (FromPeano, ImplicitPeano(..), SingPeano(..))
+import           Geometry.Vector.VectorFamilyPeano (FromPeano, ImplicitPeano(..), SingPeano(..))
 import           Data.Proxy
 import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
 import           Data.Vinyl.Core

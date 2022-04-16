@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon.Inflate
+-- Module      :  Geometry.Polygon.Inflate
 -- Copyright   :  (C) David Himmelstrup
 -- License     :  see the LICENSE file
 -- Maintainer  :  David Himmelstrup
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Inflate
+module Geometry.Polygon.Inflate
   ( Arc(..)
   , inflate
   ) where
@@ -13,11 +13,11 @@ module Data.Geometry.Polygon.Inflate
 import           Algorithms.Geometry.SSSP   (SSSP, sssp, triangulate)
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Line         (lineThrough)
-import           Data.Geometry.LineSegment  (LineSegment (LineSegment, OpenLineSegment),
+import           Geometry.Line         (lineThrough)
+import           Geometry.LineSegment  (LineSegment (LineSegment, OpenLineSegment),
                                              interpolate, sqSegmentLength)
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
+import           Geometry.Point
+import           Geometry.Polygon.Core
 import           Data.Intersection          (IsIntersectableWith (intersect),
                                              NoIntersection (NoIntersection))
 import           Data.Maybe                 (catMaybes)

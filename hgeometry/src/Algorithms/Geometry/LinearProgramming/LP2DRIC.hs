@@ -25,14 +25,14 @@ import           Control.Monad (foldM)
 import           Control.Monad.Random.Class
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.HalfLine
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
+import           Geometry.Boundary
+import           Geometry.HalfLine
+import           Geometry.HalfSpace
+import           Geometry.HyperPlane
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Util

@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.LineSegment.Internal
+-- Module      :  Geometry.LineSegment.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,12 +10,12 @@
 -- Line segment data type and some basic functions on line segments
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.LineSegment.Internal
+module Geometry.LineSegment.Internal
   ( LineSegment(LineSegment, LineSegment', ClosedLineSegment, OpenLineSegment)
   , endPoints
 
   , _SubLine
-  , module Data.Geometry.Interval
+  , module Geometry.Interval
 
 
   , toLineSegment
@@ -39,14 +39,14 @@ import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box.Internal
-import           Data.Geometry.Interval hiding (width, midPoint)
-import           Data.Geometry.Line.Internal
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.SubLine
-import           Data.Geometry.Transformation.Internal
-import           Data.Geometry.Vector
+import           Geometry.Box.Internal
+import           Geometry.Interval hiding (width, midPoint)
+import           Geometry.Line.Internal
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.SubLine
+import           Geometry.Transformation.Internal
+import           Geometry.Vector
 import           Data.Ord (comparing)
 import           Data.Tuple (swap)
 import           Data.Vinyl

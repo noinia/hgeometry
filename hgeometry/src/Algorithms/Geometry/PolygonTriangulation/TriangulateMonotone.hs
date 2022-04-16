@@ -26,10 +26,10 @@ import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable                                  as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic          (PlanarSubdivision, PolygonFaceData)
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision.Basic          (PlanarSubdivision, PolygonFaceData)
+import           Geometry.Point
+import           Geometry.Polygon
 import qualified Data.List                                      as L
 import           Data.Ord                                       (Down (..), comparing)
 import           Data.PlaneGraph                                (PlaneGraph)

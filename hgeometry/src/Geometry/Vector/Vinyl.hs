@@ -1,6 +1,6 @@
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE UndecidableInstances       #-}
-module Data.Geometry.Vector.Vinyl where
+module Geometry.Vector.Vinyl where
 
 import           Control.Applicative          hiding (Const (..))
 import           Data.Foldable

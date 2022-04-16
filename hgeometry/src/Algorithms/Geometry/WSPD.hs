@@ -28,12 +28,12 @@ import           Control.Monad.ST (ST,runST)
 import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
-import           Data.Geometry.Point
--- import           Data.Geometry.Properties
--- import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as GV
+import           Geometry.Box
+import           Geometry.Point
+-- import           Geometry.Properties
+-- import           Geometry.Transformation
+import           Geometry.Vector
+import qualified Geometry.Vector as GV
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.LSeq as LSeq
 import           Data.LSeq (LSeq, toSeq,pattern (:<|))

@@ -3,12 +3,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.HalfLine
+-- Module      :  Geometry.HalfLine
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.HalfLine( HalfLine(HalfLine)
+module Geometry.HalfLine( HalfLine(HalfLine)
                              , startPoint, halfLineDirection
                              , toHalfLine
                              , halfLineToSubLine, fromSubLine
@@ -18,16 +18,16 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box
-import           Data.Geometry.Interval
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.SubLine
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
+import           Geometry.Boundary
+import           Geometry.Box
+import           Geometry.Interval
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.SubLine
+import           Geometry.Transformation
+import           Geometry.Vector
 import qualified Data.Traversable as T
 import           Data.UnBounded
 import qualified Data.Vector.Fixed as FV

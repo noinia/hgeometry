@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Point
+-- Module      :  Geometry.Point
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
+module Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
                           , origin, vector
                           , pointFromList
                           , projectPoint
@@ -41,12 +41,12 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
                           , ToAPoint(..), AsAPoint(..)
                           ) where
 
-import Data.Geometry.Point.Class
-import Data.Geometry.Point.Internal hiding (coord, unsafeCoord)
-import Data.Geometry.Point.Orientation.Degenerate
-import Data.Geometry.Point.Quadrants
-import Data.Geometry.Line.Internal
-import Data.Geometry.Vector
+import Geometry.Point.Class
+import Geometry.Point.Internal hiding (coord, unsafeCoord)
+import Geometry.Point.Orientation.Degenerate
+import Geometry.Point.Quadrants
+import Geometry.Line.Internal
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Point
+-- Module      :  Geometry.Point
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,7 +11,7 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point.Internal
+module Geometry.Point.Internal
   ( Point(..)
   , origin, vector
   , pointFromList
@@ -39,9 +39,9 @@ import           Data.Aeson
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as Vec
+import           Geometry.Properties
+import           Geometry.Vector
+import qualified Geometry.Vector as Vec
 import           Data.Hashable
 import           Data.List (intersperse)
 import           Data.Ord (comparing)
@@ -102,7 +102,7 @@ instance (Arity d) => Read1 (Point d) where
       readUnaryWith (replicateM d rp) constr $ \rs ->
         case pointFromList rs of
           Just p -> p
-          _      -> error "internal error in Data.Geometry.Point read instance."
+          _      -> error "internal error in Geometry.Point read instance."
     where
       d = fromIntegral (natVal (Proxy :: Proxy d))
       constr = "Point" <> show d

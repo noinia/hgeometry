@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree.Quadrants
+-- Module      :  Geometry.QuadTree.Quadrants
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree.Quadrants( pattern Quadrants
+module Geometry.QuadTree.Quadrants( pattern Quadrants
                                        , Quadrants
-                                       , module Data.Geometry.Box.Corners
+                                       , module Geometry.Box.Corners
                                        ) where
 
-import           Data.Geometry.Box.Corners
+import           Geometry.Box.Corners
 
 --------------------------------------------------------------------------------
 

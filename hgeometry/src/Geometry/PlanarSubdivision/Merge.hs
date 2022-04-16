@@ -1,13 +1,13 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlanarSubdivision.Merge
+-- Module      :  Geometry.PlanarSubdivision.Merge
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  Functions for merging two planar subdivisions
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Merge( merge
+module Geometry.PlanarSubdivision.Merge( merge
                                             , mergeWith
                                             , mergeAllWith
 
@@ -18,10 +18,10 @@ module Data.Geometry.PlanarSubdivision.Merge( merge
 import           Algorithms.DivideAndConquer
 import           Control.Lens hiding (holes)
 import           Data.Ext
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.PlanarSubdivision.Raw
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.PlanarSubdivision.Raw
+import           Geometry.Point
+import           Geometry.Polygon
 import           Data.PlanarGraph.Dart
 import qualified Data.PlaneGraph as PG
 import           Data.Semigroup.Foldable

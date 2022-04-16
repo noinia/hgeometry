@@ -14,9 +14,9 @@ module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
 
 import           Control.Lens ((^.))
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex (ConvexPolygon(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 

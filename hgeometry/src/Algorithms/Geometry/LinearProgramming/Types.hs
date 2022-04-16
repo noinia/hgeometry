@@ -13,10 +13,10 @@
 module Algorithms.Geometry.LinearProgramming.Types where
 
 import           Control.Lens
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HalfLine
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.HalfSpace
+import           Geometry.HalfLine
+import           Geometry.Point
+import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 

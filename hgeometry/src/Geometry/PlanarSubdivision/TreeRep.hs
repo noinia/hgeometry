@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlanarSubdivision.TreeRep
+-- Module      :  Geometry.PlanarSubdivision.TreeRep
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,7 +8,7 @@
 -- Data types to represent a PlanarSubdivision using adjacency representations
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.TreeRep
+module Geometry.PlanarSubdivision.TreeRep
   ( PlanarSD(..), InnerSD
   , Gr(..), Vtx(..), Face(..)
   , myTreeRep, myTriangle
@@ -19,7 +19,7 @@ module Data.Geometry.PlanarSubdivision.TreeRep
 import Data.Aeson
 import Data.PlaneGraph.AdjRep (Vtx(..), Gr(..))
 import GHC.Generics (Generic)
-import Data.Geometry.Point
+import Geometry.Point
 import Data.Traversable
 import Data.Bitraversable
 
@@ -81,7 +81,7 @@ instance (FromJSON r, FromJSON v, FromJSON e, FromJSON f) => FromJSON (Face v e 
 -- graph is undirected, the arrows are just to indicate what the
 -- Positive direction of the darts is.
 --
--- ![mySubDiv](docs/Data/Geometry/PlanarSubdivision/mySubDiv.jpg)
+-- ![mySubDiv](docs/Geometry/PlanarSubdivision/mySubDiv.jpg)
 myTreeRep :: PlanarSD Int () String (RealNumber 3)
 myTreeRep = PlanarSD "f_infty" [ Gr ads1 fs1
                                , Gr ads2 fs2

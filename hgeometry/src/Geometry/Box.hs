@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Box
+-- Module      :  Geometry.Box
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,20 +11,20 @@
 -- Orthogonal \(d\)-dimensiontal boxes (e.g. rectangles)
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Box
-  ( module Data.Geometry.Box.Internal
-  , module Data.Geometry.Box.Corners
-  , module Data.Geometry.Box.Sides
+module Geometry.Box
+  ( module Geometry.Box.Internal
+  , module Geometry.Box.Corners
+  , module Geometry.Box.Sides
   , inBox'
   ) where
 
 import Control.DeepSeq
-import Data.Geometry.Box.Corners
-import Data.Geometry.Box.Internal
-import Data.Geometry.Box.Sides
-import Data.Geometry.Vector
-import Data.Geometry.Point
-import Data.Geometry.Boundary
+import Geometry.Box.Corners
+import Geometry.Box.Internal
+import Geometry.Box.Sides
+import Geometry.Vector
+import Geometry.Point
+import Geometry.Boundary
 
 --------------------------------------------------------------------------------
 

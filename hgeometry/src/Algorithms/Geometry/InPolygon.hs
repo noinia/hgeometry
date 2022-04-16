@@ -18,12 +18,12 @@ import           Control.Lens
 
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
-import           Data.Geometry.Properties
+import           Geometry.Boundary
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon.Core
+import           Geometry.Properties
 
 import qualified Data.List.Util as List
 import           Data.Maybe (mapMaybe)

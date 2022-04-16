@@ -1,13 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Interval.Util
+-- Module      :  Geometry.Interval.Util
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Interval.Util where
+module Geometry.Interval.Util where
 
 import Control.DeepSeq
 import Control.Lens

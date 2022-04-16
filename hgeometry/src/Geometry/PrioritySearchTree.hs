@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PrioritySearchTree
+-- Module      :  Geometry.PrioritySearchTree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -14,7 +14,7 @@
 -- for more details.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PrioritySearchTree( PrioritySearchTree(..)
+module Geometry.PrioritySearchTree( PrioritySearchTree(..)
                                        , createTree
                                        , queryRange
                                        ) where
@@ -23,7 +23,7 @@ import           Algorithms.DivideAndConquer (mergeSortedListsBy)
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Measured.Class ()

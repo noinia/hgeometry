@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Arrangement.Internal
+-- Module      :  Geometry.Arrangement.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- Data type for representing an Arrangement of lines in \(\mathbb{R}^2\).
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Arrangement.Internal where
+module Geometry.Arrangement.Internal where
 
 import           Algorithms.BinarySearch
 import           Control.Lens
@@ -17,13 +17,13 @@ import           Data.Bifunctor
 import qualified Data.CircularSeq                as CSeq
 import           Data.Ext
 import qualified Data.Foldable                   as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
+import           Geometry.Boundary
+import           Geometry.Box
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Properties
 import qualified Data.List                       as List
 import           Data.Maybe
 import           Data.Ord                        (Down (..))
@@ -202,7 +202,7 @@ link vs ps = V.fromList . map (\((p,x),(_,y)) -> (p,y,x)) . F.toList
   where
     vs' = CSeq.fromList . map (\v -> (ps^.locationOf v,v) ) . V.toList
         $ boundaryVertices (outerFaceId ps) ps
-    fromJust' = fromMaybe (error "Data.Geometry.Arrangement.link: fromJust")
+    fromJust' = fromMaybe (error "Geometry.Arrangement.link: fromJust")
 
 --------------------------------------------------------------------------------
 

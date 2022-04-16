@@ -2,24 +2,24 @@
 {-# Language TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Slab
+-- Module      :  Geometry.Slab
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Slab where
+module Geometry.Slab where
 
 import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both, from)
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box.Internal
-import           Data.Geometry.Interval
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.SubLine
+import           Geometry.Box.Internal
+import           Geometry.Interval
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.SubLine
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec

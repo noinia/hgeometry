@@ -1,14 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.SegmentTree.Generic
+-- Module      :  Geometry.SegmentTree.Generic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  Implementation of SegmentTrees
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
+module Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
                                         , LeafData(..), atomicRange, leafAssoc
 
                                         , SegmentTree(..), unSegmentTree
@@ -28,9 +28,9 @@ module Data.Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.BinaryTree
-import           Data.Geometry.Interval
-import           Data.Geometry.IntervalTree (IntervalLike(..))
-import           Data.Geometry.Properties
+import           Geometry.Interval
+import           Geometry.IntervalTree (IntervalLike(..))
+import           Geometry.Properties
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty

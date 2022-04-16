@@ -16,9 +16,9 @@ module Algorithms.Geometry.WSPD.Types
 import           Control.Lens hiding (Level)
 import           Data.BinaryTree
 import           Data.Ext
-import           Data.Geometry.Box
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.Box
+import           Geometry.Point
+import           Geometry.Vector
 import qualified Data.LSeq as LSeq
 import           Data.Measured.Class
 import qualified Data.Sequence as S

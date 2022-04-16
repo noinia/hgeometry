@@ -10,10 +10,10 @@ module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker where
 import           Control.Lens hiding (only)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Vector
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.PolyLine
+import           Geometry.Vector
 import qualified Data.LSeq as LSeq
 import           Data.LSeq (LSeq, pattern (:|>))
 import           Data.Ord (comparing)

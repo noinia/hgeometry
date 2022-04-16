@@ -1,16 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree.Split
+-- Module      :  Geometry.QuadTree.Split
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree.Split where
+module Geometry.QuadTree.Split where
 
 import Control.Lens (makePrisms,(^.))
-import Data.Geometry.QuadTree.Cell
-import Data.Geometry.QuadTree.Quadrants
+import Geometry.QuadTree.Cell
+import Geometry.QuadTree.Quadrants
 
 --------------------------------------------------------------------------------
 

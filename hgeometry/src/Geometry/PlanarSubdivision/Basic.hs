@@ -2,14 +2,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlnarSubdivision.Basic
+-- Module      :  Geometry.PlnarSubdivision.Basic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  Basic data types to represent a PlanarSubdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Basic
+module Geometry.PlanarSubdivision.Basic
   ( -- $setup
     PlanarSubdivision(PlanarSubdivision)
   , Component, ComponentId
@@ -89,12 +89,12 @@ import           Data.Bifunctor (first, second)
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
-import           Data.Geometry.LineSegment hiding (endPoints)
-import           Data.Geometry.PlanarSubdivision.Raw
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Properties
+import           Geometry.Box
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.PlanarSubdivision.Raw
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Properties
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlanarGraph.Dart (allDarts,isPositive)

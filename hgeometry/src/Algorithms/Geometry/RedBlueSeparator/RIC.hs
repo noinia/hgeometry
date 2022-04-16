@@ -20,10 +20,10 @@ import           Control.Lens hiding (below)
 import           Control.Monad.Random.Class
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.Line
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.HalfSpace
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Vector
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable
 import           Data.Util

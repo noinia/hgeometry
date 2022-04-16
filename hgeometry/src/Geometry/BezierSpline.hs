@@ -2,17 +2,17 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.BezierSpline
+-- Module      :  Geometry.BezierSpline
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.BezierSpline(
+module Geometry.BezierSpline(
     BezierSpline (BezierSpline, Bezier2, Bezier3)
   , controlPoints
   , fromPointSeq
   , endPoints
-  , Data.Geometry.BezierSpline.reverse
+  , Geometry.BezierSpline.reverse
 
   , evaluate
   , split
@@ -39,17 +39,17 @@ import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens hiding (Empty)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ball
-import           Data.Geometry.Box.Internal
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment hiding (endPoints)
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine (PolyLine(..))
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex hiding (merge)
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector hiding (init)
+import           Geometry.Ball
+import           Geometry.Box.Internal
+import           Geometry.Line
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.Point
+import           Geometry.PolyLine (PolyLine(..))
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex hiding (merge)
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Vector hiding (init)
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
 import           Data.List (sort)

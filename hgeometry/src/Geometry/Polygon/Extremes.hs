@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon.Extremes
+-- Module      :  Geometry.Polygon.Extremes
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,15 +8,15 @@
 -- Finding the Extremal vertex of a polygon in a given direction.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Extremes( cmpExtreme
+module Geometry.Polygon.Extremes( cmpExtreme
                                      , extremesLinear
                                      ) where
 
 import           Control.Lens hiding (Simple,simple)
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core as P
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Polygon.Core as P
+import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 

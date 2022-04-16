@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Vector
+-- Module      :  Geometry.Vector
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- \(d\)-dimensional vectors.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
+module Geometry.Vector( module Geometry.Vector.VectorFamily
                            , module LV
                            , C(..)
                            , Affine(..)
@@ -27,9 +27,9 @@ import           Control.Applicative (liftA2)
 import           Control.Lens (Lens')
 import           Control.Monad.State
 import qualified Data.Foldable as F
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Vector.VectorFixed (C (..))
+import           Geometry.Properties
+import           Geometry.Vector.VectorFamily
+import           Geometry.Vector.VectorFixed (C (..))
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Linear.Affine (Affine (..), distanceA, qdA)

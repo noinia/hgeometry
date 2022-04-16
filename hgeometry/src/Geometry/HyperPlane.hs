@@ -3,20 +3,20 @@
 {-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.HyperPlane
+-- Module      :  Geometry.HyperPlane
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.HyperPlane where
+module Geometry.HyperPlane where
 
 import Control.DeepSeq
 import Control.Lens
-import Data.Geometry.Line
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Transformation
-import Data.Geometry.Vector
+import Geometry.Line
+import Geometry.Point
+import Geometry.Properties
+import Geometry.Transformation
+import Geometry.Vector
 import GHC.Generics (Generic)
 import Data.Kind
 import GHC.TypeLits

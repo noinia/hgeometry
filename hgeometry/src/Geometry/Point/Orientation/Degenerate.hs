@@ -1,4 +1,4 @@
-module Data.Geometry.Point.Orientation.Degenerate(
+module Geometry.Point.Orientation.Degenerate(
     CCW(..)
   , pattern CCW, pattern CW, pattern CoLinear
 
@@ -20,9 +20,9 @@ import           Control.Lens
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Vector
+import           Geometry.Point.Internal
+import           Geometry.Point.Class
+import           Geometry.Vector
 import qualified Data.List as L
 
 --------------------------------------------------------------------------------

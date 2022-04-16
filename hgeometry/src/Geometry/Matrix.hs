@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Matrix
+-- Module      :  Geometry.Matrix
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,7 +8,7 @@
 -- type-indexed matrices.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Matrix(
+module Geometry.Matrix(
     Matrix(Matrix)
   , identityMatrix
 
@@ -21,9 +21,9 @@ module Data.Geometry.Matrix(
 
 import           Control.Lens                           (imap)
 import           Data.Coerce
-import           Data.Geometry.Matrix.Internal          (mkRow)
-import           Data.Geometry.Vector
-import           Data.Geometry.Vector.VectorFamilyPeano
+import           Geometry.Matrix.Internal          (mkRow)
+import           Geometry.Vector
+import           Geometry.Vector.VectorFamilyPeano
 import           Linear.Matrix                          (M22, M33, M44, (!*!), (!*))
 import qualified Linear.Matrix                          as Lin
 

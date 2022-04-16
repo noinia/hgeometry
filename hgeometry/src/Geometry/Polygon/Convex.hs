@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon.Convex
+-- Module      :  Geometry.Polygon.Convex
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- Convex Polygons
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Convex
+module Geometry.Polygon.Convex
   ( ConvexPolygon(..), simplePolygon
   , convexPolygon
   , isConvex, verifyConvex
@@ -42,19 +42,19 @@ import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
 import           Data.Function                  (on)
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box              (IsBoxable (..))
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
+import           Geometry.Boundary
+import           Geometry.Box              (IsBoxable (..))
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
                                                  outerBoundaryVector, outerVertex, size,
                                                  unsafeFromPoints, unsafeFromVector,
                                                  unsafeOuterBoundaryVector)
-import           Data.Geometry.Polygon.Extremes (cmpExtreme)
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
+import           Geometry.Polygon.Extremes (cmpExtreme)
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Triangle
+import           Geometry.Vector
 import qualified Data.IntSet                    as IS
 import           Data.List.NonEmpty             (NonEmpty (..))
 import qualified Data.List.NonEmpty             as NonEmpty
@@ -69,7 +69,7 @@ import qualified Data.Vector.Circular.Util      as CV
 import qualified Data.Vector.Mutable            as Mut
 import qualified Data.Vector.NonEmpty           as NE
 import qualified Data.Vector.Unboxed            as VU
--- import           Data.Geometry.Ipe
+-- import           Geometry.Ipe
 -- import Data.Ratio
 -- import Data.RealNumber.Rational
 -- import Debug.Trace
@@ -697,7 +697,7 @@ randomEdges n vMax = do
 --   Generate a uniformly random ConvexPolygon with @N@ vertices and a granularity of @vMax@.
 randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon () Rational)
 randomConvex n _vMax | n < 3 =
-  error "Data.Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
+  error "Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
 randomConvex n vMax = do
   ~(v:vs) <- coerce . sortAround origin . coerce <$> randomEdges n vMax
   let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs

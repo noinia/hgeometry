@@ -2,12 +2,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Vector.VectorFamilyPeano
+-- Module      :  Geometry.Vector.VectorFamilyPeano
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector.VectorFamilyPeano
+module Geometry.Vector.VectorFamilyPeano
   ( ImplicitArity
   , VectorFamily(VectorFamily)
   , VectorFamilyF
@@ -22,7 +22,7 @@ import           Data.Aeson (FromJSON(..),ToJSON(..))
 import           Data.Kind
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
-import qualified Data.Geometry.Vector.VectorFixed as FV
+import qualified Geometry.Vector.VectorFixed as FV
 import           Data.Proxy
 import           Data.Functor.Classes
 import qualified Data.Vector.Fixed as V

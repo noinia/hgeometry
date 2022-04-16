@@ -2,12 +2,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Vector.VectorFixed
+-- Module      :  Geometry.Vector.VectorFixed
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector.VectorFixed where
+module Geometry.Vector.VectorFixed where
 
 import           Control.DeepSeq
 import           Control.Lens hiding (element)

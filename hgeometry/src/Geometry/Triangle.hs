@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | Triangles in \(d\)-dimensional space.
-module Data.Geometry.Triangle where
+module Geometry.Triangle where
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
@@ -10,18 +10,18 @@ import           Data.Bifunctor (Bifunctor (first))
 import           Data.Bitraversable
 import           Data.Either (partitionEithers)
 import           Data.Ext
-import           Data.Geometry.Ball (Disk, disk)
-import           Data.Geometry.Boundary (PointLocationResult (..))
-import           Data.Geometry.Box (IsBoxable (..))
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line (Line (Line))
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as V
+import           Geometry.Ball (Disk, disk)
+import           Geometry.Boundary (PointLocationResult (..))
+import           Geometry.Box (IsBoxable (..))
+import           Geometry.HalfSpace
+import           Geometry.HyperPlane
+import           Geometry.Line (Line (Line))
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Vector
+import qualified Geometry.Vector as V
 import qualified Data.List as List
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup.Foldable

@@ -1,4 +1,4 @@
-module Data.Geometry.PlanarSubdivision.Dynamic
+module Geometry.PlanarSubdivision.Dynamic
   ( splitEdge, unSplitEdge
   , sproutIntoFace
   , splitFace
@@ -7,10 +7,10 @@ module Data.Geometry.PlanarSubdivision.Dynamic
 import           Control.Lens
 import           Data.Ext
 import           Data.Functor.Identity
-import           Data.Geometry hiding (Vector, head, imap)
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.PlanarSubdivision.Raw
+import           Geometry.Point -- hiding (Vector, head, imap)
+import           Geometry.PlanarSubdivision
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.PlanarSubdivision.Raw
 import           Data.List (sort, sortOn, findIndex)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

@@ -3,22 +3,22 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlnarSubdivision.Build
+-- Module      :  Geometry.PlnarSubdivision.Build
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  Functions for Constructing a PlanarSubdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Build where
+module Geometry.PlanarSubdivision.Build where
 
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Control.Monad.State.Strict
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.Polygon
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.Polygon
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual

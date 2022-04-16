@@ -4,7 +4,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Box.Internal
+-- Module      :  Geometry.Box.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -12,7 +12,7 @@
 -- Orthogonal \(d\)-dimensiontal boxes (e.g. rectangles)
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Box.Internal where
+module Geometry.Box.Internal where
 
 import           Control.DeepSeq
 import           Control.Lens
@@ -21,11 +21,11 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation.Internal
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as V
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation.Internal
+import           Geometry.Vector
+import qualified Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F

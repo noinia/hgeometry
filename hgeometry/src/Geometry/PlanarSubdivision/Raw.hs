@@ -1,14 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlnarSubdivision.Raw
+-- Module      :  Geometry.PlnarSubdivision.Raw
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 -- Description :  The 'Raw' building block used in a Planar Subdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Raw where
+module Geometry.PlanarSubdivision.Raw where
 
 import           Control.Lens
 import           Data.Aeson

@@ -1,12 +1,12 @@
 {-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PolyLine
+-- Module      :  Geometry.PolyLine
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.PolyLine where
+module Geometry.PolyLine where
 
 import           Control.Lens
 import           Data.Aeson
@@ -15,12 +15,12 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
+import           Geometry.Box
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Vector
 import           Data.LSeq (LSeq, pattern (:<|))
 import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE

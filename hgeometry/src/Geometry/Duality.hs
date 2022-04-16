@@ -1,14 +1,14 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Duality
+-- Module      :  Geometry.Duality
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Duality where
+module Geometry.Duality where
 
-import Data.Geometry.Line
-import Data.Geometry.Point
+import Geometry.Line
+import Geometry.Point
 import Data.Maybe(fromJust)
 --------------------------------------------------------------------------------
 -- * Standard Point-Line duality in R^2

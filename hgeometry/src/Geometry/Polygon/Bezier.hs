@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Polygon.Bezier
+module Geometry.Polygon.Bezier
   ( PathJoin(..)
   , fromBeziers
   , approximate
@@ -9,11 +9,11 @@ module Data.Geometry.Polygon.Bezier
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.BezierSpline (BezierSpline, pattern Bezier3)
-import qualified Data.Geometry.BezierSpline as Bezier
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine(points)
-import           Data.Geometry.Polygon
+import           Geometry.BezierSpline (BezierSpline, pattern Bezier3)
+import qualified Geometry.BezierSpline as Bezier
+import           Geometry.Point
+import           Geometry.PolyLine(points)
+import           Geometry.Polygon
 import qualified Data.Vector.Circular       as CV
 import qualified Data.Foldable as F
 

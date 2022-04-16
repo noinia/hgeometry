@@ -24,11 +24,11 @@ import           Data.Bitraversable
 import           Data.Either
 import           Data.Ext                        (ext, extra, type (:+) (..))
 import qualified Data.FingerTree                 as F
-import           Data.Geometry.Line              (lineThrough)
-import           Data.Geometry.LineSegment       (LineSegment (ClosedLineSegment, LineSegment))
-import           Data.Geometry.PlanarSubdivision (PolygonFaceData (..))
-import           Data.Geometry.Point             (Point, ccw, pattern CCW, pattern CW)
-import           Data.Geometry.Polygon
+import           Geometry.Line              (lineThrough)
+import           Geometry.LineSegment       (LineSegment (ClosedLineSegment, LineSegment))
+import           Geometry.PlanarSubdivision (PolygonFaceData (..))
+import           Geometry.Point             (Point, ccw, pattern CCW, pattern CW)
+import           Geometry.Polygon
 import           Data.Intersection
 import           Data.List                       (sortOn, (\\))
 import           Data.Maybe                      (fromMaybe)

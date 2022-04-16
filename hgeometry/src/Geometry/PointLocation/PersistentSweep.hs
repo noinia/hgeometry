@@ -2,12 +2,12 @@
 {-# Language TypeApplications #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PointLocation.PersistentSweep
+-- Module      :  Geometry.PointLocation.PersistentSweep
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.PointLocation.PersistentSweep
+module Geometry.PointLocation.PersistentSweep
   ( PointLocationDS(PointLocationDS)
   , verticalRayShootingStructure, subdivision, outerFace
 
@@ -24,13 +24,13 @@ module Data.Geometry.PointLocation.PersistentSweep
   , edgeOnOrAbove
   ) where
 
-import qualified Data.Geometry.VerticalRayShooting.PersistentSweep as VRS
+import qualified Geometry.VerticalRayShooting.PersistentSweep as VRS
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Polygon
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util (SP(..))
 import qualified Data.Vector as V

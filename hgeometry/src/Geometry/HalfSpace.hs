@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.HalfSpace
+-- Module      :  Geometry.HalfSpace
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,17 +10,17 @@
 -- \(d\)-dimensional HalfSpaces
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.HalfSpace where
+module Geometry.HalfSpace where
 
 import Control.Lens
-import Data.Geometry.HalfLine
-import Data.Geometry.HyperPlane
-import Data.Geometry.Line
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Transformation
-import Data.Geometry.Boundary
-import Data.Geometry.Vector
+import Geometry.HalfLine
+import Geometry.HyperPlane
+import Geometry.Line
+import Geometry.Point
+import Geometry.Properties
+import Geometry.Transformation
+import Geometry.Boundary
+import Geometry.Vector
 import Data.Vinyl.CoRec
 import Data.Vinyl.Core
 import GHC.Generics (Generic)

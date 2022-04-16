@@ -2,14 +2,14 @@
 {-# LANGUAGE TypeApplications #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree
+-- Module      :  Geometry.QuadTree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree-- ( module Data.Geometry.QuadTree.Cell
-                             -- , module Data.Geometry.QuadTree.Quadrants
-                             -- , module Data.Geometry.QuadTree.Split
+module Geometry.QuadTree-- ( module Geometry.QuadTree.Cell
+                             -- , module Geometry.QuadTree.Quadrants
+                             -- , module Geometry.QuadTree.Split
                              -- , QuadTree(..)
                              -- , leaves
                              -- , withCells
@@ -20,14 +20,14 @@ module Data.Geometry.QuadTree-- ( module Data.Geometry.QuadTree.Cell
 import           Control.Lens (makeLenses, (^.), (.~), (&), (^?!), ix, view)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
-import           Data.Geometry.Point
-import           Data.Geometry.QuadTree.Cell
-import           Data.Geometry.QuadTree.Quadrants
-import           Data.Geometry.QuadTree.Split
-import           Data.Geometry.QuadTree.Tree (Tree(..))
-import qualified Data.Geometry.QuadTree.Tree as Tree
-import           Data.Geometry.Vector
+import           Geometry.Box
+import           Geometry.Point
+import           Geometry.QuadTree.Cell
+import           Geometry.QuadTree.Quadrants
+import           Geometry.QuadTree.Split
+import           Geometry.QuadTree.Tree (Tree(..))
+import qualified Geometry.QuadTree.Tree as Tree
+import           Geometry.Vector
 import           Data.Intersection
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Tree.Util (TreeNode(..), levels)

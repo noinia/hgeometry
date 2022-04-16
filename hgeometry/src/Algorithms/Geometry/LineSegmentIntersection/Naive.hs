@@ -8,10 +8,10 @@ module Algorithms.Geometry.LineSegmentIntersection.Naive
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens((^.))
 import           Data.Ext
--- import           Data.Geometry.Interval
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
+-- import           Geometry.Interval
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
 import qualified Data.Map as M
 import           Data.Util
 import           Data.Vinyl

@@ -1,12 +1,12 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PointLocation
+-- Module      :  Geometry.PointLocation
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.PointLocation
-  ( module Data.Geometry.PointLocation.PersistentSweep
+module Geometry.PointLocation
+  ( module Geometry.PointLocation.PersistentSweep
   ) where
 
-import Data.Geometry.PointLocation.PersistentSweep
+import Geometry.PointLocation.PersistentSweep

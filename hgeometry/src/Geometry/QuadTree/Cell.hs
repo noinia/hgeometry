@@ -1,22 +1,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree.Cell
+-- Module      :  Geometry.QuadTree.Cell
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree.Cell where
+module Geometry.QuadTree.Cell where
 
 import Control.Lens (makeLenses, (^.),(&),(%~),ix, to)
 import Data.Ext
-import Data.Geometry.Box
-import Data.Geometry.Directions
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.QuadTree.Quadrants
-import Data.Geometry.Vector
+import Geometry.Box
+import Geometry.Directions
+import Geometry.LineSegment
+import Geometry.Point
+import Geometry.Properties
+import Geometry.QuadTree.Quadrants
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 

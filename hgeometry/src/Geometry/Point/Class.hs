@@ -1,13 +1,13 @@
 {-# LANGUAGE  AllowAmbiguousTypes  #-}
 {-# LANGUAGE  FunctionalDependencies  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Data.Geometry.Point.Class where
+module Geometry.Point.Class where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Point.Internal (Point)
-import qualified Data.Geometry.Point.Internal as Internal
-import           Data.Geometry.Vector
+import           Geometry.Point.Internal (Point)
+import qualified Geometry.Point.Internal as Internal
+import           Geometry.Vector
 import           GHC.TypeNats
 import           Linear.V2
 import           Linear.V3
@@ -15,7 +15,7 @@ import           Linear.V4
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> import Data.Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
+-- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
 class ToAPoint point d r | point -> r where
   toPoint   :: Getter point (Point d r)

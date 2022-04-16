@@ -1,20 +1,20 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.RangeTree
+-- Module      :  Geometry.RangeTree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.RangeTree where
+module Geometry.RangeTree where
 
 import           Control.Lens hiding (element)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
-import qualified Data.Geometry.RangeTree.Generic as GRT
-import           Data.Geometry.RangeTree.Measure
-import           Data.Geometry.Vector
+import           Geometry.Point
+import qualified Geometry.RangeTree.Generic as GRT
+import           Geometry.RangeTree.Measure
+import           Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Measured.Class

@@ -1,12 +1,12 @@
 {-# Language TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.VerticalRayShooting.PersistentSweep
+-- Module      :  Geometry.VerticalRayShooting.PersistentSweep
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.VerticalRayShooting.PersistentSweep
+module Geometry.VerticalRayShooting.PersistentSweep
   ( VerticalRayShootingStructure(VerticalRayShootingStructure), StatusStructure
   , leftMost, sweepStruct
 
@@ -23,9 +23,9 @@ import           Control.Lens hiding (contains, below)
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Function (on)
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

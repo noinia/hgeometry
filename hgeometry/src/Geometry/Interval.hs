@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Interval
+-- Module      :  Geometry.Interval
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Interval(
+module Geometry.Interval(
                                -- * 1 dimensional Intervals
                                Interval (Interval, OpenInterval,ClosedInterval)
                              , fromRange, toRange
@@ -28,8 +28,8 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Properties
+import           Geometry.Boundary
+import           Geometry.Properties
 import           Data.Range
 import           Data.Semigroup (Arg (..))
 import qualified Data.Traversable as T

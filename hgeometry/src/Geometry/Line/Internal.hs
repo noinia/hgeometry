@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Line.Internal
+-- Module      :  Geometry.Line.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,16 +10,16 @@
 -- \(d\)-dimensional lines.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Line.Internal where
+module Geometry.Line.Internal where
 
 import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Point.Orientation.Degenerate
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
+import           Geometry.Point.Internal
+import           Geometry.Point.Orientation.Degenerate
+import           Geometry.Point.Class
+import           Geometry.Properties
+import           Geometry.Vector
 import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl

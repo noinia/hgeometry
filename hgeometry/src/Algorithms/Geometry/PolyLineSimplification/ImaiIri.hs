@@ -13,10 +13,10 @@ import           Algorithms.Graph.BFS (bfs')
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Vector
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.PolyLine
+import           Geometry.Vector
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

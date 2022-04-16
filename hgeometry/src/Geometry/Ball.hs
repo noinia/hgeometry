@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Ball
+-- Module      :  Geometry.Ball
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,19 +10,19 @@
 -- \(d\)-dimensional Balls and Spheres
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ball where
+module Geometry.Ball where
 
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
+import           Geometry.Boundary
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Vector
 import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl

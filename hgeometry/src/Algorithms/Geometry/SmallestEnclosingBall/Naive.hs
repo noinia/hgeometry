@@ -18,8 +18,8 @@ module Algorithms.Geometry.SmallestEnclosingBall.Naive
 import Control.Lens
 import Data.Ext
 import Algorithms.Geometry.SmallestEnclosingBall.Types
-import Data.Geometry.Ball
-import Data.Geometry.Point
+import Geometry.Ball
+import Geometry.Point
 import Data.List (minimumBy)
 import Data.Function (on)
 import Data.Maybe (fromMaybe)

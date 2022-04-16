@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon
+-- Module      :  Geometry.Polygon
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- A Polygon data type and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon
+module Geometry.Polygon
   ( -- * Types
     PolygonType(..)
   , Polygon(..)
@@ -85,14 +85,14 @@ import           Control.Lens hiding (Simple)
 import           Control.Monad.Random.Class
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.HalfSpace (rightOf)
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
-import           Data.Geometry.Polygon.Extremes
-import           Data.Geometry.Properties
+import           Geometry.Boundary
+import           Geometry.HalfSpace (rightOf)
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon.Core
+import           Geometry.Polygon.Extremes
+import           Geometry.Properties
 import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 

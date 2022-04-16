@@ -17,9 +17,9 @@ module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
 
 import           Control.Lens hiding (contains)
 import           Data.Ext
-import           Data.Geometry.Interval
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.Interval
+import           Geometry.LineSegment
+import           Geometry.Point
 
 import           Data.Intersection
 import qualified Data.List as L
@@ -30,7 +30,7 @@ import qualified Data.Set.Util as SS
 
 -- import           Data.RealNumber.Rational
 import Debug.Trace
-import Data.Geometry.Polygon
+import Geometry.Polygon
 
 --------------------------------------------------------------------------------
 

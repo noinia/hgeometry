@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.LineSegment
+-- Module      :  Geometry.LineSegment
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,12 +11,12 @@
 -- Line segment data type and some basic functions on line segments
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.LineSegment
+module Geometry.LineSegment
   ( LineSegment(LineSegment, LineSegment', ClosedLineSegment, OpenLineSegment)
   , endPoints
 
   , _SubLine
-  , module Data.Geometry.Interval
+  , module Geometry.Interval
 
   , toLineSegment
   , orderedEndPoints
@@ -32,14 +32,14 @@ module Data.Geometry.LineSegment
 -- import           Control.Lens
 import           Data.Ext
 -- import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box.Internal
-import           Data.Geometry.Box.Sides
-import           Data.Geometry.Interval hiding (width, midPoint)
-import           Data.Geometry.LineSegment.Internal
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
--- import           Data.Geometry.SubLine
+import           Geometry.Boundary
+import           Geometry.Box.Internal
+import           Geometry.Box.Sides
+import           Geometry.Interval hiding (width, midPoint)
+import           Geometry.LineSegment.Internal
+import           Geometry.Point
+import           Geometry.Properties
+-- import           Geometry.SubLine
 import           Data.Util
 -- import           Data.Vinyl.CoRec
 -- import           Data.Bifunctor

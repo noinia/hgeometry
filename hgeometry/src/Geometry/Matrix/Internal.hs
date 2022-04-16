@@ -1,8 +1,8 @@
 {-# LANGUAGE Unsafe #-}
-module Data.Geometry.Matrix.Internal where
+module Geometry.Matrix.Internal where
 
 import           Control.Lens (set)
-import           Data.Geometry.Vector
+import           Geometry.Vector
 import qualified Data.Vector.Fixed as FV
 
 --------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import           Control.Lens ((^.))
 import           Control.Monad.ST (ST,runST)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
+import           Geometry.Point
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe, fromJust)
 import           Data.Sequence.Util (binarySearchIn)

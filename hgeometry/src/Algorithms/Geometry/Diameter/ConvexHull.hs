@@ -11,12 +11,12 @@ module Algorithms.Geometry.Diameter.ConvexHull
   ) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
-import qualified Algorithms.Geometry.Diameter.Naive        as Naive
-import           Control.Lens                              ((^.))
-import           Data.Ext                                  (core, type (:+))
-import           Data.Geometry                             (Point, euclideanDist)
-import qualified Data.Geometry.Polygon.Convex              as Convex
-import qualified Data.List.NonEmpty                        as NonEmpty
+import qualified Algorithms.Geometry.Diameter.Naive as Naive
+import           Control.Lens ((^.))
+import           Data.Ext (core, type (:+))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Geometry.Point
+import qualified Geometry.Polygon.Convex as Convex
 
 --------------------------------------------------------------------------------
 

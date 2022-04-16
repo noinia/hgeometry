@@ -1,15 +1,15 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Boundary
+-- Module      :  Geometry.Boundary
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Boundary where
+module Geometry.Boundary where
 
 import Control.Lens (iso,Iso)
-import Data.Geometry.Properties
-import Data.Geometry.Transformation
+import Geometry.Properties
+import Geometry.Transformation
 
 --------------------------------------------------------------------------------
 

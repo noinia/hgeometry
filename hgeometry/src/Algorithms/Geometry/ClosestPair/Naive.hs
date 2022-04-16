@@ -17,9 +17,9 @@ module Algorithms.Geometry.ClosestPair.Naive( closestPair
 import           Control.Lens ((^.),_1)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
-import           Data.Geometry.Properties (NumType)
-import           Data.Geometry.Vector (Arity)
+import           Geometry.Point
+import           Geometry.Properties (NumType)
+import           Geometry.Vector (Arity)
 import           Data.LSeq (LSeq)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup

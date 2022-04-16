@@ -10,11 +10,11 @@ module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
 import           Control.Lens ((^.))
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Line
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
-import           Data.Geometry.Triangle
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Geometry.Triangle
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)

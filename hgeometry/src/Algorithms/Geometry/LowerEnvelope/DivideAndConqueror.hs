@@ -1,9 +1,9 @@
 module Algorithms.Geometry.LowerEnvelope.DivideAndConquereor where
 
 import Algorithms.DivideAndConquer
-import Data.Geometry.Point
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
+import Geometry.Point
+import Geometry.Line
+import Geometry.LineSegment
 import Data.List.NonEmpty(NonEmpty)
 import Data.Vector
 

@@ -1,17 +1,17 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Point.Quadrants
+-- Module      :  Geometry.Point.Quadrants
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Point.Quadrants where
+module Geometry.Point.Quadrants where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Vector
+import           Geometry.Point.Class
+import           Geometry.Point.Internal
+import           Geometry.Vector
 import qualified Data.List as L
 import           GHC.TypeLits
 

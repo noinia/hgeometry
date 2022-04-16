@@ -15,9 +15,9 @@ import           Control.Lens
 import           Data.Either (lefts)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.Polygon
 
 --------------------------------------------------------------------------------
 

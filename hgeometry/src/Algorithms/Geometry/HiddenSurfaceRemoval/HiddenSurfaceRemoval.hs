@@ -18,15 +18,15 @@ import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
-import           Data.Geometry.Arrangement
-import           Data.Geometry.Box
-import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon (centroid)
-import           Data.Geometry.Properties
-import           Data.Geometry.Triangle
+import           Geometry.Arrangement
+import           Geometry.Box
+import           Geometry.HyperPlane
+import           Geometry.Line
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Polygon (centroid)
+import           Geometry.Properties
+import           Geometry.Triangle
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

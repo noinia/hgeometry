@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Polygon.Core
+-- Module      :  Geometry.Polygon.Core
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- A Polygon data type and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Core
+module Geometry.Polygon.Core
   ( PolygonType(..)
   , Polygon(..)
   , Vertices
@@ -85,17 +85,17 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box                                          (IsBoxable (..),
+import           Geometry.Boundary
+import           Geometry.Box                                          (IsBoxable (..),
                                                                              boundingBoxList')
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Triangle                                     (Triangle (..),
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Triangle                                     (Triangle (..),
                                                                              inTriangle)
-import           Data.Geometry.Vector                                       (Additive (zero, (^+^)),
+import           Geometry.Vector                                       (Additive (zero, (^+^)),
                                                                              Affine ((.+^), (.-.)),
                                                                              (*^), (^*), (^/))
 import qualified Data.List as List
@@ -391,7 +391,7 @@ isSimple MultiPolygon{}      = False
 requireThree :: String -> [a] -> [a]
 requireThree _ lst@(_:_:_:_) = lst
 requireThree label _ = error $
-  "Data.Geometry.Polygon." ++ label ++ ": Polygons must have at least three points."
+  "Geometry.Polygon." ++ label ++ ": Polygons must have at least three points."
 
 -- | \( O(n) \) Creates a polygon from the given list of vertices.
 --
@@ -429,7 +429,7 @@ simpleFromCircularVector v =
   let p = fromCircularVector v
       hasInteriorIntersections = not . null . BO.interiorIntersections . map ext
   in if hasInteriorIntersections (listEdges p)
-      then error "Data.Geometry.Polygon.simpleFromCircularVector: \
+      then error "Geometry.Polygon.simpleFromCircularVector: \
                  \Found self-intersections or repeated vertices."
       else p
 

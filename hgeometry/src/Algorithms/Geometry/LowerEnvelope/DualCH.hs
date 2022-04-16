@@ -11,11 +11,13 @@ module Algorithms.Geometry.LowerEnvelope.DualCH where
 import Data.Maybe(fromJust)
 import Control.Lens((^.))
 import Data.Ext
-import Data.Geometry
+import Geometry.Point
+import Geometry.Line
+import Data.Intersection
 import Algorithms.Geometry.ConvexHull.GrahamScan
 import Data.List.NonEmpty(NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import Data.Geometry.Duality
+import Geometry.Duality
 import Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------

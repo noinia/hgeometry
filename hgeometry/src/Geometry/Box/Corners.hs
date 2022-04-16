@@ -1,21 +1,21 @@
 {-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Box.Corners
+-- Module      :  Geometry.Box.Corners
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
+module Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
                                 , corners, cornersInDirection
                                 ) where
 
 import Control.Lens (makeLenses,Ixed(..),Index, IxValue,(%~),(&),(^?!))
 import Data.Ext
 import Data.Functor.Apply
-import Data.Geometry.Box.Internal
-import Data.Geometry.Directions
-import Data.Geometry.Point
+import Geometry.Box.Internal
+import Geometry.Directions
+import Geometry.Point
 import Data.Semigroup.Foldable.Class
 import Data.Semigroup.Traversable.Class
 import Data.Util

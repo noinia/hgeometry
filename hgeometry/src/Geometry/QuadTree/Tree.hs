@@ -2,12 +2,12 @@
 {-# LANGUAGE TypeApplications #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree.Tree
+-- Module      :  Geometry.QuadTree.Tree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree.Tree where
+module Geometry.QuadTree.Tree where
 
 
 import           Control.Lens (makePrisms)
@@ -17,10 +17,10 @@ import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Apply
-import           Data.Geometry.Point
-import           Data.Geometry.QuadTree.Cell
-import           Data.Geometry.QuadTree.Quadrants
-import           Data.Geometry.QuadTree.Split
+import           Geometry.Point
+import           Geometry.QuadTree.Cell
+import           Geometry.QuadTree.Quadrants
+import           Geometry.QuadTree.Split
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable.Class

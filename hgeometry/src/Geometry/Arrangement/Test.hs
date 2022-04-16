@@ -1,16 +1,16 @@
-module Data.Geometry.Arrangement.Test where
+module Geometry.Arrangement.Test where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry.Arrangement.Internal
-import Data.Geometry.Box
-import Data.Geometry.Ipe
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.PlanarSubdivision
-import Data.Geometry.PlanarSubdivision.Draw
-import Data.Geometry.Point
-import Data.Geometry.Properties
+import Geometry.Arrangement.Internal
+import Geometry.Box
+import Geometry.Ipe
+import Geometry.Line
+import Geometry.LineSegment
+import Geometry.PlanarSubdivision
+import Geometry.PlanarSubdivision.Draw
+import Geometry.Point
+import Geometry.Properties
 
 --------------------------------------------------------------------------------
 data Test = Test
@@ -28,7 +28,7 @@ readArr fp = do  Right ls <- fmap f <$> readSinglePageFile fp
         segs = page^..content.traverse._withAttrs _IpePath _asLineSegment
 
 readArr' :: IO (Arrangement Test () () () Rational)
-readArr' = readArr "test/Data/Geometry/arrangement.ipe"
+readArr' = readArr "test/Geometry/arrangement.ipe"
 
 {- HLINT ignore test -}
 test :: IO ()

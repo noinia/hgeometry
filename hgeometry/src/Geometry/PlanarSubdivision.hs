@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlanarSubdivision
+-- Module      :  Geometry.PlanarSubdivision
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,8 +9,8 @@
 -- Data type to represent a PlanarSubdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision
-  ( module Data.Geometry.PlanarSubdivision.Basic
+module Geometry.PlanarSubdivision
+  ( module Geometry.PlanarSubdivision.Basic
   , fromPolygons, fromPolygons'
   , fromPolygon
   ) where
@@ -20,13 +20,13 @@ import           Data.Ext
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.PlanarSubdivision.Merge
-import           Data.Geometry.PlanarSubdivision.TreeRep
-import           Data.Geometry.Polygon
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.PlanarSubdivision.Merge
+import           Geometry.PlanarSubdivision.TreeRep
+import           Geometry.Polygon
 
 
--- import Data.Geometry.Point
+-- import Geometry.Point
 -- import qualified Data.List.NonEmpty as NonEmpty
 
 

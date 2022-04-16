@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Transformation
+-- Module      :  Geometry.Transformation
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Transformation
+module Geometry.Transformation
   ( Transformation(Transformation)
   , transformationMatrix
   , (|.|), identity, inverseOf
@@ -28,12 +28,12 @@ module Data.Geometry.Transformation
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Box.Internal (Rectangle, IsBoxable)
-import qualified Data.Geometry.Box.Internal as Box
-import           Data.Geometry.Properties
-import           Data.Geometry.Point
-import           Data.Geometry.Transformation.Internal
-import           Data.Geometry.Vector
+import           Geometry.Box.Internal (Rectangle, IsBoxable)
+import qualified Geometry.Box.Internal as Box
+import           Geometry.Properties
+import           Geometry.Point
+import           Geometry.Transformation.Internal
+import           Geometry.Vector
 --------------------------------------------------------------------------------
 
 -- | Given a rectangle r and a geometry g with its boundingbox,

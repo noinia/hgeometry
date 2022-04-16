@@ -2,7 +2,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Properties
+-- Module      :  Geometry.Properties
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,7 +11,7 @@
 -- Intersection types.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Properties( module Data.Intersection
+module Geometry.Properties( module Data.Intersection
                                , Dimension
                                , NumType
                                ) where

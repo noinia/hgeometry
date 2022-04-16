@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlanarSubdivision.IO
+-- Module      :  Geometry.PlanarSubdivision.IO
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- Converting from/to Adjacency Representation of the Planar subdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.IO
+module Geometry.PlanarSubdivision.IO
   (
     --  * Reading and Writing the Plane Graph to a file
     readPlanarSubdivision
@@ -31,9 +31,9 @@ import           Data.Bifunctor
 import qualified Data.ByteString as B
 import qualified Data.DList as DList
 import qualified Data.Foldable as F
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.PlanarSubdivision.Raw
-import           Data.Geometry.PlanarSubdivision.TreeRep
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.PlanarSubdivision.Raw
+import           Geometry.PlanarSubdivision.TreeRep
 import qualified Data.PlaneGraph as PG
 import qualified Data.PlaneGraph.AdjRep as PG
 import qualified Data.PlaneGraph.IO as PGIO
@@ -43,8 +43,8 @@ import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Vector
 import           Data.RealNumber.Rational
 import           Debug.Trace
 

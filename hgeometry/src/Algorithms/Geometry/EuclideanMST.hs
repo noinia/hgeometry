@@ -16,7 +16,7 @@ import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Algorithms.Graph.MST
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry
+import           Geometry.Point
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph
 import           Data.Tree

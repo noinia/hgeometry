@@ -1,24 +1,24 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Transformation.Internal
+-- Module      :  Geometry.Transformation.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Transformation.Internal where
+module Geometry.Transformation.Internal where
 
 import           Control.Lens (iso,set,Iso,imap)
-import           Data.Geometry.Matrix
-import           Data.Geometry.Matrix.Internal (mkRow)
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as V
+import           Geometry.Matrix
+import           Geometry.Matrix.Internal (mkRow)
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Vector
+import qualified Geometry.Vector as V
 import           GHC.TypeLits
 
 {- $setup
->>> import Data.Geometry.LineSegment
+>>> import Geometry.LineSegment
 >>> import Data.Ext
 -}
 

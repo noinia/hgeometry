@@ -1,4 +1,4 @@
-module Data.Geometry.Algorithms.RedBlueLineSegmentIntersection where
+module Geometry.Algorithms.RedBlueLineSegmentIntersection where
 
 import qualified Data.Foldable as F
 import           Data.Monoid

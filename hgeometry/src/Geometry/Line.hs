@@ -4,7 +4,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.Line
+-- Module      :  Geometry.Line
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -12,21 +12,21 @@
 -- \(d\)-dimensional lines.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Line( module Data.Geometry.Line.Internal
+module Geometry.Line( module Geometry.Line.Internal
                          ) where
 
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box
-import           Data.Geometry.Line.Internal
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
-import           Data.Geometry.SubLine
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
+import           Geometry.Boundary
+import           Geometry.Box
+import           Geometry.Line.Internal
+import           Geometry.LineSegment
+import           Geometry.Point.Internal
+import           Geometry.Properties
+import           Geometry.SubLine
+import           Geometry.Transformation
+import           Geometry.Vector
 import qualified Data.List as L
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy

@@ -2,21 +2,21 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.KDTree
+-- Module      :  Geometry.KDTree
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.KDTree where
+module Geometry.KDTree where
 
 import           Control.Lens             hiding (Empty, element, imap, (:<))
 import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable            as F
-import           Data.Geometry.Box
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
+import           Geometry.Box
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Vector
 import           Data.LSeq                (LSeq, pattern (:<|))
 import qualified Data.LSeq                as LSeq
 import qualified Data.List.NonEmpty       as NonEmpty

@@ -9,7 +9,8 @@ module Algorithms.Geometry.Diameter.Naive where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry
+import Geometry.Point
+import Geometry.Vector
 import Data.List(maximumBy)
 
 --------------------------------------------------------------------------------

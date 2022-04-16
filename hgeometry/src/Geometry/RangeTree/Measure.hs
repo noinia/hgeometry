@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.RangeTree.Measure
+-- Module      :  Geometry.RangeTree.Measure
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.RangeTree.Measure where
+module Geometry.RangeTree.Measure where
 
 import Data.Measured.Class
 import Data.Functor.Product(Product(..))

@@ -1,4 +1,4 @@
-module Data.Geometry.Envelope where
+module Geometry.Envelope where
 
 
 import qualified Data.Map as M
