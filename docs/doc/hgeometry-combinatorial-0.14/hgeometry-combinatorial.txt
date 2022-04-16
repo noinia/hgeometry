@@ -234,38 +234,6 @@ kmpMatch :: Eq a => Vector a -> Vector a -> Maybe Int
 buildFailureFunction :: forall a. Eq a => Vector a -> Vector Int
 
 
-module Control.CanAquire
-
--- | Run a computation on something that can aquire i's.
-runAcquire :: forall t a b. Traversable t => (forall s. CanAquire (I s a) a => t (I s a) -> b) -> t a -> b
-class HasIndex i Int => CanAquire i a
-
--- | A value of type i can obtain something of type <tt>'a'</tt>
-aquire :: CanAquire i a => i -> a
-class HasIndex t i | t -> i
-
--- | Types that have an instance of this class can act as indices.
-indexOf :: HasIndex t i => t -> i
-
--- | Replaces every element by an index. Returns the new traversable
---   containing only these indices, as well as a vector with the values.
---   (such that indexing in this value gives the original value).
-replaceByIndex :: forall t a. Traversable t => t a -> (Vector a, t Int)
-
--- | Label each element with its index. Returns the new collection as well
---   as its size.
-labelWithIndex :: Traversable t => t a -> (t (Int, a), Int)
-
--- | A type that can act as an Index.
-data I (s :: *) a
-instance forall s k (a :: k). GHC.Enum.Enum (Control.CanAquire.I s a)
-instance forall s k (a :: k). GHC.Classes.Ord (Control.CanAquire.I s a)
-instance forall s k (a :: k). GHC.Classes.Eq (Control.CanAquire.I s a)
-instance forall k s (a :: k). GHC.Show.Show (Control.CanAquire.I s a)
-instance forall k s (a :: k). Control.CanAquire.HasIndex (Control.CanAquire.I s a) GHC.Types.Int
-instance Data.Reflection.Reifies s (Data.Vector.Vector a) => Control.CanAquire.CanAquire (Control.CanAquire.I s a) a
-
-
 module Control.Monad.State.Persistent
 
 -- | A State monad that can store earlier versions of the state.
@@ -1645,8 +1613,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_avSv a_aw25. Lens (Permutation a_avSv) (Permutation a_aw25) (Vector (Orbit a_avSv)) (Vector (Orbit a_aw25))
-indexes :: forall a_avSv. Lens' (Permutation a_avSv) (Vector (Int, Int))
+orbits :: forall a_avPo a_avYY. Lens (Permutation a_avPo) (Permutation a_avYY) (Vector (Orbit a_avPo)) (Vector (Orbit a_avYY))
+indexes :: forall a_avPo. Lens' (Permutation a_avPo) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -4120,6 +4088,26 @@ instance GHC.Read.Read a => GHC.Read.Read (Data.Range.EndPoint a)
 instance Data.Functor.Classes.Read1 Data.Range.EndPoint
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Range.EndPoint a)
 instance Test.QuickCheck.Arbitrary.Arbitrary r => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.EndPoint r)
+
+module Data.Ratio.Generalized
+
+-- | Generalized Ratio type that accepts more general "base" types than
+--   just Integral ones. That does mean we cannot normalize the
+--   intermediate expressions, so expect the numbers to become big quite
+--   quickly!
+--   
+--   invariant: the denominator is not zero
+data GRatio a
+
+-- | smart constructor to construct a GRatio. Throws an exception if the
+--   denominator is zero.
+(%) :: (Eq a, Num a) => a -> a -> GRatio a
+instance GHC.Show.Show a => GHC.Show.Show (Data.Ratio.Generalized.GRatio a)
+instance (GHC.Classes.Eq a, GHC.Num.Num a) => GHC.Classes.Eq (Data.Ratio.Generalized.GRatio a)
+instance (GHC.Classes.Ord a, GHC.Num.Num a) => GHC.Classes.Ord (Data.Ratio.Generalized.GRatio a)
+instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Num.Num (Data.Ratio.Generalized.GRatio a)
+instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Real.Fractional (Data.Ratio.Generalized.GRatio a)
+instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Num.Num a, GHC.Classes.Eq a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Ratio.Generalized.GRatio a)
 
 
 module Data.RealNumber.Rational
