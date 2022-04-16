@@ -174,6 +174,22 @@ instance Coordinate r => IpeReadText (IpeDash r) where
                   -- TODO: Implement proper parsing here
 
 
+instance IpeReadText HorizontalAlignment where
+  ipeReadText = \case
+    "left"   -> Right AlignLeft
+    "center" -> Right AlignHCenter
+    "right"  -> Right AlignRight
+    _        -> Left "invalid HorizontalAlignment"
+
+instance IpeReadText VerticalAlignment where
+  ipeReadText = \case
+    "top"      -> Right AlignTop
+    "center"   -> Right AlignVCenter
+    "bottom"   -> Right AlignBottom
+    "baseline" -> Right AlignBaseline
+    _          -> Left "invalid VerticalAlignment"
+
+
 ipeReadTextWith     :: (Text -> Either t v) -> Text -> Either ConversionError (IpeValue v)
 ipeReadTextWith f t = case f t of
                         Right v -> Right (Valued v)

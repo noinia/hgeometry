@@ -11,6 +11,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Ord (comparing)
 import           Data.PlaneGraph
+import           Data.PlaneGraph.AdjRep
 import           Data.RealNumber.Rational
 import qualified Data.Vector as V
 import           Data.Yaml.Util
@@ -37,7 +38,7 @@ spec = describe "PlaneGraph tests" $ do
            allFaceOrientations myGraph `shouldBe` True
          it "outerfaceDart still the same" $
            outerFaceDart myGraph `shouldBe` outerFaceDartFractional myGraph
-
+         triangleSpec
 
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
@@ -90,20 +91,32 @@ testSegs2 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
 
 --------------------------------------------------------------------------------
 
--- triangle :: Gr (Vtx Int String Int) (Face String)
--- triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
---                                 , (1,"0->1")
---                                 ] 0
---            , Vtx 1 (Point2 2 2) [ (0,"1->0")
---                                 , (2,"1->2")
---                                 ] 1
---            , Vtx 2 (Point2 2 0) [ (0,"2->0")
---                                 , (1,"2->1")
---                                 ] 2
---            ]
---            [ Face (2,1) "OuterFace"
---            , Face (0,1) "A"
---            ]
+data Dummy
+
+triangleSpec :: Spec
+triangleSpec = describe "triangle fromAjRep" $ do
+                 it "outerFace Correct" $ do
+                   let i = outerFaceId myTriangle
+                   myTriangle^.dataOf i `shouldBe` "OuterFace"
+
+
+myTriangle :: PlaneGraph Dummy Int String String R
+myTriangle = fromAdjRep myTriangle'
+
+myTriangle' :: Gr (Vtx Int String R) (Face String)
+myTriangle' = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+                                , (1,"0->1")
+                                ] 0
+           , Vtx 1 (Point2 2 2) [ (0,"1->0")
+                                , (2,"1->2")
+                                ] 1
+           , Vtx 2 (Point2 2 0) [ (0,"2->0")
+                                , (1,"2->1")
+                                ] 2
+           ]
+           [ Face (2,1) "OuterFace"
+           , Face (0,1) "A"
+           ]
 
 -- smallG = fromAdjRep (Proxy :: Proxy ()) small
 

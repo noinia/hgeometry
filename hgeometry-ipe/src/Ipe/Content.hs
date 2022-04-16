@@ -146,7 +146,16 @@ type family AttrMap (r :: Type) (l :: AttributeUniverse) :: Type where
   AttrMap r Tiling        = IpeTiling
   AttrMap r Gradient      = IpeGradient
 
+  AttrMap r Width          = TextSizeUnit r
+  AttrMap r Height         = TextSizeUnit r
+  AttrMap r Depth          = TextSizeUnit r
+  AttrMap r VAlign         = VerticalAlignment
+  AttrMap r HAlign         = HorizontalAlignment
+  AttrMap r Style          = TeXStyle
+
   AttrMap r Clip = Path r -- strictly we event want this to be a closed path I guess
+
+
 
 genDefunSymbols [''AttrMap]
 
@@ -185,6 +194,13 @@ instance TraverseIpeAttr Opacity    where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Tiling     where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Gradient   where traverseIpeAttr _ = pureAttr
 
+-- TextAttibuteUniverse
+instance TraverseIpeAttr Width   where traverseIpeAttr f = traverseAttr f
+instance TraverseIpeAttr Height  where traverseIpeAttr f = traverseAttr f
+instance TraverseIpeAttr Depth   where traverseIpeAttr f = traverseAttr f
+instance TraverseIpeAttr VAlign  where traverseIpeAttr _ = pureAttr
+instance TraverseIpeAttr HAlign  where traverseIpeAttr _ = pureAttr
+instance TraverseIpeAttr Style   where traverseIpeAttr _ = pureAttr
 
 -- GroupAttributeUniverse
 instance TraverseIpeAttr Clip     where traverseIpeAttr f = traverseAttr (traverse f)

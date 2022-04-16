@@ -46,6 +46,7 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Vinyl (Rec(..))
 import           Data.Vinyl.CoRec
+import           Ipe.Content (IpeAttributes)
 
 
 --------------------------------------------------------------------------------
@@ -292,8 +293,18 @@ ipeLabel (txt :+ p) = Label txt p :+ mempty
 
 
 -- | Annotate an IpeOut with a label
-labelled                 :: (Show lbl, NumType g ~ r, ToObject i)
-                         => (g -> Point 2 r) -- ^ where to place the label
-                         -> IpeOut g i r     -- ^ how to draw the geometric object
-                         -> IpeOut (g :+ lbl) Group r
-labelled pos f (g :+ lbl) = ipeGroup [iO $ f g, iO $ ipeLabel ((Text.pack $ show lbl) :+ pos g)]
+labelled :: (Show lbl, NumType g ~ r, ToObject i)
+         => (g -> Point 2 r) -- ^ where to place the label
+         -> IpeOut g i r     -- ^ how to draw the geometric object
+         -> IpeOut (g :+ lbl) Group r
+labelled = labelledWith mempty
+
+-- | Annotate an IpeOut with a label
+labelledWith                      :: (Show lbl, NumType g ~ r, ToObject i)
+                                  => IpeAttributes TextLabel r -- ^ attributes for the label
+                                  -> (g -> Point 2 r) -- ^ where to place the label
+                                  -> IpeOut g i r     -- ^ how to draw the geometric object
+                                  -> IpeOut (g :+ lbl) Group r
+labelledWith ats pos f (g :+ lbl) = ipeGroup [ iO $ f g
+                                     , iO $ ipeLabel (Text.pack (show lbl) :+ pos g) ! ats
+                                     ]

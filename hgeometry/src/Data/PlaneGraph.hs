@@ -12,12 +12,16 @@
 --
 --------------------------------------------------------------------------------
 module Data.PlaneGraph( -- $setup
+                       -- * The PlaneGraph data type
                         PlaneGraph(PlaneGraph), graph
                       , PlanarGraph
                       , VertexData(VertexData), vData, location, vtxDataToExt
+
+                       -- * Constructing PlaneGraphs
                       , fromSimplePolygon, fromConnectedSegments
                       , toAdjRep, fromAdjRep
 
+                       -- * Quering a PlaneGraph graph
                       , numVertices, numEdges, numFaces, numDarts
                       , dual
 
@@ -25,10 +29,9 @@ module Data.PlaneGraph( -- $setup
                       , edges', edges
                       , faces', faces, internalFaces, faces''
                       , darts', darts
-                      , traverseVertices, traverseDarts, traverseFaces
 
+                      -- * Incidences and Adjacencies
                       , headOf, tailOf, twin, endPoints
-
                       , incidentEdges, incomingEdges, outgoingEdges
                       , neighboursOf
                       , nextIncidentEdge, prevIncidentEdge
@@ -39,20 +42,29 @@ module Data.PlaneGraph( -- $setup
                       , boundary, boundary', boundaryDart, boundaryVertices
                       , outerFaceId, outerFaceDart
 
+                      -- * Data
+
                       , vertexDataOf, locationOf, HasDataOf(..)
 
                       , endPointsOf, endPointData
                       , vertexData, faceData, dartData, rawDartData
+
+                      , traverseVertices, traverseDarts, traverseFaces
+
+                      -- * Obtaining a Geometric Representation
 
                       , edgeSegment, edgeSegments
                       , faceBoundary, internalFacePolygon
                       , outerFacePolygon, outerFacePolygon'
                       , facePolygons, facePolygons'
 
-                      , VertexId(..), FaceId(..), Dart, World(..), VertexId', FaceId'
-
                       , withEdgeDistances
+
+                      -- * IO
                       , writePlaneGraph, readPlaneGraph
+
+                      -- * Reexports
+                      , VertexId(..), FaceId(..), Dart, World(..), VertexId', FaceId'
                       ) where
 
 import           Data.PlaneGraph.IO

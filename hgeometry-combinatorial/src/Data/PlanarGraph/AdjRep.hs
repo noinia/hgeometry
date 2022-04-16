@@ -14,6 +14,8 @@ module Data.PlanarGraph.AdjRep where
 import           Control.Lens   (Bifunctor (..))
 import           Data.Aeson
 import           Data.Bifunctor (second)
+import           Data.Bitraversable
+import           Data.Bifoldable
 import           GHC.Generics   (Generic)
 
 --------------------------------------------------------------------------------
@@ -26,6 +28,12 @@ data Gr v f = Gr { adjacencies :: [v]
 instance Bifunctor Gr where
   bimap f g (Gr vs fs) = Gr (map f vs) (map g fs)
 
+instance Bifoldable Gr where
+  bifoldMap f g (Gr vs fs) = foldMap f vs <> foldMap g fs
+instance Bitraversable Gr where
+  bitraverse f g (Gr vs fs) = Gr <$> traverse f vs <*> traverse g fs
+
+
 instance (ToJSON v, ToJSON f)     => ToJSON   (Gr v f) where
   toEncoding = genericToEncoding defaultOptions
 instance (FromJSON v, FromJSON f) => FromJSON (Gr v f)
@@ -33,7 +41,7 @@ instance (FromJSON v, FromJSON f) => FromJSON (Gr v f)
 ----------------------------------------
 
 -- | A vertex, represented by an id, its adjacencies, and its data.
-data Vtx v e = Vtx { id    :: Int
+data Vtx v e = Vtx { id    :: {-# UNPACK #-} !Int
                    , adj   :: [(Int,e)] -- ^ adjacent vertices + data
                                         -- on the edge. Some
                                         -- functions, like
@@ -43,11 +51,15 @@ data Vtx v e = Vtx { id    :: Int
                                         -- order around the
                                         -- vertices. This is not (yet)
                                         -- enforced by the data type.
-                   , vData :: v
+                   , vData :: !v
                    } deriving (Generic, Show, Eq)
 
 instance Bifunctor Vtx where
   bimap f g (Vtx i as x) = Vtx i (map (second g) as) (f x)
+instance Bifoldable Vtx where
+  bifoldMap f g (Vtx _ ads x) = foldMap (g . snd) ads <> f x
+instance Bitraversable Vtx where
+  bitraverse f g (Vtx i adjs x) = Vtx i <$> traverse (bitraverse pure g) adjs <*> f x
 
 instance (ToJSON v, ToJSON e)     => ToJSON   (Vtx v e) where
   toEncoding = genericToEncoding defaultOptions
@@ -58,8 +70,8 @@ instance (FromJSON v, FromJSON e) => FromJSON (Vtx v e)
 -- | Faces
 data Face f = Face { incidentEdge :: (Int,Int) -- ^ an edge (u,v) s.t. the face
                                                -- is right from (u,v)
-                   , fData        :: f
-                   } deriving (Generic,Functor, Show, Eq)
+                   , fData        :: !f
+                   } deriving (Generic,Functor,Foldable,Traversable,Show, Eq)
 
 instance ToJSON f   => ToJSON   (Face f) where
   toEncoding = genericToEncoding defaultOptions

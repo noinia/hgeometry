@@ -1,4 +1,3 @@
-{-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -10,10 +9,11 @@
 -- Data type to represent a PlanarSubdivision
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
-                                      , fromPolygons, fromPolygons'
-                                      , fromPolygon
-                                      ) where
+module Data.Geometry.PlanarSubdivision
+  ( module Data.Geometry.PlanarSubdivision.Basic
+  , fromPolygons, fromPolygons'
+  , fromPolygon
+  ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Data.Ext

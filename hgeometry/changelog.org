@@ -19,12 +19,16 @@
 - Added ~Uniform~, ~UniformRange~, and ~Bounded~ instances for
   ~Vector~ and ~Point~. This thus bumps the minimum required version
   of random to 1.2.
+- More work on Loading/Saving Planar subdivisions.
 
 ** 0.14
 
 - Allow the associated/extra data of linesegments and intervals to
   differ when testing for intersections.
 - Intersection testing between line segments and rectangles
+- Removed proxy arguments to PlaneGraph and PlanarSubdivision
+- Computing the OuterFaceDart in a PlaneGraph now only requires an ~Num r~
+  constraint rather than a ~Fractional r~ constraint.
 - Testing if lines and/or line segments intersect no longer requires a
   Fractional constraint; Num is sufficient. However, in turn we now do
   need Ord rather than just Eq. That seemed a worthwile tradeoff though.

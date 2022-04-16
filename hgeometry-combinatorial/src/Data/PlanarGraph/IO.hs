@@ -7,10 +7,17 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Converting from/to our JSON/Yaml representation of the plane graph
+-- Converting from/to our Adjacency-list representation of the Planar graph
 --
 --------------------------------------------------------------------------------
-module Data.PlanarGraph.IO where
+module Data.PlanarGraph.IO
+  ( toAdjRep
+
+  , fromAdjRep
+  , fromAdjRep'
+  , buildGraph
+  , fromAdjacencyLists
+  ) where
 
 import           Control.Lens
 import           Control.Monad.State.Strict
@@ -66,42 +73,45 @@ toAdjRep g = Gr vs fs
     mkEdge u v@(VertexId vi) = (vi,fromJust $ findData u v)
 
 
--- | Read a planar graph, given in JSON format into a planar graph. The adjacencylists
--- should be in counter clockwise order.
+-- | Read a planar graph, given in some adjacency list representation
+-- into a planar graph. The adjacencylists should be in counter
+-- clockwise order.
+--
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
 --
 -- running time: \(O(n)\)
 fromAdjRep            :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
-fromAdjRep (Gr as fs) = g&vertexData .~ reorder vs' _unVertexId
-                         &dartData   .~ ds
-                         &faceData   .~ reorder fs' (_unVertexId._unFaceId)
+fromAdjRep (Gr as fs) = g&faceData   .~ reorder fs' (_unVertexId._unFaceId)
   where
-    -- build the actual graph using the adjacencies
-    g = buildGraph as
-    -- build an edge oracle so that we can quickly lookup the dart corresponding to a
-    -- pair of vertices.
-    oracle = edgeOracle g
+    (g, oracle) = fromAdjRep'' as
     -- function to lookup a given dart
     findEdge' u v = fromJust $ findDart u v oracle
     -- faces are right of oriented darts
     findFace ui vi = let d = findEdge' (VertexId ui) (VertexId vi) in rightFace d g
-
-    vs' = V.fromList [ VertexId vi :+ v     | Vtx vi _ v <- as ]
     fs' = V.fromList [ findFace ui vi :+ f | Face (ui,vi) f <- fs ]
-
-    ds = V.fromList $ concatMap (\(Vtx vi us _) ->
-                                   [(findEdge' (VertexId vi) (VertexId ui), x) | (ui,x) <- us]
-                                ) as
-
-  -- TODO: Properly handle graphs with self-loops
 
 -- | Read a planar graph, given by its adjacencylists in counter clockwise order.
 --
--- pre: no self-loops and no multiedges
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
 --
 -- running time: \(O(n)\)
-fromAdjRep'    :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
-fromAdjRep' as = g&vertexData .~ reorder vs' _unVertexId
-                  &dartData   .~ ds
+fromAdjRep' :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
+fromAdjRep' = fst . fromAdjRep''
+
+-- | implementation of fromAdjRep'. Returns the oracle used to build the graph as well.
+--
+-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)
+--      - no self-loops and no multi-edges
+--
+-- running time: \(O(n)\)
+fromAdjRep''    :: forall s v e. [Vtx v e]
+                -> (PlanarGraph s Primal v e (), EdgeOracle s Primal (Dart s))
+fromAdjRep'' as = (g&vertexData .~ reorder vs' _unVertexId
+                    &dartData   .~ ds
+                  , oracle
+                  )
   where
     -- build the actual graph using the adjacencies
     g = buildGraph as

@@ -7,48 +7,23 @@ import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 import           Control.Lens hiding (holesOf)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Ipe
-import           Data.Geometry.Point
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.Geometry.PlanarSubdivision as PS
+import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import qualified Data.PlaneGraph as PG
+import           Data.RealNumber.Rational
 import qualified Data.Vector as V
+import           Ipe
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
 
-data Test = Test
-
-
-
-simplePg  :: PlanarSubdivision Test () () PolygonFaceData Rational
-simplePg  = fromSimplePolygon @Test simplePg' Inside Outside
-
-simplePg' :: SimplePolygon () Rational
-simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
-                                                             , Point2 128 688
-                                                             , Point2 176 672
-                                                             , Point2 256 672
-                                                             , Point2 272 608
-                                                             , Point2 384 656
-                                                             , Point2 336 768
-                                                             , Point2 272 720
-                                                             ]
-
-triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
-triangle = (\pg -> fromSimplePolygon @Test pg Inside Outside)
-         $ trianglePG
-
-trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
-
-
-toNonEmpty :: Foldable f => f a -> NonEmpty.NonEmpty a
-toNonEmpty = NonEmpty.fromList . toList
+type R = RealNumber 5
 
 spec :: Spec
 spec = do
@@ -72,6 +47,9 @@ spec = do
     -- this last test is nonsense
 
 
+
+-- | Verify that we answer the same thing as PlaneGraph when there is
+-- only one component.
 sameAsConnectedPG      :: (Eq v, Eq e, Eq f, Eq r, Show v, Show e, Show f, Show r)
                        => PlaneGraph s v e f r -> PlanarSubdivision s v e f r
                        -> Spec
@@ -106,20 +84,8 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
   --   (second (FaceData mempty) <$> PG.faces g) `shouldBe` faces ps
 
 
--- sameDart g ps d =
-
--- sameDarts          :: (Eq v, Eq e, Eq f, Eq r, Show v, Show e, Show f, Show r)
---                        => PlaneGraph s v e f r -> PlanarSubdivision s v e f r
---                        -> Spec
--- sameDarts g ps =
---     -- sameDart g ps
-
-
--- sort' = V.fromList . L.sortOn fst . toList
-
-
-
-
+-- | Some test cases for when the planegrpah is a simple polgyon, or
+-- obtained from a simple polygon.
 testSpec    :: (Ord r, Eq p, Fractional r, Show r, Show p)
             => SimplePolygon p r -> Spec
 testSpec pg = do
@@ -133,6 +99,10 @@ testSpec pg = do
         x = ps^.dataOf i
     x `shouldBe` Outside
 
+
+
+--------------------------------------------------------------------------------
+-- * Some of our test polygons
 
 testPoly :: SimplePolygon () Rational
 testPoly = toCounterClockWiseOrder . fromPoints $ map ext $ [
@@ -196,6 +166,11 @@ monotonePlaneG = fromJust $ monotonePs^?components.ix 0
 
 test = TR.triangulate @Test testPoly5
 test' = TR.triangulate' @Test testPoly5
+
+
+
+
+
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
 -- printMP = mapM_ printAsIpeSelection
@@ -286,3 +261,33 @@ testSegs3 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    , (Point2 (-10) 0, Point2 (-10) (-10))
                    , (origin, Point2 (-10) (-10))
                    ]
+
+
+
+data Test = Test
+
+
+
+simplePg  :: PlanarSubdivision Test () () PolygonFaceData Rational
+simplePg  = fromSimplePolygon @Test simplePg' Inside Outside
+
+simplePg' :: SimplePolygon () Rational
+simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
+                                                             , Point2 128 688
+                                                             , Point2 176 672
+                                                             , Point2 256 672
+                                                             , Point2 272 608
+                                                             , Point2 384 656
+                                                             , Point2 336 768
+                                                             , Point2 272 720
+                                                             ]
+
+triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
+triangle = (\pg -> fromSimplePolygon @Test pg Inside Outside)
+         $ trianglePG
+
+trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
+
+
+toNonEmpty :: Foldable f => f a -> NonEmpty.NonEmpty a
+toNonEmpty = NonEmpty.fromList . toList
