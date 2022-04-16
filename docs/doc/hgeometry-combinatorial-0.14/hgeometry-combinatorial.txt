@@ -1670,23 +1670,23 @@ Gr :: [v] -> [f] -> Gr v f
 
 -- | A vertex, represented by an id, its adjacencies, and its data.
 data Vtx v e
-Vtx :: Int -> [(Int, e)] -> v -> Vtx v e
-[id] :: Vtx v e -> Int
+Vtx :: {-# UNPACK #-} !Int -> [(Int, e)] -> !v -> Vtx v e
+[id] :: Vtx v e -> {-# UNPACK #-} !Int
 
 -- | adjacent vertices + data on the edge. Some functions, like
 --   <tt>fromAdjRep</tt> may assume that the adjacencies are given in
 --   counterclockwise order around the vertices. This is not (yet) enforced
 --   by the data type.
 [adj] :: Vtx v e -> [(Int, e)]
-[vData] :: Vtx v e -> v
+[vData] :: Vtx v e -> !v
 
 -- | Faces
 data Face f
-Face :: (Int, Int) -> f -> Face f
+Face :: (Int, Int) -> !f -> Face f
 
 -- | an edge (u,v) s.t. the face is right from (u,v)
 [incidentEdge] :: Face f -> (Int, Int)
-[fData] :: Face f -> f
+[fData] :: Face f -> !f
 instance (GHC.Classes.Eq v, GHC.Classes.Eq f) => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Gr v f)
 instance (GHC.Show.Show v, GHC.Show.Show f) => GHC.Show.Show (Data.PlanarGraph.AdjRep.Gr v f)
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Gr v f)
@@ -1695,14 +1695,20 @@ instance (GHC.Show.Show e, GHC.Show.Show v) => GHC.Show.Show (Data.PlanarGraph.A
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Vtx v e)
 instance GHC.Classes.Eq f => GHC.Classes.Eq (Data.PlanarGraph.AdjRep.Face f)
 instance GHC.Show.Show f => GHC.Show.Show (Data.PlanarGraph.AdjRep.Face f)
+instance Data.Traversable.Traversable Data.PlanarGraph.AdjRep.Face
+instance Data.Foldable.Foldable Data.PlanarGraph.AdjRep.Face
 instance GHC.Base.Functor Data.PlanarGraph.AdjRep.Face
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.ToJSON.ToJSON f => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.FromJSON.FromJSON f => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Bifunctor.Bifunctor Data.PlanarGraph.AdjRep.Vtx
+instance Data.Bifoldable.Bifoldable Data.PlanarGraph.AdjRep.Vtx
+instance Data.Bitraversable.Bitraversable Data.PlanarGraph.AdjRep.Vtx
 instance (Data.Aeson.Types.ToJSON.ToJSON v, Data.Aeson.Types.ToJSON.ToJSON e) => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Vtx v e)
 instance (Data.Aeson.Types.FromJSON.FromJSON v, Data.Aeson.Types.FromJSON.FromJSON e) => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Vtx v e)
 instance Data.Bifunctor.Bifunctor Data.PlanarGraph.AdjRep.Gr
+instance Data.Bifoldable.Bifoldable Data.PlanarGraph.AdjRep.Gr
+instance Data.Bitraversable.Bitraversable Data.PlanarGraph.AdjRep.Gr
 instance (Data.Aeson.Types.ToJSON.ToJSON v, Data.Aeson.Types.ToJSON.ToJSON f) => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Gr v f)
 instance (Data.Aeson.Types.FromJSON.FromJSON v, Data.Aeson.Types.FromJSON.FromJSON f) => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Gr v f)
 
@@ -1835,7 +1841,7 @@ instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Foldable.Fol
 instance forall k (s :: k) (w :: Data.PlanarGraph.Core.World). Data.Traversable.Traversable (Data.PlanarGraph.EdgeOracle.EdgeOracle s w)
 
 
--- | Converting from<i>to our JSON</i>Yaml representation of the plane
+-- | Converting from/to our Adjacency-list representation of the Planar
 --   graph
 module Data.PlanarGraph.IO
 
@@ -1848,8 +1854,12 @@ module Data.PlanarGraph.IO
 --   running time: &lt;math&gt;
 toAdjRep :: PlanarGraph s w v e f -> Gr (Vtx v e) (Face f)
 
--- | Read a planar graph, given in JSON format into a planar graph. The
---   adjacencylists should be in counter clockwise order.
+-- | Read a planar graph, given in some adjacency list representation into
+--   a planar graph. The adjacencylists should be in counter clockwise
+--   order.
+--   
+--   pre: - the id's are consecutive from 0 to n (where is the number of
+--   vertices) - no self-loops and no multi-edges
 --   
 --   running time: &lt;math&gt;
 fromAdjRep :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
@@ -1857,7 +1867,8 @@ fromAdjRep :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e 
 -- | Read a planar graph, given by its adjacencylists in counter clockwise
 --   order.
 --   
---   pre: no self-loops and no multiedges
+--   pre: - the id's are consecutive from 0 to n (where is the number of
+--   vertices) - no self-loops and no multi-edges
 --   
 --   running time: &lt;math&gt;
 fromAdjRep' :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
@@ -1865,7 +1876,6 @@ fromAdjRep' :: forall s v e. [Vtx v e] -> PlanarGraph s Primal v e ()
 -- | Builds the graph from the adjacency lists (but ignores all associated
 --   data)
 buildGraph :: forall s v e. [Vtx v e] -> PlanarGraph s Primal () () ()
-reorder :: Vector (i :+ a) -> (i -> Int) -> Vector a
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex,
 --   all vertices should be given in counter-clockwise order.
@@ -1874,7 +1884,6 @@ reorder :: Vector (i :+ a) -> (i -> Int) -> Vector a
 --   
 --   running time: &lt;math&gt;.
 fromAdjacencyLists :: forall s w h. (Foldable h, Functor h) => [(VertexId s w, h (VertexId s w))] -> PlanarGraph s w () () ()
-assignArcs :: EdgeOracle s w e -> EdgeOracle s w (Int :+ e)
 instance forall k v e f (s :: k) (w :: Data.PlanarGraph.Core.World). (Data.Aeson.Types.ToJSON.ToJSON v, Data.Aeson.Types.ToJSON.ToJSON e, Data.Aeson.Types.ToJSON.ToJSON f) => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.Core.PlanarGraph s w v e f)
 instance forall k v e f (s :: k). (Data.Aeson.Types.FromJSON.FromJSON v, Data.Aeson.Types.FromJSON.FromJSON e, Data.Aeson.Types.FromJSON.FromJSON f) => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.Core.PlanarGraph s 'Data.PlanarGraph.Core.Primal v e f)
 
@@ -2003,8 +2012,12 @@ fromAdjacencyLists :: forall s w h. (Foldable h, Functor h) => [(VertexId s w, h
 --   running time: &lt;math&gt;
 toAdjacencyLists :: PlanarGraph s w v e f -> [(VertexId s w, Vector (VertexId s w))]
 
--- | Read a planar graph, given in JSON format into a planar graph. The
---   adjacencylists should be in counter clockwise order.
+-- | Read a planar graph, given in some adjacency list representation into
+--   a planar graph. The adjacencylists should be in counter clockwise
+--   order.
+--   
+--   pre: - the id's are consecutive from 0 to n (where is the number of
+--   vertices) - no self-loops and no multi-edges
 --   
 --   running time: &lt;math&gt;
 fromAdjRep :: forall s v e f. Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
