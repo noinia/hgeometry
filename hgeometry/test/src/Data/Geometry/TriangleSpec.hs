@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.TriangleSpec (spec) where
+module Geometry.TriangleSpec (spec) where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Triangle
+import Geometry
+import Geometry.Boundary
+import Geometry.Triangle
 import Data.Proxy
 import Data.RealNumber.Rational
 import Paths_hgeometry

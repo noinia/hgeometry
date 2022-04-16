@@ -1,13 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.IntervalSpec (spec) where
+module Geometry.IntervalSpec (spec) where
 
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
-import qualified Data.Geometry.IntervalTree as IntTree
-import           Data.Geometry.SegmentTree (I(..))
-import qualified Data.Geometry.SegmentTree as SegTree
+import           Geometry
+import qualified Geometry.IntervalTree as IntTree
+import           Geometry.SegmentTree (I(..))
+import qualified Geometry.SegmentTree as SegTree
 import qualified Data.List.NonEmpty as NonEmpty
 import           Test.Hspec
 import           Test.QuickCheck

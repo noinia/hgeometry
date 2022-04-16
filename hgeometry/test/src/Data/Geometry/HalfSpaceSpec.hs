@@ -1,7 +1,7 @@
-module Data.Geometry.HalfSpaceSpec where
+module Geometry.HalfSpaceSpec where
 
-import Data.Geometry
-import Data.Geometry.HalfSpace
+import Geometry
+import Geometry.HalfSpace
 import Data.Ratio
 import Test.Hspec
 

@@ -8,9 +8,9 @@ import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens
 import           Data.Vector.Circular.Util (isShiftOf)
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Test.Hspec

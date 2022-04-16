@@ -3,7 +3,7 @@ module Algorithms.Geometry.SoS.SortSpec where
 import           Algorithms.Geometry.SoS
 import           Control.Lens
 import           Control.Monad (forM_)
-import           Data.Geometry.Vector
+import           Geometry.Vector
 import qualified Data.List as List
 import           Data.Proxy
 import           Data.Util

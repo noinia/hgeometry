@@ -1,10 +1,10 @@
-module Data.Geometry.PrioritySearchTreeSpec where
+module Geometry.PrioritySearchTreeSpec where
 
 import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.PrioritySearchTree
+import           Geometry.Point
+import           Geometry.PrioritySearchTree
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Set as Set

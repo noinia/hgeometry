@@ -1,16 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.LineSegmentSpec where
+module Geometry.LineSegmentSpec where
 
 import Data.Bifunctor
 import Control.Lens
 import Data.Ext
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.LineSegment.Internal (onSegment, onSegment2)
-import Data.Geometry.Point
-import Data.Geometry.Vector
-import Data.Geometry.Boundary
-import Data.Geometry.Box
+import Geometry.Line
+import Geometry.LineSegment
+import Geometry.LineSegment.Internal (onSegment, onSegment2)
+import Geometry.Point
+import Geometry.Vector
+import Geometry.Boundary
+import Geometry.Box
 import Data.Intersection
 import Data.RealNumber.Rational
 import Test.Hspec

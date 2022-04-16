@@ -1,4 +1,4 @@
-module Data.Geometry.PointSpec (spec) where
+module Geometry.PointSpec (spec) where
 
 import           Control.Exception
 import qualified Data.CircularList             as C
@@ -6,9 +6,9 @@ import           Data.Coerce
 import           Data.Double.Approximate       (DoubleRelAbs (..), SafeDouble)
 import           Data.Double.Shaman            (SDouble, Shaman)
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Point.CmpAround
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Point.CmpAround
+import           Geometry.Vector
 import           Data.Proxy
 import           Test.Hspec
 import           Test.QuickCheck

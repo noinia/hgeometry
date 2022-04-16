@@ -1,8 +1,8 @@
-module Data.Geometry.LineSpec where
+module Geometry.LineSpec where
 
 import Data.Ext
-import Data.Geometry
-import Data.Geometry.Box
+import Geometry
+import Geometry.Box
 import Test.Hspec
 import Data.Ratio
 

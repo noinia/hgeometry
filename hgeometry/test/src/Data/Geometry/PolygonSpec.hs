@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.PolygonSpec (spec) where
+module Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens (over, view, (^.), (^..))
@@ -10,11 +10,11 @@ import           Data.Coerce
 import           Data.Double.Approximate
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
-import           Data.Geometry.Boundary
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Monotone
-import           Data.Geometry.Triangle
+import           Geometry
+import           Geometry.Boundary
+import           Geometry.Polygon
+import           Geometry.Polygon.Monotone
+import           Geometry.Triangle
 import           Data.Ord
 import           Data.Proxy
 import           Data.Ratio
@@ -29,7 +29,7 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import           Data.Geometry.Transformation
+import           Geometry.Transformation
 import           Data.Util
 import           Data.Maybe
 import           Data.Vinyl

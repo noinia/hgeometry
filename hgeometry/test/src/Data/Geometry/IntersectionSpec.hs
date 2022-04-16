@@ -1,11 +1,11 @@
 {-# LANGUAGE UnicodeSyntax #-}
-module Data.Geometry.IntersectionSpec where
+module Geometry.IntersectionSpec where
 
 import Data.Ext
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Polygon
+import Geometry.Line
+import Geometry.LineSegment
+import Geometry.Point
+import Geometry.Polygon
 import Data.Intersection
 import Data.Proxy
 import Data.RealNumber.Rational
@@ -22,11 +22,11 @@ type R = RealNumber 5
 -- |
 spec :: Spec
 spec = do
-        it ("intersects agrees with intersect: Data.Geometry.Line ") $
+        it ("intersects agrees with intersect: Geometry.Line ") $
            property (propIntersectionsAgree @(Line 2 R) @(Line 2 R))
-        it ("intersects agrees with intersect: Data.Geometry.LineSegment ") $
+        it ("intersects agrees with intersect: Geometry.LineSegment ") $
            property (propIntersectionsAgree @(LineSegment 2 () R) @(LineSegment 2 () R))
-        it ("intersects agrees with intersect: Data.Geometry.LineSegment x Line ") $
+        it ("intersects agrees with intersect: Geometry.LineSegment x Line ") $
            property (propIntersectionsAgree @(LineSegment 2 () R) @(Line 2 R))
 
 propIntersectionsAgree     :: forall a b. ( IsIntersectableWith a b

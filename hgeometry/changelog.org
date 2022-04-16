@@ -20,6 +20,15 @@
   ~Vector~ and ~Point~. This thus bumps the minimum required version
   of random to 1.2.
 - More work on Loading/Saving Planar subdivisions.
+- Dropping the ~Data~ and ~Algorithms~ and placing the modules just in
+  ~Geometry~.
+
+  #+begin_src sh
+  find . -type f exec sed -i 's/Data.Geometry/Geometry/g' {} \;
+  #+end_src
+
+
+
 
 ** 0.14
 

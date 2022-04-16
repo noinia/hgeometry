@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.BezierMaarten
+module Geometry.BezierMaarten
   ( Bezier (Bezier)
   , evaluate
   , split
@@ -10,8 +10,8 @@ module Data.Geometry.BezierMaarten
   , snap
   ) where
 
-import Data.Geometry.Point
-import Data.Geometry.Vector hiding (head, init, last)
+import Geometry.Point
+import Geometry.Vector hiding (head, init, last)
 
 -- newtype Bezier n d r = Bezier { controlPoints :: [Point d r] }
 

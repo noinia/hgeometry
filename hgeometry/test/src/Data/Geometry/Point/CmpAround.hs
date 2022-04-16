@@ -1,9 +1,9 @@
-module Data.Geometry.Point.CmpAround where
+module Geometry.Point.CmpAround where
 
 import Control.Lens ((^.))
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Vector(qdA)
+import Geometry.Point
+import Geometry.Vector(qdA)
 
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with

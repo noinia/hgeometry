@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.Polygon.PickPointSpec where
+module Geometry.Polygon.PickPointSpec where
 
 import Data.Ext
 import Control.Lens
-import Data.Geometry
-import Data.Geometry.Polygon
-import Data.Geometry.Boundary
+import Geometry
+import Geometry.Polygon
+import Geometry.Boundary
 import Test.Hspec
 import           Paths_hgeometry
 
@@ -35,4 +35,4 @@ testPoly2 = TestCase . toCounterClockWiseOrder. fromPoints . map ext
             , Point2 48 736
             ]
 
--- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+-- main = readInputFromFile "tests/Geometry/pointInPolygon.ipe"

@@ -1,6 +1,6 @@
-module Data.Geometry.VectorSpec (spec) where
+module Geometry.VectorSpec (spec) where
 
-import           Data.Geometry.Vector
+import           Geometry.Vector
 import           Data.Proxy
 import           Test.Hspec
 import           Test.QuickCheck

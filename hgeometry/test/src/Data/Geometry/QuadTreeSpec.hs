@@ -1,15 +1,15 @@
 {-# LANGUAGE TypeApplications #-}
-module Data.Geometry.QuadTreeSpec where
+module Geometry.QuadTreeSpec where
 
 import Control.Lens
 import Test.Hspec
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Box.Sides
-import Data.Geometry.QuadTree
-import Data.Geometry.QuadTree.Quadrants
-import Data.Geometry.QuadTree.Tree(Tree(..))
-import Data.Geometry.QuadTree.Cell
+import Geometry.Point
+import Geometry.Box.Sides
+import Geometry.QuadTree
+import Geometry.QuadTree.Quadrants
+import Geometry.QuadTree.Tree(Tree(..))
+import Geometry.QuadTree.Cell
 import Data.Maybe(isJust)
 import Data.RealNumber.Rational
 

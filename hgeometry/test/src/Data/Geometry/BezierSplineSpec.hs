@@ -1,15 +1,15 @@
 {-# LANGUAGE TypeApplications #-}
-module Data.Geometry.BezierSplineSpec where
+module Geometry.BezierSplineSpec where
 
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.Geometry.BezierMaarten as Maarten
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.PolyLine
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Vector hiding (init)
+import qualified Geometry.BezierMaarten as Maarten
+import           Geometry.BezierSpline
+import           Geometry.PolyLine
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Vector hiding (init)
 import           Data.Range
 import           Data.RealNumber.Rational
 import           Test.Hspec

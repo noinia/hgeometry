@@ -1,5 +1,5 @@
 {-# LANGUAGE PartialTypeSignatures #-}
-module Data.Geometry.PlanarSubdivisionSpec where
+module Geometry.PlanarSubdivisionSpec where
 
 
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
@@ -7,11 +7,11 @@ import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 import           Control.Lens hiding (holesOf)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Data.Geometry.LineSegment hiding (endPoints)
-import           Data.Geometry.PlanarSubdivision
-import qualified Data.Geometry.PlanarSubdivision as PS
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.PlanarSubdivision
+import qualified Geometry.PlanarSubdivision as PS
+import           Geometry.Point
+import           Geometry.Polygon
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)

@@ -1,10 +1,10 @@
-module Data.Geometry.RangeTreeSpec (spec) where
+module Geometry.RangeTreeSpec (spec) where
 
 import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Ext
-import           Data.Geometry.PrioritySearchTreeSpec (Unique(..))
-import           Data.Geometry.RangeTree.Generic
+import           Geometry.PrioritySearchTreeSpec (Unique(..))
+import           Geometry.RangeTree.Generic
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range

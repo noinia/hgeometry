@@ -4,9 +4,9 @@ module Algorithms.Geometry.PolygonTriangulation.EarClipSpec (spec) where
 import Algorithms.Geometry.PolygonTriangulation.EarClip
 
 import           Control.Lens
-import           Data.Geometry
-import           Data.Geometry.PolygonSpec       ()
-import qualified Data.Geometry.Triangle          as Triangle
+import           Geometry
+import           Geometry.PolygonSpec       ()
+import qualified Geometry.Triangle          as Triangle
 import qualified Data.Vector                     as V
 import qualified Data.Vector.Circular            as CV
 import qualified Data.Vector.NonEmpty            as NE

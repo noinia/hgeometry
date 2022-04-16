@@ -1,11 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.KDTreeSpec where
+module Geometry.KDTreeSpec where
 
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
-import           Data.Geometry.Box
-import           Data.Geometry.KDTree
+import           Geometry
+import           Geometry.Box
+import           Geometry.KDTree
 import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import           GHC.TypeLits

@@ -1,11 +1,11 @@
-module Data.Geometry.BallSpec where
+module Geometry.BallSpec where
 
 import Control.Lens
 import Control.Monad (forM_)
 import Data.Ext
-import Data.Geometry.Ball
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
+import Geometry.Ball
+import Geometry.LineSegment
+import Geometry.Point
 import Data.Intersection
 import Data.RealNumber.Rational
 import Test.Hspec
