@@ -20,15 +20,24 @@ tested-with:         GHC >= 8.8
 category:            Geometry
 build-type:          Simple
 
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
 extra-source-files:  README.md
                      changelog
                      changelog.org
 
 Extra-doc-files:     docs/**/*.png
                      docs/**/*.jpg
-source-repository head
-  type:     git
-  location: https://github.com/noinia/hgeometry
+
+data-files:          test/src/Data/PlaneGraph/testsegs.png
+                     test/data/polygons.simple
+                     test/data/polygons.multi
+                     -- test/src/**/*.yaml
+
+--------------------------------------------------------------------------------
+-- * Common Stanzas
 
 common setup
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
@@ -113,8 +122,12 @@ common setup
               , hspec, QuickCheck, quickcheck-instances
 
 
+--------------------------------------------------------------------------------
+-- * Main Library
+
 library
   import: setup
+  hs-source-dirs: src
 
   exposed-modules:
                     -- * Primitives; Simulating General Position
@@ -318,21 +331,8 @@ library
 
   -- other-extensions:
 
-  hs-source-dirs: src
-
-
-
-test-suite doctests
-  type:          exitcode-stdio-1.0
-  ghc-options:   -threaded
-  main-is:       doctests.hs
-  build-depends: base
-               , doctest             >= 0.8
-               , doctest-discover
-               , QuickCheck
-               , quickcheck-instances
-
-  default-language:    Haskell2010
+--------------------------------------------------------------------------------
+-- * Benchmarks
 
 benchmark benchmarks
   import: setup
@@ -368,3 +368,105 @@ benchmark benchmarks
                , hgeometry
                , deepseq-generics
                , optparse-applicative
+
+--------------------------------------------------------------------------------
+-- * Test Suites
+
+test-suite doctests
+  type:          exitcode-stdio-1.0
+  ghc-options:   -threaded
+  main-is:       doctests.hs
+  build-depends: base
+               , doctest             >= 0.8
+               , doctest-discover
+               , QuickCheck
+               , quickcheck-instances
+
+  default-language:    Haskell2010
+
+test-suite hspec
+  import: setup
+  type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
+  hs-source-dirs:       test/src
+  main-is:              Main.hs
+
+  build-depends: hgeometry
+
+  -- -threaded -with-rtsopts=-N
+  ghc-options:   -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-partial-type-signatures
+                 -fno-warn-missing-signatures
+                 -fno-warn-type-defaults
+                 -fno-warn-orphans
+
+  build-tool-depends: hspec-discover:hspec-discover
+
+  other-modules: Data.PlaneGraphSpec
+                 Data.Geometry.PolygonSpec
+                 Data.Geometry.LineSegmentSpec
+                 Data.Geometry.PointSpec
+                 Data.Geometry.VectorSpec
+                 Data.Geometry.Polygon.Convex.ConvexSpec
+                 Data.Geometry.Polygon.Convex.LowerTangentSpec
+                 Data.Geometry.Polygon.PickPointSpec
+                 Data.Geometry.Polygon.StarShapedSpec
+                 Data.Geometry.KDTreeSpec
+                 Data.Geometry.IntervalSpec
+                 Data.Geometry.BoxSpec
+                 Data.Geometry.BallSpec
+                 Data.Geometry.LineSpec
+                 Data.Geometry.SubLineSpec
+                 Data.Geometry.PlanarSubdivisionSpec
+                 Data.Geometry.PlanarSubdivision.IOSpec
+                 Data.Geometry.TriangleSpec
+                 Data.Geometry.ArrangementSpec
+                 Data.Geometry.HalfSpaceSpec
+                 Data.Geometry.PrioritySearchTreeSpec
+                 Data.Geometry.RangeTreeSpec
+                 Data.Geometry.BezierSplineSpec
+                 Data.Geometry.BezierMaarten
+                 Data.Geometry.QuadTreeSpec
+
+                 Algorithms.Geometry.SoSSpec
+                 -- Algorithms.Geometry.SoS.SortSpec
+                 Algorithms.Geometry.SoS.SymbolicSpec
+                 Algorithms.Geometry.SoS.OrientationSpec
+
+                 Algorithms.Geometry.SmallestEnclosingDisk.RISpec
+                 Algorithms.Geometry.DelaunayTriangulation.DTSpec
+                 Algorithms.Geometry.WSPDSpec
+                 Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
+                 Algorithms.Geometry.LineSegmentIntersection.BooleanSweepSpec
+                 Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec
+                 Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
+                 Algorithms.Geometry.PolygonTriangulation.TriangulateSpec
+                 Algorithms.Geometry.PolygonTriangulation.EarClipSpec
+                 Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
+                 Algorithms.Geometry.ConvexHull.ConvexHullSpec
+                 -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
+                 Algorithms.Geometry.ClosestPair.ClosestPairSpec
+                 Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec
+                 Algorithms.Geometry.RedBlueSeparator.RICSpec
+                 Algorithms.Geometry.RayShooting.NaiveSpec
+                 Algorithms.Geometry.FrechetDistance.DiscreteSpec
+                 Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
+                 Algorithms.Geometry.SSSPSpec
+                 Algorithms.Geometry.PolyLineSimplificationSpec
+
+                 Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec
+                 Data.Geometry.PointLocation.PointLocationSpec
+
+                 Graphics.CameraSpec
+
+                 Test.Util
+                 Spec
+                 Paths_hgeometry
+
+                 Data.Geometry.Point.CmpAround
+                 Data.Geometry.Polygon.Convex.LowerTangent
+
+                 Algorithms.Geometry.ConvexHull.OldDivideAndConquer
+
+                 Data.Geometry.IntersectionSpec
