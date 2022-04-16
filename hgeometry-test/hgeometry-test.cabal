@@ -30,6 +30,10 @@ flag planargraph
   default: False
   manual: True
 
+flag withgeojson
+  default: False
+  manual: True
+
 common setup
   default-language:     Haskell2010
   build-depends: base
@@ -41,7 +45,6 @@ common setup
                , aeson
                , bytestring
                , hashable
-               , geojson
                , cereal
                , MonadRandom
                , QuickCheck               >= 2.5
@@ -94,8 +97,13 @@ common setup
 
 executable fromgeojson
   import: setup
+  if flag(withgeojson)
+    buildable: True
+  else
+    buildable: False
   main-is: FromGeoJSON.hs
   hs-source-dirs: src
+  build-depends: geojson
 
 test-suite hspec-with-ipe
   import: setup
