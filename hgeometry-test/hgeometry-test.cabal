@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                hgeometry-test
-version:             0.13
+version:             0.14
 synopsis:            HGeometry testsuite (hack)
 description:
   Extended testsuite for HGeometry
@@ -97,7 +97,7 @@ executable fromgeojson
   main-is: FromGeoJSON.hs
   hs-source-dirs: src
 
-test-suite hspec
+test-suite hspec-with-ipe
   import: setup
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
@@ -117,26 +117,14 @@ test-suite hspec
   other-modules: Data.PlaneGraphSpec
                  Data.Geometry.PolygonSpec
                  Data.Geometry.LineSegmentSpec
-                 Data.Geometry.PointSpec
-                 Data.Geometry.VectorSpec
                  Data.Geometry.Polygon.Convex.ConvexSpec
                  Data.Geometry.Polygon.Convex.LowerTangentSpec
                  Data.Geometry.Polygon.PickPointSpec
                  Data.Geometry.Polygon.StarShapedSpec
-                 Data.Geometry.KDTreeSpec
-                 Data.Geometry.IntervalSpec
-                 Data.Geometry.BoxSpec
-                 Data.Geometry.BallSpec
-                 Data.Geometry.LineSpec
-                 Data.Geometry.SubLineSpec
                  Data.Geometry.PlanarSubdivisionSpec
                  Data.Geometry.PlanarSubdivision.IOSpec
                  Data.Geometry.TriangleSpec
                  Data.Geometry.ArrangementSpec
-                 Data.Geometry.HalfSpaceSpec
-                 Data.Geometry.PrioritySearchTreeSpec
-                 Data.Geometry.RangeTreeSpec
-                 Data.Geometry.BezierSplineSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
@@ -146,29 +134,23 @@ test-suite hspec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
-                 Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
                  Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec
                  Algorithms.Geometry.RedBlueSeparator.RICSpec
                  Algorithms.Geometry.RayShooting.NaiveSpec
-                 Algorithms.Geometry.FrechetDistance.DiscreteSpec
                  Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
-                 Algorithms.Geometry.SSSPSpec
                  Algorithms.Geometry.PolyLineSimplificationSpec
 
                  Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec
                  Data.Geometry.PointLocation.PointLocationSpec
 
-                 Graphics.CameraSpec
+
+                 Data.Geometry.BoxSpec
 
                  Test.Util
                  Spec
                  Paths_hgeometry_test
-
-                 Data.Geometry.Point.CmpAround
                  Data.Geometry.Polygon.Convex.LowerTangent
-
-                 Algorithms.Geometry.ConvexHull.OldDivideAndConquer
 
                  Data.Geometry.IntersectionSpec
 

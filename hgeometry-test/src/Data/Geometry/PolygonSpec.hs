@@ -166,44 +166,6 @@ genMonotone = do
 spec :: Spec
 spec = do
   testCases "src/Data/Geometry/pointInPolygon.ipe"
-  it "read . show = id (SimplePolygon)" $ do
-    property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let p = unsafeFromCircularVector pts in
-      read (show p) == p
-  it "read . show = id (MultiPolygon)" $ do
-    property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let simple = unsafeFromCircularVector pts
-          p = MultiPolygon simple [simple] in
-      read (show p) == p
-  -- it "valid polygons (Simple/Double)" $ do
-  --   forM_ allSimplePolygons $ \poly -> do
-  --     hasSelfIntersections poly `shouldBe` False
-  --     isCounterClockwise poly `shouldBe` True
-  -- it "valid polygons (Simple/Rational)" $ do
-  --   forM_ allSimplePolygons' $ \poly -> do
-  --     hasSelfIntersections poly `shouldBe` False
-  --     isCounterClockwise poly `shouldBe` True
-  -- it "valid polygons (Multi/Double)" $ do
-  --   forM_ allMultiPolygons $ \poly -> do
-  --     ShowPoly poly (hasSelfIntersections poly) `shouldBe` ShowPoly poly False
-  --     isCounterClockwise poly `shouldBe` True
-  -- it "valid polygons (Multi/Rational)" $ do
-  --   forM_ allMultiPolygons' $ \poly -> do
-  --     hasSelfIntersections poly `shouldBe` False
-  --     isCounterClockwise poly `shouldBe` True
-  -- Hm, is this property always true? What happens when points are all colinear?
-  specify "monotone is simple" $
-    property $ forAll genMonotone $ \(_dir, mono :: SimplePolygon () R) ->
-      isSimple mono
-  it "is monotone" $
-    property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
-      isMonotone dir mono
-  numericalSpec
-  it "pickPoint picks point inside polygon (manual)" $
-      (pickPoint myPg `insidePolygon` myPg) `shouldBe` True
-  it "pickPoint picks point inside polygon" $ do
-      property $ \(pg :: SimplePolygon () R) ->
-        pickPoint pg `insidePolygon` pg
 
 myPg :: SimplePolygon () R
 myPg = read "SimplePolygon [Point2 7865790 3349116 :+ (),Point2 6304943 3123049 :+ (),Point2 5770988 3123102 :+ (),Point2 5770988 3123103 :+ (),Point2 5093248 2691560 :+ (),Point2 4456582 2321791 :+ (),Point2 3984237 1931429 :+ (),Point2 3327061 1479350 :+ (),Point2 2423390 1130062 :+ (),Point2 184830 842440 :+ (),Point2 0 410951 :+ (),Point2 1376016 61610 :+ (),Point2 3861016 0 :+ (),Point2 6058502 205475 :+ (),Point2 8030084 452025 :+ (),Point2 9734688 719111 :+ (),Point2 11357118 1047861 :+ (),Point2 11316045 1582088 :+ (),Point2 11192824 2034113 :+ (),Point2 10741016 2671078 :+ (),Point2 9447147 3123049 :+ ()]"
