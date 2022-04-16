@@ -148,7 +148,7 @@ suitableBase = max 2 . (1+) . maxMultiplicity . factors
 -- 0.25
 -- >>> evalEps 2 (1/2) $ mkEpsFold [2]
 -- 6.25e-2
--- >> evalEps 2 (1/2) $ mkEpsFold [1,2]
+-- >>> evalEps 2 (1/2) $ mkEpsFold [1,2]
 -- 1.5625e-2
 evalEps            :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
 evalEps d delta ef = delta ^ sum [ d ^ i | i <- toList $ factors ef]
