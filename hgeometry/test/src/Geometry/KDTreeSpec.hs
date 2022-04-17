@@ -3,12 +3,14 @@ module Geometry.KDTreeSpec where
 
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry
-import           Geometry.Box
-import           Geometry.KDTree
+import           Data.Intersection
 import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import           GHC.TypeLits
+import           Geometry.Box
+import           Geometry.KDTree
+import           Geometry.Point
+import           Geometry.Vector
 import           Test.Hspec
 import           Test.QuickCheck
 

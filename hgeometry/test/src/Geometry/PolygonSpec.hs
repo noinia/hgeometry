@@ -10,7 +10,8 @@ import           Data.Coerce
 import           Data.Double.Approximate
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry
+import           Geometry.Point
+import           Geometry.Vector
 import           Geometry.Boundary
 import           Geometry.Polygon
 import           Geometry.Polygon.Monotone

@@ -3,13 +3,17 @@ module Geometry.SubLineSpec (spec) where
 
 import Control.Lens
 import Data.Ext
-import Geometry
-import Geometry.SubLine
+import Data.Intersection
 import Data.Ratio
+import Data.RealNumber.Rational
 import Data.UnBounded
+import Geometry.Line
+import Geometry.Point
+import Geometry.Vector
+import Geometry.SubLine
+import Geometry.LineSegment
 import Test.Hspec
 import Test.QuickCheck
-import Data.RealNumber.Rational
 
 type R = RealNumber 5
 

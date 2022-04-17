@@ -1,10 +1,13 @@
 module Geometry.LineSpec where
 
 import Data.Ext
-import Geometry
-import Geometry.Box
-import Test.Hspec
+import Data.Intersection
 import Data.Ratio
+import Geometry.Box
+import Geometry.Line
+import Geometry.LineSegment
+import Geometry.Point
+import Test.Hspec
 
 
 

@@ -1,7 +1,10 @@
 module Geometry.HalfSpaceSpec where
 
-import Geometry
+import Geometry.Point
+import Geometry.Line
+import Geometry.Vector
 import Geometry.HalfSpace
+import Data.Intersection
 import Data.Ratio
 import Test.Hspec
 

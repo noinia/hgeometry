@@ -1,14 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Geometry.TriangleSpec (spec) where
 
-import Control.Lens
 import Data.Ext
-import Geometry
-import Geometry.Boundary
-import Geometry.Triangle
-import Data.Proxy
+import Data.Intersection
 import Data.RealNumber.Rational
-import Paths_hgeometry
+import Data.Range
+import Geometry.Boundary
+import Geometry.Point
+import Geometry.Triangle
+import Geometry.Vector
+import Geometry.Line
+import Geometry.LineSegment
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()

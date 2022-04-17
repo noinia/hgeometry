@@ -1,12 +1,14 @@
 module Geometry.BoxSpec where
 
-import           Control.Lens
-import           Data.Ext
-import           Geometry
-import           Geometry.Box
-import           Test.Hspec
-import           Test.QuickCheck
-import           Test.Util
+import Control.Lens
+import Data.Ext
+import Data.Intersection
+import Geometry.Box
+import Geometry.Point
+import Geometry.Vector
+import Test.Hspec
+import Test.QuickCheck
+import Test.Util
 
 arbitraryPointInBoundingBox :: Box 2 p Rational -> Gen (Point 2 Rational)
 arbitraryPointInBoundingBox b = do

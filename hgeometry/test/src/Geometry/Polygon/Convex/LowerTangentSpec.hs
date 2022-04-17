@@ -5,7 +5,7 @@ import           Algorithms.Geometry.ConvexHull.GrahamScan (lowerHull)
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable                             as F
-import           Geometry                             hiding (vector)
+import           Geometry.Point
 import           Geometry.Polygon
 import           Geometry.Polygon.Convex
 import           Data.List.NonEmpty                        (NonEmpty (..))
