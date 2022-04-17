@@ -159,7 +159,7 @@ instance Data.Foldable.Foldable Ipe.Path.Operation
 instance GHC.Base.Functor Ipe.Path.Operation
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Path.Operation r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Path.Operation r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Path.Path r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Path.Path r)
 instance Data.Traversable.Traversable Ipe.Path.Path
 instance Data.Foldable.Foldable Ipe.Path.Path
 instance GHC.Base.Functor Ipe.Path.Path
@@ -168,7 +168,7 @@ instance GHC.Show.Show r => GHC.Show.Show (Ipe.Path.Path r)
 instance GHC.Base.Functor Ipe.Path.PathSegment
 instance Data.Foldable.Foldable Ipe.Path.PathSegment
 instance Data.Traversable.Traversable Ipe.Path.PathSegment
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Path.PathSegment r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Path.PathSegment r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Path.PathSegment r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Path.PathSegment r)
 
@@ -730,8 +730,8 @@ instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.Group r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.Group r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.IpeObject r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.IpeObject r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeObject r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Group r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeObject r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Group r)
 instance GHC.Base.Functor Ipe.Content.IpeObject
 instance Data.Foldable.Foldable Ipe.Content.IpeObject
 instance Data.Traversable.Traversable Ipe.Content.IpeObject
@@ -762,7 +762,7 @@ instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Style
 instance Ipe.Content.TraverseIpeAttr 'Ipe.Attributes.Clip
 instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings Ipe.Content.AttrMapSym0
 instance Data.Singletons.SuppressUnusedWarnings.SuppressUnusedWarnings (Ipe.Content.AttrMapSym1 a6989586621679249649)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeSymbol r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.IpeSymbol r)
 instance Data.Traversable.Traversable Ipe.Content.TextLabel
 instance Data.Foldable.Foldable Ipe.Content.TextLabel
 instance GHC.Base.Functor Ipe.Content.TextLabel
@@ -781,9 +781,9 @@ instance GHC.Base.Functor Ipe.Content.IpeSymbol
 instance GHC.Classes.Ord r => GHC.Classes.Ord (Ipe.Content.IpeSymbol r)
 instance GHC.Classes.Eq r => GHC.Classes.Eq (Ipe.Content.IpeSymbol r)
 instance GHC.Show.Show r => GHC.Show.Show (Ipe.Content.IpeSymbol r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.MiniPage r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.TextLabel r)
-instance GHC.Real.Fractional r => Data.Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Image r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.MiniPage r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.TextLabel r)
+instance GHC.Real.Fractional r => Geometry.Transformation.Internal.IsTransformable (Ipe.Content.Image r)
 instance GHC.Base.Functor Ipe.Content.Image
 instance Data.Foldable.Foldable Ipe.Content.Image
 instance Data.Traversable.Traversable Ipe.Content.Image
@@ -1093,8 +1093,8 @@ instance (Ipe.PathParser.Coordinate r, GHC.Classes.Eq r) => Ipe.Reader.IpeRead (
 instance Ipe.Reader.IpeRead Ipe.Types.IpeStyle
 instance Ipe.Reader.IpeReadText Data.Text.Internal.Text
 instance Ipe.Reader.IpeReadText GHC.Types.Int
-instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Data.Geometry.Point.Internal.Point 2 r)
-instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Data.Geometry.Matrix.Matrix 3 3 r)
+instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Geometry.Point.Internal.Point 2 r)
+instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Geometry.Matrix.Matrix 3 3 r)
 instance Ipe.Reader.IpeReadText Ipe.Layer.LayerName
 instance Ipe.Reader.IpeReadText Ipe.Attributes.PinType
 instance Ipe.Reader.IpeReadText Ipe.Attributes.TransformationTypes
@@ -1103,7 +1103,7 @@ instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Ipe.Attributes.I
 instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Ipe.Attributes.IpeDash r)
 instance Ipe.Reader.IpeReadText Ipe.Attributes.HorizontalAlignment
 instance Ipe.Reader.IpeReadText Ipe.Attributes.VerticalAlignment
-instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Data.Geometry.Box.Internal.Rectangle () r)
+instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Geometry.Box.Internal.Rectangle () r)
 instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Data.Colour.RGB.RGB r)
 instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Ipe.Color.IpeColor r)
 instance Ipe.PathParser.Coordinate r => Ipe.Reader.IpeReadText (Ipe.Attributes.IpePen r)
@@ -1165,15 +1165,15 @@ readAll :: forall g r. (HasDefaultFromIpe g, r ~ NumType g) => IpePage r -> [g :
 -- | Convenience function from reading all g's from an ipe file. If there
 --   is an error reading or parsing the file the error is "thrown away".
 readAllFrom :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r) => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Point.Internal.Point 2 r)
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.LineSegment.Internal.LineSegment 2 () r)
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Ellipse.Ellipse r)
-instance (GHC.Float.Floating r, GHC.Classes.Eq r) => Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Ball.Circle () r)
-instance (GHC.Float.Floating r, GHC.Classes.Eq r) => Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Ball.Disk () r)
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.PolyLine.PolyLine 2 () r)
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Polygon.Core.SimplePolygon () r)
-instance Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Polygon.Core.MultiPolygon () r)
-instance (GHC.Num.Num r, GHC.Classes.Ord r) => Ipe.FromIpe.HasDefaultFromIpe (Data.Geometry.Box.Internal.Rectangle () r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.Point.Internal.Point 2 r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.LineSegment.Internal.LineSegment 2 () r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.Ellipse.Ellipse r)
+instance (GHC.Float.Floating r, GHC.Classes.Eq r) => Ipe.FromIpe.HasDefaultFromIpe (Geometry.Ball.Circle () r)
+instance (GHC.Float.Floating r, GHC.Classes.Eq r) => Ipe.FromIpe.HasDefaultFromIpe (Geometry.Ball.Disk () r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.PolyLine.PolyLine 2 () r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.Polygon.Core.SimplePolygon () r)
+instance Ipe.FromIpe.HasDefaultFromIpe (Geometry.Polygon.Core.MultiPolygon () r)
+instance (GHC.Num.Num r, GHC.Classes.Ord r) => Ipe.FromIpe.HasDefaultFromIpe (Geometry.Box.Internal.Rectangle () r)
 
 
 -- | Functions that help drawing geometric values in ipe. An <a>IpeOut</a>
@@ -1294,24 +1294,24 @@ labelled :: (Show lbl, NumType g ~ r, ToObject i) => (g -> Point 2 r) -> IpeOut 
 
 -- | Annotate an IpeOut with a label
 labelledWith :: (Show lbl, NumType g ~ r, ToObject i) => IpeAttributes TextLabel r -> (g -> Point 2 r) -> IpeOut g i r -> IpeOut (g :+ lbl) Group r
-instance (Ipe.IpeOut.HasDefaultIpeOut g, a GHC.Types.~ Ipe.Content.IpeAttributes (Ipe.IpeOut.DefaultIpeOut g) (Data.Geometry.Properties.NumType g)) => Ipe.IpeOut.HasDefaultIpeOut (g Data.Ext.:+ a)
+instance (Ipe.IpeOut.HasDefaultIpeOut g, a GHC.Types.~ Ipe.Content.IpeAttributes (Ipe.IpeOut.DefaultIpeOut g) (Geometry.Properties.NumType g)) => Ipe.IpeOut.HasDefaultIpeOut (g Data.Ext.:+ a)
 instance Ipe.IpeOut.HasDefaultIpeOut a => Ipe.IpeOut.HasDefaultIpeOut [a]
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Point.Internal.Point 2 r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.LineSegment.Internal.LineSegment 2 p r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.PolyLine.PolyLine 2 p r)
-instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Line.Internal.Line 2 r)
-instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.HalfLine.HalfLine 2 r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Polygon.Core.Polygon t p r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Polygon.Core.SomePolygon p r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Polygon.Convex.ConvexPolygon p r)
-instance Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Ellipse.Ellipse r)
-instance GHC.Float.Floating r => Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Ball.Disk p r)
-instance GHC.Float.Floating r => Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Ball.Circle p r)
-instance GHC.Num.Num r => Ipe.IpeOut.HasDefaultIpeOut (Data.Geometry.Box.Internal.Rectangle p r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.Point.Internal.Point 2 r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.LineSegment.Internal.LineSegment 2 p r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.PolyLine.PolyLine 2 p r)
+instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Ipe.IpeOut.HasDefaultIpeOut (Geometry.Line.Internal.Line 2 r)
+instance (GHC.Real.Fractional r, GHC.Classes.Ord r) => Ipe.IpeOut.HasDefaultIpeOut (Geometry.HalfLine.HalfLine 2 r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.Polygon.Core.Polygon t p r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.Polygon.Core.SomePolygon p r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.Polygon.Convex.ConvexPolygon p r)
+instance Ipe.IpeOut.HasDefaultIpeOut (Geometry.Ellipse.Ellipse r)
+instance GHC.Float.Floating r => Ipe.IpeOut.HasDefaultIpeOut (Geometry.Ball.Disk p r)
+instance GHC.Float.Floating r => Ipe.IpeOut.HasDefaultIpeOut (Geometry.Ball.Circle p r)
+instance GHC.Num.Num r => Ipe.IpeOut.HasDefaultIpeOut (Geometry.Box.Internal.Rectangle p r)
 
 
 -- | Machinery for drawing cells.
-module Data.Geometry.QuadTree.Draw
+module Geometry.QuadTree.Draw
 
 -- | Draw a quadTree cell as a Path
 drawCell :: Fractional r => IpeOut (Cell r) Path r
@@ -1386,8 +1386,8 @@ instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWrite (Ipe.Types.IpePage r)
 instance Ipe.Writer.IpeWrite Ipe.Types.IpeStyle
 instance Ipe.Writer.IpeWrite Ipe.Types.IpePreamble
 instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWrite (Ipe.Types.IpeFile r)
-instance (Ipe.Writer.IpeWriteText r, Ipe.Writer.IpeWrite p) => Ipe.Writer.IpeWrite (Data.Geometry.PolyLine.PolyLine 2 p r)
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWrite (Data.Geometry.LineSegment.Internal.LineSegment 2 p r)
+instance (Ipe.Writer.IpeWriteText r, Ipe.Writer.IpeWrite p) => Ipe.Writer.IpeWrite (Geometry.PolyLine.PolyLine 2 p r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWrite (Geometry.LineSegment.Internal.LineSegment 2 p r)
 instance Ipe.Writer.IpeWrite ()
 instance forall u (f :: u Data.Singletons.Internal.~> *) (at :: u). Ipe.Writer.IpeWriteText (Data.Singletons.Internal.Apply f at) => Ipe.Writer.IpeWriteText (Ipe.Attributes.Attr f at)
 instance (Ipe.Writer.IpeWriteText l, Ipe.Writer.IpeWriteText r) => Ipe.Writer.IpeWriteText (Data.Either.Either l r)
@@ -1400,7 +1400,7 @@ instance Ipe.Writer.IpeWriteText GHC.Integer.Type.Integer
 instance Ipe.Writer.IpeWriteText (Data.RealNumber.Rational.RealNumber p)
 instance forall k (p :: k). Data.Fixed.HasResolution p => Ipe.Writer.IpeWriteText (Data.Fixed.Fixed p)
 instance GHC.Real.Integral a => Ipe.Writer.IpeWriteText (GHC.Real.Ratio a)
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.Point.Internal.Point 2 r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Geometry.Point.Internal.Point 2 r)
 instance Ipe.Writer.IpeWriteText v => Ipe.Writer.IpeWriteText (Ipe.Value.IpeValue v)
 instance Ipe.Writer.IpeWriteText Ipe.Attributes.TransformationTypes
 instance Ipe.Writer.IpeWriteText Ipe.Attributes.PinType
@@ -1411,11 +1411,11 @@ instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Ipe.Attributes.Ip
 instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Ipe.Path.Path r)
 instance Ipe.Writer.IpeWriteText Ipe.Attributes.HorizontalAlignment
 instance Ipe.Writer.IpeWriteText Ipe.Attributes.VerticalAlignment
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.Matrix.Matrix 3 3 r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Geometry.Matrix.Matrix 3 3 r)
 instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Ipe.Path.Operation r)
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.PolyLine.PolyLine 2 () r)
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.Polygon.Core.Polygon t () r)
-instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Data.Geometry.BezierSpline.BezierSpline 3 2 r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Geometry.PolyLine.PolyLine 2 () r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Geometry.Polygon.Core.Polygon t () r)
+instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Geometry.BezierSpline.BezierSpline 3 2 r)
 instance Ipe.Writer.IpeWriteText r => Ipe.Writer.IpeWriteText (Ipe.Path.PathSegment r)
 instance Ipe.Writer.IpeWriteText ()
 
@@ -1786,6 +1786,32 @@ IpeColor :: IpeValue (RGB r) -> IpeColor r
 -- | Creates a named color
 named :: Text -> IpeColor r
 
+module Geometry.Triangulation.Draw
+
+-- | Draws a triangulation
+drawTriangulation :: IpeOut (Triangulation p r) Group r
+
+
+-- | Helper functions to draw a PlanarSubdivision in ipe
+module Geometry.PlanarSubdivision.Draw
+
+-- | Draws only the values for which we have a Just attribute
+drawPlanarSubdivision :: forall s r. (Num r, Ord r) => IpeOut (PlanarSubdivision s (Maybe (IpeAttributes IpeSymbol r)) (Maybe (IpeAttributes Path r)) (Maybe (IpeAttributes Path r)) r) Group r
+
+-- | Draw everything using the defaults
+drawPlanarSubdivision' :: forall s v e f r. (Num r, Ord r) => IpeOut (PlanarSubdivision s v e f r) Group r
+
+-- | Function to draw a planar subdivision by giving functions that specify
+--   how to render vertices, edges, the internal faces, and the outer face.
+drawPlanarSubdivisionWith :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) => IpeOut' Maybe (VertexId' s, VertexData r v) vi r -> IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r -> IpeOut' Maybe (FaceId' s, SomePolygon v r :+ f) fi r -> IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r -> IpeOut (PlanarSubdivision s v e f r) Group r
+
+
+-- | Functions for Drawing arrangements
+module Geometry.Arrangement.Draw
+
+-- | Draws an arrangement
+drawArrangement :: (Ord r, Num r) => IpeOut (Arrangement s l v e f r) Group r
+
 module Data.Tree.Draw
 
 -- | Draws a tree
@@ -1809,29 +1835,3 @@ drawPlaneGraphWith :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) => I
 -- | Function to draw a graph by giving the outer faceId and the functions
 --   that specify how to render vertices, edges, and faces.
 drawPlaneGraphWith' :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) => FaceId' s -> IpeOut' Maybe (VertexId' s, VertexData r v) vi r -> IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r -> IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r -> IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r -> IpeOut (PlaneGraph s v e f r) Group r
-
-module Data.Geometry.Triangulation.Draw
-
--- | Draws a triangulation
-drawTriangulation :: IpeOut (Triangulation p r) Group r
-
-
--- | Helper functions to draw a PlanarSubdivision in ipe
-module Data.Geometry.PlanarSubdivision.Draw
-
--- | Draws only the values for which we have a Just attribute
-drawPlanarSubdivision :: forall s r. (Num r, Ord r) => IpeOut (PlanarSubdivision s (Maybe (IpeAttributes IpeSymbol r)) (Maybe (IpeAttributes Path r)) (Maybe (IpeAttributes Path r)) r) Group r
-
--- | Draw everything using the defaults
-drawPlanarSubdivision' :: forall s v e f r. (Num r, Ord r) => IpeOut (PlanarSubdivision s v e f r) Group r
-
--- | Function to draw a planar subdivision by giving functions that specify
---   how to render vertices, edges, the internal faces, and the outer face.
-drawPlanarSubdivisionWith :: (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) => IpeOut' Maybe (VertexId' s, VertexData r v) vi r -> IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r -> IpeOut' Maybe (FaceId' s, SomePolygon v r :+ f) fi r -> IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r -> IpeOut (PlanarSubdivision s v e f r) Group r
-
-
--- | Functions for Drawing arrangements
-module Data.Geometry.Arrangement.Draw
-
--- | Draws an arrangement
-drawArrangement :: (Ord r, Num r) => IpeOut (Arrangement s l v e f r) Group r

@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.PlaneGraph.IO</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Converting from/to Adjacency Representation of the plane graph</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlaneGraph.IO</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-14"></span><span>    </span><span class="hs-comment">--  * Reading and Writing the Plane Graph to a file</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Data.PlaneGraph.IO.html#readPlaneGraph"><span class="hs-identifier">readPlaneGraph</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.IO.html#writePlaneGraph"><span class="hs-identifier">writePlaneGraph</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Converting to and from Adjacency list representions</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.IO.html#toAdjRep"><span class="hs-identifier">toAdjRep</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.IO.html#fromAdjRep"><span class="hs-identifier">fromAdjRep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.IO.html#fromAdjRep%27"><span class="hs-identifier">fromAdjRep'</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Helper functions</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.IO.html#makeCCW"><span class="hs-identifier">makeCCW</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">forM_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Point.html"><span class="hs-identifier">Geometry.Point</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.PlanarGraph.AdjRep</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PGA</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.PlanarGraph.IO</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PGIO</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlaneGraph.Core.html"><span class="hs-identifier">Data.PlaneGraph.Core</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html"><span class="hs-identifier">Data.PlaneGraph.AdjRep</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Mutable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">MV</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Yaml</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ParseException</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Yaml.Util</span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- import Data.RealNumber.Rational</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- import Data.PlanarGraph.Dart</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- import Data.PlaneGraph.AdjRep</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.PlanarGraph.Dart</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.PlanarGraph.AdjRep(Face(..))</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- let dart i s = Dart (Arc i) (read s)</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--     small :: Gr (Vtx Int String Int) (Face String)</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--     small = Gr [ Vtx 0 (Point2 0 0) [ (2,&quot;0-&gt;2&quot;)</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--                                     , (1,&quot;0-&gt;1&quot;)</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--                                     , (3,&quot;0-&gt;3&quot;)</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--                                     ] 0</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--                , Vtx 1 (Point2 2 2) [ (0,&quot;1-&gt;0&quot;)</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--                                     , (2,&quot;1-&gt;2&quot;)</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--                                     , (3,&quot;1-&gt;3&quot;)</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--                                     ] 1</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--                , Vtx 2 (Point2 2 0) [ (0,&quot;2-&gt;0&quot;)</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--                                     , (1,&quot;2-&gt;1&quot;)</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--                                     ] 2</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--                , Vtx 3 (Point2 (-1) 4) [ (0,&quot;3-&gt;0&quot;)</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--                                        , (1,&quot;3-&gt;1&quot;)</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--                                        ] 3</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--                ]</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--                [ Face (2,1) &quot;OuterFace&quot;</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--                , Face (0,1) &quot;A&quot;</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--                , Face (1,0) &quot;B&quot;</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--                ]</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--     smallG = fromAdjRep @() small</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- This represents the following graph. Note that the graph is undirected, the</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- arrows are just to indicate what the Positive direction of the darts is.</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- ![myGraph](docs/Data/PlaneGraph/small.png)</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- * Reading and Writing the Plane Graph</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | Reads a plane graph from a bytestring</span><span>
+</span><span id="line-85"></span><span class="annot"><a href="Data.PlaneGraph.IO.html#readPlaneGraph"><span class="hs-identifier hs-type">readPlaneGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680040276"><span class="annot"><a href="#local-6989586621680040276"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621680040275"><span class="annot"><a href="#local-6989586621680040275"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680040274"><span class="annot"><a href="#local-6989586621680040274"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680040273"><span class="annot"><a href="#local-6989586621680040273"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680040272"><span class="annot"><a href="#local-6989586621680040272"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040275"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040274"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040273"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040272"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span>
+</span><span id="line-87"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParseException</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040276"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040275"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040274"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040273"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040272"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span id="readPlaneGraph"><span class="annot"><span class="annottext">readPlaneGraph :: ByteString -&gt; Either ParseException (PlaneGraph s v e f r)
+</span><a href="Data.PlaneGraph.IO.html#readPlaneGraph"><span class="hs-identifier hs-var hs-var">readPlaneGraph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ParseException (PlaneGraph s v e f r)
+forall a. FromJSON a =&gt; ByteString -&gt; Either ParseException a
+</span><span class="hs-identifier hs-var">decodeYaml</span></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | Writes a plane graph to a bytestring</span><span>
+</span><span id="line-91"></span><span id="local-6989586621680040266"><span id="local-6989586621680040267"><span id="local-6989586621680040268"><span id="local-6989586621680040269"><span id="local-6989586621680040270"><span class="annot"><a href="Data.PlaneGraph.IO.html#writePlaneGraph"><span class="hs-identifier hs-type">writePlaneGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040270"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040269"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040268"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040267"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040266"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040270"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040269"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040268"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040267"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span></span></span></span></span></span><span>
+</span><span id="line-93"></span><span id="writePlaneGraph"><span class="annot"><span class="annottext">writePlaneGraph :: PlaneGraph s v e f r -&gt; ByteString
+</span><a href="Data.PlaneGraph.IO.html#writePlaneGraph"><span class="hs-identifier hs-var hs-var">writePlaneGraph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encodeYaml</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span id="local-6989586621680040260"><span id="local-6989586621680040261"><span id="local-6989586621680040262"><span id="local-6989586621680040263"><span id="local-6989586621680040264"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680040254"><span id="local-6989586621680040256"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040264"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040263"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040262"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040261"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040260"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040264"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040263"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040262"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040261"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621680040252"><span class="annot"><span class="annottext">toEncoding :: PlaneGraph s v e f r -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gr (Vtx v e r) (Face f) -&gt; Encoding
+forall a. ToJSON a =&gt; a -&gt; Encoding
+</span><span class="hs-identifier hs-var">toEncoding</span></span><span> </span><span class="annot"><span class="annottext">(Gr (Vtx v e r) (Face f) -&gt; Encoding)
+-&gt; (PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f))
+-&gt; PlaneGraph s v e f r
+-&gt; Encoding
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f)
+</span><a href="Data.PlaneGraph.IO.html#toAdjRep"><span class="hs-identifier hs-var">toAdjRep</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621680040249"><span class="annot"><span class="annottext">toJSON :: PlaneGraph s v e f r -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gr (Vtx v e r) (Face f) -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span>     </span><span class="annot"><span class="annottext">(Gr (Vtx v e r) (Face f) -&gt; Value)
+-&gt; (PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f))
+-&gt; PlaneGraph s v e f r
+-&gt; Value
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f)
+forall k (s :: k) v e f r.
+PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f)
+</span><a href="Data.PlaneGraph.IO.html#toAdjRep"><span class="hs-identifier hs-var">toAdjRep</span></a></span></span></span></span></span></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span id="local-6989586621680040243"><span id="local-6989586621680040244"><span id="local-6989586621680040245"><span id="local-6989586621680040246"><span id="local-6989586621680040247"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680040240"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040247"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040246"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040245"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680040244"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040243"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040247"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040246"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040245"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040244"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-103"></span><span>  </span><span id="local-6989586621680040238"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser (PlaneGraph s v e f r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span id="local-6989586621680040236"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621680040236"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall k (s :: k) v e f r.
+Gr (Vtx v e r) (Face f) -&gt; PlaneGraph s v e f r
+forall v e f r. Gr (Vtx v e r) (Face f) -&gt; PlaneGraph s v e f r
+</span><a href="Data.PlaneGraph.IO.html#fromAdjRep"><span class="hs-identifier hs-var">fromAdjRep</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621680040243"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Gr (Vtx v e r) (Face f) -&gt; PlaneGraph s v e f r)
+-&gt; Parser (Gr (Vtx v e r) (Face f))
+-&gt; Parser (PlaneGraph s v e f r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Parser (Gr (Vtx v e r) (Face f))
+forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621680040236"><span class="hs-identifier hs-var">v</span></a></span></span></span></span></span></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Transforms the plane graph into adjacency lists. For every</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- vertex, the adjacent vertices are given in counter clockwise order.</span><span>
+</span><span id="line-109"></span><span class="hs-comment">--</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- See 'toAdjacencyLists' for notes on how we handle self-loops.</span><span>
+</span><span id="line-111"></span><span class="hs-comment">--</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-113"></span><span id="local-6989586621680040410"><span id="local-6989586621680040411"><span id="local-6989586621680040412"><span id="local-6989586621680040413"><span id="local-6989586621680040414"><span class="annot"><a href="Data.PlaneGraph.IO.html#toAdjRep"><span class="hs-identifier hs-type">toAdjRep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040414"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040413"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040412"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040411"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040410"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040413"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040412"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040410"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Face</span></span><span> </span><span class="annot"><a href="#local-6989586621680040411"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-114"></span><span id="toAdjRep"><span class="annot"><span class="annottext">toAdjRep :: PlaneGraph s v e f r -&gt; Gr (Vtx v e r) (Face f)
+</span><a href="Data.PlaneGraph.IO.html#toAdjRep"><span class="hs-identifier hs-var hs-var">toAdjRep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vtx (VertexData r v) e -&gt; Vtx v e r)
+-&gt; Gr (Vtx (VertexData r v) e) (Face f) -&gt; Gr (Vtx v e r) (Face f)
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PGA.Vtx</span></span><span> </span><span id="local-6989586621680040232"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040232"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621680040231"><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040231"><span class="hs-identifier hs-var">aj</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#VertexData"><span class="hs-identifier hs-type">VertexData</span></a></span><span> </span><span id="local-6989586621680040229"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040229"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680040228"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040228"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
+forall v e r. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
+</span><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040232"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040229"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040231"><span class="hs-identifier hs-var">aj</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040228"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Gr (Vtx (VertexData r v) e) (Face f) -&gt; Gr (Vtx v e r) (Face f))
+-&gt; (PlaneGraph s v e f r -&gt; Gr (Vtx (VertexData r v) e) (Face f))
+-&gt; PlaneGraph s v e f r
+-&gt; Gr (Vtx v e r) (Face f)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s 'Primal (VertexData r v) e f
+-&gt; Gr (Vtx (VertexData r v) e) (Face f)
+forall k (s :: k) (w :: World) v e f.
+PlanarGraph s w v e f -&gt; Gr (Vtx v e) (Face f)
+</span><span class="hs-identifier hs-var">PGIO.toAdjRep</span></span><span>
+</span><span id="line-115"></span><span>         </span><span class="annot"><span class="annottext">(PlanarGraph s 'Primal (VertexData r v) e f
+ -&gt; Gr (Vtx (VertexData r v) e) (Face f))
+-&gt; (PlaneGraph s v e f r
+    -&gt; PlanarGraph s 'Primal (VertexData r v) e f)
+-&gt; PlaneGraph s v e f r
+-&gt; Gr (Vtx (VertexData r v) e) (Face f)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>  </span><span class="annot"><span class="annottext">Getting
+  (PlanarGraph s 'Primal (VertexData r v) e f)
+  (PlaneGraph s v e f r)
+  (PlanarGraph s 'Primal (VertexData r v) e f)
+-&gt; PlaneGraph s v e f r
+-&gt; PlanarGraph s 'Primal (VertexData r v) e f
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (PlanarGraph s 'Primal (VertexData r v) e f)
+  (PlaneGraph s v e f r)
+  (PlanarGraph s 'Primal (VertexData r v) e f)
+forall k1 k2 (s :: k1) v e f r (s2 :: k2) v2 e2 f2 r2.
+Iso
+  (PlaneGraph s v e f r)
+  (PlaneGraph s2 v2 e2 f2 r2)
+  (PlanarGraph s 'Primal (VertexData r v) e f)
+  (PlanarGraph s2 'Primal (VertexData r2 v2) e2 f2)
+</span><a href="Data.PlaneGraph.Core.html#graph"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- | Given the AdjacencyList representation of a plane graph,</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- construct the plane graph representing it. All the adjacencylists</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- should be in counter clockwise order.</span><span>
+</span><span id="line-120"></span><span class="hs-comment">--</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--      - no self-loops and no multi-edges</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--      - we specify some face information for all of the vertices, edges, and faces</span><span>
+</span><span id="line-124"></span><span class="hs-comment">--</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Data.PlaneGraph.IO.html#fromAdjRep"><span class="hs-identifier hs-type">fromAdjRep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680040396"><span class="annot"><a href="#local-6989586621680040396"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621680040400"><span class="annot"><a href="#local-6989586621680040400"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680040399"><span class="annot"><a href="#local-6989586621680040399"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680040397"><span class="annot"><a href="#local-6989586621680040397"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680040398"><span class="annot"><a href="#local-6989586621680040398"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040400"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040399"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040398"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Face</span></span><span> </span><span class="annot"><a href="#local-6989586621680040397"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040396"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040400"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040399"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040397"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040398"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-127"></span><span id="fromAdjRep"><span class="annot"><span class="annottext">fromAdjRep :: Gr (Vtx v e r) (Face f) -&gt; PlaneGraph s v e f r
+</span><a href="Data.PlaneGraph.IO.html#fromAdjRep"><span class="hs-identifier hs-var hs-var">fromAdjRep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s 'Primal (VertexData r v) e f -&gt; PlaneGraph s v e f r
+forall k (s :: k) v e f r.
+PlanarGraph s 'Primal (VertexData r v) e f -&gt; PlaneGraph s v e f r
+</span><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-var">PlaneGraph</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarGraph s 'Primal (VertexData r v) e f
+ -&gt; PlaneGraph s v e f r)
+-&gt; (Gr (Vtx v e r) (Face f)
+    -&gt; PlanarGraph s 'Primal (VertexData r v) e f)
+-&gt; Gr (Vtx v e r) (Face f)
+-&gt; PlaneGraph s v e f r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Gr (Vtx (VertexData r v) e) (Face f)
+-&gt; PlanarGraph s 'Primal (VertexData r v) e f
+forall k (s :: k) v e f.
+Gr (Vtx v e) (Face f) -&gt; PlanarGraph s 'Primal v e f
+</span><span class="hs-identifier hs-var">PGIO.fromAdjRep</span></span><span> </span><span class="annot"><span class="annottext">(Gr (Vtx (VertexData r v) e) (Face f)
+ -&gt; PlanarGraph s 'Primal (VertexData r v) e f)
+-&gt; (Gr (Vtx v e r) (Face f)
+    -&gt; Gr (Vtx (VertexData r v) e) (Face f))
+-&gt; Gr (Vtx v e r) (Face f)
+-&gt; PlanarGraph s 'Primal (VertexData r v) e f
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Vtx v e r -&gt; Vtx (VertexData r v) e)
+-&gt; Gr (Vtx v e r) (Face f) -&gt; Gr (Vtx (VertexData r v) e) (Face f)
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">Vtx v e r -&gt; Vtx (VertexData r v) e
+forall v e r. Vtx v e r -&gt; Vtx (VertexData r v) e
+</span><a href="Data.PlaneGraph.IO.html#wrapVtx"><span class="hs-identifier hs-var">wrapVtx</span></a></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- | Given the AdjacencyList representation of a plane graph,</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- construct the plane graph representing it. All the adjacencylists</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- should be in counter clockwise order.</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- pre: - the id's are consecutive from 0 to n (where is the number of vertices)</span><span>
+</span><span id="line-134"></span><span class="hs-comment">--</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-136"></span><span class="annot"><a href="Data.PlaneGraph.IO.html#fromAdjRep%27"><span class="hs-identifier hs-type">fromAdjRep'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680040220"><span class="annot"><a href="#local-6989586621680040220"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621680040219"><span class="annot"><a href="#local-6989586621680040219"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680040218"><span class="annot"><a href="#local-6989586621680040218"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680040217"><span class="annot"><a href="#local-6989586621680040217"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040219"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040218"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040217"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040220"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040219"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040218"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680040217"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-137"></span><span id="fromAdjRep%27"><span class="annot"><span class="annottext">fromAdjRep' :: [Vtx v e r] -&gt; PlaneGraph s v e () r
+</span><a href="Data.PlaneGraph.IO.html#fromAdjRep%27"><span class="hs-identifier hs-var hs-var">fromAdjRep'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s 'Primal (VertexData r v) e ()
+-&gt; PlaneGraph s v e () r
+forall k (s :: k) v e f r.
+PlanarGraph s 'Primal (VertexData r v) e f -&gt; PlaneGraph s v e f r
+</span><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-var">PlaneGraph</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarGraph s 'Primal (VertexData r v) e ()
+ -&gt; PlaneGraph s v e () r)
+-&gt; ([Vtx v e r] -&gt; PlanarGraph s 'Primal (VertexData r v) e ())
+-&gt; [Vtx v e r]
+-&gt; PlaneGraph s v e () r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Vtx (VertexData r v) e]
+-&gt; PlanarGraph s 'Primal (VertexData r v) e ()
+forall k (s :: k) v e. [Vtx v e] -&gt; PlanarGraph s 'Primal v e ()
+</span><span class="hs-identifier hs-var">PGIO.fromAdjRep'</span></span><span> </span><span class="annot"><span class="annottext">([Vtx (VertexData r v) e]
+ -&gt; PlanarGraph s 'Primal (VertexData r v) e ())
+-&gt; ([Vtx v e r] -&gt; [Vtx (VertexData r v) e])
+-&gt; [Vtx v e r]
+-&gt; PlanarGraph s 'Primal (VertexData r v) e ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Vtx v e r -&gt; Vtx (VertexData r v) e)
+-&gt; [Vtx v e r] -&gt; [Vtx (VertexData r v) e]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Vtx v e r -&gt; Vtx (VertexData r v) e
+forall v e r. Vtx v e r -&gt; Vtx (VertexData r v) e
+</span><a href="Data.PlaneGraph.IO.html#wrapVtx"><span class="hs-identifier hs-var">wrapVtx</span></a></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Convert a vertex in PlaneGeometry format to generic PlanarGraph Vtx format.</span><span>
+</span><span id="line-140"></span><span id="local-6989586621680040334"><span id="local-6989586621680040335"><span id="local-6989586621680040336"><span class="annot"><a href="Data.PlaneGraph.IO.html#wrapVtx"><span class="hs-identifier hs-type">wrapVtx</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040336"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040335"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040334"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PGA.Vtx</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#VertexData"><span class="hs-identifier hs-type">VertexData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040334"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040336"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680040335"><span class="hs-identifier hs-type">e</span></a></span></span></span></span><span>
+</span><span id="line-141"></span><span id="wrapVtx"><span class="annot"><span class="annottext">wrapVtx :: Vtx v e r -&gt; Vtx (VertexData r v) e
+</span><a href="Data.PlaneGraph.IO.html#wrapVtx"><span class="hs-identifier hs-var hs-var">wrapVtx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621680040215"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040215"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621680040214"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040214"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680040213"><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040213"><span class="hs-identifier hs-var">aj</span></a></span></span><span> </span><span id="local-6989586621680040212"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040212"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, e)] -&gt; VertexData r v -&gt; Vtx (VertexData r v) e
+forall v e. Int -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e
+</span><span class="hs-identifier hs-var">PGA.Vtx</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040215"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040213"><span class="hs-identifier hs-var">aj</span></a></span><span> </span><span class="annot"><span class="annottext">(VertexData r v -&gt; Vtx (VertexData r v) e)
+-&gt; VertexData r v -&gt; Vtx (VertexData r v) e
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; v -&gt; VertexData r v
+forall r v. Point 2 r -&gt; v -&gt; VertexData r v
+</span><a href="Data.PlaneGraph.Core.html#VertexData"><span class="hs-identifier hs-var">VertexData</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040214"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040212"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- | Orders the adjacencylists of a plane graph (with \(n\) vertices) (in Adj</span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- repr) so that they are all counter-clockwise around the vertices.</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--</span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-149"></span><span id="local-6989586621680040208"><span id="local-6989586621680040209"><span id="local-6989586621680040210"><span id="local-6989586621680040211"><span class="annot"><a href="Data.PlaneGraph.IO.html#makeCCW"><span class="hs-identifier hs-type">makeCCW</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680040211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680040211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040210"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040209"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680040208"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040210"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040209"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680040211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680040208"><span class="hs-identifier hs-type">f</span></a></span></span></span></span></span><span>
+</span><span id="line-150"></span><span id="makeCCW"><span class="annot"><span class="annottext">makeCCW :: Gr (Vtx v e r) f -&gt; Gr (Vtx v e r) f
+</span><a href="Data.PlaneGraph.IO.html#makeCCW"><span class="hs-identifier hs-var hs-var">makeCCW</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span id="local-6989586621680040206"><span class="annot"><span class="annottext">[Vtx v e r]
+</span><a href="#local-6989586621680040206"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621680040205"><span class="annot"><span class="annottext">[f]
+</span><a href="#local-6989586621680040205"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx v e r] -&gt; [f] -&gt; Gr (Vtx v e r) f
+forall v f. [v] -&gt; [f] -&gt; Gr v f
+</span><span class="hs-identifier hs-var">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vtx v e r -&gt; Vtx v e r) -&gt; [Vtx v e r] -&gt; [Vtx v e r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Vtx v e r -&gt; Vtx v e r
+</span><a href="#local-6989586621680040204"><span class="hs-identifier hs-var">sort'</span></a></span><span> </span><span class="annot"><span class="annottext">[Vtx v e r]
+</span><a href="#local-6989586621680040206"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[f]
+</span><a href="#local-6989586621680040205"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-151"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-comment">-- create an array that we can use to lookup the vertex locations in constant time.</span><span>
+</span><span id="line-153"></span><span>    </span><span id="local-6989586621680040203"><span class="annot"><span class="annottext">location' :: Vector (Point 2 r)
+</span><a href="#local-6989586621680040203"><span class="hs-identifier hs-var hs-var">location'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s (Point 2 r))) -&gt; Vector (Point 2 r)
+forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
+</span><span class="hs-identifier hs-var">V.create</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s (Point 2 r))) -&gt; Vector (Point 2 r))
+-&gt; (forall s. ST s (MVector s (Point 2 r))) -&gt; Vector (Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-154"></span><span>                   </span><span id="local-6989586621680040201"><span class="annot"><span class="annottext">MVector s (Point 2 r)
+</span><a href="#local-6989586621680040201"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) (Point 2 r))
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Int -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">MV.new</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Vtx v e r] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Vtx v e r]
+</span><a href="#local-6989586621680040206"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>                   </span><span class="annot"><span class="annottext">[Vtx v e r] -&gt; (Vtx v e r -&gt; ST s ()) -&gt; ST s ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+t a -&gt; (a -&gt; m b) -&gt; m ()
+</span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[Vtx v e r]
+</span><a href="#local-6989586621680040206"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">((Vtx v e r -&gt; ST s ()) -&gt; ST s ())
+-&gt; (Vtx v e r -&gt; ST s ()) -&gt; ST s ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621680040198"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040198"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680040197"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040197"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">v
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-156"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Point 2 r)
+-&gt; Int -&gt; Point 2 r -&gt; ST s ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">MV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Point 2 r)
+MVector (PrimState (ST s)) (Point 2 r)
+</span><a href="#local-6989586621680040201"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040198"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040197"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-157"></span><span>                   </span><span class="annot"><span class="annottext">MVector s (Point 2 r) -&gt; ST s (MVector s (Point 2 r))
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Point 2 r)
+</span><a href="#local-6989586621680040201"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-comment">-- sort the adjacencies around every vertex v</span><span>
+</span><span id="line-159"></span><span>    </span><span id="local-6989586621680040204"><span class="annot"><span class="annottext">sort' :: Vtx v e r -&gt; Vtx v e r
+</span><a href="#local-6989586621680040204"><span class="hs-identifier hs-var hs-var">sort'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621680040195"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040195"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621680040194"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040194"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680040193"><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040193"><span class="hs-identifier hs-var">ajs</span></a></span></span><span> </span><span id="local-6989586621680040192"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040192"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
+forall v e r. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
+</span><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040195"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040194"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, e) -&gt; (Int, e) -&gt; Ordering) -&gt; [(Int, e)] -&gt; [(Int, e)]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.sortBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; (Int, e) -&gt; (Int, e) -&gt; Ordering
+</span><a href="#local-6989586621680040190"><span class="hs-identifier hs-var">around</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040194"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680040193"><span class="hs-identifier hs-var">ajs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621680040192"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621680040190"><span class="annot"><span class="annottext">around :: Point 2 r -&gt; (Int, e) -&gt; (Int, e) -&gt; Ordering
+</span><a href="#local-6989586621680040190"><span class="hs-identifier hs-var hs-var">around</span></a></span></span><span> </span><span id="local-6989586621680040189"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040189"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680040188"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040188"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">e
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680040187"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040187"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">e
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall r.
+(Num r, Ord r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+</span><a href="Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier hs-var">ccwCmpAround</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680040189"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r)
+</span><a href="#local-6989586621680040203"><span class="hs-identifier hs-var">location'</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r) -&gt; Int -&gt; Point 2 r
+forall a. Vector a -&gt; Int -&gt; a
+</span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040188"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r)
+</span><a href="#local-6989586621680040203"><span class="hs-identifier hs-var">location'</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r) -&gt; Int -&gt; Point 2 r
+forall a. Vector a -&gt; Int -&gt; a
+</span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680040187"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>                           </span><span class="hs-comment">-- note: since the graph is planar, there should not be</span><span>
+</span><span id="line-162"></span><span>                           </span><span class="hs-comment">-- any pairs of points for which ccwCmpAround returns EQ</span><span>
+</span><span id="line-163"></span><span>                           </span><span class="hs-comment">-- hence, no need to pick a secondary comparison</span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- smallG = fromAdjRep (Proxy :: Proxy ()) small</span><span>
+</span><span id="line-168"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-169"></span><span class="hs-comment">--     small :: Gr (Vtx Int String Int) (Face String)</span><span>
+</span><span id="line-170"></span><span class="hs-comment">--     small = Gr [ Vtx 0 (Point2 0 0) [ (2,&quot;0-&gt;2&quot;)</span><span>
+</span><span id="line-171"></span><span class="hs-comment">--                                     , (1,&quot;0-&gt;1&quot;)</span><span>
+</span><span id="line-172"></span><span class="hs-comment">--                                     , (3,&quot;0-&gt;3&quot;)</span><span>
+</span><span id="line-173"></span><span class="hs-comment">--                                     ] 0</span><span>
+</span><span id="line-174"></span><span class="hs-comment">--                , Vtx 1 (Point2 2 2) [ (0,&quot;1-&gt;0&quot;)</span><span>
+</span><span id="line-175"></span><span class="hs-comment">--                                     , (2,&quot;1-&gt;2&quot;)</span><span>
+</span><span id="line-176"></span><span class="hs-comment">--                                     , (3,&quot;1-&gt;3&quot;)</span><span>
+</span><span id="line-177"></span><span class="hs-comment">--                                     ] 1</span><span>
+</span><span id="line-178"></span><span class="hs-comment">--                , Vtx 2 (Point2 2 0) [ (0,&quot;2-&gt;0&quot;)</span><span>
+</span><span id="line-179"></span><span class="hs-comment">--                                     , (1,&quot;2-&gt;1&quot;)</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--                                     ] 2</span><span>
+</span><span id="line-181"></span><span class="hs-comment">--                , Vtx 3 (Point2 (-1) 4) [ (0,&quot;3-&gt;0&quot;)</span><span>
+</span><span id="line-182"></span><span class="hs-comment">--                                        , (1,&quot;3-&gt;1&quot;)</span><span>
+</span><span id="line-183"></span><span class="hs-comment">--                                        ] 3</span><span>
+</span><span id="line-184"></span><span class="hs-comment">--                ]</span><span>
+</span><span id="line-185"></span><span class="hs-comment">--                [ Face (2,1) &quot;OuterFace&quot;</span><span>
+</span><span id="line-186"></span><span class="hs-comment">--                , Face (0,1) &quot;A&quot;</span><span>
+</span><span id="line-187"></span><span class="hs-comment">--                , Face (1,0) &quot;B&quot;</span><span>
+</span><span id="line-188"></span><span class="hs-comment">--                ]</span><span>
+</span><span id="line-189"></span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- dart i s = Dart (Arc i) (read s)</span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- data MyWorld</span><span>
+</span><span id="line-193"></span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- -- ![myGraph](docs/Data/PlaneGraph/planegraph.png)</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- myPlaneGraph :: PlaneGraph MyWorld Int () String (RealNumber 5)</span><span>
+</span><span id="line-196"></span><span class="hs-comment">-- myPlaneGraph = fromAdjRep @MyWorld myPlaneGraphAdjrep</span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span class="hs-comment">-- myPlaneGraphAdjrep :: Gr (Vtx Int () (RealNumber 5)) (Face String)</span><span>
+</span><span id="line-199"></span><span class="hs-comment">-- myPlaneGraphAdjrep = Gr [ vtx 0 (Point2 0   0   ) [e 9, e 5, e 1, e 2]</span><span>
+</span><span id="line-200"></span><span class="hs-comment">--                         , vtx 1 (Point2 4   4   ) [e 0, e 5, e 12]</span><span>
+</span><span id="line-201"></span><span class="hs-comment">--                         , vtx 2 (Point2 3   7   ) [e 0, e 3]</span><span>
+</span><span id="line-202"></span><span class="hs-comment">--                         , vtx 3 (Point2 0   5   ) [e 4, e 2]</span><span>
+</span><span id="line-203"></span><span class="hs-comment">--                         , vtx 4 (Point2 3   8   ) [e 3, e 13]</span><span>
+</span><span id="line-204"></span><span class="hs-comment">--                         , vtx 5 (Point2 8   1   ) [e 0, e 6, e 8, e 1]</span><span>
+</span><span id="line-205"></span><span class="hs-comment">--                         , vtx 6 (Point2 6   (-1)) [e 5, e 9]</span><span>
+</span><span id="line-206"></span><span class="hs-comment">--                         , vtx 7 (Point2 9   (-1)) [e 8, e 11]</span><span>
+</span><span id="line-207"></span><span class="hs-comment">--                         , vtx 8 (Point2 12  1   ) [e 7, e 12, e 5]</span><span>
+</span><span id="line-208"></span><span class="hs-comment">--                         , vtx 9 (Point2 8   (-5)) [e 0, e 10, e 6]</span><span>
+</span><span id="line-209"></span><span class="hs-comment">--                         , vtx 10 (Point2 12 (-3)) [e 9, e 11]</span><span>
+</span><span id="line-210"></span><span class="hs-comment">--                         , vtx 11 (Point2 14 (-1)) [e 10, e 7]</span><span>
+</span><span id="line-211"></span><span class="hs-comment">--                         , vtx 12 (Point2 10 4   ) [e 1, e 8, e 13, e 14]</span><span>
+</span><span id="line-212"></span><span class="hs-comment">--                         , vtx 13 (Point2 9  6   ) [e 4, e 14, e 12]</span><span>
+</span><span id="line-213"></span><span class="hs-comment">--                         , vtx 14 (Point2 8  5   ) [e 13, e 12]</span><span>
+</span><span id="line-214"></span><span class="hs-comment">--                         ]</span><span>
+</span><span id="line-215"></span><span class="hs-comment">--                         [ Face (0,9) &quot;OuterFace&quot;</span><span>
+</span><span id="line-216"></span><span class="hs-comment">--                         , Face (0,5) &quot;A&quot;</span><span>
+</span><span id="line-217"></span><span class="hs-comment">--                         , Face (0,1) &quot;B&quot;</span><span>
+</span><span id="line-218"></span><span class="hs-comment">--                         , Face (0,2) &quot;C&quot;</span><span>
+</span><span id="line-219"></span><span class="hs-comment">--                         , Face (14,13) &quot;D&quot;</span><span>
+</span><span id="line-220"></span><span class="hs-comment">--                         , Face (1,12) &quot;E&quot;</span><span>
+</span><span id="line-221"></span><span class="hs-comment">--                         , Face (5,8) &quot;F&quot;</span><span>
+</span><span id="line-222"></span><span class="hs-comment">--                         ]</span><span>
+</span><span id="line-223"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-224"></span><span class="hs-comment">--     e i = (i,())</span><span>
+</span><span id="line-225"></span><span class="hs-comment">--     vtx i p es = Vtx i p es i</span><span>
+</span><span id="line-226"></span><span>
+</span><span id="line-227"></span><span>
+</span><span id="line-228"></span><span class="hs-comment">-- myPlaneGraph' :: IO (PlaneGraph MyWorld () () () (RealNumber 5))</span><span>
+</span><span id="line-229"></span><span class="hs-comment">-- myPlaneGraph' = let err x  = error $ show x</span><span>
+</span><span id="line-230"></span><span class="hs-comment">--                 in either err id . readPlaneGraph</span><span>
+</span><span id="line-231"></span><span class="hs-comment">--                 &lt;$&gt; B.readFile &quot;docs/Data/PlaneGraph/myPlaneGraph.yaml&quot;</span><span>
+</span><span id="line-232"></span></pre></body></html>

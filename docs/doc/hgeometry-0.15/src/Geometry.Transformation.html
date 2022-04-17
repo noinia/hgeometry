@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Geometry.Transformation</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Geometry.Transformation</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#Transformation"><span class="hs-identifier">Transformation</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Transformation.Internal.html#Transformation"><span class="hs-identifier">Transformation</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#transformationMatrix"><span class="hs-identifier">transformationMatrix</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#%7C.%7C"><span class="hs-operator">(|.|)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#identity"><span class="hs-identifier">identity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#inverseOf"><span class="hs-identifier">inverseOf</span></a></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier">IsTransformable</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#transformAllBy"><span class="hs-identifier">transformAllBy</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#transformPointFunctor"><span class="hs-identifier">transformPointFunctor</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#translation"><span class="hs-identifier">translation</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#scaling"><span class="hs-identifier">scaling</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#uniformScaling"><span class="hs-identifier">uniformScaling</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#translateBy"><span class="hs-identifier">translateBy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#scaleBy"><span class="hs-identifier">scaleBy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#scaleUniformlyBy"><span class="hs-identifier">scaleUniformlyBy</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#rotateTo"><span class="hs-identifier">rotateTo</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#skewX"><span class="hs-identifier">skewX</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#rotation"><span class="hs-identifier">rotation</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#reflection"><span class="hs-identifier">reflection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#reflectionV"><span class="hs-identifier">reflectionV</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#reflectionH"><span class="hs-identifier">reflectionH</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.html#fitToBox"><span class="hs-identifier">fitToBox</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Transformation.html#fitToBoxTransform"><span class="hs-identifier">fitToBoxTransform</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Box.Internal.html"><span class="hs-identifier">Geometry.Box.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier">Rectangle</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#IsBoxable"><span class="hs-identifier">IsBoxable</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html"><span class="hs-identifier">Geometry.Box.Internal</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Box</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Properties.html"><span class="hs-identifier">Geometry.Properties</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Point.html"><span class="hs-identifier">Geometry.Point</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Transformation.Internal.html"><span class="hs-identifier">Geometry.Transformation.Internal</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Geometry.Vector.html"><span class="hs-identifier">Geometry.Vector</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- | Given a rectangle r and a geometry g with its boundingbox,</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- transform the g to fit r.</span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Geometry.Transformation.html#fitToBox"><span class="hs-identifier hs-type">fitToBox</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680019528"><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span id="local-6989586621680019527"><span class="annot"><a href="#local-6989586621680019527"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621680019526"><span class="annot"><a href="#local-6989586621680019526"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-42"></span><span>                </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#IsBoxable"><span class="hs-identifier hs-type">IsBoxable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621680019527"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-43"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019527"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680019527"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span>                </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019526"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019527"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680019528"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-45"></span><span id="fitToBox"><span class="annot"><span class="annottext">fitToBox :: Rectangle q r -&gt; g -&gt; g
+</span><a href="Geometry.Transformation.html#fitToBox"><span class="hs-identifier hs-var hs-var">fitToBox</span></a></span></span><span> </span><span id="local-6989586621680019525"><span class="annot"><span class="annottext">Rectangle q r
+</span><a href="#local-6989586621680019525"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680019524"><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
+forall g.
+IsTransformable g =&gt;
+Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
+</span><a href="Geometry.Transformation.Internal.html#transformBy"><span class="hs-identifier hs-var">transformBy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle q r -&gt; g -&gt; Transformation 2 r
+forall g r q.
+(IsTransformable g, IsBoxable g, NumType g ~ r, Dimension g ~ 2,
+ Ord r, Fractional r) =&gt;
+Rectangle q r -&gt; g -&gt; Transformation 2 r
+</span><a href="Geometry.Transformation.html#fitToBoxTransform"><span class="hs-identifier hs-var">fitToBoxTransform</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle q r
+</span><a href="#local-6989586621680019525"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | Given a rectangle r and a geometry g with its boundingbox,</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- compute a transformation can fit g to r.</span><span>
+</span><span id="line-49"></span><span class="annot"><a href="Geometry.Transformation.html#fitToBoxTransform"><span class="hs-identifier hs-type">fitToBoxTransform</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680019608"><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span id="local-6989586621680019606"><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621680019605"><span class="annot"><a href="#local-6989586621680019605"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#IsBoxable"><span class="hs-identifier hs-type">IsBoxable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-50"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-51"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                      </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019605"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680019608"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Transformation.Internal.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-53"></span><span id="fitToBoxTransform"><span class="annot"><span class="annottext">fitToBoxTransform :: Rectangle q r -&gt; g -&gt; Transformation 2 r
+</span><a href="Geometry.Transformation.html#fitToBoxTransform"><span class="hs-identifier hs-var hs-var">fitToBoxTransform</span></a></span></span><span> </span><span id="local-6989586621680019522"><span class="annot"><span class="annottext">Rectangle q r
+</span><a href="#local-6989586621680019522"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680019521"><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621680019521"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Transformation 2 r
+forall r (d :: Nat).
+(Num r, Arity d, Arity (d + 1)) =&gt;
+Vector d r -&gt; Transformation d r
+</span><a href="Geometry.Transformation.Internal.html#translation"><span class="hs-identifier hs-var">translation</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621680019520"><span class="hs-identifier hs-var">v2</span></a></span><span> </span><span class="annot"><span class="annottext">Transformation 2 r -&gt; Transformation 2 r -&gt; Transformation 2 r
+forall r (d :: Nat).
+(Num r, Arity (d + 1)) =&gt;
+Transformation d r -&gt; Transformation d r -&gt; Transformation d r
+</span><a href="Geometry.Transformation.Internal.html#%7C.%7C"><span class="hs-operator hs-var">|.|</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Transformation 2 r
+forall r (d :: Nat).
+(Num r, Arity d, Arity (d + 1)) =&gt;
+r -&gt; Transformation d r
+</span><a href="Geometry.Transformation.Internal.html#uniformScaling"><span class="hs-identifier hs-var">uniformScaling</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680019519"><span class="hs-identifier hs-var">lam</span></a></span><span> </span><span class="annot"><span class="annottext">Transformation 2 r -&gt; Transformation 2 r -&gt; Transformation 2 r
+forall r (d :: Nat).
+(Num r, Arity (d + 1)) =&gt;
+Transformation d r -&gt; Transformation d r -&gt; Transformation d r
+</span><a href="Geometry.Transformation.Internal.html#%7C.%7C"><span class="hs-operator hs-var">|.|</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Transformation 2 r
+forall r (d :: Nat).
+(Num r, Arity d, Arity (d + 1)) =&gt;
+Vector d r -&gt; Transformation d r
+</span><a href="Geometry.Transformation.Internal.html#translation"><span class="hs-identifier hs-var">translation</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621680019518"><span class="hs-identifier hs-var">v1</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621680019517"><span class="annot"><span class="annottext">b :: Box (Dimension g) () (NumType g)
+</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g -&gt; Box (Dimension g) () (NumType g)
+forall g.
+(IsBoxable g, Ord (NumType g)) =&gt;
+g -&gt; Box (Dimension g) () (NumType g)
+</span><a href="Geometry.Box.Internal.html#boundingBox"><span class="hs-identifier hs-var">Box.boundingBox</span></a></span><span> </span><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621680019521"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><a href="#local-6989586621680019518"><span class="hs-identifier hs-type">v1</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019606"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621680019518"><span class="annot"><span class="annottext">v1 :: Vector 2 r
+</span><a href="#local-6989586621680019518"><span class="hs-identifier hs-var hs-var">v1</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r) -&gt; Vector 2 r -&gt; Vector 2 r
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Box 2 () r
+Box (Dimension g) () (NumType g)
+</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">Box 2 () r
+-&gt; Getting (Vector 2 r) (Box 2 () r) (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Box 2 () r -&gt; Point 2 r :+ ())
+-&gt; Optic' (-&gt;) (Const (Vector 2 r)) (Box 2 () r) (Point 2 r :+ ())
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">Box 2 () r -&gt; Point 2 r :+ ()
+forall (d :: Nat) p r. Box d p r -&gt; Point d r :+ p
+</span><a href="Geometry.Box.Internal.html#minPoint"><span class="hs-identifier hs-var">Box.minPoint</span></a></span><span class="annot"><span class="annottext">Optic' (-&gt;) (Const (Vector 2 r)) (Box 2 () r) (Point 2 r :+ ())
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; (Point 2 r :+ ()) -&gt; Const (Vector 2 r) (Point 2 r :+ ()))
+-&gt; Getting (Vector 2 r) (Box 2 () r) (Vector 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ ()) -&gt; Const (Vector 2 r) (Point 2 r :+ ())
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+ -&gt; (Point 2 r :+ ()) -&gt; Const (Vector 2 r) (Point 2 r :+ ()))
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; (Point 2 r :+ ())
+-&gt; Const (Vector 2 r) (Point 2 r :+ ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r)
+forall (d :: Nat) r r'.
+Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
+</span><a href="Geometry.Point.Internal.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621680019520"><span class="annot"><span class="annottext">v2 :: Vector 2 r
+</span><a href="#local-6989586621680019520"><span class="hs-identifier hs-var hs-var">v2</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle q r
+</span><a href="#local-6989586621680019522"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">Rectangle q r
+-&gt; Getting (Vector 2 r) (Rectangle q r) (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Rectangle q r -&gt; Point 2 r :+ q)
+-&gt; Optic'
+     (-&gt;) (Const (Vector 2 r)) (Rectangle q r) (Point 2 r :+ q)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">Rectangle q r -&gt; Point 2 r :+ q
+forall (d :: Nat) p r. Box d p r -&gt; Point d r :+ p
+</span><a href="Geometry.Box.Internal.html#minPoint"><span class="hs-identifier hs-var">Box.minPoint</span></a></span><span class="annot"><span class="annottext">Optic' (-&gt;) (Const (Vector 2 r)) (Rectangle q r) (Point 2 r :+ q)
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; (Point 2 r :+ q) -&gt; Const (Vector 2 r) (Point 2 r :+ q))
+-&gt; Getting (Vector 2 r) (Rectangle q r) (Vector 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ q) -&gt; Const (Vector 2 r) (Point 2 r :+ q)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+ -&gt; (Point 2 r :+ q) -&gt; Const (Vector 2 r) (Point 2 r :+ q))
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; (Point 2 r :+ q)
+-&gt; Const (Vector 2 r) (Point 2 r :+ q)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r)
+forall (d :: Nat) r r'.
+Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
+</span><a href="Geometry.Point.Internal.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621680019519"><span class="annot"><span class="annottext">lam :: r
+</span><a href="#local-6989586621680019519"><span class="hs-identifier hs-var hs-var">lam</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; r
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">minimum</span></span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; r) -&gt; Vector 2 r -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(/)</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r -&gt; r) -&gt; Vector 2 r -&gt; Vector 2 (r -&gt; r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Rectangle q r -&gt; Vector 2 r
+forall (d :: Nat) r p. (Arity d, Num r) =&gt; Box d p r -&gt; Vector d r
+</span><a href="Geometry.Box.Internal.html#size"><span class="hs-identifier hs-var">Box.size</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle q r
+</span><a href="#local-6989586621680019522"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 (r -&gt; r) -&gt; Vector 2 r -&gt; Vector 2 r
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Box 2 () r -&gt; Vector 2 r
+forall (d :: Nat) r p. (Arity d, Num r) =&gt; Box d p r -&gt; Vector d r
+</span><a href="Geometry.Box.Internal.html#size"><span class="hs-identifier hs-var">Box.size</span></a></span><span> </span><span class="annot"><span class="annottext">Box 2 () r
+Box (Dimension g) () (NumType g)
+</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-60"></span></pre></body></html>

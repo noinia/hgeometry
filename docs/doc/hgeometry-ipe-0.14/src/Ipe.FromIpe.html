@@ -32,18 +32,18 @@
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Simple</span></span><span class="hs-special">)</span><span>
 </span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Ball</span></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Box</span></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Ellipse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Ellipse</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_EllipseCircle</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Ball</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Box</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Ellipse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Ellipse</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_EllipseCircle</span></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Ipe.Path.html"><span class="hs-identifier">Ipe.Path</span></a></span><span>
 </span><span id="line-39"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Ipe.Reader.html"><span class="hs-identifier">Ipe.Reader</span></a></span><span>
 </span><span id="line-40"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Ipe.Types.html"><span class="hs-identifier">Ipe.Types</span></a></span><span>
-</span><span id="line-41"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.LineSegment</span></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Point</span></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Geometry.PolyLine</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PolyLine</span></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Polygon</span></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Properties</span></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Geometry.Triangle</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.LineSegment</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Point</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Geometry.PolyLine</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PolyLine</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Polygon</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Properties</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Geometry.Triangle</span></span><span>
 </span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LSeq</span></span><span>
 </span><span id="line-48"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-49"></span><span>
@@ -52,7 +52,7 @@
 </span><span id="line-52"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XOverloadedStrings</span><span>
 </span><span id="line-53"></span><span class="hs-comment">-- &gt;&gt;&gt; import Ipe.Attributes</span><span>
 </span><span id="line-54"></span><span class="hs-comment">-- &gt;&gt;&gt; import Ipe.Color(IpeColor(..))</span><span>
-</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Geometry.Point</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; import Geometry.Point</span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- let testPath :: Path Int</span><span>
 </span><span id="line-58"></span><span class="hs-comment">--     testPath = Path . fromSingleton  . PolyLineSegment</span><span>

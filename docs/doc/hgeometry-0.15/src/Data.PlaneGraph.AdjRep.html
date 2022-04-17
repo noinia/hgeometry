@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.PlaneGraph.AdjRep</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Data types that help encode/decode a planegraph as a JSON/YAML file.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlaneGraph.AdjRep</span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Gr</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier">Vtx</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Face</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>                             </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.PlanarGraph.AdjRep</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Gr</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Face</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Geometry.Point.html"><span class="hs-identifier">Geometry.Point</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- | A vertex, represented by an id, location, its adjacencies, and its data.</span><span>
+</span><span id="line-24"></span><span id="local-6989586621680017375"><span id="local-6989586621680017376"></span></span><span class="hs-keyword">data</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span id="local-6989586621680017374"><span class="annot"><a href="#local-6989586621680017374"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680017373"><span class="annot"><a href="#local-6989586621680017373"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680017372"><span class="annot"><a href="#local-6989586621680017372"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="id"><span class="annot"><span class="annottext">Vtx v e r -&gt; Int
+</span><a href="Data.PlaneGraph.AdjRep.html#id"><span class="hs-identifier hs-var hs-var">id</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-25"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="loc"><span class="annot"><span class="annottext">Vtx v e r -&gt; Point 2 r
+</span><a href="Data.PlaneGraph.AdjRep.html#loc"><span class="hs-identifier hs-var hs-var">loc</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680017372"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="adj"><span class="annot"><span class="annottext">Vtx v e r -&gt; [(Int, e)]
+</span><a href="Data.PlaneGraph.AdjRep.html#adj"><span class="hs-identifier hs-var hs-var">adj</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621680017373"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-27"></span><span>                       </span><span class="hs-comment">-- ^ adjacent vertices + data on the</span><span>
+</span><span id="line-28"></span><span>                       </span><span class="hs-comment">-- edge. Idealy adjacencies are given in CCW</span><span>
+</span><span id="line-29"></span><span>                       </span><span class="hs-comment">-- order around the vertex.</span><span>
+</span><span id="line-30"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="vData"><span class="annot"><span class="annottext">Vtx v e r -&gt; v
+</span><a href="Data.PlaneGraph.AdjRep.html#vData"><span class="hs-identifier hs-var hs-var">vData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680017374"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-31"></span><span>                     </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Vtx v e r -&gt; Rep (Vtx v e r) x)
+-&gt; (forall x. Rep (Vtx v e r) x -&gt; Vtx v e r)
+-&gt; Generic (Vtx v e r)
+forall x. Rep (Vtx v e r) x -&gt; Vtx v e r
+forall x. Vtx v e r -&gt; Rep (Vtx v e r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall v e r x. Rep (Vtx v e r) x -&gt; Vtx v e r
+forall v e r x. Vtx v e r -&gt; Rep (Vtx v e r) x
+$cto :: forall v e r x. Rep (Vtx v e r) x -&gt; Vtx v e r
+$cfrom :: forall v e r x. Vtx v e r -&gt; Rep (Vtx v e r) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680017358"><span id="local-6989586621680017360"><span id="local-6989586621680017362"><span class="annot"><span class="annottext">Int -&gt; Vtx v e r -&gt; ShowS
+[Vtx v e r] -&gt; ShowS
+Vtx v e r -&gt; String
+(Int -&gt; Vtx v e r -&gt; ShowS)
+-&gt; (Vtx v e r -&gt; String)
+-&gt; ([Vtx v e r] -&gt; ShowS)
+-&gt; Show (Vtx v e r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall v e r. (Show r, Show e, Show v) =&gt; Int -&gt; Vtx v e r -&gt; ShowS
+forall v e r. (Show r, Show e, Show v) =&gt; [Vtx v e r] -&gt; ShowS
+forall v e r. (Show r, Show e, Show v) =&gt; Vtx v e r -&gt; String
+showList :: [Vtx v e r] -&gt; ShowS
+$cshowList :: forall v e r. (Show r, Show e, Show v) =&gt; [Vtx v e r] -&gt; ShowS
+show :: Vtx v e r -&gt; String
+$cshow :: forall v e r. (Show r, Show e, Show v) =&gt; Vtx v e r -&gt; String
+showsPrec :: Int -&gt; Vtx v e r -&gt; ShowS
+$cshowsPrec :: forall v e r. (Show r, Show e, Show v) =&gt; Int -&gt; Vtx v e r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680017353"><span id="local-6989586621680017355"><span class="annot"><span class="annottext">Vtx v e r -&gt; Vtx v e r -&gt; Bool
+(Vtx v e r -&gt; Vtx v e r -&gt; Bool)
+-&gt; (Vtx v e r -&gt; Vtx v e r -&gt; Bool) -&gt; Eq (Vtx v e r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall v e r. (Eq r, Eq e, Eq v) =&gt; Vtx v e r -&gt; Vtx v e r -&gt; Bool
+/= :: Vtx v e r -&gt; Vtx v e r -&gt; Bool
+$c/= :: forall v e r. (Eq r, Eq e, Eq v) =&gt; Vtx v e r -&gt; Vtx v e r -&gt; Bool
+== :: Vtx v e r -&gt; Vtx v e r -&gt; Bool
+$c== :: forall v e r. (Eq r, Eq e, Eq v) =&gt; Vtx v e r -&gt; Vtx v e r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680017348"><span id="local-6989586621680017350"><span class="annot"><span class="annottext">a -&gt; Vtx v e b -&gt; Vtx v e a
+(a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b
+(forall a b. (a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b)
+-&gt; (forall a b. a -&gt; Vtx v e b -&gt; Vtx v e a) -&gt; Functor (Vtx v e)
+forall a b. a -&gt; Vtx v e b -&gt; Vtx v e a
+forall a b. (a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b
+forall v e a b. a -&gt; Vtx v e b -&gt; Vtx v e a
+forall v e a b. (a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Vtx v e b -&gt; Vtx v e a
+$c&lt;$ :: forall v e a b. a -&gt; Vtx v e b -&gt; Vtx v e a
+fmap :: (a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b
+$cfmap :: forall v e a b. (a -&gt; b) -&gt; Vtx v e a -&gt; Vtx v e b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680017313"><span id="local-6989586621680017315"><span id="local-6989586621680017317"><span id="local-6989586621680017319"><span id="local-6989586621680017321"><span id="local-6989586621680017323"><span id="local-6989586621680017325"><span id="local-6989586621680017327"><span id="local-6989586621680017329"><span id="local-6989586621680017331"><span id="local-6989586621680017333"><span id="local-6989586621680017335"><span id="local-6989586621680017337"><span id="local-6989586621680017339"><span id="local-6989586621680017341"><span id="local-6989586621680017343"><span id="local-6989586621680017345"><span class="annot"><span class="annottext">Vtx v e a -&gt; Bool
+(a -&gt; m) -&gt; Vtx v e a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+(forall m. Monoid m =&gt; Vtx v e m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a)
+-&gt; (forall a. Vtx v e a -&gt; [a])
+-&gt; (forall a. Vtx v e a -&gt; Bool)
+-&gt; (forall a. Vtx v e a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Vtx v e a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Vtx v e a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Vtx v e a -&gt; a)
+-&gt; (forall a. Num a =&gt; Vtx v e a -&gt; a)
+-&gt; (forall a. Num a =&gt; Vtx v e a -&gt; a)
+-&gt; Foldable (Vtx v e)
+forall a. Eq a =&gt; a -&gt; Vtx v e a -&gt; Bool
+forall a. Num a =&gt; Vtx v e a -&gt; a
+forall a. Ord a =&gt; Vtx v e a -&gt; a
+forall m. Monoid m =&gt; Vtx v e m -&gt; m
+forall a. Vtx v e a -&gt; Bool
+forall a. Vtx v e a -&gt; Int
+forall a. Vtx v e a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+forall v e a. Eq a =&gt; a -&gt; Vtx v e a -&gt; Bool
+forall v e a. Num a =&gt; Vtx v e a -&gt; a
+forall v e a. Ord a =&gt; Vtx v e a -&gt; a
+forall v e m. Monoid m =&gt; Vtx v e m -&gt; m
+forall v e a. Vtx v e a -&gt; Bool
+forall v e a. Vtx v e a -&gt; Int
+forall v e a. Vtx v e a -&gt; [a]
+forall v e a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+forall v e m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m
+forall v e b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+forall v e a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Vtx v e a -&gt; a
+$cproduct :: forall v e a. Num a =&gt; Vtx v e a -&gt; a
+sum :: Vtx v e a -&gt; a
+$csum :: forall v e a. Num a =&gt; Vtx v e a -&gt; a
+minimum :: Vtx v e a -&gt; a
+$cminimum :: forall v e a. Ord a =&gt; Vtx v e a -&gt; a
+maximum :: Vtx v e a -&gt; a
+$cmaximum :: forall v e a. Ord a =&gt; Vtx v e a -&gt; a
+elem :: a -&gt; Vtx v e a -&gt; Bool
+$celem :: forall v e a. Eq a =&gt; a -&gt; Vtx v e a -&gt; Bool
+length :: Vtx v e a -&gt; Int
+$clength :: forall v e a. Vtx v e a -&gt; Int
+null :: Vtx v e a -&gt; Bool
+$cnull :: forall v e a. Vtx v e a -&gt; Bool
+toList :: Vtx v e a -&gt; [a]
+$ctoList :: forall v e a. Vtx v e a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+$cfoldl1 :: forall v e a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+$cfoldr1 :: forall v e a. (a -&gt; a -&gt; a) -&gt; Vtx v e a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+$cfoldl' :: forall v e b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+$cfoldl :: forall v e b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+$cfoldr' :: forall v e a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+$cfoldr :: forall v e a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Vtx v e a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Vtx v e a -&gt; m
+$cfoldMap' :: forall v e m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Vtx v e a -&gt; m
+$cfoldMap :: forall v e m a. Monoid m =&gt; (a -&gt; m) -&gt; Vtx v e a -&gt; m
+fold :: Vtx v e m -&gt; m
+$cfold :: forall v e m. Monoid m =&gt; Vtx v e m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680017302"><span id="local-6989586621680017304"><span id="local-6989586621680017306"><span id="local-6989586621680017308"><span class="annot"><span class="annottext">Functor (Vtx v e)
+Foldable (Vtx v e)
+Functor (Vtx v e)
+-&gt; Foldable (Vtx v e)
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Vtx v e (f a) -&gt; f (Vtx v e a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Vtx v e a -&gt; m (Vtx v e b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Vtx v e (m a) -&gt; m (Vtx v e a))
+-&gt; Traversable (Vtx v e)
+(a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b)
+forall v e. Functor (Vtx v e)
+forall v e. Foldable (Vtx v e)
+forall v e (m :: * -&gt; *) a.
+Monad m =&gt;
+Vtx v e (m a) -&gt; m (Vtx v e a)
+forall v e (f :: * -&gt; *) a.
+Applicative f =&gt;
+Vtx v e (f a) -&gt; f (Vtx v e a)
+forall v e (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Vtx v e a -&gt; m (Vtx v e b)
+forall v e (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b)
+forall (t :: * -&gt; *).
+Functor t
+-&gt; Foldable t
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Vtx v e (m a) -&gt; m (Vtx v e a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Vtx v e (f a) -&gt; f (Vtx v e a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Vtx v e a -&gt; m (Vtx v e b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b)
+sequence :: Vtx v e (m a) -&gt; m (Vtx v e a)
+$csequence :: forall v e (m :: * -&gt; *) a.
+Monad m =&gt;
+Vtx v e (m a) -&gt; m (Vtx v e a)
+mapM :: (a -&gt; m b) -&gt; Vtx v e a -&gt; m (Vtx v e b)
+$cmapM :: forall v e (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Vtx v e a -&gt; m (Vtx v e b)
+sequenceA :: Vtx v e (f a) -&gt; f (Vtx v e a)
+$csequenceA :: forall v e (f :: * -&gt; *) a.
+Applicative f =&gt;
+Vtx v e (f a) -&gt; f (Vtx v e a)
+traverse :: (a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b)
+$ctraverse :: forall v e (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Vtx v e a -&gt; f (Vtx v e b)
+$cp2Traversable :: forall v e. Foldable (Vtx v e)
+$cp1Traversable :: forall v e. Functor (Vtx v e)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span id="local-6989586621680017298"><span id="local-6989586621680017299"><span id="local-6989586621680017300"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680017291"><span id="local-6989586621680017293"><span id="local-6989586621680017296"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017300"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017299"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017298"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017299"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017298"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017300"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621680017289"><span class="annot"><span class="annottext">toEncoding :: Vtx v e r -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Vtx v e r -&gt; Encoding
+forall a.
+(Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
+Options -&gt; a -&gt; Encoding
+</span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span></span><span>
+</span><span id="line-35"></span><span id="local-6989586621680017283"><span id="local-6989586621680017284"><span id="local-6989586621680017285"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680017279"><span id="local-6989586621680017281"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017285"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017284"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680017283"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017284"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017283"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680017285"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-36"></span></pre></body></html>
