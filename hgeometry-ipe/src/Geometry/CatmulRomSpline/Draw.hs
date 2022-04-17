@@ -1,7 +1,7 @@
-module Data.Geometry.CatmulRomSpline.Draw where
+module Geometry.CatmulRomSpline.Draw where
 
 import           Data.Ext
-import           Data.Geometry.CatmulRomSpline
+import           Geometry.CatmulRomSpline
 import           Ipe.IpeOut
 import           Ipe.Types
 import qualified Data.LSeq as LSeq

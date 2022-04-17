@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.CatmulRomSpline
+-- Module      :  Geometry.CatmulRomSpline
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,13 +9,13 @@
 -- Catmul Rom Splines
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.CatmulRomSpline where
+module Geometry.CatmulRomSpline where
 
 import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.BezierSpline
+import           Geometry.Point
+import           Geometry.Vector
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
 import qualified Data.List as List

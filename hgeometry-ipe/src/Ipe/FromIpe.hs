@@ -32,18 +32,18 @@ module Ipe.FromIpe(
 
 import           Control.Lens hiding (Simple)
 import           Data.Ext
-import           Data.Geometry.Ball
-import           Data.Geometry.Box
-import           Data.Geometry.Ellipse (Ellipse, _EllipseCircle)
+import           Geometry.Ball
+import           Geometry.Box
+import           Geometry.Ellipse (Ellipse, _EllipseCircle)
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import qualified Data.Geometry.PolyLine as PolyLine
-import           Data.Geometry.Polygon
-import           Data.Geometry.Properties
-import           Data.Geometry.Triangle
+import           Geometry.LineSegment
+import           Geometry.Point
+import qualified Geometry.PolyLine as PolyLine
+import           Geometry.Polygon
+import           Geometry.Properties
+import           Geometry.Triangle
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 
@@ -52,7 +52,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 -- >>> :set -XOverloadedStrings
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
--- >>> import Data.Geometry.Point
+-- >>> import Geometry.Point
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment

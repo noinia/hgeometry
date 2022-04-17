@@ -1,7 +1,7 @@
-module Data.Geometry.Triangulation.Draw where
+module Geometry.Triangulation.Draw where
 
 import           Algorithms.Geometry.DelaunayTriangulation.Types
-import           Data.Geometry.LineSegment
+import           Geometry.LineSegment
 import           Ipe
 
 --------------------------------------------------------------------------------

@@ -19,12 +19,12 @@ module Ipe.Sketchy where
 import           Control.Lens
 import           Control.Monad.Random.Class
 import           Data.Ext
-import           Data.Geometry.CatmulRomSpline (Spline)
-import qualified Data.Geometry.CatmulRomSpline as Spline
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
+import           Geometry.CatmulRomSpline (Spline)
+import qualified Geometry.CatmulRomSpline as Spline
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util

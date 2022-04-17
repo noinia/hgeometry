@@ -14,8 +14,8 @@ module Data.PlaneGraph.Draw where
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.Polygon
 import           Data.Maybe (mapMaybe)
 import           Data.PlaneGraph
 import           Ipe

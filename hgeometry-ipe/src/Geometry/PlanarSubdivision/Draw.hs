@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlanarSubdivision.Draw
+-- Module      :  Geometry.PlanarSubdivision.Draw
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,14 +8,14 @@
 -- Helper functions to draw a PlanarSubdivision in ipe
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.PlanarSubdivision.Draw where
+module Geometry.PlanarSubdivision.Draw where
 
 import           Control.Lens
 import           Data.Ext
 import           Ipe
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision
+import           Geometry.Polygon
 import           Data.Maybe (mapMaybe)
 import qualified Data.Vector as V
 

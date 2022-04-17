@@ -1,8 +1,8 @@
 module Data.Tree.Draw where
 
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.LineSegment
+import           Geometry.Point
 import           Ipe
 import           Data.Tree
 

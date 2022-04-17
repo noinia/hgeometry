@@ -9,8 +9,8 @@ import           Control.Lens          ()
 import           Control.Monad.ST
 import           Data.Ext
 import           Data.Foldable         as F
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.Point
+import           Geometry.Polygon
 import           Data.STRef
 import           Data.Hashable
 import qualified Data.Text             as T

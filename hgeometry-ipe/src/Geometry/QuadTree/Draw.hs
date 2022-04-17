@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.QuadTree.Draw
+-- Module      :  Geometry.QuadTree.Draw
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,15 +10,15 @@
 -- Machinery for drawing cells.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.QuadTree.Draw where
+module Geometry.QuadTree.Draw where
 
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Ipe.Attributes
 import           Ipe.IpeOut
 import           Ipe.Types
-import           Data.Geometry.QuadTree
-import           Data.Geometry.QuadTree.Cell
+import           Geometry.QuadTree
+import           Geometry.QuadTree.Cell
 import qualified Data.Text as T
 import           Data.Tree.Util (TreeNode(..))
 --------------------------------------------------------------------------------

@@ -25,10 +25,10 @@ import           Data.Char (isSpace)
 import           Data.Ext (ext)
 import           Data.Fixed
 import           Data.Functor (($>))
-import           Data.Geometry.Box
-import           Data.Geometry.Matrix
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.Box
+import           Geometry.Matrix
+import           Geometry.Point
+import           Geometry.Vector
 import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Text (Text)
