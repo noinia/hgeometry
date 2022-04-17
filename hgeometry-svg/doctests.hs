@@ -49,5 +49,5 @@ replace a b = go
 
 modules :: [String]
 modules =
-  [ "Data.Geometry.Svg"
+  [ "Geometry.Svg"
   ]
