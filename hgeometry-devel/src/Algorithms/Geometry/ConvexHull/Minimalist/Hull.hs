@@ -18,11 +18,11 @@ module Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Applicative ((<|>))
 import           Data.Ext
-import           Data.Geometry.Point (ccw, pattern CCW)
-import qualified Data.Geometry.PolyLine as PolyLine
-import           Data.Geometry.Properties
+import           Geometry.Point (ccw, pattern CCW)
+import qualified Geometry.PolyLine as PolyLine
+import           Geometry.Properties
 import qualified Data.List as List
--- import           Data.Geometry.Triangle
+-- import           Geometry.Triangle
 -- import qualified Data.List as List
 -- import           Data.List.NonEmpty (NonEmpty(..))
 -- import qualified Data.List.NonEmpty as NonEmpty

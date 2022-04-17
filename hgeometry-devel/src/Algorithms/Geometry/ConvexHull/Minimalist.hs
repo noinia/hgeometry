@@ -29,14 +29,14 @@ import           Algorithms.Geometry.ConvexHull.Minimalist.Hull
 import           Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens (iso, (^.), view)
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import qualified Data.Geometry.Point as Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Triangle
+import           Geometry.LineSegment
+import qualified Geometry.Point as Point
+import           Geometry.Properties
+import           Geometry.Triangle
 import qualified Data.List as List
 import           Data.Ord (comparing, Down(..))
 import           Data.Util
--- import           Data.Geometry.Triangle
+-- import           Geometry.Triangle
 -- import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

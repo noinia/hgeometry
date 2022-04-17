@@ -3,8 +3,8 @@ module Algorithms.Geometry.ConvexHull.Types where
 import Control.Lens (Lens', _1, _2)
 import Control.Monad.State.Strict (StateT)
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Triangle
+import Geometry.Point
+import Geometry.Triangle
 import Data.IndexedDoublyLinkedList
 import Data.List.NonEmpty (NonEmpty)
 import Data.Util

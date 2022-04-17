@@ -7,9 +7,9 @@ import           Control.Applicative ((<|>))
 import           Control.Lens ((^.))
 import           Control.Monad (replicateM)
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.PolyLine
 import           Data.IndexedDoublyLinkedList
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

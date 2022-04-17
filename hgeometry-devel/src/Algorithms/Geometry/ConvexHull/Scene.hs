@@ -6,7 +6,7 @@ module Algorithms.Geometry.ConvexHull.Scene where
 import           Control.Lens
 import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.Point
+import           Geometry.Point
 -- import qualified Data.IndexedDoublyLinkedList.Bare as IDLList
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

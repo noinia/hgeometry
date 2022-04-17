@@ -5,7 +5,7 @@ import Control.Lens
 import Data.Aeson (decodeFileStrict')
 import Data.Bifunctor
 import Data.Ext
-import Data.Geometry.Point
+import Geometry.Point
 import Data.List.NonEmpty (NonEmpty)
 import Data.RealNumber.Rational
 import PLY.Writer
