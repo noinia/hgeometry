@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
-module Data.Geometry.Web.ICanvas(
-    module Data.Geometry.Web.StaticCanvas
+module Geometry.Web.ICanvas(
+    module Geometry.Web.StaticCanvas
   , ICanvas(ICanvas), blankCanvas
   , canvas, mousePosition, panStatus
   , mouseCoordinates
@@ -20,9 +20,9 @@ module Data.Geometry.Web.ICanvas(
 
 import           Control.Lens hiding (view, element, rmap, Zoom)
 import           Data.Aeson.Types
-import           Data.Geometry.Web.StaticCanvas
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.Web.StaticCanvas
+import           Geometry.Point
+import           Geometry.Vector
 import           Data.Range
 import qualified Data.Set as Set
 import           Data.Set (Set)

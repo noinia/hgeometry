@@ -4,9 +4,9 @@ module Main where
 import           Control.Lens
 import           Control.Monad (unless, when)
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.Polygon (SimplePolygon,outerBoundaryEdges)
-import qualified Data.Geometry.Polygon as Polygon
+import           Geometry
+import           Geometry.Polygon (SimplePolygon,outerBoundaryEdges)
+import qualified Geometry.Polygon as Polygon
 import           Data.Maybe (mapMaybe)
 import qualified Data.Vector.Storable as V
 import           Foreign.C.Types (CInt)

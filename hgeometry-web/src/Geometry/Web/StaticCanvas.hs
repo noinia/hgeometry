@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Web.StaticCanvas(
+module Geometry.Web.StaticCanvas(
     Canvas(..)
     , center, dimensions, zoomLevel, createCanvas
     , staticCanvas_, textAt
@@ -8,15 +8,15 @@ module Data.Geometry.Web.StaticCanvas(
     ) where
 
 import           Control.Lens
-import           Data.Geometry.Point
-import           Data.Geometry.Svg.MathCoordinateSystem ( Canvas(..)
+import           Geometry.Point
+import           Geometry.Svg.MathCoordinateSystem ( Canvas(..)
                                                         , center
                                                         , dimensions
                                                         , zoomLevel
                                                         , createCanvas
                                                         , realWorldCoordinates
                                                         )
-import           Data.Geometry.Vector
+import           Geometry.Vector
 import qualified Data.Map as Map
 import           Miso
 import qualified Miso.Svg as Miso

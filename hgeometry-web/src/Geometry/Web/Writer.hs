@@ -1,22 +1,22 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Web.Writer where
+module Geometry.Web.Writer where
 
 import           Control.Lens hiding (Const,rmap)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ball
-import           Data.Geometry.Box
-import           Data.Geometry.Web.OrphanInstances ()
+import           Geometry.Ball
+import           Geometry.Box
+import           Geometry.Web.OrphanInstances ()
 import qualified Ipe as Ipe
 import qualified Ipe.Attributes as IA
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine (PolyLine, fromLineSegment, points)
-import           Data.Geometry.Polygon (Polygon(..), SomePolygon, SimplePolygon)
-import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Vector
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.Point
+import           Geometry.PolyLine (PolyLine, fromLineSegment, points)
+import           Geometry.Polygon (Polygon(..), SomePolygon, SimplePolygon)
+import           Geometry.Polygon.Convex
+import           Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (catMaybes, mapMaybe)
 import           Data.Proxy

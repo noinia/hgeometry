@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Web.OrphanInstances where
+module Geometry.Web.OrphanInstances where
 
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Fixed
@@ -9,7 +9,7 @@ import qualified Ipe as Ipe
 import qualified Ipe.Attributes as IA
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Value
-import           Data.Geometry.Matrix (Matrix)
+import           Geometry.Matrix (Matrix)
 import qualified Data.List as List
 import           Data.Singletons (Apply)
 import           Miso.String (ToMisoString(..), FromMisoString(..))
