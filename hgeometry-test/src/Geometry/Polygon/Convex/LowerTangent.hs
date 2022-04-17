@@ -1,4 +1,4 @@
-module Data.Geometry.Polygon.Convex.LowerTangent( lowerTangent
+module Geometry.Polygon.Convex.LowerTangent( lowerTangent
                                                 , upperTangent
                                                 ) where
 
@@ -6,10 +6,10 @@ import           Control.Lens hiding ((:<), (:>))
 import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon (outerBoundaryVector)
-import           Data.Geometry.Polygon.Convex(ConvexPolygon(..), simplePolygon)
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon (outerBoundaryVector)
+import           Geometry.Polygon.Convex(ConvexPolygon(..), simplePolygon)
 import           Data.Ord (comparing)
 
 

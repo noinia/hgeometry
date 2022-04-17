@@ -6,7 +6,7 @@ import qualified Algorithms.Geometry.LowerEnvelope.DualCH as DualCH
 import           Control.Lens
 import           Data.Eq.Approximate
 import           Data.Ext
-import           Data.Geometry
+import           Geometry
 import           Ipe
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))

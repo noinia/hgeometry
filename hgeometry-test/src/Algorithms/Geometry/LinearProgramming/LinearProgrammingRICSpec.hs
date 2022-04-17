@@ -7,10 +7,10 @@ import Algorithms.Geometry.LinearProgramming.Types
 import Data.Maybe(mapMaybe)
 import Control.Lens hiding (below)
 import Data.Ext
-import Data.Geometry
+import Geometry
 import Ipe
 import Ipe.Color(named)
-import Data.Geometry.HalfSpace
+import Geometry.HalfSpace
 import Data.List.NonEmpty(NonEmpty)
 import Data.Ratio
 import Test.Hspec

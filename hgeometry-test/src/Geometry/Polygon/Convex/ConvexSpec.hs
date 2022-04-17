@@ -1,5 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Polygon.Convex.ConvexSpec (spec) where
+module Geometry.Polygon.Convex.ConvexSpec (spec) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
 import qualified Algorithms.Geometry.Diameter.Naive        as Naive
@@ -10,13 +10,13 @@ import           Control.Monad.Random
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                as F
-import           Data.Geometry
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box            (boundingBox)
-import           Data.Geometry.BoxSpec        (arbitraryPointInBoundingBox)
+import           Geometry
+import           Geometry.Boundary
+import           Geometry.Box            (boundingBox)
+import           Geometry.BoxSpec        (arbitraryPointInBoundingBox)
 import           Ipe
-import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.PolygonSpec    ()
+import           Geometry.Polygon.Convex
+import           Geometry.PolygonSpec    ()
 import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular         as CV
@@ -45,7 +45,7 @@ type R = RealNumber 10
 
 spec :: Spec
 spec = do
-  testCases "src/Data/Geometry/Polygon/Convex/convexTests.ipe"
+  testCases "src/Geometry/Polygon/Convex/convexTests.ipe"
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case

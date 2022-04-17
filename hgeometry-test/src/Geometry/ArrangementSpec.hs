@@ -1,19 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.ArrangementSpec where
+module Geometry.ArrangementSpec where
 
 import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.Arrangement
-import           Data.Geometry.Arrangement.Draw
+import           Geometry
+import           Geometry.Arrangement
+import           Geometry.Arrangement.Draw
 import           Ipe
 import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util(runOnFile)
 
 spec :: Spec
-spec = testCases "src/Data/Geometry/arrangement.ipe"
+spec = testCases "src/Geometry/arrangement.ipe"
 
 
 testCases    :: FilePath -> Spec
@@ -23,7 +23,7 @@ testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Right tcs -> mapM_ toSpec tcs
 
 
---   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+--   ipeF <- beforeAll $ readInputFromFile "tests/Geometry/pointInPolygon.ipe"
 --   describe "Point in Polygon tests" $ do
 --     it "returns the first element of a list" $ do
 --       head [23 ..] `shouldBe` (23 :: Int)

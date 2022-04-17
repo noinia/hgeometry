@@ -5,10 +5,10 @@ import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Ext
 import           Data.Function (on)
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
 import           Data.Ord (comparing)
 import           Data.PlaneGraph
 import           Data.PlaneGraph.AdjRep

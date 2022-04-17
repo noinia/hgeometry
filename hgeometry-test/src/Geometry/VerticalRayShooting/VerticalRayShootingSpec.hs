@@ -1,10 +1,10 @@
-module Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec where
+module Geometry.VerticalRayShooting.VerticalRayShootingSpec where
 
-import           Data.Geometry.VerticalRayShooting.PersistentSweep
+import           Geometry.VerticalRayShooting.PersistentSweep
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.LineSegment
+import           Geometry.Point
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational

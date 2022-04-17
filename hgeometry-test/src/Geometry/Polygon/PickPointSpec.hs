@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.Polygon.PickPointSpec where
+module Geometry.Polygon.PickPointSpec where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Polygon
+import Geometry
+import Geometry.Boundary
+import Geometry.Polygon
 import Ipe
 import Paths_hgeometry_test
 import Test.Hspec
@@ -13,7 +13,7 @@ import Test.Hspec
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = do testCases "src/Data/Geometry/pointInPolygon.ipe"
+spec = do testCases "src/Geometry/pointInPolygon.ipe"
           testCases "../hgeometry-examples/data/world.ipe"
 
 testCases    :: FilePath -> Spec
@@ -36,4 +36,4 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
       where
         polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
 
--- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+-- main = readInputFromFile "tests/Geometry/pointInPolygon.ipe"

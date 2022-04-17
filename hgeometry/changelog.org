@@ -20,8 +20,21 @@
   ~Vector~ and ~Point~. This thus bumps the minimum required version
   of random to 1.2.
 - More work on Loading/Saving Planar subdivisions.
-- Dropping the ~Data~ and ~Algorithms~ and placing the modules just in
-  ~Geometry~.
+- Dropping the ~Data~ prefix from the module names. This means most of
+  the modules now simply live in ~Geometry~ rather than
+  ~Data.Geometry~. The main reason for this is that some of the module
+  names became rather lengthy, and for several modules it is actually
+  not so clear whether or not they should live in ~Data.Geometry~ or
+  in ~Algorithms.Geometry~ (for example ~DelaunayTriangulation~ or
+  ~VoronoiDiagram~ are also data structures of some sort). The plan is
+  to just move everything into ~Geometry~.
+
+  Running the following expression on command-line in your project
+  folder should take care of most of the migration (but use it at your
+  own risk). Note that if you have your own modules named
+  ~Data.Geometry.MyModule~ they will also get renamed to
+  ~Geometry.MyModule~ (You would still have to move the actual files
+  from the appropriate subfolder though).
 
   #+begin_src sh
   find . -type f -exec sed -i 's/Data.Geometry/Geometry/g' {} \;

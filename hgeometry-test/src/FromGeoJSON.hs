@@ -11,8 +11,8 @@ import           Data.Either
 import           Data.Ext
 import           Data.Foldable
 import           Data.Foldable                               as F
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon                       as H
+import           Geometry.Point
+import           Geometry.Polygon                       as H
 import           Data.Geospatial                             as Geo
 import           Data.Hashable
 import           Data.LinearRing

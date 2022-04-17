@@ -1,5 +1,5 @@
 {-# LANGUAGE PartialTypeSignatures #-}
-module Data.Geometry.PlanarSubdivisionSpec where
+module Geometry.PlanarSubdivisionSpec where
 
 
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
@@ -7,11 +7,11 @@ import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 import           Control.Lens hiding (holesOf)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Data.Geometry.LineSegment hiding (endPoints)
-import           Data.Geometry.PlanarSubdivision
-import qualified Data.Geometry.PlanarSubdivision as PS
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.PlanarSubdivision
+import qualified Geometry.PlanarSubdivision as PS
+import           Geometry.Point
+import           Geometry.Polygon
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
@@ -206,13 +206,13 @@ noEmptyFacesSpec = describe "fromConnectedSegments, correct handling of high deg
       draw' testSegs2 `shouldBe` mempty
     it "ps3" $
       draw' testSegs3 `shouldBe` mempty
-    -- segs4 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.ipe"
+    -- segs4 <- runIO $ readFromIpeFile "src/Geometry/connectedsegments_simple2.ipe"
     -- it "connected_simple2.ipe" $
     --   draw' segs4 `shouldBe` mempty
-    -- segs2 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments_simple.ipe"
+    -- segs2 <- runIO $ readFromIpeFile "src/Geometry/connectedsegments_simple.ipe"
     -- it "connected_simple.ipe" $
     --   draw' segs2 `shouldBe` mempty
-    -- segs3 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments.ipe"
+    -- segs3 <- runIO $ readFromIpeFile "src/Geometry/connectedsegments.ipe"
     -- it "connectedsegments.ipe" $
     --   draw' segs3 `shouldBe` mempty
   where
@@ -225,7 +225,7 @@ readFromIpeFile fp = do Right page <- readSinglePageFile fp
 
 data Test1 = Test1
 
-testX = do segs <- readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.ipe"
+testX = do segs <- readFromIpeFile "src/Geometry/connectedsegments_simple2.ipe"
            let ps = fromConnectedSegments @Test1 segs
            print $ draw ps
 

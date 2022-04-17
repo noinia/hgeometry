@@ -4,7 +4,7 @@ module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec (spec) w
 import           Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry
+import           Geometry
 import           Ipe
 import           Data.Maybe
 import           Paths_hgeometry_test

@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.PolygonSpec (spec) where
+module Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens (over, view, (^.), (^..))
@@ -10,12 +10,12 @@ import           Data.Coerce
 import           Data.Double.Approximate
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
-import           Data.Geometry.Boundary
+import           Geometry
+import           Geometry.Boundary
 import           Ipe
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Monotone
-import           Data.Geometry.Triangle
+import           Geometry.Polygon
+import           Geometry.Polygon.Monotone
+import           Geometry.Triangle
 import           Data.Ord
 import           Data.Proxy
 import           Data.Ratio
@@ -30,7 +30,7 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import           Data.Geometry.Transformation
+import           Geometry.Transformation
 import Data.Util
 import Data.Maybe
 import Data.Vinyl
@@ -165,7 +165,7 @@ genMonotone = do
 
 spec :: Spec
 spec = do
-  testCases "src/Data/Geometry/pointInPolygon.ipe"
+  testCases "src/Geometry/pointInPolygon.ipe"
 
 myPg :: SimplePolygon () R
 myPg = read "SimplePolygon [Point2 7865790 3349116 :+ (),Point2 6304943 3123049 :+ (),Point2 5770988 3123102 :+ (),Point2 5770988 3123103 :+ (),Point2 5093248 2691560 :+ (),Point2 4456582 2321791 :+ (),Point2 3984237 1931429 :+ (),Point2 3327061 1479350 :+ (),Point2 2423390 1130062 :+ (),Point2 184830 842440 :+ (),Point2 0 410951 :+ (),Point2 1376016 61610 :+ (),Point2 3861016 0 :+ (),Point2 6058502 205475 :+ (),Point2 8030084 452025 :+ (),Point2 9734688 719111 :+ (),Point2 11357118 1047861 :+ (),Point2 11316045 1582088 :+ (),Point2 11192824 2034113 :+ (),Point2 10741016 2671078 :+ (),Point2 9447147 3123049 :+ ()]"
@@ -232,7 +232,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 
 
 
--- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+-- main = readInputFromFile "tests/Geometry/pointInPolygon.ipe"
 
 
 ----------------------------------

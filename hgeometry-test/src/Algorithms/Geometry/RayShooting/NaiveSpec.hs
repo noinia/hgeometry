@@ -4,13 +4,13 @@ import Algorithms.Geometry.RayShooting.Naive
 import Control.Lens
 import Data.Bifunctor
 import Data.Ext
-import Data.Geometry.HalfLine
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Polygon
-import Data.Geometry.PolygonSpec() -- import the arbitrary instance
-import           Data.Geometry.Vector
+import Geometry.HalfLine
+import Geometry.Line
+import Geometry.LineSegment
+import Geometry.Point
+import Geometry.Polygon
+import Geometry.PolygonSpec() -- import the arbitrary instance
+import           Geometry.Vector
 import           Data.Intersection
 import qualified Data.List as List
 import           Data.Maybe

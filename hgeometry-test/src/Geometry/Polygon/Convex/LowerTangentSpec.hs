@@ -1,13 +1,13 @@
-module Data.Geometry.Polygon.Convex.LowerTangentSpec (spec) where
+module Geometry.Polygon.Convex.LowerTangentSpec (spec) where
 
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (lowerHull)
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable                             as F
-import           Data.Geometry                             hiding (vector)
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
+import           Geometry                             hiding (vector)
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex
 import           Data.List.NonEmpty                        (NonEmpty (..))
 import           Test.Hspec
 import           Test.QuickCheck                           (Arbitrary (..), listOf, suchThat)

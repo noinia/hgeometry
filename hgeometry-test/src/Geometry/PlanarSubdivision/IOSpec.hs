@@ -1,8 +1,8 @@
-module Data.Geometry.PlanarSubdivision.IOSpec where
+module Geometry.PlanarSubdivision.IOSpec where
 
 
 import qualified Data.ByteString as B
-import           Data.Geometry.PlanarSubdivision
+import           Geometry.PlanarSubdivision
 import           Data.RealNumber.Rational
 import           Ipe
 import           Test.Hspec

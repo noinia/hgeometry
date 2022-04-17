@@ -5,7 +5,7 @@ import           Algorithms.Geometry.RedBlueSeparator.RIC
 import           Control.Lens
 import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
-import           Data.Geometry
+import           Geometry
 import           Ipe
 import           Ipe.Color
 import           Data.List.NonEmpty (NonEmpty(..))

@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.Polygon.StarShapedSpec where
+module Geometry.Polygon.StarShapedSpec where
 
 import Control.Lens
 import Control.Monad.Random.Strict(evalRand)
 import Data.Ext
-import Data.Geometry
+import Geometry
 import Ipe
 import Ipe.Color (named)
 import Data.Maybe
@@ -15,7 +15,7 @@ import           Paths_hgeometry_test
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = do testCases "src/Data/Geometry/Polygon/star_shaped.ipe"
+spec = do testCases "src/Geometry/Polygon/star_shaped.ipe"
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
@@ -61,4 +61,4 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 --             , Point2 48 736
 --             ]
 
--- -- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+-- -- main = readInputFromFile "tests/Geometry/pointInPolygon.ipe"

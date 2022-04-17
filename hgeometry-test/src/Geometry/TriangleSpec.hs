@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.TriangleSpec (spec) where
+module Geometry.TriangleSpec (spec) where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Triangle
+import Geometry
+import Geometry.Boundary
+import Geometry.Triangle
 import Data.Proxy
 import Data.RealNumber.Rational
 import Ipe
@@ -19,7 +19,7 @@ import Test.QuickCheck.Instances ()
 type R = RealNumber 10
 
 spec :: Spec
-spec = do testCases "src/Data/Geometry/pointInTriangle.ipe"
+spec = do testCases "src/Geometry/pointInTriangle.ipe"
           it "inTriangle same as inTriangleFrac" $ property $ \q (t :: Triangle 2 () R) ->
               (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
           it "onTriangle same as onTriangleFrac" $ property $ \q (t :: Triangle 2 () R) ->
@@ -34,7 +34,7 @@ testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Right tcs -> mapM_ toSpec tcs
 
 
---   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+--   ipeF <- beforeAll $ readInputFromFile "tests/Geometry/pointInPolygon.ipe"
 --   describe "Point in Polygon tests" $ do
 --     it "returns the first element of a list" $ do
 --       head [23 ..] `shouldBe` (23 :: Int)
@@ -100,7 +100,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 
 
 
--- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+-- main = readInputFromFile "tests/Geometry/pointInPolygon.ipe"
 
 --------------------------------------------------------------------------------
 
