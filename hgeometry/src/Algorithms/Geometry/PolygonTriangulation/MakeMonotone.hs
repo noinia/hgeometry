@@ -25,10 +25,10 @@ import           Data.Bifunctor
 import qualified Data.DList as DList
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision.Basic
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.PlanarSubdivision.Basic
+import           Geometry.Point
+import           Geometry.Polygon
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (Down (..), comparing)

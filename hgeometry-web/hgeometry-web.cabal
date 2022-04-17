@@ -1,5 +1,5 @@
 name:                hgeometry-web
-version:             0.13
+version:             0.14
 synopsis:            Interactive web viewer for HGeometry
 description:
     A GUI To view and play with geometric data using HGeometry
@@ -11,7 +11,7 @@ author:              Frank Staals
 maintainer:          frank@fstaals.net
 -- copyright:
 
-tested-with:         GHC >= 8.2
+tested-with:         GHC >= 8.10
 
 category:            Geometry
 build-type:          Simple
@@ -38,10 +38,10 @@ library
 
   exposed-modules:
                   -- * Generic Geometry
-                  Data.Geometry.Web.StaticCanvas
-                  Data.Geometry.Web.ICanvas
-                  Data.Geometry.Web.Writer
-                  Data.Geometry.Web.OrphanInstances
+                  Geometry.Web.StaticCanvas
+                  Geometry.Web.ICanvas
+                  Geometry.Web.Writer
+                  Geometry.Web.OrphanInstances
 
                   -- * Miso Helper stuff
 
@@ -68,7 +68,7 @@ library
   -- other-extensions:
   build-depends:
                  base                     >= 4.11      &&     < 5
-               , hgeometry                >= 0.13
+               , hgeometry                >= 0.15
                , hgeometry-combinatorial
                , hgeometry-svg
                , hgeometry-ipe

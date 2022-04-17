@@ -6,9 +6,9 @@ module Algorithms.Geometry.SoS.Point
 import Algorithms.Geometry.SoS.Index
 import Algorithms.Geometry.SoS.Symbolic
 import Control.Lens
-import Data.Geometry.Point.Class
-import Data.Geometry.Point.Internal
-import Data.Geometry.Vector
+import Geometry.Point.Class
+import Geometry.Point.Internal
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 

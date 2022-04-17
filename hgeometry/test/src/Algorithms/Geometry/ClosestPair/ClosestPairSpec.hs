@@ -4,7 +4,7 @@ import qualified Algorithms.Geometry.ClosestPair.DivideAndConquer as DivideAndCo
 import qualified Algorithms.Geometry.ClosestPair.Naive            as Naive
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.LSeq                                        (LSeq)
 import qualified Data.LSeq                                        as LSeq
 import           Data.Ratio

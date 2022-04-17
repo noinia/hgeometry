@@ -8,8 +8,8 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.LineSegment
+import           Geometry.Point
 import           Data.Hashable
 import qualified Data.List                 as List
 import           Data.RealNumber.Rational

@@ -23,10 +23,12 @@ import qualified Data.CircularList.Util                          as CU
 import           Data.Ext
 import qualified Data.Foldable                                   as F
 import           Data.Function                                   (on)
-import           Data.Geometry                                   hiding (rotateTo)
-import           Data.Geometry.Ball                              (disk, insideBall)
-import           Data.Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
-import qualified Data.Geometry.Polygon.Convex                    as Convex
+import           Geometry.Point
+import           Geometry.LineSegment
+import           Geometry.Polygon
+import           Geometry.Ball                              (disk, insideBall)
+import           Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
+import qualified Geometry.Polygon.Convex                    as Convex
 import qualified Data.IntMap.Strict                              as IM
 import qualified Data.List                                       as L
 import qualified Data.List.NonEmpty                              as NonEmpty

@@ -4,9 +4,9 @@ module Algorithms.Geometry.SoS.OrientationSpec where
 -- import           Control.Lens
 -- import           Control.Monad (forM_)
 -- import           Data.Ext
--- import           Data.Geometry.Point
--- -- import           Data.Geometry.Point.Orientation.Degenerate (CCW(..))
--- import           Data.Geometry.Vector
+-- import           Geometry.Point
+-- -- import           Geometry.Point.Orientation.Degenerate (CCW(..))
+-- import           Geometry.Vector
 -- import qualified Data.List as List
 -- import           Data.Proxy
 -- import           Data.Util

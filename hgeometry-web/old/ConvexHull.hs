@@ -8,8 +8,8 @@ import           Control.Exception (catch)
 import           Control.Lens
 import           Data.Ext
 import           Data.GI.Base
-import           Data.Geometry
-import           Data.Geometry.Polygon.Convex
+import           Geometry
+import           Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as T
 import qualified GI.Gdk as Gdk

@@ -27,8 +27,9 @@ module Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import qualified Data.CircularList as C
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.PlanarSubdivision
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
 -- import qualified Data.Map.Strict as SM

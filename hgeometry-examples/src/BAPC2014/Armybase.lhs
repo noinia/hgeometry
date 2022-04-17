@@ -18,10 +18,10 @@ $O(n^2 \log n)$ solution.
 > import Control.Lens((^.))
 > import Data.Ix
 > import Data.Ext
-> import Data.Geometry.Triangle
-> import Data.Geometry.Point
-> import Data.Geometry.Polygon
-> import Data.Geometry.Polygon.Convex
+> import Geometry.Triangle
+> import Geometry.Point
+> import Geometry.Polygon
+> import Geometry.Polygon.Convex
 > import Algorithms.Geometry.ConvexHull.GrahamScan
 > import qualified Data.Array   as A
 > import qualified Data.Foldable as F

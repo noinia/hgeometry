@@ -23,8 +23,8 @@ import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as B
 import qualified Algorithms.Geometry.LineSegmentIntersection.BooleanSweep as BooleanSweep
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Data.Ext (ext)
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.Polygon
 
 import qualified Data.Map as Map
 

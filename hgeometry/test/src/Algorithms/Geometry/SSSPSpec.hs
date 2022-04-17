@@ -2,8 +2,8 @@ module Algorithms.Geometry.SSSPSpec (spec) where
 
 import           Algorithms.Geometry.SSSP
 import qualified Algorithms.Geometry.SSSP.Naive as Naive
-import           Data.Geometry
-import           Data.Geometry.PolygonSpec      ()
+import           Geometry
+import           Geometry.PolygonSpec      ()
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances      ()

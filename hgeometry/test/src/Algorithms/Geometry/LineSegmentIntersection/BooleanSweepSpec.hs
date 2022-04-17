@@ -6,9 +6,9 @@ import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as B
 import qualified Algorithms.Geometry.LineSegmentIntersection.BooleanSweep as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Data.Ext
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
 import           Data.Proxy
 import           Data.RealNumber.Rational
 import           Paths_hgeometry

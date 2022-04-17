@@ -15,7 +15,7 @@ module Data.PlaneGraph.AdjRep( Gr(..)
 
 import Data.PlanarGraph.AdjRep(Gr(..), Face(..))
 import Data.Aeson
-import Data.Geometry.Point
+import Geometry.Point
 import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------

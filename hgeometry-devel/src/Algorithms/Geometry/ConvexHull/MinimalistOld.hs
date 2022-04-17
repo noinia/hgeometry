@@ -26,10 +26,10 @@ import           Control.Lens
 import           Data.Coerce
 import           Data.Ext
 import           Data.Foldable
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Convex (lowerTangent')
-import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Polygon.Convex (lowerTangent')
+import           Geometry.Triangle
+import           Geometry.Vector
 import qualified Data.List as List
 import           Data.List.Alternating(Alternating(..), withNeighbours)
 import           Data.List.NonEmpty (NonEmpty(..))

@@ -5,7 +5,7 @@ import Control.DeepSeq
 import Control.Lens
 import Criterion.Main
 import Data.Ext
-import Data.Geometry.Point
+import Geometry.Point
 import Demo.ExpectedPairwiseDistance
 
 

@@ -2,8 +2,8 @@ module Main where
 
 import           Data.Aeson
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Point.Random
+import           Geometry.Point
+import           Geometry.Point.Random
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational

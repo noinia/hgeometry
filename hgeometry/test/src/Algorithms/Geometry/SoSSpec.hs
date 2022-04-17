@@ -4,7 +4,7 @@ import           Algorithms.Geometry.SoS.Symbolic
 -- import           Control.Lens
 -- import           Control.Monad (forM_)
 import           Data.Foldable
--- import           Data.Geometry.Vector
+-- import           Geometry.Vector
 -- import qualified Data.List as List
 -- import           Data.Proxy
 -- import           Data.RealNumber.Rational

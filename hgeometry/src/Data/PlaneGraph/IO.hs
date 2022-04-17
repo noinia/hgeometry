@@ -26,7 +26,7 @@ import           Control.Monad (forM_)
 import           Data.Aeson
 import           Data.Bifunctor
 import qualified Data.ByteString as B
-import           Data.Geometry.Point
+import           Geometry.Point
 import qualified Data.List as List
 import qualified Data.PlanarGraph.AdjRep as PGA
 import qualified Data.PlanarGraph.IO as PGIO

@@ -4,7 +4,7 @@ import Control.Applicative
 import Control.Monad(replicateM)
 import qualified Data.Set as S
 import Data.Monoid
-import Data.Geometry
+import Geometry
 import Ipe
 import System.Random
 import Options.Applicative

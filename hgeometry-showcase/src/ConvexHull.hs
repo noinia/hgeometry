@@ -6,9 +6,9 @@ import Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens                 ((&), (^.))
 import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
 import           Data.Ext                     (ext)
-import           Data.Geometry.Point          (Point (Point2))
-import           Data.Geometry.Polygon.Convex (simplePolygon)
-import           Data.Geometry.Transformation (scaleUniformlyBy)
+import           Geometry.Point          (Point (Point2))
+import           Geometry.Polygon.Convex (simplePolygon)
+import           Geometry.Transformation (scaleUniformlyBy)
 import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular         as CV

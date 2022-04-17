@@ -8,9 +8,9 @@ import           Algorithms.Geometry.EuclideanMST
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.PlanarSubdivision.Draw
+import           Geometry
+import           Geometry.PlanarSubdivision
+import           Geometry.PlanarSubdivision.Draw
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
 import           Data.Semigroup

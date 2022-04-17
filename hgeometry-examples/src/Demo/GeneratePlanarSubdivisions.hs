@@ -7,7 +7,7 @@ import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
-import           Data.Geometry
+import           Geometry
 import           Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph

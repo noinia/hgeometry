@@ -5,11 +5,11 @@ import           Control.Lens
 import           Data.Colour.SRGB(RGB(..), toSRGB24)
 import           Data.Colour.Names(readColourName)
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.Box
-import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.Types hiding (ipeObject', width)
-import qualified Data.Geometry.Ipe.Attributes as A
+import           Geometry
+import           Geometry.Box
+import           Geometry.Ipe.Attributes
+import           Geometry.Ipe.Types hiding (ipeObject', width)
+import qualified Geometry.Ipe.Attributes as A
 import           Data.Proxy
 import           Data.Vinyl
 import           Linear.V4 (V4(..))

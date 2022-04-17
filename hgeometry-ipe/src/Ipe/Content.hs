@@ -28,11 +28,11 @@ module Ipe.Content(
 import           Control.Lens hiding (views)
 import           Data.Bitraversable
 import           Data.Ext
-import           Data.Geometry.Box (Rectangle)
-import           Data.Geometry.Matrix
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
+import           Geometry.Box (Rectangle)
+import           Geometry.Matrix
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation
 import           Data.Kind
 import           Data.Proxy
 import           Data.Singletons.TH (genDefunSymbols)

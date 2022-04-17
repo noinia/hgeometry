@@ -20,7 +20,7 @@ where
 import           Algorithms.DivideAndConquer
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
 import qualified Data.List as List

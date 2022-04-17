@@ -11,11 +11,11 @@ module Graphics.Render where
 
 import Data.Ext
 import Control.Lens
-import Data.Geometry.Point
-import Data.Geometry.Triangle
-import Data.Geometry.LineSegment
-import Data.Geometry.Transformation
-import Data.Geometry.Properties
+import Geometry.Point
+import Geometry.Triangle
+import Geometry.LineSegment
+import Geometry.Transformation
+import Geometry.Properties
 
 --------------------------------------------------------------------------------
 -- * Rendering functions

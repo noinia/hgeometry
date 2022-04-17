@@ -2,8 +2,8 @@ module Algorithms.Geometry.PolyLineSimplificationSpec (spec) where
 
 import Algorithms.Geometry.PolyLineSimplification.ImaiIri
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.PolyLine
+import Geometry.Point
+import Geometry.PolyLine
 import Data.Maybe
 import Data.RealNumber.Rational
 import Test.Hspec

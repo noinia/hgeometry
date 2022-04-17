@@ -7,10 +7,10 @@ import           Control.Lens
 import           Data.Data
 import           Data.Either (partitionEithers)
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.HalfLine
+import           Geometry
+import           Geometry.HalfLine
 import           Ipe
-import           Data.Geometry.Triangulation.Draw
+import           Geometry.Triangulation.Draw
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
 import           Data.Semigroup

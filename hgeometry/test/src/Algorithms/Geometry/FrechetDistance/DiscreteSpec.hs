@@ -2,7 +2,7 @@ module Algorithms.Geometry.FrechetDistance.DiscreteSpec where
 
 import Data.Ext
 import Algorithms.Geometry.FrechetDistance.Discrete
-import Data.Geometry.Point
+import Geometry.Point
 import Test.Hspec
 
 

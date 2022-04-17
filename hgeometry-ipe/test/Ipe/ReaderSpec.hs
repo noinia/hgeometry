@@ -3,7 +3,7 @@ module Ipe.ReaderSpec where
 
 import Test.Hspec
 import Data.Ext
-import Data.Geometry
+import Geometry
 import Ipe
 import Ipe.Reader
 import Ipe.Path

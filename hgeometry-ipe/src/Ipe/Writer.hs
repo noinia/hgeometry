@@ -28,22 +28,22 @@ import           Data.Colour.SRGB             (RGB (..))
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable                as F
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Box
-import           Data.Geometry.Ellipse        (ellipseMatrix)
+import           Geometry.BezierSpline
+import           Geometry.Box
+import           Geometry.Ellipse        (ellipseMatrix)
 import           Ipe.Attributes
 import qualified Ipe.Attributes as IA
 import           Ipe.Color      (IpeColor (..))
 import           Ipe.Path
 import           Ipe.Types
 import           Ipe.Value
-import           Data.Geometry.LineSegment
-import qualified Data.Geometry.Matrix         as Matrix
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon        (Polygon, holeList, outerBoundary,
+import           Geometry.LineSegment
+import qualified Geometry.Matrix         as Matrix
+import           Geometry.Point
+import           Geometry.PolyLine
+import           Geometry.Polygon        (Polygon, holeList, outerBoundary,
                                                outerBoundaryVector)
-import           Data.Geometry.Vector
+import           Geometry.Vector
 import qualified Data.LSeq                    as LSeq
 import           Data.List.NonEmpty           (NonEmpty (..))
 import           Data.Maybe                   (catMaybes, fromMaybe, mapMaybe)

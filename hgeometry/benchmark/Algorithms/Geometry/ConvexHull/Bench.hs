@@ -8,7 +8,7 @@ import qualified Algorithms.Geometry.ConvexHull.QuickHull        as QuickHull
 import           Control.Monad.Random
 import           Data.Double.Approximate
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.Hashable
 import           Data.List.NonEmpty       (NonEmpty (..))
 import qualified Data.List.NonEmpty       as NonEmpty

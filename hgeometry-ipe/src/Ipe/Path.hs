@@ -36,14 +36,14 @@ module Ipe.Path(
 
 import           Control.Lens hiding (rmap)
 import           Data.Bitraversable
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Point
-import           Data.Geometry.Ellipse(Ellipse)
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon (SimplePolygon)
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Matrix
+import           Geometry.BezierSpline
+import           Geometry.Point
+import           Geometry.Ellipse(Ellipse)
+import           Geometry.PolyLine
+import           Geometry.Polygon (SimplePolygon)
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Matrix
 import qualified Data.LSeq as LSeq
 import           Data.Traversable
 

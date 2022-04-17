@@ -15,8 +15,8 @@ import           Data.Ext
 import qualified Ipe.Attributes as AT
 import           Ipe.Attributes hiding (Matrix)
 import           Ipe.Types
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
+import           Geometry.Properties
+import           Geometry.Transformation
 import           Data.Proxy
 import           Data.Vinyl hiding (Label)
 

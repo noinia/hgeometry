@@ -2,9 +2,9 @@ module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
 import           Data.Coerce
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary (PointLocationResult(..))
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HyperPlane
+import           Geometry.Boundary (PointLocationResult(..))
+import           Geometry.HalfSpace
+import           Geometry.HyperPlane
 import           Prelude hiding (filter)
 import           Witherable
 -- import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
@@ -15,9 +15,9 @@ import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Triangle
+import           Geometry.Vector
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -32,7 +32,7 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 -- import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
-import           Data.Geometry.Point.Random
+import           Geometry.Point.Random
 
 --------------------------------------------------------------------------------
 

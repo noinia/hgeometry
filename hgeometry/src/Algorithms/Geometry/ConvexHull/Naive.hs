@@ -14,12 +14,12 @@ module Algorithms.Geometry.ConvexHull.Naive( ConvexHull
 import           Control.Lens
 import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line
-import           Data.Geometry.Point
-import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
+import           Geometry.HalfSpace
+import           Geometry.HyperPlane
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Triangle
+import           Geometry.Vector
 import           Data.Intersection(intersects)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.List (find)

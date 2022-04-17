@@ -20,10 +20,10 @@ import           Control.Lens hiding (contains)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
-import           Data.Geometry.Interval
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
+import           Geometry.Interval
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Properties
 import qualified Data.List as L
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

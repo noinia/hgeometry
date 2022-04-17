@@ -2,10 +2,10 @@ module Graphics.CameraSpec where
 
 import Control.Lens
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Transformation
-import Data.Geometry.Triangle
-import Data.Geometry.Vector
+import Geometry.Point
+import Geometry.Transformation
+import Geometry.Triangle
+import Geometry.Vector
 import Graphics.Camera
 import Test.Hspec
 

@@ -6,16 +6,16 @@ module App.SubdivisionViewer where
 import           Control.Lens hiding (view, element)
 import           Control.Monad.IO.Class
 import           Data.Ext
-import qualified Data.Geometry.Web.ICanvas as ICanvas
-import           Data.Geometry.Web.ICanvas hiding (update, view)
+import qualified Geometry.Web.ICanvas as ICanvas
+import           Geometry.Web.ICanvas hiding (update, view)
 
 import           Ipe (IpePage, content, readSinglePageFile, _IpePath)
 import           Ipe.Attributes (pattern SFill, _Attr)
 import           Ipe.Color
 import           Ipe.FromIpe (_withAttrs, _asSomePolygon)
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Polygon
-import           Data.Geometry.Web.Writer
+import           Geometry.PlanarSubdivision
+import           Geometry.Polygon
+import           Geometry.Web.Writer
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle

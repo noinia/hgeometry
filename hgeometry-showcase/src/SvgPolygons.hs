@@ -5,7 +5,7 @@ module SvgPolygons (svgPolygonsShowcase) where
 
 import Algorithms.Geometry.PolygonTriangulation.Triangulate (computeDiagonals)
 
-import Data.Geometry.Polygon.Bezier (approximateSome)
+import Geometry.Polygon.Bezier (approximateSome)
 import Reanimate
 
 import Common

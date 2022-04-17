@@ -65,14 +65,14 @@ import           Data.Bifunctor (first)
 import           Data.Ext
 import qualified Data.Foldable as F
 
-import           Data.Geometry.Box
-import           Data.Geometry.Interval
+import           Geometry.Box
+import           Geometry.Interval
 
-import           Data.Geometry.LineSegment hiding (endPoints)
-import           Data.Geometry.Point
-import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Polygon
-import           Data.Geometry.Properties
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.Point
+import           Geometry.Vector.VectorFamily
+import           Geometry.Polygon
+import           Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Ord (comparing)

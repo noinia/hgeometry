@@ -7,17 +7,17 @@ import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box (Rectangle)
-import           Data.Geometry.Interval
+import           Geometry.Boundary
+import           Geometry.Box (Rectangle)
+import           Geometry.Interval
 import           Ipe
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.PolygonSpec ()
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.PolygonSpec ()
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Vector
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -31,7 +31,7 @@ import           Test.Hspec
 import           Test.QuickCheck (arbitrary, generate, property, (==>))
 import           Test.Util
 
-import qualified Data.Geometry.Box as Box
+import qualified Geometry.Box as Box
 
 --------------------------------------------------------------------------------
 

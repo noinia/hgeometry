@@ -37,7 +37,7 @@ flag withgeojson
 common setup
   default-language:     Haskell2010
   build-depends: base
-               , hgeometry                >= 0.13
+               , hgeometry                >= 0.15
                , hgeometry-combinatorial
                , hgeometry-ipe
                , containers
@@ -123,16 +123,16 @@ test-suite hspec-with-ipe
   build-tool-depends: hspec-discover:hspec-discover
 
   other-modules: Data.PlaneGraphSpec
-                 Data.Geometry.PolygonSpec
-                 Data.Geometry.LineSegmentSpec
-                 Data.Geometry.Polygon.Convex.ConvexSpec
-                 Data.Geometry.Polygon.Convex.LowerTangentSpec
-                 Data.Geometry.Polygon.PickPointSpec
-                 Data.Geometry.Polygon.StarShapedSpec
-                 Data.Geometry.PlanarSubdivisionSpec
-                 Data.Geometry.PlanarSubdivision.IOSpec
-                 Data.Geometry.TriangleSpec
-                 Data.Geometry.ArrangementSpec
+                 Geometry.PolygonSpec
+                 Geometry.LineSegmentSpec
+                 Geometry.Polygon.Convex.ConvexSpec
+                 Geometry.Polygon.Convex.LowerTangentSpec
+                 Geometry.Polygon.PickPointSpec
+                 Geometry.Polygon.StarShapedSpec
+                 Geometry.PlanarSubdivisionSpec
+                 Geometry.PlanarSubdivision.IOSpec
+                 Geometry.TriangleSpec
+                 Geometry.ArrangementSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
@@ -149,18 +149,18 @@ test-suite hspec-with-ipe
                  Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
                  Algorithms.Geometry.PolyLineSimplificationSpec
 
-                 Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec
-                 Data.Geometry.PointLocation.PointLocationSpec
+                 Geometry.VerticalRayShooting.VerticalRayShootingSpec
+                 Geometry.PointLocation.PointLocationSpec
 
 
-                 Data.Geometry.BoxSpec
+                 Geometry.BoxSpec
 
                  Test.Util
                  Spec
                  Paths_hgeometry_test
-                 Data.Geometry.Polygon.Convex.LowerTangent
+                 Geometry.Polygon.Convex.LowerTangent
 
-                 Data.Geometry.IntersectionSpec
+                 Geometry.IntersectionSpec
 
 executable planargraph
   import: setup

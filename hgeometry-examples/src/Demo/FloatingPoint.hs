@@ -4,14 +4,14 @@ module Demo.FloatingPoint where
 import Control.Lens
 import Data.Data
 import Data.Ext
-import Data.Geometry.Box
+import Geometry.Box
 import Ipe
 import Ipe.Attributes
 import Ipe.Color
 import Ipe.IpeOut
-import Data.Geometry.Line
-import Data.Geometry.Point
-import Data.Geometry.Vector
+import Geometry.Line
+import Geometry.Point
+import Geometry.Vector
 import Options.Applicative
 import Prelude hiding (Float,Double)
 import qualified Prelude as Prelude

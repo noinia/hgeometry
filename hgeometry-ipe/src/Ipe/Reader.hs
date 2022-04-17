@@ -39,11 +39,11 @@ import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
-import           Data.Geometry hiding (head)
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Box
-import           Data.Geometry.Ellipse (ellipseMatrix)
-import qualified Data.Geometry.Matrix as Matrix
+import           Geometry hiding (head)
+import           Geometry.BezierSpline
+import           Geometry.Box
+import           Geometry.Ellipse (ellipseMatrix)
+import qualified Geometry.Matrix as Matrix
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Matrix
@@ -54,7 +54,7 @@ import           Ipe.Types
 import           Ipe.Value
 
 
-import qualified Data.Geometry.Polygon as Polygon
+import qualified Geometry.Polygon as Polygon
 import qualified Data.LSeq as LSeq
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty

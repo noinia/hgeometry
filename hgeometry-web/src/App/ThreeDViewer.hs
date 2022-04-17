@@ -9,21 +9,21 @@ import           Control.Concurrent
 import           Control.Lens hiding (view, element)
 import           Control.Monad.IO.Class
 import           Data.Ext
-import qualified Data.Geometry.Web.ICanvas as ICanvas
-import           Data.Geometry.Web.ICanvas hiding (update, view)
+import qualified Geometry.Web.ICanvas as ICanvas
+import           Geometry.Web.ICanvas hiding (update, view)
 
-import           Data.Geometry.Web.Writer
+import           Geometry.Web.Writer
 import           Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
 import           Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
 import           Ipe.Color
 import           Ipe.Value
 import           Ipe.Attributes (Sing(..), attr)
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
-import           Data.Geometry.Transformation
-import           Data.Geometry.Polygon.Convex
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Vector
+import           Geometry.Transformation
+import           Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
@@ -43,10 +43,10 @@ import qualified Graphics.UI.Webviewhs as WHS
 
 import           Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval (EdgeSide(..), Tri)
 import qualified Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval as HiddenSurfaceRemoval
-import           Data.Geometry.Arrangement
-import           Data.Geometry.Box (Rectangle,box)
-import           Data.Geometry.Point
-import           Data.Geometry.Triangle
+import           Geometry.Arrangement
+import           Geometry.Box (Rectangle,box)
+import           Geometry.Point
+import           Geometry.Triangle
 import           Graphics.Camera
 import           Graphics.Render
 

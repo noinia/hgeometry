@@ -13,8 +13,8 @@
 module Algorithms.Geometry.SmallestEnclosingBall.Types where
 
 import qualified Data.Foldable as F
-import           Data.Geometry
-import           Data.Geometry.Ball
+import           Geometry.Point
+import           Geometry.Ball
 import           Control.Lens
 import           Data.Ext
 

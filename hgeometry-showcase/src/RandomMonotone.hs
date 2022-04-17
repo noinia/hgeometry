@@ -2,18 +2,18 @@
 {-# LANGUAGE PatternSynonyms #-}
 module RandomMonotone (randomMonotoneShowcase ) where
 
-import Data.Geometry.Polygon.Monotone (randomMonotoneDirected, randomNonZeroVector)
+import Geometry.Polygon.Monotone (randomMonotoneDirected, randomNonZeroVector)
 
 import           Control.Lens                 ((&), (.~), (^.))
 import           Control.Monad.Random
 import           Data.Ext                     (_core, core)
 import qualified Data.Foldable                as F
-import           Data.Geometry.Line           (Line (..))
-import           Data.Geometry.LineSegment    (LineSegment (LineSegment))
-import           Data.Geometry.Point          (Point (Point2), squaredEuclideanDist)
-import           Data.Geometry.Polygon        as P
-import           Data.Geometry.Transformation (scaleUniformlyBy)
-import           Data.Geometry.Vector         (Vector, pattern Vector2, quadrance)
+import           Geometry.Line           (Line (..))
+import           Geometry.LineSegment    (LineSegment (LineSegment))
+import           Geometry.Point          (Point (Point2), squaredEuclideanDist)
+import           Geometry.Polygon        as P
+import           Geometry.Transformation (scaleUniformlyBy)
+import           Geometry.Vector         (Vector, pattern Vector2, quadrance)
 import           Data.Hashable                (Hashable (hash))
 import           Data.Intersection            (IsIntersectableWith (intersect),
                                                NoIntersection (NoIntersection))

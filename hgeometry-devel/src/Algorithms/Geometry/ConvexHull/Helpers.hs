@@ -5,7 +5,7 @@ import           Control.Applicative ((<|>))
 import           Control.Lens (view)
 import           Control.Monad.Trans
 import           Data.Foldable (toList)
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))

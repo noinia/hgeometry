@@ -4,14 +4,14 @@ module Inflate (animateInflate) where
 
 import Control.Lens                  ((&), (^.))
 import Data.Ext                      (core, ext, (:+) ((:+)))
-import Data.Geometry.Ball            (Touching (Touching), pattern Circle)
-import Data.Geometry.Interval        ()
-import Data.Geometry.LineSegment     (LineSegment (OpenLineSegment), sqSegmentLength)
-import Data.Geometry.Point           (Point (Point2))
-import Data.Geometry.Polygon         (SimplePolygon, outerVertex, simpleFromPoints, size)
-import Data.Geometry.Polygon.Inflate (Arc (Arc), inflate)
-import Data.Geometry.Transformation
-import Data.Geometry.Vector          (pattern Vector2)
+import Geometry.Ball            (Touching (Touching), pattern Circle)
+import Geometry.Interval        ()
+import Geometry.LineSegment     (LineSegment (OpenLineSegment), sqSegmentLength)
+import Geometry.Point           (Point (Point2))
+import Geometry.Polygon         (SimplePolygon, outerVertex, simpleFromPoints, size)
+import Geometry.Polygon.Inflate (Arc (Arc), inflate)
+import Geometry.Transformation
+import Geometry.Vector          (pattern Vector2)
 import Data.Intersection             (IsIntersectableWith (intersect),
                                       NoIntersection (NoIntersection))
 import Data.RealNumber.Rational      (RealNumber)

@@ -21,19 +21,19 @@ import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.Ball
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box
-import           Data.Geometry.Ellipse (Ellipse, circleToEllipse)
-import           Data.Geometry.HalfLine
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine (PolyLine,fromLineSegment)
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Properties
+import           Geometry.Ball
+import           Geometry.BezierSpline
+import           Geometry.Boundary
+import           Geometry.Box
+import           Geometry.Ellipse (Ellipse, circleToEllipse)
+import           Geometry.HalfLine
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.PolyLine (PolyLine,fromLineSegment)
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex
+import           Geometry.Properties
 import           Data.Kind
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))

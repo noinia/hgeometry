@@ -17,10 +17,10 @@ import           Control.Lens ((^.))
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
-import           Data.Geometry.Vector
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Geometry.Vector
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty

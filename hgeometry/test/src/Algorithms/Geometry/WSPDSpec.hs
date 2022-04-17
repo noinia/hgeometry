@@ -3,7 +3,8 @@ module Algorithms.Geometry.WSPDSpec (spec) where
 import           Algorithms.Geometry.WSPD
 import           Control.Lens             ((%~), (&))
 import           Data.Ext
-import           Data.Geometry
+import           Geometry.Point
+import           Geometry.Vector
 import qualified Data.LSeq                as LSeq
 import qualified Data.List.NonEmpty       as NonEmpty
 import qualified Data.Vector              as V

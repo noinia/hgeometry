@@ -7,7 +7,7 @@ import           Control.Lens
 import           Criterion.Main
 import           Criterion.Types
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational

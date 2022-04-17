@@ -30,9 +30,9 @@ import           Control.Monad.Trans
 import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Convex (lowerTangent')
-import           Data.Geometry.Triangle
+import           Geometry.Point
+import           Geometry.Polygon.Convex (lowerTangent')
+import           Geometry.Triangle
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -49,7 +49,7 @@ import           Data.Maybe (catMaybes)
 import           Data.RealNumber.Rational
 
 
-import Data.Geometry.Vector
+import Geometry.Vector
 import           Debug.Trace
 
 import Algorithms.Geometry.ConvexHull.RenderPLY

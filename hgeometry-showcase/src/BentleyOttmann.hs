@@ -6,9 +6,9 @@ import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (intersections
 import           Control.Lens                 ((&), (.~), (^.))
 import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
 import           Data.Ext                     (core)
-import           Data.Geometry.LineSegment    (LineSegment (LineSegment'))
-import           Data.Geometry.Point          (Point (Point2))
-import           Data.Geometry.Transformation (scaleUniformlyBy)
+import           Geometry.LineSegment    (LineSegment (LineSegment'))
+import           Geometry.Point          (Point (Point2))
+import           Geometry.Transformation (scaleUniformlyBy)
 import           Data.Hashable                (Hashable (hash))
 import qualified Data.List.NonEmpty           as NonEmpty
 import qualified Data.Map                     as Map

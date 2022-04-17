@@ -9,7 +9,7 @@ import           Control.Monad.IO.Class (MonadIO)
 import           Control.Monad.Trans.Reader (runReaderT)
 import           Data.GI.Base
 import           Data.GI.Base.Signals (SignalInfo, HaskellCallbackType)
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.IORef
 import qualified Data.Text as T
 import           Foreign.Ptr (castPtr)

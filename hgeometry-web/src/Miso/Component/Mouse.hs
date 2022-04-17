@@ -1,6 +1,6 @@
 module Miso.Component.Mouse where
 
-import Data.Geometry.Point
+import Geometry.Point
 import Miso hiding (update, view)
 
 newtype MousePosition = MousePosition (Maybe (Point 2 Int)) deriving (Show,Eq)

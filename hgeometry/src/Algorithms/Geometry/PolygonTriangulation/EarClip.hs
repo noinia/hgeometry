@@ -32,11 +32,11 @@ import           Control.Monad.ST             (ST, runST)
 import           Control.Monad.ST.Unsafe      (unsafeInterleaveST)
 import           Data.Bits
 import           Data.Ext
-import           Data.Geometry.Boundary       (PointLocationResult (Outside))
-import           Data.Geometry.Point          (Point (Point2), ccw, pattern CCW)
-import           Data.Geometry.Polygon
-import           Data.Geometry.Box
-import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangle)
+import           Geometry.Boundary       (PointLocationResult (Outside))
+import           Geometry.Point          (Point (Point2), ccw, pattern CCW)
+import           Geometry.Polygon
+import           Geometry.Box
+import           Geometry.Triangle       (Triangle (Triangle), inTriangle)
 import           Data.STRef
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V

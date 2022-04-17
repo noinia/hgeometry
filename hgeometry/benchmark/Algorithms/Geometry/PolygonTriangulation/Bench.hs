@@ -10,10 +10,10 @@ import           Data.Ext
 import           Test.Tasty.Bench
 import qualified Data.Foldable as F
 import           Ipe
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Polygon
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
+import           Geometry.LineSegment
+import           Geometry.Polygon
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
 import qualified Data.LSeq as LSeq
 import qualified Data.List as List
 import           Data.Proxy

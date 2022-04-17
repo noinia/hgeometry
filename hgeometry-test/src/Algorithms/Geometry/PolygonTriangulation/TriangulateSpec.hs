@@ -5,9 +5,9 @@ import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.PlanarSubdivision (PolygonFaceData)
-import           Data.Geometry.PolygonSpec ()
+import           Geometry
+import           Geometry.PlanarSubdivision (PolygonFaceData)
+import           Geometry.PolygonSpec ()
 import           Data.PlaneGraph
 import qualified Data.Vector as V
 import           Test.Hspec

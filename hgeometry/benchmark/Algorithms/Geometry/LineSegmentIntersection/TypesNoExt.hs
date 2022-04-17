@@ -14,9 +14,9 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
 import           Data.Bifunctor
-import           Data.Geometry.Interval
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
+import           Geometry.Interval
+import           Geometry.LineSegment
+import           Geometry.Point
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import           Data.Ord (comparing, Down(..))

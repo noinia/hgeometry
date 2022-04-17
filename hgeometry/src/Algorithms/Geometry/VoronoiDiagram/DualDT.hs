@@ -5,12 +5,12 @@ import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Ball
-import           Data.Geometry.Box
-import           Data.Geometry.HalfLine
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Geometry.Ball
+import           Geometry.Box
+import           Geometry.HalfLine
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Vector
 import qualified Data.List.NonEmpty                                         as NonEmpty
 import           Data.PlanarGraph                                           (FaceId)
 import           Data.PlaneGraph                                            (PlaneGraph)

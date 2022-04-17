@@ -16,10 +16,10 @@ import           Control.Lens
 import           Control.Monad.ST          (runST)
 import           Data.Ext                  (_core, core)
 import qualified Data.Foldable             as F
-import           Data.Geometry.Interval    (EndPoint (Closed, Open), end, start)
-import           Data.Geometry.LineSegment (LineSegment (..), sqSegmentLength)
-import           Data.Geometry.Point       (ccwCmpAroundWith')
-import           Data.Geometry.Polygon     (SimplePolygon, listEdges, outerBoundaryVector)
+import           Geometry.Interval    (EndPoint (Closed, Open), end, start)
+import           Geometry.LineSegment (LineSegment (..), sqSegmentLength)
+import           Geometry.Point       (ccwCmpAroundWith')
+import           Geometry.Polygon     (SimplePolygon, listEdges, outerBoundaryVector)
 import           Data.Intersection         (IsIntersectableWith (intersect),
                                             NoIntersection (NoIntersection))
 import           Data.Vector               (Vector)

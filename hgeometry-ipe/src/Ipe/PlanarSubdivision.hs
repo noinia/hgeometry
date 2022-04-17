@@ -4,12 +4,12 @@ import           Control.Lens
 import           Data.Ext
 import           Ipe.Attributes
 import           Ipe
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Polygon hiding (vertices)
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.PlanarSubdivision
+import           Geometry.Polygon hiding (vertices)
+import           Geometry.Properties
+import           Geometry.Transformation
 import           Data.PlaneGraph
 import           Data.Semigroup
 import qualified Data.Seq2 as S2

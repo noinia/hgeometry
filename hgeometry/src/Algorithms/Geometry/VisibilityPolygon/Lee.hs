@@ -31,12 +31,12 @@ import           Data.Bifunctor (first)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
-import           Data.Geometry.HalfLine
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
+import           Geometry.HalfLine
+import           Geometry.Line
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Vector
 import           Data.Intersection
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))

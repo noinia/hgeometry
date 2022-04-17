@@ -8,8 +8,8 @@ import           Control.Lens
 import           Control.Monad (when)
 import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.Ball (fromDiameter, disk, Disk)
+import           Geometry
+import           Geometry.Ball (fromDiameter, disk, Disk)
 import           Ipe
 import           Data.Maybe
 import           System.Random (mkStdGen)

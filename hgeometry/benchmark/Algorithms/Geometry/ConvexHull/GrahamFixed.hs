@@ -7,9 +7,9 @@ module Algorithms.Geometry.ConvexHull.GrahamFixed( convexHull
 import           Control.DeepSeq
 import           Control.Lens ((^.))
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.Vector.Fixed (Arity)
-import qualified Data.Geometry.Vector.VectorFixed as VF
+import qualified Geometry.Vector.VectorFixed as VF
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid

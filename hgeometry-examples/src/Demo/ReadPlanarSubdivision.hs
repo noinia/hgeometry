@@ -5,8 +5,8 @@ import Control.Lens
 import Data.Data
 import Data.Ext
 import Ipe
-import Data.Geometry.Polygon
-import Data.Geometry.PlanarSubdivision
+import Geometry.Polygon
+import Geometry.PlanarSubdivision
 import Data.Semigroup
 import Options.Applicative
 import qualified Data.Foldable as F

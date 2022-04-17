@@ -21,8 +21,8 @@ import           Control.Lens
 import           Control.Monad.Random.Class
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
-import           Data.Geometry.Ball
+import           Geometry.Point
+import           Geometry.Ball
 import qualified Data.List as List
 import           Data.List.NonEmpty(NonEmpty(..))
 import           Data.Maybe (fromMaybe, mapMaybe, catMaybes)

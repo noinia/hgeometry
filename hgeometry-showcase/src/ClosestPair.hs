@@ -10,9 +10,9 @@ import Algorithms.Geometry.ClosestPair.DivideAndConquer (closestPair)
 import           Control.Lens                 ((&))
 import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
 import           Data.Ext                     (ext, type (:+) ((:+)))
-import           Data.Geometry.Point          (Point (Point2, toVec), euclideanDist)
-import           Data.Geometry.Transformation (scaleUniformlyBy)
-import           Data.Geometry.Vector         (Affine ((.+^), (.-^)), (^/))
+import           Geometry.Point          (Point (Point2, toVec), euclideanDist)
+import           Geometry.Transformation (scaleUniformlyBy)
+import           Geometry.Vector         (Affine ((.+^), (.-^)), (^/))
 import           Data.Hashable                (Hashable (hash))
 import qualified Data.LSeq                    as LSeq
 import           Data.RealNumber.Rational

@@ -23,7 +23,7 @@ import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
 import           Data.GI.Base.Signals(SignalInfo, HaskellCallbackType)
 
-import Data.Geometry.Point
+import Geometry.Point
 
 import qualified SDL.Cairo.Canvas as Canvas
 import SDL.Cairo.Canvas(Canvas)

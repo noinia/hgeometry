@@ -24,15 +24,15 @@ import           Reanimate.Animation       (Sync (SyncFreeze))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Polygon.Bezier
-import qualified Data.Geometry.BezierSpline as Bezier
-import Data.Geometry.BezierSpline(BezierSpline(..))
-import Data.Geometry.Polygon
-import Data.Geometry.Box (Rectangle, box, minPoint, maxPoint)
-import Data.Geometry.Transformation
-import Data.Geometry.Vector
+import Geometry.LineSegment
+import Geometry.Point
+import Geometry.Polygon.Bezier
+import qualified Geometry.BezierSpline as Bezier
+import Geometry.BezierSpline(BezierSpline(..))
+import Geometry.Polygon
+import Geometry.Box (Rectangle, box, minPoint, maxPoint)
+import Geometry.Transformation
+import Geometry.Vector
 
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
 pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)

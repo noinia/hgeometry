@@ -15,9 +15,9 @@ import           Algorithms.DivideAndConquer
 import           Control.Lens ((^.))
 import           Data.Ext
 import           Data.Function (on)
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 
 --------------------------------------------------------------------------------

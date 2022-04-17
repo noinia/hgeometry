@@ -12,10 +12,10 @@ import           Control.Monad
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
+import           Geometry
 import           Ipe
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Vector
+import           Geometry.PolyLine
+import           Geometry.Vector
 import           Data.List (isSuffixOf)
 import qualified Data.List as List
 import           Data.Maybe

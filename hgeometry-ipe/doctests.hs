@@ -45,6 +45,6 @@ replace a b = go
               | otherwise = c:go cs
 
 modules =
-  [ "Data.Geometry.Ipe.IpeOut"
-  , "Data.Geometry.Ipe.FromIpe"
+  [ "Geometry.Ipe.IpeOut"
+  , "Geometry.Ipe.FromIpe"
   ]

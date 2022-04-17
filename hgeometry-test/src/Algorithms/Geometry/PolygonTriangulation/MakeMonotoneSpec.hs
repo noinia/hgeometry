@@ -1,8 +1,8 @@
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec where
 
 import Algorithms.Geometry.PolygonTriangulation.MakeMonotone
-import Data.Geometry.Polygon
-import Data.Geometry
+import Geometry.Polygon
+import Geometry
 import Data.Ext
 import Control.Lens
 import Test.Hspec

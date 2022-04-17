@@ -9,9 +9,9 @@ module Algorithms.Geometry.ConvexHull.Minimalist.Point
 import           Control.Lens (to, view)
 import           Data.Ext
 import           Data.Function (on)
-import           Data.Geometry.Point (xCoord)
-import qualified Data.Geometry.Point as Point
-import           Data.Geometry.Properties
+import           Geometry.Point (xCoord)
+import qualified Geometry.Point as Point
+import           Geometry.Properties
 import           Data.Ord (comparing)
 
 --------------------------------------------------------------------------------

@@ -2,7 +2,7 @@ module Algorithms.Geometry.SoS.Determinant where
 
 import           Algorithms.Geometry.SoS.Sign
 import           Algorithms.Geometry.SoS.Symbolic
-import           Data.Geometry.Matrix
+import           Geometry.Matrix
 
 
 -- | pre: computes the sign of the determinant

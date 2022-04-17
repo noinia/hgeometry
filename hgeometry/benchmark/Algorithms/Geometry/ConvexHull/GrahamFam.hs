@@ -7,8 +7,8 @@ module Algorithms.Geometry.ConvexHull.GrahamFam( convexHull
 import           Control.DeepSeq
 import           Control.Lens ((^.))
 import           Data.Ext
-import           Data.Geometry.Point
-import qualified Data.Geometry.Vector.VectorFamily as VF
+import           Geometry.Point
+import qualified Geometry.Vector.VectorFamily as VF
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid

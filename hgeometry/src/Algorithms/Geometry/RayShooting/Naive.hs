@@ -11,10 +11,10 @@ module Algorithms.Geometry.RayShooting.Naive
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.HalfLine
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Geometry.HalfLine
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Polygon
 import           Data.Intersection
 import qualified Data.List as List
 import           Data.Maybe

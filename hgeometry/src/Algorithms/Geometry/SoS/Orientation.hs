@@ -10,9 +10,9 @@ import Algorithms.Geometry.SoS.Sign
 import Algorithms.Geometry.SoS.Symbolic
 import Algorithms.Geometry.SoS.Point
 import Control.Lens hiding (snoc,cons)
-import Data.Geometry.Matrix
-import Data.Geometry.Point
-import Data.Geometry.Vector
+import Geometry.Matrix
+import Geometry.Point
+import Geometry.Vector
 import GHC.TypeNats
 
 --------------------------------------------------------------------------------
