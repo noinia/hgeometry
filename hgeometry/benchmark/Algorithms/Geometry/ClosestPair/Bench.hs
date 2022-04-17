@@ -5,7 +5,7 @@ import qualified Algorithms.Geometry.ClosestPair.Naive            as Naive
 
 import           Control.Monad.Random
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.Hashable
 import           Data.LSeq            (LSeq)
 import qualified Data.LSeq            as LSeq

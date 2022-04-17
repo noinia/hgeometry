@@ -7,9 +7,9 @@ module Algorithms.Geometry.ConvexHull.GrahamFamPeano( convexHull
 import           Control.DeepSeq
 import           Control.Lens ((^.))
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import qualified Data.Vector.Fixed.Cont as V
-import qualified Data.Geometry.Vector.VectorFamilyPeano as VF
+import qualified Geometry.Vector.VectorFamilyPeano as VF
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid
