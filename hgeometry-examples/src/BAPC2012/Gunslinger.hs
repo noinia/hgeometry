@@ -5,9 +5,9 @@ import           Control.Lens
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Polygon.Convex
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector.Circular as C

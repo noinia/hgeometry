@@ -1,12 +1,12 @@
 module Demo.Orthogonal where
 
 import Data.Ext
-import Data.Geometry
-import Data.Geometry.Polygon
+import Geometry
+import Geometry.Polygon
 import Ipe
 
-import Data.Geometry.LineSegment
-import Data.Geometry.SegmentTree
+import Geometry.LineSegment
+import Geometry.SegmentTree
 import qualified Data.Map as Map
 
 -- Given a set of horizontal line segments, preprocess them for vertical
@@ -19,7 +19,7 @@ import qualified Data.Map as Map
 -- 3) 3D-Range Tree
 -- 4) 3D KD-Tree
 
--- 5) SegmenTree + 1D RangeTree (implemented by Data.Geometry.RangeTree)
+-- 5) SegmenTree + 1D RangeTree (implemented by Geometry.RangeTree)
 
 --------------------------------------------------------------------------------
 

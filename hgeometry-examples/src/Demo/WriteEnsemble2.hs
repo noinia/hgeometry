@@ -11,8 +11,8 @@ import Data.Fixed
 import qualified Data.Text as T
 import Data.Maybe
 import Ipe
-import Data.Geometry
-import Data.Geometry.PolyLine(fromPoints')
+import Geometry
+import Geometry.PolyLine(fromPoints')
 import System.Environment
 import Data.Time.Calendar
 import Data.Time.Clock

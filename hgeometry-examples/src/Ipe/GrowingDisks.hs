@@ -3,14 +3,14 @@ module Ipe.GrowingDisks where
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
-import           Data.Geometry.Ball
-import           Data.Geometry.Boundary
-import           Data.Geometry.Box
-import           Data.Geometry.Ellipse (ellipseToCircle)
+import           Geometry.Ball
+import           Geometry.Boundary
+import           Geometry.Box
+import           Geometry.Ellipse (ellipseToCircle)
 import           Ipe
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Properties
--- import           Data.Geometry.ZeroSet
+import           Geometry.PolyLine
+import           Geometry.Properties
+-- import           Geometry.ZeroSet
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)

@@ -8,10 +8,10 @@ import           Algorithms.Geometry.EuclideanMST
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
-import           Data.Geometry
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.PlanarSubdivision.Raw
-import           Data.Geometry.PlanarSubdivision.Draw
+import           Geometry
+import           Geometry.PlanarSubdivision
+import           Geometry.PlanarSubdivision.Raw
+import           Geometry.PlanarSubdivision.Draw
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph.Draw
 import qualified Data.List.NonEmpty as NonEmpty

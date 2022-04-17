@@ -10,7 +10,7 @@ module Demo.GPXParser where
 import           Control.Lens
 import qualified Data.ByteString.Lazy as B
 import           Data.Ext
-import           Data.Geometry.Point
+import           Geometry.Point
 import           Data.Maybe
 import           Data.Semigroup
 import           Data.Time.Clock

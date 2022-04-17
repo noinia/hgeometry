@@ -12,10 +12,10 @@ import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
-import           Data.Geometry
+import           Geometry
 import           Ipe
-import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
+import           Geometry.Polygon
+import           Geometry.Vector
 import           Data.List (isSuffixOf)
 import qualified Data.List as List
 import           Data.Maybe

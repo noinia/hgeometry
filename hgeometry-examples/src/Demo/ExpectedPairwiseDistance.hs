@@ -13,7 +13,7 @@ import           Data.Char (isSpace)
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry
+import           Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Measured.Class

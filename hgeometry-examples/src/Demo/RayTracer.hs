@@ -6,10 +6,10 @@ import qualified Data.List as List
 import           Data.Maybe (mapMaybe)
 import           Data.Ext
 import           Control.Lens
-import           Data.Geometry.Line
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
-import           Data.Geometry.Triangle
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Vector
+import           Geometry.Triangle
 import           Data.Range
 import           Data.Util
 import           Graphics.Camera

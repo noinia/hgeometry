@@ -10,8 +10,8 @@ import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Ipe
-import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Polygon
+import           Geometry.PlanarSubdivision
+import           Geometry.Polygon
 import qualified Data.Map as Map
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup
