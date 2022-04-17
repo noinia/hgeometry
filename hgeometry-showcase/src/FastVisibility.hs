@@ -13,10 +13,10 @@ import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Algorithms.Geometry.SSSP                             (triangulate, visibilityDual,
                                                                        visibilityFinger)
 import           Data.Ext
-import           Data.Geometry.PlanarSubdivision                      (PolygonFaceData)
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Transformation
+import           Geometry.PlanarSubdivision                      (PolygonFaceData)
+import           Geometry.Point
+import           Geometry.Polygon
+import           Geometry.Transformation
 import           Data.PlaneGraph
 import qualified Data.Vector                                          as V
 import           Graphics.SvgTree                                     (LineJoin (..), Cap(..),strokeLineCap)

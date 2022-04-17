@@ -13,10 +13,10 @@ import Reanimate.Animation (Sync (SyncFreeze))
 
 import Algorithms.Geometry.SSSP     (sssp, triangulate)
 import Data.Ext                     (core, ext)
-import Data.Geometry.Point          (Point (Point2))
-import Data.Geometry.Polygon        (SimplePolygon, fromPoints, outerVertex, simpleFromPoints,
+import Geometry.Point          (Point (Point2))
+import Geometry.Polygon        (SimplePolygon, fromPoints, outerVertex, simpleFromPoints,
                                      toPoints)
-import Data.Geometry.Transformation
+import Geometry.Transformation
 
 import Common
 
