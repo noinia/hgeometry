@@ -75,7 +75,7 @@ common setup
                     , MultiParamTypeClasses
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.13
+              , hgeometry-combinatorial >= 0.15
 
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
@@ -131,10 +131,7 @@ library
 
   exposed-modules:  Geometry
                     -- * Primitives; Simulating General Position
-                    -- Algorithms.Geometry.SoS
-                    -- only export stuff from SoS I guess
-                    Algorithms.Geometry.SoS.Symbolic
-                    Algorithms.Geometry.SoS.Index
+                    -- Geometry.SoS
 
                     -- * Generic Geometry
                     Geometry.Properties
@@ -316,10 +313,9 @@ library
                     Geometry.Interval.Util
 
                     -- Algorithms.Geometry.SoS.Expr
-                    Algorithms.Geometry.SoS.Point
-                    Algorithms.Geometry.SoS.Orientation
-                    Algorithms.Geometry.SoS.Determinant
-                    Algorithms.Geometry.SoS.Sign
+                    Geometry.SoS.Point
+                    Geometry.SoS.Determinant
+                    Geometry.SoS.Orientation
 
                     Data.PlaneGraph.Core
 
@@ -433,7 +429,6 @@ test-suite hspec
 
                  Algorithms.Geometry.SoSSpec
                  -- Algorithms.Geometry.SoS.SortSpec
-                 Algorithms.Geometry.SoS.SymbolicSpec
                  Algorithms.Geometry.SoS.OrientationSpec
 
                  Algorithms.Geometry.WSPDSpec

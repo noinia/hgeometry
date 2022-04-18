@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Algorithms.Geometry.SoS.Orientation( SoS
+module Geometry.SoS.Orientation( SoS
                                           , sideTest
                                           , sideTest'
                                           ) where

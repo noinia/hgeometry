@@ -8,7 +8,6 @@ module Data.Indexed
 
 
 import Control.Monad.State.Strict
--- import Test.QuickCheck (Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
@@ -35,21 +34,6 @@ instance HasIndex (WithIndex a) where
 
 --------------------------------------------------------------------------------
 
--- -- | the index type used to disambiguate the values
--- data SoSI = MkSoS {-# UNPACK #-}!Index -- ^ original index
---                   {-# UNPACK #-}!Int -- ^ index of the coordinate in [0..(d-1)]
---           deriving (Show,Eq,Ord)
-
--- -- for now I've kept the two components separtely, as to avoid blowing
--- -- up the range required for the indices. Maybe it would be faster to
--- -- just map the jth coordinate of point p_i to index i*d+j
--- -- though. That way we can map to a Point d (Symoblic (WithIndex
--- -- r)). Maybe that way we can use IntSets and so on to represent the
--- -- Bags/Symbolic type rather than the arbitrary i as we currently
--- -- have.
-
--- instance Arbitrary SoSI where
---   arbitrary = MkSoS <$> arbitrary <*> arbitrary
 
 --------------------------------------------------------------------------------
 
