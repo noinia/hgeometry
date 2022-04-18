@@ -1,7 +1,7 @@
-module Algorithms.Geometry.SoS.SymbolicSpec where
+module Data.RealNumber.SymbolicSpec where
 
-import Algorithms.Geometry.SoS.Index
-import Algorithms.Geometry.SoS.Symbolic
+import Data.Indexed
+import Data.RealNumber.Symbolic
 import GHC.Generics
 import System.Random
 import System.Random.Stateful
@@ -56,13 +56,13 @@ instance Arbitrary SmallInt where
 
 --------------------------------------------------------------------------------
 
-symbolic' :: Integer -> SoSIndex -> Symbolic SoSIndex Integer
+symbolic' :: Integer -> Index -> Symbolic Index Integer
 symbolic' = symbolic
 
-perturb' :: Integer -> SoSIndex -> Symbolic SoSIndex Integer
+perturb' :: Integer -> Index -> Symbolic Index Integer
 perturb' = perturb
 
-term' :: Integer -> SoSIndex -> Term SoSIndex Integer
+term' :: Integer -> Index -> Term Index Integer
 term' = term
 
 

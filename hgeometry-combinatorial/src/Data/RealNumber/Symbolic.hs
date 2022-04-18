@@ -1,13 +1,13 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Algorithms.Geometry.SoS.Symbolic
+-- Module      :  Data.RealNumber.Symbolic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SoS.Symbolic(
+module Data.RealNumber.Symbolic(
     EpsFold
   , eps, mkEpsFold
   , evalEps
@@ -29,15 +29,15 @@ module Algorithms.Geometry.SoS.Symbolic(
   , SoSRational, sosRational
   ) where
 
-import           Algorithms.Geometry.SoS.Index
-import           Algorithms.Geometry.SoS.Sign (Sign(..))
-import           Control.Lens
+import           Control.Lens hiding (Index)
 import           Data.Foldable (toList)
+import           Data.Indexed
 import qualified Data.List as List
 import qualified Data.Map.Merge.Strict as Map
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
 import           Data.Ratio.Generalized (GRatio, (%))
+import           Data.Sign (Sign(..))
 import           Test.QuickCheck (Arbitrary(..), listOf, suchThat)
 import           Test.QuickCheck.Instances ()
 
@@ -427,7 +427,7 @@ sosRational = (%)
 --------------------------------------------------------------------------------
 
 -- | the index type used to disambiguate the values
-data SoSI = MkSoS {-# UNPACK #-}!SoSIndex -- ^ original index
+data SoSI = MkSoS {-# UNPACK #-}!Index -- ^ original index
                   {-# UNPACK #-}!Int -- ^ index of the coordinate in [0..(d-1)]
           deriving (Show,Eq,Ord)
 
