@@ -1,6 +1,6 @@
-module Algorithms.Geometry.SoSSpec where
+module Geometry.SoSSpec where
 
-import           Algorithms.Geometry.SoS.Symbolic
+import           Data.RealNumber.Symbolic
 -- import           Control.Lens
 -- import           Control.Monad (forM_)
 import           Data.Foldable
