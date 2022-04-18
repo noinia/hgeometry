@@ -17,11 +17,11 @@ import Test.QuickCheck (Arbitrary(..))
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: (Arity d, ToAPoint point d r, HasIndex point)
+toSymbolic    :: (Arity d, ToAPoint point d r, HasIndex point, Num r)
               => point -> Point d (Symbolic SoSI r)
 toSymbolic p' = let p = p'^.toPoint
                     i = sosIndex p'
-                in p&vector %~ imap (\j x -> symbolic x $ MkSoS i j)
+                in p&vector %~ imap (\j x -> perturb x $ MkSoS i j)
 
 -- | Drops the pertubations in a point
 fromSymbolic :: (Arity d, Num r) => Point d (Symbolic i r) -> Point d r

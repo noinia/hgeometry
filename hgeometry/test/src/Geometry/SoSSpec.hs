@@ -56,6 +56,10 @@ spec = describe "symoblic/convex hull test" $ do
          it "toSymbolic/fromSymbolic" $ property $ \i (p :: Point 2 RBase) ->
            fromSymbolic (toSymbolic $ WithIndex i p) `shouldBe` p
 
+         it "toSoSRational/fromSoSRational" $ property $ \i (p :: Point 2 RBase) ->
+           fromSoSRational  (toSoSRational $ WithIndex i p) `shouldBe` p
+
+
 -- spec :: Spec
 -- spec = describe "SoS Symoblic" $ do
 --          let eps' = (0.1 :: RealNumber 10)
