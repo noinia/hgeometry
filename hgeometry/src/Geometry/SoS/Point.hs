@@ -1,12 +1,12 @@
 module Geometry.SoS.Point
-  ( toSymbolic
-  , toSoSRational
-
+  ( toSymbolic, fromSymbolic
+  , toSoSRational, fromSoSRational
   , SoSI
   ) where
 
 import Control.Lens hiding (Index)
 import Data.Indexed
+import Data.Ratio.Generalized
 import Data.RealNumber.Symbolic
 import Geometry.Point.Class
 import Geometry.Point.Internal
@@ -14,7 +14,6 @@ import Geometry.Vector
 import Test.QuickCheck (Arbitrary(..))
 
 --------------------------------------------------------------------------------
-
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
@@ -24,19 +23,21 @@ toSymbolic p' = let p = p'^.toPoint
                     i = sosIndex p'
                 in p&vector %~ imap (\j x -> symbolic x $ MkSoS i j)
 
+-- | Drops the pertubations in a point
+fromSymbolic :: (Arity d, Num r) => Point d (Symbolic i r) -> Point d r
+fromSymbolic = fmap roundToConstant
+
+----------------------------------------
+
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
 toSoSRational :: (Arity d, ToAPoint point d r, HasIndex point, Eq r, Num r)
               => point -> Point d (SoSRational SoSI r)
 toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
 
--- instance (ToAPoint point d r, Arity d, HasIndex point)
---          => ToAPoint (WithSoS point) d (Symbolic SoSI r) where
---   toPoint = to undefined -- toSymbolic
-
-
--- FIXME: I guess the indices should be strictly positive, otherwise some term eps(0) would add 1?
-
+-- | Drops the pertubations
+fromSoSRational :: (Arity d, Fractional r) => Point d (SoSRational i r) -> Point d r
+fromSoSRational = fmap (\x -> roundToConstant (numerator x) / roundToConstant (denominator x))
 
 --------------------------------------------------------------------------------
 

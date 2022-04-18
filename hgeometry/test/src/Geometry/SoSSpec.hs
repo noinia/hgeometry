@@ -1,21 +1,43 @@
 module Geometry.SoSSpec where
 
+import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
+
+import           Control.Lens
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Symbolic
 -- import           Control.Lens
 -- import           Control.Monad (forM_)
 import           Data.Foldable
--- import           Geometry.Vector
+import           Geometry.Point
+import           Geometry.SoS.Point
 -- import qualified Data.List as List
 -- import           Data.Proxy
--- import           Data.RealNumber.Rational
+import           Data.RealNumber.Rational
 -- import           Data.Util
 -- import           Data.Word
+import           Data.Ext
 -- import           GHC.TypeNats
 import           Test.Hspec
 import           Test.QuickCheck
+import           Geometry.SoS.Point
+import           Geometry.SoS.Orientation()
+import           Data.Ext
+import           Data.Indexed
+
+
 --------------------------------------------------------------------------------
 
+type RBase = RealNumber 5
+type R = Symbolic SoSI RBase
 
+
+lowerHullSymbolic :: (Ord r, Num r)
+                  => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+lowerHullSymbolic = fmap (over core fromSymbolic)
+                  . DivideAndConquer.lowerHull
+                  . fmap (\(WithIndex i (p :+ e)) -> toSymbolic (WithIndex i p) :+ e)
+                  . fst . labelWithIndex
 
 -- data Eps = Eps
 --
@@ -25,7 +47,14 @@ import           Test.QuickCheck
 
 -- unfortunately, it seems that this is not really feasilbe to explicitly evaluate thee things.
 spec :: Spec
-spec = pure ()
+spec = describe "symoblic/convex hull test" $ do
+         it "convex hull same with symoblic" $ property $
+           \(pts :: NonEmpty (Point 2 RBase :+ ())) ->
+             lowerHullSymbolic pts `shouldBe` DivideAndConquer.lowerHull pts
+
+
+         it "toSymbolic/fromSymbolic" $ property $ \i (p :: Point 2 RBase) ->
+           fromSymbolic (toSymbolic $ WithIndex i p) `shouldBe` p
 
 -- spec :: Spec
 -- spec = describe "SoS Symoblic" $ do
