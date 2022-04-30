@@ -14,7 +14,7 @@
 </span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="hs-comment">-- | Measured size. Always non-negative.</span><span>
-</span><span id="line-17"></span><span id="local-6989586621679264559"><span id="local-6989586621679264560"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="Size"><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-var">Size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Size"><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-var">Size</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264552"><span id="local-6989586621679264554"><span id="local-6989586621679264556"><span class="annot"><span class="annottext">Int -&gt; Size -&gt; ShowS
+</span><span id="line-17"></span><span id="local-6989586621679264322"><span id="local-6989586621679264323"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="Size"><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-var">Size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Size"><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-var">Size</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264315"><span id="local-6989586621679264317"><span id="local-6989586621679264319"><span class="annot"><span class="annottext">Int -&gt; Size -&gt; ShowS
 [Size] -&gt; ShowS
 Size -&gt; String
 (Int -&gt; Size -&gt; ShowS)
@@ -27,7 +27,7 @@ show :: Size -&gt; String
 $cshow :: Size -&gt; String
 showsPrec :: Int -&gt; Size -&gt; ShowS
 $cshowsPrec :: Int -&gt; Size -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264543"><span id="local-6989586621679264545"><span id="local-6989586621679264547"><span id="local-6989586621679264549"><span class="annot"><span class="annottext">ReadPrec [Size]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264306"><span id="local-6989586621679264308"><span id="local-6989586621679264310"><span id="local-6989586621679264312"><span class="annot"><span class="annottext">ReadPrec [Size]
 ReadPrec Size
 Int -&gt; ReadS Size
 ReadS [Size]
@@ -44,14 +44,14 @@ readList :: ReadS [Size]
 $creadList :: ReadS [Size]
 readsPrec :: Int -&gt; ReadS Size
 $creadsPrec :: Int -&gt; ReadS Size
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264538"><span id="local-6989586621679264540"><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264301"><span id="local-6989586621679264303"><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Bool
 (Size -&gt; Size -&gt; Bool) -&gt; (Size -&gt; Size -&gt; Bool) -&gt; Eq Size
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Size -&gt; Size -&gt; Bool
 $c/= :: Size -&gt; Size -&gt; Bool
 == :: Size -&gt; Size -&gt; Bool
 $c== :: Size -&gt; Size -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264523"><span id="local-6989586621679264525"><span id="local-6989586621679264527"><span id="local-6989586621679264529"><span id="local-6989586621679264531"><span id="local-6989586621679264533"><span id="local-6989586621679264535"><span class="annot"><span class="annottext">Integer -&gt; Size
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264286"><span id="local-6989586621679264288"><span id="local-6989586621679264290"><span id="local-6989586621679264292"><span id="local-6989586621679264294"><span id="local-6989586621679264296"><span id="local-6989586621679264298"><span class="annot"><span class="annottext">Integer -&gt; Size
 Size -&gt; Size
 Size -&gt; Size -&gt; Size
 (Size -&gt; Size -&gt; Size)
@@ -85,7 +85,7 @@ $c* :: Size -&gt; Size -&gt; Size
 $c- :: Size -&gt; Size -&gt; Size
 + :: Size -&gt; Size -&gt; Size
 $c+ :: Size -&gt; Size -&gt; Size
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264506"><span id="local-6989586621679264508"><span id="local-6989586621679264510"><span id="local-6989586621679264512"><span id="local-6989586621679264514"><span id="local-6989586621679264516"><span id="local-6989586621679264518"><span class="annot"><span class="annottext">Enum Size
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264269"><span id="local-6989586621679264271"><span id="local-6989586621679264273"><span id="local-6989586621679264275"><span id="local-6989586621679264277"><span id="local-6989586621679264279"><span id="local-6989586621679264281"><span class="annot"><span class="annottext">Enum Size
 Real Size
 Real Size
 -&gt; Enum Size
@@ -127,7 +127,7 @@ quot :: Size -&gt; Size -&gt; Size
 $cquot :: Size -&gt; Size -&gt; Size
 $cp2Integral :: Enum Size
 $cp1Integral :: Real Size
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Integral</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264489"><span id="local-6989586621679264491"><span id="local-6989586621679264493"><span id="local-6989586621679264495"><span id="local-6989586621679264497"><span id="local-6989586621679264499"><span id="local-6989586621679264501"><span id="local-6989586621679264503"><span class="annot"><span class="annottext">Int -&gt; Size
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Integral</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264252"><span id="local-6989586621679264254"><span id="local-6989586621679264256"><span id="local-6989586621679264258"><span id="local-6989586621679264260"><span id="local-6989586621679264262"><span id="local-6989586621679264264"><span id="local-6989586621679264266"><span class="annot"><span class="annottext">Int -&gt; Size
 Size -&gt; Int
 Size -&gt; [Size]
 Size -&gt; Size
@@ -168,7 +168,7 @@ pred :: Size -&gt; Size
 $cpred :: Size -&gt; Size
 succ :: Size -&gt; Size
 $csucc :: Size -&gt; Size
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264484"><span class="annot"><span class="annottext">Num Size
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264247"><span class="annot"><span class="annottext">Num Size
 Ord Size
 Num Size -&gt; Ord Size -&gt; (Size -&gt; Rational) -&gt; Real Size
 Size -&gt; Rational
@@ -177,7 +177,7 @@ toRational :: Size -&gt; Rational
 $ctoRational :: Size -&gt; Rational
 $cp2Real :: Ord Size
 $cp1Real :: Num Size
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679264468"><span id="local-6989586621679264470"><span id="local-6989586621679264472"><span id="local-6989586621679264474"><span id="local-6989586621679264476"><span id="local-6989586621679264478"><span id="local-6989586621679264480"><span class="annot"><span class="annottext">Eq Size
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679264231"><span id="local-6989586621679264233"><span id="local-6989586621679264235"><span id="local-6989586621679264237"><span id="local-6989586621679264239"><span id="local-6989586621679264241"><span id="local-6989586621679264243"><span class="annot"><span class="annottext">Eq Size
 Eq Size
 -&gt; (Size -&gt; Size -&gt; Ordering)
 -&gt; (Size -&gt; Size -&gt; Bool)
@@ -223,25 +223,25 @@ forall a.
 (forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
 $cto :: forall x. Rep Size x -&gt; Size
 $cfrom :: forall x. Size -&gt; Rep Size x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679264462"><span class="annot"><span class="annottext">Size -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679264225"><span class="annot"><span class="annottext">Size -&gt; ()
 (Size -&gt; ()) -&gt; NFData Size
 forall a. (a -&gt; ()) -&gt; NFData a
 rnf :: Size -&gt; ()
 $crnf :: Size -&gt; ()
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264456"><span id="local-6989586621679264458"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-20"></span><span>  </span><span id="local-6989586621679264454"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264454"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679264453"><span class="annot"><span class="annottext">&lt;&gt; :: Size -&gt; Size -&gt; Size
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621679264452"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264452"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264454"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><span id="line-19"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264219"><span id="local-6989586621679264221"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>  </span><span id="local-6989586621679264217"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679264217"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679264216"><span class="annot"><span class="annottext">&lt;&gt; :: Size -&gt; Size -&gt; Size
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621679264215"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679264215"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679264217"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264452"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621679264215"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264445"><span id="local-6989586621679264447"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-23"></span><span>  </span><span id="local-6989586621679264443"><span class="annot"><span class="annottext">mempty :: Size
+</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264208"><span id="local-6989586621679264210"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679264206"><span class="annot"><span class="annottext">mempty :: Size
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word -&gt; Size
 </span><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-var">Size</span></a></span><span> </span><span class="annot"><span class="annottext">Word
 </span><span class="hs-number">0</span></span><span>
@@ -249,9 +249,9 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span class="hs-comment">-- | Newtype wrapper for things for which we can measure the size</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">newtype</span><span> </span><span id="Elem"><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-var">Elem</span></a></span></span><span> </span><span id="local-6989586621679264442"><span class="annot"><a href="#local-6989586621679264442"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Elem"><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-var">Elem</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unElem"><span class="annot"><span class="annottext">Elem a -&gt; a
-</span><a href="Data.Measured.Size.html#_unElem"><span class="hs-identifier hs-var hs-var">_unElem</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679264442"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-29"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264434"><span id="local-6989586621679264436"><span id="local-6989586621679264438"><span class="annot"><span class="annottext">Int -&gt; Elem a -&gt; ShowS
+</span><span id="line-28"></span><span class="hs-keyword">newtype</span><span> </span><span id="Elem"><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-var">Elem</span></a></span></span><span> </span><span id="local-6989586621679264205"><span class="annot"><a href="#local-6989586621679264205"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Elem"><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-var">Elem</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unElem"><span class="annot"><span class="annottext">Elem a -&gt; a
+</span><a href="Data.Measured.Size.html#_unElem"><span class="hs-identifier hs-var hs-var">_unElem</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679264205"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-29"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264197"><span id="local-6989586621679264199"><span id="local-6989586621679264201"><span class="annot"><span class="annottext">Int -&gt; Elem a -&gt; ShowS
 [Elem a] -&gt; ShowS
 Elem a -&gt; String
 (Int -&gt; Elem a -&gt; ShowS)
@@ -267,7 +267,7 @@ show :: Elem a -&gt; String
 $cshow :: forall a. Show a =&gt; Elem a -&gt; String
 showsPrec :: Int -&gt; Elem a -&gt; ShowS
 $cshowsPrec :: forall a. Show a =&gt; Int -&gt; Elem a -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264426"><span id="local-6989586621679264428"><span id="local-6989586621679264430"><span id="local-6989586621679264432"><span class="annot"><span class="annottext">ReadPrec [Elem a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264189"><span id="local-6989586621679264191"><span id="local-6989586621679264193"><span id="local-6989586621679264195"><span class="annot"><span class="annottext">ReadPrec [Elem a]
 ReadPrec (Elem a)
 Int -&gt; ReadS (Elem a)
 ReadS [Elem a]
@@ -291,7 +291,7 @@ readList :: ReadS [Elem a]
 $creadList :: forall a. Read a =&gt; ReadS [Elem a]
 readsPrec :: Int -&gt; ReadS (Elem a)
 $creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (Elem a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264422"><span id="local-6989586621679264424"><span class="annot"><span class="annottext">Elem a -&gt; Elem a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264185"><span id="local-6989586621679264187"><span class="annot"><span class="annottext">Elem a -&gt; Elem a -&gt; Bool
 (Elem a -&gt; Elem a -&gt; Bool)
 -&gt; (Elem a -&gt; Elem a -&gt; Bool) -&gt; Eq (Elem a)
 forall a. Eq a =&gt; Elem a -&gt; Elem a -&gt; Bool
@@ -300,7 +300,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall a. Eq a =&gt; Elem a -&gt; Elem a -&gt; Bool
 == :: Elem a -&gt; Elem a -&gt; Bool
 $c== :: forall a. Eq a =&gt; Elem a -&gt; Elem a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264407"><span id="local-6989586621679264409"><span id="local-6989586621679264411"><span id="local-6989586621679264413"><span id="local-6989586621679264415"><span id="local-6989586621679264417"><span id="local-6989586621679264419"><span class="annot"><span class="annottext">Eq (Elem a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264170"><span id="local-6989586621679264172"><span id="local-6989586621679264174"><span id="local-6989586621679264176"><span id="local-6989586621679264178"><span id="local-6989586621679264180"><span id="local-6989586621679264182"><span class="annot"><span class="annottext">Eq (Elem a)
 Eq (Elem a)
 -&gt; (Elem a -&gt; Elem a -&gt; Ordering)
 -&gt; (Elem a -&gt; Elem a -&gt; Bool)
@@ -342,7 +342,7 @@ $c&lt; :: forall a. Ord a =&gt; Elem a -&gt; Elem a -&gt; Bool
 compare :: Elem a -&gt; Elem a -&gt; Ordering
 $ccompare :: forall a. Ord a =&gt; Elem a -&gt; Elem a -&gt; Ordering
 $cp1Ord :: forall a. Ord a =&gt; Eq (Elem a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264403"><span id="local-6989586621679264405"><span class="annot"><span class="annottext">a -&gt; Elem b -&gt; Elem a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264166"><span id="local-6989586621679264168"><span class="annot"><span class="annottext">a -&gt; Elem b -&gt; Elem a
 (a -&gt; b) -&gt; Elem a -&gt; Elem b
 (forall a b. (a -&gt; b) -&gt; Elem a -&gt; Elem b)
 -&gt; (forall a b. a -&gt; Elem b -&gt; Elem a) -&gt; Functor Elem
@@ -355,7 +355,7 @@ forall (f :: * -&gt; *).
 $c&lt;$ :: forall a b. a -&gt; Elem b -&gt; Elem a
 fmap :: (a -&gt; b) -&gt; Elem a -&gt; Elem b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Elem a -&gt; Elem b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264368"><span id="local-6989586621679264370"><span id="local-6989586621679264372"><span id="local-6989586621679264374"><span id="local-6989586621679264376"><span id="local-6989586621679264378"><span id="local-6989586621679264380"><span id="local-6989586621679264382"><span id="local-6989586621679264384"><span id="local-6989586621679264386"><span id="local-6989586621679264388"><span id="local-6989586621679264390"><span id="local-6989586621679264392"><span id="local-6989586621679264394"><span id="local-6989586621679264396"><span id="local-6989586621679264398"><span id="local-6989586621679264400"><span class="annot"><span class="annottext">Elem a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264131"><span id="local-6989586621679264133"><span id="local-6989586621679264135"><span id="local-6989586621679264137"><span id="local-6989586621679264139"><span id="local-6989586621679264141"><span id="local-6989586621679264143"><span id="local-6989586621679264145"><span id="local-6989586621679264147"><span id="local-6989586621679264149"><span id="local-6989586621679264151"><span id="local-6989586621679264153"><span id="local-6989586621679264155"><span id="local-6989586621679264157"><span id="local-6989586621679264159"><span id="local-6989586621679264161"><span id="local-6989586621679264163"><span class="annot"><span class="annottext">Elem a -&gt; Bool
 (a -&gt; m) -&gt; Elem a -&gt; m
 (a -&gt; b -&gt; b) -&gt; b -&gt; Elem a -&gt; b
 (forall m. Monoid m =&gt; Elem m -&gt; m)
@@ -440,7 +440,7 @@ foldMap :: (a -&gt; m) -&gt; Elem a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Elem a -&gt; m
 fold :: Elem m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Elem m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264357"><span id="local-6989586621679264359"><span id="local-6989586621679264361"><span id="local-6989586621679264363"><span class="annot"><span class="annottext">Functor Elem
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264120"><span id="local-6989586621679264122"><span id="local-6989586621679264124"><span id="local-6989586621679264126"><span class="annot"><span class="annottext">Functor Elem
 Foldable Elem
 Functor Elem
 -&gt; Foldable Elem
@@ -492,8 +492,8 @@ $cp2Traversable :: Foldable Elem
 $cp1Traversable :: Functor Elem
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span id="local-6989586621679264355"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264355"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-32"></span><span>  </span><span id="local-6989586621679264351"><span class="annot"><span class="annottext">measure :: Elem a -&gt; Size
+</span><span id="line-31"></span><span id="local-6989586621679264118"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679264114"><span class="annot"><span class="annottext">measure :: Elem a -&gt; Size
 </span><a href="Data.Measured.Class.html#measure"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="annot"><span class="annottext">Elem a
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span></span><span>
@@ -501,8 +501,8 @@ $cp1Traversable :: Functor Elem
 </span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- | Things that have a size</span><span>
-</span><span id="line-37"></span><span id="local-6989586621679264348"><span id="local-6989586621679264349"></span></span><span class="hs-keyword">data</span><span> </span><span id="Sized"><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span id="local-6989586621679264562"><span class="annot"><a href="#local-6989586621679264562"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Sized"><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264562"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-38"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264341"><span id="local-6989586621679264343"><span id="local-6989586621679264345"><span class="annot"><span class="annottext">Int -&gt; Sized a -&gt; ShowS
+</span><span id="line-37"></span><span id="local-6989586621679264111"><span id="local-6989586621679264112"></span></span><span class="hs-keyword">data</span><span> </span><span id="Sized"><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span id="local-6989586621679264325"><span class="annot"><a href="#local-6989586621679264325"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Sized"><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Data.Measured.Size.html#Size"><span class="hs-identifier hs-type">Size</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264325"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-38"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679264104"><span id="local-6989586621679264106"><span id="local-6989586621679264108"><span class="annot"><span class="annottext">Int -&gt; Sized a -&gt; ShowS
 [Sized a] -&gt; ShowS
 Sized a -&gt; String
 (Int -&gt; Sized a -&gt; ShowS)
@@ -518,7 +518,7 @@ show :: Sized a -&gt; String
 $cshow :: forall a. Show a =&gt; Sized a -&gt; String
 showsPrec :: Int -&gt; Sized a -&gt; ShowS
 $cshowsPrec :: forall a. Show a =&gt; Int -&gt; Sized a -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264337"><span id="local-6989586621679264339"><span class="annot"><span class="annottext">Sized a -&gt; Sized a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264100"><span id="local-6989586621679264102"><span class="annot"><span class="annottext">Sized a -&gt; Sized a -&gt; Bool
 (Sized a -&gt; Sized a -&gt; Bool)
 -&gt; (Sized a -&gt; Sized a -&gt; Bool) -&gt; Eq (Sized a)
 forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
@@ -527,7 +527,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
 == :: Sized a -&gt; Sized a -&gt; Bool
 $c== :: forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264322"><span id="local-6989586621679264324"><span id="local-6989586621679264326"><span id="local-6989586621679264328"><span id="local-6989586621679264330"><span id="local-6989586621679264332"><span id="local-6989586621679264334"><span class="annot"><span class="annottext">Eq (Sized a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264085"><span id="local-6989586621679264087"><span id="local-6989586621679264089"><span id="local-6989586621679264091"><span id="local-6989586621679264093"><span id="local-6989586621679264095"><span id="local-6989586621679264097"><span class="annot"><span class="annottext">Eq (Sized a)
 Eq (Sized a)
 -&gt; (Sized a -&gt; Sized a -&gt; Ordering)
 -&gt; (Sized a -&gt; Sized a -&gt; Bool)
@@ -569,7 +569,7 @@ $c&lt; :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
 compare :: Sized a -&gt; Sized a -&gt; Ordering
 $ccompare :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Ordering
 $cp1Ord :: forall a. Ord a =&gt; Eq (Sized a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264318"><span id="local-6989586621679264320"><span class="annot"><span class="annottext">a -&gt; Sized b -&gt; Sized a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264081"><span id="local-6989586621679264083"><span class="annot"><span class="annottext">a -&gt; Sized b -&gt; Sized a
 (a -&gt; b) -&gt; Sized a -&gt; Sized b
 (forall a b. (a -&gt; b) -&gt; Sized a -&gt; Sized b)
 -&gt; (forall a b. a -&gt; Sized b -&gt; Sized a) -&gt; Functor Sized
@@ -582,7 +582,7 @@ forall (f :: * -&gt; *).
 $c&lt;$ :: forall a b. a -&gt; Sized b -&gt; Sized a
 fmap :: (a -&gt; b) -&gt; Sized a -&gt; Sized b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Sized a -&gt; Sized b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264284"><span id="local-6989586621679264286"><span id="local-6989586621679264288"><span id="local-6989586621679264290"><span id="local-6989586621679264292"><span id="local-6989586621679264294"><span id="local-6989586621679264296"><span id="local-6989586621679264298"><span id="local-6989586621679264300"><span id="local-6989586621679264302"><span id="local-6989586621679264304"><span id="local-6989586621679264306"><span id="local-6989586621679264308"><span id="local-6989586621679264310"><span id="local-6989586621679264312"><span id="local-6989586621679264314"><span id="local-6989586621679264316"><span class="annot"><span class="annottext">Sized a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264047"><span id="local-6989586621679264049"><span id="local-6989586621679264051"><span id="local-6989586621679264053"><span id="local-6989586621679264055"><span id="local-6989586621679264057"><span id="local-6989586621679264059"><span id="local-6989586621679264061"><span id="local-6989586621679264063"><span id="local-6989586621679264065"><span id="local-6989586621679264067"><span id="local-6989586621679264069"><span id="local-6989586621679264071"><span id="local-6989586621679264073"><span id="local-6989586621679264075"><span id="local-6989586621679264077"><span id="local-6989586621679264079"><span class="annot"><span class="annottext">Sized a -&gt; Bool
 (a -&gt; m) -&gt; Sized a -&gt; m
 (a -&gt; b -&gt; b) -&gt; b -&gt; Sized a -&gt; b
 (forall m. Monoid m =&gt; Sized m -&gt; m)
@@ -667,7 +667,7 @@ foldMap :: (a -&gt; m) -&gt; Sized a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sized a -&gt; m
 fold :: Sized m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Sized m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264274"><span id="local-6989586621679264276"><span id="local-6989586621679264278"><span id="local-6989586621679264280"><span class="annot"><span class="annottext">Functor Sized
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679264037"><span id="local-6989586621679264039"><span id="local-6989586621679264041"><span id="local-6989586621679264043"><span class="annot"><span class="annottext">Functor Sized
 Foldable Sized
 Functor Sized
 -&gt; Foldable Sized
@@ -728,28 +728,28 @@ forall a x. Sized a -&gt; Rep (Sized a) x
 $cto :: forall a x. Rep (Sized a) x -&gt; Sized a
 $cfrom :: forall a x. Sized a -&gt; Rep (Sized a) x
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
-</span><span id="line-39"></span><span id="local-6989586621679264271"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264269"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679264271"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264271"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679264034"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264032"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679264034"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264034"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span id="local-6989586621679264268"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264263"><span id="local-6989586621679264265"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679264268"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264268"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679264262"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264262"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679264261"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679264261"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679264260"><span class="annot"><span class="annottext">&lt;&gt; :: Sized a -&gt; Sized a -&gt; Sized a
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679264259"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264259"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679264258"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679264258"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; a -&gt; Sized a
+</span><span id="line-41"></span><span id="local-6989586621679264031"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264026"><span id="local-6989586621679264028"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679264031"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264031"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679264025"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679264025"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679264024"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264024"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679264023"><span class="annot"><span class="annottext">&lt;&gt; :: Sized a -&gt; Sized a -&gt; Sized a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679264022"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679264022"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679264021"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264021"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; a -&gt; Sized a
 forall a. Size -&gt; a -&gt; Sized a
 </span><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264262"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679264025"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679264259"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679264261"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679264022"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264024"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679264258"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span></span><span>
+</span><a href="#local-6989586621679264021"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span id="local-6989586621679264257"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264251"><span id="local-6989586621679264253"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679264257"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264257"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-45"></span><span>  </span><span id="local-6989586621679264250"><span class="annot"><span class="annottext">mempty :: Sized a
+</span><span id="line-44"></span><span id="local-6989586621679264020"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264014"><span id="local-6989586621679264016"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679264020"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264020"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679264013"><span class="annot"><span class="annottext">mempty :: Sized a
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; a -&gt; Sized a
 forall a. Size -&gt; a -&gt; Sized a
 </span><a href="Data.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="annot"><span class="annottext">Size

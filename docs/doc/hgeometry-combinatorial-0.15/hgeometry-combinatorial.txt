@@ -47,9 +47,15 @@ binarySearch :: Integral a => (a -> Bool) -> a -> a -> a
 --   0.515625
 --   </pre>
 binarySearchUntil :: (Fractional r, Ord r) => r -> (r -> Bool) -> r -> r -> r
+
+-- | Containers storing elements on which we can binary search.
 class BinarySearch v where {
-    type family Index v :: Type;
+    
+    -- | The type of the elements of the container
     type family Elem v :: Type;
+    
+    -- | The type of indices used in the container.
+    type family Index v :: Type;
 }
 
 -- | Given a monotonic predicate p and a data structure v, find the element
@@ -384,6 +390,7 @@ instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Classes.E
 instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Classes.Ord (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance GHC.Show.Show (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance GHC.Read.Read (Data.Double.Approximate.DoubleRelAbs abs rel)
+
 
 module Data.Double.Shaman
 
@@ -893,11 +900,17 @@ instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbi
 
 -- | Things that have an index.
 module Data.Indexed
-class HasIndex a
 
 -- | Types that have an index.
+class HasIndex a
+
+-- | Get the index of a given <tt>a</tt>
 sosIndex :: HasIndex a => a -> Index
+
+-- | A type of Indices
 type Index = Int
+
+-- | Associate a value of type <tt>a</tt> with an Index.
 data WithIndex a
 WithIndex :: {-# UNPACK #-} !Index -> a -> WithIndex a
 
@@ -1629,20 +1642,35 @@ instance GHC.Base.Monoid (Data.OrdSeq.Key a)
 -- | Data type for representing a Permutation
 module Data.Permutation
 
--- | Orbits (Cycles) are represented by vectors
-type Orbit a = Vector a
-
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-[_orbits] :: Permutation a -> Vector (Orbit a)
-
--- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
---   orbit
-[_indexes] :: Permutation a -> Vector (Int, Int)
 orbits :: forall a_avDn a_avMX. Lens (Permutation a_avDn) (Permutation a_avMX) (Vector (Orbit a_avDn)) (Vector (Orbit a_avMX))
-indexes :: forall a_avDn. Lens' (Permutation a_avDn) (Vector (Int, Int))
+
+-- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
+--   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
+--   the indices.
+--   
+--   <pre>
+--   &gt;&gt;&gt; ["hello","the","world","!!!"]^..traversed.indices even
+--   ["hello","world"]
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; over (traversed.indices (&gt;0)) Prelude.reverse $ ["He","was","stressed","o_O"]
+--   ["He","saw","desserts","O_o"]
+--   </pre>
+indices :: (Indexable i p, Applicative f) => (i -> Bool) -> Optical' p (Indexed i) f a a
+
+-- | Orbits (Cycles) are represented by vectors
+type Orbit a = Vector a
+
+-- | Get the elements of the permutation
 elems :: Permutation a -> Vector a
+
+-- | Get the size of a permutation
+--   
+--   running time: &lt;math&gt;
 size :: Permutation a -> Int
 
 -- | The cycle containing a given item
@@ -1674,7 +1702,6 @@ cycleRep :: (Vector v a, Enum a, Eq a) => v a -> (a -> a) -> Permutation a
 -- | Given the size n, and a list of Cycles, turns the cycles into a cyclic
 --   representation of the Permutation.
 toCycleRep :: Enum a => Int -> [[a]] -> Permutation a
-genIndexes :: Enum a => Int -> [[a]] -> Vector (Int, Int)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Permutation.Permutation a)
 instance GHC.Base.Functor Data.Permutation.Permutation
 instance Data.Foldable.Foldable Data.Permutation.Permutation
@@ -3901,24 +3928,6 @@ instance GHC.Read.Read Data.PlanarGraph.Immutable.Edge
 instance GHC.Show.Show Data.PlanarGraph.Immutable.HalfEdge
 instance GHC.Read.Read Data.PlanarGraph.Immutable.HalfEdge
 
-module Data.PlanarGraph.Persistent
-type HalfEdge = Int
-type Vertex = Int
-type Face = Int
-data PlanarGraph
-PlanarGraph :: HalfEdge -> Vertex -> Face -> HashMap HalfEdge HalfEdge -> HashMap HalfEdge Vertex -> HashMap HalfEdge Face -> HashMap Vertex HalfEdge -> HashMap Face HalfEdge -> PlanarGraph
-[pgNextHalfEdgeId] :: PlanarGraph -> HalfEdge
-[pgNextVertexId] :: PlanarGraph -> Vertex
-[pgNextFaceId] :: PlanarGraph -> Face
-[pgNext] :: PlanarGraph -> HashMap HalfEdge HalfEdge
-[pgVertex] :: PlanarGraph -> HashMap HalfEdge Vertex
-[pgFace] :: PlanarGraph -> HashMap HalfEdge Face
-[pgHalfEdgeFromVertex] :: PlanarGraph -> HashMap Vertex HalfEdge
-[pgHalfEdgeFromFace] :: PlanarGraph -> HashMap Face HalfEdge
-new :: Int -> PlanarGraph
-halfEdgeNext :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgeNextM :: MonadState PlanarGraph m => HalfEdge -> m HalfEdge
-
 
 -- | Data type for representing Generic Ranges (Intervals) and functions
 --   that work with them.
@@ -4355,10 +4364,72 @@ instance GHC.Show.Show Data.Sign.Sign
 --   This is useful for implementing a more general form of "Simulation of
 --   Simplicity" as described in:
 module Data.RealNumber.Symbolic
+
+-- | Let &lt;math&gt; be a bag with indices, let &lt;math&gt; be an upper
+--   bound on the number of times a single item may occur in (mathcal{I}),
+--   and let &lt;math&gt; be a function mapping indices to real numbers
+--   that satisfies:
+--   
+--   <ol>
+--   <li>&lt;math&gt;, for all &lt;math&gt;,</li>
+--   <li>&lt;math&gt;, for all &lt;math&gt;</li>
+--   </ol>
+--   
+--   Note that such a function exists:
+--   
+--   begin{lemma} label{lem:condition_2} Let &lt;math&gt; and &lt;math&gt;.
+--   The function &lt;math&gt; satisfies condition 2. end{lemma}
+--   
+--   begin{proof} By transitivity it suffices to argue this for
+--   &lt;math&gt;:
+--   
+--   begin{align*} &amp;qquad prod_{0 leq i leq j} varepsilon(i)^c &gt;
+--   varepsilon(j+1) \ equiv &amp;qquad prod_{0 leq i leq j}
+--   (delta^{d^i})^c &gt; delta^{d^{j+1}}\ equiv &amp;qquad prod_{0 leq i
+--   leq j} delta^{cd^i} &gt; delta^{d^{j+1}} \ equiv &amp;qquad
+--   delta^{sum_{0 leq i leq j} cd^i} &gt; delta^{d^{j+1}} &amp; text{using
+--   } delta in (0,1)\ equiv &amp;qquad sum_{0 leq i leq j} cd^i &lt;
+--   d^{j+1} \ equiv &amp;qquad csum_{0 leq i leq j} d^i &lt; d^{j+1} \
+--   end{align*}
+--   
+--   We prove this by induction.
+--   
+--   For the base case &lt;math&gt;: we have &lt;math&gt;, which is
+--   trivially true.
+--   
+--   For the step case we have the induction hypothesis &lt;math&gt;, and
+--   we have to prove that &lt;math&gt;:
+--   
+--   begin{align*} csum_{0 leq i leq j+1} d^i &amp;= cd^{j+1} + csum_{0 leq
+--   i leq j} d^i \ &amp;&lt; cd^{j+1} + d^{j+1} &amp; text{using IH} \
+--   &amp;= (c+1)d^{j+1} &amp; text{using that } c+1 leq d \ &amp;leq
+--   dd^{j+1} \ &amp;=d^{j+2} end{align*} This completes the proof.
+--   end{proof}
+--   
+--   An EpsFold now represents the term
+--   
+--   &lt;math&gt;
+--   
+--   for some bag &lt;math&gt;.
+--   
+--   Let &lt;math&gt; be some sub-bag of &lt;math&gt;. Note that condition
+--   2 implies that:
+--   
+--   &lt;math&gt;, for all &lt;math&gt;
+--   
+--   This means that when comparing two EpsFolds, say &lt;math&gt; and
+--   &lt;math&gt;, representing bags &lt;math&gt; and &lt;math&gt;,
+--   respectively. It suffices to compare the largest index (j in
+--   mathcal{I}_1setminusmathcal{I}_2) with the largest index (k in
+--   mathcal{I}_2setminusmathcal{I}_1). We have that
+--   
+--   &lt;math&gt; if and only if &lt;math&gt;.
 data EpsFold i
 
 -- | Creates the term &lt;math&gt;
 eps :: i -> EpsFold i
+
+-- | Constructs an epsfold from a list of elements
 mkEpsFold :: Ord i => [i] -> EpsFold i
 
 -- | Evaluate an eps-fold using the choice of eps from the lemma above,
