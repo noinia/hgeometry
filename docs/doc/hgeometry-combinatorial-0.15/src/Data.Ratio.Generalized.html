@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Ratio.Generalized</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Generalized Ratio type that accepts arbitrary 'Num a' types rather</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- than just Integral ones as in Data.Ratio</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Ratio.Generalized</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier">GRatio</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%25"><span class="hs-operator">(%)</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#numerator"><span class="hs-identifier">numerator</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#denominator"><span class="hs-identifier">denominator</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Real</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Ratio</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">suchThat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Test.QuickCheck.Instances</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- | Generalized Ratio type that accepts more general &quot;base&quot; types</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- than just Integral ones. That does mean we cannot normalize the</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- intermediate expressions, so expect the numbers to become big quite</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- quickly!</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- invariant: the denominator is not zero</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="GRatio"><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-var">GRatio</span></a></span></span><span> </span><span id="local-6989586621679271467"><span class="annot"><a href="#local-6989586621679271467"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679271467"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span id="%3A%25"><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679271467"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-30"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271436"><span id="local-6989586621679271438"><span id="local-6989586621679271440"><span class="annot"><span class="annottext">Int -&gt; GRatio a -&gt; ShowS
+[GRatio a] -&gt; ShowS
+GRatio a -&gt; String
+(Int -&gt; GRatio a -&gt; ShowS)
+-&gt; (GRatio a -&gt; String) -&gt; ([GRatio a] -&gt; ShowS) -&gt; Show (GRatio a)
+forall a. Show a =&gt; Int -&gt; GRatio a -&gt; ShowS
+forall a. Show a =&gt; [GRatio a] -&gt; ShowS
+forall a. Show a =&gt; GRatio a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [GRatio a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [GRatio a] -&gt; ShowS
+show :: GRatio a -&gt; String
+$cshow :: forall a. Show a =&gt; GRatio a -&gt; String
+showsPrec :: Int -&gt; GRatio a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; GRatio a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Get the numerator</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679271434"><span class="annot"><a href="Data.Ratio.Generalized.html#numerator"><span class="hs-identifier hs-type">numerator</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679271434"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-34"></span><span id="numerator"><span class="annot"><span class="annottext">numerator :: GRatio a -&gt; a
+</span><a href="Data.Ratio.Generalized.html#numerator"><span class="hs-identifier hs-var hs-var">numerator</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271433"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271433"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271433"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Get the denominator</span><span>
+</span><span id="line-37"></span><span id="local-6989586621679271432"><span class="annot"><a href="Data.Ratio.Generalized.html#denominator"><span class="hs-identifier hs-type">denominator</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271432"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679271432"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-38"></span><span id="denominator"><span class="annot"><span class="annottext">denominator :: GRatio a -&gt; a
+</span><a href="Data.Ratio.Generalized.html#denominator"><span class="hs-identifier hs-var hs-var">denominator</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271431"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271431"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271431"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- | smart constructor to construct a GRatio. Throws an exception if</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- the denominator is zero.</span><span>
+</span><span id="line-42"></span><span id="local-6989586621679271458"><span class="annot"><a href="Data.Ratio.Generalized.html#%25"><span class="hs-operator hs-type">(%)</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679271458"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271458"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679271458"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679271458"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271458"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-43"></span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="%25"><span class="annot"><span class="annottext">% :: a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%25"><span class="hs-operator hs-var hs-var">%</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GRatio a
+forall a. a
+</span><span class="hs-identifier hs-var">Ratio.ratioZeroDenominatorError</span></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679271429"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271429"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%25"><span class="hs-operator hs-var">%</span></a></span><span> </span><span id="local-6989586621679271428"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271428"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271429"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271428"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679271427"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679271424"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679271427"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271427"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271427"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679271422"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271422"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271421"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271421"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679271420"><span class="annot"><span class="annottext">== :: GRatio a -&gt; GRatio a -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271419"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271419"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271418"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271418"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271422"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271418"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271421"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271419"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-comment">-- by invariant b and d are non-zero</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">==</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679271416"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679271402"><span id="local-6989586621679271404"><span id="local-6989586621679271406"><span id="local-6989586621679271408"><span id="local-6989586621679271410"><span id="local-6989586621679271412"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679271416"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271416"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271416"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679271400"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271400"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271399"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271399"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679271398"><span class="annot"><span class="annottext">compare :: GRatio a -&gt; GRatio a -&gt; Ordering
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271396"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271396"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271395"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271395"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271399"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271395"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271400"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271395"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271399"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271396"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- by invariant b and d are non-zero</span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271399"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271396"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271400"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271395"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-comment">-- by invariant b and d are non-zero</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679271393"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679271390"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271393"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679271393"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271393"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679271383"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271383"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271382"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271382"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679271381"><span class="annot"><span class="annottext">+ :: GRatio a -&gt; GRatio a -&gt; GRatio a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">+</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271379"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271379"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271378"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271378"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271383"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271378"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271382"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271379"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271382"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271378"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-comment">-- since b and d where non-zero, b*d is also non-zero</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679271377"><span class="annot"><span class="annottext">negate :: GRatio a -&gt; GRatio a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271376"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271376"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271375"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271375"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271376"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271375"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-comment">-- b was non-zero, it remains non-zero</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679271374"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271374"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271373"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271373"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679271372"><span class="annot"><span class="annottext">* :: GRatio a -&gt; GRatio a -&gt; GRatio a
+</span><a href="#local-6989586621679271372"><span class="hs-operator hs-var hs-var hs-var hs-var">*</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271371"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271371"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271370"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271370"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271374"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271371"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271373"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271370"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-comment">-- since b and d where non-zero, b*d is also non-zero</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679271369"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; GRatio a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span id="local-6989586621679271368"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271368"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; a
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271368"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679271367"><span class="annot"><span class="annottext">signum :: GRatio a -&gt; GRatio a
+</span><a href="#local-6989586621679271367"><span class="hs-identifier hs-var hs-var hs-var hs-var">signum</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271366"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271366"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271365"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271365"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271366"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271365"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-comment">-- by invariant b cannot be zero, so signum b cannot be zero either.</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679271364"><span class="annot"><span class="annottext">abs :: GRatio a -&gt; GRatio a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">abs</span></span></span><span> </span><span id="local-6989586621679271362"><span class="annot"><span class="annottext">GRatio a
+</span><a href="#local-6989586621679271362"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">GRatio a -&gt; GRatio a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">GRatio a
+</span><a href="#local-6989586621679271362"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">GRatio a -&gt; GRatio a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">GRatio a
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">GRatio a
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">GRatio a -&gt; GRatio a -&gt; GRatio a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">GRatio a
+</span><a href="#local-6989586621679271362"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-66"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GRatio a
+</span><a href="#local-6989586621679271362"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679271361"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679271357"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271361"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679271361"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271361"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679271354"><span class="annot"><span class="annottext">fromRational :: Rational -&gt; GRatio a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromRational</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271353"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271353"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">Ratio.:%</span></span><span> </span><span id="local-6989586621679271352"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271352"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; a
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271353"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; a
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679271352"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679271351"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271351"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271350"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271350"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679271349"><span class="annot"><span class="annottext">/ :: GRatio a -&gt; GRatio a -&gt; GRatio a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">/</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679271347"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271347"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-type">:%</span></a></span><span> </span><span id="local-6989586621679271346"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271346"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271351"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271346"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. (Eq a, Num a) =&gt; a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%25"><span class="hs-operator hs-var">%</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271350"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679271347"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-comment">-- b is non-zero, but c may be zero, so in that case we would be</span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-comment">-- dividing by zero.  however, if c is zero then (c % d) would be</span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-comment">-- zero, so there is no need to explicitly handle that; i.e. that</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- is a something the user must do</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679271345"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679271342"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679271345"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679271345"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679271345"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Ratio.Generalized.html#GRatio"><span class="hs-identifier hs-type">GRatio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679271345"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621679271340"><span class="annot"><span class="annottext">arbitrary :: Gen (GRatio a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; GRatio a
+forall a. a -&gt; a -&gt; GRatio a
+</span><a href="Data.Ratio.Generalized.html#%3A%25"><span class="hs-operator hs-var">(:%)</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; GRatio a) -&gt; Gen a -&gt; Gen (a -&gt; GRatio a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen (a -&gt; GRatio a) -&gt; Gen a -&gt; Gen (GRatio a)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Gen a
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen a -&gt; (a -&gt; Bool) -&gt; Gen a
+forall a. Gen a -&gt; (a -&gt; Bool) -&gt; Gen a
+</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-78"></span></pre></body></html>
