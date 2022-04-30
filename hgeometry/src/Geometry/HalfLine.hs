@@ -7,12 +7,15 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
+--
+-- Halflines
 --------------------------------------------------------------------------------
-module Geometry.HalfLine( HalfLine(HalfLine)
-                             , startPoint, halfLineDirection
-                             , toHalfLine
-                             , halfLineToSubLine, fromSubLine
-                             ) where
+module Geometry.HalfLine
+  ( HalfLine(HalfLine)
+  , startPoint, halfLineDirection
+  , toHalfLine
+  , halfLineToSubLine, fromSubLine
+  ) where
 
 import           Control.DeepSeq
 import           Control.Lens
@@ -86,13 +89,14 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (HalfLine d r
 
 --------------------------------------------------------------------------------
 
+-- | Convert to a SubLine
 halfLineToSubLine                :: (Arity d, Num r)
                                  => HalfLine d r -> SubLine d () (UnBounded r) r
 halfLineToSubLine (HalfLine p v) = let l = Line p v
                                    in SubLine l (Interval (Closed $ ext (Val 0))
                                                           (Open   $ ext MaxInfinity))
 
-
+-- | Try to construct a halfline from a subline.
 fromSubLine               :: (Num r, Arity d) => SubLine d p (UnBounded r) r
                           -> Maybe (HalfLine d r)
 fromSubLine (SubLine l i) = case (i^.start.core, i^.end.core) of

@@ -6,8 +6,14 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
+--
+-- Orthogonal Slabs
 --------------------------------------------------------------------------------
-module Geometry.Slab where
+module Geometry.Slab
+  ( Slab
+  , horizontalSlab, verticalSlab
+  , Orthogonal(..)
+  ) where
 
 import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both, from)
 import           Data.Bifunctor

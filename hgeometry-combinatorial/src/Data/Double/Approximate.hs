@@ -1,7 +1,15 @@
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE MagicHash           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
--- | See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Double.Approximate
+-- Copyright   :  (C) David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--
+-- See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+--------------------------------------------------------------------------------
 module Data.Double.Approximate
   ( SafeDouble
   , DoubleRelAbs(..)
