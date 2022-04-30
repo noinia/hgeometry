@@ -29,6 +29,10 @@ module Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
                           , sortAround, sortAround'
                           , insertIntoCyclicOrder
 
+                          , StrictCCW, pattern SCCW, pattern SCW
+                          , strictCcw
+
+
                           , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
                           , cmpByDistanceTo, cmpByDistanceTo', cmpInDirection
@@ -44,6 +48,7 @@ module Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
 import Geometry.Point.Class
 import Geometry.Point.Internal hiding (coord, unsafeCoord)
 import Geometry.Point.Orientation.Degenerate
+import Geometry.Point.Orientation
 import Geometry.Point.Quadrants
 import Geometry.Line.Internal
 import Geometry.Vector

@@ -188,10 +188,17 @@ v3 a b c = Vector $ V.mk3 a b c
 
 -- | Destruct a 2 dim vector into a pair
 _unV2 :: Vector 2 r -> (r,r)
-_unV2 v = let [x,y] = V.toList v in (x,y)
+_unV2 v = case V.toList v of
+            [x,y] -> (x,y)
+            _     -> error "_unV2 :: absurd"
+{-# INLINE _unV2 #-}
 
-_unV3 :: Vector 3 r -> (r,r,r)
-_unV3 v = let [x,y,z] = V.toList v in (x,y,z)
+-- | Destruct a 3 dim vector into a pair
+_unV3   :: Vector 3 r -> (r,r,r)
+_unV3 v = case V.toList v of
+            [x,y,z] ->  (x,y,z)
+            _       -> error "_unV3 :: absurd"
+{-# INLINE _unV3 #-}
 
 -- | Pattern synonym for two and three dim vectors
 pattern Vector2       :: r -> r -> Vector 2 r

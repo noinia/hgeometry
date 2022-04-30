@@ -1,14 +1,16 @@
 {-# LANGUAGE  AllowAmbiguousTypes  #-}
+{-# LANGUAGE  UndecidableInstances  #-}
 {-# LANGUAGE  FunctionalDependencies  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Geometry.Point.Class where
 
 import           Control.Lens
 import           Data.Ext
+import           Data.Indexed
+import           GHC.TypeNats
 import           Geometry.Point.Internal (Point)
 import qualified Geometry.Point.Internal as Internal
 import           Geometry.Vector
-import           GHC.TypeNats
 import           Linear.V2
 import           Linear.V3
 import           Linear.V4
@@ -65,6 +67,11 @@ instance ToAPoint (Point d r :+ p) d r where
 instance AsAPoint Point where
   asAPoint = id
   {-# INLINABLE asAPoint #-}
+
+instance ToAPoint point d r => ToAPoint (WithIndex point) d r where
+  toPoint = to (\(WithIndex _ p) -> p^.toPoint)
+  {-# INLINABLE toPoint #-}
+
 
 instance (1 <= d, Arity d) => R1 (Point d) where
   _x = coord @1

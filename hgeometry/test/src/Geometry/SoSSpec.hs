@@ -1,30 +1,20 @@
 module Geometry.SoSSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
-
+import qualified Geometry.SoS.ConvexHull as StrictConvexHull
 import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.RealNumber.Symbolic
--- import           Control.Lens
--- import           Control.Monad (forM_)
-import           Data.Foldable
-import           Geometry.Point
-import           Geometry.SoS.Point
--- import qualified Data.List as List
--- import           Data.Proxy
-import           Data.RealNumber.Rational
--- import           Data.Util
--- import           Data.Word
-import           Data.Ext
--- import           GHC.TypeNats
-import           Test.Hspec
-import           Test.QuickCheck
-import           Geometry.SoS.Point
-import           Geometry.SoS.Orientation()
 import           Data.Ext
 import           Data.Indexed
-
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.RealNumber.Rational
+import           Data.RealNumber.Symbolic
+import           Geometry.Point
+import           Geometry.SoS.Orientation ()
+import           Geometry.SoS.Point
+import           Test.Hspec
+import           Test.QuickCheck
+import Geometry.Polygon.Convex (lowerTangent)
 
 --------------------------------------------------------------------------------
 
@@ -37,10 +27,8 @@ lowerHullSymbolic :: (Ord r, Num r)
 lowerHullSymbolic = fmap (over core fromSymbolic)
                   . DivideAndConquer.lowerHull
                   . fmap (\(WithIndex i (p :+ e)) -> toSymbolic (WithIndex i p) :+ e)
-                  . fst . labelWithIndex
+                  . labelWithIndex
 
--- data Eps = Eps
---
 
 -- \(\prod_{0 \leq i \leq j} \varepsilon(i)^c > \varepsilon(k)\), for all \(1 \leq j < k\)
 
@@ -52,6 +40,9 @@ spec = describe "symoblic/convex hull test" $ do
            \(pts :: NonEmpty (Point 2 RBase :+ ())) ->
              lowerHullSymbolic pts `shouldBe` DivideAndConquer.lowerHull pts
 
+         it "strict convex hull same with symoblic" $ property $
+           \(pts :: NonEmpty (Point 2 RBase :+ ())) ->
+             StrictConvexHull.lowerHull pts `shouldBe` DivideAndConquer.lowerHull pts
 
          it "toSymbolic/fromSymbolic" $ property $ \i (p :: Point 2 RBase) ->
            fromSymbolic (toSymbolic $ WithIndex i p) `shouldBe` p
@@ -72,3 +63,13 @@ spec = describe "symoblic/convex hull test" $ do
          --   forM_ [1..5] $ \c -> it "math" $
          --   let d = c+1
          --   in c * sum [ d^i | i <- [0..j]] < d ^ (j+1) `shouldBe` True
+
+test :: NonEmpty (Point 2 RBase :+ ())
+test = read "(Point2 (-4.65285) (-3.3007) :+ ()) :| [Point2 (-4.24464) 1.90593 :+ (),Point2 3.4645 (-2.71976) :+ ()]"
+
+test' = StrictConvexHull.debug test
+
+lh1 = NonEmpty.fromList $ NonEmpty.take 2 test'
+rh1 = NonEmpty.fromList $ NonEmpty.drop 2 test'
+
+foo = StrictConvexHull.lowerTangent (NonEmpty.reverse lh1) rh1

@@ -16,10 +16,11 @@ module Geometry.Properties( module Data.Intersection
                                , NumType
                                ) where
 
-import GHC.TypeLits
 import Data.Ext
 import Data.Intersection
+import Data.Kind (Type)
 import Data.Range
+import GHC.TypeLits
 
 -------------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ import Data.Range
 type family Dimension t :: Nat
 
 -- | A type family for types that have an associated numeric type.
-type family NumType t :: *
+type family NumType t :: Type
 
 --------------------------------------------------------------------------------
 
