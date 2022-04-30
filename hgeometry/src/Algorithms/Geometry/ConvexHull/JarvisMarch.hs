@@ -17,15 +17,16 @@ import           Control.Lens ((^.))
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..), (<|))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.Util (extractMinimaBy)
+import           Data.Ord (comparing, Down(..))
+import           Data.Semigroup.Foldable
 import           Geometry.Point
 import           Geometry.Polygon
 import           Geometry.Polygon.Convex (ConvexPolygon(..))
 import           Geometry.Vector
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..), (<|))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing, Down(..))
-import           Data.Semigroup.Foldable
 
 --------------------------------------------------------------------------------
 
@@ -133,19 +134,3 @@ foldr1With f b = go . toNonEmpty
     go (x :| xs) = case NonEmpty.nonEmpty xs of
                      Nothing  -> b x
                      Just xs' -> x `f` go xs'
-
--- | extracts all minima from the list. The result consists of the
--- list of minima, and all remaining points. Both lists are returned
--- in the order in which they occur in the input.
---
--- >>> extractMinimaBy compare [1,2,3,0,1,2,3,0,1,2,0,2]
--- [0,0,0] :+ [2,3,1,2,3,1,2,1,2]
-extractMinimaBy     :: (a -> a -> Ordering) -> [a] -> [a] :+ [a]
-extractMinimaBy cmp = \case
-  []     -> [] :+ []
-  (x:xs) -> first NonEmpty.toList $ foldr (\y (mins@(m:|_) :+ rest) ->
-                                             case m `cmp` y of
-                                               LT -> mins :+ y:rest
-                                               EQ -> (y NonEmpty.<| mins) :+ rest
-                                               GT -> (y:|[]) :+ NonEmpty.toList mins <> rest
-                                          ) ((x:|[]) :+ []) xs

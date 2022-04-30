@@ -56,7 +56,7 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 -- >>> sideTest (Point2 1 1 `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Negative
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
--- Negative
+-- Positive
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 3) (Point2 2 2 `with` 1)
 -- Positive
 sideTest      :: (SoS d, Num r, Ord r, ToAPoint point d r, HasIndex point)

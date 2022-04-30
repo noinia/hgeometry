@@ -23,6 +23,7 @@ import Geometry.Vector
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import Geometry.Point.Internal
 -- >>> let with p i = WithIndex i p
 
 
