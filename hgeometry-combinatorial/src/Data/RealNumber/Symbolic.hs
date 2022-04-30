@@ -54,7 +54,7 @@ import           Test.QuickCheck.Instances ()
 --------------------------------------------------------------------------------
 -- * EpsFolds
 
-{-
+{- |
 Let \(\mathcal{I}\) be a bag with indices, let \(c\) be an upper
 bound on the number of times a single item may occur in
 \(\mathcal{I}\), and let \(\varepsilon\) be a function mapping indices
@@ -140,9 +140,9 @@ factors (Pi is) = is
 eps :: i -> EpsFold i
 eps = Pi . singleton
 
+-- | Constructs an epsfold from a list of elements
 mkEpsFold :: Ord i => [i] -> EpsFold i
 mkEpsFold = Pi . foldMap singleton
-
 
 
 -- | computes a base 'd' that can be used as:
@@ -383,6 +383,7 @@ perturb c i = Sum $ Map.fromAscList [ (eps i,1) , (mempty,c) ]
 -- Bag maps k to i, then k has multiplicity i+1.
 newtype Bag a = Bag (Map.Map a Int) deriving (Show,Eq,Ord)
 
+-- | Construct a singleton bag
 singleton   :: k -> Bag k
 singleton x = Bag $ Map.singleton x 0
 
@@ -412,6 +413,7 @@ difference (Bag m1) (Bag m2) = Bag $ Map.differenceWith updateCount m1 m2
                                    else Just $ d - 1
 
 
+-- | Get the maximum in the bag
 maximum'         :: Bag b -> Maybe b
 maximum' (Bag m) = fmap fst . Map.lookupMax $ m
 

@@ -257,6 +257,8 @@ instance (Fractional r, Arity d) => HasSquaredEuclideanDistance (Line d r) where
 data SideTestUpDown = Below | On | Above deriving (Show,Read,Eq,Ord)
 
 class OnSideUpDownTest t where
+  -- | Given a point q and a hyperplane h, compute to which side of h q lies. For
+  -- vertical hyperplanes the left side of the hyperplane is interpeted as below.
   onSideUpDown :: (d ~ Dimension t, r ~ NumType t, Ord r, Num r)
                => Point d r -> t -> SideTestUpDown
 

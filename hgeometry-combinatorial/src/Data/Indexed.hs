@@ -22,13 +22,15 @@ import Control.Monad.State.Strict
 
 --------------------------------------------------------------------------------
 
+-- | A type of Indices
 type Index = Int
 
+-- | Types that have an index.
 class HasIndex a where
-  -- | Types that have an index.
+  -- | Get the index of a given 'a'
   sosIndex :: a -> Index
 
-
+-- | Associate a value of type 'a' with an Index.
 data WithIndex a = WithIndex {-# UNPACK #-} !Index a
                deriving (Show)
 
