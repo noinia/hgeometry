@@ -1,7 +1,8 @@
-module Algorithms.Geometry.SoS.SymbolicSpec where
+module Data.RealNumber.SymbolicSpec where
 
-import Algorithms.Geometry.SoS.Index
-import Algorithms.Geometry.SoS.Symbolic
+import Data.Traversable
+import Data.Indexed
+import Data.RealNumber.Symbolic
 import GHC.Generics
 import System.Random
 import System.Random.Stateful
@@ -39,7 +40,7 @@ symbolicSpec = describe "Symbolic Tests" $ do
     it "Ord < " $ property $ \a b (NonNegative i) (NonNegative j) -> a < b ==>
       perturb' a i < perturb b j `shouldBe` True
     it "eval exprs" $ property $ \(eI :: Expr Integer) ->
-      let e = flip perturb 5 <$> eI
+      let e = perturbAll eI
       in roundToConstant (eval e)
          `shouldBe`
          eval eI
@@ -56,13 +57,13 @@ instance Arbitrary SmallInt where
 
 --------------------------------------------------------------------------------
 
-symbolic' :: Integer -> SoSIndex -> Symbolic SoSIndex Integer
+symbolic' :: Integer -> Index -> Symbolic Index Integer
 symbolic' = symbolic
 
-perturb' :: Integer -> SoSIndex -> Symbolic SoSIndex Integer
+perturb' :: Integer -> Index -> Symbolic Index Integer
 perturb' = perturb
 
-term' :: Integer -> SoSIndex -> Term SoSIndex Integer
+term' :: Integer -> Index -> Term Index Integer
 term' = term
 
 
@@ -90,6 +91,15 @@ data Expr a = Const a
             | BinOp Op (Expr a) (Expr a)
             deriving (Show,Eq,Functor)
 
+instance Foldable Expr where
+  foldMap = foldMapDefault
+instance Traversable Expr where
+  traverse f = go
+    where
+      go = \case
+        Const x        -> Const <$> f x
+        BinOp op e1 e2 -> BinOp op <$> go e1 <*> go e2
+
 type IntExpr = Expr Integer
 
 instance Arbitrary a => Arbitrary (Expr a) where
@@ -101,3 +111,9 @@ eval :: Num a => Expr a -> a
 eval = \case
   Const c        -> c
   BinOp op e1 e2 -> evalOp op (eval e1) (eval e2)
+
+
+
+-- | Perturbs all elements with a unique offset
+perturbAll :: Num r => Traversable t => t r -> t (Symbolic Index r)
+perturbAll = labelWith (flip perturb)

@@ -1,32 +1,34 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Algorithms.Geometry.SoS.Orientation( SoS
-                                          , sideTest
-                                          , sideTest'
-                                          ) where
+module Geometry.SoS.Orientation
+  ( SoS
+  , sideTest
+  , sideTest'
+  ) where
 
-import Algorithms.Geometry.SoS.Index
-import Algorithms.Geometry.SoS.Determinant
-import Algorithms.Geometry.SoS.Sign
-import Algorithms.Geometry.SoS.Symbolic
-import Algorithms.Geometry.SoS.Point
 import Control.Lens hiding (snoc,cons)
-import Geometry.Matrix
-import Geometry.Point
-import Geometry.Vector
+import Data.Indexed
+import Data.RealNumber.Symbolic
+import Data.Sign
 import GHC.TypeNats
+import Geometry.Matrix
+import Geometry.Point.Class
+import Geometry.Point.Internal
+import Geometry.SoS.Determinant
+import Geometry.SoS.Point
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 
-instance ToAPoint point d r => ToAPoint (WithSoS point) d r where
-  toPoint = to (\(WithSoS _ p) -> p^.toPoint)
-with = flip WithSoS
-
 -- $setup
--- let with = flip WithSoS
+-- >>> let with p i = WithIndex i p
+
 
 -- | A dimension d has support for SoS when we can: compute a
 -- dterminant of a d+1 by d+1 dimensional matrix.
 type SoS d = (Arity d, HasDeterminant (d+1))
+
+-- sideTest (Point2 1 1 `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)'
+
 
 
 -- | Given a query point q, and a vector of d points defining a
@@ -52,12 +54,12 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 -- >>> sideTest (Point2 1 (-2) `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
 -- Negative
 -- >>> sideTest (Point2 1 1 `with` 0) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
--- Positive
+-- Negative
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 1) (Point2 2 2 `with` 3)
--- Negative
+-- Positive
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 3) (Point2 2 2 `with` 1)
--- Negative
-sideTest      :: (SoS d, Num r, Ord r, ToAPoint point d r, HasSoSIndex point)
+-- Positive
+sideTest      :: (SoS d, Num r, Ord r, ToAPoint point d r, HasIndex point)
               => point -> Vector d point -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 

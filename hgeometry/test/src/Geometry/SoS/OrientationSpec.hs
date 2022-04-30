@@ -1,4 +1,4 @@
-module Algorithms.Geometry.SoS.OrientationSpec where
+module Geometry.SoS.OrientationSpec where
 
 -- import           Algorithms.Geometry.SoS
 -- import           Control.Lens

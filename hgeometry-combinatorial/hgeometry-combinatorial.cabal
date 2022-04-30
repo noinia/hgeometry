@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                hgeometry-combinatorial
-version:             0.14
+version:             0.15
 synopsis:            Data structures, and Data types.
 description:
     The Non-geometric data types and algorithms used in HGeometry.
@@ -101,10 +101,8 @@ common setup
               , text                    >= 1.1.1.0
               , math-functions
 
-              , mtl
+              , mtl                     >= 2.1
               , template-haskell
-
-              , hspec
 
 library
   import: setup
@@ -130,6 +128,7 @@ library
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
+                    Data.RealNumber.Symbolic
                     Data.Double.Approximate
                     Data.Double.Shaman
                     Data.Ratio.Generalized
@@ -144,6 +143,8 @@ library
                     Data.Intersection
                     Data.Range
                     Data.Ext
+                    Data.Sign
+                    Data.Indexed
 
                     -- Data.Ext.Multi
 
@@ -207,7 +208,7 @@ test-suite doctests
 
   default-language:    Haskell2010
 
-test-suite hspec
+test-suite comb-hspec
   import: setup
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       test
@@ -231,6 +232,7 @@ test-suite hspec
                  Data.IndexedDoublyLinkedListSpec
                  Data.RealNumber.RationalSpec
                  Data.Ratio.GeneralizedSpec
+                 Data.RealNumber.SymbolicSpec
 
 
   build-depends: hspec                   >= 2.1

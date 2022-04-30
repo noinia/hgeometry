@@ -1,7 +1,7 @@
-module Algorithms.Geometry.SoS.Determinant where
+module Geometry.SoS.Determinant where
 
-import           Algorithms.Geometry.SoS.Sign
-import           Algorithms.Geometry.SoS.Symbolic
+import           Data.Sign
+import           Data.RealNumber.Symbolic
 import           Geometry.Matrix
 
 

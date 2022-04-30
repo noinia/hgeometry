@@ -1,13 +1,25 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Algorithms.Geometry.SoS.Symbolic
+-- Module      :  Data.RealNumber.Symbolic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
+-- Defines a type 'Symbolic i r' that represents "indexed" numbers of
+-- type r that have been "symbolically" perturbed by some arbitraryily
+-- small \(\varepsilon\).
+--
+-- With indexed numbers we mean that every number has some index, and
+-- the size of the pertubation \(\varepsilon\) is proportional to this index.
+--
+-- This is useful for implementing a more general form of "Simulation of Simplicity"
+-- as described in:
+--
+--
+--
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SoS.Symbolic(
+module Data.RealNumber.Symbolic(
     EpsFold
   , eps, mkEpsFold
   , evalEps
@@ -25,12 +37,9 @@ module Algorithms.Geometry.SoS.Symbolic(
   , signOf
   , roundToConstant
 
-  , SoSI(..)
   , SoSRational, sosRational
   ) where
 
-import           Algorithms.Geometry.SoS.Index
-import           Algorithms.Geometry.SoS.Sign (Sign(..))
 import           Control.Lens
 import           Data.Foldable (toList)
 import qualified Data.List as List
@@ -38,7 +47,8 @@ import qualified Data.Map.Merge.Strict as Map
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
 import           Data.Ratio.Generalized (GRatio, (%))
-import           Test.QuickCheck (Arbitrary(..), listOf, suchThat)
+import           Data.Sign (Sign(..))
+import           Test.QuickCheck (Arbitrary(..), listOf)
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -426,20 +436,5 @@ sosRational = (%)
 
 --------------------------------------------------------------------------------
 
--- | the index type used to disambiguate the values
-data SoSI = MkSoS {-# UNPACK #-}!SoSIndex -- ^ original index
-                  {-# UNPACK #-}!Int -- ^ index of the coordinate in [0..(d-1)]
-          deriving (Show,Eq,Ord)
-
--- for now I've kept the two components separtely, as to avoid blowing
--- up the range required for the indices. Maybe it would be faster to
--- just map the jth coordinate of point p_i to index i*d+j
--- though. That way we can map to a Point d (Symoblic (WithIndex
--- r)). Maybe that way we can use IntSets and so on to represent the
--- Bags/Symbolic type rather than the arbitrary i as we currently
--- have.
-
-instance Arbitrary SoSI where
-  arbitrary = MkSoS <$> arbitrary <*> arbitrary
 
 --------------------------------------------------------------------------------

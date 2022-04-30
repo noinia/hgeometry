@@ -3,7 +3,9 @@ module Data.RealNumber.RationalSpec where
 
 import           Data.RealNumber.Rational
 import           Test.Hspec
-import           Test.QuickCheck
+-- import           Test.QuickCheck
+
+--------------------------------------------------------------------------------
 
 type R = RealNumber 5
 

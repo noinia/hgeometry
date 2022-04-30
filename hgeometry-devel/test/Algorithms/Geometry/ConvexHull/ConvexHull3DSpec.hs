@@ -31,6 +31,7 @@ import           Data.Util
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
+import           Data.RealNumber.Symbolic
 -- import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 import           Geometry.Point.Random
 
@@ -45,8 +46,10 @@ import           Geometry.Point.Random
 
 
 --------------------------------------------------------------------------------
-
 type R = RealNumber 10
+-- type RBase = RealNumber 5
+-- type R = Symbolic SoSI RBase
+
 
 spec :: Spec
 spec = describe "3D ConvexHull tests" $ do

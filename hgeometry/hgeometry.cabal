@@ -13,28 +13,25 @@ license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Frank Staals
 maintainer:          frank@fstaals.net
--- copyright:
-
-tested-with:         GHC >= 8.8
-
+tested-with:         GHC >= 8.10
 category:            Geometry
 build-type:          Simple
-
-source-repository head
-  type:     git
-  location: https://github.com/noinia/hgeometry
 
 extra-source-files:  README.md
                      changelog
                      changelog.org
 
-Extra-doc-files:     docs/**/*.png
+extra-doc-files:     docs/**/*.png
                      docs/**/*.jpg
 
 data-files:          test/src/Data/PlaneGraph/testsegs.png
                      test/data/polygons.simple
                      test/data/polygons.multi
                      test/src/**/*.yaml
+
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
 
 --------------------------------------------------------------------------------
 -- * Common Stanzas
@@ -75,7 +72,7 @@ common setup
                     , MultiParamTypeClasses
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.13
+              , hgeometry-combinatorial >= 0.15
 
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
@@ -131,10 +128,9 @@ library
 
   exposed-modules:  Geometry
                     -- * Primitives; Simulating General Position
-                    -- Algorithms.Geometry.SoS
-                    -- only export stuff from SoS I guess
-                    Algorithms.Geometry.SoS.Symbolic
-                    Algorithms.Geometry.SoS.Index
+                    -- Geometry.SoS
+                    Geometry.SoS.Point
+                    Geometry.SoS.Orientation
 
                     -- * Generic Geometry
                     Geometry.Properties
@@ -316,10 +312,7 @@ library
                     Geometry.Interval.Util
 
                     -- Algorithms.Geometry.SoS.Expr
-                    Algorithms.Geometry.SoS.Point
-                    Algorithms.Geometry.SoS.Orientation
-                    Algorithms.Geometry.SoS.Determinant
-                    Algorithms.Geometry.SoS.Sign
+                    Geometry.SoS.Determinant
 
                     Data.PlaneGraph.Core
 
@@ -431,10 +424,10 @@ test-suite hspec
                  Geometry.BezierMaarten
                  Geometry.QuadTreeSpec
 
-                 Algorithms.Geometry.SoSSpec
-                 -- Algorithms.Geometry.SoS.SortSpec
-                 Algorithms.Geometry.SoS.SymbolicSpec
-                 Algorithms.Geometry.SoS.OrientationSpec
+                 Geometry.SoSSpec
+                 -- Geometry.SoS.SortSpec
+                 Geometry.SoS.OrientationSpec
+                 Geometry.SoS.ConvexHull
 
                  Algorithms.Geometry.WSPDSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateSpec

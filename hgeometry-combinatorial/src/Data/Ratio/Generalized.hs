@@ -1,6 +1,17 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Ratio.Generalized
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Generalized Ratio type that accepts arbitrary 'Num a' types rather
+-- than just Integral ones as in Data.Ratio
+--------------------------------------------------------------------------------
 module Data.Ratio.Generalized
   ( GRatio
   , (%)
+  , numerator, denominator
   ) where
 
 import qualified GHC.Real as Ratio
@@ -17,6 +28,14 @@ import           Test.QuickCheck.Instances ()
 -- invariant: the denominator is not zero
 data GRatio a = !a :% !a
               deriving (Show)
+
+-- | Get the numerator
+numerator          :: GRatio a -> a
+numerator (a :% _) = a
+
+-- | Get the denominator
+denominator          :: GRatio a -> a
+denominator (_ :% b) = b
 
 -- | smart constructor to construct a GRatio. Throws an exception if
 -- the denominator is zero.

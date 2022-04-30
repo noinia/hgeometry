@@ -70,6 +70,6 @@ modules =
   , "Algorithms.Geometry.ConvexHull.Naive"
   , "Algorithms.Geometry.ConvexHull.JarvisMarch"
 
-  , "Algorithms.Geometry.SoS.Orientation"
+  , "Geometry.SoS.Orientation"
   , "Algorithms.Geometry.InPolygon"
   ]
