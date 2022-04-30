@@ -116,4 +116,4 @@ eval = \case
 
 -- | Perturbs all elements with a unique offset
 perturbAll :: Num r => Traversable t => t r -> t (Symbolic Index r)
-perturbAll = fst . labelWith (flip perturb)
+perturbAll = labelWith (flip perturb)

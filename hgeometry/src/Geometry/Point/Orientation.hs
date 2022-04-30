@@ -51,11 +51,11 @@ instance Show StrictCCW where
 -- >>> strictCcw (Point2 0 0 `with` 1) (Point2 2 2 `with` 3) (Point2 1 (-2) `with` 0)
 -- SCW
 -- >>> strictCcw (Point2 0 0 `with` 1) (Point2 2 2 `with` 3) (Point2 1 1 `with` 0)
--- SCCW
+-- SCW
 -- >>> strictCcw (Point2 0 0 `with` 1) (Point2 2 2 `with` 3) (Point2 1 1 `with` 10)
 -- SCCW
 -- >>> strictCcw (Point2 0 0 `with` 3) (Point2 2 2 `with` 1) (Point2 1 1 `with` 10)
--- SCW
+-- SCCW
 strictCcw      :: ( Num r, Ord r
                   , ToAPoint point 2 r
                   , HasIndex point
