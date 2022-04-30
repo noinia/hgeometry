@@ -6,12 +6,13 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Geometry.Box.Sides( Sides(Sides), north, east, south, west
-                              , topSide, bottomSide, leftSide, rightSide
-                              , sides, sides'
+module Geometry.Box.Sides
+  ( Sides(Sides), north, east, south, west
+  , topSide, bottomSide, leftSide, rightSide
+  , sides, sides'
 
-                              , sideDirections
-                              ) where
+  , sideDirections
+  ) where
 
 import Geometry.Directions
 import Geometry.Box.Internal
@@ -64,6 +65,7 @@ sideDirections = Sides North East South West
 
 --------------------------------------------------------------------------------
 
+-- | The top side of the box, from left to right.
 topSide :: Num r => Rectangle p r -> LineSegment 2 p r
 topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
 
@@ -71,7 +73,7 @@ topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
 bottomSide :: Num r => Rectangle p r -> LineSegment 2 p r
 bottomSide = (\(Corners _ _ r l) -> ClosedLineSegment l r) . corners
 
---
+-- | Left side of the box, from bottom to top
 leftSide  :: Num r => Rectangle p r -> LineSegment 2 p r
 leftSide = (\(Corners t _ _ b) -> ClosedLineSegment b t) . corners
 

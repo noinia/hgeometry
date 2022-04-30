@@ -36,7 +36,7 @@ closestPair :: ( Ord r, Arity d, Num r)
             => LSeq 2 (Point d r :+ p) -> Two (Point d r :+ p)
 closestPair = (^._1) . closestPairWith (\p q -> squaredEuclideanDist (p^.core) (q^.core))
 
-
+-- | A distance function between geometries of type 'g'
 type DistanceFunction g = g -> g -> NumType g
 
 -- | Naive algorithm to compute the closest pair of points (and the
