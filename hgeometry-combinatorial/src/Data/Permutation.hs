@@ -9,7 +9,21 @@
 -- Data type for representing a Permutation
 --
 --------------------------------------------------------------------------------
-module Data.Permutation where
+module Data.Permutation
+  ( Permutation(Permutation)
+  , orbits, indices
+
+  , Orbit
+  , elems
+  , size
+  , cycleOf
+  , next, previous
+  , lookupIdx
+  , apply
+  , orbitFrom
+
+  , cycleRep, toCycleRep
+  ) where
 
 import           Control.DeepSeq
 import           Control.Lens
@@ -50,10 +64,13 @@ instance F.Foldable Permutation where
 instance T.Traversable Permutation where
   traverse f (Permutation os is) = flip Permutation is <$> T.traverse (T.traverse f) os
 
-
+-- | Get the elements of the permutation
 elems :: Permutation a -> V.Vector a
 elems = GV.concat . GV.toList . _orbits
 
+-- | Get the size of a permutation
+--
+-- running time: \(O(1)\)
 size      :: Permutation a -> Int
 size perm = GV.length (perm^.indexes)
 
@@ -113,7 +130,7 @@ cycleRep v perm = toCycleRep n $ runST $ do
 toCycleRep      :: Enum a => Int -> [[a]] -> Permutation a
 toCycleRep n os = Permutation (V.fromList . map V.fromList $ os) (genIndexes n os)
 
-
+-- | Helper function to generate the indices of a permutation
 genIndexes      :: Enum a => Int -> [[a]] -> UV.Vector (Int,Int)
 genIndexes n os = UV.create $ do
                                 v <- UMV.new n
