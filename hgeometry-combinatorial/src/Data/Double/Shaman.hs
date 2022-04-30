@@ -1,7 +1,16 @@
--- https://tel.archives-ouvertes.fr/tel-03116750/document
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Double.Shaman
+-- Copyright   :  (C) David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--
+-- https://tel.archives-ouvertes.fr/tel-03116750/document
+--
+--------------------------------------------------------------------------------
 module Data.Double.Shaman
   ( Shaman
   , significativeBits

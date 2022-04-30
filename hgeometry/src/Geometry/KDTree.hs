@@ -6,8 +6,11 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
+--
+-- Static, d-dimensional KD-Trees.
+--
 --------------------------------------------------------------------------------
-module Geometry.KDTree where
+module Geometry.KDTree  where
 
 import           Control.Lens             hiding (Empty, element, imap, (:<))
 import           Data.BinaryTree
@@ -56,12 +59,13 @@ deriving instance (Eq r, Arity d, KnownNat d)   => Eq (Split d r)
 
 type Split' d r = SP (Coord d) r
 
+-- | A non-empty KD-tree
 newtype KDTree' d p r = KDT { unKDT :: BinLeafTree (Split d r) (Point d r :+ p) }
 
 deriving instance (Show p, Show r, Arity d, KnownNat d) => Show (KDTree' d p r)
 deriving instance (Eq p, Eq r, Arity d, KnownNat d)     => Eq   (KDTree' d p r)
 
-
+-- | A d-dimensional KD-Tree.
 data KDTree d p r = Empty
                   | Tree (KDTree' d p r)
 

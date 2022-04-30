@@ -7,12 +7,22 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- \(d\)-dimensional HalfSpaces
+-- \(d\)-dimensional HalfSpaces.
 --
 --------------------------------------------------------------------------------
-module Geometry.HalfSpace where
+module Geometry.HalfSpace
+  ( HalfSpace(HalfSpace)
+  , HalfPlane
+  , boundingPlane
 
-import Control.Lens
+  , leftOf, rightOf
+
+  , above, below
+
+  , inHalfSpace
+  ) where
+
+import Control.Lens hiding (below)
 import Geometry.HalfLine
 import Geometry.HyperPlane
 import Geometry.Line
@@ -64,16 +74,17 @@ instance (Arity d, Eq r, Fractional r) => Eq (HalfSpace d r) where
 
 --------------------------------------------------------------------------------
 
+-- | Halfplanes are two-dimensional halfspaces.
 type HalfPlane = HalfSpace 2
 
 
-{- HLINT ignore leftOf -}
 -- | Get the halfplane left of a line (i.e. "above") a line
 --
 -- >>> leftOf $ horizontalLine 4
 -- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 0 1}}
 leftOf   :: Num r => Line 2 r -> HalfPlane r
 leftOf l = (rightOf l)&boundingPlane.normalVec %~ ((-1) *^)
+{- HLINT ignore leftOf -}
 
 -- | Get the halfplane right of a line (i.e. "below") a line
 --
@@ -82,9 +93,11 @@ leftOf l = (rightOf l)&boundingPlane.normalVec %~ ((-1) *^)
 rightOf   :: Num r => Line 2 r -> HalfPlane r
 rightOf l = HalfSpace $ l^.re _asLine
 
+-- | The halfspace above a line.
 above :: Num r => Line 2 r -> HalfPlane r
 above = leftOf
 
+-- | The halfspace below a line.
 below :: Num r => Line 2 r -> HalfPlane r
 below = rightOf
 

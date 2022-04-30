@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Geometry.SoS.Point
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Points whose coordinates have been symbolically perturbed.
+--
+--------------------------------------------------------------------------------
 module Geometry.SoS.Point
   ( toSymbolic, fromSymbolic
   , toSoSRational, fromSoSRational

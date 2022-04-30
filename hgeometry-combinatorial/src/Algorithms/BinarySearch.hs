@@ -5,6 +5,7 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
+--
 --------------------------------------------------------------------------------
 module Algorithms.BinarySearch where
 
@@ -62,15 +63,18 @@ binarySearchUntil eps p = go
     go l u | u - l < eps = u
            | otherwise   = let m = (l + u) / 2
                            in if p m then go l m else go m u
+{-# INLINABLE binarySearchUntil #-}
 
 
 --------------------------------------------------------------------------------
 -- * Binary Searching in some data structure
 
-
+-- | Containers storing elements on which we can binary search.
 class BinarySearch v where
-  type Index v :: Type
+  -- | The type of the elements of the container
   type Elem  v :: Type
+  -- | The type of indices used in the container.
+  type Index v :: Type
 
   -- | Given a monotonic predicate p and a data structure v, find the
   -- element v[h] such that that
@@ -105,6 +109,7 @@ instance BinarySearch (Seq a) where
 
   -- ^ runs in \(O(T*\log^2 n)\) time.
   binarySearchIn p s = Seq.index s <$>  binarySearchIdxIn p s
+  {-# INLINABLE binarySearchIn #-}
 
   -- ^ runs in \(O(T*\log^2 n)\) time.
   binarySearchIdxIn p s = case Seq.viewr s of
@@ -116,6 +121,8 @@ instance BinarySearch (Seq a) where
     where
       p' = p . Seq.index s
       u  = Seq.length s - 1
+  {-# INLINABLE binarySearchIdxIn #-}
+
 
 instance {-# OVERLAPPABLE #-} V.Vector v a => BinarySearch (v a) where
   type Index (v a) = Int
@@ -127,8 +134,10 @@ instance {-# OVERLAPPABLE #-} V.Vector v a => BinarySearch (v a) where
     where
       n' = V.length v - 1
       p = p' . (v V.!)
+  {-# INLINABLE binarySearchIn #-}
 
   binarySearchIn p v = (v V.!) <$>  binarySearchIdxIn p v
+  {-# INLINABLE binarySearchIdxIn #-}
 
 instance BinarySearch (Set a) where
   type Index (Set a) = Int
@@ -140,6 +149,7 @@ instance BinarySearch (Set a) where
         Set.Tip                     -> Nothing
         Set.Bin _ k l r | p k       -> go l <|> Just k
                         | otherwise -> go r
+  {-# INLINABLE binarySearchIn #-}
 
   binarySearchIdxIn p = go
     where
@@ -147,3 +157,4 @@ instance BinarySearch (Set a) where
         Set.Tip                     -> Nothing
         Set.Bin _ k l r | p k       -> go l <|> Just (Set.size l)
                         | otherwise -> (+ (1 + Set.size l)) <$> go r
+  {-# INLINABLE binarySearchIdxIn #-}

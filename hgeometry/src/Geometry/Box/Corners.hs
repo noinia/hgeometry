@@ -5,10 +5,13 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
+--
+-- The corners of a box.
 --------------------------------------------------------------------------------
-module Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
-                                , corners, cornersInDirection
-                                ) where
+module Geometry.Box.Corners
+  ( Corners(Corners), northWest, northEast, southEast, southWest
+  , corners, cornersInDirection
+  ) where
 
 import Control.Lens (makeLenses,Ixed(..),Index, IxValue,(%~),(&),(^?!))
 import Data.Ext
