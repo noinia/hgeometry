@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Geometry.SoS.Orientation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Orientation/side tests tests using Simulation of Simplicity.
+--
+--------------------------------------------------------------------------------
 module Geometry.SoS.Orientation
   ( SoS
   , sideTest
