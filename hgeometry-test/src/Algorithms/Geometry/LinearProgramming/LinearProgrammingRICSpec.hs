@@ -2,8 +2,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 module Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec (spec) where
 
-import Algorithms.Geometry.LinearProgramming.LP2DRIC
-import Algorithms.Geometry.LinearProgramming.Types
+import Algorithms.Geometry.LinearProgramming
 import Data.Maybe(mapMaybe)
 import Control.Lens hiding (below)
 import Data.Ext

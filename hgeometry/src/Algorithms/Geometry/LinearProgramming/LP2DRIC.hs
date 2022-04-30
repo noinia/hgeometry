@@ -10,13 +10,14 @@
 -- 2D Linear programming in expected linear time.
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.LinearProgramming.LP2DRIC( solveBoundedLinearProgram
-                                                    , solveBoundedLinearProgram'
+module Algorithms.Geometry.LinearProgramming.LP2DRIC
+  ( solveBoundedLinearProgram
+  , solveBoundedLinearProgram'
 
-                                                    , maximumOn
-                                                    , oneDLinearProgramming
-                                                    , commonIntersection
-                                                    , cmpHalfPlane
+  , maximumOn
+  , oneDLinearProgramming
+  , commonIntersection
+  , cmpHalfPlane
                                                     ) where
 
 import           Algorithms.Geometry.LinearProgramming.Types
