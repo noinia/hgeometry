@@ -10,12 +10,13 @@ module Geometry.Vector.Induction(
   , All, AllPeano
   ) where
 
-import           Geometry.Vector.VectorFamilyPeano (FromPeano, ImplicitPeano(..), SingPeano(..))
-import           Data.Proxy
-import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
-import           Data.Vinyl.Core
-import           GHC.Exts
-import           GHC.TypeLits
+import Data.Kind (Type)
+import Data.Proxy
+import Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
+import Data.Vinyl.Core
+import GHC.Exts
+import GHC.TypeLits
+import Geometry.Vector.VectorFamilyPeano (FromPeano, ImplicitPeano(..), SingPeano(..))
 
 --------------------------------------------------------------------------------
 
@@ -94,8 +95,8 @@ class LiftC (c :: Nat -> Constraint) (n :: PeanoNum) where
 instance (c (FromPeano n)) => LiftC c n where
   conjure _ _ = DictOnly
 
--- | Similary, we lift a 'Nat -> *' into a 'PeanoNum -> *'
-newtype P (p :: Nat -> *) (n :: PeanoNum) = P { runP :: p (FromPeano n) }
+-- | Similary, we lift a 'Nat -> Type' into a 'PeanoNum -> Type'
+newtype P (p :: Nat -> Type) (n :: PeanoNum) = P { runP :: p (FromPeano n) }
 
 --------------------------------------------------------------------------------
 

@@ -20,6 +20,7 @@ import qualified Linear.V2 as L2
 import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
 import           Linear.Vector
+import           Data.Kind (Type)
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -49,7 +50,7 @@ instance ImplicitPeano d => ImplicitPeano (S d) where
   implicitPeano = SS implicitPeano
 
 -- | Mapping between the implementation type, and the actual implementation.
-type family VectorFamilyF (d :: PeanoNum) :: * -> * where
+type family VectorFamilyF (d :: PeanoNum) :: Type -> Type where
   VectorFamilyF Z        = Const ()
   VectorFamilyF One      = Identity
   VectorFamilyF Two      = L2.V2
@@ -61,7 +62,7 @@ type family VectorFamilyF (d :: PeanoNum) :: * -> * where
 -- | Datatype representing d dimensional vectors. The default implementation is
 -- based n VectorFixed. However, for small vectors we automatically select a
 -- more efficient representation.
-newtype VectorFamily (d :: PeanoNum) (r :: *) =
+newtype VectorFamily (d :: PeanoNum) (r :: Type) =
   VectorFamily { _unVF :: VectorFamilyF d r }
 
 type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
@@ -192,7 +193,7 @@ type instance IxValue (VectorFamily d r) = r
 --------------------------------------------------------------------------------
 
 
-newtype Vector (d :: Nat) (r :: *) = MKVector { _unV :: VectorFamily (Peano d) r }
+newtype Vector (d :: Nat) (r :: Type) = MKVector { _unV :: VectorFamily (Peano d) r }
 
 type instance V.Dim (Vector d)  = d
 

@@ -17,10 +17,10 @@ import Data.Coerce
 import Data.Vinyl
 import GHC.Generics (Generic)
 import Test.QuickCheck
-
+import Data.Kind
 --------------------------------------------------------------------------------
 
-data family core :+ (extras :: [*]) :: *
+data family core :+ (extras :: [Type]) :: Type
 
 newtype instance core :+ '[]    = Only core deriving (Eq,Ord,NFData,Arbitrary,Generic,Show)
 data    instance core :+ (t:ts) = WithExtra !core (HList (t:ts))

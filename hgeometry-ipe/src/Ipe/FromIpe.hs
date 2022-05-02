@@ -32,20 +32,21 @@ module Ipe.FromIpe(
 
 import           Control.Lens hiding (Simple)
 import           Data.Ext
+import           Data.Kind (Type)
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Geometry.Ball
 import           Geometry.Box
 import           Geometry.Ellipse (Ellipse, _EllipseCircle)
-import           Ipe.Path
-import           Ipe.Reader
-import           Ipe.Types
 import           Geometry.LineSegment
 import           Geometry.Point
 import qualified Geometry.PolyLine as PolyLine
 import           Geometry.Polygon
 import           Geometry.Properties
 import           Geometry.Triangle
-import qualified Data.LSeq as LSeq
-import           Data.List.NonEmpty (NonEmpty(..))
+import           Ipe.Path
+import           Ipe.Reader
+import           Ipe.Types
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -202,14 +203,10 @@ _withAttrs po pg = prism' g2o o2g
 --   defaultIpeObject' = _IpePath
 
 
--- class HasDefaultFromIpe g where
---   type DefaultFromIpe g :: * -> *
---   defaultIpeObject :: proxy g -> Prism' (IpeObject r) (DefaultFromIpe g r :+ IpeAttributes (DefaultFromIpe g) r)
---   defaultFromIpe   :: proxy g -> Prism' (DefaultFromIpe g (NumType g)) g
 
 
 class HasDefaultFromIpe g where
-  type DefaultFromIpe g :: * -> *
+  type DefaultFromIpe g :: Type -> Type
   defaultFromIpe :: (r ~ NumType g)
                  => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
 

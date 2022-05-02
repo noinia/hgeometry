@@ -20,13 +20,14 @@ module Ipe.Attributes
   where
 
 import Control.Lens hiding (rmap, Const)
-import Ipe.Value
+import Data.Kind (Type)
 import Data.Singletons
 import Data.Singletons.TH
 import Data.Text (Text)
 import Data.Vinyl
-import Data.Vinyl.TypeLevel
 import Data.Vinyl.Functor
+import Data.Vinyl.TypeLevel
+import Ipe.Value
 import Text.Read (lexP, step, parens, prec, (+++)
                 , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
 
@@ -88,8 +89,8 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
 -- | Attr implements the mapping from labels to types as specified by the
 -- (symbol representing) the type family 'f'
-newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
-                                   -- Labels in universe u to concrete types
+newtype Attr (f :: TyFun u Type -> Type) -- Symbol repr. the Type family mapping
+                                         -- Labels in universe u to concrete types
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
 
 
@@ -156,7 +157,7 @@ instance Monoid (Attr f l) where
 -- * Attributes
 
 -- | A collection of Attributes.
-newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) = Attrs (Rec (Attr f) ats)
+newtype Attributes (f :: TyFun u Type -> Type) (ats :: [u]) = Attrs (Rec (Attr f) ats)
 
 -- | Get a vinyl Record with Attrs
 unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')

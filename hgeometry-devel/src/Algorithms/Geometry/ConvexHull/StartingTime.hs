@@ -15,8 +15,7 @@ import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Identity
-import           Geometry.Point
-import           Geometry.Vector
+import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -28,6 +27,8 @@ import           Data.Sequence (Seq(..))
 import           Data.Typeable (TypeRep, Typeable, typeOf)
 import           Data.Util
 import           GHC.TypeNats
+import           Geometry.Point
+import           Geometry.Vector
 -- import           Data.Witherable.Class
 import           Refined (Refined, unrefine, Predicate(..), throwRefine, RefineException(..))
 import qualified Refined
@@ -51,8 +52,8 @@ data NotAllTheSame
 
 data NotAllTheSameInDim (i :: Nat)
 
-data All' (preds :: [*])
-data Any (preds :: [*])
+data All' (preds :: [Type])
+data Any (preds :: [Type])
 
 
 -- type Propper (d :: Nat) =
