@@ -151,7 +151,6 @@ instance Semigroup (Attr f l) where
 
 instance Monoid (Attr f l) where
   mempty  = NoAttr
-  mappend = (<>)
 
 --------------------------------------------------------------------------------
 -- * Attributes
@@ -175,10 +174,9 @@ instance ( ReifyConstraint Eq (Attr f) ats, RecordToList ats
 
 instance RecApplicative ats => Monoid (Attributes f ats) where
   mempty        = Attrs $ rpure mempty
-  a `mappend` b = a <> b
 
 instance Semigroup (Attributes f ats) where
-  (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith mappend as bs
+  (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith (<>) as bs
 
 -- | Traverse implementation for Attrs
 traverseAttrs               :: Applicative h
