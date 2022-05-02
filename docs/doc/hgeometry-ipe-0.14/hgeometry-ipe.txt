@@ -339,7 +339,7 @@ type VAlignSym0 = 'VAlign :: AttributeUniverse
 type HAlignSym0 = 'HAlign :: AttributeUniverse
 type StyleSym0 = 'Style :: AttributeUniverse
 type ClipSym0 = 'Clip :: AttributeUniverse
-data SAttributeUniverse z_aLFP
+data SAttributeUniverse z_aLFU
 [SLayer] :: SAttributeUniverse ('Layer :: AttributeUniverse)
 [SMatrix] :: SAttributeUniverse ('Matrix :: AttributeUniverse)
 [SPin] :: SAttributeUniverse ('Pin :: AttributeUniverse)
@@ -395,10 +395,10 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
 -- | Attr implements the mapping from labels to types as specified by the
 --   (symbol representing) the type family <tt>f</tt>
-newtype Attr (f :: TyFun u * -> *) (label :: u)
-GAttr :: Maybe (Apply f label) -> Attr (f :: TyFun u * -> *) (label :: u)
-[_getAttr] :: Attr (f :: TyFun u * -> *) (label :: u) -> Maybe (Apply f label)
-getAttr :: forall f_aLGR label_aLGS f_aMVU label_aMVV. Iso (Attr f_aLGR label_aLGS) (Attr f_aMVU label_aMVV) (Maybe (Apply f_aLGR label_aLGS)) (Maybe (Apply f_aMVU label_aMVV))
+newtype Attr (f :: TyFun u Type -> Type) (label :: u)
+GAttr :: Maybe (Apply f label) -> Attr (f :: TyFun u Type -> Type) (label :: u)
+[_getAttr] :: Attr (f :: TyFun u Type -> Type) (label :: u) -> Maybe (Apply f label)
+getAttr :: forall f_aLGW label_aLGX f_aMVZ label_aMW0. Iso (Attr f_aLGW label_aLGX) (Attr f_aMVZ label_aMW0) (Maybe (Apply f_aLGW label_aLGX)) (Maybe (Apply f_aMVZ label_aMW0))
 
 -- | Constructor for constructing an Attr given an actual value.
 pattern Attr :: Apply f label -> Attr f label
@@ -414,8 +414,8 @@ traverseAttr :: Applicative h => (Apply f label -> h (Apply g label)) -> Attr f 
 pureAttr :: (Applicative h, Apply f a ~ Apply g a) => Attr f a -> h (Attr g a)
 
 -- | A collection of Attributes.
-newtype Attributes (f :: TyFun u * -> *) (ats :: [u])
-Attrs :: Rec (Attr f) ats -> Attributes (f :: TyFun u * -> *) (ats :: [u])
+newtype Attributes (f :: TyFun u Type -> Type) (ats :: [u])
+Attrs :: Rec (Attr f) ats -> Attributes (f :: TyFun u Type -> Type) (ats :: [u])
 
 -- | Get a vinyl Record with Attrs
 unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
@@ -506,8 +506,8 @@ data IpeArrow r
 IpeArrow :: Text -> IpeSize r -> IpeArrow r
 [_arrowName] :: IpeArrow r -> Text
 [_arrowSize] :: IpeArrow r -> IpeSize r
-arrowSize :: forall r_aMWP r_aPn7. Lens (IpeArrow r_aMWP) (IpeArrow r_aPn7) (IpeSize r_aMWP) (IpeSize r_aPn7)
-arrowName :: forall r_aMWP. Lens' (IpeArrow r_aMWP) Text
+arrowSize :: forall r_aMWU r_aPnc. Lens (IpeArrow r_aMWU) (IpeArrow r_aPnc) (IpeSize r_aMWU) (IpeSize r_aPnc)
+arrowName :: forall r_aMWU. Lens' (IpeArrow r_aMWU) Text
 
 -- | A normal arrow
 normalArrow :: IpeArrow r
@@ -1155,7 +1155,7 @@ _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
 --   </pre>
 _withAttrs :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
 class HasDefaultFromIpe g where {
-    type family DefaultFromIpe g :: * -> *;
+    type family DefaultFromIpe g :: Type -> Type;
 }
 defaultFromIpe :: (HasDefaultFromIpe g, r ~ NumType g) => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
 
@@ -1765,7 +1765,7 @@ _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
 --   </pre>
 _withAttrs :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
 class HasDefaultFromIpe g where {
-    type family DefaultFromIpe g :: * -> *;
+    type family DefaultFromIpe g :: Type -> Type;
 }
 defaultFromIpe :: (HasDefaultFromIpe g, r ~ NumType g) => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
 

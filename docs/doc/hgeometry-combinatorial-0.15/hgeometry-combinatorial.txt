@@ -944,7 +944,7 @@ type Intersection g h = CoRec Identity (IntersectionOf g h)
 
 -- | The type family specifying the list of possible result types of an
 --   intersection.
-type family IntersectionOf g h :: [*]
+type family IntersectionOf g h :: [Type]
 
 -- | Helper to produce a corec
 coRec :: a ∈ as => a -> CoRec Identity as
@@ -1627,10 +1627,10 @@ instance Data.Foldable.Foldable Data.OrdSeq.Elem
 instance Data.Traversable.Traversable Data.OrdSeq.Elem
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.OrdSeq.Elem a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Elem a)
+instance GHC.Base.Monoid (Data.OrdSeq.OrdSeq a)
+instance GHC.Base.Semigroup (Data.OrdSeq.OrdSeq a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.OrdSeq a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.OrdSeq a)
-instance GHC.Base.Semigroup (Data.OrdSeq.OrdSeq a)
-instance GHC.Base.Monoid (Data.OrdSeq.OrdSeq a)
 instance Data.Foldable.Foldable Data.OrdSeq.OrdSeq
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Classes.Ord a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.OrdSeq.OrdSeq a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.Elem a)
@@ -1645,7 +1645,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_avDn a_avMX. Lens (Permutation a_avDn) (Permutation a_avMX) (Vector (Orbit a_avDn)) (Vector (Orbit a_avMX))
+orbits :: forall a_avIc a_avRM. Lens (Permutation a_avIc) (Permutation a_avRM) (Vector (Orbit a_avIc)) (Vector (Orbit a_avRM))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
