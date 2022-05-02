@@ -10,9 +10,83 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.PlanarSubdivision
-  ( module Geometry.PlanarSubdivision.Basic
+  ( -- $setup
+    PlanarSubdivision
+
+  , Component, ComponentId
+
+    -- * Constructing Planar Subdivisions
+  , fromSimplePolygon
+  , fromConnectedSegments
+  , fromPlaneGraph, fromPlaneGraph'
   , fromPolygons, fromPolygons'
   , fromPolygon
+
+  -- * Quering the Planar Subdivision
+  , numComponents, numVertices
+  , numEdges, numFaces, numDarts
+  , dual
+
+  , components, component
+  , vertices', vertices
+  , edges', edges
+  , faces', internalFaces', faces, internalFaces
+  , darts'
+
+  -- * Incidences and Adjacencies
+  , headOf, tailOf, twin, endPoints
+
+  , incidentEdges, incomingEdges, outgoingEdges
+  , nextIncidentEdge, prevIncidentEdge
+  , nextIncidentEdgeFrom, prevIncidentEdgeFrom
+  , neighboursOf
+
+  , leftFace, rightFace
+  , outerBoundaryDarts, boundaryVertices, holesOf
+  , outerFaceId
+  , boundary'
+
+  , Incident (incidences)
+  , common, commonVertices, commonDarts, commonFaces
+
+  -- * Data
+  , locationOf
+  , HasDataOf(..)
+
+  , endPointsOf, endPointData
+
+  , faceDataOf
+
+  , traverseVertices, traverseDarts, traverseFaces
+  , mapVertices, mapDarts, mapFaces
+
+  -- * Obtaining a Geometric Representation
+  , edgeSegment, edgeSegments
+  , faceBoundary
+  , internalFacePolygon, internalFacePolygons
+  , outerFacePolygon, outerFacePolygon'
+  , facePolygons
+
+  -- * IO
+
+  -- * ReExports
+  , VertexId', FaceId'
+  , VertexId(..), FaceId(..), Dart, World(..)
+  , VertexData(VertexData), PG.vData, PG.location
+  , PlanarGraph
+  , PlaneGraph
+
+  -- * Helper; dealing with the Raw types
+  , PolygonFaceData(..)
+  , FaceData(FaceData), holes, fData
+  , Wrap
+  , rawVertexData, rawDartData, rawFaceData
+  , vertexData, dartData, faceData
+  , dataVal
+  , dartMapping, Raw(..)
+  , asLocalD, asLocalV, asLocalF
+
+
   ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
@@ -22,9 +96,9 @@ import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
 import           Geometry.PlanarSubdivision.Basic
 import           Geometry.PlanarSubdivision.Merge
-import           Geometry.PlanarSubdivision.TreeRep
+import           Geometry.PlanarSubdivision.TreeRep()
 import           Geometry.Polygon
-
+import qualified Data.PlaneGraph as PG
 
 -- import Geometry.Point
 -- import qualified Data.List.NonEmpty as NonEmpty

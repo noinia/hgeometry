@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module Geometry.PlanarSubdivision.Basic
   ( -- $setup
-    PlanarSubdivision
+    PlanarSubdivision(PlanarSubdivision)
   , Component, ComponentId
 
     -- * Constructing Planar Subdivisions

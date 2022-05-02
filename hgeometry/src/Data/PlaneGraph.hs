@@ -13,7 +13,7 @@
 --------------------------------------------------------------------------------
 module Data.PlaneGraph( -- $setup
                        -- * The PlaneGraph data type
-                        PlaneGraph(PlaneGraph), graph
+                        PlaneGraph, graph
                       , PlanarGraph
                       , VertexData(VertexData), vData, location, vtxDataToExt
 
