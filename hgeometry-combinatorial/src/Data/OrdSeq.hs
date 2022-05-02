@@ -47,7 +47,6 @@ instance Semigroup (Key a) where
 
 instance Monoid (Key a) where
   mempty = NoKey
-  k `mappend` k' = k <> k'
 
 liftCmp                     :: (a -> a -> Ordering) -> Key a -> Key a -> Ordering
 liftCmp _   NoKey   NoKey   = EQ
@@ -64,17 +63,10 @@ instance Show a => Show (Elem a) where
 
 -- | Sequence of ordered elements.
 newtype OrdSeq a = OrdSeq { _asFingerTree :: FingerTree (Key a) (Elem a) }
-                   deriving (Eq)
+                   deriving (Eq,Semigroup,Monoid)
 
 instance Show a => Show (OrdSeq a) where
   show s = "fromAscList " ++ show (F.toList s)
-
-instance Semigroup (OrdSeq a) where
-  (OrdSeq s) <> (OrdSeq t) = OrdSeq $ s `mappend` t
-
-instance Monoid (OrdSeq a) where
-  mempty = OrdSeq mempty
-  mappend = (<>)
 
 instance Foldable OrdSeq where
   foldMap f = foldMap (foldMap f) . _asFingerTree
@@ -98,7 +90,7 @@ type Compare a = a -> a -> Ordering
 --
 -- \(O(\log n)\)
 insertBy                  :: Compare a -> a -> OrdSeq a -> OrdSeq a
-insertBy cmp x (OrdSeq s) = OrdSeq $ l `mappend` (Elem x <| r)
+insertBy cmp x (OrdSeq s) = OrdSeq $ l <> (Elem x <| r)
   where
     (l,r) = split (\v -> liftCmp cmp v (Key x) `elem` [EQ, GT]) s
 
@@ -141,8 +133,13 @@ splitBy cmp x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
 splitOn :: Ord b => (a -> b) -> b -> OrdSeq a -> (OrdSeq a, OrdSeq a, OrdSeq a)
 splitOn f x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
   where
-    (l, m) = split (\(Key v) -> compare (f v) x `elem` [EQ,GT]) s
-    (m',r) = split (\(Key v) -> compare (f v) x ==     GT)      m
+    (l, m) = split (\v -> compare (f' v) x `elem` [EQ,GT]) s
+    (m',r) = split (\v -> compare (f' v) x ==     GT)      m
+
+    f' = \case
+      NoKey -> error "Data.OrdSeq.splitOn :: trying to match on a NoKey"
+      Key v -> f v
+
 
 -- | Given a monotonic predicate p, splits the sequence s into two sequences
 --  (as,bs) such that all (not p) as and all p bs
