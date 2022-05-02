@@ -181,13 +181,15 @@ cseq l x r
     rn = length r
     ln = length l
 
--- smart constructor that automatically balances the sequence.
--- pre: at least one of the two seq's is NonEmpty
+-- | smart constructor that automatically balances the sequence.
 --
+-- pre: at least one of the two seq's is NonEmpty
 cseq'     :: Seq a -> Seq a -> CSeq a
 cseq' l r = case S.viewl r of
               (x :< r') -> cseq l x r'
-              EmptyL    -> let (x :< l') = S.viewl l in cseq l' x r
+              EmptyL    -> case S.viewl l of
+                             EmptyL  -> error "cseq':: both l and r are empty!"
+                             x :< l' -> cseq l' x r
 
 -- | Builds a balanced seq with the element as the focus.
 withFocus     :: a -> Seq a -> CSeq a

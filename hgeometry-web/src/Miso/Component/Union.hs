@@ -9,6 +9,7 @@ import qualified Data.Vinyl.Functor as VF
 import           Data.Vinyl.Notation
 import           Data.Vinyl.TypeLevel
 import           Miso hiding (update, view)
+import Data.Kind(Type)
 
 --------------------------------------------------------------------------------
 
@@ -16,7 +17,7 @@ type Action = CoRec VF.Identity
 
 --------------------------------------------------------------------------------
 
-type family ModelOf a :: *
+type family ModelOf a :: Type
 
 newtype ActionHandler a = ActionHandler (a -> Effect a (ModelOf a))
 

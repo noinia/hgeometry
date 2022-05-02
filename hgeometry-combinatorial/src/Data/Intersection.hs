@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module Data.Intersection where
 
+import Data.Kind (Type)
 import Data.Maybe (isNothing)
 import Data.Vinyl.CoRec
 import Data.Vinyl.Core
@@ -29,7 +30,7 @@ type Intersection g h = CoRec Identity (IntersectionOf g h)
 
 -- | The type family specifying the list of possible result types of an
 -- intersection.
-type family IntersectionOf g h :: [*]
+type family IntersectionOf g h :: [Type]
 
 -- | Helper to produce a corec
 coRec :: (a ∈ as) => a -> CoRec Identity as

@@ -20,11 +20,12 @@ import Data.Vinyl
 import GHC.Generics (Generic)
 import GHC.TypeLits
 import Test.QuickCheck
+import Data.Kind
 
 --------------------------------------------------------------------------------
 -- * The implementation
 
-data family (core :: *) :+ (extra :: Maybe *)
+data family (core :: Type) :+ (extra :: Maybe Type)
 
 newtype instance core :+ Nothing      = Only core
   deriving (Eq,Ord,NFData,Arbitrary,Generic,Bounded,Enum)
@@ -55,7 +56,7 @@ type family Extra m where
   Extra Nothing  = ()
   Extra (Just e) = e
 
-type family ExtraArg (t :: *) (ls :: [(Symbol,*)]) where
+type family ExtraArg (t :: Type) (ls :: [(Symbol,Type)]) where
   ExtraArg t '[]     = t
   ExtraArg t  (l:ls) = FieldRec (l:ls)
 
