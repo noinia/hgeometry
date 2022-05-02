@@ -188,7 +188,7 @@ cseq'     :: Seq a -> Seq a -> CSeq a
 cseq' l r = case S.viewl r of
               (x :< r') -> cseq l x r'
               EmptyL    -> case S.viewl l of
-                             EmptyR  -> error "cseq':: both l and r are empty!"
+                             EmptyL  -> error "cseq':: both l and r are empty!"
                              x :< l' -> cseq l' x r
 
 -- | Builds a balanced seq with the element as the focus.
