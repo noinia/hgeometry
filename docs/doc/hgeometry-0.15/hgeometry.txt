@@ -5390,8 +5390,7 @@ instance forall k v e f r (s :: k). (Data.Aeson.Types.FromJSON.FromJSON v, Data.
 module Data.PlaneGraph
 
 -- | Embedded, *connected*, planar graph
-newtype PlaneGraph s v e f r
-PlaneGraph :: PlanarGraph s Primal (VertexData r v) e f -> PlaneGraph s v e f r
+data PlaneGraph s v e f r
 graph :: forall s_a3c3P v_a3c3Q e_a3c3R f_a3c3S r_a3c3T s_a3ceO v_a3ceP e_a3ceQ f_a3ceR r_a3ceS. Iso (PlaneGraph s_a3c3P v_a3c3Q e_a3c3R f_a3c3S r_a3c3T) (PlaneGraph s_a3ceO v_a3ceP e_a3ceQ f_a3ceR r_a3ceS) (PlanarGraph s_a3c3P 'Primal (VertexData r_a3c3T v_a3c3Q) e_a3c3R f_a3c3S) (PlanarGraph s_a3ceO 'Primal (VertexData r_a3ceS v_a3ceP) e_a3ceQ f_a3ceR)
 
 -- | A *connected* Planar graph with bidirected edges. I.e. the edges
@@ -6140,7 +6139,6 @@ module Geometry.PlanarSubdivision
 --   
 --   invariant: the outerface has faceId 0
 data PlanarSubdivision s v e f r
-PlanarSubdivision :: Vector (Component s r) -> Vector (Raw s (VertexId' (Wrap s)) v) -> Vector (Raw s (Dart (Wrap s)) e) -> Vector (RawFace s f) -> PlanarSubdivision s v e f r
 
 -- | A connected component.
 --   
@@ -6177,6 +6175,31 @@ fromPlaneGraph :: forall s v e f r. (Ord r, Num r) => PlaneGraph s v e f r -> Pl
 --   
 --   runningTime: &lt;math&gt;
 fromPlaneGraph' :: forall s v e f r. PlaneGraph s v e f r -> Dart s -> PlanarSubdivision s v e f r
+
+-- | Constructs a planar subdivision from a collection of &lt;math&gt;
+--   disjoint polygons of total complexity &lt;math&gt;.
+--   
+--   pre: The boundary of the polygons is given in counterclockwise
+--   orientation
+--   
+--   runningtime: &lt;math&gt; in case of polygons with holes, and
+--   &lt;math&gt; in case of simple polygons.
+fromPolygons :: forall s c t p r f. (Foldable1 c, Ord r, Num r) => f -> c (Polygon t p r :+ f) -> PlanarSubdivision s p () f r
+
+-- | Version of <a>fromPolygons</a> that accepts <a>SomePolygon</a>s as
+--   input.
+fromPolygons' :: forall s c p r f. (Foldable1 c, Ord r, Num r) => f -> c (SomePolygon p r :+ f) -> PlanarSubdivision s p () f r
+
+-- | Construct a planar subdivision from a polygon. Since our
+--   PlanarSubdivision models only connected planar subdivisions, this may
+--   add dummy/invisible edges.
+--   
+--   pre: The outer boundary of the polygons is given in counterclockwise
+--   orientation
+--   
+--   running time: &lt;math&gt; for a simple polygon, &lt;math&gt; for a
+--   polygon with holes.
+fromPolygon :: forall s t p f r. (Ord r, Num r) => Polygon t p r -> f -> f -> PlanarSubdivision s p () f r
 
 -- | Get the number of vertices
 --   
@@ -6607,31 +6630,6 @@ asLocalV :: VertexId' s -> PlanarSubdivision s v e f r -> (ComponentId s, Vertex
 
 -- | Get the local face and component from a given face.
 asLocalF :: FaceId' s -> PlanarSubdivision s v e f r -> NonEmpty (ComponentId s, FaceId' (Wrap s), Component s r)
-
--- | Constructs a planar subdivision from a collection of &lt;math&gt;
---   disjoint polygons of total complexity &lt;math&gt;.
---   
---   pre: The boundary of the polygons is given in counterclockwise
---   orientation
---   
---   runningtime: &lt;math&gt; in case of polygons with holes, and
---   &lt;math&gt; in case of simple polygons.
-fromPolygons :: forall s c t p r f. (Foldable1 c, Ord r, Num r) => f -> c (Polygon t p r :+ f) -> PlanarSubdivision s p () f r
-
--- | Version of <a>fromPolygons</a> that accepts <a>SomePolygon</a>s as
---   input.
-fromPolygons' :: forall s c p r f. (Foldable1 c, Ord r, Num r) => f -> c (SomePolygon p r :+ f) -> PlanarSubdivision s p () f r
-
--- | Construct a planar subdivision from a polygon. Since our
---   PlanarSubdivision models only connected planar subdivisions, this may
---   add dummy/invisible edges.
---   
---   pre: The outer boundary of the polygons is given in counterclockwise
---   orientation
---   
---   running time: &lt;math&gt; for a simple polygon, &lt;math&gt; for a
---   polygon with holes.
-fromPolygon :: forall s t p f r. (Ord r, Num r) => Polygon t p r -> f -> f -> PlanarSubdivision s p () f r
 instance (GHC.Classes.Eq f, GHC.Classes.Eq p) => GHC.Classes.Eq (Geometry.PlanarSubdivision.HoleData f p)
 instance (GHC.Show.Show f, GHC.Show.Show p) => GHC.Show.Show (Geometry.PlanarSubdivision.HoleData f p)
 
@@ -6659,15 +6657,10 @@ module Geometry.Arrangement
 
 -- | Data type representing a two dimensional planar arrangement
 data Arrangement s l v e f r
-Arrangement :: Vector (Line 2 r :+ l) -> PlanarSubdivision s v e f r -> Rectangle () r -> ArrangementBoundary s l r -> Arrangement s l v e f r
-[_inputLines] :: Arrangement s l v e f r -> Vector (Line 2 r :+ l)
-[_subdivision] :: Arrangement s l v e f r -> PlanarSubdivision s v e f r
-[_boundedArea] :: Arrangement s l v e f r -> Rectangle () r
-[_unboundedIntersections] :: Arrangement s l v e f r -> ArrangementBoundary s l r
-inputLines :: forall s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1. Lens' (Arrangement s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1) (Vector ((:+) (Line 2 r_a3CK1) l_a3CJX))
-subdivision :: forall s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1 v_a3CRD e_a3CRE f_a3CRF. Lens (Arrangement s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1) (Arrangement s_a3CJW l_a3CJX v_a3CRD e_a3CRE f_a3CRF r_a3CK1) (PlanarSubdivision s_a3CJW v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1) (PlanarSubdivision s_a3CJW v_a3CRD e_a3CRE f_a3CRF r_a3CK1)
-boundedArea :: forall s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1. Lens' (Arrangement s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1) (Rectangle () r_a3CK1)
-unboundedIntersections :: forall s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1. Lens' (Arrangement s_a3CJW l_a3CJX v_a3CJY e_a3CJZ f_a3CK0 r_a3CK1) (ArrangementBoundary s_a3CJW l_a3CJX r_a3CK1)
+inputLines :: forall s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ. Lens' (Arrangement s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ) (Vector ((:+) (Line 2 r_a3CJZ) l_a3CJV))
+subdivision :: forall s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ v_a3CRB e_a3CRC f_a3CRD. Lens (Arrangement s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ) (Arrangement s_a3CJU l_a3CJV v_a3CRB e_a3CRC f_a3CRD r_a3CJZ) (PlanarSubdivision s_a3CJU v_a3CJW e_a3CJX f_a3CJY r_a3CJZ) (PlanarSubdivision s_a3CJU v_a3CRB e_a3CRC f_a3CRD r_a3CJZ)
+boundedArea :: forall s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ. Lens' (Arrangement s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ) (Rectangle () r_a3CJZ)
+unboundedIntersections :: forall s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ. Lens' (Arrangement s_a3CJU l_a3CJV v_a3CJW e_a3CJX f_a3CJY r_a3CJZ) (ArrangementBoundary s_a3CJU l_a3CJV r_a3CJZ)
 type ArrangementBoundary s e r = Vector (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
 
 -- | Builds an arrangement of &lt;math&gt; lines
@@ -7741,8 +7734,8 @@ module Geometry.VerticalRayShooting.PersistentSweep
 data VerticalRayShootingStructure p e r
 VerticalRayShootingStructure :: r -> Vector (r :+ StatusStructure p e r) -> VerticalRayShootingStructure p e r
 type StatusStructure p e r = Set (LineSegment 2 p r :+ e)
-leftMost :: forall p_a40pq e_a40pr r_a40ps. Getter (VerticalRayShootingStructure p_a40pq e_a40pr r_a40ps) r_a40ps
-sweepStruct :: forall p_a40pq e_a40pr r_a40ps. Getter (VerticalRayShootingStructure p_a40pq e_a40pr r_a40ps) (Vector ((:+) r_a40ps (StatusStructure p_a40pq e_a40pr r_a40ps)))
+leftMost :: forall p_a40po e_a40pp r_a40pq. Getter (VerticalRayShootingStructure p_a40po e_a40pp r_a40pq) r_a40pq
+sweepStruct :: forall p_a40po e_a40pp r_a40pq. Getter (VerticalRayShootingStructure p_a40po e_a40pp r_a40pq) (Vector ((:+) r_a40pq (StatusStructure p_a40po e_a40pp r_a40pq)))
 
 -- | Given a set of &lt;math&gt; interiorly pairwise disjoint *closed*
 --   segments, compute a vertical ray shooting data structure. (i.e. the
@@ -7796,9 +7789,9 @@ module Geometry.PointLocation.PersistentSweep
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r
 PointLocationDS :: VerticalRayShootingStructure v (Dart s) r -> PlanarSubdivision s v e f r -> FaceId' s -> PointLocationDS s v e f r
-verticalRayShootingStructure :: forall s_a437q v_a437r e_a437s f_a437t r_a437u. Getter (PointLocationDS s_a437q v_a437r e_a437s f_a437t r_a437u) (VerticalRayShootingStructure v_a437r (Dart s_a437q) r_a437u)
-subdivision :: forall s_a437q v_a437r e_a437s f_a437t r_a437u. Getter (PointLocationDS s_a437q v_a437r e_a437s f_a437t r_a437u) (PlanarSubdivision s_a437q v_a437r e_a437s f_a437t r_a437u)
-outerFace :: forall s_a437q v_a437r e_a437s f_a437t r_a437u. Getter (PointLocationDS s_a437q v_a437r e_a437s f_a437t r_a437u) (FaceId' s_a437q)
+verticalRayShootingStructure :: forall s_a437o v_a437p e_a437q f_a437r r_a437s. Getter (PointLocationDS s_a437o v_a437p e_a437q f_a437r r_a437s) (VerticalRayShootingStructure v_a437p (Dart s_a437o) r_a437s)
+subdivision :: forall s_a437o v_a437p e_a437q f_a437r r_a437s. Getter (PointLocationDS s_a437o v_a437p e_a437q f_a437r r_a437s) (PlanarSubdivision s_a437o v_a437p e_a437q f_a437r r_a437s)
+outerFace :: forall s_a437o v_a437p e_a437q f_a437r r_a437s. Getter (PointLocationDS s_a437o v_a437p e_a437q f_a437r r_a437s) (FaceId' s_a437o)
 
 -- | Builds a pointlocation data structure on the planar subdivision with
 --   &lt;math&gt; vertices.
