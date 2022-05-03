@@ -27,16 +27,16 @@ module Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import qualified Data.CircularList as C
 import           Data.Ext
-import           Geometry.Point
-import           Geometry.Properties
-import           Geometry.PlanarSubdivision
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
+import           Geometry.PlanarSubdivision
+import           Geometry.Point
+import           Geometry.Properties
 -- import qualified Data.Map.Strict as SM
-import qualified Data.PlaneGraph  as PG
+import qualified Data.PlaneGraph as PG
 import qualified Data.PlanarGraph as PPG
 import qualified Data.Vector as V
-
+import           Data.PlaneGraph.Core (PlaneGraph(..))
 
 --------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ toPlanarSubdivision = fromPlaneGraph . toPlaneGraph
 --
 -- running time: \(O(n)\).
 toPlaneGraph    :: forall s p r. Triangulation p r -> PG.PlaneGraph s p () () r
-toPlaneGraph tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData
+toPlaneGraph tr = PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
     g       = PPG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
     f i adj = (VertexId i, C.leftElements $ VertexId <$> adj) -- report in CCW order
