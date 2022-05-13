@@ -22,19 +22,21 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry.Point
-import           Geometry.Properties
-import           Geometry.Transformation.Internal
-import           Geometry.Vector
-import qualified Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
+import           GHC.Show
 import           GHC.TypeLits
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation.Internal
+import           Geometry.Vector
+import qualified Geometry.Vector as V
 import           Test.QuickCheck (Arbitrary(..))
+
 
 --------------------------------------------------------------------------------
 
@@ -108,8 +110,33 @@ centerPoint b = Point $ w V.^/ 2
 
 
 
-deriving instance (Show r, Show p, Arity d) => Show (Box d p r)
--- TODO
+instance (Show r, Show p, Arity d) => Show (Box d p r) where
+    showsPrec d (Box p q) = showParen (d >= 11)
+      (showString "Box {"
+      . showString "minPoint = "
+      . showsPrec 0 p
+      . showCommaSpace
+      . showString "maxPoint = "
+      . showsPrec 0 q
+      . showString "}"
+      )
+
+-- instance (Read r, Read p, Arity d) => Read (Box d p r) where
+--   readPrec = parens (prec app_prec $ do
+--                         Ident "Box" <- lexP
+--                           p <- readField "minPoint" readPrec
+--                           p <- readField "maxPoint" readPrec
+--                     )
+--     d > app_prec)
+--       (\r -> [ (Box p q,r4)
+--               | ("Box { minPoint = ",r0) <- lex r
+--               , (p,r1)                   <- step readPrec
+--               , ("maxPoint = ",r2)       <- lex r1
+--               , (q,r3)                   <- step readPrec
+--               , ("}",r4)                 <- lex r3
+--               ]
+--       )
+--     where app_prec = 10
 
 deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
 deriving instance (Ord r, Ord p, Arity d)   => Ord  (Box d p r)
