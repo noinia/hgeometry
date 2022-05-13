@@ -157,7 +157,7 @@ boxOf (Leaf p)                 = boundingBox (p^.core)
 boxOf (Node _ (Split _ _ b) _) = b
 
 containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
-(Box (CWMin p :+ _) (CWMax q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
+(Box (p :+ _) (q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
 
 --------------------------------------------------------------------------------
 

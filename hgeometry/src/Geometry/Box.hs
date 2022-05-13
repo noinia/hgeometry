@@ -12,10 +12,26 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Box
-  ( module Geometry.Box.Internal
+  ( Box, pattern Box
+  , box, fromExtent, fromCenter
+  , grow
+
+  , centerPoint
+  , minPoint, maxPoint
+
+  , inBox, inBox', insideBox
+  , extent, size
+  , widthIn, widthIn'
+
+  , Rectangle
+  , width, height
+
+
+  , IsBoxable(..)
+  , boundingBoxList, boundingBoxList'
+
   , module Geometry.Box.Corners
   , module Geometry.Box.Sides
-  , inBox'
   ) where
 
 import Control.DeepSeq

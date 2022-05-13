@@ -58,19 +58,28 @@ instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
 -- * d-dimensional boxes
 
 
-data Box d p r = Box { _minP :: !(CWMin (Point d r) :+ p)
-                     , _maxP :: !(CWMax (Point d r) :+ p)
-                     } deriving Generic
+data Box d p r = MkBox { _minP :: !(CWMin (Point d r) :+ p)
+                       , _maxP :: !(CWMax (Point d r) :+ p)
+                       } deriving Generic
 makeLenses ''Box
 
+pattern Box     :: Point d r :+ p
+                -> Point d r :+ p
+                -> Box d p r
+pattern Box p q <- (getBox -> (p,q))
+  where
+    Box = box
+{-# COMPLETE Box #-}
 
-
+-- | Helper to implement the Box pattern
+getBox                                         :: Box d p r -> (Point d r :+ p, Point d r :+ p)
+getBox (MkBox (CWMin a :+ ae) (CWMax b :+ be)) = (a :+ ae, b :+ be)
 
 
 -- | Given the point with the lowest coordinates and the point with highest
 -- coordinates, create a box.
 box          :: Point d r :+ p -> Point d r :+ p -> Box d p r
-box low high = Box (low&core %~ CWMin) (high&core %~ CWMax)
+box low high = MkBox (low&core %~ CWMin) (high&core %~ CWMax)
 
 -- | grows the box by x on all sides
 grow     :: (Num r, Arity d) => r -> Box d p r -> Box d p r
@@ -80,8 +89,8 @@ grow x b = let v = V.replicate x
 
 -- | Build a d dimensional Box given d ranges.
 fromExtent    :: Arity d => Vector d (R.Range r) -> Box d () r
-fromExtent rs = Box (CWMin (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
-                    (CWMax (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
+fromExtent rs = MkBox (CWMin (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
+                      (CWMax (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
 
 
 -- | Given a center point and a vector specifying the box width's, construct a box.
@@ -99,11 +108,13 @@ centerPoint b = Point $ w V.^/ 2
 
 
 deriving instance (Show r, Show p, Arity d) => Show (Box d p r)
+-- TODO
+
 deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
 deriving instance (Ord r, Ord p, Arity d)   => Ord  (Box d p r)
 
 instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
-  (Box mi ma) <> (Box mi' ma') = Box (mi <> mi') (ma <> ma')
+  (MkBox mi ma) <> (MkBox mi' ma') = MkBox (mi <> mi') (ma <> ma')
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
@@ -122,7 +133,7 @@ instance Arity d => Bifunctor (Box d) where
 instance Arity d => Bifoldable (Box d) where
   bifoldMap = bifoldMapDefault
 instance Arity d => Bitraversable (Box d) where
-  bitraverse f g (Box mi ma) = Box <$> bitraverse (tr g) f mi <*> bitraverse (tr g) f ma
+  bitraverse f g (MkBox mi ma) = MkBox <$> bitraverse (tr g) f mi <*> bitraverse (tr g) f ma
     where
       tr    :: (Traversable t, Applicative f) => (r -> f s) -> t (Point d r) -> f (t (Point d s))
       tr g' = traverse $ traverse g'
@@ -159,8 +170,7 @@ instance (Arity d, Ord r) => Point d r `IsIntersectableWith` Box d p r where
 
 
 instance PointFunctor (Box d p) where
-  pmap f (Box mi ma) = Box (first (fmap f) mi) (first (fmap f) ma)
-
+  pmap f (MkBox mi ma) = MkBox (first (fmap f) mi) (first (fmap f) ma)
 
 instance (Fractional r, Arity d, Arity (d + 1))
          => IsTransformable (Box d p r) where
@@ -179,7 +189,7 @@ type instance NumType   (Box d p r) = r
 --------------------------------------------------------------------------------0
 -- * Functions on d-dimensonal boxes
 
-minPoint :: Box d p r -> Point d r :+ p
+minPoint   :: Box d p r -> Point d r :+ p
 minPoint b = let (CWMin p :+ e) = b^.minP in p :+ e
 
 maxPoint :: Box d p r -> Point d r :+ p
@@ -212,9 +222,9 @@ p `insideBox` b = FV.and . FV.zipWith R.inRange (toVec p) . fmap toOpenRange . e
 --
 -- >>> extent (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
 -- Vector3 (Range (Closed 1) (Closed 10)) (Range (Closed 2) (Closed 20)) (Range (Closed 3) (Closed 30))
-extent                                 :: Arity d
-                                       => Box d p r -> Vector d (R.Range r)
-extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
+extent                                       :: Arity d
+                                             => Box d p r -> Vector d (R.Range r)
+extent (MkBox (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
@@ -291,10 +301,10 @@ boundingBoxList' = boundingBoxList . NE.fromList . F.toList
 ----------------------------------------
 
 instance IsBoxable (Point d r) where
-  boundingBox p = Box (ext $ CWMin p) (ext $ CWMax p)
+  boundingBox p = MkBox (ext $ CWMin p) (ext $ CWMax p)
 
 instance IsBoxable (Box d p r) where
-  boundingBox (Box m m') = Box (m&extra .~ ()) (m'&extra .~ ())
+  boundingBox (MkBox m m') = MkBox (m&extra .~ ()) (m'&extra .~ ())
 
 instance IsBoxable c => IsBoxable (c :+ e) where
   boundingBox = boundingBox . view core
