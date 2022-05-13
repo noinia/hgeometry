@@ -44,6 +44,15 @@
   the interface for linear programming. Hidden the
   ~Algorithms.Geometry.LinearProgramming.Types~ module.
 
+- Made more data types abstract. In particular ~Arrangement~,
+  ~PlanarSubdivision~, ~PlaneGraph~, and ~Box~.
+
+  The ~Box~ data type no longer exposes its original constructor, but
+  a pattern that allows you to directly match on the two ~Point d r :+
+  p~ 's. Also, ~minPoint~ and ~maxPoint~ are now lenses rather than
+  functions, and the show instance has been updated.
+
+
 ** 0.14
 
 - Allow the associated/extra data of linesegments and intervals to
