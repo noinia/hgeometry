@@ -31,7 +31,7 @@ makeLenses ''Cell
 
 -- | Computes a cell that contains the given rectangle
 fitsRectangle   :: (RealFrac r, Ord r) => Rectangle p r -> Cell r
-fitsRectangle b = Cell w ((b^.to minPoint.core) .-^ Vector2 1 1)
+fitsRectangle b = Cell w ((b^.minPoint.core) .-^ Vector2 1 1)
   where
     w = lg' . ceiling . (1+) . maximum . size $ b
 

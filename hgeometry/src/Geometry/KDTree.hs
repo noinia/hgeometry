@@ -10,7 +10,17 @@
 -- Static, d-dimensional KD-Trees.
 --
 --------------------------------------------------------------------------------
-module Geometry.KDTree  where
+module Geometry.KDTree
+  ( KDTree, KDTree'
+  , buildKDTree, buildKDTree'
+
+  , reportSubTree
+
+  , searchKDTree, searchKDTree'
+
+
+  , toPointSet, splitOn
+  ) where
 
 import           Control.Lens             hiding (Empty, element, imap, (:<))
 import           Data.BinaryTree
@@ -113,6 +123,7 @@ compareOn i p q = let f = (^.core.unsafeCoord i)
                   in (f p, p^.core) `compare` (f q, q^.core)
 
 
+-- | Constructs the tree
 build      :: (1 <= d, Arity d, Ord r)
            => Coord d
            -> PointSet (LSeq 1) d p r
@@ -157,7 +168,7 @@ boxOf (Leaf p)                 = boundingBox (p^.core)
 boxOf (Node _ (Split _ _ b) _) = b
 
 containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
-(Box (CWMin p :+ _) (CWMax q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
+(Box (p :+ _) (q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
 
 --------------------------------------------------------------------------------
 

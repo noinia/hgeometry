@@ -8,11 +8,13 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.Util
 
+--------------------------------------------------------------------------------
+
 arbitraryPointInBoundingBox :: Box 2 p Rational -> Gen (Point 2 Rational)
 arbitraryPointInBoundingBox b = do
   ZeroToOne rX <- arbitrary
   ZeroToOne rY <- arbitrary
-  let minPt = minPoint b ^. core
+  let minPt = b^.minPoint.core
       offsetVector = Vector2 (width b * rX) (height b * rY)
   pure $ minPt .+^ offsetVector
 
