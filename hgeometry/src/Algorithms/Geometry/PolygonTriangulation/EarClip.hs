@@ -272,8 +272,8 @@ zHashGen v = zHashPoint bounds
   where
     bounds = (minX, realToFrac (maxX-minX), minY, realToFrac (maxY-minY))
     bb = V.foldl1' (<>) $ V.map boundingBox v
-    Point2 minX minY = minPoint bb ^. core
-    Point2 maxX maxY = minPoint bb ^. core
+    Point2 minX minY = bb^.minPoint.core
+    Point2 maxX maxY = bb^.minPoint.core
 
 -------------------------------------------------------------------------------
 -- Z-Order
@@ -485,8 +485,8 @@ earCheckHashed hasher vertices zHashes a b c = do
       pointC = mutListIndex vertices c
       trig = Triangle pointA pointB pointC
       trigBB = boundingBox trig
-      lowPt = minPoint trigBB ^. core
-      highPt = maxPoint trigBB ^. core
+      lowPt  = trigBB^.minPoint.core
+      highPt = trigBB^.maxPoint.core
       -- (lowPt, highPt) = triangleBoundingBox trig
 
       minZ = hasher lowPt

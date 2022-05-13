@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE InstanceSigs  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
@@ -57,7 +58,7 @@ instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
 --------------------------------------------------------------------------------
 -- * d-dimensional boxes
 
-
+-- | d-Dimensional boxes.
 data Box d p r = MkBox { _minP :: !(CWMin (Point d r) :+ p)
                        , _maxP :: !(CWMax (Point d r) :+ p)
                        } deriving Generic
@@ -187,13 +188,23 @@ type instance Dimension (Box d p r) = d
 type instance NumType   (Box d p r) = r
 
 --------------------------------------------------------------------------------0
+-- * Lenses on d-dimensonal boxes
+
+-- | Lens to access the minPoint
+minPoint :: Lens' (Box d p r) (Point d r :+ p)
+minPoint = lens get' (\(MkBox _ q) (p :+ e) -> MkBox (CWMin p :+ e) q)
+  where
+    get' b = let (CWMin p :+ e) = b^.minP in p :+ e
+
+-- | Lens to access the maxPoint
+maxPoint :: Lens' (Box d p r) (Point d r :+ p)
+maxPoint = lens get' (\(MkBox p _) (q :+ e) -> MkBox p ((CWMax q) :+ e))
+  where
+    get' b = let (CWMax q :+ e) = b^.maxP in q :+ e
+
+--------------------------------------------------------------------------------
 -- * Functions on d-dimensonal boxes
 
-minPoint   :: Box d p r -> Point d r :+ p
-minPoint b = let (CWMin p :+ e) = b^.minP in p :+ e
-
-maxPoint :: Box d p r -> Point d r :+ p
-maxPoint b = let (CWMax p :+ e) = b^.maxP in p :+ e
 
 -- | Check if a point lies a box
 --

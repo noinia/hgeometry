@@ -54,6 +54,6 @@ fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
   where
     b = Box.boundingBox g
     v1  :: Vector 2 r
-    v1  = negate <$> b^.to Box.minPoint.core.vector
-    v2  = r^.to Box.minPoint.core.vector
+    v1  = negate <$> b^.Box.minPoint.core.vector
+    v2  = r^.Box.minPoint.core.vector
     lam = minimum $ (/) <$> Box.size r <*> Box.size b

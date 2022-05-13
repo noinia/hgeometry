@@ -15,9 +15,9 @@ module Geometry.Box
   ( Box, pattern Box
   , box, fromExtent, fromCenter
   , grow
+  , minPoint, maxPoint
 
   , centerPoint
-  , minPoint, maxPoint
 
   , inBox, inBox', insideBox
   , extent, size
