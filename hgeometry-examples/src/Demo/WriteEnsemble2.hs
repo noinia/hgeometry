@@ -3,32 +3,32 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 module Main where
 
-import Control.Lens hiding ((<.>))
-import Control.Monad
-import Data.Ext
-import Control.Applicative
-import Data.Fixed
-import qualified Data.Text as T
-import Data.Maybe
-import Ipe
-import Geometry
-import Geometry.PolyLine(fromPoints')
-import System.Environment
-import Data.Time.Calendar
-import Data.Time.Clock
-import Data.Time.Clock.POSIX
-import qualified Data.Foldable as F
-import System.Directory
-import Data.List(isSuffixOf)
+import           Control.Applicative
+import           Control.Lens hiding ((<.>))
+import           Control.Monad
+import           Data.Aeson
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
-import Data.Aeson
-import Data.Monoid
+import           Data.Ext
+import           Data.Fixed
+import qualified Data.Foldable as F
 import qualified Data.HashMap.Strict as H
-import Text.Printf
 import qualified Data.List as L
+import           Data.List (isSuffixOf)
+import           Data.Maybe
+import           Data.Monoid
+import qualified Data.Text as T
+import           Data.Time.Calendar
+import           Data.Time.Clock
+import           Data.Time.Clock.POSIX
+import           Geometry
+import           Geometry.PolyLine (fromPoints')
+import           Ipe
+import           System.Directory
+import           System.Environment
+import           Text.Printf
 
-import Network.HTTP.Conduit
+import           Network.HTTP.Conduit
 
 --------------------------------------------------------------------------------0
 

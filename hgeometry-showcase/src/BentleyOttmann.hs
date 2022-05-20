@@ -4,7 +4,8 @@ module BentleyOttmann (bentleyOttmannShowcase) where
 import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (intersections)
 
 import           Control.Lens                 ((&), (.~), (^.))
-import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
+import           Control.Monad(forM_)
+import           Control.Monad.Random         (evalRand, mkStdGen, replicateM)
 import           Data.Ext                     (core)
 import           Geometry.LineSegment    (LineSegment (LineSegment'))
 import           Geometry.Point          (Point (Point2))

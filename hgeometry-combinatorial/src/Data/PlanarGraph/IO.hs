@@ -142,7 +142,7 @@ buildGraph as' = fromAdjacencyLists as
 reorder     :: V.Vector (i :+ a) -> (i -> Int) -> V.Vector a
 reorder v f = V.create $ do
                            v' <- MV.new (V.length v)
-                           forM_ v $ \(i :+ x) ->
+                           F.forM_ v $ \(i :+ x) ->
                              MV.write v' (f i) x
                            pure v'
 
