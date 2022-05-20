@@ -19,13 +19,20 @@ import           Linear.V4
 -- $setup
 -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
+-- | Types that can act as d-dimensional points whose numeric type is
+-- r.
+--
+-- Note that updates to the 'point' are not necessarily supported. See
+-- ~AsAPoint~ for updatable points.
 class ToAPoint point d r | point -> r where
+  -- | Getter to get a 'Point d r' out of the point.
   toPoint   :: Getter point (Point d r)
 
--- class ToAPoint point d r => AsAPoint point d r where
---   asAPoint :: Lens' point (Point d r)
-class AsAPoint p where
-  asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
+-- | Types that can act a points
+class AsAPoint point where
+  -- | Lens to access the Point in the point. Updates may change the
+  -- dimension and/or numeric type.
+  asAPoint :: Lens (point d r) (point d' r') (Point d r) (Point d' r')
 
 -- | Lens to access the vector corresponding to this point.
 --
