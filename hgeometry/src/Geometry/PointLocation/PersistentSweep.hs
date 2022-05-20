@@ -8,7 +8,7 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Geometry.PointLocation.PersistentSweep
-  ( PointLocationDS(PointLocationDS)
+  ( PointLocationDS
   , verticalRayShootingStructure, subdivision, outerFace
 
   -- * Building the Data Structure
@@ -40,8 +40,11 @@ import qualified Data.Vector as V
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r = PointLocationDS {
         _verticalRayShootingStructure :: VRS.VerticalRayShootingStructure v (Dart s) r
+       -- ^ the actual vertical ray shooting DS
       , _subdivision                  :: PlanarSubdivision s v e f r
+      -- ^ the planarsubdivision the point location structure is built on
       , _outerFace                    :: FaceId' s
+      -- ^ the outerface id
       } deriving (Show,Eq)
 
 makeLensesWith (lensRules&generateUpdateableOptics .~ False) ''PointLocationDS
