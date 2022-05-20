@@ -13,6 +13,7 @@ module Data.PlanarGraph.EdgeOracle where
 
 import           Control.Applicative (Alternative(..))
 import           Control.Lens hiding ((.=))
+import           Control.Monad (forM_)
 import           Control.Monad.ST (ST)
 import           Control.Monad.State.Strict
 import           Data.Bitraversable

@@ -12,17 +12,17 @@ module Data.PlanarGraph.Core where
 
 
 import           Control.DeepSeq
-import           Control.Lens               hiding ((.=))
+import           Control.Lens hiding ((.=))
 import           Control.Monad.State.Strict
 import           Data.Aeson
-import qualified Data.Foldable              as F
+import qualified Data.Foldable as F
 import           Data.Permutation
 import           Data.PlanarGraph.Dart
-import           Data.Type.Equality         (gcastWith)
-import qualified Data.Vector                as V
-import qualified Data.Vector.Mutable        as MV
-import           GHC.Generics               (Generic)
-import           Unsafe.Coerce              (unsafeCoerce)
+import           Data.Type.Equality (gcastWith)
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
+import           GHC.Generics (Generic)
+import           Unsafe.Coerce (unsafeCoerce)
 
 
 --------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ updateData' fv fe ff (PlanarGraph em vtxData dData fData dg) = g'
 reorderEdgeData    :: Foldable f => f (Dart s, e) -> V.Vector e
 reorderEdgeData ds = V.create $ do
                                   v <- MV.new (F.length ds)
-                                  forM_ (F.toList ds) $ \(d,x) ->
+                                  F.forM_ ds $ \(d,x) ->
                                     MV.write v (fromEnum d) x
                                   pure v
 
