@@ -1086,10 +1086,22 @@ coord :: forall i p d r. (1 <= i, i <= d, KnownNat i, Arity d, AsAPoint p) => Le
 --   2
 --   </pre>
 unsafeCoord :: (Arity d, AsAPoint p) => Int -> Lens' (p d r) r
+
+-- | Types that can act as d-dimensional points whose numeric type is r.
+--   
+--   Note that updates to the <a>point</a> are not necessarily supported.
+--   See ~AsAPoint~ for updatable points.
 class ToAPoint point d r | point -> r
+
+-- | Getter to get a 'Point d r' out of the point.
 toPoint :: ToAPoint point d r => Getter point (Point d r)
-class AsAPoint p
-asAPoint :: AsAPoint p => Lens (p d r) (p d' r') (Point d r) (Point d' r')
+
+-- | Types that can act a points
+class AsAPoint point
+
+-- | Lens to access the Point in the point. Updates may change the
+--   dimension and/or numeric type.
+asAPoint :: AsAPoint point => Lens (point d r) (point d' r') (Point d r) (Point d' r')
 
 
 module Geometry.RangeTree
@@ -1333,191 +1345,6 @@ module Algorithms.Geometry.ClosestPair
 --   
 --   running time: &lt;math&gt;
 closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
-
-
--- | Orthogonal &lt;math&gt;-dimensiontal boxes (e.g. rectangles)
-module Geometry.Box.Internal
-
--- | Coordinate wize minimum
-newtype CWMin a
-CWMin :: a -> CWMin a
-[_cwMin] :: CWMin a -> a
-cwMin :: forall a_a1lnd a_a1lEW. Iso (CWMin a_a1lnd) (CWMin a_a1lEW) a_a1lnd a_a1lEW
-
--- | Coordinate wize maximum
-newtype CWMax a
-CWMax :: a -> CWMax a
-[_cwMax] :: CWMax a -> a
-cwMax :: forall a_a1lF2 a_a1lVY. Iso (CWMax a_a1lF2) (CWMax a_a1lVY) a_a1lF2 a_a1lVY
-
--- | d-Dimensional boxes.
-data Box d p r
-MkBox :: !CWMin (Point d r) :+ p -> !CWMax (Point d r) :+ p -> Box d p r
-[_minP] :: Box d p r -> !CWMin (Point d r) :+ p
-[_maxP] :: Box d p r -> !CWMax (Point d r) :+ p
-minP :: forall d_a1lW5 p_a1lW6 r_a1lW7. Lens' (Box d_a1lW5 p_a1lW6 r_a1lW7) ((:+) (CWMin (Point d_a1lW5 r_a1lW7)) p_a1lW6)
-maxP :: forall d_a1lW5 p_a1lW6 r_a1lW7. Lens' (Box d_a1lW5 p_a1lW6 r_a1lW7) ((:+) (CWMax (Point d_a1lW5 r_a1lW7)) p_a1lW6)
-pattern Box :: (Point d r :+ p) -> (Point d r :+ p) -> Box d p r
-
--- | Helper to implement the Box pattern
-getBox :: Box d p r -> (Point d r :+ p, Point d r :+ p)
-
--- | Given the point with the lowest coordinates and the point with highest
---   coordinates, create a box.
-box :: (Point d r :+ p) -> (Point d r :+ p) -> Box d p r
-
--- | grows the box by x on all sides
-grow :: (Num r, Arity d) => r -> Box d p r -> Box d p r
-
--- | Build a d dimensional Box given d ranges.
-fromExtent :: Arity d => Vector d (Range r) -> Box d () r
-
--- | Given a center point and a vector specifying the box width's,
---   construct a box.
-fromCenter :: (Arity d, Fractional r) => Point d r -> Vector d r -> Box d () r
-
--- | Center of the box
-centerPoint :: (Arity d, Fractional r) => Box d p r -> Point d r
-
--- | Lens to access the minPoint
-minPoint :: Lens' (Box d p r) (Point d r :+ p)
-
--- | Lens to access the maxPoint
-maxPoint :: Lens' (Box d p r) (Point d r :+ p)
-
--- | Check if a point lies a box
---   
---   <pre>
---   &gt;&gt;&gt; origin `inBox` (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
---   False
---   
---   &gt;&gt;&gt; origin `inBox` (boundingBoxList' [Point3 (-1) (-2) (-3), Point3 10 20 30] :: Box 3 () Int)
---   True
---   </pre>
-inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
-
--- | Check if a point lies strictly inside a box (i.e. not on its boundary)
---   
---   <pre>
---   &gt;&gt;&gt; origin `inBox` (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
---   False
---   
---   &gt;&gt;&gt; origin `inBox` (boundingBoxList' [Point3 (-1) (-2) (-3), Point3 10 20 30] :: Box 3 () Int)
---   True
---   </pre>
-insideBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
-
--- | Get a vector with the extent of the box in each dimension. Note that
---   the resulting vector is 0 indexed whereas one would normally count
---   dimensions starting at zero.
---   
---   <pre>
---   &gt;&gt;&gt; extent (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
---   Vector3 (Range (Closed 1) (Closed 10)) (Range (Closed 2) (Closed 20)) (Range (Closed 3) (Closed 30))
---   </pre>
-extent :: Arity d => Box d p r -> Vector d (Range r)
-
--- | Get the size of the box (in all dimensions). Note that the resulting
---   vector is 0 indexed whereas one would normally count dimensions
---   starting at zero.
---   
---   <pre>
---   &gt;&gt;&gt; size (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   Vector3 1 2 3
---   </pre>
-size :: (Arity d, Num r) => Box d p r -> Vector d r
-
--- | Given a dimension, get the width of the box in that dimension.
---   Dimensions are 1 indexed.
---   
---   <pre>
---   &gt;&gt;&gt; widthIn @1 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   1
---   
---   &gt;&gt;&gt; widthIn @3 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   3
---   </pre>
-widthIn :: forall i p d r. (Arity d, Arity (i - 1), Num r, ((i - 1) + 1) <= d) => Box d p r -> r
-
--- | Same as <a>widthIn</a> but with a runtime int instead of a static
---   dimension.
---   
---   <pre>
---   &gt;&gt;&gt; widthIn' 1 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   Just 1
---   
---   &gt;&gt;&gt; widthIn' 3 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   Just 3
---   
---   &gt;&gt;&gt; widthIn' 10 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
---   Nothing
---   </pre>
-widthIn' :: (Arity d, Num r) => Int -> Box d p r -> Maybe r
-type Rectangle = Box 2
-
--- | <pre>
---   &gt;&gt;&gt; width (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
---   1
---   
---   &gt;&gt;&gt; width (boundingBoxList' [origin] :: Rectangle () Int)
---   0
---   </pre>
-width :: Num r => Rectangle p r -> r
-
--- | <pre>
---   &gt;&gt;&gt; height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
---   2
---   
---   &gt;&gt;&gt; height (boundingBoxList' [origin] :: Rectangle () Int)
---   0
---   </pre>
-height :: Num r => Rectangle p r -> r
-class IsBoxable g
-boundingBox :: (IsBoxable g, Ord (NumType g)) => g -> Box (Dimension g) () (NumType g)
-
--- | Create a bounding box that encapsulates a list of objects.
-boundingBoxList :: (IsBoxable g, Foldable1 c, Ord (NumType g), Arity (Dimension g)) => c g -> Box (Dimension g) () (NumType g)
-
--- | Unsafe version of boundingBoxList, that does not check if the list is
---   non-empty
-boundingBoxList' :: (IsBoxable g, Foldable c, Ord (NumType g), Arity (Dimension g)) => c g -> Box (Dimension g) () (NumType g)
-instance (GHC.Classes.Eq r, GHC.Classes.Eq p, Geometry.Vector.VectorFamily.Arity d) => GHC.Classes.Eq (Geometry.Box.Internal.Box d p r)
-instance (GHC.Classes.Ord r, GHC.Classes.Ord p, Geometry.Vector.VectorFamily.Arity d) => GHC.Classes.Ord (Geometry.Box.Internal.Box d p r)
-instance Geometry.Box.Internal.IsBoxable (Geometry.Point.Internal.Point d r)
-instance Geometry.Box.Internal.IsBoxable (Geometry.Box.Internal.Box d p r)
-instance Geometry.Box.Internal.IsBoxable c => Geometry.Box.Internal.IsBoxable (c Data.Ext.:+ e)
-instance (GHC.Show.Show r, GHC.Show.Show p, Geometry.Vector.VectorFamily.Arity d) => GHC.Show.Show (Geometry.Box.Internal.Box d p r)
-instance (Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r, GHC.Base.Semigroup p) => GHC.Base.Semigroup (Geometry.Box.Internal.Box d p r)
-instance (GHC.Classes.Ord r, Geometry.Vector.VectorFamily.Arity d) => Data.Intersection.HasIntersectionWith (Geometry.Box.Internal.Box d p r) (Geometry.Box.Internal.Box d q r)
-instance (GHC.Classes.Ord r, Geometry.Vector.VectorFamily.Arity d) => Data.Intersection.IsIntersectableWith (Geometry.Box.Internal.Box d p r) (Geometry.Box.Internal.Box d q r)
-instance Geometry.Vector.VectorFamily.Arity d => Data.Bifunctor.Bifunctor (Geometry.Box.Internal.Box d)
-instance Geometry.Vector.VectorFamily.Arity d => Data.Bifoldable.Bifoldable (Geometry.Box.Internal.Box d)
-instance Geometry.Vector.VectorFamily.Arity d => Data.Bitraversable.Bitraversable (Geometry.Box.Internal.Box d)
-instance (Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r) => Data.Intersection.HasIntersectionWith (Geometry.Point.Internal.Point d r) (Geometry.Box.Internal.Box d p r)
-instance (Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r) => Data.Intersection.IsIntersectableWith (Geometry.Point.Internal.Point d r) (Geometry.Box.Internal.Box d p r)
-instance Geometry.Point.Internal.PointFunctor (Geometry.Box.Internal.Box d p)
-instance (GHC.Real.Fractional r, Geometry.Vector.VectorFamily.Arity d, Geometry.Vector.VectorFamily.Arity (d GHC.TypeNats.+ 1)) => Geometry.Transformation.Internal.IsTransformable (Geometry.Box.Internal.Box d p r)
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r) => Test.QuickCheck.Arbitrary.Arbitrary (Geometry.Box.Internal.Box d () r)
-instance (GHC.Num.Num r, GHC.Classes.Ord r) => Geometry.Point.Internal.HasSquaredEuclideanDistance (Geometry.Box.Internal.Box 2 p r)
-instance GHC.Generics.Generic (Geometry.Box.Internal.Box d p r)
-instance (Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r) => GHC.Base.Semigroup (Geometry.Box.Internal.CWMax (Geometry.Point.Internal.Point d r))
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Geometry.Box.Internal.CWMax a)
-instance GHC.Generics.Generic (Geometry.Box.Internal.CWMax a)
-instance Data.Traversable.Traversable Geometry.Box.Internal.CWMax
-instance Data.Foldable.Foldable Geometry.Box.Internal.CWMax
-instance GHC.Base.Functor Geometry.Box.Internal.CWMax
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Geometry.Box.Internal.CWMax a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Geometry.Box.Internal.CWMax a)
-instance GHC.Show.Show a => GHC.Show.Show (Geometry.Box.Internal.CWMax a)
-instance (Geometry.Vector.VectorFamily.Arity d, GHC.Classes.Ord r) => GHC.Base.Semigroup (Geometry.Box.Internal.CWMin (Geometry.Point.Internal.Point d r))
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Geometry.Box.Internal.CWMin a)
-instance GHC.Generics.Generic (Geometry.Box.Internal.CWMin a)
-instance Data.Traversable.Traversable Geometry.Box.Internal.CWMin
-instance Data.Foldable.Foldable Geometry.Box.Internal.CWMin
-instance GHC.Base.Functor Geometry.Box.Internal.CWMin
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Geometry.Box.Internal.CWMin a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Geometry.Box.Internal.CWMin a)
-instance GHC.Show.Show a => GHC.Show.Show (Geometry.Box.Internal.CWMin a)
 
 
 module Geometry.Transformation

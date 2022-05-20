@@ -110,7 +110,7 @@ module Ipe.Path
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akGB r_aq5A. Iso (Path r_akGB) (Path r_aq5A) (LSeq 1 (PathSegment r_akGB)) (LSeq 1 (PathSegment r_aq5A))
+pathSegments :: forall r_akG0 r_aq5A. Iso (Path r_akG0) (Path r_aq5A) (LSeq 1 (PathSegment r_akG0)) (LSeq 1 (PathSegment r_aq5A))
 
 -- | Paths
 --   
@@ -125,14 +125,14 @@ EllipseSegment :: Ellipse r -> PathSegment r
 ArcSegment :: PathSegment r
 SplineSegment :: PathSegment r
 ClosedSplineSegment :: PathSegment r
-_PolyLineSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) (PolyLine 2 () r_ajDj)
-_PolygonPath :: forall r_ajDj. Prism' (PathSegment r_ajDj) (SimplePolygon () r_ajDj)
-_CubicBezierSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) (BezierSpline 3 2 r_ajDj)
-_QuadraticBezierSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) (BezierSpline 2 2 r_ajDj)
-_EllipseSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) (Ellipse r_ajDj)
-_ArcSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) ()
-_SplineSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) ()
-_ClosedSplineSegment :: forall r_ajDj. Prism' (PathSegment r_ajDj) ()
+_PolyLineSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) (PolyLine 2 () r_ajCI)
+_PolygonPath :: forall r_ajCI. Prism' (PathSegment r_ajCI) (SimplePolygon () r_ajCI)
+_CubicBezierSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) (BezierSpline 3 2 r_ajCI)
+_QuadraticBezierSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) (BezierSpline 2 2 r_ajCI)
+_EllipseSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) (Ellipse r_ajCI)
+_ArcSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) ()
+_SplineSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) ()
+_ClosedSplineSegment :: forall r_ajCI. Prism' (PathSegment r_ajCI) ()
 
 -- | type that represents a path in ipe.
 data Operation r
@@ -653,7 +653,7 @@ symbolName :: forall r_aZHz. Lens' (IpeSymbol r_aZHz) Text
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akGB r_aq5A. Iso (Path r_akGB) (Path r_aq5A) (LSeq 1 (PathSegment r_akGB)) (LSeq 1 (PathSegment r_aq5A))
+pathSegments :: forall r_akG0 r_aq5A. Iso (Path r_akG0) (Path r_aq5A) (LSeq 1 (PathSegment r_akG0)) (LSeq 1 (PathSegment r_aq5A))
 
 -- | Paths
 --   
@@ -885,7 +885,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akGB r_aq5A. Iso (Path r_akGB) (Path r_aq5A) (LSeq 1 (PathSegment r_akGB)) (LSeq 1 (PathSegment r_aq5A))
+pathSegments :: forall r_akG0 r_aq5A. Iso (Path r_akG0) (Path r_aq5A) (LSeq 1 (PathSegment r_akG0)) (LSeq 1 (PathSegment r_aq5A))
 
 -- | Paths
 --   
@@ -1628,7 +1628,7 @@ mkIpeObject :: ToObject i => IpeObject' i r -> IpeObject r
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r
 Path :: LSeq 1 (PathSegment r) -> Path r
-pathSegments :: forall r_akGB r_aq5A. Iso (Path r_akGB) (Path r_aq5A) (LSeq 1 (PathSegment r_akGB)) (LSeq 1 (PathSegment r_aq5A))
+pathSegments :: forall r_akG0 r_aq5A. Iso (Path r_akG0) (Path r_aq5A) (LSeq 1 (PathSegment r_akG0)) (LSeq 1 (PathSegment r_aq5A))
 
 -- | Paths
 --   
