@@ -163,6 +163,7 @@ toOffset p (Line q v) = scalarMultiple (p .-. q) v
 -- 0.5
 --
 -- The point (6,4) is not on the line but we can still point closest to it.
+--
 -- >>> toOffset' (Point2 6 4) (lineThrough origin $ Point2 10 10)
 -- 0.5
 toOffset'             :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
