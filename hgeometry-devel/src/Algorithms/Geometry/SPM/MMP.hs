@@ -13,6 +13,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Maybe (maybeToList, fromMaybe)
 import qualified Data.PQueue.Prio.Min as PQueue
+import           Data.Range
 import qualified Data.Set as Set
 import           Data.UnBounded
 import           Data.Vector (Vector)
@@ -44,6 +45,77 @@ instance Eq r => Eq (WithDistance s r) where
   (WithDistance a _) == (WithDistance b _) = a == b
 instance Ord r => Ord (WithDistance s r) where
   (WithDistance a _) `compare` (WithDistance b _) = a `compare` b
+
+
+--------------------------------------------------------------------------------
+
+
+
+-- | A generator gives rise to a candidate interval on an edge.
+data Generator s r =
+  Generator { _root         :: !(VertexId' s)
+              -- ^ the root/apex of the points in the interval
+            , _initialDist  :: !(WithDistance s r)
+              -- ^ distance to the root
+            , _unfoldedRoot :: !(Point 2 r)
+              -- ^ point corresponding to the root in the same
+              -- coordinate system as the face opposite to the edge
+              -- this generator corresponds to.
+              --
+              -- note that in the plane the unfolded root is just the
+              -- same as the original location of the root.
+            } deriving (Show)
+
+makeLenses ''Generator
+
+-- | An SPM Interval
+data SPMInterval s r =
+  SPMInterval { _generator :: !(Generator s r)
+              -- ^ the generator for the interval
+              , _edgeRange :: !(Range (Point 2 r))
+              -- ^ the actual interval/range on the edge
+              }
+  deriving (Show)
+
+makeLenses ''SPMInterval
+
+--------------------------------------------------------------------------------
+
+
+newtype EdgeSubdivision s r =
+    EdgeSubdivision (Set.Set (SPMInterval s r))
+  deriving (Show)
+
+
+data InsertResult s r = InsertResult { _deleted      :: [SPMInterval s r]
+                                     , _trimmedLeft  :: Maybe (Point 2 r)
+                                     , _trimmedRight :: Maybe (Point 2 r)
+                                     , _leftNeigh    :: Maybe (SPMInterval s r)
+                                     , _rightNeigh   :: Maybe (SPMInterval s r)
+                                     , _newSubdiv    :: EdgeSubdivision s r
+                                     }
+                        deriving (Show)
+
+makeLenses ''InsertResult
+
+
+
+
+
+insertInterval' :: Dart s -> SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
+insertInterval' = undefined
+
+insert                 :: Point 2 r -> SPMInterval s r
+                       -> Dart s -> EdgeSubdivision s r -> InsertResult s r
+insert c i e intervals = undefined
+
+
+
+splitLocate             :: Point 2 r -> EdgeSubdivision s r
+                        -> (EdgeSubdivision s r,Maybe (SPMInterval s r), EdgeSubdivision s r)
+splitLocate c intervals = undefined
+
+
 
 
 --------------------------------------------------------------------------------
@@ -92,7 +164,7 @@ edgeShortestPathMap s subdiv = mergeAllIntervals
   where
     edgeSPM = edgeShortestPathMapPortalEdge s subdiv
 
-mergeAllIntervals subdiv = id
+mergeAllIntervals subdiv = subdiv
   -- mapEdges (\d (e,es) -> let es' = subdiv^.dataOf (twin d)._2
   --                                                 in (e, mergeIntervals es es')
   --                                   )
@@ -109,8 +181,8 @@ edgeShortestPathMapPortalEdge :: (Ord r, Num r)
                               => VertexId' s
                               -> Triangles s v e f r
                               -> EdgeSPM s r
-edgeShortestPathMapPortalEdge s subdiv = computeIntervals s subdiv queue
-                                       $ EdgeSPM initialDistances initialSubdivs
+edgeShortestPathMapPortalEdge s subdiv = computeIntervals subdiv
+                                       $ (queue, EdgeSPM initialDistances initialSubdivs)
   where
     -- initialize all vertex distances on +Infty and s on 0
     initialDistances = EnumMap.insert s (ValT $ WithDistance 0 Nothing)
@@ -139,48 +211,35 @@ edgeShortestPathMapPortalEdge s subdiv = computeIntervals s subdiv queue
           f w   = ( WithDistance (distance (subdiv^.locationOf w) locS) (Just s)
                   , Event $ VertexEvent w
                   )
-          mEvt = (\(c,d) -> (WithDistance d (Just s),Event $ InteriorEvent e gen0 c))
+          mEvt = (\(c,d) -> ( WithDistance d (Just s)
+                            , Event $ InteriorEvent e (spmInterval u v) c)
+                 )
                  <$> closestInteriorPointOn (edgeSegment e subdiv) locS
       in maybeToList mEvt <> [ f u, f v ]
 
     locS = subdiv^.locationOf s
     gen0 = Generator s (WithDistance 0 Nothing) locS
 
+    spmInterval u v = SPMInterval gen0
+                                  (ClosedRange (subdiv^.locationOf u) (subdiv^.locationOf v))
+
+
 ----------------------------------------
 
 
--- | A generator gives rise to a candidate interval on an edge.
-data Generator s r = Generator { _root         :: !(VertexId' s)
-                               , _initialDist  :: !(WithDistance s r)
-                               , _unfoldedRoot :: !(Point 2 r)
-                               -- ^ point corresponding to the root in the same coordinate
-                               -- system as the face opposite to the edge this generator
-                               -- corresponds to.
-                               --
-                               -- note that in the plane the unfolded root is just the same
-                               -- as the original location of the root.
-                               } deriving (Show)
-
-type SPMInterval s r = Generator s r
-
-newtype EdgeSubdivision s r =
-    EdgeSubdivision (Set.Set (Generator s r))
-  deriving (Show)
 
 
-insertInterval' :: Dart s -> SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
-insertInterval' = undefined
+
 
 
 ----------------------------------------
 
 
 data EdgeSPM s r =
-  EdgeSPM { vertexDistances  :: EnumMap (VertexId' s) (Top (WithDistance s r))
-          , edgeSubdivisions :: EnumMap (Dart s)      (EdgeSubdivision s r)
+  EdgeSPM { _vertexDistances  :: EnumMap (VertexId' s) (Top (WithDistance s r))
+          , _edgeSubdivisions :: EnumMap (Dart s)      (EdgeSubdivision s r)
           }
                  deriving (Show)
-
 
 -- | Get the current distance estimate and predecessor to v
 distanceOf                  :: VertexId' s -> EdgeSPM s r -> Top (WithDistance s r)
@@ -204,6 +263,13 @@ insertSPMInterval                     :: Dart s -> SPMInterval s r -> EdgeSPM s 
 insertSPMInterval e i (EdgeSPM vs es) = EdgeSPM vs (EnumMap.adjust (insertInterval' e i) e es)
 
 
+-- | apply the given function on the edge subdivision of the given edge
+apply                     :: Functor f
+                          => (EdgeSubdivision s r -> f (EdgeSubdivision s r))
+                          -> Dart s -> EdgeSPM s r -> f (EdgeSPM s r)
+apply f d (EdgeSPM vd es) = case EnumMap.lookup d es of
+    Nothing   -> error $ "apply: absurd, dart " <> show d <> " not found!?"
+    Just ints -> EdgeSPM vd . (\ints' -> EnumMap.insert d ints' es) <$> f ints
 
 --------------------------------------------------------------------------------
 
@@ -229,6 +295,7 @@ edgesOppositeTo s subdiv = flip prevIncidentEdge subdiv <$> outgoingEdges s subd
 
 
 type EventQueue s r = PQueue.MinPQueue (WithDistance s r) (Event s r)
+-- TODO seems like we need some sort of PSQueue to support deletions
 
 
 data Event s r = Event { eventKind :: EventKind s r }
@@ -239,40 +306,41 @@ data Event s r = Event { eventKind :: EventKind s r }
 -- (Point 2 r) EventKind
 
 data EventKind s r = VertexEvent (VertexId' s)
-                   | InteriorEvent (Dart s) (Generator s r) (Point 2 r)
+                   | InteriorEvent (Dart s) (SPMInterval s r) (Point 2 r)
                    deriving (Show)
 
+--------------------------------------------------------------------------------
 
 computeIntervals          :: Ord r
-                          => VertexId' s
-                          -> Triangles s v e f r
-                          -> EventQueue s r
+                          => Triangles s v e f r
+                          -> (EventQueue s r, EdgeSPM s r)
                           -> EdgeSPM s r
-                          -> EdgeSPM s r
-computeIntervals s subdiv = go
+computeIntervals subdiv = go
   where
-    go queue state = case PQueue.minViewWithKey queue of
+    go (queue, state) = case PQueue.minViewWithKey queue of
       Nothing           -> state -- done
-      Just (evt,queue') -> let (newEvts, state') = propagate subdiv state evt
-                           in go (insertAll newEvts queue') state'
-
-    insertAll = undefined -- foldr PQueue.insert
-
+      Just (evt,queue') -> go $ propagate subdiv (queue, state) evt
 
 -- | Propagate an interval
-propagate      :: Triangles s v e f r
-               -> EdgeSPM s r -> ( WithDistance s r
-                                 , Event s r
-                                 )
-               -> ( [Event s r] -- new events
-                  , EdgeSPM s r
-                  )
-propagate subdiv state (dist,evt) = case eventKind evt of
-    InteriorEvent e gen c -> propagateInterior subdiv state e gen c
-    VertexEvent v         -> propagateVertex   subdiv state dist v
+propagate                               :: forall s v e f r.
+                                           Triangles s v e f r
+                                        -> (EventQueue s r, EdgeSPM s r)
+                                        -> ( WithDistance s r
+                                           , Event s r
+                                           )
+                                        -> ( EventQueue s r
+                                           , EdgeSPM s r
+                                           )
+propagate subdiv z0 (dist,evt) = foldr doInsert z0 newIntervals
+  where
+    doInsert (e,int,c) (queue,spmEdges) = apply (doInsertInterval int c queue e) e spmEdges
 
+    newIntervals :: [(Dart s, SPMInterval s r, Point 2 r)]
+    newIntervals = case eventKind evt of
+      InteriorEvent e int c -> undefined -- propagateInterior subdiv state e int c
+      VertexEvent v         -> undefined -- propagateVertex   subdiv state dist v
 
-propagateInterior subdiv state e gen c = ( undefined
+propagateInterior subdiv state e int c = ( undefined
                                          , undefined
                                          )
   where
@@ -282,8 +350,41 @@ propagateInterior subdiv state e gen c = ( undefined
     e2 = nextIncidentEdge (twin e) subdiv
 
 
-project :: SPMInterval s r
-project = undefined
+--------------------------------------------------------------------------------
+
+doInsertInterval                       :: SPMInterval s r -- ^ the interval to insert
+                                       -> Point 2 r       -- ^ the frontierpoint of the interval
+                                       -> EventQueue s r
+                                       -> Dart s -- ^ the edge in question
+                                       -> EdgeSubdivision s r -- ^ subdivision of e
+                                       -> (EventQueue s r, EdgeSubdivision s r)
+doInsertInterval i c queue e intervals = (queue', intervals')
+  where
+    queue' = undefined
+    intervals' = undefined
+
+
+--------------------------------------------------------------------------------
+
+project         :: SPMInterval s r -> LineSegment 2 p r -> SPMInterval s r
+project int seg = int&edgeRange %~ extend
+  where
+    gen' = int^.generator
+    extend (Range l r) = undefined
+      -- match (lineThrough (gen'^.unfoldedRoot) l `intersect` seg ) $
+      -- H \NoIntersection ->
+
+
+
+-- data Cone p r = Cone { _apex           :: !(Point 2 r :+ p)
+--                      , _leftDirection  :: !(Vector 2 r)
+--                      , _rightDirection :: !(Vector 2 r)
+--                      } deriving (Show,Eq)
+-- type instance NumType (Cone p r) = r
+-- type instance Dimension (Cone p r) = 2
+
+-- trimToCone :: LineSegment 2 p r -> Cone r -> LineSegment 2 p r
+-- trimToCone = undefined
 
 
 propagateVertex                     :: ()
