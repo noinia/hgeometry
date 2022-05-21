@@ -13,15 +13,16 @@ import           Data.Char (isSpace)
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Measured.Class
 import           Data.Measured.Size
 import           Data.Proxy
+import           Data.Radical
 import           Data.Semigroup
 import qualified Data.Set as Set
 import           GHC.TypeLits
+import           Geometry
 import           Options.Applicative hiding ((<>))
 
 
@@ -50,13 +51,13 @@ options = info (helper <*> parser)
 -- k}} \sum_{p,q} \|pq\|$
 --
 -- running time: $O(n^2)$, where $n$ is the number of points
-expectedPairwiseDistance       :: (Floating r, Arity d) => Int -> [Point d r :+ p] -> r
+expectedPairwiseDistance       :: (Radical r, Fractional r, Arity d) => Int -> [Point d r :+ p] -> r
 expectedPairwiseDistance k pts = makeExpected k pts pairwiseDist
 
 -- | A $(1+\varepsilon)$-approximation of expectedPairwiseDistance
 --
 -- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
-approxExpectedPairwiseDistance          :: (Floating r, Ord r
+approxExpectedPairwiseDistance          :: (Radical r, Fractional r, Ord r
                                            , Arity d, Arity (d+1), 1 <= d
                                          , Show r, Show p)
                                          => r -> Int -> [Point d r :+ p] -> r
@@ -67,14 +68,14 @@ approxExpectedPairwiseDistance eps k pts =
 -- * Computing Distances
 
 -- | Sum of the pairwise distances
-pairwiseDist     :: (Floating r, Arity d) => [Point d r :+ p] -> r
+pairwiseDist     :: (Radical r, Fractional r, Arity d) => [Point d r :+ p] -> r
 pairwiseDist pts = sum [ euclideanDist (p^.core) (q^.core) | p <- pts, q <- pts] / 2
 
 
 -- | $(1+\eps)$-approximation of the sum of the pairwise distances.
 --
 -- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
-approxPairwiseDistance         :: (Floating r, Ord r, Arity d, Arity (d+1), 1 <= d
+approxPairwiseDistance         :: (Radical r, Fractional r, Ord r, Arity d, Arity (d+1), 1 <= d
                                   , Show r, Show p)
                                => r -> [Point d r :+ p] -> r
 approxPairwiseDistance _   []  = 0
@@ -180,7 +181,7 @@ mainWith (Options f) = compareBoth 0.05 f >>= print
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Floating r, Ord r, Arity d, Arity (d+1), Ord p)
+uncovered         :: (Fractional r, Radical r, Ord r, Arity d, Arity (d+1), Ord p)
                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
 uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
   where
@@ -193,7 +194,7 @@ mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList
 -- separation s. i.e. computes the maximum diameter of as and bs, and then
 -- tests by brute force if all pairs (a,b) from different sets are at distance
 -- at least s times the maximum diameter.
-isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
+isWellSeparated           :: (Fractional r, Radical r, Ord r, Arity d) => r -> WSP d p r a -> Bool
 isWellSeparated s (as,bs) =
     and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
   where

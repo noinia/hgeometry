@@ -28,6 +28,7 @@ import           Control.Monad.ST (ST,runST)
 import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Radical
 import           Geometry.Box.Internal
 import           Geometry.Point
 -- import           Geometry.Properties
@@ -79,7 +80,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
 -- | Given a split tree, generate the Well separated pairs
 --
 -- running time: \(O(s^d n)\)
-wellSeparatedPairs   :: (Floating r, Ord r, Arity d, Arity (d + 1))
+wellSeparatedPairs   :: (Radical r, Fractional r, Ord r, Arity d, Arity (d + 1))
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
   where
@@ -376,7 +377,7 @@ extends = imap (\i pts ->
 --------------------------------------------------------------------------------
 -- * Finding Well Separated Pairs
 
-findPairs                     :: (Floating r, Ord r, Arity d, Arity (d + 1))
+findPairs                     :: (Radical r, Fractional r, Ord r, Arity d, Arity (d + 1))
                               => r -> SplitTree d p r a -> SplitTree d p r a
                               -> [WSP d p r a]
 findPairs s l r
@@ -421,7 +422,7 @@ findPairs s l r
 -- * Alternative def if wellSeparated that uses fractional
 
 
-areWellSeparated'                     :: (Floating r, Ord r, Arity d)
+areWellSeparated'                     :: (Radical r, Fractional r, Ord r, Arity d)
                                       => r
                                       -> SplitTree d p r a
                                       -> SplitTree d p r a
@@ -433,7 +434,7 @@ areWellSeparated' s l        r        = boxBox1 s (bbOf l) (bbOf r)
 -- areWellSeparated' s (Node _ nd _) (Leaf p)      = pointBox' s (p^.core) (nd^.bBox)
 -- areWellSeparated' s (Node _ ld _) (Node _ rd _) = boxBox'   s (ld^.bBox) (rd^.bBox)
 
-boxBox1         :: (Floating r, Ord r, Arity d) => r -> Box d p r -> Box d p r -> Bool
+boxBox1         :: (Radical r, Fractional r, Ord r, Arity d) => r -> Box d p r -> Box d p r -> Bool
 boxBox1 s lb rb = euclideanDist (centerPoint lb) (centerPoint rb) >= (s+1)*d
   where
     diam b = euclideanDist (b^.minP.core.cwMin) (b^.maxP.core.cwMax)

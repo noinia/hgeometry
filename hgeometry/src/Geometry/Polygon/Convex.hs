@@ -33,17 +33,32 @@ module Geometry.Polygon.Convex
   ) where
 
 
-import           Control.DeepSeq                (NFData)
-import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
+import           Control.DeepSeq (NFData)
+import           Control.Lens (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
 import           Control.Monad.ST
 import           Control.Monad.State
 import           Data.Coerce
 import           Data.Ext
-import qualified Data.Foldable                  as F
-import           Data.Function                  (on)
+import qualified Data.Foldable as F
+import           Data.Function (on)
+import qualified Data.IntSet as IS
+import           Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
+import           Data.Ord (comparing)
+import           Data.Radical
+import           Data.Semigroup.Foldable (Foldable1 (..))
+import           Data.Util
+import qualified Data.Vector as V
+import           Data.Vector.Circular (CircularVector)
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
+import qualified Data.Vector.Mutable as Mut
+import qualified Data.Vector.NonEmpty as NE
+import qualified Data.Vector.Unboxed as VU
 import           Geometry.Boundary
-import           Geometry.Box              (IsBoxable (..))
+import           Geometry.Box (IsBoxable (..))
 import           Geometry.LineSegment
 import           Geometry.Point
 import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
@@ -55,20 +70,6 @@ import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Triangle
 import           Geometry.Vector
-import qualified Data.IntSet                    as IS
-import           Data.List.NonEmpty             (NonEmpty (..))
-import qualified Data.List.NonEmpty             as NonEmpty
-import           Data.Maybe                     (fromJust)
-import           Data.Ord                       (comparing)
-import           Data.Semigroup.Foldable        (Foldable1 (..))
-import           Data.Util
-import qualified Data.Vector                    as V
-import           Data.Vector.Circular           (CircularVector)
-import qualified Data.Vector.Circular           as CV
-import qualified Data.Vector.Circular.Util      as CV
-import qualified Data.Vector.Mutable            as Mut
-import qualified Data.Vector.NonEmpty           as NE
-import qualified Data.Vector.Unboxed            as VU
 -- import           Geometry.Ipe
 -- import Data.Ratio
 -- import Data.RealNumber.Rational
@@ -543,7 +544,7 @@ inConvex p (ConvexPolygon poly)
 -- Diameter
 
 -- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
-diameter :: (Ord r, Floating r) => ConvexPolygon p r -> r
+diameter :: (Ord r, Radical r) => ConvexPolygon p r -> r
 diameter p = euclideanDist (a^.core) (b^.core)
   where
     (a,b) = diametralPair p

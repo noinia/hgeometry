@@ -45,7 +45,8 @@
   ~Algorithms.Geometry.LinearProgramming.Types~ module.
 
 - Made more data types abstract. In particular ~Arrangement~,
-  ~PlanarSubdivision~, ~PlaneGraph~, and ~Box~.
+  ~PlanarSubdivision~, ~PlaneGraph~, ~Box~, ~PointLocationDS~, and
+  ~VerticalRayShootingStructure~.
 
   The ~Box~ data type no longer exposes its original constructor, but
   a pattern that allows you to directly match on the two ~Point d r :+
@@ -53,7 +54,10 @@
   functions, and the show instance has been updated.
 
 - No longer exporting the ~Geometry.Box.Internal~ module.
-
+- A new ~mapEdges~ function in ~Geometry.PlanarSubdivision~ that maps
+  over only the positive darts, and makes sure the negative darts have
+  consistent data.
+- Use ~Data.Radical~ rather than ~Floating~ when we only need square roots.
 
 ** 0.14
 

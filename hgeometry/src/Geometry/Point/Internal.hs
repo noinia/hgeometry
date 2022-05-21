@@ -39,15 +39,16 @@ import           Data.Aeson
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
-import           Geometry.Properties
-import           Geometry.Vector
-import qualified Geometry.Vector as Vec
 import           Data.Hashable
 import           Data.List (intersperse)
 import           Data.Ord (comparing)
 import           Data.Proxy
+import qualified Data.Radical as Radical
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           Geometry.Properties
+import           Geometry.Vector
+import qualified Geometry.Vector as Vec
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 import           Test.QuickCheck (Arbitrary, Arbitrary1)
@@ -284,8 +285,8 @@ squaredEuclideanDist :: (Num r, Arity d) => Point d r -> Point d r -> r
 squaredEuclideanDist = qdA
 
 -- | Euclidean distance between two points
-euclideanDist :: (Floating r, Arity d) => Point d r -> Point d r -> r
-euclideanDist = distanceA
+euclideanDist     :: (Radical.Radical r, Arity d) => Point d r -> Point d r -> r
+euclideanDist p q = Radical.sqrt $ squaredEuclideanDist p q
 
 
 --------------------------------------------------------------------------------
