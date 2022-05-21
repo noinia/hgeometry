@@ -6432,13 +6432,17 @@ traverseDarts :: Applicative g => (Dart s -> e -> g e') -> PlanarSubdivision s v
 traverseFaces :: Applicative g => (FaceId' s -> f -> g f') -> PlanarSubdivision s v e f r -> g (PlanarSubdivision s v e f' r)
 
 -- | Map with index over all vertices
-mapVertices :: (VertexId' s -> t -> v') -> PlanarSubdivision s t e f r -> PlanarSubdivision s v' e f r
+mapVertices :: (VertexId' s -> v -> v') -> PlanarSubdivision s v e f r -> PlanarSubdivision s v' e f r
 
 -- | Map with index over all darts
-mapDarts :: (Dart s -> t -> e') -> PlanarSubdivision s v t f r -> PlanarSubdivision s v e' f r
+mapDarts :: (Dart s -> e -> e') -> PlanarSubdivision s v e f r -> PlanarSubdivision s v e' f r
+
+-- | Map a function over all positive darts. The negative darts are simply
+--   set to look up the value of their corresponding positive dart
+mapEdges :: (Dart s -> e -> e') -> PlanarSubdivision s v e f r -> PlanarSubdivision s v e' f r
 
 -- | Map with index over all faces
-mapFaces :: (FaceId' s -> t -> f') -> PlanarSubdivision s v e t r -> PlanarSubdivision s v e f' r
+mapFaces :: (FaceId' s -> f -> f') -> PlanarSubdivision s v e f r -> PlanarSubdivision s v e f' r
 
 -- | Given a dart and the subdivision constructs the line segment
 --   representing it. The segment &lt;math&gt; is has &lt;math&gt; as its
@@ -6598,10 +6602,10 @@ module Geometry.Arrangement
 
 -- | Data type representing a two dimensional planar arrangement
 data Arrangement s l v e f r
-inputLines :: forall s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv. Lens' (Arrangement s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv) (Vector ((:+) (Line 2 r_a3CTv) l_a3CTr))
-subdivision :: forall s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv v_a3D17 e_a3D18 f_a3D19. Lens (Arrangement s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv) (Arrangement s_a3CTq l_a3CTr v_a3D17 e_a3D18 f_a3D19 r_a3CTv) (PlanarSubdivision s_a3CTq v_a3CTs e_a3CTt f_a3CTu r_a3CTv) (PlanarSubdivision s_a3CTq v_a3D17 e_a3D18 f_a3D19 r_a3CTv)
-boundedArea :: forall s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv. Lens' (Arrangement s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv) (Rectangle () r_a3CTv)
-unboundedIntersections :: forall s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv. Lens' (Arrangement s_a3CTq l_a3CTr v_a3CTs e_a3CTt f_a3CTu r_a3CTv) (ArrangementBoundary s_a3CTq l_a3CTr r_a3CTv)
+inputLines :: forall s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p. Lens' (Arrangement s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p) (Vector ((:+) (Line 2 r_a3D7p) l_a3D7l))
+subdivision :: forall s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p v_a3Df1 e_a3Df2 f_a3Df3. Lens (Arrangement s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p) (Arrangement s_a3D7k l_a3D7l v_a3Df1 e_a3Df2 f_a3Df3 r_a3D7p) (PlanarSubdivision s_a3D7k v_a3D7m e_a3D7n f_a3D7o r_a3D7p) (PlanarSubdivision s_a3D7k v_a3Df1 e_a3Df2 f_a3Df3 r_a3D7p)
+boundedArea :: forall s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p. Lens' (Arrangement s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p) (Rectangle () r_a3D7p)
+unboundedIntersections :: forall s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p. Lens' (Arrangement s_a3D7k l_a3D7l v_a3D7m e_a3D7n f_a3D7o r_a3D7p) (ArrangementBoundary s_a3D7k l_a3D7l r_a3D7p)
 type ArrangementBoundary s e r = Vector (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
 
 -- | Builds an arrangement of &lt;math&gt; lines
@@ -7726,9 +7730,9 @@ module Geometry.PointLocation.PersistentSweep
 
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r
-verticalRayShootingStructure :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (VerticalRayShootingStructure v_a43hl (Dart s_a43hk) r_a43ho)
-subdivision :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (PlanarSubdivision s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho)
-outerFace :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (FaceId' s_a43hk)
+verticalRayShootingStructure :: forall s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi. Getter (PointLocationDS s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi) (VerticalRayShootingStructure v_a43vf (Dart s_a43ve) r_a43vi)
+subdivision :: forall s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi. Getter (PointLocationDS s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi) (PlanarSubdivision s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi)
+outerFace :: forall s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi. Getter (PointLocationDS s_a43ve v_a43vf e_a43vg f_a43vh r_a43vi) (FaceId' s_a43ve)
 
 -- | Builds a pointlocation data structure on the planar subdivision with
 --   &lt;math&gt; vertices.
