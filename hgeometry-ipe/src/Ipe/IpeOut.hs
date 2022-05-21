@@ -16,11 +16,14 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeOut where
 
-
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
+import           Data.Kind
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Radical
 import           Geometry.Ball
 import           Geometry.BezierSpline
 import           Geometry.Boundary
@@ -34,9 +37,6 @@ import           Geometry.PolyLine (PolyLine,fromLineSegment)
 import           Geometry.Polygon
 import           Geometry.Polygon.Convex
 import           Geometry.Properties
-import           Data.Kind
-import qualified Data.LSeq as LSeq
-import           Data.List.NonEmpty (NonEmpty(..))
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.FromIpe
@@ -167,11 +167,11 @@ instance HasDefaultIpeOut (Ellipse r) where
   type DefaultIpeOut (Ellipse r) = Path
   defIO = ipeEllipse
 
-instance Floating r => HasDefaultIpeOut (Disk p r) where
+instance Radical r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
   defIO = ipeDisk
 
-instance Floating r => HasDefaultIpeOut (Circle p r) where
+instance Radical r => HasDefaultIpeOut (Circle p r) where
   type DefaultIpeOut (Circle p r) = Path
   defIO = ipeCircle
 
@@ -248,10 +248,10 @@ ipePolyLine p = (path . PolyLineSegment . first (const ()) $ p) :+ mempty
 ipeEllipse :: IpeOut (Ellipse r) Path r
 ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
 
-ipeCircle :: Floating r => IpeOut (Circle p r) Path r
+ipeCircle :: Radical r => IpeOut (Circle p r) Path r
 ipeCircle = ipeEllipse . circleToEllipse
 
-ipeDisk   :: Floating r => IpeOut (Disk p r) Path r
+ipeDisk   :: Radical r => IpeOut (Disk p r) Path r
 ipeDisk d = ipeCircle (Boundary d) ! attr SFill (IpeColor "0.722 0.145 0.137")
 
 ipeBezier :: IpeOut (BezierSpline 3 2 r) Path r

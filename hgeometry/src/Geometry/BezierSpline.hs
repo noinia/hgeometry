@@ -39,6 +39,15 @@ import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens hiding (Empty)
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.LSeq (LSeq)
+import qualified Data.LSeq as LSeq
+import           Data.List (sort)
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Radical as Radical
+import           Data.Sequence (Seq(..))
+import qualified Data.Sequence as Seq
+import           Data.Traversable (fmapDefault,foldMapDefault)
+import           GHC.TypeNats
 import           Geometry.Ball
 import           Geometry.Box.Internal
 import           Geometry.Line
@@ -50,14 +59,6 @@ import           Geometry.Polygon.Convex hiding (merge)
 import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Vector hiding (init)
-import           Data.LSeq (LSeq)
-import qualified Data.LSeq as LSeq
-import           Data.List (sort)
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
-import           Data.Traversable (fmapDefault,foldMapDefault)
-import           GHC.TypeNats
 import qualified Test.QuickCheck as QC
 
 -- import Debug.Trace
@@ -235,7 +236,7 @@ splitMany = splitManySorted . sort . map (restrict "splitMany" 0 1)
 --   Can only be solved exactly for degree 4 or smaller.
 --   Only gives rational result for degree 2 or smaller.
 --   Currentlly implemented for degree 3.
-splitMonotone :: (Arity d, Ord r, Enum r, Floating r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
+splitMonotone :: (Arity d, Ord r, Enum r, Fractional r, Radical.Radical r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
 splitMonotone i b = splitMany (locallyExtremalParameters i b) b
 
 {-
@@ -249,7 +250,7 @@ type family RealTypeConstraint (n :: Nat) (r :: *) :: Constraint where
 -}
 
 -- | Report all parameter values at which the derivative of the $i$th coordinate is 0.
-locallyExtremalParameters         :: (Arity d, Ord r, Enum r, Floating r)
+locallyExtremalParameters         :: (Arity d, Ord r, Enum r, Fractional r, Radical.Radical r)
                                   => Int -> BezierSpline 3 d r -> [r]
 locallyExtremalParameters i curve =
   let [x1, x2, x3, x4] = map (view $ unsafeCoord i) $ F.toList $ _controlPoints curve
@@ -588,7 +589,7 @@ snap treshold b = evaluate b . parameterOf treshold b
 -- | Solve equation of the form ax^2 + bx + c = 0.
 --   If there are multiple solutions, report in ascending order.
 --   Attempt at a somewhat robust implementation.
-solveQuadraticEquation :: (Ord r, Enum r, Floating r) => r -> r -> r -> [r]
+solveQuadraticEquation :: (Ord r, Enum r, Fractional r, Radical.Radical r) => r -> r -> r -> [r]
 solveQuadraticEquation 0 0 0 = [0..] -- error "infinite solutions"
 solveQuadraticEquation _ 0 0 = [0]
 solveQuadraticEquation 0 _ 0 = [0]
@@ -596,26 +597,25 @@ solveQuadraticEquation 0 0 _ = []
 solveQuadraticEquation a b 0 = sort [0, -b / a]
 solveQuadraticEquation a 0 c | (-c / a) <  0 = []
                              | (-c / a) == 0 = [0]
-                             | (-c / a) >  0 = [sqrt (-c / a)]
+                             | (-c / a) >  0 = [Radical.sqrt (-c / a)]
 solveQuadraticEquation 0 b c = [-c / b]
 solveQuadraticEquation a b c | almostzero a || almostzero (a / b) || almostzero (a / c) = solveQuadraticEquation 0 b c
 solveQuadraticEquation a b c =
   let d = b^2 - 4 * a * c
       result | d == 0 = [-b / (2 * a)]
-             | d >  0 = [(-b - sqrt d) / (2 * a), (-b + sqrt d) / (2 * a)]
+             | d >  0 = [(-b - Radical.sqrt d) / (2 * a), (-b + Radical.sqrt d) / (2 * a)]
              | otherwise = []
   in result
   -- trace ("soving equation " ++ show a ++ "x^2 + " ++ show b ++ "x + " ++ show c ++ " = 0") $ result
 
 -- | Test whether a floating point number is close enough to zero, taking rounding errors into account.
-almostzero :: (Floating r, Ord r) => r -> Bool
+almostzero :: (Fractional r, Ord r) => r -> Bool
 almostzero x = abs x < epsilon
 
 -- | Treshold for rounding errors in almostzero test.
 --   TODO: Should be different depending on the type.
-epsilon :: Floating r => r
+epsilon :: Fractional r => r
 epsilon = 0.0001
-
 
 
 -- | This function tests whether a value lies within bounds of a given interval.

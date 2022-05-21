@@ -1,16 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.MinDisk where
 
-import           Algorithms.Geometry.SmallestEnclosingBall.RIC
 import           Algorithms.Geometry.SmallestEnclosingBall
+import           Algorithms.Geometry.SmallestEnclosingBall.RIC
 import           Control.Lens
 import           Control.Monad.Random.Strict
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Radical
+import qualified Data.Traversable as Tr
 import           Geometry
 import           Ipe
-import qualified Data.Traversable as Tr
 import           Options.Applicative
 
 --------------------------------------------------------------------------------
@@ -29,7 +30,7 @@ options = info (helper <*> parser)
 
 --------------------------------------------------------------------------------
 
-diskResult :: Floating r => IpeOut (DiskResult p r) Group r
+diskResult :: Radical r => IpeOut (DiskResult p r) Group r
 diskResult (DiskResult d pts) = ipeGroup (iO' d  : (F.toList . fmap g $ pts))
   where
     g p = iO' (p^.core)

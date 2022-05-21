@@ -39,6 +39,12 @@ import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Ord (comparing)
+import           Data.Radical
+import           Data.Tuple (swap)
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
+import           GHC.TypeLits
 import           Geometry.Box.Internal
 import           Geometry.Interval hiding (width, midPoint)
 import           Geometry.Line.Internal
@@ -47,11 +53,6 @@ import           Geometry.Properties
 import           Geometry.SubLine
 import           Geometry.Transformation.Internal
 import           Geometry.Vector
-import           Data.Ord (comparing)
-import           Data.Tuple (swap)
-import           Data.Vinyl
-import           Data.Vinyl.CoRec
-import           GHC.TypeLits
 import           Test.QuickCheck (Arbitrary(..), suchThatMap)
 import           Text.Read
 
@@ -422,8 +423,8 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 
 
 -- | Length of the line segment
-segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
-segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
+segmentLength                     :: (Arity d, Radical r) => LineSegment d p r -> r
+segmentLength ~(LineSegment' p q) = euclideanDist (p^.core) (q^.core)
 
 -- | Squared length of a line segment.
 sqSegmentLength                     :: (Arity d, Num r) => LineSegment d p r -> r
