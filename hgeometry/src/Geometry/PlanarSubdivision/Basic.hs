@@ -660,18 +660,18 @@ traverseWith mkIdx h = itraverse (\i -> traverse (h $ mkIdx i))
 --------------------------------------------------------------------------------
 
 -- | Map with index over all faces
-mapFaces   :: (FaceId' s -> t -> f')
-           -> PlanarSubdivision s v e t r -> PlanarSubdivision s v e f' r
+mapFaces   :: (FaceId' s -> f -> f')
+           -> PlanarSubdivision s v e f r -> PlanarSubdivision s v e f' r
 mapFaces h = runIdentity . traverseFaces (\i x -> Identity $ h i x)
 
 -- | Map with index over all vertices
-mapVertices   :: (VertexId' s -> t -> v')
-              -> PlanarSubdivision s t e f r -> PlanarSubdivision s v' e f r
+mapVertices   :: (VertexId' s -> v -> v')
+              -> PlanarSubdivision s v e f r -> PlanarSubdivision s v' e f r
 mapVertices h = runIdentity . traverseVertices (\i x -> Identity $ h i x)
 
 -- | Map with index over all darts
-mapDarts   :: (Dart s -> t -> e')
-           -> PlanarSubdivision s v t f r -> PlanarSubdivision s v e' f r
+mapDarts   :: (Dart s -> e -> e')
+           -> PlanarSubdivision s v e f r -> PlanarSubdivision s v e' f r
 mapDarts h = runIdentity . traverseDarts (\i x -> Identity $ h i x)
 
 -- | Map a function over all positive darts. The negative darts are
@@ -679,12 +679,13 @@ mapDarts h = runIdentity . traverseDarts (\i x -> Identity $ h i x)
 mapEdges     :: (Dart s -> e -> e')
              -> PlanarSubdivision s v e  f r
              -> PlanarSubdivision s v e' f r
-mapEdges f ps = let ps' = mapDarts (\d e -> if isPositive d then Right (f e) else Left e)
-                    fromRight = either (error "mapEdges: absurd") id
-                in mapDarts (\d -> \case
-                                Left  _ -> fromRight $ ps'^.dataOf (twin d)
-                                Right e -> e
-                            )
+mapEdges f ps = mapDarts (\d -> \case
+                             Left  _ -> fromRight $ ps'^.dataOf (twin d)
+                             Right e -> e
+                         ) ps'
+  where
+    ps'       = mapDarts (\d e -> if isPositive d then Right (f d e) else Left e) ps
+    fromRight = either (error "mapEdges: absurd") id
 
 --------------------------------------------------------------------------------
 
