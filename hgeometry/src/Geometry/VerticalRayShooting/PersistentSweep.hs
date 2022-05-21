@@ -7,8 +7,9 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Geometry.VerticalRayShooting.PersistentSweep
-  ( VerticalRayShootingStructure(VerticalRayShootingStructure), StatusStructure
-  , leftMost, sweepStruct
+  ( VerticalRayShootingStructure
+  , StatusStructure
+  -- , leftMost, sweepStruct
 
   -- * Building the Data Structure
   , verticalRayShootingStructure
@@ -44,6 +45,7 @@ import qualified Data.Vector as V
 -- | The vertical ray shooting data structure
 data VerticalRayShootingStructure p e r =
     VerticalRayShootingStructure { _leftMost    :: r
+                                 -- ^ x-coordinate of the leftmost vertex/endpoint
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure p e r)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the
                                    -- status structure is 's', i.e up to 'r'
