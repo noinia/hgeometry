@@ -7673,10 +7673,7 @@ module Geometry.VerticalRayShooting.PersistentSweep
 
 -- | The vertical ray shooting data structure
 data VerticalRayShootingStructure p e r
-VerticalRayShootingStructure :: r -> Vector (r :+ StatusStructure p e r) -> VerticalRayShootingStructure p e r
 type StatusStructure p e r = Set (LineSegment 2 p r :+ e)
-leftMost :: forall p_a40zk e_a40zl r_a40zm. Getter (VerticalRayShootingStructure p_a40zk e_a40zl r_a40zm) r_a40zm
-sweepStruct :: forall p_a40zk e_a40zl r_a40zm. Getter (VerticalRayShootingStructure p_a40zk e_a40zl r_a40zm) (Vector ((:+) r_a40zm (StatusStructure p_a40zk e_a40zl r_a40zm)))
 
 -- | Given a set of &lt;math&gt; interiorly pairwise disjoint *closed*
 --   segments, compute a vertical ray shooting data structure. (i.e. the
@@ -7729,7 +7726,6 @@ module Geometry.PointLocation.PersistentSweep
 
 -- | Planar Point Location Data structure
 data PointLocationDS s v e f r
-PointLocationDS :: VerticalRayShootingStructure v (Dart s) r -> PlanarSubdivision s v e f r -> FaceId' s -> PointLocationDS s v e f r
 verticalRayShootingStructure :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (VerticalRayShootingStructure v_a43hl (Dart s_a43hk) r_a43ho)
 subdivision :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (PlanarSubdivision s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho)
 outerFace :: forall s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho. Getter (PointLocationDS s_a43hk v_a43hl e_a43hm f_a43hn r_a43ho) (FaceId' s_a43hk)
