@@ -3929,6 +3929,24 @@ instance GHC.Show.Show Data.PlanarGraph.Immutable.HalfEdge
 instance GHC.Read.Read Data.PlanarGraph.Immutable.HalfEdge
 
 
+-- | Types that support computing Square roots
+module Data.Radical
+
+-- | Types that support taking a square root.
+class Num r => Radical r
+
+-- | Computes the square root of the number
+sqrt :: Radical r => r -> r
+
+-- | Computes the square root of the number
+sqrt :: (Radical r, Floating r) => r -> r
+instance Data.Radical.Radical GHC.Types.Float
+instance Data.Radical.Radical GHC.Types.Double
+instance Data.Radical.Radical (Data.Double.Approximate.DoubleRelAbs abs rel)
+instance Data.Radical.Radical (Data.Double.Shaman.SDouble n)
+instance Data.Radical.Radical Data.Double.Shaman.Shaman
+
+
 -- | Data type for representing Generic Ranges (Intervals) and functions
 --   that work with them.
 module Data.Range
