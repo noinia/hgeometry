@@ -92,9 +92,11 @@ edgeShortestPathMap s subdiv = mergeAllIntervals
   where
     edgeSPM = edgeShortestPathMapPortalEdge s subdiv
 
-mergeAllIntervals subdiv = mapEdges (\d (e,es) -> let es' = subdiv^.dataOf (twin d)._2
-                                                  in (e, mergeIntervals es es')
-                                    )
+mergeAllIntervals subdiv = id
+  -- mapEdges (\d (e,es) -> let es' = subdiv^.dataOf (twin d)._2
+  --                                                 in (e, mergeIntervals es es')
+  --                                   )
+  -- FIXME: implement this properly
 
 
 -- | merge the two edge subdivisions so that we have the actual shortest paths
