@@ -58,7 +58,7 @@ module Geometry.PlanarSubdivision
   , faceDataOf
 
   , traverseVertices, traverseDarts, traverseFaces
-  , mapVertices, mapDarts, mapFaces
+  , mapVertices, mapDarts, mapEdges, mapFaces
 
   -- * Obtaining a Geometric Representation
   , edgeSegment, edgeSegments
