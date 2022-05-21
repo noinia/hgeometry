@@ -35,6 +35,7 @@ import           Data.Ext
 import           Data.Kind (Type)
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Racial
 import           Geometry.Ball
 import           Geometry.Box
 import           Geometry.Ellipse (Ellipse, _EllipseCircle)
@@ -142,11 +143,11 @@ _asEllipse = prism' toPath toEllipse
                     [e] -> Just e
                     _   -> Nothing
 
-_asCircle :: (Floating r, Eq r) => Prism' (Path r) (Circle () r)
+_asCircle :: (Radical r, Eq r) => Prism' (Path r) (Circle () r)
 _asCircle = _asEllipse._EllipseCircle
--- FIXME: For reading we should not need the floating constraint!
+-- FIXME: For reading we should not need the Radical constraint!
 
-_asDisk :: (Floating r, Eq r) => Prism' (Path r) (Disk () r)
+_asDisk :: (Radical r, Eq r) => Prism' (Path r) (Disk () r)
 _asDisk = _asCircle.from _DiskCircle
 
 
@@ -224,11 +225,11 @@ instance HasDefaultFromIpe (Ellipse r) where
   type DefaultFromIpe (Ellipse r) = Path
   defaultFromIpe = _withAttrs _IpePath _asEllipse
 
-instance (Floating r, Eq r) => HasDefaultFromIpe (Circle () r) where
+instance (Radical r, Eq r) => HasDefaultFromIpe (Circle () r) where
   type DefaultFromIpe (Circle () r) = Path
   defaultFromIpe = _withAttrs _IpePath _asCircle
 
-instance (Floating r, Eq r) => HasDefaultFromIpe (Disk () r) where
+instance (Radical r, Eq r) => HasDefaultFromIpe (Disk () r) where
   type DefaultFromIpe (Disk () r) = Path
   defaultFromIpe = _withAttrs _IpePath _asDisk
 

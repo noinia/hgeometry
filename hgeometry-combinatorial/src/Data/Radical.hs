@@ -20,7 +20,7 @@ import           Prelude hiding (sqrt)
 --------------------------------------------------------------------------------
 
 -- | Types that support taking a square root.
-class Radical r where
+class Num r => Radical r where
   -- | Computes the square root of the number
   sqrt :: r -> r
   default sqrt :: Floating r => r -> r

@@ -15,6 +15,7 @@ import qualified Algorithms.Geometry.Diameter.Naive as Naive
 import           Control.Lens ((^.))
 import           Data.Ext (core, type (:+))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Radical
 import           Geometry.Point
 import qualified Geometry.Polygon.Convex as Convex
 
@@ -23,7 +24,7 @@ import qualified Geometry.Polygon.Convex as Convex
 -- | Computes the Euclidean diameter by first finding the convex hull.
 --
 -- running time: \(O(n \log n)\)
-diameter :: (Ord r, Floating r) => [Point 2 r :+ p] -> r
+diameter :: (Ord r, Radical r) => [Point 2 r :+ p] -> r
 diameter = maybe 0 (\(p,q) -> euclideanDist (p^.core) (q^.core)) . diametralPair
 
 -- | Computes the Euclidean diameter by first finding the convex hull.

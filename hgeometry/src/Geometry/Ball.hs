@@ -17,17 +17,19 @@ import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
+import qualified Data.List as L
+import           Data.Radical as Radical
+import qualified Data.Radical as Radical
+import qualified Data.Traversable as T
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
+import           GHC.Generics (Generic)
 import           Geometry.Boundary
 import           Geometry.Line
 import           Geometry.LineSegment
 import           Geometry.Point
 import           Geometry.Properties
 import           Geometry.Vector
-import qualified Data.List as L
-import qualified Data.Traversable as T
-import           Data.Vinyl
-import           Data.Vinyl.CoRec
-import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V3 (V3(..))
 
@@ -42,8 +44,8 @@ data Ball d p r = Ball { _center        :: !(Point d r :+ p)
 makeLenses ''Ball
 
 -- | A lens to get/set the radius of a Ball
-radius :: Floating r => Lens' (Ball d p r) r
-radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
+radius :: Radical.Radical r => Lens' (Ball d p r) r
+radius = lens (Radical.sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
 
 
 deriving instance (Show r, Show p, Arity d)     => Show (Ball d p r)
@@ -220,7 +222,8 @@ instance {-# OVERLAPPING #-} (Ord r, Num r) => Line 2 r `HasIntersectionWith` Ci
       cc                   = px^2 + py^2 - r^2
       discr                = bb^2 - 4*aa*cc
 
-instance (Ord r, Floating r) => Line 2 r `IsIntersectableWith` Circle p r where
+instance (Ord r, Radical.Radical r, Fractional r)
+         => Line 2 r `IsIntersectableWith` Circle p r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
   (Line p' v) `intersect` (Circle (c :+ _) r) = case discr `compare` 0 of
@@ -247,7 +250,7 @@ instance (Ord r, Floating r) => Line 2 r `IsIntersectableWith` Circle p r where
       bb                   = 2 * (px * vx + py * vy)
       cc                   = px^2 + py^2 - r^2
       discr                = bb^2 - 4*aa*cc
-      discr'               = sqrt discr
+      discr'               = Radical.sqrt discr
       -- This thus gives us the following value(s) for lambda
       lambda (|+-|)        = (-bb |+-| discr') / (2*aa)
 
@@ -268,7 +271,8 @@ instance (Ord r, Fractional r, Arity d)
                                               EQ -> closest `intersects` seg
                                               GT -> False
 
-instance (Ord r, Floating r) => LineSegment 2 p r `IsIntersectableWith` Circle q r where
+instance (Ord r, Radical.Radical r, Fractional r)
+          => LineSegment 2 p r `IsIntersectableWith` Circle q r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 

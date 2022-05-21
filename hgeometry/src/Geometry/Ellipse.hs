@@ -16,14 +16,15 @@ module Geometry.Ellipse(
   , circleToEllipse, ellipseToCircle, _EllipseCircle
   ) where
 
-import Control.Lens
-import Data.Ext
-import Geometry.Ball
-import Geometry.Matrix
-import Geometry.Transformation
-import Geometry.Point
-import Geometry.Properties
-import Geometry.Vector
+import           Control.Lens
+import           Data.Ext
+import qualified Data.Radical as Radical
+import           Geometry.Ball
+import           Geometry.Matrix
+import           Geometry.Point
+import           Geometry.Properties
+import           Geometry.Transformation
+import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -50,7 +51,7 @@ unitEllipse = Ellipse $ Transformation identityMatrix
 -- | Converting between ellipses and circles
 
 -- | Prims to convert between an Ellipse and a Circle.
-_EllipseCircle :: (Floating r, Eq r) => Prism' (Ellipse r) (Circle () r)
+_EllipseCircle :: (Radical.Radical r, Eq r) => Prism' (Ellipse r) (Circle () r)
 _EllipseCircle = prism' circleToEllipse ellipseToCircle
 
 -- | Try to Convert a circle into an ellipse. Returns a Nothing if the
@@ -65,5 +66,6 @@ ellipseToCircle e = case e^.ellipseMatrix of
       _               -> Nothing
 
 -- | Convert a circle to an ellipse
-circleToEllipse                            :: Floating r => Circle p r -> Ellipse r
-circleToEllipse (Circle (Point v :+ _) rr) = Ellipse $ translation v |.| uniformScaling (sqrt rr)
+circleToEllipse                            :: Radical.Radical r => Circle p r -> Ellipse r
+circleToEllipse (Circle (Point v :+ _) rr) =
+  Ellipse $ translation v |.| uniformScaling (Radical.sqrt rr)

@@ -45,12 +45,12 @@ module Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
                           , ToAPoint(..), AsAPoint(..)
                           ) where
 
+import Geometry.Line.Internal
 import Geometry.Point.Class
 import Geometry.Point.Internal hiding (coord, unsafeCoord)
-import Geometry.Point.Orientation.Degenerate
 import Geometry.Point.Orientation
+import Geometry.Point.Orientation.Degenerate
 import Geometry.Point.Quadrants
-import Geometry.Line.Internal
 import Geometry.Vector
 
 --------------------------------------------------------------------------------
