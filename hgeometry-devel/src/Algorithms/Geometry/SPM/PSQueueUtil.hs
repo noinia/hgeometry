@@ -6,28 +6,19 @@ import Data.PSQueue.Internal
 -- | Joins two PSQ's
 --
 -- pre: all kyes in the first tree are smaller than the keys in the second tree.
-join                            :: PSQ k p -> PSQ k p -> PSQ k p
-join tl tr | size tl <= size tr = joinL tl tr
-           | otherwise          = joinR tl tr
-
--- | Join's tl onto tr by "inserting" tl along the left spine of tr
-joinL tl tr = case tourView tl of
-                Null       -> tr
-                Single k p -> insert k p tl
-                _          -> go
-  -- where
-  --   go = case tourView tr of
-  --          Null -> tl
-  --          Single
+join :: (Ord k, Ord p) => PSQ k p -> PSQ k p -> PSQ k p
+join = play
+-- FIXME!!! seems that this is essentially just 'play'. However, I
+-- don't think play does the right balancing for this type of
+-- operation.
 
 
-joinR tl tr = undefined
 
 
 -- | Splits the Queue at the given key
 --
 -- O(log n)
-split   :: Ord k => k -> PSQ k p -> (PSQ k p, Maybe (Binding k p), PSQ k p)
+split   :: (Ord k, Ord p) => k -> PSQ k p -> (PSQ k p, Maybe (Binding k p), PSQ k p)
 split k = go
   where
     go q = case tourView q of

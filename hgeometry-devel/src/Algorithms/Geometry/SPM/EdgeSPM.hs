@@ -13,6 +13,7 @@ module Algorithms.Geometry.SPM.EdgeSPM
   ) where
 
 import           Control.Lens
+import           Data.DynamicOrd
 import           Data.EnumMap.Strict (EnumMap)
 import qualified Data.EnumMap.Strict as EnumMap
 import           Data.Ext
@@ -121,14 +122,38 @@ unreachableEdge :: Ord r => EdgeSubdivision s r
 unreachableEdge = EdgeSubdivision PSQueue.empty
 
 
--- locatePoint :: Point 2 r -> EdgeSubdivision s r -> Maybe (SPMInterval s r)
--- locatePoint
+
+orderPoint       :: Point 2 r -> SPMInterval s r -> Ordering
+orderPoint c int = case c `onSide` line of
+                     LeftSide -> LT
+                     OnSide   -> if isOpen (int^.start) then LT else EQ
+                     RightSide -> case c `onSide` (Line (int^.end.extra) v) of
+                       LeftSide  -> EQ -- we are in the interval
+                       OnSide    -> if isOpen (int^.end) then GT else EQ
+                       RightSide -> GT
+  where
+    line@(Line l v) = perpendicularTo $ lineThrough (int^.start.extra) (int^.end.extra)
+
+
+-- | Given a monotonic function f that maps a to b, split the sequence s
+-- depending on the b values. I.e. the result (l,m,r) is such that
+-- * all (< x) . fmap f $ l
+-- * all (== x) . fmap f $ m
+-- * all (> x) . fmap f $ r
+--
+-- running time: \(O(\log n)\)
+splitBy :: Ord b => (a -> Ordering) -> PSQueue.PSQ a p -> PSQueue.PSQ a p -> PSQueue.PSQ a p
+splitBy undefined
+
+locatePoint :: Point 2 r -> EdgeSubdivision s r
+            -> Maybe (EdgeSubdivision k p, Maybe (SPMInterval s r), EdgeSubdivision k p)
+locatePoint c (EdgeSubdivision psq) = splitBy (orderPoint c)
 
 
 
 -- | Inserts a new edge into the subdivision
 insertInterval            :: SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
-insertInterval int subdiv =
+insertInterval int subdiv = undefined
 
 --------------------------------------------------------------------------------
 

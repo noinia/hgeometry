@@ -3,7 +3,6 @@ module Algorithms.Geometry.SPM.MMP
   ( ShortestPathMap
   , edgeShortestPathMap
 
-  , WithDistance(WithDistance), distanceToSource, predecessorToSource
   ) where
 
 import           Control.Lens
@@ -30,54 +29,12 @@ import           Witherable
 data MyWorld
 
 
--- | Distance and predecessor towards the source
-data WithDistance s r = WithDistance { _distanceToSource    :: !r
-                                       -- ^ distance to the source
-                                     , _predecessorToSource :: !(Maybe (VertexId' s))
-                                       -- ^ Nothing if this is the source itself.
-                                     }
-                      deriving (Show)
-
-makeLenses ''WithDistance
-
--- | Compare by distance
-instance Eq r => Eq (WithDistance s r) where
-  (WithDistance a _) == (WithDistance b _) = a == b
-instance Ord r => Ord (WithDistance s r) where
-  (WithDistance a _) `compare` (WithDistance b _) = a `compare` b
 
 
 --------------------------------------------------------------------------------
 
 
 
--- | A generator gives rise to a candidate interval on an edge.
-data Generator s r =
-  Generator { _root         :: !(VertexId' s)
-              -- ^ the root/apex of the points in the interval
-            , _initialDist  :: !(WithDistance s r)
-              -- ^ distance to the root
-            , _unfoldedRoot :: !(Point 2 r)
-              -- ^ point corresponding to the root in the same
-              -- coordinate system as the face opposite to the edge
-              -- this generator corresponds to.
-              --
-              -- note that in the plane the unfolded root is just the
-              -- same as the original location of the root.
-            } deriving (Show)
-
-makeLenses ''Generator
-
--- | An SPM Interval
-data SPMInterval s r =
-  SPMInterval { _generator :: !(Generator s r)
-              -- ^ the generator for the interval
-              , _edgeRange :: !(Range (Point 2 r))
-              -- ^ the actual interval/range on the edge
-              }
-  deriving (Show)
-
-makeLenses ''SPMInterval
 
 --------------------------------------------------------------------------------
 
@@ -180,9 +137,9 @@ mergeIntervals = undefined
 edgeShortestPathMapPortalEdge :: (Ord r, Num r)
                               => VertexId' s
                               -> Triangles s v e f r
-                              -> EdgeSPM s r
+                              -> SimState s r
 edgeShortestPathMapPortalEdge s subdiv = computeIntervals subdiv
-                                       $ (queue, EdgeSPM initialDistances initialSubdivs)
+                                       $ (queue, SimState initialDistances initialSubdivs)
   where
     -- initialize all vertex distances on +Infty and s on 0
     initialDistances = EnumMap.insert s (ValT $ WithDistance 0 Nothing)
@@ -235,19 +192,19 @@ edgeShortestPathMapPortalEdge s subdiv = computeIntervals subdiv
 ----------------------------------------
 
 
-data EdgeSPM s r =
-  EdgeSPM { _vertexDistances  :: EnumMap (VertexId' s) (Top (WithDistance s r))
+data SimState s r =
+  SimState { _vertexDistances  :: EnumMap (VertexId' s) (Top (WithDistance s r))
           , _edgeSubdivisions :: EnumMap (Dart s)      (EdgeSubdivision s r)
           }
                  deriving (Show)
 
 -- | Get the current distance estimate and predecessor to v
-distanceOf                  :: VertexId' s -> EdgeSPM s r -> Top (WithDistance s r)
-distanceOf v (EdgeSPM vd _) = fromMaybe Top $ EnumMap.lookup v vd
+distanceOf                  :: VertexId' s -> SimState s r -> Top (WithDistance s r)
+distanceOf v (SimState vd _) = fromMaybe Top $ EnumMap.lookup v vd
 
 -- | get the edge subdivision of a given dart
-edgeSubdivOf                  :: Dart s -> EdgeSPM s r -> EdgeSubdivision s r
-edgeSubdivOf d (EdgeSPM _ es) = fromMaybe err $ EnumMap.lookup d es
+edgeSubdivOf                  :: Dart s -> SimState s r -> EdgeSubdivision s r
+edgeSubdivOf d (SimState _ es) = fromMaybe err $ EnumMap.lookup d es
   where
     err = error $ "edgeSubdivOf: absurd, dart " <> show d <> " not found!?"
 
@@ -255,21 +212,21 @@ edgeSubdivOf d (EdgeSPM _ es) = fromMaybe err $ EnumMap.lookup d es
 -- | Permanently assign a distance label to a vertex
 permanentlyLabel                              :: VertexId' s
                                               -> Top (WithDistance s r)
-                                              -> EdgeSPM s r -> EdgeSPM s r
-permanentlyLabel v dist (EdgeSPM vds subdivs) = EdgeSPM (EnumMap.insert v dist vds) subdivs
+                                              -> SimState s r -> SimState s r
+permanentlyLabel v dist (SimState vds subdivs) = SimState (EnumMap.insert v dist vds) subdivs
 
 
-insertSPMInterval                     :: Dart s -> SPMInterval s r -> EdgeSPM s r -> EdgeSPM s r
-insertSPMInterval e i (EdgeSPM vs es) = EdgeSPM vs (EnumMap.adjust (insertInterval' e i) e es)
+insertSPMInterval                     :: Dart s -> SPMInterval s r -> SimState s r -> SimState s r
+insertSPMInterval e i (SimState vs es) = SimState vs (EnumMap.adjust (insertInterval' e i) e es)
 
 
 -- | apply the given function on the edge subdivision of the given edge
 apply                     :: Functor f
                           => (EdgeSubdivision s r -> f (EdgeSubdivision s r))
-                          -> Dart s -> EdgeSPM s r -> f (EdgeSPM s r)
-apply f d (EdgeSPM vd es) = case EnumMap.lookup d es of
+                          -> Dart s -> SimState s r -> f (SimState s r)
+apply f d (SimState vd es) = case EnumMap.lookup d es of
     Nothing   -> error $ "apply: absurd, dart " <> show d <> " not found!?"
-    Just ints -> EdgeSPM vd . (\ints' -> EnumMap.insert d ints' es) <$> f ints
+    Just ints -> SimState vd . (\ints' -> EnumMap.insert d ints' es) <$> f ints
 
 --------------------------------------------------------------------------------
 
@@ -313,8 +270,8 @@ data EventKind s r = VertexEvent (VertexId' s)
 
 computeIntervals          :: Ord r
                           => Triangles s v e f r
-                          -> (EventQueue s r, EdgeSPM s r)
-                          -> EdgeSPM s r
+                          -> (EventQueue s r, SimState s r)
+                          -> SimState s r
 computeIntervals subdiv = go
   where
     go (queue, state) = case PQueue.minViewWithKey queue of
@@ -324,12 +281,12 @@ computeIntervals subdiv = go
 -- | Propagate an interval
 propagate                               :: forall s v e f r.
                                            Triangles s v e f r
-                                        -> (EventQueue s r, EdgeSPM s r)
+                                        -> (EventQueue s r, SimState s r)
                                         -> ( WithDistance s r
                                            , Event s r
                                            )
                                         -> ( EventQueue s r
-                                           , EdgeSPM s r
+                                           , SimState s r
                                            )
 propagate subdiv z0 (dist,evt) = foldr doInsert z0 newIntervals
   where
@@ -389,11 +346,11 @@ project int seg = int&edgeRange %~ extend
 
 propagateVertex                     :: ()
                                     => Triangles s v e f r
-                                    -> EdgeSPM s r
+                                    -> SimState s r
                                     -> WithDistance s r
                                     -> VertexId' s
                                     -> ( [Event s r] -- new events
-                                       , EdgeSPM s r
+                                       , SimState s r
                                        )
 propagateVertex subdiv state dist v =
     ( undefined
