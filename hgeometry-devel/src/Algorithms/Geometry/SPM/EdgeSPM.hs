@@ -171,6 +171,7 @@ testInterval = SPMInterval testGen
     f lambda = lambda :+ interpolate lambda seg
 
 
+testGen :: Num r => Generator s r
 testGen = Generator (VertexId 0) (WithDistance 0 Nothing) origin
 
 
