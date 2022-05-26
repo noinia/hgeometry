@@ -12,7 +12,9 @@ module Algorithms.Geometry.SPM.EdgeSPM
   , EdgeSPM
   ) where
 
+import qualified Algorithms.Geometry.SPM.PSQueueUtil as PSQueue
 import           Control.Lens
+import           Data.Coerce
 import           Data.DynamicOrd
 import           Data.EnumMap.Strict (EnumMap)
 import qualified Data.EnumMap.Strict as EnumMap
@@ -20,14 +22,18 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Maybe (maybeToList, fromMaybe)
 import qualified Data.PSQueue as PSQueue
+import           Data.Radical
 import qualified Data.Set as Set
+import           Data.Set.Util (genericSplitBy)
 import           Data.UnBounded
 import           Data.Vector (Vector)
 import qualified Data.Vector as V
 import           Geometry.Interval
+import           Geometry.Line
 import           Geometry.LineSegment hiding (endPoints)
 import           Geometry.PlanarSubdivision
 import           Geometry.Point
+import           Geometry.Point (euclideanDist)
 import           Witherable
 
 --------------------------------------------------------------------------------
@@ -68,7 +74,7 @@ data Generator s r =
 makeLenses ''Generator
 
 -- | First point in an interval that is discovered
-data FrontierPoint s r = VertexEvent   (VertexId' s)
+data FrontierPoint s r = VertexEvent   (VertexId' s) (Point 2 r)
                        | InteriorEvent (Point 2 r)
                        deriving (Show,Eq)
 
@@ -123,37 +129,70 @@ unreachableEdge = EdgeSubdivision PSQueue.empty
 
 
 
-orderPoint       :: Point 2 r -> SPMInterval s r -> Ordering
+orderPoint       :: (Ord r, Num r) => Point 2 r -> SPMInterval s r -> Ordering
 orderPoint c int = case c `onSide` line of
                      LeftSide -> LT
-                     OnSide   -> if isOpen (int^.start) then LT else EQ
+                     OnLine   -> if isOpen s then LT else EQ
                      RightSide -> case c `onSide` (Line (int^.end.extra) v) of
                        LeftSide  -> EQ -- we are in the interval
-                       OnSide    -> if isOpen (int^.end) then GT else EQ
+                       OnLine    -> if isOpen t then GT else EQ
                        RightSide -> GT
   where
-    line@(Line l v) = perpendicularTo $ lineThrough (int^.start.extra) (int^.end.extra)
+    line@(Line _ v) = perpendicularTo $ lineThrough (int^.start.extra) (int^.end.extra)
+    Interval s t = int^.subInterval
 
 
--- | Given a monotonic function f that maps a to b, split the sequence s
--- depending on the b values. I.e. the result (l,m,r) is such that
--- * all (< x) . fmap f $ l
--- * all (== x) . fmap f $ m
--- * all (> x) . fmap f $ r
---
--- running time: \(O(\log n)\)
-splitBy :: Ord b => (a -> Ordering) -> PSQueue.PSQ a p -> PSQueue.PSQ a p -> PSQueue.PSQ a p
-splitBy undefined
-
-locatePoint :: Point 2 r -> EdgeSubdivision s r
-            -> Maybe (EdgeSubdivision k p, Maybe (SPMInterval s r), EdgeSubdivision k p)
-locatePoint c (EdgeSubdivision psq) = splitBy (orderPoint c)
-
+-- | computes the intervals strictly left of the point, the interval
+-- containing the point (if ite xists), and the intervals right of the
+-- point.
+locatePoint :: (Ord r, Num r)
+            => Point 2 r -- ^ point to locate
+            -> EdgeSubdivision s r -- ^ the edge subdivision
+            -> ( EdgeSubdivision s r
+               , Maybe (SPMInterval s r, WithDistance s r)
+               , EdgeSubdivision s r
+               )
+locatePoint c (EdgeSubdivision psq) = case PSQueue.splitBy (orderPoint c) psq of
+    (l,m,r) -> (EdgeSubdivision l, undefined ,EdgeSubdivision r)
+      -- just view the min of the middle
 
 
 -- | Inserts a new edge into the subdivision
-insertInterval            :: SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
-insertInterval int subdiv = undefined
+insertInterval            :: (Ord r, Radical r)
+                          => SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
+insertInterval int subdiv = case locatePoint c subdiv of
+    (ls,m,rs) -> let (EdgeSubdivision ls',l) = trimR ls m int
+                     (EdgeSubdivision rs',r) = trimL m rs int
+                     int'    = int&subInterval.start %~ f l
+                                  &subInterval.end   %~ f r
+                 in EdgeSubdivision $ ls' `PSQueue.join` (PSQueue.insert int' dist rs')
+  where
+    dist = WithDistance (euclideanDist c $ int^.generator.unfoldedRoot)
+                        (Just $ int^.generator.root)
+
+    c = case (int^.frontierPoint) of
+          VertexEvent i c' -> c'
+          InteriorEvent c' -> c'
+
+    f (x :+ p) z = z&core .~ x
+                    &extra .~ p
+
+
+trimR :: EdgeSubdivision s r
+      -> Maybe (SPMInterval s r, WithDistance s r)
+      -> SPMInterval s r -> (EdgeSubdivision s r, r :+ Point 2 r)
+trimR (EdgeSubdivision subdiv) mb int = case mb of
+    Nothing                                -> rest
+    Just (intB,_) | intB `dominatedBy` int -> rest
+                  | otherwise              ->  undefined
+  where
+    rest = trimFirst $ PSQueue.dropWhile (dominatedBy int) subdiv
+
+intA `dominatedBy` intB = undefined
+
+trimFirst = undefined
+
+trimL = undefined
 
 --------------------------------------------------------------------------------
 

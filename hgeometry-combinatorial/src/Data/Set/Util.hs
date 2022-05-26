@@ -33,11 +33,8 @@ cmpS = comparing (\(S s) -> length s)
 -- * all (> x) . fmap f $ r
 --
 -- running time: \(O(\log n)\)
-splitOn       :: Ord b => (a -> b) -> b -> Set a -> (Set a, Set a, Set a)
-splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
-                    (m,r)  = Set.spanAntitone (g EQ . f) s'
-                    g c y  = y `compare` x == c
-                in (l,m,r)
+splitOn     :: Ord b => (a -> b) -> b -> Set a -> (Set a, Set a, Set a)
+splitOn f b = splitBy (\y -> f y `compare` b)
 
 -- | Given a monotonic function f that orders @a@, split the sequence @s@
 -- into three parts. I.e. the result (lt,eq,gt) is such that
@@ -47,9 +44,32 @@ splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
 --
 -- running time: \(O(\log n)\)
 splitBy       :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
-splitBy f s = let (l,s') = Set.spanAntitone ((==) LT . f) s
-                  (m,r)  = Set.spanAntitone ((==) EQ . f) s'
-              in (l,m,r)
+splitBy f s = genericSplitBy Set.spanAntitone f s
+
+  -- let (l,s') = Set.spanAntitone ((==) LT . f) s
+  --                 (m,r)  = Set.spanAntitone ((==) EQ . f) s'
+  --             in (l,m,r)
+
+-- | Generic implementation of a ordered splitting function on
+-- sequences.  The first argument is a 'spanAntitone' function that
+-- splits the sequence based on a monotonic predicate that flips from
+-- True to false only once.
+--
+-- Given a monotonic function f that orders @a@, split the sequence @s@
+-- into three parts. I.e. the result (lt,eq,gt) is such that
+-- * all (\x -> f x == LT) . fmap f $ lt
+-- * all (\x -> f x == EQ) . fmap f $ eq
+-- * all (\x -> f x == GT) . fmap f $ gt
+--
+-- running time: \(O(1)\)*cost of the antitone function.
+genericSplitBy :: ( (a -> Bool) -> seq a -> (seq a, seq a) )
+               -- ^ the spanAntitone function to use
+               -> (a -> Ordering)
+               -- ^ a monotonic ordering function f
+               -> seq a -> (seq a, seq a, seq a)
+genericSplitBy spanAntitone f s = let (l,s') = spanAntitone ((==) LT . f) s
+                                      (m,r)  = spanAntitone ((==) EQ . f) s'
+                                  in (l,m,r)
 
 -- | Constructs a Set using the given Order.
 --
