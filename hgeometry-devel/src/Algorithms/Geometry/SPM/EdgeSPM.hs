@@ -9,7 +9,14 @@ module Algorithms.Geometry.SPM.EdgeSPM
 
 
   , EdgeSubdivision
+  , unreachableEdge
+  , insertInterval
+  , locatePoint
+
   , EdgeSPM
+
+
+
   ) where
 
 import qualified Algorithms.Geometry.SPM.PSQueueUtil as PSQueue
@@ -35,6 +42,15 @@ import           Geometry.PlanarSubdivision
 import           Geometry.Point
 import           Geometry.Point (euclideanDist)
 import           Witherable
+
+import Data.RealNumber.Rational
+import Geometry.LineSegment (interpolate)
+
+import Test.Hspec
+
+type R = RealNumber 5
+
+
 
 --------------------------------------------------------------------------------
 
@@ -128,7 +144,8 @@ unreachableEdge :: Ord r => EdgeSubdivision s r
 unreachableEdge = EdgeSubdivision PSQueue.empty
 
 
-
+-- | Computes the ordering of the interval with respect to the given
+-- point (essentially treating) the point as a singleton interval.
 orderPoint       :: (Ord r, Num r) => Point 2 r -> SPMInterval s r -> Ordering
 orderPoint c int = case c `onSide` line of
                      LeftSide -> LT
@@ -140,6 +157,34 @@ orderPoint c int = case c `onSide` line of
   where
     line@(Line _ v) = perpendicularTo $ lineThrough (int^.start.extra) (int^.end.extra)
     Interval s t = int^.subInterval
+
+
+
+-- | the edge we pretend this interval lies on lies on hight 1 and has the x-range [0,10]
+--
+testInterval :: SPMInterval () R
+testInterval = SPMInterval testGen
+                           (ClosedInterval (f 0.25) (f 0.75))
+                           (InteriorEvent (Point2 5 1))
+  where
+    seg      = ClosedLineSegment (Point2 0 1 :+ 0) (Point2 10 1 :+ 1)
+    f lambda = lambda :+ interpolate lambda seg
+
+
+testGen = Generator (VertexId 0) (WithDistance 0 Nothing) origin
+
+
+spec :: Spec
+spec = it "orderPoint tests" $ do
+         test 0.1 `shouldBe` LT
+         test 0.5 `shouldBe` EQ
+         test 0.9 `shouldBe` GT
+  where
+    test cx = orderPoint (Point2 (cx*10) 1) testInterval
+
+
+
+
 
 
 -- | computes the intervals strictly left of the point, the interval
@@ -171,12 +216,11 @@ insertInterval int subdiv = case locatePoint c subdiv of
                         (Just $ int^.generator.root)
 
     c = case (int^.frontierPoint) of
-          VertexEvent i c' -> c'
+          VertexEvent _ c' -> c'
           InteriorEvent c' -> c'
 
     f (x :+ p) z = z&core .~ x
                     &extra .~ p
-
 
 trimR :: EdgeSubdivision s r
       -> Maybe (SPMInterval s r, WithDistance s r)
