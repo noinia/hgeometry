@@ -80,7 +80,7 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
     m       = lineThrough (l^.core) (r^.core)
     mid     = F.maximumBy (comparing dist) pts
 
-    dist (p :+ _) = p `sqDistanceTo` m
+    dist (p :+ _) = p `squaredEuclideanDistTo` m
     t       = Triangle l mid r
     -- line through l and mid, which splits the remaining points in a left half and a right half.
     splitL   = lineThrough (l^.core) (mid^.core)

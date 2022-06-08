@@ -41,7 +41,6 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import           Data.Radical
-import           Data.Tuple (swap)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
@@ -433,8 +432,8 @@ sqSegmentLength ~(LineSegment' p q) = qdA (p^.core) (q^.core)
 -- | Squared distance from the point to the Segment s. The same remark as for
 -- the 'sqDistanceToSegArg' applies here.
 {-# DEPRECATED sqDistanceToSeg "use squaredEuclideanDistTo instead" #-}
-sqDistanceToSeg   :: (Arity d, Fractional r, Ord r) => Point d r -> LineSegment d p r -> r
-sqDistanceToSeg p = fst . sqDistanceToSegArg p
+sqDistanceToSeg :: (Arity d, Fractional r, Ord r) => Point d r -> LineSegment d p r -> r
+sqDistanceToSeg = squaredEuclideanDistTo
 
 -- | Squared distance from the point to the Segment s, and the point on s
 -- realizing it.
@@ -447,19 +446,19 @@ sqDistanceToSeg p = fst . sqDistanceToSegArg p
 -- >>> :{
 -- let ls = OpenLineSegment (Point2 0 0 :+ ()) (Point2 1 0 :+ ())
 --     p  = Point2 2 0
--- in  snd (sqDistanceToSegArg p ls) == Point2 1 0
+-- in  fst (sqDistanceToSegArg p ls) == Point2 1 0
 -- :}
 -- True
 sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r)
-                                            => Point d r -> LineSegment d p r -> (r, Point d r)
+                                            => Point d r -> LineSegment d p r -> (Point d r, r)
 sqDistanceToSegArg p (toClosedSegment -> s) =
-  let m  = sqDistanceToArg p (supportingLine s)
-      xs = m : map (\(q :+ _) -> (qdA p q, q)) [s^.start, s^.end]
-  in   F.minimumBy (comparing fst)
-     . filter (flip onSegment s . snd) $ xs
+  let m  = pointClosestToWithDistance p (supportingLine s)
+      xs = m : map (\(q :+ _) -> (q, qdA p q)) [s^.start, s^.end]
+  in   F.minimumBy (comparing snd)
+     . filter (flip onSegment s . fst) $ xs
 
 instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (LineSegment d p r) where
-  pointClosestToWithDistance q = swap . sqDistanceToSegArg q
+  pointClosestToWithDistance q = sqDistanceToSegArg q
 
 
 -- | flips the start and end point of the segment

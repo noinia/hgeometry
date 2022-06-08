@@ -12,8 +12,33 @@
 -- \(d\)-dimensional lines.
 --
 --------------------------------------------------------------------------------
-module Geometry.Line( module Geometry.Line.Internal
-                         ) where
+module Geometry.Line
+  ( Line(Line), anchorPoint, direction
+  , lineThrough
+  , verticalLine, horizontalLine
+  , perpendicularTo
+  , bisector
+
+  , fromLinearFunction, toLinearFunction
+
+  , isPerpendicularTo
+  , isParallelTo, isParallelTo2
+  , isIdenticalTo
+
+  , onLine, onLine2
+  , pointAt
+
+  , toOffset, toOffset'
+
+  , HasSupportingLine(..)
+
+  , SideTestUpDown(..)
+  , OnSideUpDownTest(..)
+  , SideTest(..)
+  , onSide, liesAbove, liesBelow
+
+  , cmpSlope
+  ) where
 
 import           Control.Lens
 import           Data.Bifunctor

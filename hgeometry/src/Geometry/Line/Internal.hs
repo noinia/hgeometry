@@ -201,20 +201,6 @@ instance (Ord r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
       Point2 px py = p
       Point2 qx qy = q
 
--- | Squared distance from point p to line l
-sqDistanceTo   :: (Fractional r, Arity d) => Point d r -> Line d r -> r
-sqDistanceTo p = fst . sqDistanceToArg p
-
-
--- | The squared distance between the point p and the line l, and the point m
--- realizing this distance.
-sqDistanceToArg              :: (Fractional r, Arity d)
-                             => Point d r -> Line d r -> (r, Point d r)
-sqDistanceToArg p (Line q v) = let u = q .-. p
-                                   t = (-1 * (u `dot` v)) / (v `dot` v)
-                                   m = q .+^ (v ^* t)
-                               in (qdA m p, m)
-
 --------------------------------------------------------------------------------
 -- * Supporting Lines
 
