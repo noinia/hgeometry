@@ -237,10 +237,6 @@ closestInteriorPointOn (s :+ _) q =
   undefined --   sqrt' <$> pointClosestToWithDistance q s
   -- todo get rid of the point if it is and endpoint; otherwise we add that event twice.
 
-sqrt' = undefined
-
-distance :: Point 2 r -> Point 2 r -> r
-distance = undefined
 
 
 -- | Get all edges opposite to s

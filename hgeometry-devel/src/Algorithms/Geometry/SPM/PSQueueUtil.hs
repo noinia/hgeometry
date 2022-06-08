@@ -90,6 +90,14 @@ viewLeftMost q = case tourView q of
   Single k p   -> Just (k :-> p, Void)
   tl `Play` tr -> viewLeftMost tl <&> \(m,tl') -> (m,tl' `play` tr)
 
+-- | Get the rightmost binding, i.e. the one with maximum k value.
+--
+-- \(O(\log n)\)
+viewRightMost   :: (Ord k, Ord p) => PSQ k p -> Maybe (PSQ k p, Binding k p)
+viewRightMost q = case tourView q of
+  Null         -> Nothing
+  Single k p   -> Just (Void, k :-> p)
+  tl `Play` tr -> viewRightMost tr <&> \(tr',m) -> (tl `play` tr',m)
 
 -- | Splits the Queue at the given key
 --
@@ -108,6 +116,21 @@ split k = go
                                    in (tl', x, tr' `join` tr)
                | otherwise      -> let (tl',x, tr') = go tr
                                    in (tl `join` tl', x, tr')
+
+
+-- | Updates the leftmost binding (which may now no longer be leftmost)
+updateLeftMost     :: (Ord k, Ord p) => (Binding k p -> Binding k p) -> PSQ k p -> PSQ k p
+updateLeftMost f q = case viewLeftMost q of
+                       Nothing     -> Void
+                       Just (b,q') -> let k :-> p = f b
+                                      in insert k p q'
+
+-- | Updates the rightmost binding (which may now longer be rightmost)
+updateRightMost     :: (Ord k, Ord p) => (Binding k p -> Binding k p) -> PSQ k p -> PSQ k p
+updateRightMost f q = case viewRightMost q of
+                       Nothing     -> Void
+                       Just (q',b) -> let k :-> p = f b
+                                      in insert k p q'
 
 
 --------------------------------------------------------------------------------

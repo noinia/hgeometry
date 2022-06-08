@@ -214,7 +214,12 @@ locatePoint c (EdgeSubdivision psq) = case PSQueue.splitBy (orderPoint c) psq of
 insertInterval            :: (Ord r, Radical r)
                           => SPMInterval s r -> EdgeSubdivision s r -> EdgeSubdivision s r
 insertInterval int subdiv = case locatePoint c subdiv of
-    (ls,m,rs) -> let (EdgeSubdivision ls',l) = trimR ls m int
+    (ls,m,rs) -> combine (trimL ls)
+                         (middle m int)
+                         (trimR rs)
+
+
+      let (EdgeSubdivision ls',l) = trimR ls m int
                      (EdgeSubdivision rs',r) = trimL m rs int
                      int'    = int&subInterval.start %~ f l
                                   &subInterval.end   %~ f r
@@ -230,27 +235,56 @@ insertInterval int subdiv = case locatePoint c subdiv of
     f (x :+ p) z = z&core .~ x
                     &extra .~ p
 
--- | Given a subdivision, and a new interval, remove/trim the
--- intervals from the left of the subdivision that are dominated by
--- the new given interval. Returns the new first endpoint of the new
--- interval
+    trimL = coerce $ PSQueue.dropWhileR (\i _ -> i `startDominatedBy` int)
+    trimR = coerce $ PSQueue.dropWhile  (\i _ -> i `endDominatedBy` int)
+
+    combine l m r = l `PSQueue.join` (m `PSQueue.join` r)
+
+
+middle mexisting new = case mexisting of
+
+
+
+
+
+-- | Given a subdivision, and a new interval, remove the intervals
+-- from the left of the subdivision that are dominated by the new
+-- given interval.
 trimL :: (Ord r, Radical r)
-      => Maybe (SPMInterval s r, WithDistance s r)
+      => Maybe (SPMInterval s r, WithDistance s r) -- ^ the interval
+                                                   -- that contains
+                                                   -- the frontier
+                                                   -- point of the new
+                                                   -- interval, if it
+                                                   -- exists.
+      -> EdgeSubdivision s r                       -- ^ remainder of
+                                                   -- the subdivision
+                                                   -- right of the
+                                                   -- frontier point.
+      -> SPMInterval s r    -- ^ our new interval
       -> EdgeSubdivision s r
-      -> SPMInterval s r -> (EdgeSubdivision s r, r :+ Point 2 r)
-trimL mb (EdgeSubdivision subdiv) int = case mb of
-    Nothing                                -> rest
-    Just (intB,_) | intB `dominatedBy` int -> rest
-                  | otherwise              -> undefined
+trimL mb (EdgeSubdivision subdiv) int = EdgeSubdivision $ case mb of
+    Nothing                                   -> rest
+    Just (intB,_) | intB `endDominatedBy` int -> rest
+                  | otherwise                 -> subdiv
   where
-    rest = trimFirst $ PSQueue.dropWhile (\i _ -> i `dominatedBy` int) subdiv
+    rest = PSQueue.dropWhile (\i _ -> i `endDominatedBy` int) subdiv
 
-
+----------------------------------------
 
 dominatedBy             :: (Ord r, Radical r) => SPMInterval s r -> SPMInterval s r -> Bool
-intA `dominatedBy` intB = f (intA^.start.extra) && f (intA^.end.extra)
-  where
-    f q = evalDistance q intB <= evalDistance q intA
+intA `dominatedBy` intB = intA `startDominatedBy` intB && intA `endDominatedBy` intB
+
+startDominatedBy             :: (Ord r, Radical r) => SPMInterval s r -> SPMInterval s r -> Bool
+intA `startDominatedBy` intB = let q = intA^.start.extra
+                               in evalDistance q intB <= evalDistance q intA
+
+endDominatedBy             :: (Ord r, Radical r) => SPMInterval s r -> SPMInterval s r -> Bool
+intA `endDominatedBy` intB = let q = intA^.end.extra
+                             in evalDistance q intB <= evalDistance q intA
+
+----------------------------------------
+
 
 -- | given two generators generators in order along the segment, compute their bisector point, if it exists.
 bisecPoint                :: LineSegment 2 p r
@@ -262,28 +296,21 @@ bisecPoint edge genL genR = bisec' (genL^.unfoldedRoot) (genL^.initialDist.dista
     bisec' c cC d dC = undefined
 
 
-
-
-
-
-
-
-
-
-
-
-
 -- | recompute the bisector/endpoint of the first interval. Returns the new endpoint as well.
 trimFirst        :: (Ord r)
                  => PSQueue.PSQ (SPMInterval s r) (WithDistance s r)
                  -> (EdgeSubdivision s r, (r :+ Point 2 r))
-trimFirst subdiv = case PSQueue.viewLeftMost subdiv of
-    Nothing                           -> (unreachableEdge, undefined -- start of the edge
-                                         )
-    Just (int PSQueue.:-> _, subdiv') -> let int' = trimInt int in
-                                           ( EdgeSubdivision
-                                             $ PSQueue.insert int' (closest int') subdiv'
-                                           , undefined )-- should be the start of the interval.
+trimFirst subdiv = EdgeSubdivision . PSQueue.updateLeftMost $ \(int PSQueue.:-> _dist) ->
+                     undefined
+
+
+  -- case PSQueue.viewLeftMost subdiv of
+  --   Nothing                           -> (unreachableEdge, undefined -- start of the edge
+  --                                        )
+  --   Just (int PSQueue.:-> _, subdiv') -> let int' = trimInt int in
+  --                                          ( EdgeSubdivision
+  --                                            $ PSQueue.insert int' (closest int') subdiv'
+  --                                          , undefined )-- should be the start of the interval.
 
 -- trimInt :: SPMInterval s r -> SPMInterval s r ->
 trimInt = undefined
