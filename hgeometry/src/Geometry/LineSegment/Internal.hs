@@ -41,7 +41,6 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import           Data.Radical
-import           Data.Tuple (swap)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
@@ -455,7 +454,7 @@ sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r)
 sqDistanceToSegArg p (toClosedSegment -> s) =
   let m  = pointClosestToWithDistance p (supportingLine s)
       xs = m : map (\(q :+ _) -> (q, qdA p q)) [s^.start, s^.end]
-  in   F.minimumBy (comparing fst)
+  in   F.minimumBy (comparing snd)
      . filter (flip onSegment s . fst) $ xs
 
 instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (LineSegment d p r) where
