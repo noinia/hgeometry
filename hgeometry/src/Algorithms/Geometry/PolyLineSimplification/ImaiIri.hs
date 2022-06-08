@@ -40,7 +40,7 @@ simplify     :: (Ord r, Fractional r, Arity d)
              => r -> PolyLine d p r -> PolyLine d p r
 simplify eps = simplifyWith $ \shortcut subPoly -> all (closeTo shortcut) (subPoly^.points)
   where
-    closeTo seg (p :+ _) = sqDistanceToSeg p seg  <= epsSq
+    closeTo seg (p :+ _) = squaredEuclideanDistTo p seg  <= epsSq
     epsSq = eps*eps
 
 -- | Given a function that tests if the shortcut is valid, compute a

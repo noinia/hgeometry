@@ -67,4 +67,4 @@ split i (PolyLine pts) = bimap f f (as,bs)
 maxDist       :: (Ord r, Fractional r, Arity d)
               => LSeq n (Point d r :+ p) -> LineSegment d p r -> (Int,r)
 maxDist pts s = F.maximumBy (comparing snd) . LSeq.mapWithIndex (\i (p :+ _) ->
-                                                     (i,sqDistanceToSeg p s)) $ pts
+                                                     (i,squaredEuclideanDistTo p s)) $ pts

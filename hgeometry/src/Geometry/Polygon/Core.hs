@@ -592,7 +592,7 @@ findDiagonal pg = List.head . catMaybes . F.toList $ diags
                       . F.toList . polygonVertices
                       $ pg
 
-    distTo l (z :+ _) = sqDistanceTo z l
+    distTo l (z :+ _) = squaredEuclideanDistTo z l
 
 
 safeMaximumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
