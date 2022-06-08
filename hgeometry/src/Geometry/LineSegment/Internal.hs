@@ -446,7 +446,7 @@ sqDistanceToSeg = squaredEuclideanDistTo
 -- >>> :{
 -- let ls = OpenLineSegment (Point2 0 0 :+ ()) (Point2 1 0 :+ ())
 --     p  = Point2 2 0
--- in  snd (sqDistanceToSegArg p ls) == Point2 1 0
+-- in  fst (sqDistanceToSegArg p ls) == Point2 1 0
 -- :}
 -- True
 sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r)
