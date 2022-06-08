@@ -94,6 +94,9 @@ common devel-setup
                , PSQueue                 >= 1.1.1
 
 
+
+
+
 library
   import: devel-setup
   hs-source-dirs: src
@@ -108,9 +111,16 @@ library
 
                    Geometry.Point.Random
                    PLY.Writer
+
+
+
+
   other-modules:
                    Algorithms.Geometry.ConvexHull.Minimalist.Hull
                    Algorithms.Geometry.ConvexHull.Minimalist.Point
+
+
+                   Algorithms.Geometry.SPM.PSQueueUtil
 
 benchmark benchmarks
   import: devel-setup

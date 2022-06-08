@@ -1,12 +1,14 @@
 {-# LANGUAGE  ScopedTypeVariables  #-}
 module Algorithms.Geometry.SPM.PSQueueUtil where
 
+import Prelude hiding (dropWhile)
 import Data.Coerce
 import Data.Functor ((<&>))
 import Data.Maybe (fromMaybe)
 import Data.PSQueue.Internal
 import Data.Set.Util (genericSplitBy)
 
+import Test.Hspec
 
 --------------------------------------------------------------------------------
 
@@ -45,7 +47,7 @@ spanAntitone f = go
   where
     go q = case tourView q of
              Null                         -> (Void,Void)
-             Single k p | f k             -> (q,Void)
+             Single k _ | f k             -> (q,Void)
                         | otherwise       -> (Void,q)
              tl `Play` tr | f (maxKey tl) -> let (tlr,trr) = go tr
                                              in (tl `join` tlr,trr)
@@ -64,6 +66,20 @@ dropWhile shouldDrop = fromMaybe Void . go
              tl `Play` tr                -> case go tl of
                Nothing  -> go tr
                Just tl' -> Just $ tl' `join` tr
+
+
+-- | Drops elements from the right
+--
+dropWhileR            :: (Ord k, Ord p) => (k -> p -> Bool) -> PSQ k p -> PSQ k p
+dropWhileR shouldDrop = fromMaybe Void . go
+  where
+    go q = case tourView q of
+             Null                        -> Just q
+             Single k p | shouldDrop k p -> Nothing
+                        | otherwise      -> Just q
+             tl `Play` tr                -> case go tr of
+               Nothing  -> go tl
+               Just tr' -> Just $ tl `join` tr'
 
 -- | Get the leftmost binding, i.e. the one with minimum k value.
 --
@@ -118,7 +134,65 @@ isBalanced t1 t2 = size' t1 <= omega * size' t2
 -- second tree.
 join                         :: (Ord k, Ord p)
                              => PSQ k p -> PSQ k p -> PSQ k p
--- join = play
+join = play
+
+
+testQ, testQ2 :: PSQ Char Int
+testQ = fromList [ 'a' :-> 1
+                 , 'b' :-> 2
+                 , 'c' :-> 0
+                 , 'd' :-> 5
+                 , 'e' :-> 100
+                 ]
+
+testQ2 = fromList [ 'g' :-> 101
+                  , 'h' :-> -1
+                  , 'i' :-> 20
+                  ]
+
+
+
+spec = describe "PSQUtil tests" $ do
+  it "spanAntitone" $
+    let (fs,ts) = spanAntitone (< 'c') testQ
+    in (toList fs, toList ts) `shouldBe`
+       (['a' :-> 1,'b' :-> 2],['c' :-> 0,'d' :-> 5,'e' :-> 100])
+
+  it "splitBy" $
+    let (l,m,r) = splitBy (\x -> compare x 'c') testQ
+    in (toList l, toList m, toList r) `shouldBe`
+       (['a' :-> 1,'b' :-> 2],['c' :-> 0],['d' :-> 5,'e' :-> 100])
+
+  it "join" $ do
+    toList (testQ `join` testQ2) `shouldBe`
+      ['a' :-> 1,'b' :-> 2,'c' :-> 0,'d' :-> 5,'e' :-> 100,'g' :-> 101,'h' :-> -1,'i' :-> 20]
+    let Just (a,b) = minView $ testQ `join` testQ2
+    (a, toList b) `shouldBe`
+      ('h' :-> -1
+      ,['a' :-> 1,'b' :-> 2,'c' :-> 0,'d' :-> 5,'e' :-> 100,'g' :-> 101,'i' :-> 20]
+      )
+
+  it "dropwhile" $
+    toList (dropWhile (\k _ -> k <= 'c') testQ)
+    `shouldBe`
+    ['d' :-> 5,'e' :-> 100]
+  it "dropwhileR" $
+    toList (dropWhileR (\k _ -> k >= 'c') testQ)
+    `shouldBe`
+    ['a' :-> 1,'b' :-> 2]
+
+
+-- test = splitBy (compare 'c') testQ
+test = spanAntitone (< 'c') testQ
+
+{-
+
+
+
+
+
+
+
 
 join Void              t'    = t'
 join t                 Void  = t
@@ -195,3 +269,5 @@ lbalanceJoin = undefined
 
 
 --------------------------------------------------------------------------------
+
+-}
