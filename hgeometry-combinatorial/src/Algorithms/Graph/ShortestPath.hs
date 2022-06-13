@@ -1,7 +1,10 @@
 module Algorithms.Graph.ShortestPath
   ( shortestPaths, shortestPaths'
   , shortestPathsWith
+  , mapWeightFunction
+
   , WithPath(..)
+  , withPaths
   ) where
 
 import           Control.Lens
