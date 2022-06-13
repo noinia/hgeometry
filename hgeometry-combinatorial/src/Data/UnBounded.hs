@@ -36,7 +36,11 @@ import qualified Data.Traversable     as T
 --
 -- >>> data Top a = ValT a | Top
 newtype Top a = GTop (Maybe a)
-                deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1)
+                deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1
+                         ,Semigroup,Monoid)
+
+
+
 
 -- | @Top a@ values are isomorphing to @Maybe a@ values.
 topToMaybe :: Top a -> Maybe a
@@ -52,17 +56,17 @@ pattern Top    = GTop Nothing
 
 
 instance Ord1 Top where
-  liftCompare _   Top       Top       = EQ
-  liftCompare _   _         Top       = LT
-  liftCompare _   Top       _         = GT
-  liftCompare cmp ~(ValT x) ~(ValT y) = x `cmp` y
+  liftCompare _   Top      Top       = EQ
+  liftCompare _   _        Top       = LT
+  liftCompare _   Top      _         = GT
+  liftCompare cmp (ValT x) (ValT y) = x `cmp` y
 
 instance Ord a => Ord (Top a) where
   compare = compare1
 
 instance Show a => Show (Top a) where
-  show Top       = "Top"
-  show ~(ValT x) = "ValT " ++ show x
+  show Top      = "Top"
+  show (ValT x) = "ValT " ++ show x
 
 -- | 'ValT' prism. Can be used to access the non-bottom element if it exists:
 --
@@ -101,7 +105,8 @@ _TopMaybe = iso topToMaybe GTop
 --
 -- >>> data Bottom a = Bottom | ValB a
 newtype Bottom a = GBottom (Maybe a)
-                 deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1,Ord1)
+                 deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1,Ord1
+                          ,Semigroup,Monoid)
 
 -- | `Bottom a` values are isomorphing to `Maybe a` values.
 bottomToMaybe :: Bottom a -> Maybe a
@@ -116,8 +121,8 @@ pattern ValB x = GBottom (Just x)
 {-# COMPLETE Bottom, ValB #-}
 
 instance Show a => Show (Bottom a) where
-  show Bottom    = "Bottom"
-  show ~(ValB x) = "ValB " ++ show x
+  show Bottom   = "Bottom"
+  show (ValB x) = "ValB " ++ show x
 
 -- | 'ValB' prism. Can be used to access the non-bottom element if it exists:
 --
