@@ -1,12 +1,15 @@
 module Algorithms.Graph.ShortestPath
-  ( shortestPaths
+  ( shortestPaths, shortestPaths'
+  , shortestPathsWith
   , WithPath(..)
   ) where
 
 import           Control.Lens
+import           Control.Monad (join)
 import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Function (on)
+import qualified Data.Map as Map
 import           Data.PSQueue (Binding(..))
 import qualified Data.PSQueue as PSQueue
 import           Data.Semigroup
@@ -14,29 +17,76 @@ import           Data.UnBounded
 
 --------------------------------------------------------------------------------
 
+-- | Given a weighted adjacency graph with finite weights, compute the
+-- shortest paths from the source.
+shortestPaths         :: forall graph adjList v w.
+                         ( Foldable graph, Foldable adjList, Functor graph, Functor adjList
+                         , Ord v
+                         , Ord w, Monoid w
+                         )
+                      => v -- ^ source
+                      -> graph (v, adjList (v, w))    -- ^ weighted adjacency graph
+                      -> [(v, Top w)]
+shortestPaths s = shortestPaths' s . mapWeightFunction (const ValT)
+
+-- | Given a weighted adjacency graph with possibly infinite weights,
+-- compute the shortest paths from the source
+shortestPaths'         :: forall graph adjList v w.
+                         ( Foldable graph, Foldable adjList
+                         , Ord v
+                         , Ord w, Monoid w
+                         )
+                      => v -- ^ source
+                      -> graph (v, adjList (v, Top w))    -- ^ weighted adjacency graph
+                      -> [(v, Top w)]
+shortestPaths' s graph = shortestPathsWith weightF s (Map.toAscList graph')
+  where
+    graph' = foldMap (\(u,ns) -> Map.singleton u (mkNeighs ns)) $ graph
+
+    weightF     :: v -> v -> Top w
+    weightF u v = join . review _TopMaybe $ Map.lookup u graph' >>= lookupN v
+
+-- | finite weights are also possibly infinite weights
+mapWeightFunction   :: (Functor graph, Functor adjList)
+                     => (v -> w -> w')
+                     -> graph (v, adjList (v, w))    -- ^ weighted adjacency graph
+                     -> graph (v, adjList (v, w'))
+mapWeightFunction f = fmap (\(u,ns) -> (u, fmap (\(v,w) -> (v, f v w)) ns))
+
+
+withPaths :: (Functor graph, Functor adjList)
+          => graph (v, adjList (v, w))    -- ^ weighted adjacency graph
+          -> graph (v, adjList (v, WithPath [] v w))
+withPaths = mapWeightFunction (\v w -> WithPath [v] w)
+
+
+--------------------------------------------------------------------------------
+
 -- | Dijkstra's algorithm for computing the shortest paths from the
 -- given source node to all other nodes in the unweighted graph
-shortestPaths           :: forall f g v w. (Foldable f, Foldable g
-                                           , Ord v
-                                           , Ord w, Monoid w)
-                        => (v -> v -> Top w) -- ^ weight function
-                        -> v -- ^ source
-                        -> f (v, g v)    -- ^ adjacency graph
-                        -> [(v, Top w)]
-shortestPaths weight s graph = go . initializeQueue $ graph
+shortestPathsWith                    :: forall graph adjList v w.
+                                    ( Foldable graph, Foldable adjList
+                                    , Ord v
+                                    , Ord w, Monoid w
+                                    )
+                                 => (v -> v -> Top w) -- ^ weight function
+                                 -> v -- ^ source
+                                 -> graph (v, adjList v)    -- ^ adjacency graph
+                                 -> [(v, Top w)]
+shortestPathsWith weight s graph = go . initializeQueue $ graph
   where
-    initializeQueue :: f (v, g v) -> Queue g v w
-    initializeQueue = PSQueue.adjust (fmap (const mempty)) s
+    initializeQueue :: graph (v, adjList v) -> Queue adjList v w
+    initializeQueue = PSQueue.adjust (fmap (const $ ValT mempty)) s
                     . PSQueue.fromList
                     . map (\(u,ns) -> u :-> WithNeighbours Top ns)
                     . F.toList
 
-    go       :: Queue g v w -> [(v,Top w)]
+    go       :: Queue adjList v w -> [(v,Top w)]
     go queue = case PSQueue.minView queue of
       Nothing                                      -> []
       Just (u :-> WithNeighbours du neighs,queue') -> (u, du) : go (relaxAll u du queue' neighs)
 
-    relaxAll      :: v -> Top w -> Queue g v w -> g v -> Queue g v w
+    relaxAll      :: v -> Top w -> Queue adjList v w -> adjList v -> Queue adjList v w
     relaxAll u du = foldr (\v -> decreasePrio v $ du <> weight u v)
 
 --------------------------------------------------------------------------------
@@ -78,19 +128,27 @@ instance (Monoid r, Monoid (f v)) => Monoid (WithPath f v r) where
   mempty = WithPath mempty mempty
 
 
+
+--------------------------------------------------------------------------------
+-- * Helper so that we can run with a weighted graph
+
+newtype Neighs w v = Neighs { unNeighs :: Map.Map v w }
+
+instance Foldable (Neighs w) where
+  foldr f z = Map.foldrWithKey (\v _ -> f v) z . unNeighs
+
+lookupN   :: Ord v => v -> Neighs w v -> Maybe w
+lookupN k = Map.lookup k . unNeighs
+
+mkNeighs :: (Foldable f, Ord v) => f (v, w) -> Neighs w v
+mkNeighs = Neighs . foldMap (uncurry Map.singleton)
+
 --------------------------------------------------------------------------------
 
-shortestPaths'         :: (Ord v, Monoid r, Ord r) => v -> WeightedGraph v r -> [(v, Top r)]
-shortestPaths' s graph =  shortestPaths (weightF graph) s (dropWeights graph)
+
+
 
 type WeightedGraph v r = [(v,[(v,r)])]
-
-
-weightF           :: Eq v => WeightedGraph v r -> v -> v -> Top r
-weightF graph u v = review _TopMaybe $ lookup u graph >>= lookup v
-
-dropWeights :: WeightedGraph v r -> [(v,[v])]
-dropWeights = map (\(v,vs) -> (v,map fst vs))
 
 testGraph :: WeightedGraph Char (Sum Int)
 testGraph = coerce $
@@ -100,6 +158,6 @@ testGraph = coerce $
             , ('c', [('a',6),('b',4)])
             ]
 
-test1 = shortestPaths' 's' testGraph
+test1 = shortestPaths 's' testGraph
 
-test2 = shortestPaths' 's' testGraph
+test2 = shortestPaths 's' $ withPaths testGraph
