@@ -61,6 +61,7 @@ mapWeightFunction   :: (Functor graph, Functor adjList)
 mapWeightFunction f = fmap (\(u,ns) -> (u, fmap (\(v,w) -> (v, f v w)) ns))
 
 
+-- | Also compute the shortest paths
 withPaths :: (Functor graph, Functor adjList)
           => graph (v, adjList (v, w))    -- ^ weighted adjacency graph
           -> graph (v, adjList (v, WithPath [] v w))
