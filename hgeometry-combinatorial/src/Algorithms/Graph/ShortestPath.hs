@@ -22,6 +22,8 @@ import           Data.UnBounded
 
 -- | Given a weighted adjacency graph with finite weights, compute the
 -- shortest paths from the source.
+--
+-- running time: \(O((V+E)\log V)\)
 shortestPaths         :: forall graph adjList v w.
                          ( Foldable graph, Foldable adjList, Functor graph, Functor adjList
                          , Ord v
@@ -34,6 +36,8 @@ shortestPaths s = shortestPaths' s . mapWeightFunction (const ValT)
 
 -- | Given a weighted adjacency graph with possibly infinite weights,
 -- compute the shortest paths from the source
+--
+-- running time: \(O((V+E)\log V)\)
 shortestPaths'         :: forall graph adjList v w.
                          ( Foldable graph, Foldable adjList
                          , Ord v
@@ -67,6 +71,8 @@ withPaths = mapWeightFunction (\v w -> WithPath [v] w)
 
 -- | Dijkstra's algorithm for computing the shortest paths from the
 -- given source node to all other nodes in the unweighted graph
+--
+-- running time: \(O((V+E)\log V)\)
 shortestPathsWith                    :: forall graph adjList v w.
                                     ( Foldable graph, Foldable adjList
                                     , Ord v
@@ -115,6 +121,7 @@ instance Ord p => Ord (WithNeighbours vs p) where
 
 --------------------------------------------------------------------------------
 
+-- | Data type to help to also compute the path
 data WithPath f v r = WithPath { path  :: f v
                                , dist  :: !r
                                } deriving (Show)
@@ -135,14 +142,17 @@ instance (Monoid r, Monoid (f v)) => Monoid (WithPath f v r) where
 --------------------------------------------------------------------------------
 -- * Helper so that we can run with a weighted graph
 
+-- | newtype to flip the w and v
 newtype Neighs w v = Neighs { unNeighs :: Map.Map v w }
 
 instance Foldable (Neighs w) where
   foldr f z = Map.foldrWithKey (\v _ -> f v) z . unNeighs
 
+-- | lookup for negibhours
 lookupN   :: Ord v => v -> Neighs w v -> Maybe w
 lookupN k = Map.lookup k . unNeighs
 
+-- | Smart constructor to build a Neighs
 mkNeighs :: (Foldable f, Ord v) => f (v, w) -> Neighs w v
 mkNeighs = Neighs . foldMap (uncurry Map.singleton)
 
