@@ -28,11 +28,15 @@ class ( Affine (point d)
 
   -- | Lens to access the vector corresponding to this point.
   --
-  -- >>> (Point3 1 2 3) ^. vector'
+  -- >>> (Point3 1 2 3) ^. asVector
   -- Vector3 1 2 3
-  -- >>> origin & vector' .~ Vector3 1 2 3
+  -- >>> origin & asVector .~ Vector3 1 2 3
   -- Point3 1 2 3
-  asVector   :: Lens' (point d r) (Vector d r)
+  asVector :: Lens (point d r) (point d s) (Vector d r) (Vector d s)
+
+  -- asVector' :: Lens' (point d r) (Vector d r)
+  -- asVector' = asVector
+
 
   -- | Get the coordinate in a given dimension. Consider using 'coord'
   -- instead, this is just a way of implementing that function more easily.

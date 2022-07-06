@@ -19,34 +19,38 @@ import Data.Indexed
 import Data.Ratio.Generalized
 import Data.RealNumber.Symbolic
 import Geometry.Point.Class
-import Geometry.Point.Internal
-import Geometry.Vector
+-- import Geometry.Point.Internal
+-- import Geometry.Vector
 import Test.QuickCheck (Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: (Arity d, ToAPoint point d r, HasIndex point, Num r)
-              => point -> Point d (Symbolic SoSI r)
-toSymbolic p' = let p = p'^.toPoint
-                    i = sosIndex p'
-                in p&vector %~ imap (\j x -> perturb x $ MkSoS i j)
+toSymbolic    :: ( Point point d r, Functor (point d)
+                 , HasIndex (point d r), Num r
+                 )
+              => point d r -> point d (Symbolic SoSI r)
+toSymbolic p = let i = sosIndex p
+               in p&asVector %~ imap (\j x -> perturb x $ MkSoS i j)
+
+-- TODO: I think I may want to choose a concrete point implementation for the symbolic ones
 
 -- | Drops the pertubations in a point
-fromSymbolic :: (Arity d, Num r) => Point d (Symbolic i r) -> Point d r
+fromSymbolic :: (Functor f, Num r) => f (Symbolic i r) -> f r
 fromSymbolic = fmap roundToConstant
 
 ----------------------------------------
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: (Arity d, ToAPoint point d r, HasIndex point, Eq r, Num r)
-              => point -> Point d (SoSRational SoSI r)
+toSoSRational :: ( Point point d r, Functor (point d)
+                 , HasIndex (point d r), Eq r, Num r)
+              => point d r -> point d (SoSRational SoSI r)
 toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
 
 -- | Drops the pertubations
-fromSoSRational :: (Arity d, Fractional r) => Point d (SoSRational i r) -> Point d r
+fromSoSRational :: (Functor f, Fractional r) => f (SoSRational i r) -> f r
 fromSoSRational = fmap (\x -> roundToConstant (numerator x) / roundToConstant (denominator x))
 
 --------------------------------------------------------------------------------
