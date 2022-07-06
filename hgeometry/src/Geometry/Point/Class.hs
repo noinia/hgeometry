@@ -17,7 +17,8 @@ import qualified Geometry.Vector as Vector
 -- -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
 class ( Affine (point d)
-      , Foldable (Diff (point d))
+      -- , Foldable (Diff (point d))
+      , Diff (point d) ~ Vector d
       , NumType (point d r) ~ r
       , Dimension (point d r) ~ d
       , Arity d
