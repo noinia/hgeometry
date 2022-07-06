@@ -1,118 +1,136 @@
-{-# LANGUAGE  AllowAmbiguousTypes  #-}
-{-# LANGUAGE  UndecidableInstances  #-}
-{-# LANGUAGE  FunctionalDependencies  #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Geometry.Point.Class where
 
 import           Control.Lens
-import           Data.Ext
-import           Data.Indexed
+import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
-import           Geometry.Point.Internal (Point)
-import qualified Geometry.Point.Internal as Internal
+import           Geometry.Properties
 import           Geometry.Vector
-import           Linear.V2
-import           Linear.V3
-import           Linear.V4
+import qualified Geometry.Vector as Vector
+
 --------------------------------------------------------------------------------
 
--- $setup
--- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
+-- -- $setup
+-- -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
--- | Types that can act as d-dimensional points whose numeric type is
--- r.
+class ( Affine (point d)
+      , Foldable (Diff (point d))
+      , NumType (point d r) ~ r
+      , Dimension (point d r) ~ d
+      , Arity d
+      ) => Point point d r where
+
+  -- | Construct a point from a vector
+  fromVector :: Vector d r -> point d r
+
+  -- | Lens to access the vector corresponding to this point.
+  --
+  -- >>> (Point3 1 2 3) ^. vector'
+  -- Vector3 1 2 3
+  -- >>> origin & vector' .~ Vector3 1 2 3
+  -- Point3 1 2 3
+  asVector   :: Lens' (point d r) (Vector d r)
+
+  -- | Get the coordinate in a given dimension. Consider using 'coord'
+  -- instead, this is just a way of implementing that function more easily.
+  --
+  -- >>> Point3 1 2 3 ^. coordProxy (Proxy @2)
+  -- 2
+  -- >>> Point3 1 2 3 & coordProxy (Proxy @1) .~ 10
+  -- Point3 10 2 3
+  -- >>> Point3 1 2 3 & coordProxy (Proxy @3) %~ (+1)
+  -- Point3 1 2 4
+  coordProxy    :: (1 <= i, i <= d, KnownNat i)
+                => proxy i -> IndexedLens' Int (point d r) r
+  coordProxy px = singular $ unsafeCoord (fromIntegral . natVal $ px)
+  {-# INLINE coordProxy #-}
+
+  -- | Get the coordinate in a given dimension. This operation is unsafe in the
+  -- sense that no bounds are checked. Consider using `coord` instead.
+  --
+  --
+  -- >>> Point3 1 2 3 ^. unsafeCoord 2
+  -- 2
+  unsafeCoord :: (Point point d r) => Int -> IndexedTraversal' Int (point d r) r
+  unsafeCoord i = asVector . Vector.element' (i - 1)
+                -- vectors are 0 indexed, whereas we are  indexed.
+  {-# INLINE  unsafeCoord #-}
+
+  {-# MINIMAL asVector, fromVector #-}
+
+
+  -- | Get the coordinate in a given dimension
+  --
+  -- >>> Point3 1 2 3 ^. coord @2
+  -- 2
+  -- >>> Point3 1 2 3 & coord @1 .~ 10
+  -- Point3 10 2 3
+  -- >>> Point3 1 2 3 & coord @3 %~ (+1)
+  -- Point3 1 2 4
+coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point point d r)
+      => IndexedLens' Int (point d r) r
+coord = coordProxy $ Proxy @i
+{-# INLINE coord #-}
+
+--------------------------------------------------------------------------------
+
+-- | A bidirectional pattern synonym for 1 dimensional points.
+pattern Point1   :: Point point 1 r => r -> point 1 r
+pattern Point1 x <- (view asVector -> Vector1 x)
+  where
+    Point1 x = fromVector (Vector1 x)
+
+-- | A bidirectional pattern synonym for 2 dimensional points.
+pattern Point2     :: Point point 2 r => r -> r -> point 2 r
+pattern Point2 x y <- (view asVector -> Vector2 x y)
+  where
+    Point2 x y = fromVector (Vector2 x y)
+
+-- | A bidirectional pattern synonym for 3 dimensional points.
+pattern Point3       :: Point point 3 r => r -> r -> r -> point 3 r
+pattern Point3 x y z <- (view asVector -> Vector3 x y z)
+  where
+    Point3 x y z = fromVector (Vector3 x y z)
+
+-- | A bidirectional pattern synonym for 4 dimensional points.
+pattern Point4         :: Point point 4 r => r -> r -> r -> r -> point 4 r
+pattern Point4 x y z w <- (view asVector -> Vector4 x y z w)
+  where
+    Point4 x y z w = fromVector (Vector4 x y z w)
+
+
+-- | Point representing the origin in d dimensions
 --
--- Note that updates to the 'point' are not necessarily supported. See
--- ~AsAPoint~ for updatable points.
-class ToAPoint point d r | point -> r where
-  -- | Getter to get a 'Point d r' out of the point.
-  toPoint   :: Getter point (Point d r)
+-- >>> origin :: Point 4 Int
+-- Point4 0 0 0 0
+origin :: (Arity d, Num r, Point point d r) => point d r
+origin = fromVector $ pure 0
 
--- | Types that can act a points
-class AsAPoint point where
-  -- | Lens to access the Point in the point. Updates may change the
-  -- dimension and/or numeric type.
-  asAPoint :: Lens (point d r) (point d' r') (Point d r) (Point d' r')
+--------------------------------------------------------------------------------
 
--- | Lens to access the vector corresponding to this point.
+-- | Constructs a point from a list of coordinates. The length of the
+-- list has to match the dimension exactly.
 --
--- >>> (Point3 1 2 3) ^. vector'
--- Vector3 1 2 3
--- >>> origin & vector' .~ Vector3 1 2 3
--- Point3 1 2 3
-vector' :: AsAPoint p => Lens (p d r) (p d r') (Vector d r) (Vector d r')
-vector' = asAPoint . lens Internal.toVec (const Internal.Point)
+-- >>> pointFromList [1,2,3] :: Maybe (Point 3 Int)
+-- Just (Point3 1 2 3)
+-- >>> pointFromList [1] :: Maybe (Point 3 Int)
+-- Nothing
+-- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
+-- Nothing
+pointFromList :: (Arity d, Point point d r) => [r] -> Maybe (point d r)
+pointFromList = fmap fromVector . Vector.vectorFromList
 
--- | Get the coordinate in a given dimension
---
--- >>> Point3 1 2 3 ^. coord @2
--- 2
--- >>> Point3 1 2 3 & coord @1 .~ 10
--- Point3 10 2 3
--- >>> Point3 1 2 3 & coord @3 %~ (+1)
--- Point3 1 2 4
-coord :: forall i p d r. (1 <= i, i <= d, KnownNat i, Arity d, AsAPoint p) => Lens' (p d r) r
-coord = asAPoint.Internal.coord @i
+-- | Project a point down into a lower dimension.
+projectPoint :: ( Arity i, i <= d
+                , Point point d r, Point point i r
+                ) => point d r -> point i r
+projectPoint = fromVector . prefix . view asVector
 
--- | Get the coordinate in a given dimension. This operation is unsafe in the
--- sense that no bounds are checked. Consider using `coord` instead.
---
---
--- >>> Point3 1 2 3 ^. unsafeCoord 2
--- 2
-unsafeCoord   :: (Arity d, AsAPoint p) => Int -> Lens' (p d r) r
-unsafeCoord i = asAPoint.Internal.unsafeCoord i
+--------------------------------------------------------------------------------
 
-instance ToAPoint (Point d r) d r where
-  toPoint = to id
-  {-# INLINABLE toPoint #-}
-
-instance ToAPoint (Point d r :+ p) d r where
-  toPoint = core
-  {-# INLINABLE toPoint #-}
-
-instance AsAPoint Point where
-  asAPoint = id
-  {-# INLINABLE asAPoint #-}
-
-instance ToAPoint point d r => ToAPoint (WithIndex point) d r where
-  toPoint = to (\(WithIndex _ p) -> p^.toPoint)
-  {-# INLINABLE toPoint #-}
-
-
-instance (1 <= d, Arity d) => R1 (Point d) where
-  _x = coord @1
-  {-# INLINABLE _x #-}
-
-instance (2 <= d, Arity d, 1 <= d) => R2 (Point d) where
-  _y  = coord @2
-  {-# INLINABLE _y #-}
-  _xy = lens (\p -> V2 (p^._x) (p^._y)) (\p (V2 x y) -> p&_x .~ x
-                                                         &_y .~ y
-
-                                        )
-  {-# INLINABLE _xy #-}
-
-instance (3 <= d, Arity d, 1 <= d, 2 <= d) => R3 (Point d) where
-  _z = coord @3
-  {-# INLINABLE _z #-}
-  _xyz = lens (\p -> V3 (p^._x) (p^._y) (p^._z))
-              (\p (V3 x y z) -> p&_x .~ x
-                                 &_y .~ y
-                                 &_z .~ z
-              )
-  {-# INLINABLE _xyz #-}
-
-instance (4 <= d, Arity d, 1 <= d, 2 <= d, 3 <= d) => R4 (Point d) where
-  _w = coord @4
-  {-# INLINABLE _w #-}
-  _xyzw = lens (\p -> V4 (p^._x) (p^._y) (p^._z) (p^._w))
-               (\p (V4 x y z w) -> p&_x .~ x
-                                    &_y .~ y
-                                    &_z .~ z
-                                    &_w .~ w
-               )
-  {-# INLINABLE _xyzw #-}
 
 -- | Shorthand to access the first coordinate
 --
@@ -120,7 +138,7 @@ instance (4 <= d, Arity d, 1 <= d, 2 <= d, 3 <= d) => R4 (Point d) where
 -- 1
 -- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 10 2
-xCoord :: (1 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+xCoord :: (1 <= d, Point point d r) => Lens' (point d r) r
 xCoord = coord @1
 {-# INLINABLE xCoord #-}
 
@@ -130,7 +148,7 @@ xCoord = coord @1
 -- 2
 -- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 1 3 3
-yCoord :: (2 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+yCoord :: (2 <= d, Point point d r) => Lens' (point d r) r
 yCoord = coord @2
 {-# INLINABLE yCoord #-}
 
@@ -140,7 +158,7 @@ yCoord = coord @2
 -- 3
 -- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 1 2 4
-zCoord :: (3 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+zCoord :: (3 <= d, Point point d r) => Lens' (point d r) r
 zCoord = coord @3
 {-# INLINABLE zCoord #-}
 
@@ -150,6 +168,6 @@ zCoord = coord @3
 -- 4
 -- >>> Point4 1 2 3 4 & wCoord %~ (+1)
 -- Point4 1 2 3 5
-wCoord :: (4 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+wCoord :: (4 <= d, Point point d r) => Lens' (point d r) r
 wCoord = coord @4
 {-# INLINABLE wCoord #-}

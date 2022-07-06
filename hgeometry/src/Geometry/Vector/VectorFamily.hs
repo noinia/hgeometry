@@ -205,23 +205,23 @@ head = view $ element @0
 
 -- | Lens into the i th element
 element :: forall i d r. (Arity d, KnownNat i, (i + 1) <= d)
-        => Lens' (Vector d r) r
+        => IndexedLens' Int (Vector d r) r
 element = elementProxy (C @i)
 {-# INLINE element #-}
 
 -- | Lens into the i th element
 elementProxy   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
-               => proxy i -> Lens' (Vector d r) r
+               => proxy i -> IndexedLens' Int (Vector d r) r
 elementProxy _ = singular $ element' $ fromInteger . natVal $ C @i
 {-# INLINE elementProxy #-}
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
-element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
-element' i = unV.e (C :: C d) i
+element'   :: forall d r. Arity d => Int -> IndexedTraversal' Int (Vector d r) r
+element' i = unV . e (C :: C d) i
   where
-    e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
-    e _ = ix
+    e  :: Arity d => proxy d -> Int -> IndexedTraversal' Int (VectorFamily (Peano d) r) r
+    e _ = iix
 {-# INLINE element' #-}
 
 --------------------------------------------------------------------------------
