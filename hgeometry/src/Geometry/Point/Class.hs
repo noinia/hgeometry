@@ -13,6 +13,7 @@ import qualified Geometry.Vector as Vector
 
 --------------------------------------------------------------------------------
 
+
 -- -- $setup
 -- -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
@@ -35,9 +36,16 @@ class ( Affine (point d)
   -- Point3 1 2 3
   asVector :: Lens (point d r) (point d s) (Vector d r) (Vector d s)
 
-  -- asVector' :: Lens' (point d r) (Vector d r)
-  -- asVector' = asVector
 
+  -- | Traversal over *all* coordinates of the points
+  --
+  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20)
+  -- (0,10)
+  -- (1,20)
+  -- Point2 () ()
+  coordinates :: Point point d r => IndexedTraversal Int (point d r) (point d s) r s
+  coordinates = asVector . reindexed (+1) itraversed
+  {-# INLINE coordinates #-}
 
   -- | Get the coordinate in a given dimension. Consider using 'coord'
   -- instead, this is just a way of implementing that function more easily.

@@ -217,6 +217,9 @@ elementProxy _ = singular $ element' $ fromInteger . natVal $ C @i
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
+--
+-- >>> itraverseOf_ (element' 0) (\i x -> print (i,x)) (Vector2 10 20)
+-- (0,10)
 element'   :: forall d r. Arity d => Int -> IndexedTraversal' Int (Vector d r) r
 element' i = unV . e (C :: C d) i
   where
