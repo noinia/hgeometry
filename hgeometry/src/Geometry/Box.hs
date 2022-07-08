@@ -12,7 +12,7 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Box
-  ( Box, pattern Box
+  ( Box(Box)
   , box, fromExtent, fromCenter
   , grow
   , minPoint, maxPoint

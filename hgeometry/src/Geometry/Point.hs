@@ -16,13 +16,12 @@ module Geometry.Point
   , origin, vector
   , pointFromList
   , projectPoint
-  , coord, unsafeCoord
+  , coord
   , xCoord, yCoord, zCoord
 
   , PointFunctor(..)
 
-  , CCW, ccw, isCoLinear
-  , pattern CCW, pattern CW, pattern CoLinear
+  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
 
   , ccwCmpAround
   , cwCmpAround
@@ -31,7 +30,7 @@ module Geometry.Point
   , sortAround
   , insertIntoCyclicOrder
 
-  , StrictCCW, pattern SCCW, pattern SCW
+  , StrictCCW(SCCW, SCW)
   , strictCcw
 
 
