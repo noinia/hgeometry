@@ -135,7 +135,7 @@ instance Arity d =>  Affine (Point d) where
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
 
-instance Arity d => PointClass.Point Point d r where
+instance Arity d => PointClass.Point_ Point d r where
   fromVector = Point
   asVector = vector
 

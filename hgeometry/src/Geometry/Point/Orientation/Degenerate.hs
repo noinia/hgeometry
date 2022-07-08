@@ -19,7 +19,7 @@ import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import           Geometry.Point.Class
 import           Geometry.Point.EuclideanDistance
-import qualified Geometry.Point.Internal as Boxed
+import qualified Geometry.Point.Boxed as Boxed
 import           Geometry.Vector
 import qualified Data.List as L
 
@@ -65,7 +65,7 @@ instance Show CCW where
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
 -- CoLinear
 --
-ccw       :: (Ord r, Num r, Point point 2 r)
+ccw       :: (Ord r, Num r, Point_ point 2 r)
           => point 2 r -> point 2 r -> point 2 r -> CCW
 ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
 -- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
@@ -84,7 +84,7 @@ ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
 --
 -- This is identical to `ccw p q r == CoLinear` but doesn't have the `Ord` constraint.
-isCoLinear       :: (Eq r, Num r, Point point 2 r) => point 2 r -> point 2 r -> point 2 r -> Bool
+isCoLinear       :: (Eq r, Num r, Point_ point 2 r) => point 2 r -> point 2 r -> point 2 r -> Bool
 isCoLinear p q r = (ux * vy) == (uy * vx)
      where
        Vector2 ux uy = q .-. p
@@ -98,7 +98,7 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
 -- Sort the points arround the given point p in counter clockwise order with
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.
-sortAround   :: (Ord r, Num r, Point point 2 r)
+sortAround   :: (Ord r, Num r, Point_ point 2 r)
              => point 2 r -> [point 2 r] -> [point 2 r]
 sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 
@@ -107,7 +107,7 @@ sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 -- direction.
 --
 -- pre: the points p,q /= c
-ccwCmpAroundWith                              :: (Ord r, Num r, Point point 2 r)
+ccwCmpAroundWith                              :: (Ord r, Num r, Point_ point 2 r)
                                               => Vector 2 r
                                               -> point 2 r
                                               -> point 2 r -> point 2 r
@@ -153,7 +153,7 @@ ccwCmpAroundWith z@(Vector2 zx zy) c q r =
 -- direction.
 --
 -- pre: the points p,q /= c
-cwCmpAroundWith     :: (Ord r, Num r, Point point 2 r)
+cwCmpAroundWith     :: (Ord r, Num r, Point_ point 2 r)
                     => Vector 2 r
                     -> point 2 r
                     -> point 2 r -> point 2 r
@@ -162,13 +162,13 @@ cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-ccwCmpAround :: (Num r, Ord r, Point point 2 r)
+ccwCmpAround :: (Num r, Ord r, Point_ point 2 r)
              => point 2 r -> point 2 r -> point 2 r -> Ordering
 ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 
 -- | Clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-cwCmpAround :: (Num r, Ord r, Point point 2 r)
+cwCmpAround :: (Num r, Ord r, Point_ point 2 r)
             => point 2 r -> point 2 r -> point 2 r -> Ordering
 cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 
@@ -176,7 +176,7 @@ cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 -- Given a center c, a new point p, and a list of points ps, sorted in
 -- counter clockwise order around c. Insert p into the cyclic order. The focus
 -- of the returned cyclic list is the new point p.
-insertIntoCyclicOrder   :: (Ord r, Num r, Point point 2 r)
+insertIntoCyclicOrder   :: (Ord r, Num r, Point_ point 2 r)
                         => point 2 r -> point 2 r
                         -> C.CList (point 2 r) -> C.CList (point 2 r)
 insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c <> cmpByDistanceTo c)

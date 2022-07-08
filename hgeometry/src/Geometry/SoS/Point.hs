@@ -27,7 +27,7 @@ import Test.QuickCheck (Arbitrary(..))
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: ( Point point d r, Functor (point d)
+toSymbolic    :: ( Point_ point d r, Functor (point d)
                  , HasIndex (point d r), Num r
                  )
               => point d r -> point d (Symbolic SoSI r)
@@ -44,7 +44,7 @@ fromSymbolic = fmap roundToConstant
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: ( Point point d r, Functor (point d)
+toSoSRational :: ( Point_ point d r, Functor (point d)
                  , HasIndex (point d r), Eq r, Num r)
               => point d r -> point d (SoSRational SoSI r)
 toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic

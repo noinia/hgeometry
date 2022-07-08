@@ -15,16 +15,17 @@ module Geometry.Line.Internal where
 import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Geometry.Point.Internal
-import           Geometry.Point.Orientation.Degenerate
-import           Geometry.Point.Class
-import           Geometry.Properties
-import           Geometry.Vector
 import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
+import           Geometry.Point.Class
+import           Geometry.Point.EuclideanDistance
+import           Geometry.Point.Internal
+import           Geometry.Point.Orientation.Degenerate
+import           Geometry.Properties
+import           Geometry.Vector
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------

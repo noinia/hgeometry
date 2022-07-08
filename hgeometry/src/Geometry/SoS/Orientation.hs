@@ -69,8 +69,8 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 3) (Point2 2 2 `with` 1)
 -- Positive
 sideTest      :: ( SoS d, Num r, Ord r
-                 , Point point d (Symbolic SoSI r)
-                 , Point point d r
+                 , Point_ point d (Symbolic SoSI r)
+                 , Point_ point d r
                  , HasIndex (point d r), Functor (point d))
               => point d r -> Vector d (point d r) -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
@@ -79,7 +79,7 @@ sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 -- test on which side of the hyperplane q lies.
 --
 -- TODO: Specify what the sign means
-sideTest'      :: (Num r, Ord r, Ord i, SoS d, Arity (d+1), Point point d (Symbolic i r))
+sideTest'      :: (Num r, Ord r, Ord i, SoS d, Arity (d+1), Point_ point d (Symbolic i r))
                => point d (Symbolic i r) -> Vector d (point d (Symbolic i r)) -> Sign
 sideTest' q ps = sideTest'' $ cons q ps
 
@@ -87,12 +87,12 @@ sideTest' q ps = sideTest'' $ cons q ps
 -- row is above/below the hyperplane defined by the remaining points
 -- (rows).
 sideTest'' :: ( Num r, Ord r, Ord i, HasDeterminant (d+1)
-              , Point point d (Symbolic i r), Arity (d+1))
+              , Point_ point d (Symbolic i r), Arity (d+1))
            => Vector (d+1) (point d (Symbolic i r)) -> Sign
 sideTest'' = signDet . Matrix . fmap mkLambdaRow
 
 -- | Given a point produces the vector/row corresponding to this point
 -- in a homogeneous matrix represetnation. I.e. we add a 1 as an
 -- additonal column at the end.
-mkLambdaRow :: (Num r, Point point d r, Arity (d+1)) => point d r -> Vector (d+1) r
+mkLambdaRow :: (Num r, Point_ point d r, Arity (d+1)) => point d r -> Vector (d+1) r
 mkLambdaRow = flip snoc 1 . view asVector

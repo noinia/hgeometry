@@ -13,7 +13,6 @@ import qualified Geometry.Vector as Vector
 
 --------------------------------------------------------------------------------
 
-
 -- -- $setup
 -- -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
 
@@ -23,7 +22,7 @@ class ( Affine (point d)
       , NumType (point d r) ~ r
       , Dimension (point d r) ~ d
       , Arity d
-      ) => Point point d r where
+      ) => Point_ point d r where
 
   -- | Construct a point from a vector
   fromVector :: Vector d r -> point d r
@@ -43,7 +42,7 @@ class ( Affine (point d)
   -- (0,10)
   -- (1,20)
   -- Point2 () ()
-  coordinates :: Point point d r => IndexedTraversal Int (point d r) (point d s) r s
+  coordinates :: IndexedTraversal Int (point d r) (point d s) r s
   coordinates = asVector . reindexed (+1) itraversed
   {-# INLINE coordinates #-}
 
@@ -67,7 +66,7 @@ class ( Affine (point d)
   --
   -- >>> Point3 1 2 3 ^. unsafeCoord 2
   -- 2
-  unsafeCoord :: (Point point d r) => Int -> IndexedTraversal' Int (point d r) r
+  unsafeCoord   :: Int -> IndexedTraversal' Int (point d r) r
   unsafeCoord i = asVector . Vector.element' (i - 1)
                 -- vectors are 0 indexed, whereas we are  indexed.
   {-# INLINE  unsafeCoord #-}
@@ -83,7 +82,7 @@ class ( Affine (point d)
   -- Point3 10 2 3
   -- >>> Point3 1 2 3 & coord @3 %~ (+1)
   -- Point3 1 2 4
-coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point point d r)
+coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point_ point d r)
       => IndexedLens' Int (point d r) r
 coord = coordProxy $ Proxy @i
 {-# INLINE coord #-}
@@ -91,25 +90,25 @@ coord = coordProxy $ Proxy @i
 --------------------------------------------------------------------------------
 
 -- | A bidirectional pattern synonym for 1 dimensional points.
-pattern Point1   :: Point point 1 r => r -> point 1 r
+pattern Point1   :: Point_ point 1 r => r -> point 1 r
 pattern Point1 x <- (view asVector -> Vector1 x)
   where
     Point1 x = fromVector (Vector1 x)
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
-pattern Point2     :: Point point 2 r => r -> r -> point 2 r
+pattern Point2     :: Point_ point 2 r => r -> r -> point 2 r
 pattern Point2 x y <- (view asVector -> Vector2 x y)
   where
     Point2 x y = fromVector (Vector2 x y)
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
-pattern Point3       :: Point point 3 r => r -> r -> r -> point 3 r
+pattern Point3       :: Point_ point 3 r => r -> r -> r -> point 3 r
 pattern Point3 x y z <- (view asVector -> Vector3 x y z)
   where
     Point3 x y z = fromVector (Vector3 x y z)
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
-pattern Point4         :: Point point 4 r => r -> r -> r -> r -> point 4 r
+pattern Point4         :: Point_ point 4 r => r -> r -> r -> r -> point 4 r
 pattern Point4 x y z w <- (view asVector -> Vector4 x y z w)
   where
     Point4 x y z w = fromVector (Vector4 x y z w)
@@ -119,7 +118,7 @@ pattern Point4 x y z w <- (view asVector -> Vector4 x y z w)
 --
 -- >>> origin :: Point 4 Int
 -- Point4 0 0 0 0
-origin :: (Arity d, Num r, Point point d r) => point d r
+origin :: (Arity d, Num r, Point_ point d r) => point d r
 origin = fromVector $ pure 0
 
 --------------------------------------------------------------------------------
@@ -133,12 +132,12 @@ origin = fromVector $ pure 0
 -- Nothing
 -- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
 -- Nothing
-pointFromList :: (Arity d, Point point d r) => [r] -> Maybe (point d r)
+pointFromList :: (Arity d, Point_ point d r) => [r] -> Maybe (point d r)
 pointFromList = fmap fromVector . Vector.vectorFromList
 
 -- | Project a point down into a lower dimension.
 projectPoint :: ( Arity i, i <= d
-                , Point point d r, Point point i r
+                , Point_ point d r, Point_ point i r
                 ) => point d r -> point i r
 projectPoint = fromVector . prefix . view asVector
 
@@ -151,7 +150,7 @@ projectPoint = fromVector . prefix . view asVector
 -- 1
 -- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 10 2
-xCoord :: (1 <= d, Point point d r) => Lens' (point d r) r
+xCoord :: (1 <= d, Point_ point d r) => Lens' (point d r) r
 xCoord = coord @1
 {-# INLINABLE xCoord #-}
 
@@ -161,7 +160,7 @@ xCoord = coord @1
 -- 2
 -- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 1 3 3
-yCoord :: (2 <= d, Point point d r) => Lens' (point d r) r
+yCoord :: (2 <= d, Point_ point d r) => Lens' (point d r) r
 yCoord = coord @2
 {-# INLINABLE yCoord #-}
 
@@ -171,7 +170,7 @@ yCoord = coord @2
 -- 3
 -- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 1 2 4
-zCoord :: (3 <= d, Point point d r) => Lens' (point d r) r
+zCoord :: (3 <= d, Point_ point d r) => Lens' (point d r) r
 zCoord = coord @3
 {-# INLINABLE zCoord #-}
 
@@ -181,6 +180,6 @@ zCoord = coord @3
 -- 4
 -- >>> Point4 1 2 3 4 & wCoord %~ (+1)
 -- Point4 1 2 3 5
-wCoord :: (4 <= d, Point point d r) => Lens' (point d r) r
+wCoord :: (4 <= d, Point_ point d r) => Lens' (point d r) r
 wCoord = coord @4
 {-# INLINABLE wCoord #-}
