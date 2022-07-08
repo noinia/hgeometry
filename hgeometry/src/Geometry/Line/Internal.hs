@@ -65,7 +65,7 @@ instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
 
 
 instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
-  arbitrary = do p <- arbitrary
+  arbitrary = do p <- arbitrary @(Point d r)
                  q <- suchThat arbitrary (/= p)
                  return $ lineThrough p q
 
@@ -75,8 +75,8 @@ type instance NumType   (Line d r) = r
 -- ** Functions on lines
 
 -- | A line may be constructed from two points.
-lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
-lineThrough p q = Line p (q .-. p)
+lineThrough     :: (Num r, Arity d, Point_ point d r) => point d r -> point d r -> Line d r
+lineThrough p q = Line (fromGenericPoint p) (q .-. p)
 
 -- | Vertical line with a given X-coordinate.
 verticalLine   :: Num r => r -> Line 2 r
@@ -134,12 +134,13 @@ isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
 -- True
 -- >>> Point2 10 5 `onLine` lineThrough origin (Point2 2 2)
 -- False
-onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
-p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
+onLine                :: (Eq r, Fractional r, Arity d, Point_ point d r)
+                      => point d r -> Line d r -> Bool
+(fromGenericPoint -> p) `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
 -- | Specific 2d version of testing if apoint lies on a line.
-onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
-p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
+onLine2 :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> Bool
+p `onLine2` (Line q v) = ccw (fromGenericPoint p) q (q .+^ v) == CoLinear
 
 
 -- | Get the point at the given position along line, where 0 corresponds to the
@@ -150,8 +151,9 @@ pointAt a (Line p v) = p .+^ (a *^ v)
 
 -- | Given point p and a line (Line q v), Get the scalar lambda s.t.
 -- p = q + lambda v. If p does not lie on the line this returns a Nothing.
-toOffset              :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Maybe r
-toOffset p (Line q v) = scalarMultiple (p .-. q) v
+toOffset              :: (Eq r, Fractional r, Arity d, Point_ point d r)
+                      => point d r -> Line d r -> Maybe r
+toOffset p (Line q v) = scalarMultiple (fromGenericPoint  p .-. q) v
 
 
 -- | Given point p near a line (Line q v), get the scalar lambda s.t.
@@ -166,8 +168,9 @@ toOffset p (Line q v) = scalarMultiple (p .-. q) v
 -- The point (6,4) is not on the line but we can still point closest to it.
 -- >>> toOffset' (Point2 6 4) (lineThrough origin $ Point2 10 10)
 -- 0.5
-toOffset'             :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
-toOffset' p (Line q v) = dot (p .-. q) v / quadrance v
+toOffset'             :: (Eq r, Fractional r, Arity d, Point_ point d r)
+                      => point d r -> Line d r -> r
+toOffset' (fromGenericPoint -> p) (Line q v) = dot (p .-. q) v / quadrance v
 -- toOffset' p = fromJust' . toOffset p
 --   where
 --     fromJust' (Just x) = x
@@ -232,7 +235,7 @@ toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine
 
 
 instance (Fractional r, Arity d) => HasSquaredEuclideanDistance (Line d r) where
-  pointClosestTo p (Line a m) = a .+^ (t0 *^ m)
+  pointClosestTo (fromGenericPoint -> p) (Line a m) = toGenericPoint  $ a .+^ (t0 *^ m)
     where
       -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
       t0 = numerator / divisor
@@ -246,8 +249,8 @@ data SideTestUpDown = Below | On | Above deriving (Show,Read,Eq,Ord)
 class OnSideUpDownTest t where
   -- | Given a point q and a hyperplane h, compute to which side of h q lies. For
   -- vertical hyperplanes the left side of the hyperplane is interpeted as below.
-  onSideUpDown :: (d ~ Dimension t, r ~ NumType t, Ord r, Num r)
-               => Point d r -> t -> SideTestUpDown
+  onSideUpDown :: (d ~ Dimension t, r ~ NumType t, Ord r, Num r, Point_ point d r)
+               => point d r -> t -> SideTestUpDown
 
 instance OnSideUpDownTest (Line 2 r) where
   -- | Given a point q and a line l, compute to which side of l q lies. For
@@ -265,7 +268,7 @@ instance OnSideUpDownTest (Line 2 r) where
                                     f z         = (z^.xCoord, -z^.yCoord)
                                     minBy g a b = F.minimumBy (comparing g) [a,b]
                                     maxBy g a b = F.maximumBy (comparing g) [a,b]
-                                in case ccw (minBy f p r) (maxBy f p r) q of
+                                in case ccw (minBy f p r) (maxBy f p r) (fromGenericPoint q) of
                                      CCW      -> Above
                                      CW       -> Below
                                      CoLinear -> On
@@ -284,28 +287,28 @@ data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)
 -- LeftSide
 -- >>> Point2 5 5 `onSide` (lineThrough origin $ Point2 (-3) (-3))
 -- OnLine
-onSide                :: (Ord r, Num r) => Point 2 r -> Line 2 r -> SideTest
+onSide                :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> SideTest
 q `onSide` (Line p v) = let r    =  p .+^ v
                             -- f z         = (z^.xCoord, -z^.yCoord)
                             -- minBy g a b = F.minimumBy (comparing g) [a,b]
                             -- maxBy g a b = F.maximumBy (comparing g) [a,b]
-                        in case ccw p r q of
+                        in case ccw p r (fromGenericPoint q) of
                           CCW      -> LeftSide
                           CW       -> RightSide
                           CoLinear -> OnLine
 
 -- | Test if the query point q lies (strictly) above line l
-liesAbove       :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
+liesAbove       :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> Bool
 q `liesAbove` l = q `onSideUpDown` l == Above
 
 -- | Test if the query point q lies (strictly) above line l
-liesBelow      :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
+liesBelow      :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> Bool
 q `liesBelow` l = q `onSideUpDown` l == Below
 
 -- | Get the bisector between two points
-bisector     :: Fractional r => Point 2 r -> Point 2 r -> Line 2 r
+bisector     :: (Fractional r, Point_ point 2 r) => point 2 r -> point 2 r -> Line 2 r
 bisector p q = let v = q .-. p
-                   h = p .+^ (v ^/ 2)
+                   h = fromGenericPoint $ p .+^ (v ^/ 2)
                in perpendicularTo (Line h v)
 
 

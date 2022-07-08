@@ -14,6 +14,7 @@
 module Geometry.Point.Internal
   ( Point(..)
   , vector
+  , fromGenericPoint, toGenericPoint
   -- , pattern Point1
   -- , pattern Point2
   -- , pattern Point3
@@ -255,3 +256,12 @@ class PointFunctor g where
 
 instance PointFunctor (Point d) where
   pmap f = f
+
+
+-- | Convert a generic point into this specific point.
+fromGenericPoint :: PointClass.Point_ point d r => point d r -> Point d r
+fromGenericPoint = PointClass.fromVector . view PointClass.asVector
+
+-- | Convert this point into a generic point.
+toGenericPoint :: PointClass.Point_ point d r => Point d r -> point d r
+toGenericPoint = PointClass.fromVector . view PointClass.asVector

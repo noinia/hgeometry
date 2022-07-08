@@ -10,44 +10,44 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Geometry.Point( Point(.., Point1, Point2, Point3, Point4)
-                          , origin, vector
-                          , pointFromList
-                          , projectPoint
+module Geometry.Point
+  ( Point_(..)
+  , Point(.., Point1, Point2, Point3, Point4)
+  , origin, vector
+  , pointFromList
+  , projectPoint
+  , coord, unsafeCoord
+  , xCoord, yCoord, zCoord
 
-                          , xCoord, yCoord, zCoord
+  , PointFunctor(..)
 
-                          , PointFunctor(..)
+  , CCW, ccw, isCoLinear
+  , pattern CCW, pattern CW, pattern CoLinear
 
-                          , CCW, ccw, isCoLinear
-                          , pattern CCW, pattern CW, pattern CoLinear
+  , ccwCmpAround
+  , cwCmpAround
+  , ccwCmpAroundWith
+  , cwCmpAroundWith
+  , sortAround
+  , insertIntoCyclicOrder
 
-                          , ccwCmpAround, ccwCmpAround'
-                          , cwCmpAround, cwCmpAround'
-                          , ccwCmpAroundWith, ccwCmpAroundWith'
-                          , cwCmpAroundWith, cwCmpAroundWith'
-                          , sortAround, sortAround'
-                          , insertIntoCyclicOrder
-
-                          , StrictCCW, pattern SCCW, pattern SCW
-                          , strictCcw
+  , StrictCCW, pattern SCCW, pattern SCW
+  , strictCcw
 
 
-                          , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
+  , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
-                          , cmpByDistanceTo, cmpByDistanceTo', cmpInDirection
+  , cmpByDistanceTo, cmpInDirection
 
-                          , squaredEuclideanDist, euclideanDist
-                          , HasSquaredEuclideanDistance(..)
+  , squaredEuclideanDist, euclideanDist
+  , HasSquaredEuclideanDistance(..)
 
-                          , coord, unsafeCoord
-
-                          , ToAPoint(..), AsAPoint(..)
-                          ) where
+  ) where
 
 import Geometry.Line.Internal
 import Geometry.Point.Class
-import Geometry.Point.Internal hiding (coord, unsafeCoord)
+import Geometry.Point.Boxed
+import Geometry.Point.EuclideanDistance
 import Geometry.Point.Orientation
 import Geometry.Point.Orientation.Degenerate
 import Geometry.Point.Quadrants
@@ -68,7 +68,8 @@ import Geometry.Vector
 -- GT
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
-cmpInDirection       :: (Ord r, Num r) => Vector 2 r -> Point 2 r -> Point 2 r -> Ordering
+cmpInDirection       :: (Ord r, Num r, Point_ point 2 r)
+                     => Vector 2 r -> point 2 r -> point 2 r -> Ordering
 cmpInDirection n p q = case p `onSide` perpendicularTo (Line q n) of
                          LeftSide  -> LT
                          OnLine    -> EQ
