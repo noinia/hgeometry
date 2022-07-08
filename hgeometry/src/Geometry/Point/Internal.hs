@@ -120,6 +120,13 @@ deriving instance (Arity d, Hashable r)     => Hashable (Point d r)
 deriving instance (Arity d, Random r)       => Random (Point d r)
 deriving instance (Bounded r, Arity d)      => Bounded (Point d r)
 
+instance Arity d => FunctorWithIndex Int (Point d) where
+  imap = iover PointClass.coordinates
+instance Arity d => FoldableWithIndex Int (Point d) where
+  ifoldMap = ifoldMapOf PointClass.coordinates
+instance Arity d => TraversableWithIndex Int (Point d) where
+  itraverse = itraverseOf PointClass.coordinates
+
 instance (Arity d, UniformRange r) => UniformRange (Point d r) where
   uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
 
