@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
@@ -14,7 +15,8 @@ import           Data.Ext
 import           Data.Maybe
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
-import           Data.Vector.Circular as CV
+import qualified Data.Vector.Circular as CV
+import           Data.Vector.Circular (CircularVector(..))
 import qualified Data.Vector.NonEmpty as NV
 import           Test.QuickCheck (Arbitrary (..), NonEmptyList (..))
 
@@ -24,14 +26,14 @@ instance Foldable1 NV.NonEmptyVector
 
 -- | Access the ith item in the CircularVector (w.r.t the rotation) as a lens
 item   :: Int -> Lens' (CircularVector a) a
-item i = lens (`CV.index` i) (\s x -> unsafeFromVector (toVector s V.// [(i,x)]))
+item i = lens (`CV.index` i) (\s x -> CV.unsafeFromVector (CV.toVector s V.// [(i,x)]))
 
 -- | All elements, starting with the focus, going to the right
 --
 -- >>> rightElements $ unsafeFromList [3,4,5,1,2]
 -- [3,4,5,1,2]
 rightElements :: CircularVector a -> NV.NonEmptyVector a
-rightElements = toNonEmptyVector
+rightElements = CV.toNonEmptyVector
 
 -- | All elements, starting with the focus, going to the left
 --
@@ -61,14 +63,42 @@ xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
                     in length xs == length ys && check xs ys
 
 instance Arbitrary a => Arbitrary (CircularVector a) where
-  arbitrary = unsafeFromList <$> (getNonEmpty <$> arbitrary)
+  arbitrary = CV.unsafeFromList <$> (getNonEmpty <$> arbitrary)
 
 -- | label the circular vector with indices, starting from zero at the
 -- current focus, going right.
 --
 -- Running time: \(O(n)\)
-withIndicesRight                      :: CircularVector a -> CircularVector (Int :+ a)
-withIndicesRight (CircularVector v s) = CircularVector v' s
+withIndicesRight :: CircularVector a -> CircularVector (Int :+ a)
+withIndicesRight = imapRight (:+)
+
+-- | Traverse the vector, starting from the current focus, which we
+-- consider to have index 0, going right.
+imapRight   :: (Int -> a -> b) -> CircularVector a -> CircularVector b
+imapRight f = runIdentity . itraverseRight (\i x -> Identity (f i x))
+
+-- | Traverse the vector, starting from the current focus, which we
+-- consider to have index 0, going right.
+--
+-- >>> let myVec = fromJust . findRotateTo (==3) $ CV.unsafeFromList [1..10] in itraverseRight (\i x -> print (i,x)) myVec
+-- (0,3)
+-- (1,4)
+-- (2,5)
+-- (3,6)
+-- (4,7)
+-- (5,8)
+-- (6,9)
+-- (7,10)
+-- (8,1)
+-- (9,2)
+-- CircularVector {vector = [(),(),(),(),(),(),(),(),(),()], rotation = 2}
+itraverseRight :: Applicative f => (Int -> a -> f b) -> CircularVector a -> f (CircularVector b)
+itraverseRight f (CircularVector v s) = flip CircularVector s <$> v'
   where
-    n  = length v
-    v' = NV.imap (\i x -> ((i-s) `mod` n) :+ x) v
+    !n = NV.length v
+    v' = sequenceA . NV.unsafeFromVector
+       $ V.fromListN n [ let j = (s+i) `mod` n in f i (v NV.! j) | i <- [0..n]]
+
+-- | Indexed traversal corresponding to itraverseRight
+itraversedRight :: IndexedTraversal Int (CircularVector a) (CircularVector b) a b
+itraversedRight = itraverseRight . indexed
