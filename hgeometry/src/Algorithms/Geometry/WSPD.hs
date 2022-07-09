@@ -65,7 +65,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
     pts' = imap sortOn . pure . g $ pts
     n    = length $ pts'^.GV.element @0
 
-    sortOn' i = NonEmpty.sortWith (^.core.unsafeCoord i)
+    sortOn' i = NonEmpty.sortWith (^.core.singular (unsafeCoord i))
     sortOn  i = LSeq.fromNonEmpty . sortOn' (i + 1)
     -- sorts the points on the first coordinate, and then associates each point
     -- with an index,; its rank in terms of this first coordinate.
@@ -328,7 +328,7 @@ findAndCompact j (l0 :<| s0) m = fmap select . stepL $ l0 S.<| toSeq s0
     stepL s = case S.viewl s of
       S.EmptyL  -> pure $ FAC mempty mempty L
       l S.:< s' -> hasLevel l >>= \case
-                     False -> if l^.core.unsafeCoord j <= m
+                     False -> if l^.core.singular (unsafeCoord j) <= m
                                  then addL l <$> stepR s'
                                  else pure $ FAC mempty s L
                      True  -> stepL s' -- delete, continue left
@@ -337,7 +337,7 @@ findAndCompact j (l0 :<| s0) m = fmap select . stepL $ l0 S.<| toSeq s0
     stepR s = case S.viewr s of
       S.EmptyR  -> pure $ FAC mempty mempty R
       s' S.:> r -> hasLevel r >>= \case
-                     False -> if r^.core.unsafeCoord j >= m
+                     False -> if r^.core.singular (unsafeCoord j) >= m
                                  then addR r <$> stepL s'
                                  else pure $ FAC s mempty R
                      True  -> stepR s'
@@ -370,8 +370,8 @@ widths = fmap Range.width . extends
 -- pre: points are sorted according to their dimension
 extends :: Arity d => GV.Vector d (PointSeq d p r) -> GV.Vector d (Range r)
 extends = imap (\i pts ->
-                     ClosedRange ((LSeq.head pts)^.core.unsafeCoord (i + 1))
-                                 ((LSeq.last pts)^.core.unsafeCoord (i + 1)))
+                     ClosedRange ((LSeq.head pts)^.core.singular (unsafeCoord (i + 1)))
+                                 ((LSeq.last pts)^.core.singular (unsafeCoord (i + 1))))
 
 
 --------------------------------------------------------------------------------

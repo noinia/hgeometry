@@ -715,9 +715,9 @@ rotateRight n = over unsafeOuterBoundaryVector (CV.rotateRight n)
 isReflexVertex      :: (Ord r, Num r) => Int -> Polygon Simple p r -> Bool
 isReflexVertex i pg = ccw u v w == CW
   where
-    u = pg^.outerVertex (i-1)
-    v = pg^.outerVertex i
-    w = pg^.outerVertex (i+1)
+    u = pg^.outerVertex (i-1).core
+    v = pg^.outerVertex i.core
+    w = pg^.outerVertex (i+1).core
 
 -- | Test if a given vertex is a convex vertex (i.e. not a reflex vertex).
 --
@@ -731,9 +731,9 @@ isConvexVertex i = not . isReflexVertex i
 isStrictlyConvexVertex      :: (Ord r, Num r) => Int -> Polygon t p r -> Bool
 isStrictlyConvexVertex i pg = ccw u v w == CCW
   where
-    u = pg^.outerVertex (i-1)
-    v = pg^.outerVertex i
-    w = pg^.outerVertex (i+1)
+    u = pg^.outerVertex (i-1).core
+    v = pg^.outerVertex i.core
+    w = pg^.outerVertex (i+1).core
 
 
 -- | Computes all reflex vertices of the polygon.
