@@ -14,6 +14,7 @@
 module Geometry.Point.Boxed
   ( Point(..)
   , vector
+  , fromGenericPoint, toGenericPoint
   -- , pattern Point1
   -- , pattern Point2
   -- , pattern Point3

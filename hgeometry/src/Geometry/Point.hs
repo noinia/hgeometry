@@ -69,7 +69,7 @@ import Geometry.Vector
 -- EQ
 cmpInDirection       :: (Ord r, Num r, Point_ point 2 r)
                      => Vector 2 r -> point 2 r -> point 2 r -> Ordering
-cmpInDirection n p q = case p `onSide` perpendicularTo (Line q n) of
+cmpInDirection n p q = case p `onSide` perpendicularTo (Line (fromGenericPoint q) n) of
                          LeftSide  -> LT
                          OnLine    -> EQ
                          RightSide -> GT

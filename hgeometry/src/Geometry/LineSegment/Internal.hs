@@ -48,6 +48,7 @@ import           Geometry.Box.Internal
 import           Geometry.Interval hiding (width, midPoint)
 import           Geometry.Line.Internal
 import           Geometry.Point
+import           Geometry.Point.Boxed (toGenericPoint, fromGenericPoint)
 import           Geometry.Properties
 import           Geometry.SubLine
 import           Geometry.Transformation.Internal
@@ -398,7 +399,7 @@ instance (Ord r, Fractional r) =>
 -- True
 onSegment2                          :: (Ord r, Num r)
                                     => Point 2 r -> LineSegment 2 p r -> Bool
-p `onSegment2` s@(LineSegment u v) = case ccw p (u^.unEndPoint) (v^.unEndPoint) of
+p `onSegment2` s@(LineSegment u v) = case ccw p (u^.unEndPoint.core) (v^.unEndPoint.core) of
     CoLinear -> let su = p `onSide` lu
                     sv = p `onSide` lv
                 in su /= sv
@@ -449,16 +450,16 @@ sqDistanceToSeg = squaredEuclideanDistTo
 -- in  fst (sqDistanceToSegArg p ls) == Point2 1 0
 -- :}
 -- True
-sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r)
-                                            => Point d r -> LineSegment d p r -> (Point d r, r)
-sqDistanceToSegArg p (toClosedSegment -> s) =
+sqDistanceToSegArg                          :: (Arity d, Fractional r, Ord r, Point_ point d r)
+                                            => point d r -> LineSegment d p r -> (Point d r, r)
+sqDistanceToSegArg (fromGenericPoint -> p) (toClosedSegment -> s) =
   let m  = pointClosestToWithDistance p (supportingLine s)
-      xs = m : map (\(q :+ _) -> (q, qdA p q)) [s^.start, s^.end]
+      xs = m : map (\q -> (q, squaredEuclideanDist p q)) [s^.start.core, s^.end.core]
   in   F.minimumBy (comparing snd)
      . filter (flip onSegment s . fst) $ xs
 
 instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (LineSegment d p r) where
-  pointClosestToWithDistance q = sqDistanceToSegArg q
+  pointClosestToWithDistance q = over _1 toGenericPoint . sqDistanceToSegArg q
 
 
 -- | flips the start and end point of the segment

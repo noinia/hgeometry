@@ -8,6 +8,7 @@
 -- Points whose coordinates have been symbolically perturbed.
 --
 --------------------------------------------------------------------------------
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module Geometry.SoS.Point
   ( toSymbolic, fromSymbolic
   , toSoSRational, fromSoSRational
@@ -19,7 +20,7 @@ import Data.Indexed
 import Data.Ratio.Generalized
 import Data.RealNumber.Symbolic
 import Geometry.Point.Class
--- import Geometry.Point.Internal
+import Geometry.Point.Boxed(Point, fromGenericPoint)
 -- import Geometry.Vector
 import Test.QuickCheck (Arbitrary(..))
 
@@ -27,14 +28,13 @@ import Test.QuickCheck (Arbitrary(..))
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: ( Point_ point d r, Functor (point d)
+toSymbolic    :: ( Point_ point d r
                  , HasIndex (point d r), Num r
                  )
-              => point d r -> point d (Symbolic SoSI r)
-toSymbolic p = let i = sosIndex p
-               in p&asVector %~ imap (\j x -> perturb x $ MkSoS i j)
-
--- TODO: I think I may want to choose a concrete point implementation for the symbolic ones
+              => point d r -> Point d (Symbolic SoSI r)
+toSymbolic p = let i  = sosIndex p
+                   p' = fromGenericPoint p
+               in p'&coordinates %@~ \j x -> perturb x $ MkSoS i j
 
 -- | Drops the pertubations in a point
 fromSymbolic :: (Functor f, Num r) => f (Symbolic i r) -> f r
@@ -44,10 +44,11 @@ fromSymbolic = fmap roundToConstant
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: ( Point_ point d r, Functor (point d)
+toSoSRational :: ( Point_ point d r
                  , HasIndex (point d r), Eq r, Num r)
-              => point d r -> point d (SoSRational SoSI r)
+              => point d r -> Point d (SoSRational SoSI r)
 toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
+{-# HLINT ignore "Avoid lambda using `infix`" #-}
 
 -- | Drops the pertubations
 fromSoSRational :: (Functor f, Fractional r) => f (SoSRational i r) -> f r

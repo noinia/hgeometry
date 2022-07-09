@@ -69,9 +69,8 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 -- >>> sideTest (Point2 1 1 `with` 10) $ Vector2 (Point2 0 0 `with` 3) (Point2 2 2 `with` 1)
 -- Positive
 sideTest      :: ( SoS d, Num r, Ord r
-                 , Point_ point d (Symbolic SoSI r)
                  , Point_ point d r
-                 , HasIndex (point d r), Functor (point d))
+                 , HasIndex (point d r))
               => point d r -> Vector d (point d r) -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 
