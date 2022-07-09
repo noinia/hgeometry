@@ -70,6 +70,7 @@ import           Geometry.Interval
 
 import           Geometry.LineSegment hiding (endPoints)
 import           Geometry.Point
+import           Geometry.Point.WithExtra(sortAround', ccwCmpAroundWith')
 import           Geometry.Vector.VectorFamily
 import           Geometry.Polygon
 import           Geometry.Properties

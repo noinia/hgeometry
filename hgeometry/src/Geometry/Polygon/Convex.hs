@@ -33,7 +33,6 @@ module Geometry.Polygon.Convex
   , diametralIndexPair
   ) where
 
-
 import           Control.DeepSeq (NFData)
 import           Control.Lens (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
@@ -62,6 +61,7 @@ import           Geometry.Boundary
 import           Geometry.Box (IsBoxable (..))
 import           Geometry.LineSegment
 import           Geometry.Point
+import           Geometry.Point.WithExtra
 import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
                                                  outerBoundaryVector, outerVertex, size,
                                                  unsafeFromPoints, unsafeFromVector,
@@ -408,22 +408,6 @@ lowerTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
     rh = coerce' . CV.leftElements  . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
-newtype WithExtra point extra d r = WithExtra (point d r :+ extra)
-type instance Dimension (WithExtra point extra d r) = d
-type instance NumType (WithExtra point extra d r) = r
-
-_WithExtra :: Iso (WithExtra point extra d r) (WithExtra point extra d s) (point d r :+ extra) (point d s :+ extra)
-_WithExtra = iso coerce coerce
-
-instance Affine (point d)  => Affine (WithExtra point extra d) where
-  type Diff (WithExtra point extra d) = Diff (point d)
-
-  (WithExtra (p :+ _)) .-. (WithExtra (q :+ _)) = p .-. q
-  p .+^ v = p&_WithExtra.core %~ (.+^ v)
-
-instance (Point_ point d r) => Point_ (WithExtra point extra) d r where
-  fromVector v = WithExtra $ fromVector v :+ undefined --- FIXME: hack
-  asVector = _WithExtra . core . asVector
 
 -- | Compute the lower tangent of the two convex chains lp and rp
 --
