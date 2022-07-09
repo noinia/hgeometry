@@ -23,9 +23,9 @@ import           Geometry.Vector
 {- HLINT ignore cmpExtreme -}
 -- | Comparison that compares which point is 'larger' in the direction given by
 -- the vector u.
-cmpExtreme       :: (Num r, Ord r)
-                 => Vector 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
+cmpExtreme       :: (Num r, Ord r, Point_ point 2 r)
+                 => Vector 2 r -> point 2 r -> point 2 r -> Ordering
+cmpExtreme u p q = u `dot` (p .-. q) `compare` 0
 
 
 -- | Finds the extreme points, minimum and maximum, in a given direction
@@ -34,5 +34,5 @@ cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
 extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
                    -> (Point 2 r :+ p, Point 2 r :+ p)
 extremesLinear u p = let simple = p^.outerBoundary
-                         f  = cmpExtreme u
+                         f  a b = cmpExtreme u (a^.core) (b^.core)
                      in (P.minimumVertexBy f simple, P.maximumVertexBy f simple)

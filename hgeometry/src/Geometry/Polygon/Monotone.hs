@@ -89,9 +89,10 @@ randomMonotoneDirected nVertices direction = do
 -- | \( O(n \log n) \)
 --   Assemble a given set of points in a polygon that is monotone in the given direction.
 monotoneFrom :: (Ord r, Num r) => Vector 2 r -> [Point 2 r] -> SimplePolygon () r
-monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
+monotoneFrom direction vertices =
+  fromPoints . map ext $ ([min] ++ rightHalf ++ [max] ++ leftHalf)
     where
-        specialPoints = map (\x -> x :+ ()) vertices
+        specialPoints = vertices
         min = Data.List.minimumBy (cmpExtreme direction) specialPoints
         max = Data.List.maximumBy (cmpExtreme direction) specialPoints
         -- 4
@@ -105,7 +106,7 @@ monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ lef
 -- helper functions
 
 -- for partitioning points
-toTheLeft :: (Ord r, Num r) => Point 2 r :+ () -> Point 2 r :+ () -> Point 2 r :+ () -> Bool
+toTheLeft :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
 toTheLeft min max x = ccw min max x == CCW
 
 -- | \( O(1) \)
@@ -113,6 +114,6 @@ toTheLeft min max x = ccw min max x == CCW
 randomNonZeroVector :: (RandomGen g, Random r, Eq r, Num r) => Rand g (Vector 2 r)
 randomNonZeroVector = do
     v <- getRandom
-    if (quadrance v==0)
+    if quadrance v==0
       then randomNonZeroVector
       else pure v

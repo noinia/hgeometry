@@ -774,8 +774,8 @@ strictlyConvexVertices = \case
 reflexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 reflexVertices' = filterReflexConvexWorker asReflex
   where
-    asReflex u v w | ccw (u^.extra) (v^.extra) (w^.extra) == CW = Just v
-                   | otherwise                                  = Nothing
+    asReflex u v w | ccw (u^.extra.core) (v^.extra.core) (w^.extra.core) == CW = Just v
+                   | otherwise                                                 = Nothing
 
 -- | Return (the indices of) all strictly convex vertices, in
 -- increasing order along the boundary.
@@ -784,8 +784,8 @@ reflexVertices' = filterReflexConvexWorker asReflex
 strictlyConvexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 strictlyConvexVertices' = filterReflexConvexWorker asStrictlyConvex
   where
-    asStrictlyConvex u v w | ccw (u^.extra) (v^.extra) (w^.extra) == CCW = Just v
-                           | otherwise                                   = Nothing
+    asStrictlyConvex u v w | ccw (u^.extra.core) (v^.extra.core) (w^.extra.core) == CCW = Just v
+                           | otherwise                                                  = Nothing
 
 -- | Return (the indices of) all convex (= non-reflex) vertices, in increasing order
 -- along the boundary.
@@ -794,8 +794,8 @@ strictlyConvexVertices' = filterReflexConvexWorker asStrictlyConvex
 convexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
 convexVertices' = filterReflexConvexWorker asConvex
   where
-    asConvex u v w | ccw (u^.extra) (v^.extra) (w^.extra) /= CW = Just v
-                   | otherwise                                  = Nothing
+    asConvex u v w | ccw (u^.extra.core) (v^.extra.core) (w^.extra.core) /= CW = Just v
+                   | otherwise                                                 = Nothing
 
 -- | Helper function to implement convexVertices, reflexVertices, and
 -- strictlyConvexVertices

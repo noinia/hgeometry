@@ -39,8 +39,8 @@ lowerHull' :: forall r p. (Ord r, Fractional r, Show r)
            => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' = filter (not . isVertical) . lowerHullAll
   where
-    toPt2   :: Point 3 r :+ p ->  Point 2 r :+ p
-    toPt2 p = p&core %~ projectPoint
+    toPt2          :: Point 3 r :+ p ->  Point 2 r
+    toPt2 (p :+ _) = projectPoint p
 
     isVertical (Triangle p q r) = ccw (toPt2 p) (toPt2 q) (toPt2 r) == CoLinear
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -143,6 +144,9 @@ dequeTop idx = do
   (v,f) <- get
   Mut.read v (f-idx-1)
 
+ccw'       :: (Ord r, Num r) => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> CCW
+ccw' a b c = ccw (a^.core) (b^.core) (c^.core)
+
 -- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&rep=rep1&type=pdf
 
 -- | \( O(n) \) Convex hull of a simple polygon.
@@ -152,12 +156,13 @@ convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -
 convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
     findStartingPoint 2
   where
+
     -- Find the first spot where 0,n-1,n is not colinear.
     findStartingPoint :: Int -> M s (Point 2 r :+ p) ()
     findStartingPoint nth = do
       let vPrev = NE.unsafeIndex vs (nth-1)
           vNth = NE.unsafeIndex vs nth
-      case ccw v1 vPrev vNth of
+      case ccw' v1 vPrev vNth of
         CoLinear -> findStartingPoint (nth+1)
         CCW -> do
           dequePush v1 >> dequePush vPrev
@@ -171,18 +176,18 @@ convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
     v1 = NE.unsafeIndex vs 0
     vs = CV.vector (p^.outerBoundaryVector)
     build v = do
-      botTurn <- ccw <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
-      topTurn <- ccw <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
       when (botTurn == CW || topTurn == CW) $ do
         backtrackTop v; dequePush v
         backtrackBot v; dequeInsert v
     backtrackTop v = do
-      turn <- ccw <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
       unless (turn == CCW) $ do
         dequePop
         backtrackTop v
     backtrackBot v = do
-      turn <- ccw <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
       unless (turn == CCW) $ do
         dequeRemove
         backtrackBot v
@@ -198,7 +203,7 @@ isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
 isConvex s =
     CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
   where
-    f a b c = ccw a b c == CCW
+    f a b c = ccw' a b c == CCW
     vs = s ^. outerBoundaryVector
 
 -- | \( O(n) \) Verify that a convex polygon is strictly convex.
@@ -241,7 +246,7 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 --
 -- running time: \(O(\log n)\)
 maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u = findMaxWith (cmpExtreme u)
+maxInDirection u = findMaxWith (\a b -> cmpExtreme u (a^.core) (b^.core))
 
 -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
 --        Use unsafe indexing.
@@ -391,15 +396,34 @@ coreEq = (==) `on` (^.core)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent       :: (Num r, Ord r)
+lowerTangent       :: forall p r. (Num r, Ord r)
                    => ConvexPolygon p r
                    -> ConvexPolygon p r
                    -> LineSegment 2 p r
-lowerTangent lp rp = ClosedLineSegment l r
+lowerTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
   where
-    lh = CV.rightElements . rightMost . getVertices $ lp
-    rh = CV.leftElements  . leftMost  . getVertices $ rp
+    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
+                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
+    lh = coerce' . CV.rightElements . rightMost . getVertices $ lp
+    rh = coerce' . CV.leftElements  . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
+
+newtype WithExtra point extra d r = WithExtra (point d r :+ extra)
+type instance Dimension (WithExtra point extra d r) = d
+type instance NumType (WithExtra point extra d r) = r
+
+_WithExtra :: Iso (WithExtra point extra d r) (WithExtra point extra d s) (point d r :+ extra) (point d s :+ extra)
+_WithExtra = iso coerce coerce
+
+instance Affine (point d)  => Affine (WithExtra point extra d) where
+  type Diff (WithExtra point extra d) = Diff (point d)
+
+  (WithExtra (p :+ _)) .-. (WithExtra (q :+ _)) = p .-. q
+  p .+^ v = p&_WithExtra.core %~ (.+^ v)
+
+instance (Point_ point d r) => Point_ (WithExtra point extra) d r where
+  fromVector v = WithExtra $ fromVector v :+ undefined --- FIXME: hack
+  asVector = _WithExtra . core . asVector
 
 -- | Compute the lower tangent of the two convex chains lp and rp
 --
@@ -415,8 +439,8 @@ lowerTangent lp rp = ClosedLineSegment l r
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-lowerTangent'       :: forall point r f. (Ord r, Num r, Foldable1 f, ToAPoint point 2 r)
-                    => f point -> f point -> Two (point :+ [point])
+lowerTangent'       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r)
+                    => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
 lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
@@ -436,14 +460,16 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
-upperTangent       :: (Num r, Ord r)
+upperTangent       :: forall p r. (Num r, Ord r)
                    => ConvexPolygon p r
                    -> ConvexPolygon p r
                    -> LineSegment 2 p r
-upperTangent lp rp = ClosedLineSegment l r
+upperTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
   where
-    lh = CV.leftElements  . rightMost . getVertices $ lp
-    rh = CV.rightElements . leftMost  . getVertices $ rp
+    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
+                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
+    lh = coerce' . CV.leftElements  . rightMost . getVertices $ lp
+    rh = coerce' . CV.rightElements . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
@@ -460,8 +486,8 @@ upperTangent lp rp = ClosedLineSegment l r
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-upperTangent'       :: (Ord r, Num r, Foldable1 f, ToAPoint point 2 r)
-                    => f point -> f point -> Two (point :+ [point])
+upperTangent'       :: (Ord r, Num r, Foldable1 f, Point_ point 2 r)
+                    => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
 upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
@@ -535,8 +561,8 @@ inConvex p (ConvexPolygon poly)
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside
               then Outside
               else Inside
-      | ccw point0 (point c) p' == CCW = worker c b
-      | otherwise                      = worker a c
+      | ccw' point0 (point c) p' == CCW = worker c b
+      | otherwise                       = worker a c
       where c = (a+b) `div` 2
     point x = poly ^. outerVertex x
 
@@ -700,7 +726,7 @@ randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon () Rational)
 randomConvex n _vMax | n < 3 =
   error "Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
 randomConvex n vMax = do
-  ~(v:vs) <- coerce . sortAround origin . coerce <$> randomEdges n vMax
+  ~(v:vs) <- coerce . sortAround origin . coerce @[Vector 2 Int] @[Point 2 Int]  <$> randomEdges n vMax
   let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
       pRational = unsafeFromPoints $ map ext vertices
       Point c = centroid pRational

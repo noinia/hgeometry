@@ -17,7 +17,6 @@ import GHC.Generics (Generic)
 import GHC.TypeLits
 import Geometry.Line
 import Geometry.Point
-import Geometry.Point.Boxed (fromGenericPoint)
 import Geometry.Properties
 import Geometry.Transformation
 import Geometry.Vector

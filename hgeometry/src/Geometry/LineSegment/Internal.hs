@@ -48,7 +48,6 @@ import           Geometry.Box.Internal
 import           Geometry.Interval hiding (width, midPoint)
 import           Geometry.Line.Internal
 import           Geometry.Point
-import           Geometry.Point.Boxed (toGenericPoint, fromGenericPoint)
 import           Geometry.Properties
 import           Geometry.SubLine
 import           Geometry.Transformation.Internal

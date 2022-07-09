@@ -71,7 +71,7 @@ class ( Affine (point d)
                 -- vectors are 0 indexed, whereas we are  indexed.
   {-# INLINE  unsafeCoord #-}
 
-  {-# MINIMAL asVector, fromVector #-}
+  {-# MINIMAL fromVector, asVector  #-}
 
 
   -- | Get the coordinate in a given dimension

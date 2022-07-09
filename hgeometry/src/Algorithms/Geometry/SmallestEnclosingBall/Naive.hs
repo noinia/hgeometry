@@ -37,7 +37,7 @@ smallestEnclosingDisk pts@(_:_:_) = smallestEnclosingDisk' pts $
                                       pairs pts ++ triplets pts
 smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
-pairs     :: Fractional r => [point 2 r] -> [DiskResult point r]
+pairs     :: (Fractional r, Point_ point 2 r) => [point 2 r] -> [DiskResult point r]
 pairs pts = [ DiskResult (fromDiameter a b) (Two a b)
             | Util.Two a b <- uniquePairs pts]
 
@@ -62,4 +62,4 @@ smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRad
 
 -- | check if a disk encloses all points
 enclosesAll   :: (Num r, Ord r, Point_ point 2 r) => DiskResult point r -> [point 2 r] -> Bool
-enclosesAll d = all (\(p :+ _) -> p `inClosedBall` (d^.enclosingDisk))
+enclosesAll d = all (`inClosedBall` (d^.enclosingDisk))
