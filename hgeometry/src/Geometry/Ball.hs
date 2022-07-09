@@ -18,7 +18,6 @@ import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
 import qualified Data.List as L
-import           Data.Radical as Radical
 import qualified Data.Radical as Radical
 import qualified Data.Traversable as T
 import           Data.Vinyl
@@ -65,12 +64,14 @@ instance Arity d => Bifunctor (Ball d) where
 -- * Constructing Balls
 
 -- | Given two points on the diameter of the ball, construct a ball.
-fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d () r
-fromDiameter p q = let c = p .+^ ((q .-. p) ^/ 2) in Ball (ext c) (qdA c p)
+fromDiameter     :: (Fractional r, Point_ point d r)
+                 => point d r -> point d r -> Ball d () r
+fromDiameter p q = let c = p .+^ ((q .-. p) ^/ 2) in Ball (ext $ fromGenericPoint c) (qdA c p)
 
 -- | Construct a ball given the center point and a point p on the boundary.
-fromCenterAndPoint     :: (Arity d, Num r) => Point d r :+ p -> Point d r :+ p -> Ball d p r
-fromCenterAndPoint c p = Ball c $ qdA (c^.core) (p^.core)
+fromCenterAndPoint     :: (Num r, Point_ point d r)
+                       => point d r :+ p -> point d r :+ p -> Ball d p r
+fromCenterAndPoint c p = Ball (c&core %~ fromGenericPoint) $ qdA (c^.core) (p^.core)
 
 -- | A d dimensional unit ball centered at the origin.
 unitBall :: (Arity d, Num r) => Ball d () r
@@ -79,9 +80,9 @@ unitBall = Ball (ext origin) 1
 -- * Querying if a point lies in a ball
 
 -- | Query location of a point relative to a d-dimensional ball.
-inBall                 :: (Arity d, Ord r, Num r)
-                       => Point d r -> Ball d p r -> PointLocationResult
-p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
+inBall                 :: (Ord r, Num r, Point_ point d r)
+                       => point d r -> Ball d p r -> PointLocationResult
+p `inBall` (Ball c sr) = case qdA p (fromGenericPoint $ c^.core) `compare` sr of
                            LT -> Inside
                            EQ -> OnBoundary
                            GT -> Outside
@@ -94,14 +95,14 @@ p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
 -- False
 -- >>> (Point2 2 0) `insideBall` unitBall
 -- False
-insideBall       :: (Arity d, Ord r, Num r)
-                 => Point d r -> Ball d p r -> Bool
+insideBall       :: (Ord r, Num r, Point_ point d r)
+                 => point d r -> Ball d p r -> Bool
 p `insideBall` b = p `inBall` b == Inside
 
 -- | Test if a point lies in or on the ball
 --
-inClosedBall       :: (Arity d, Ord r, Num r)
-                    => Point d r -> Ball d p r -> Bool
+inClosedBall       :: (Point_ point d r, Ord r, Num r)
+                    => point d r -> Ball d p r -> Bool
 p `inClosedBall` b = p `inBall` b /= Outside
 
 -- TODO: Add test cases
@@ -112,8 +113,8 @@ p `inClosedBall` b = p `inBall` b /= Outside
 -- True
 -- >>> (Point3 1 1 0) `onBall` unitBall
 -- False
-onBall       :: (Arity d, Ord r, Num r)
-             => Point d r -> Ball d p r -> Bool
+onBall       :: (Point_ point d r, Ord r, Num r)
+             => point d r -> Ball d p r -> Bool
 p `onBall` b = p `inBall` b == OnBoundary
 
 
@@ -158,11 +159,11 @@ pattern Circle c r = Sphere c r
 --
 -- >>> disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
 -- Just (Ball {_center = Point2 0.0 0.0 :+ (), _squaredRadius = 100.0})
-disk       :: (Ord r, Fractional r)
-           => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
+disk       :: (Ord r, Fractional r, Point_ point 2 r)
+           => point 2 r -> point 2 r -> point 2 r -> Maybe (Disk () r)
 disk p q r = match (f p `intersect` f q) $
        H (\NoIntersection -> Nothing)
-    :& H (\c@Point{}      -> Just $ Ball (ext c) (qdA c p))
+    :& H (\c@Point{}      -> Just $ Ball (ext c) (qdA c $ fromGenericPoint p))
     :& H (\_              -> Nothing)
     :& RNil
        -- If the intersection is not a point, The two lines f p and f q are
@@ -171,14 +172,14 @@ disk p q r = match (f p `intersect` f q) $
     -- Given a point p', get the line perpendicular, and through the midpoint
     -- of the line segment p'r
     f p' = let v        = r .-. p'
-               midPoint = p' .+^ (v ^/ 2)
+               midPoint = fromGenericPoint $ p' .+^ (v ^/ 2)
            in perpendicularTo (Line midPoint v)
 
 -- | Creates a circle from three points on the boundary
-from3Points :: Fractional r
-            => Point 2 r :+ p -> Point 2 r :+ q -> Point 2 r :+ s -> Circle () r
+from3Points :: (Fractional r, Point_ point 2 r)
+            => point 2 r :+ p -> point 2 r :+ q -> point 2 r :+ s -> Circle () r
 from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
-    Circle (ext c) (squaredEuclideanDist c p)
+    Circle (ext $ fromGenericPoint c) (squaredEuclideanDist c p)
   where
     f  x y = x^2 + y^2
     fx x y = V3 (f x y) y       1

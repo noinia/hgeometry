@@ -119,7 +119,7 @@ toPointSet = FV.imap sort . FV.replicate
 
 compareOn       :: (Ord r, Arity d)
                 => Int -> Point d r :+ e -> Point d r :+ e -> Ordering
-compareOn i p q = let f = (^.core.unsafeCoord i)
+compareOn i p q = let f = (^.core.singular (unsafeCoord i))
                   in (f p, p^.core) `compare` (f q, q^.core)
 
 
@@ -182,7 +182,7 @@ splitOn                 :: (Arity d, KnownNat d, Ord r)
                         -> ( PointSet (LSeq 1) d p r
                            , Split' d r
                            , PointSet (LSeq 1) d p r)
-splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
+splitOn c@(Coord i) pts = (l, SP c (m^.core.singular (unsafeCoord i)), r)
   where
     -- i = traceShow (c,j) j
 

@@ -12,14 +12,15 @@ module Geometry.HyperPlane where
 
 import Control.DeepSeq
 import Control.Lens
+import Data.Kind
+import GHC.Generics (Generic)
+import GHC.TypeLits
 import Geometry.Line
 import Geometry.Point
+import Geometry.Point.Boxed (fromGenericPoint)
 import Geometry.Properties
 import Geometry.Transformation
 import Geometry.Vector
-import GHC.Generics (Generic)
-import Data.Kind
-import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -101,7 +102,7 @@ instance OnSideUpDownTest (Plane r) where
   -- Below
   -- >>> (Point3 5 5 0) `onSideUpDown` from3Points origin (Point3 1 0 0) (Point3 0 1 0)
   -- On
-  q `onSideUpDown` (Plane p n) = let v = q .-. p in case (n `dot` v) `compare` 0 of
+  q `onSideUpDown` (Plane p n) = let v = fromGenericPoint q .-. p in case (n `dot` v) `compare` 0 of
                                    LT -> Below
                                    EQ -> On
                                    GT -> Above

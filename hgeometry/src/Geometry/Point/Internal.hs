@@ -70,6 +70,10 @@ import           Text.Read (Read (..), readListPrecDefault)
 newtype Point d r = Point { toVec :: Vector d r }
   deriving (Generic)
 
+-- {-# COMPLETE Point1 :: Point 1 r #-}
+-- {-# COMPLETE Point2 :: Point 2 r #-}
+-- {-# COMPLETE Point3 :: Point 3 r #-}
+-- {-# COMPLETE Point4 :: Point 4 r #-}
 
 instance (Show r, Arity d) => Show (Point d r) where
   showsPrec = liftShowsPrec showsPrec showList
@@ -259,8 +263,11 @@ instance PointFunctor (Point d) where
 
 
 -- | Convert a generic point into this specific point.
-fromGenericPoint :: PointClass.Point_ point d r => point d r -> Point d r
+fromGenericPoint :: forall point genericPoint d r. ( PointClass.Point_ genericPoint d r
+                                                   , PointClass.Point_ point  d r
+                                                   ) => genericPoint d r -> point d r
 fromGenericPoint = PointClass.fromVector . view PointClass.asVector
+{-# SPECIALIZE INLINE fromGenericPoint :: PointClass.Point_ genericPoint d r => genericPoint d r -> Point d r #-}
 
 -- | Convert this point into a generic point.
 toGenericPoint :: PointClass.Point_ point d r => Point d r -> point d r

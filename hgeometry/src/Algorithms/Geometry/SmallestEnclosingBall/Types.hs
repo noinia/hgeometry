@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -13,10 +14,8 @@
 module Algorithms.Geometry.SmallestEnclosingBall.Types where
 
 import qualified Data.Foldable as F
-import           Geometry.Point
 import           Geometry.Ball
 import           Control.Lens
-import           Data.Ext
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +37,11 @@ twoOrThreeFromList _       = Left "Wrong number of elements"
 
 -- | The result of a smallest enclosing disk computation: The smallest ball
 --    and the points defining it
-data DiskResult p r = DiskResult { _enclosingDisk  :: Disk () r
-                                 , _definingPoints :: TwoOrThree (Point 2 r :+ p)
-                                 } deriving (Show,Eq)
+data DiskResult point r = DiskResult { _enclosingDisk  :: Disk () r
+                                     , _definingPoints :: TwoOrThree (point 2 r)
+                                     }
+
+deriving instance (Show r, Show (point 2 r)) => Show (DiskResult point r)
+deriving instance (Eq r, Eq (point 2 r))     => Eq   (DiskResult point r)
+
 makeLenses ''DiskResult

@@ -101,6 +101,7 @@ pattern Point2 x y <- (view asVector -> Vector2 x y)
   where
     Point2 x y = fromVector (Vector2 x y)
 
+
 -- | A bidirectional pattern synonym for 3 dimensional points.
 pattern Point3       :: Point_ point 3 r => r -> r -> r -> point 3 r
 pattern Point3 x y z <- (view asVector -> Vector3 x y z)

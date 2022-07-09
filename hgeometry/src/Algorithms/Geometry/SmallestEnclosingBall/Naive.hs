@@ -30,36 +30,36 @@ import qualified Data.Util as Util
 -- | Horrible \( O(n^4) \) implementation that simply tries all disks, checks if they
 -- enclose all points, and takes the largest one. Basically, this is only useful
 -- to check correctness of the other algorithm(s)
-smallestEnclosingDisk          :: (Ord r, Fractional r)
-                               => [Point 2 r :+ p]
-                               -> DiskResult p r
+smallestEnclosingDisk          :: (Ord r, Fractional r, Point_ point 2 r)
+                               => [point 2 r]
+                               -> DiskResult point r
 smallestEnclosingDisk pts@(_:_:_) = smallestEnclosingDisk' pts $
                                       pairs pts ++ triplets pts
 smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
-pairs     :: Fractional r => [Point 2 r :+ p] -> [DiskResult p r]
-pairs pts = [ DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)
+pairs     :: Fractional r => [point 2 r] -> [DiskResult point r]
+pairs pts = [ DiskResult (fromDiameter a b) (Two a b)
             | Util.Two a b <- uniquePairs pts]
 
-triplets     :: (Ord r, Fractional r) => [Point 2 r :+ p] -> [DiskResult p r]
+triplets     :: (Ord r, Fractional r, Point_ point 2 r) => [point 2 r] -> [DiskResult point r]
 triplets pts = [DiskResult (disk' a b c) (Three a b c)
                | Util.Three a b c <- uniqueTriplets pts]
 
 {- HLINT ignore disk' -}
-disk'       :: (Ord r, Fractional r)
-            => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Disk () r
-disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)
+disk'       :: (Ord r, Fractional r, Point_ point 2 r)
+            => point 2 r -> point 2 r -> point 2 r -> Disk () r
+disk' a b c = fromMaybe degen $ disk a b c
   where
     -- if the points are colinear, select the disk by the diametral pair
     degen = (smallestEnclosingDisk' [a,b,c] $ pairs [a,b,c])^.enclosingDisk
 
 
 -- | Given a list of canidate enclosing disks, report the smallest one.
-smallestEnclosingDisk'     :: (Ord r, Num r)
-                           => [Point 2 r :+ p] -> [DiskResult p r] -> DiskResult p r
+smallestEnclosingDisk'     :: (Ord r, Num r, Point_ point 2 r)
+                           => [point 2 r] -> [DiskResult point r] -> DiskResult point r
 smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))
                            . filter (`enclosesAll` pts)
 
 -- | check if a disk encloses all points
-enclosesAll   :: (Num r, Ord r) => DiskResult p r -> [Point 2 r :+ q] -> Bool
+enclosesAll   :: (Num r, Ord r, Point_ point 2 r) => DiskResult point r -> [point 2 r] -> Bool
 enclosesAll d = all (\(p :+ _) -> p `inClosedBall` (d^.enclosingDisk))

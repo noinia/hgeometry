@@ -93,7 +93,7 @@ pattern Triangle' p q r <- Triangle (p :+ ()) (q :+ ()) (r :+ ())
 -- | the three halfspaces whose intersection is the input triangle
 -- pre: assumes the triangle is non-degenerate
 intersectingHalfSpaces :: (Num r, Ord r) => Triangle 2 p r -> Three (HalfSpace 2 r)
-intersectingHalfSpaces (Triangle p q r) = case ccw p q r of
+intersectingHalfSpaces (Triangle p q r) = case ccw (p^.core) (q^.core) (r^.core) of
     CCW -> Three (halfSpace p q) (halfSpace q r) (halfSpace r p)
     CW  -> Three (halfSpace p r) (halfSpace r q) (halfSpace q p)
     _   -> error "halfSpaces: degenerate triangle!"

@@ -41,66 +41,69 @@ import           System.Random.Shuffle (shuffle)
 --
 -- running time: expected \(O(n)\) time, where \(n\) is the number of input points.
 smallestEnclosingDisk           :: (Ord r, Fractional r, MonadRandom m
+                                   , Point_ point 2 r
                                                -- , Show r, Show p
                                    )
-                                => [Point 2 r :+ p]
-                                -> m (DiskResult p r)
+                                => [point 2 r]
+                                -> m (DiskResult point r)
 
 smallestEnclosingDisk pts@(_:_:_) = (\(p:q:pts') -> smallestEnclosingDisk' p q pts')
                                     . F.toList <$> shuffle pts
 smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
 -- | Smallest enclosing disk.
-smallestEnclosingDisk'     :: (Ord r, Fractional r
+smallestEnclosingDisk'     :: (Ord r, Fractional r, Point_ point 2 r
                                                -- , Show r, Show p
 
                               )
-                           => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
-                           -> DiskResult p r
+                           => point 2 r  -> point 2 r -> [point 2 r]
+                           -> DiskResult point r
 smallestEnclosingDisk' a b = foldr addPoint (initial a b) . List.tails
   where
     -- The empty case occurs only initially
-    addPoint []      br            = br
+    addPoint []      br     = br
     addPoint (p:pts) br@(DiskResult d _)
-      | (p^.core) `inClosedBall` d = br
-      | otherwise                  = fromJust' $ smallestEnclosingDiskWithPoint p (a :| (b : pts))
+      | p `inClosedBall` d = br
+      | otherwise          = fromJust' $ smallestEnclosingDiskWithPoint p (a :| (b : pts))
     fromJust' = fromMaybe (error "smallestEncosingDisk' : fromJust, absurd")
 
 -- | Smallest enclosing disk, given that p should be on it.
-smallestEnclosingDiskWithPoint              :: (Ord r, Fractional r
+smallestEnclosingDiskWithPoint              :: (Ord r, Fractional r, Point_ point 2 r
                                                -- , Show r, Show p
                                                )
-                                            => Point 2 r :+ p -> NonEmpty (Point 2 r :+ p)
-                                            -> Maybe (DiskResult p r)
+                                            => point 2 r -> NonEmpty (point 2 r)
+                                            -> Maybe (DiskResult point r)
 smallestEnclosingDiskWithPoint p (a :| pts) = foldr addPoint (Just $ initial p a) $ List.tails pts
   where
     addPoint []       br   = br
     addPoint (q:pts') br@(Just (DiskResult d _))
-      | (q^.core) `inClosedBall` d = br
-      | otherwise                  = smallestEnclosingDiskWithPoints p q (a:pts')
-    addPoint _        br           = br
+      | q `inClosedBall` d = br
+      | otherwise          = smallestEnclosingDiskWithPoints p q (a:pts')
+    addPoint _        br   = br
 
 
 -- | Smallest enclosing disk, given that p and q should be on it
 --
 -- running time: \(O(n)\)
-smallestEnclosingDiskWithPoints        :: (Ord r, Fractional r
+smallestEnclosingDiskWithPoints        :: forall point r. (Ord r, Fractional r, Point_ point 2 r
                                           -- , Show r, Show p
                                           )
-                                       => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
-                                       -> Maybe (DiskResult p r)
+                                       => point 2 r -> point 2 r -> [point 2 r]
+                                       -> Maybe (DiskResult point r)
 smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadius)
                                        $ catMaybes [mkEnclosingDisk dl, mkEnclosingDisk dr, mdc]
   where
+    centers :: [point 2 r :+ Disk () r]
     centers = mapMaybe disk' ps
     -- generate a disk with p q and r
-    disk' r = (r:+) <$> disk (p^.core) (q^.core) (r^.core)
+    disk' r = (r:+) <$> disk p q r
 
     -- partition the points in to those on the left and those on the
     -- right.  Note that centers still contains only those points (and
     -- disks) for which the three points are not colinear. So the
     -- points are either on the left or on the right.
-    (leftCenters,rightCenters) = List.partition (\(r :+ _) -> ccw p q r == CCW) centers
+    (leftCenters,rightCenters) =
+        List.partition (\(r :+ _) -> ccw p q (fromGenericPoint r) == CCW) centers
     -- note that we consider 'leftmost' with respect to going from p
     -- to q. This does not really have a global meaning.
 
@@ -109,15 +112,15 @@ smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadiu
     -- the left centers we want to find the point that is furthest way
     -- from p (or q). If there are no left-centers, we with to find
     -- the closest one among the right-centers.
-    leftDist z = let c = z^.extra.center
+    leftDist z = let c = toGenericPoint $ z^.extra.center.core
                      s = if ccw p q c == CCW then 1 else -1
-                 in s * squaredEuclideanDist (p^.core) (c^.core)
+                 in s * squaredEuclideanDist p c -- (p^.core) (c^.core)
 
     dl = maximumOn leftDist leftCenters  -- disk that has the "leftmost" center
     dr = minimumOn leftDist rightCenters -- disk that has the "rightmost" center
 
     -- diameteral disk
-    dd = fromDiameter (p^.core) (q^.core)
+    dd = fromDiameter p q
     mdc | isEnclosingDisk dd ps = Just $ DiskResult dd (Two p q)
         | otherwise             = Nothing
 
@@ -127,13 +130,13 @@ smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadiu
                               | otherwise            = Nothing
 
 
-isEnclosingDisk   :: (Foldable t, Ord r, Num r)
-                  => Disk p r -> t (Point 2 r :+ extra) -> Bool
-isEnclosingDisk d = all (\s -> (s^.core) `inClosedBall` d)
+isEnclosingDisk   :: (Foldable t, Ord r, Num r, Point_ point 2 r)
+                  => Disk p r -> t (point 2 r) -> Bool
+isEnclosingDisk d = all (`inClosedBall` d)
 
 -- | Constructs the initial 'DiskResult' from two points
-initial     :: Fractional r => Point 2 r :+ p -> Point 2 r :+ p -> DiskResult p r
-initial p q = DiskResult (fromDiameter (p^.core) (q^.core)) (Two p q)
+initial     :: (Fractional r, Point_ point 2 r) => point 2 r -> point 2 r -> DiskResult point r
+initial p q = DiskResult (fromDiameter p q) (Two p q)
 
 maximumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
 maximumOn f = \case
