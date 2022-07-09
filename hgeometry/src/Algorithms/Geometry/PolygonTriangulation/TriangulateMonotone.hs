@@ -35,6 +35,7 @@ import           Data.Ord                                       (Down (..), comp
 import           Data.PlaneGraph                                (PlaneGraph)
 import           Data.Util
 import qualified Data.Vector.Circular.Util                      as CV
+import           Geometry.Point.WithExtra (ccw',cwCmpAround')
 
 --------------------------------------------------------------------------------
 
@@ -121,7 +122,7 @@ process v stack@(u:ws)
 
 -- | test if m does not block the line segment from v to u
 isInside          :: (Ord r, Num r) => P p r -> (P p r, P p r) -> Bool
-isInside v (u, m) = case ccw v m u of
+isInside v (u, m) = case ccw' v m u of
                      CoLinear -> False
                      CCW      -> chainOf v == R
                      CW       -> chainOf v == L
@@ -156,6 +157,7 @@ splitPolygon pg = bimap (f L) (f R . reverse)
              $ pg^.outerBoundaryVector
     vMaxY = getY F.maximumBy
     vMinY = getY F.minimumBy
+    swap'              :: Point 2 r -> Point 2 r
     swap' (Point2 x y) = Point2 y x
     getY ff = let p = ff (comparing (^.core.to swap')) $ pg^.outerBoundaryVector
               in p^.core

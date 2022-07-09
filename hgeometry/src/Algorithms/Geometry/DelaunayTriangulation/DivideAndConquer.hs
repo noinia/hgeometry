@@ -37,7 +37,7 @@ import           Data.Maybe                                      (fromJust, from
 import           Data.Measured.Size
 import qualified Data.Vector                                     as V
 import qualified Data.Vector.Circular.Util                       as CV
-
+import           Geometry.Point.WithExtra (cwCmpAroundWith',cmpByDistanceTo',cwCmpAround',ccw')
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
 --
@@ -261,7 +261,7 @@ isLeftOf           :: (Ord r, Num r)
 p `isLeftOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isLeftOf'` (ptMap V.! l, ptMap V.! r)
-    a `isLeftOf'` (b,c) = ccw b c a == CCW
+    a `isLeftOf'` (b,c) = ccw' b c a == CCW
 
 -- | Lifted version of Convex.IsRightOf
 isRightOf           :: (Ord r, Num r)
@@ -269,7 +269,7 @@ isRightOf           :: (Ord r, Num r)
 p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isRightOf'` (ptMap V.! l, ptMap V.! r)
-    a `isRightOf'` (b,c) = ccw b c a == CW
+    a `isRightOf'` (b,c) = ccw' b c a == CW
 
 --------------------------------------------------------------------------------
 -- * Some Helper functions

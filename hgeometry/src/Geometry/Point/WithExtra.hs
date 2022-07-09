@@ -7,14 +7,17 @@ module Geometry.Point.WithExtra
   , sortAround'
   , ccwCmpAroundWith'
   , cwCmpAroundWith'
+  , cmpByDistanceTo'
+  , cwCmpAround'
   ) where
 
 import Control.Lens
 import Data.Coerce
 import Data.Ext
 import Geometry.Point.Boxed
+import Geometry.Point.EuclideanDistance(cmpByDistanceTo)
 import Geometry.Point.Class
-import Geometry.Point.Orientation.Degenerate (sortAround, ccwCmpAroundWith,cwCmpAroundWith, ccw, CCW(..))
+import Geometry.Point.Orientation.Degenerate (sortAround, ccwCmpAroundWith,cwCmpAroundWith, cwCmpAround, ccw, CCW(..))
 import Geometry.Properties
 import Geometry.Vector
 
@@ -38,32 +41,45 @@ instance (Point_ point d r) => Point_ (WithExtra point extra) d r where
 
 
 
-sortAround'   :: forall p r. (Ord r, Num r)
-              => Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
-sortAround' c = coerce . sortAround (coerce @(Point 2 r :+ p) @(WithExtra Point p 2 r) c) . coerce
+sortAround'          :: forall p q r. (Ord r, Num r)
+                     => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+sortAround' (c :+ _) = coerce
+                     . sortAround (fromGenericPoint c)
+                     . coerce @[Point 2 r :+ p] @[WithExtra Point p 2 r]
 
 
-ccwCmpAroundWith'                               :: forall p r. (Ord r, Num r)
+
+ccwCmpAroundWith'                               :: forall a b c r. (Ord r, Num r)
                                               => Vector 2 r
-                                              -> Point 2 r :+ p
-                                              -> Point 2 r :+ p
-                                              -> Point 2 r :+ p
+                                              -> Point 2 r :+ a
+                                              -> Point 2 r :+ b
+                                              -> Point 2 r :+ c
                                               -> Ordering
-ccwCmpAroundWith' v a b c = ccwCmpAroundWith v (coerce' a) (coerce' b) (coerce' c)
-  where
-    coerce' :: Point 2 r :+ p -> WithExtra Point p 2 r
-    coerce' = coerce
+ccwCmpAroundWith' v a b c = ccwCmpAroundWith v (a^.core) (b^.core) (c^.core)
 
-cwCmpAroundWith'                               :: forall p r. (Ord r, Num r)
+
+
+cwCmpAroundWith'                               :: forall a b c r. (Ord r, Num r)
                                               => Vector 2 r
-                                              -> Point 2 r :+ p
-                                              -> Point 2 r :+ p
-                                              -> Point 2 r :+ p
+                                              -> Point 2 r :+ a
+                                              -> Point 2 r :+ b
+                                              -> Point 2 r :+ c
                                               -> Ordering
-cwCmpAroundWith' v a b c = cwCmpAroundWith v (coerce' a) (coerce' b) (coerce' c)
-  where
-    coerce' :: Point 2 r :+ p -> WithExtra Point p 2 r
-    coerce' = coerce
+cwCmpAroundWith' v a b c = cwCmpAroundWith v (a^.core) (b^.core) (c^.core)
+
+
+cwCmpAround'                               :: forall a b c r. (Ord r, Num r)
+                                              => Point 2 r :+ a
+                                              -> Point 2 r :+ b
+                                              -> Point 2 r :+ c
+                                              -> Ordering
+cwCmpAround' a b c = cwCmpAround (a^.core) (b^.core) (c^.core)
+
 
 ccw'       :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
 ccw' a b c = ccw (a^.core) (b^.core) (c^.core)
+
+
+cmpByDistanceTo'       :: (Ord r, Num r)
+                       => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> Ordering
+cmpByDistanceTo' c p q = cmpByDistanceTo (c^.core) (p^.core) (q^.core)

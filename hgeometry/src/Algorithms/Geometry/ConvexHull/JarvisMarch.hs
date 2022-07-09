@@ -24,6 +24,7 @@ import           Data.List.Util (extractMinimaBy)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup.Foldable
 import           Geometry.Point
+import           Geometry.Point.WithExtra
 import           Geometry.Polygon
 import           Geometry.Polygon.Convex (ConvexPolygon(..))
 import           Geometry.Vector

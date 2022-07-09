@@ -253,7 +253,7 @@ type family RealTypeConstraint (n :: Nat) (r :: *) :: Constraint where
 locallyExtremalParameters         :: (Arity d, Ord r, Enum r, Fractional r, Radical.Radical r)
                                   => Int -> BezierSpline 3 d r -> [r]
 locallyExtremalParameters i curve =
-  let [x1, x2, x3, x4] = map (view $ unsafeCoord i) $ F.toList $ _controlPoints curve
+  let [x1, x2, x3, x4] = map (view . singular $ unsafeCoord i) $ F.toList $ _controlPoints curve
       a = 3 * x4 -  9 * x3 + 9 * x2 - 3 * x1
       b = 6 * x1 - 12 * x2 + 6 * x3
       c = 3 * x2 -  3 * x1

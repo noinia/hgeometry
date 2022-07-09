@@ -38,7 +38,7 @@ import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Circular as CV
 import qualified Data.Vector.Mutable as MV
-
+import           Geometry.Point.WithExtra (ccw')
 
 -- import Debug.Trace
 ----------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ classifyVertices' poly =
   where
     vs = poly ^. outerBoundaryVector
     -- is the angle larger than > 180 degrees
-    largeInteriorAngle p c n = case ccw p c n of
+    largeInteriorAngle p c n = case ccw' p c n of
            CCW -> False
            CW  -> True
            _   -> error "classifyVertices -> largeInteriorAngle: colinear points"

@@ -52,6 +52,7 @@ import qualified Data.Set.Util as Set
 import           Data.Util
 import           Data.Vinyl.CoRec
 import           Debug.Trace
+import           Geometry.Point.WithExtra (cmpByDistanceTo')
 
 type R = RealNumber 5
 

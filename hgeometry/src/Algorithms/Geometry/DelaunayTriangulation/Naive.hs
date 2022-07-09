@@ -15,6 +15,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Geometry.Point
+import           Geometry.Point.WithExtra (sortAround', cwCmpAroundWith')
 import           Geometry.Ball (disk, insideBall)
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
