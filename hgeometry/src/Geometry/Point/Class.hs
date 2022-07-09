@@ -184,3 +184,13 @@ zCoord = coord @3
 wCoord :: (4 <= d, Point_ point d r) => Lens' (point d r) r
 wCoord = coord @4
 {-# INLINABLE wCoord #-}
+
+
+--------------------------------------------------------------------------------
+
+class HasPoints s t point point' where
+  -- | Traversal over all points in the structure
+  allPoints :: ( NumType s ~ r
+               , NumType t ~ r'
+               , Dimension s ~ d, Dimension t ~ d
+               ) => Traversal s t (point d r) (point' d r')

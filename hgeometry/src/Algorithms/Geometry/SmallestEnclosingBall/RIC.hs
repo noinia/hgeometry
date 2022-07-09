@@ -112,7 +112,7 @@ smallestEnclosingDiskWithPoints p q ps = minimumOn (^.enclosingDisk.squaredRadiu
     -- the left centers we want to find the point that is furthest way
     -- from p (or q). If there are no left-centers, we with to find
     -- the closest one among the right-centers.
-    leftDist z = let c = toGenericPoint $ z^.extra.center.core
+    leftDist z = let c = fromGenericPoint $ z^.extra.center.core
                      s = if ccw p q c == CCW then 1 else -1
                  in s * squaredEuclideanDist p c -- (p^.core) (c^.core)
 

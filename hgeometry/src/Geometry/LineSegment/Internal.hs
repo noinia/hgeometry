@@ -458,7 +458,7 @@ sqDistanceToSegArg (fromGenericPoint -> p) (toClosedSegment -> s) =
      . filter (flip onSegment s . fst) $ xs
 
 instance (Fractional r, Arity d, Ord r) => HasSquaredEuclideanDistance (LineSegment d p r) where
-  pointClosestToWithDistance q = over _1 toGenericPoint . sqDistanceToSegArg q
+  pointClosestToWithDistance q = over _1 fromGenericPoint . sqDistanceToSegArg q
 
 
 -- | flips the start and end point of the segment

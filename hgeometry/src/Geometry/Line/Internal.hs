@@ -235,7 +235,7 @@ toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine
 
 
 instance (Fractional r, Arity d) => HasSquaredEuclideanDistance (Line d r) where
-  pointClosestTo (fromGenericPoint -> p) (Line a m) = toGenericPoint  $ a .+^ (t0 *^ m)
+  pointClosestTo (fromGenericPoint -> p) (Line a m) = fromGenericPoint $ a .+^ (t0 *^ m)
     where
       -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
       t0 = numerator / divisor

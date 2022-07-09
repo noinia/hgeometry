@@ -14,7 +14,7 @@
 module Geometry.Point.Internal
   ( Point(..)
   , vector
-  , fromGenericPoint, toGenericPoint
+  , fromGenericPoint
   -- , pattern Point1
   -- , pattern Point2
   -- , pattern Point3
@@ -269,6 +269,5 @@ fromGenericPoint :: forall point genericPoint d r. ( PointClass.Point_ genericPo
 fromGenericPoint = PointClass.fromVector . view PointClass.asVector
 {-# SPECIALIZE INLINE fromGenericPoint :: PointClass.Point_ genericPoint d r => genericPoint d r -> Point d r #-}
 
--- | Convert this point into a generic point.
-toGenericPoint :: PointClass.Point_ point d r => Point d r -> point d r
-toGenericPoint = PointClass.fromVector . view PointClass.asVector
+instance PointClass.HasPoints (Point d r) (Point d s) Point Point where
+  allPoints = \f p -> f p

@@ -25,6 +25,7 @@ import           Data.Util
 import           Geometry.Point
 import           Geometry.Polygon
 import           Geometry.Polygon.Convex
+
 --------------------------------------------------------------------------------
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
