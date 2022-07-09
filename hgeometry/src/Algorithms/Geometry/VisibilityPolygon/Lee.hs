@@ -35,6 +35,7 @@ import           Geometry.HalfLine
 import           Geometry.Line
 import           Geometry.LineSegment
 import           Geometry.Point
+import           Geometry.Point.WithExtra       (ccwCmpAroundWith')
 import           Geometry.Polygon
 import           Geometry.Vector
 import           Data.Intersection

@@ -20,18 +20,19 @@ module Geometry.Polygon.Monotone
 
 import           Control.Monad.Random
 import           Data.Ext
-import qualified Data.Foldable                  as F
-import           Geometry.Line             (Line (..))
-import           Geometry.LineSegment
-import           Geometry.Point
-import           Geometry.Polygon.Core
-import           Geometry.Polygon.Extremes
-import           Geometry.Vector
+import qualified Data.Foldable as F
 import           Data.Intersection
 import           Data.List
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           Prelude                        hiding (max, min)
+import           Geometry.Line (Line (..))
+import           Geometry.LineSegment
+import           Geometry.Point
+import           Geometry.Point.WithExtra (ccw')
+import           Geometry.Polygon.Core
+import           Geometry.Polygon.Extremes
+import           Geometry.Vector
+import           Prelude hiding (max, min)
 
 -- | \( O(n \log n) \)
 --   A polygon is monotone if a straight line in a given direction

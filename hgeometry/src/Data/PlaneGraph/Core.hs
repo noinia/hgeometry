@@ -68,12 +68,6 @@ import qualified Data.Foldable as F
 import           Geometry.Box
 import           Geometry.Interval
 
-import           Geometry.LineSegment hiding (endPoints)
-import           Geometry.Point
-import           Geometry.Point.WithExtra(sortAround', ccwCmpAroundWith')
-import           Geometry.Vector.VectorFamily
-import           Geometry.Polygon
-import           Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Ord (comparing)
@@ -85,6 +79,12 @@ import           Data.Util
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
 import           GHC.Generics (Generic)
+import           Geometry.LineSegment hiding (endPoints)
+import           Geometry.Point
+import           Geometry.Point.WithExtra (sortAround', cwCmpAroundWith')
+import           Geometry.Polygon
+import           Geometry.Properties
+import           Geometry.Vector.VectorFamily
 
 
 --------------------------------------------------------------------------------

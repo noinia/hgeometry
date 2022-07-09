@@ -18,7 +18,7 @@ import           Data.Ext                  (_core, core)
 import qualified Data.Foldable             as F
 import           Geometry.Interval    (EndPoint (Closed, Open), end, start)
 import           Geometry.LineSegment (LineSegment (..), sqSegmentLength)
-import           Geometry.Point       (ccwCmpAroundWith')
+import           Geometry.Point.WithExtra       (ccwCmpAroundWith')
 import           Geometry.Polygon     (SimplePolygon, listEdges, outerBoundaryVector)
 import           Data.Intersection         (IsIntersectableWith (intersect),
                                             NoIntersection (NoIntersection))

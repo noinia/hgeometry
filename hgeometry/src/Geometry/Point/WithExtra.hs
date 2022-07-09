@@ -3,8 +3,10 @@ module Geometry.Point.WithExtra
   , _WithExtra
 
 
+  , ccw'
   , sortAround'
   , ccwCmpAroundWith'
+  , cwCmpAroundWith'
   ) where
 
 import Control.Lens
@@ -12,7 +14,7 @@ import Data.Coerce
 import Data.Ext
 import Geometry.Point.Boxed
 import Geometry.Point.Class
-import Geometry.Point.Orientation.Degenerate (sortAround, ccwCmpAroundWith)
+import Geometry.Point.Orientation.Degenerate (sortAround, ccwCmpAroundWith,cwCmpAroundWith, ccw, CCW(..))
 import Geometry.Properties
 import Geometry.Vector
 
@@ -51,3 +53,17 @@ ccwCmpAroundWith' v a b c = ccwCmpAroundWith v (coerce' a) (coerce' b) (coerce' 
   where
     coerce' :: Point 2 r :+ p -> WithExtra Point p 2 r
     coerce' = coerce
+
+cwCmpAroundWith'                               :: forall p r. (Ord r, Num r)
+                                              => Vector 2 r
+                                              -> Point 2 r :+ p
+                                              -> Point 2 r :+ p
+                                              -> Point 2 r :+ p
+                                              -> Ordering
+cwCmpAroundWith' v a b c = cwCmpAroundWith v (coerce' a) (coerce' b) (coerce' c)
+  where
+    coerce' :: Point 2 r :+ p -> WithExtra Point p 2 r
+    coerce' = coerce
+
+ccw'       :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
+ccw' a b c = ccw (a^.core) (b^.core) (c^.core)

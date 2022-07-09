@@ -144,9 +144,6 @@ dequeTop idx = do
   (v,f) <- get
   Mut.read v (f-idx-1)
 
-ccw'       :: (Ord r, Num r) => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> CCW
-ccw' a b c = ccw (a^.core) (b^.core) (c^.core)
-
 -- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&rep=rep1&type=pdf
 
 -- | \( O(n) \) Convex hull of a simple polygon.

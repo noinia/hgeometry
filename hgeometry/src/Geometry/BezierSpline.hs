@@ -515,12 +515,12 @@ intersectInteriorInterior treshold forbidden a b =
 
 sqrad :: (Ord r, RealFrac r) => [Point 2 r] -> r
 sqrad points | length points < 2 = error "sqrad: not enough points"
-sqrad points | otherwise =
+sqrad points =
   let rationalPoints :: [Point 2 Rational] -- smallestEnclosingDisk fails on Floats
       rationalPoints = map (traverse %~ realToFrac) points
-      (a : b : cs) = map (:+ ()) rationalPoints
+      (a : b : cs) = rationalPoints
       diskResult   = smallestEnclosingDisk' a b cs
-  in realToFrac $ view squaredRadius $ view enclosingDisk $ diskResult
+  in realToFrac . view squaredRadius . view enclosingDisk $ diskResult
 
 average :: (Functor t, Foldable t, Arity d, Fractional r) => t (Point d r) -> Point d r
 average ps = origin .+^ foldr1 (^+^) (fmap toVec ps) ^/ realToFrac (length ps)
