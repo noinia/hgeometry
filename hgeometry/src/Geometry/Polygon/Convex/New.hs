@@ -36,6 +36,7 @@ import qualified Data.Vector.Generic as GV
 newtype ConvexPolygonF f point r =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point r }
 
+
 type ConvexPolygon = ConvexPolygonF (Cyclic Vector.Vector)
 
 -- | ConvexPolygons are isomorphic to SimplePolygons with the added
@@ -66,12 +67,13 @@ type instance NumType   (ConvexPolygonF f point r) = r
 instance ( HasVertices (SimplePolygonF f point r) (SimplePolygonF f point' r')
          )
       => HasVertices (ConvexPolygonF f point r) (ConvexPolygonF f point' r') where
-  type Vertex   (ConvexPolygonF f point r) = Vertex   (SimplePolygonF f point r)
-  type VertexIx (ConvexPolygonF f point r) = VertexIx (SimplePolygonF f point r)
   vertices = _UncheckedConvexPolygon . vertices
 
 instance HasVertices' (SimplePolygonF f point r) => HasVertices' (ConvexPolygonF f point r) where
+  type Vertex   (ConvexPolygonF f point r) = Vertex   (SimplePolygonF f point r)
+  type VertexIx (ConvexPolygonF f point r) = VertexIx (SimplePolygonF f point r)
   vertexAt i = _UncheckedConvexPolygon . vertexAt i
+  vertices' = _UncheckedConvexPolygon . vertices'
 
 instance ( HasOuterBoundary (SimplePolygonF f point r)
          , VertexIx (SimplePolygonF f point r) ~ Int
@@ -80,7 +82,10 @@ instance ( HasOuterBoundary (SimplePolygonF f point r)
   outerBoundary = _UncheckedConvexPolygon . outerBoundary
   outerBoundaryVertexAt i = _UncheckedConvexPolygon . outerBoundaryVertexAt i
 
-
+instance ( SimplePolygon_ (SimplePolygonF f) point r
+         , Point_ point 2 r
+         ) => Polygon_ (ConvexPolygonF f) point r where
+  area = areaSimplePolygon
 
 instance ( SimplePolygon_ (SimplePolygonF f) point r
          , Point_ point 2 r

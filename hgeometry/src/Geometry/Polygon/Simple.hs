@@ -100,8 +100,6 @@ _SimplePolygonF = iso (\(MkSimplePolygon vs) -> vs) MkSimplePolygon
 
 instance TraversableWithIndex Int f
       => HasVertices (SimplePolygonF f point r) (SimplePolygonF f point' r') where
-  type Vertex   (SimplePolygonF f point r) = point 2 r
-  type VertexIx (SimplePolygonF f point r) = Int
   vertices = _SimplePolygonF . itraversed
 
 -- instance HasVertices (SimplePolygon point r) (SimplePolygon point' r') where
@@ -118,6 +116,8 @@ instance ( TraversableWithIndex Int f
          , Index (f (point 2 r)) ~ Int
          )
       => HasVertices' (SimplePolygonF f point r) where
+  type Vertex   (SimplePolygonF f point r) = point 2 r
+  type VertexIx (SimplePolygonF f point r) = Int
   vertexAt i = _SimplePolygonF . iix i
 
 

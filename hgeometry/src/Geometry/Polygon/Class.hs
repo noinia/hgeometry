@@ -30,14 +30,10 @@ import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 
-class HasVertices graph graph' where
+class HasVertices' graph where
   type Vertex   graph
   type VertexIx graph
 
-  -- | Traversal of all vertices in the graph
-  vertices :: IndexedTraversal (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
-
-class HasVertices' graph where
   -- | Traversal of all vertices in the graph, non type changing.
   vertices' :: IndexedTraversal' (VertexIx graph) graph (Vertex graph)
   default vertices'
@@ -48,23 +44,43 @@ class HasVertices' graph where
   vertexAt :: VertexIx graph
            -> IndexedTraversal' (VertexIx graph) graph (Vertex graph)
 
+  {-# MINIMAL vertexAt #-}
 
-class HasEdges graph graph' where
+class HasVertices graph graph' where
+  -- | Traversal of all vertices in the graph
+  vertices :: IndexedTraversal (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+
+--------------------------------------------------------------------------------
+
+class HasEdges' graph where
   type Edge   graph
   type EdgeIx graph
+  -- | Traversal of all edges in the graph, non type changing
+  edges' :: IndexedTraversal' (EdgeIx graph) graph (Edge graph)
+  default edges'
+    :: HasEdges graph graph => IndexedTraversal' (EdgeIx graph) graph (Edge graph)
+  edges' = edges
 
+class HasEdges graph graph' where
   -- | Traversal of all edges in the graph
   edges :: IndexedTraversal (EdgeIx graph) graph graph' (Edge graph) (Edge graph')
 
+--------------------------------------------------------------------------------
+
 
 class HasFaces graph graph' where
-  type Face   graph
-  type FaceIx graph
-
   -- | Traversal of all faces in the graph
   faces :: IndexedTraversal (FaceIx graph) graph graph' (Face graph) (Face graph')
 
+class HasFaces' graph where
+  type Face   graph
+  type FaceIx graph
+  -- | Traversal of all faces in the graph, non-type chagning
+  faces' :: IndexedTraversal' (FaceIx graph) graph (Face graph)
+  default faces' :: HasFaces graph graph => IndexedTraversal' (FaceIx graph) graph (Face graph)
+  faces' = faces
 
+--------------------------------------------------------------------------------
 
 newtype Neighbours graph = Neighbours (IndexedFold (VertexIx graph) graph (Vertex graph))
 
@@ -77,14 +93,15 @@ class HasAdjacencies graph where
 
 --------------------------------------------------------------------------------
 
-numVertices :: HasVertices graph graph => graph -> Int
-numVertices = lengthOf vertices
+-- | Get the number of vertices in the graph
+numVertices :: HasVertices' graph => graph -> Int
+numVertices = lengthOf vertices'
 
-numEdges :: HasEdges graph graph => graph -> Int
-numEdges = lengthOf edges
+numEdges :: HasEdges' graph => graph -> Int
+numEdges = lengthOf edges'
 
-numFaces :: HasFaces graph graph => graph -> Int
-numFaces = lengthOf faces
+numFaces :: HasFaces' graph => graph -> Int
+numFaces = lengthOf faces'
 
 
 -- ^ A class for items that have an outer boundary.
@@ -160,8 +177,6 @@ class ( HasOuterBoundary (polygon point r)
 
 --------------------------------------------------------------------------------
 
-class ( Polygon_ multiPolygon point r
-      ) => MultiPolygon_ multiPolygon point r where
 
 
 
