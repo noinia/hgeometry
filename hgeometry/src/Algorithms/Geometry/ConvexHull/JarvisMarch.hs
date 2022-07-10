@@ -14,7 +14,6 @@ module Algorithms.Geometry.ConvexHull.JarvisMarch(
   ) where
 
 import           Control.Lens ((^.))
-import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable
 import qualified Data.List as List
@@ -24,9 +23,7 @@ import           Data.List.Util (extractMinimaBy)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup.Foldable
 import           Geometry.Point
-import           Geometry.Point.WithExtra
-import           Geometry.Polygon
-import           Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Geometry.Polygon.Convex (ConvexPolygon, mkConvexPolygon)
 import           Geometry.Vector
 
 --------------------------------------------------------------------------------
@@ -36,38 +33,37 @@ import           Geometry.Vector
 --
 -- running time: \(O(nh)\), where \(n\) is the number of input points
 -- and \(h\) is the complexity of the hull.
-convexHull            :: (Ord r, Num r)
-                      => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
-convexHull pts       = ConvexPolygon . unsafeFromPoints $ uh <> reverse lh
+convexHull            :: (Ord r, Num r, Point_ point 2 r
+                         , AsExt (point 2 r)
+                         , CoreOf (point 2 r) ~ Point 2 r
+                         )
+                      => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
+convexHull (p :| []) = mkConvexPolygon $ [p]
+convexHull pts       = mkConvexPolygon $ uh <> reverse lh
   where
     lh = case NonEmpty.nonEmpty (NonEmpty.init $ lowerHull pts) of
            Nothing       -> []
            Just (_:|lh') -> lh'
     uh = toList $ upperHull pts
 
-                       -- note that fromList is afe since ps contains at least two elements
-  -- where
-  --   SP p@(c :+ _) pts = minViewBy incXdecY ps
-  --   takeWhile' pf (x :| xs) = x : takeWhile pf xs
-
-upperHull     ::  (Num r, Ord r) =>  NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+upperHull     ::  (Num r, Ord r, Point_ point 2 r) =>  NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 upperHull pts = repeatedly cmp steepestCwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp (NonEmpty.toList pts)
-    cmp           = comparing (\(Point2 x y :+ _) -> (x, Down y))
+    cmp           = comparing (\(Point2 x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
                     -- also use cmp as the comparator, so that we also select the last
                     -- vertical segment.
 
 -- | Upepr hull from left to right, without any vertical segments.
-upperHull'     ::  (Num r, Ord r) =>  NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+upperHull'     ::  (Num r, Ord r, Point_ point 2 r)
+               =>  NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 upperHull' pts = pruneVertical $ repeatedly cmp steepestCwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp0 (NonEmpty.toList pts)
-    cmp0          = comparing (\(Point2 x y :+ _) -> (x, Down y))
+    cmp0          = comparing (\(Point2 x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
-    cmp           = comparing (^.core)
+    cmp           = comparing (\(Point2 x y) -> (x, y))
                     -- for the rest select them in normal
                     -- lexicographic order, this causes the last
                     -- vertical segment to be ignored.
@@ -76,13 +72,13 @@ upperHull' pts = pruneVertical $ repeatedly cmp steepestCwFrom s rest
 -- segments at the start.
 --
 -- running time: \(O(nh)\), where \(h\) is the complexity of the hull.
-lowerHull     ::  (Num r, Ord r) =>  NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+lowerHull     ::  (Num r, Ord r, Point_ point 2 r) =>  NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 lowerHull pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp0 (NonEmpty.toList pts)
-    cmp0          = comparing (\(Point2 x y :+ _) -> (x, Down y))
+    cmp0          = comparing (\(Point2 x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
-    cmp           = comparing (^.core)
+    cmp           = comparing (\(Point2 x y) -> (x, y))
                     -- for the rest of the comparions use the normal
                     -- lexicographic comparing order.
 
@@ -90,24 +86,23 @@ lowerHull pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
 --
 --
 -- running time: \(O(nh)\), where \(h\) is the complexity of the hull.
-lowerHull'     :: (Num r, Ord r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+lowerHull'     :: (Num r, Ord r, Point_ point 2 r) => NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 lowerHull' pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp (NonEmpty.toList pts)
-    cmp           = comparing (^.core)
-
+    cmp           = comparing (\(Point2 x y) -> (x, y))
 
 -- | Find the next point in counter clockwise order, i.e. the point
 -- with minimum slope w.r.t. the given point.
-steepestCcwFrom   :: (Ord r, Num r)
-               => (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ b)  -> Point 2 r :+ b
-steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith' (Vector2 0 (-1)) p)
+steepestCcwFrom   :: (Ord r, Num r, Point_ point 2 r)
+               => point 2 r -> NonEmpty (point 2 r)  -> point 2 r
+steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith (Vector2 0 (-1)) p)
 
 -- | Find the next point in clockwise order, i.e. the point
 -- with maximum slope w.r.t. the given point.
-steepestCwFrom   :: (Ord r, Num r)
-               => (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ b)  -> Point 2 r :+ b
-steepestCwFrom p = List.minimumBy (cwCmpAroundWith' (Vector2 0 1) p)
+steepestCwFrom   :: (Ord r, Num r, Point_ point 2 r)
+                 => point 2 r -> NonEmpty (point 2 r)  -> point 2 r
+steepestCwFrom p = List.minimumBy (cwCmpAroundWith (Vector2 0 1) p)
 
 repeatedly       :: (a -> a -> Ordering) -> (a -> NonEmpty a -> a) -> a -> [a] -> NonEmpty a
 repeatedly cmp f = go
@@ -119,13 +114,13 @@ repeatedly cmp f = go
 
 
 -- | Removes the topmost vertical points, if they exist
-pruneVertical :: Eq r => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+pruneVertical :: (Eq r, Point_ point 2 r) => NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 pruneVertical = either id id . foldr1With f (\q -> Left $ q:|[])
   where
     f p = \case
-      Left (q:|qs) | p^.core.xCoord == q^.core.xCoord -> Left  (p :| qs)
-                   | otherwise                        -> Right (p :| q:qs)
-      Right pts                                       -> Right (p <| pts)
+      Left (q:|qs) | p^.xCoord == q^.xCoord -> Left  (p :| qs)
+                   | otherwise              -> Right (p :| q:qs)
+      Right pts                             -> Right (p <| pts)
 
 -- | Foldr, but start by applying some function on the rightmost
 -- element to get the starting value.

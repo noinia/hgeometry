@@ -142,10 +142,10 @@ instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` HalfSpace 2 r w
 
 
 -- | Test if a point lies in a halfspace
-inHalfSpace                                  :: (Num r, Ord r, Arity d)
-                                             => Point d r -> HalfSpace d r
+inHalfSpace                                  :: (Num r, Ord r, Point_ point d r)
+                                             => point d r -> HalfSpace d r
                                              -> PointLocationResult
-q `inHalfSpace` (HalfSpace (HyperPlane p n)) = case n `dot` (q .-. p) `compare` 0 of
+q `inHalfSpace` (HalfSpace (HyperPlane p n)) = case n `dot` (q .-. fromGenericPoint p) `compare` 0 of
                                                  LT -> Outside
                                                  EQ -> OnBoundary
                                                  GT -> Inside

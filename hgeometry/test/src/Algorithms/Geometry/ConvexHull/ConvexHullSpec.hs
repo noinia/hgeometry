@@ -40,10 +40,11 @@ spec = do
           --   property $ \pts ->
           --     (PG $ GrahamScan.convexHull pts) == (PG $ DivideAndConquer.convexHull pts)
           it "manual" $
-            (PG $ GrahamScan.convexHull myPoints) == (PG $ OldDivAndConquer.convexHull myPoints)
+            (PG $ GrahamScan.convexHull myPoints) == (PG $ OldDivAndConquer.convexHull
+                                                         $ fmap ext myPoints)
 
         it "GrahamScan and QuickHull are the same" $
-          property $ \(pts :: NonEmpty (Point 2 Int)) ->
+          property $ \(pts :: NonEmpty (Point 2 Rational)) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
         it "JarvisMarch Manual test1" $
@@ -62,7 +63,7 @@ spec = do
 
 
         it "GrahamScan and JarvisMarch are the same" $
-          property $ \(pts :: NonEmpty (Point 2 Int)) ->
+          property $ \(pts :: NonEmpty (Point 2 Rational)) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
 
@@ -93,6 +94,7 @@ myPoints = NonEmpty.fromList $
            ]
 
 
+mPoint2        :: [r] -> Point 2 r
 mPoint2 ~[x,y] = Point2 x y
 
 testPoints = NonEmpty.fromList

@@ -1,7 +1,7 @@
 module Geometry.SoSSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
-import qualified Geometry.SoS.ConvexHull as StrictConvexHull
+-- import qualified Geometry.SoS.ConvexHull as StrictConvexHull
 import           Control.Lens
 import           Data.Ext
 import           Data.Indexed
@@ -21,6 +21,10 @@ import Geometry.Polygon.Convex (lowerTangent)
 type RBase = RealNumber 5
 type R = Symbolic SoSI RBase
 
+spec :: Spec
+spec = pure ()
+
+{-
 
 lowerHullSymbolic :: (Ord r, Num r)
                   => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
@@ -73,3 +77,5 @@ lh1 = NonEmpty.fromList $ NonEmpty.take 2 test'
 rh1 = NonEmpty.fromList $ NonEmpty.drop 2 test'
 
 foo = StrictConvexHull.lowerTangent (NonEmpty.reverse lh1) rh1
+
+-}

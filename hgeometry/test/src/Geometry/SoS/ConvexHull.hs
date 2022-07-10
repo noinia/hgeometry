@@ -41,10 +41,12 @@ debug = fmap toSymbolic'
 fromSymbolic' :: (Arity d, Num r) => WithIndex (Point d (Symbolic i r) :+ e) -> Point d r :+ e
 fromSymbolic' = over core fromSymbolic . view theValue
 
-toSymbolic'                        :: (Arity d, Point_ point d r, Num r)
+toSymbolic'                        :: (Point_ point d r, Num r)
                                    => WithIndex (point d r :+ e)
                                    -> WithIndex (Point d (Symbolic SoSI r) :+ e)
 toSymbolic' (WithIndex i (p :+ e)) = WithIndex i ((toSymbolic $ WithIndex i p) :+ e)
+
+
 
 
 
@@ -83,7 +85,8 @@ incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-lowerTangent       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r, HasIndex point)
+lowerTangent       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r
+                                        , HasIndex (point 2 r))
                    => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
 lowerTangent l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where

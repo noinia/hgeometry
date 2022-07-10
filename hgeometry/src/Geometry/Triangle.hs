@@ -165,8 +165,8 @@ fromBarricentric (Vector3 a b c) (Triangle p q r) = let f = view (core.vector) i
 
 
 -- | Tests if a point lies inside a triangle, on its boundary, or outside the triangle
-inTriangle   :: (Num r, Ord r)
-             => Point 2 r -> Triangle 2 p r -> PointLocationResult
+inTriangle   :: (Num r, Ord r, Point_ point 2 r)
+             => point 2 r -> Triangle 2 p r -> PointLocationResult
 inTriangle q = unCombine . foldMap1 (Combine . (q `inHalfSpace`)) . intersectingHalfSpaces
 
 newtype Combine = Combine { unCombine :: PointLocationResult } deriving (Show,Eq)
@@ -179,7 +179,7 @@ instance Semigroup Combine where
       _          >< OnBoundary = OnBoundary
       Inside     >< Inside     = Inside
 
-onTriangle :: (Ord r, Num r) => Point 2 r -> Triangle 2 p r -> Bool
+onTriangle :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Triangle 2 p r -> Bool
 q `onTriangle` t = inTriangle q t /= Outside
 
 -- myQ :: Point 2 Rational

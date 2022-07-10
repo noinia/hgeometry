@@ -49,7 +49,7 @@ spec = do
 
   describe "numerical robustness" $ do
     it "1e0" $
-      ccw (Point2 0 0) (Point2 1 1) (Point2 2 (2::Double)) `shouldBe` CoLinear
+      ccw (Point2 0 0 :: Point 2 Double) (Point2 1 1) (Point2 2 2) `shouldBe` CoLinear
 
     -- 'ccw' is doing this calculation:
     -- 1.2 * 1e100 * 1.1 -
@@ -83,7 +83,8 @@ spec = do
 
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
-      sortAround origin [ Point2 (-3) (-3)
+      sortAround (origin :: Point 2 Int)
+                        [ Point2 (-3) (-3)
                         , Point2 (-1) (-5)
                         , Point2 5    5
                         , Point2 6    (-4)
@@ -112,52 +113,52 @@ spec = do
                  , Point2 26   (-2)
                  ]
     it "degenerate points on horizontal line" $
-      sortAround origin [ Point2 2    0
-                        , Point2 (-1) 0
-                        , Point2 10   0
-                        ]
+      sortAround (origin :: Point 2 Int) [ Point2 2    0
+                                         , Point2 (-1) 0
+                                         , Point2 10   0
+                                         ]
       `shouldBe` [ Point2 2 0, Point2 10 0, Point2 (-1) 0 ]
     it "degenerate points on vertical line" $
-      sortAround origin [ Point2 0 2
-                        , Point2 0 (-1)
-                        , Point2 0 10
-                        ]
+      sortAround (origin :: Point 2 Int) [ Point2 0 2
+                                         , Point2 0 (-1)
+                                         , Point2 0 10
+                                         ]
       `shouldBe` [ Point2 0 2, Point2 0 10, Point2 0 (-1) ]
 
 
   describe "Insert point in ciclically ordered list" $ do
     it "insert" $
-      insertIntoCyclicOrder (ext origin) (ext $ Point2 (-4) (-5))  (
-        C.fromList $ map ext [ Point2 20   0
-                             , Point2 10   1
-                             , Point2 2    2
-                             , Point2 5    5
-                             , Point2 5    5
-                             , Point2 5    7
-                             , Point2 (-5) 3
-                             , Point2 (-3) (-3)
-                             , Point2 (-1) (-5)
-                             , Point2 0    (-5)
-                             , Point2 0    (-6)
-                             , Point2 6    (-4)
-                             , Point2 26   (-2)
-                             ])
+      insertIntoCyclicOrder (origin :: Point 2 Int) (Point2 (-4) (-5))  (
+        C.fromList [ Point2 20   0
+                   , Point2 10   1
+                   , Point2 2    2
+                   , Point2 5    5
+                   , Point2 5    5
+                   , Point2 5    7
+                   , Point2 (-5) 3
+                   , Point2 (-3) (-3)
+                   , Point2 (-1) (-5)
+                   , Point2 0    (-5)
+                   , Point2 0    (-6)
+                   , Point2 6    (-4)
+                   , Point2 26   (-2)
+                   ])
       `shouldBe`
-        (C.fromList $ map ext [ Point2 20   0
-                              , Point2 10   1
-                              , Point2 2    2
-                              , Point2 5    5
-                              , Point2 5    5
-                              , Point2 5    7
-                              , Point2 (-5) 3
-                              , Point2 (-3) (-3)
-                              , Point2 (-4) (-5)
-                              , Point2 (-1) (-5)
-                              , Point2 0    (-5)
-                              , Point2 0    (-6)
-                              , Point2 6    (-4)
-                              , Point2 26   (-2)
-                              ])
+        (C.fromList [ Point2 20   0
+                    , Point2 10   1
+                    , Point2 2    2
+                    , Point2 5    5
+                    , Point2 5    5
+                    , Point2 5    7
+                    , Point2 (-5) 3
+                    , Point2 (-3) (-3)
+                    , Point2 (-4) (-5)
+                    , Point2 (-1) (-5)
+                    , Point2 0    (-5)
+                    , Point2 0    (-6)
+                    , Point2 6    (-4)
+                    , Point2 26   (-2)
+                    ])
 
   specify "Read/Show properties for Point1" $
     property $ qcReadShow1 @(Point 1) Proxy

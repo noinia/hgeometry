@@ -28,20 +28,21 @@ spec = pure ()
 data Hulls = Hulls (ConvexPolygon () Word) (ConvexPolygon () Word) deriving (Show,Eq)
 
 instance Arbitrary Hulls where
-  arbitrary = do lh <- left
-                 rh <- right (xMax lh)
-                 pure $ Hulls lh rh
-    where
-      xMax = maximum . fmap (^.core.xCoord) . (^.simplePolygon.outerBoundaryVector)
-      lowerHull' = ConvexPolygon . fromPoints . reverse . F.toList . lowerHull
-      left = do p    <- arbitrary
-                q    <- suchThat arbitrary (\a -> a^.core.xCoord > p^.core.xCoord)
-                rest <- arbitrary
-                pure . lowerHull' $ p :| (q : rest)
-      right x = do p    <- suchThat arbitrary  (\a -> a^.core.xCoord > x)
-                   q    <- suchThat arbitrary  (\a -> a^.core.xCoord > p^.core.xCoord)
-                   rest <- listOf $ suchThat arbitrary  (\a -> a^.core.xCoord > x)
-                   pure . lowerHull' $ p :| (q : rest)
+  arbitrary = error "arbitrarary @Hulls currently disabled"
+    -- do lh <- left
+    --              rh <- right (xMax lh)
+    --              pure $ Hulls lh rh
+    -- where
+    --   xMax = maximum . fmap (^.core.xCoord) . (^.simplePolygon.outerBoundaryVector)
+    --   lowerHull' = ConvexPolygon . fromPoints . reverse . F.toList . lowerHull
+    --   left = do p    <- arbitrary
+    --             q    <- suchThat arbitrary (\a -> a^.core.xCoord > p^.core.xCoord)
+    --             rest <- arbitrary
+    --             pure . lowerHull' $ p :| (q : rest)
+    --   right x = do p    <- suchThat arbitrary  (\a -> a^.core.xCoord > x)
+    --                q    <- suchThat arbitrary  (\a -> a^.core.xCoord > p^.core.xCoord)
+    --                rest <- listOf $ suchThat arbitrary  (\a -> a^.core.xCoord > x)
+    --                pure . lowerHull' $ p :| (q : rest)
 
 -- newtype Hull = Hull (NonEmpty (Point 2 Rational :+ ())) deriving (Show,Eq)
 

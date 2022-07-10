@@ -13,12 +13,13 @@ import qualified Data.Foldable as F
 import           Geometry.Line
 import           Geometry.Point
 import           Geometry.Polygon
-import           Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Geometry.Polygon.Convex (ConvexPolygon, mkConvexPolygon)
 import           Geometry.Triangle
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           Data.Util
+import Geometry (fromGenericPoint)
 
 
 -- import Data.Ratio
@@ -31,20 +32,22 @@ import           Data.Util
 -- clockwise order.
 --
 -- running time: \(O(n^2)\)
-convexHull            :: (Ord r, Fractional r, Show r, Show p)
-                      => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
-convexHull ps        = ConvexPolygon . unsafeFromPoints
-                     $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
+convexHull            :: (Ord r, Fractional r, Point_ point 2 r
+                         , AsExt (point 2 r)
+                         , CoreOf (point 2 r) ~ Point 2 r
+                         )
+                      => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
+convexHull (p :| []) = mkConvexPolygon [p]
+convexHull ps        = mkConvexPolygon $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
   where
     STR l r mids  = findExtremes ps
-    m             = lineThrough (l^.core) (r^.core)
-    (above,below) = List.partition (\(p :+ _) -> p `liesAbove` m) mids
+    m             = lineThrough l r
+    (above,below) = List.partition (`liesAbove` m) mids
 
 -- | Finds the leftmost and rightmost point in the list
-findExtremes            :: Ord r
-                        => NonEmpty (Point 2 r :+ q)
-                        -> STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+findExtremes            :: (Ord r, Point_ point 2 r)
+                        => NonEmpty (point 2 r)
+                        -> STR (point 2 r) (point 2 r) [point 2 r]
 findExtremes (p :| pts ) = foldr f (STR p p []) pts
   where
     f q (STR l r ms) = case (incXdecY q l, incXdecY q r) of
@@ -54,40 +57,31 @@ findExtremes (p :| pts ) = foldr f (STR p p []) pts
                          (GT,EQ) -> STR l r ms -- ditch q; it is the same as r
                          (GT,LT) -> STR l r (q:ms)
 
-    addIfNot y x xs | (x^.core) /= (y^.core) = x:xs
-                    | otherwise              = xs
+    addIfNot a@(Point2 ax ay) (Point2 bx by) xs
+      | (ax,ay) /= (bx,by) = a:xs
+      | otherwise          = xs
 
--- findExtremesBy         :: (a -> a -> Ordering)
---                        -> NonEmpty a
---                        -> STR a a [a]
--- findExtremesBy cmp pts = let l = F.minimumBy cmp pts
---                              r = F.maximumBy cmp pts
---                              a /=. b = a `cmp` b /= EQ
---                          in STR l r [p | p <- F.toList pts, p /=. l, p /=. r]
-
-
-incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
-  compare px qx <> compare qy py
+incXdecY  :: (Ord r, Point_ point 2 r) => point 2 r -> point 2 r -> Ordering
+incXdecY (Point2 px py) (Point2 qx qy) = compare px qx <> compare qy py
 
 -- | include neigher left or right
 --
-hull         :: (Fractional r, Ord r)
-             => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+hull         :: (Fractional r, Ord r, Point_ point 2 r)
+             => point 2 r -> point 2 r -> [point 2 r] -> [point 2 r]
 hull _ _ []  = []
 hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
   where
-    m       = lineThrough (l^.core) (r^.core)
+    m       = lineThrough l r
     mid     = F.maximumBy (comparing dist) pts
 
-    dist (p :+ _) = p `squaredEuclideanDistTo` m
-    t       = Triangle l mid r
+    dist p = p `squaredEuclideanDistTo` m
+    t       = Triangle (ext $ fromGenericPoint l) (ext $ fromGenericPoint mid) (ext $ fromGenericPoint r)
     -- line through l and mid, which splits the remaining points in a left half and a right half.
-    splitL   = lineThrough (l^.core) (mid^.core)
-    rightSide = (r^.core) `onSide` splitL -- define the side containing r the right side
+    splitL   = lineThrough l mid
+    rightSide = r `onSide` splitL -- define the side containing r the right side
 
-    (ls,rs) = List.partition (\(p :+ _) -> p `onSide` splitL /= rightSide)
-            . filter (\(p :+ _) -> not $ p `onTriangle` t) $ pts
+    (ls,rs) = List.partition (\p -> p `onSide` splitL /= rightSide)
+            . filter (\p -> not $ p `onTriangle` t) $ pts
 
 
 -- mPoint2 [x,y] = Point2 x y
