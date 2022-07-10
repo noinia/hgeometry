@@ -12,6 +12,7 @@
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Convex
   ( ConvexPolygon(..), simplePolygon
+  , mkConvexPolygon
   , convexPolygon
   , isConvex, verifyConvex
   , merge
@@ -81,6 +82,14 @@ import           Geometry.Vector
 -- | Data Type representing a convex polygon
 newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
                           deriving (Show,Eq,NFData)
+
+
+-- | constructs the convex polygon from a list of CCW points. this is unchecked
+mkConvexPolygon :: ( AsExt (point 2 r), Point_ point 2 r
+                   , CoreOf (point 2 r) ~ Point 2 r
+                   ) => [point 2 r] -> ConvexPolygon (ExtraOf (point 2 r)) r
+mkConvexPolygon = ConvexPolygon . unsafeFromPoints . map (view _Ext)
+
 
 -- | ConvexPolygons are isomorphic to SimplePolygons with the added constraint that they have no
 --   reflex vertices.

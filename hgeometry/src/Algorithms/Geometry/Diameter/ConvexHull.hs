@@ -24,13 +24,13 @@ import qualified Geometry.Polygon.Convex as Convex
 -- | Computes the Euclidean diameter by first finding the convex hull.
 --
 -- running time: \(O(n \log n)\)
-diameter :: (Ord r, Radical r) => [Point 2 r :+ p] -> r
-diameter = maybe 0 (\(p,q) -> euclideanDist (p^.core) (q^.core)) . diametralPair
+diameter :: (Ord r, Radical r, Point_ point 2 r) => [point 2 r] -> r
+diameter = maybe 0 (uncurry euclideanDist) . diametralPair
 
 -- | Computes the Euclidean diameter by first finding the convex hull.
 --
 -- running time: \(O(n \log n)\)
-diametralPair :: (Ord r, Num r)
-                   => [Point 2 r :+ p] -> Maybe (Point 2 r :+ p, Point 2 r :+ p)
-diametralPair lst@(_:_:_:_) = Just . Convex.diametralPair $ convexHull $ NonEmpty.fromList lst
+diametralPair :: (Ord r, Num r, Point_ point 2 r) => [point 2 r] -> Maybe (point 2 r, point 2 r)
+diametralPair lst@(_:_:_:_) = error "diametralPair: temporary"
+  --  Just . Convex.diametralPair $ convexHull $ NonEmpty.fromList lst
 diametralPair lst           = Naive.diametralPair lst

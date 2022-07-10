@@ -27,7 +27,7 @@ import           Geometry.Point
 import           Geometry.LineSegment
 import           Geometry.Polygon
 import           Geometry.Ball                              (disk, insideBall)
-import           Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
+import           Geometry.Polygon.Convex                    (ConvexPolygon, mkConvexPolygon, simplePolygon)
 import qualified Geometry.Polygon.Convex                    as Convex
 import qualified Data.IntMap.Strict                              as IM
 import qualified Data.List                                       as L
@@ -38,6 +38,7 @@ import           Data.Measured.Size
 import qualified Data.Vector                                     as V
 import qualified Data.Vector.Circular.Util                       as CV
 import           Geometry.Point.WithExtra (cwCmpAroundWith',cmpByDistanceTo',cwCmpAround',ccw')
+import           Geometry.Point.WithExtra(WithExtra(WithExtra))
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
 --
@@ -84,7 +85,7 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, ConvexPolygon $ unsafeFromPoints [withID p i])
+                     in (IM.singleton i CL.empty, mkConvexPolygon [withID p i])
   | size' pts <= 3 = let pts'  = NonEmpty.fromList
                                . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                . F.toList $ pts
@@ -103,7 +104,7 @@ delaunayTriangulation' pts mapping'@(vtxMap,_)
 -- the adj. list should be. The input polygon is given in Clockwise order
 firsts :: ConvexPolygon (p :+ VertexID) r -> IM.IntMap VertexID
 firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
-       . F.toList . outerBoundaryEdges . _simplePolygon
+       . F.toList . outerBoundaryEdges . view Convex.simplePolygon
 
 
 -- | Given a polygon; construct the adjacency list representation
@@ -304,8 +305,8 @@ nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)
 nub' = fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` (^.core))
 
 
-withID     :: c :+ e -> e' -> c :+ (e :+ e')
-withID p i = p&extra %~ (:+i)
+withID     :: Point 2 r :+ e -> e' -> WithExtra Point (e :+ e') 2 r
+withID p i = WithExtra $ p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
 lookup'' k m = m IM.! k

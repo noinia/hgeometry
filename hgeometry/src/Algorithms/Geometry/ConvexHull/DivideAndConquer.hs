@@ -41,11 +41,6 @@ convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy i
   where
     combine (l:|uh,_:|lh) = mkConvexPolygon $ l : uh <> reverse (init lh)
 
--- | constructs the convex polygon
-mkConvexPolygon :: ( AsExt (point 2 r), Point_ point 2 r
-                   , CoreOf (point 2 r) ~ Point 2 r
-                   ) => [point 2 r] -> ConvexPolygon (ExtraOf (point 2 r)) r
-mkConvexPolygon = ConvexPolygon . unsafeFromPoints . map (view _Ext)
 
 ----------------------------------------
 -- * Computing a lower hull

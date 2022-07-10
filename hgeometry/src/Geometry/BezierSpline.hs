@@ -185,7 +185,7 @@ subBezier t u = fst . split u . snd . split t
 -- | Compute the convex hull of the control polygon of a 2-dimensional Bezier curve.
 --   Should also work in any dimension, but convex hull is not yet implemented.
 convexHullB :: (Ord r, Fractional r) => BezierSpline n 2 r -> ConvexPolygon () r
-convexHullB = convexHull . NonEmpty.fromList . fmap ext . F.toList . _controlPoints
+convexHullB = convexHull . NonEmpty.fromList . F.toList . _controlPoints
 
 --------------------------------------------------------------------------------
 

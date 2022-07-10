@@ -24,10 +24,10 @@ spec = do
       modifyMaxSize (const 1000) $ do
         describe "GrahamScan and DivideAnd Conquer are the same" $ do
           it "quickcheck convex hull " $
-            property $ \pts ->
+            property $ \(pts :: NonEmpty (Point 2 Rational)) ->
               (PG $ GrahamScan.convexHull pts) == (PG $ DivideAndConquer.convexHull pts)
           it "quickcheck upper hull " $
-            property $ \(pts :: NonEmpty (Point 2 Int :+ ())) ->
+            property $ \(pts :: NonEmpty (Point 2 Int)) ->
               GrahamScan.upperHull pts == DivideAndConquer.upperHull pts
           -- it "quickcheck lower hull " $
           --   property $ \(pts :: NonEmpty (Point 2 Int :+ ())) ->
@@ -43,7 +43,7 @@ spec = do
             (PG $ GrahamScan.convexHull myPoints) == (PG $ OldDivAndConquer.convexHull myPoints)
 
         it "GrahamScan and QuickHull are the same" $
-          property $ \pts ->
+          property $ \(pts :: NonEmpty (Point 2 Int)) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
         it "JarvisMarch Manual test1" $
@@ -62,7 +62,7 @@ spec = do
 
 
         it "GrahamScan and JarvisMarch are the same" $
-          property $ \pts ->
+          property $ \(pts :: NonEmpty (Point 2 Int)) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
 
@@ -77,8 +77,8 @@ instance Eq PG where
                          bs = b^.simplePolygon.outerBoundaryVector
                      in isShiftOf as bs
 
-myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map ext $
+myPoints :: NonEmpty.NonEmpty (Point 2 Rational)
+myPoints = NonEmpty.fromList $
            [ Point2 1  3
            , Point2 4  26
            , Point2 5  17
@@ -95,7 +95,7 @@ myPoints = NonEmpty.fromList . map ext $
 
 mPoint2 ~[x,y] = Point2 x y
 
-testPoints = fmap ext $ NonEmpty.fromList
+testPoints = NonEmpty.fromList
   [ mPoint2 [0, 10]
   , mPoint2 [0, 5]
   , mPoint2 [1, 5]
@@ -108,7 +108,7 @@ testPoints = fmap ext $ NonEmpty.fromList
   , mPoint2 [2, 20]
   ]
 
-testPoints2 = fmap ext $ NonEmpty.fromList
+testPoints2 = NonEmpty.fromList
   [ mPoint2 [0, 10]
   , mPoint2 [1, 5]
   , mPoint2 [1, 4]

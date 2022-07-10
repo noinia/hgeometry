@@ -29,6 +29,17 @@ type instance NumType (WithExtra point extra d r) = r
 _WithExtra :: Iso (WithExtra point extra d r) (WithExtra point extra d s) (point d r :+ extra) (point d s :+ extra)
 _WithExtra = iso coerce coerce
 
+instance AsExt (WithExtra point extra d r) where
+  type CoreOf (WithExtra point extra d r)  = point d r
+  type ExtraOf (WithExtra point extra d r) = extra
+  _Ext = _WithExtra
+
+-- TODO: HACK
+instance AsExt (Point 2 r) where
+  type CoreOf (Point 2 r)  = Point 2 r
+  type ExtraOf (Point 2 r) = ()
+  _Ext = iso ext (view core)
+
 instance Affine (point d)  => Affine (WithExtra point extra d) where
   type Diff (WithExtra point extra d) = Diff (point d)
 

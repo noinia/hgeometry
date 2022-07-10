@@ -25,7 +25,7 @@ spec = do
         forM_ [1.0,1.1..1.6] $ \r ->
           (segment r (0.1 :: Double) `intersects` unitCircle @Double) `shouldBe` True
       it "touching line segment" $ do
-        let mySeg = ClosedLineSegment (ext $ Point2 @R (-1) 1) (ext $ Point2 1 1)
+        let mySeg = ClosedLineSegment (ext $ Point2 @Point @R (-1) 1) (ext $ Point2 1 1)
         (mySeg `intersects` unitCircle @R) `shouldBe` True
 
 

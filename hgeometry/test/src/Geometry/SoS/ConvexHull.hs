@@ -41,8 +41,8 @@ debug = fmap toSymbolic'
 fromSymbolic' :: (Arity d, Num r) => WithIndex (Point d (Symbolic i r) :+ e) -> Point d r :+ e
 fromSymbolic' = over core fromSymbolic . view theValue
 
-toSymbolic'                        :: (Arity d, ToAPoint point d r, Num r)
-                                   => WithIndex (point :+ e)
+toSymbolic'                        :: (Arity d, Point_ point d r, Num r)
+                                   => WithIndex (point d r :+ e)
                                    -> WithIndex (Point d (Symbolic SoSI r) :+ e)
 toSymbolic' (WithIndex i (p :+ e)) = WithIndex i ((toSymbolic $ WithIndex i p) :+ e)
 
@@ -51,7 +51,7 @@ toSymbolic' (WithIndex i (p :+ e)) = WithIndex i ((toSymbolic $ WithIndex i p) :
 
 newtype LH point = LH { unLH :: NonEmpty point } deriving (Eq,Show)
 
-instance (Num r, Ord r, ToAPoint point 2 r, HasIndex point) => Semigroup (LH point) where
+instance (Num r, Ord r, Point_ point 2 r, HasIndex (point 2 r)) => Semigroup (LH (point 2 r)) where
   (LH lh) <> (LH rh) = LH $ hull lowerTangent lh rh
 
 ----------------------------------------
@@ -83,8 +83,8 @@ incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
 --
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
-lowerTangent       :: forall point r f. (Ord r, Num r, Foldable1 f, ToAPoint point 2 r, HasIndex point)
-                   => f point -> f point -> Two (point :+ [point])
+lowerTangent       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r, HasIndex point)
+                   => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
 lowerTangent l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList

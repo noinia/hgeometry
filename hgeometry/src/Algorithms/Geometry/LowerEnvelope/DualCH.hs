@@ -12,6 +12,7 @@ import Data.Maybe(fromJust)
 import Control.Lens((^.))
 import Data.Ext
 import Geometry.Point
+import Geometry.Point.WithExtra
 import Geometry.Line
 import Data.Intersection
 import Algorithms.Geometry.ConvexHull.GrahamScan
@@ -31,20 +32,19 @@ type Envelope a r = NonEmpty (Line 2 r :+ a)
 lowerEnvelope :: (Ord r, Fractional r) => NonEmpty (Line 2 r :+ a) -> Envelope a r
 lowerEnvelope = NonEmpty.reverse . lowerEnvelopeWith upperHull
 
-
-type UpperHullAlgorithm a r = NonEmpty (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ a)
+type UpperHullAlgorithm point r = NonEmpty (point 2 r) -> NonEmpty (point 2 r)
 
 -- | Given a list of non-vertical lines, computes the lower envelope by computing
 -- the upper convex hull. It uses the given algorithm to do so
 --
 -- running time: O(time required by the given upper hull algorithm)
-lowerEnvelopeWith        :: (Fractional r, Ord r)
-                         => UpperHullAlgorithm (Line 2 r :+ a) r
+lowerEnvelopeWith        :: ( Fractional r, Ord r)
+                         => UpperHullAlgorithm (WithExtra Point (Line 2 r :+ a)) r
                          -> NonEmpty (Line 2 r :+ a) -> Envelope a r
 lowerEnvelopeWith chAlgo = fromPts . chAlgo . toPts
   where
-    toPts   = fmap (\l -> dualPoint' (l^.core) :+ l)
-    fromPts = fmap (^.extra)
+    toPts   = fmap (\l -> WithExtra $ dualPoint' (l^.core) :+ l)
+    fromPts = fmap (^._WithExtra.extra)
 
 -- | Computes the vertices of the envelope, in left to right order
 vertices   :: (Ord r, Fractional r) => Envelope a r -> [Point 2 r :+ (a,a)]
