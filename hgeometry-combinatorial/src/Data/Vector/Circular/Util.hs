@@ -25,8 +25,9 @@ import           Test.QuickCheck (Arbitrary (..), NonEmptyList (..))
 instance Foldable1 NV.NonEmptyVector
 
 -- | Access the ith item in the CircularVector (w.r.t the rotation) as a lens
-item   :: Int -> Lens' (CircularVector a) a
-item i = lens (`CV.index` i) (\s x -> CV.unsafeFromVector (CV.toVector s V.// [(i,x)]))
+item   :: Int -> IndexedLens' Int (CircularVector a) a
+item i = ilens (\v   -> (i, v `CV.index` i))
+               (\s x -> CV.unsafeFromVector (CV.toVector s V.// [(i,x)]))
 
 -- | All elements, starting with the focus, going to the right
 --

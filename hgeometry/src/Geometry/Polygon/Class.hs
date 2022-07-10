@@ -1,3 +1,5 @@
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Geometry.Polygon.Class
@@ -9,10 +11,14 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Class
-  ( HasVertices(..)
+  ( HasVertices(..), HasVertices'(..)
   , HasEdges(..)
 
   , Neighbours(..)
+
+  , HasOuterBoundary(..)
+
+  , numVertices, numEdges, numFaces
   ) where
 
 import           Control.Lens
@@ -26,6 +32,11 @@ class HasVertices graph graph' where
 
   -- | Traversal of all vertices in the graph
   vertices :: IndexedTraversal (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+
+class HasVertices' graph where
+  -- | Accessor to a given vertex.
+  vertexAt :: VertexIx graph
+           -> IndexedTraversal' (VertexIx graph) graph (Vertex graph)
 
 
 class HasEdges graph graph' where
@@ -53,7 +64,6 @@ class HasAdjacencies graph where
 
   -- | The neighbours of a particular vertex u
   neighboursOf   :: VertexIx graph -> Neighbours graph
-  neighboursOf u = undefined --    adjacencyLists . ix u
 
 --------------------------------------------------------------------------------
 
@@ -67,14 +77,43 @@ numFaces :: HasFaces graph graph => graph -> Int
 numFaces = lengthOf faces
 
 
-
-
-
-class HasOuterBoundary polygon where
-  -- | A fold
+class HasVertices' polygon => HasOuterBoundary polygon where
+  -- | A fold over all vertices of the outer boundary, the
+  -- vertices are traversed in CCW order.
   outerBoundary :: IndexedFold (VertexIx polygon) polygon (Vertex polygon)
 
--- outerBoundaryEdges :: IndexedFold (EdgeIx polygon) polygon (Edge polygon)
+  -- | A particular vertex of the outer polygon
+  outerBoundaryVertexAt   :: VertexIx polygon
+                          -> IndexedGetter (VertexIx polygon) polygon (Vertex polygon)
+
+  -- | A fold over all edges in the polygon. The edges are folded over
+  -- in CCW order, and each edge is associated with the index of its start vertex
+  -- outerBoundaryEdges :: IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  outerBoundaryEdges :: IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+
+  default outerBoundaryEdges
+    :: Enum (VertexIx polygon)
+    => IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  outerBoundaryEdges = ifolding $
+    \pg -> map ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
+         $ itoListOf outerBoundary pg
+    -- this feels much more clunky than it should be somehow.
+
+  -- | Get the edge that has the given vertex as its starting edge
+  outerBoundaryEdgeAt   :: VertexIx polygon
+                        -> IndexedGetter (VertexIx polygon) polygon
+                                         (Vertex polygon, Vertex polygon)
+
+  -- default implementation of outerBoundaryEdge
+  default outerBoundaryEdgeAt :: Enum (VertexIx polygon)
+                              => VertexIx polygon
+                              -> IndexedGetter (VertexIx polygon) polygon
+                                               (Vertex polygon, Vertex polygon)
+  outerBoundaryEdgeAt i = ito $
+    \pg -> (i, (pg^.outerBoundaryVertexAt i, pg^.outerBoundaryVertexAt (succ i)))
+
+  {-# MINIMAL outerBoundary, outerBoundaryVertexAt #-}
+
 
 
 class HasHoles face face' where

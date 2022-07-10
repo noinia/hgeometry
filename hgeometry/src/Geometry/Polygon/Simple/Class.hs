@@ -18,7 +18,7 @@ import           Geometry.Point.Class
 
 --------------------------------------------------------------------------------
 
-class ( HasVertices (polygon point r) (polygon point r)
+class ( HasOuterBoundary (polygon point r)
       , Vertex      (polygon point r) ~ point 2 r
       , Point_ point 2 r
       , VertexIx    (polygon point r) ~ Int
