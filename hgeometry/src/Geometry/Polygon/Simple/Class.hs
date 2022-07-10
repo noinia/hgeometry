@@ -10,19 +10,22 @@
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Simple.Class
   ( SimplePolygon_(..)
+
+  , signedArea, signedArea2X
   ) where
 
 import           Control.Lens
 import           Geometry.Polygon.Class
 import           Geometry.Point.Class
+import           Geometry.Vector
+import qualified Data.Foldable as F
 
 --------------------------------------------------------------------------------
 
-class ( HasOuterBoundary (polygon point r)
-      , Vertex      (polygon point r) ~ point 2 r
-      , Point_ point 2 r
-      , VertexIx    (polygon point r) ~ Int
-      ) => SimplePolygon_ polygon point r where
+-- | A class representing simple polygons; i.e. polygons without holes
+-- (and without self intersections in the boundary.)
+class ( Polygon_ simplePolygon point r
+      ) => SimplePolygon_ simplePolygon point r where
 
   -- | given the vertices of the polygon, in CCW order, constructs the
   -- polygon. The vertices are numbered in the order they are given.
@@ -31,15 +34,39 @@ class ( HasOuterBoundary (polygon point r)
   --      - at least 3 vertices, not all colinear
   --      - no repeated vertices
   --      - no self-inttersections
-  uncheckedFromCCWPoints :: Foldable f => f (point 2 r) -> polygon point r
+  uncheckedFromCCWPoints :: Foldable f => f (point 2 r) -> simplePolygon point r
 
   -- | given the vertices of the polygon, constructs the polygon. The
   -- vertices are numbered in the order they are given.
-  fromPoints :: Foldable f => f (point 2 r) -> Maybe (polygon point r)
+  fromPoints :: Foldable f => f (point 2 r) -> Maybe (simplePolygon point r)
+
+  -- | Compute the centroid of a simple polygon.
+  centroid      :: Fractional r => simplePolygon point r -> point 2 r
+  centroid poly = fromVector $ sum' xs ^/ (6 * signedArea poly)
+    where
+      xs = [ (p^.asVector ^+^ q^.asVector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
+           | (p,q) <- poly ^..outerBoundaryEdges   ]
+      sum' = F.foldl' (^+^) zero
 
 
+--------------------------------------------------------------------------------
 
--- class ( Polygon_ polygon point r ) => SimplePolygon_ polygon point r where
+-- | Compute the signed area of a simple polygon. When the vertices
+-- are given in counter clockwise order (as they should be), the area
+-- will be positive.
+signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
+                => simplePolygon point r -> r
+signedArea poly = signedArea2X poly / 2
 
-
--- class Polygon_ polygon point r where
+-- | Compute the signed area times 2 of a simple polygon. When the
+-- vertices are given in counter clockwise order (as they should be),
+-- the area will be positive.
+--
+-- If the vertices were in clockwise order, the signed area would have
+-- be negative.
+--
+-- \(O(n)\)
+signedArea2X      :: (Num r, SimplePolygon_ simplePolygon point r)
+                  => simplePolygon point r -> r
+signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
+                        | (p,q) <- poly ^..outerBoundaryEdges ]

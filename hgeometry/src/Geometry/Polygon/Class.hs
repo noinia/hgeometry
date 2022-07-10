@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
@@ -17,12 +18,15 @@ module Geometry.Polygon.Class
   , Neighbours(..)
 
   , HasOuterBoundary(..)
+  , Polygon_(..)
 
   , numVertices, numEdges, numFaces
   ) where
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Geometry.Point.Class
+import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -34,6 +38,12 @@ class HasVertices graph graph' where
   vertices :: IndexedTraversal (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
 
 class HasVertices' graph where
+  -- | Traversal of all vertices in the graph, non type changing.
+  vertices' :: IndexedTraversal' (VertexIx graph) graph (Vertex graph)
+  default vertices'
+    :: HasVertices graph graph => IndexedTraversal' (VertexIx graph) graph (Vertex graph)
+  vertices' = vertices
+
   -- | Accessor to a given vertex.
   vertexAt :: VertexIx graph
            -> IndexedTraversal' (VertexIx graph) graph (Vertex graph)
@@ -77,19 +87,28 @@ numFaces :: HasFaces graph graph => graph -> Int
 numFaces = lengthOf faces
 
 
+-- ^ A class for items that have an outer boundary.
 class HasVertices' polygon => HasOuterBoundary polygon where
   -- | A fold over all vertices of the outer boundary, the
   -- vertices are traversed in CCW order.
+  --
+  -- running time :: \(O(n)\)
   outerBoundary :: IndexedFold (VertexIx polygon) polygon (Vertex polygon)
 
   -- | A particular vertex of the outer polygon
+  --
+  -- running time: \(O(1)\)
   outerBoundaryVertexAt   :: VertexIx polygon
                           -> IndexedGetter (VertexIx polygon) polygon (Vertex polygon)
 
   -- | A fold over all edges in the polygon. The edges are folded over
   -- in CCW order, and each edge is associated with the index of its start vertex
   -- outerBoundaryEdges :: IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  --
+  --
+  -- running time :: \(O(n)\)
   outerBoundaryEdges :: IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+
 
   default outerBoundaryEdges
     :: Enum (VertexIx polygon)
@@ -100,11 +119,14 @@ class HasVertices' polygon => HasOuterBoundary polygon where
     -- this feels much more clunky than it should be somehow.
 
   -- | Get the edge that has the given vertex as its starting edge
+  --
+  -- running time: \(O(1)\)
   outerBoundaryEdgeAt   :: VertexIx polygon
                         -> IndexedGetter (VertexIx polygon) polygon
                                          (Vertex polygon, Vertex polygon)
 
-  -- default implementation of outerBoundaryEdge
+  -- default implementation of outerBoundaryEdge. It achieves the
+  -- desired running time when indexing is indeed constant.
   default outerBoundaryEdgeAt :: Enum (VertexIx polygon)
                               => VertexIx polygon
                               -> IndexedGetter (VertexIx polygon) polygon
@@ -121,36 +143,40 @@ class HasHoles face face' where
   type Hole face
   holes :: IndexedTraversal (HoleIx face) face face' (Hole face) (Hole face')
 
+--------------------------------------------------------------------------------
 
-class Polygon_ polygon point r where
+-- | A class representing (planar) polygons. The edges of the polygon
+-- may not intersect.
+class ( HasOuterBoundary (polygon point r)
+      , Vertex      (polygon point r) ~ point 2 r
+      , Point_ point 2 r
+      , VertexIx    (polygon point r) ~ Int
+      ) => Polygon_ polygon point r where
+
+  -- | The area of a polygon
+  --
+  -- running time: \(O(n)\)
   area :: Fractional r => polygon point r -> r
 
+--------------------------------------------------------------------------------
 
-  -- area = abs $ signedArea poly
-
-signedArea :: polygon point r -> r
-signedArea = undefined
-
--- centroid :: polygon point r -> point 2 r
+class ( Polygon_ multiPolygon point r
+      ) => MultiPolygon_ multiPolygon point r where
 
 
 
--- pickPoint :: polygon point r -> point d r
+--------------------------------------------------------------------------------
 
 
--- isTriangle :: simplePolygon point r -> bool
+--------------------------------------------------------------------------------
 
+-- data MultiPG
+-- data SimplePG
 
--- signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
---                 => simplepolygon point r -> r
--- signedArea poly = signedArea2X poly / 2
+-- class DerivingStrategyPolygon strat polygon point r | polygon point r -> strat where
+--   derivedArea :: Fractional r => polygon point r -> r
 
--- -- | Compute the signed area times 2 of a simple polygon. The the vertices are in
--- -- clockwise order, the signed area will be negative, if the verices are given
--- -- in counter clockwise order, the area will be positive.
--- signedArea2X      :: (Num r, SimplePolygon_ simplePolygon point r)
---                   => simplepolygon p r -> r
--- signedArea2X poly = x
---   where
---     x = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
---             | LineSegment' p q <- F.toList $ outerBoundaryEdges poly  ]
+-- instance (SimplePolygon_ polygon point r) =>  DerivingStrategyPolygon SimplePG polygon point r where
+--   derivedArea = signedArea -- abs . signedArea
+--                 -- since the polygon is stored in CCW order, there is no need to actually
+--                 -- use the absolute value.
