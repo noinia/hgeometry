@@ -47,6 +47,7 @@ module Geometry.Point
 import Geometry.Line.Internal
 import Geometry.Point.Class
 import Geometry.Point.Boxed
+import Geometry.Point.Patterns
 import Geometry.Point.EuclideanDistance
 import Geometry.Point.Orientation
 import Geometry.Point.Orientation.Degenerate

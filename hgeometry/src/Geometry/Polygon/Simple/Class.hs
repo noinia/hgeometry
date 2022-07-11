@@ -11,7 +11,7 @@
 module Geometry.Polygon.Simple.Class
   ( SimplePolygon_(..)
 
-  , signedArea, signedArea2X
+  , signedArea, area2X
   ) where
 
 import           Control.Lens
@@ -58,15 +58,22 @@ signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
                 => simplePolygon point r -> r
 signedArea poly = signedArea2X poly / 2
 
--- | Compute the signed area times 2 of a simple polygon. When the
--- vertices are given in counter clockwise order (as they should be),
--- the area will be positive.
+-- | Compute the area times 2 of a simple polygon. When the vertices
+-- are given in counter clockwise order (as they should be), the area
+-- will be positive.
 --
 -- If the vertices were in clockwise order, the signed area would have
 -- be negative.
 --
--- \(O(n)\)
-signedArea2X      :: (Num r, SimplePolygon_ simplePolygon point r)
-                  => simplePolygon point r -> r
-signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
-                        | (p,q) <- poly ^..outerBoundaryEdges ]
+-- running time: \(O(n)\)
+area2X :: (Num r, SimplePolygon_ simplePolygon point r)
+       => simplePolygon point r -> r
+area2X = signedArea2X
+
+
+
+
+-- | \( O(n) \) Test if the outer boundary of the polygon is in clockwise or counter
+-- clockwise order.
+-- isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
+-- isCounterClockwise = (\x -> x == abs x) . signedArea2X . view outerBoundary

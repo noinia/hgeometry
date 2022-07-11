@@ -18,6 +18,9 @@ module Geometry.Polygon.Class
   , Neighbours(..)
 
   , HasOuterBoundary(..)
+  , signedArea2X
+  , minimumVertexBy, maximumVertexBy
+
   , Polygon_(..)
 
   , numVertices, numEdges, numFaces
@@ -25,9 +28,14 @@ module Geometry.Polygon.Class
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromMaybe)
+import           Data.Semigroup.Foldable
 import           Geometry.Point.Class
 import           Geometry.Vector
 
+import           Data.Functor.Apply (Apply)
+import           Data.Functor.Contravariant (phantom)
 --------------------------------------------------------------------------------
 
 class HasVertices' graph where
@@ -103,6 +111,9 @@ numEdges = lengthOf edges'
 numFaces :: HasFaces' graph => graph -> Int
 numFaces = lengthOf faces'
 
+--------------------------------------------------------------------------------
+
+
 
 -- ^ A class for items that have an outer boundary.
 class HasVertices' polygon => HasOuterBoundary polygon where
@@ -110,7 +121,7 @@ class HasVertices' polygon => HasOuterBoundary polygon where
   -- vertices are traversed in CCW order.
   --
   -- running time :: \(O(n)\)
-  outerBoundary :: IndexedFold (VertexIx polygon) polygon (Vertex polygon)
+  outerBoundary :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
 
   -- | A particular vertex of the outer polygon
   --
@@ -124,16 +135,20 @@ class HasVertices' polygon => HasOuterBoundary polygon where
   --
   --
   -- running time :: \(O(n)\)
-  outerBoundaryEdges :: IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  outerBoundaryEdges :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
 
+
+  {-# MINIMAL outerBoundary, outerBoundaryVertexAt #-}
 
   default outerBoundaryEdges
     :: Enum (VertexIx polygon)
-    => IndexedFold (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
-  outerBoundaryEdges = ifolding $
-    \pg -> map ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
+    => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  outerBoundaryEdges = ifolding1 $
+    \pg -> fmap ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
+         . NonEmpty.fromList
          $ itoListOf outerBoundary pg
     -- this feels much more clunky than it should be somehow.
+    -- TODO: I would like an 'itoNonEmptyOf'
 
   -- | Get the edge that has the given vertex as its starting edge
   --
@@ -141,7 +156,6 @@ class HasVertices' polygon => HasOuterBoundary polygon where
   outerBoundaryEdgeAt   :: VertexIx polygon
                         -> IndexedGetter (VertexIx polygon) polygon
                                          (Vertex polygon, Vertex polygon)
-
   -- default implementation of outerBoundaryEdge. It achieves the
   -- desired running time when indexing is indeed constant.
   default outerBoundaryEdgeAt :: Enum (VertexIx polygon)
@@ -151,8 +165,69 @@ class HasVertices' polygon => HasOuterBoundary polygon where
   outerBoundaryEdgeAt i = ito $
     \pg -> (i, (pg^.outerBoundaryVertexAt i, pg^.outerBoundaryVertexAt (succ i)))
 
-  {-# MINIMAL outerBoundary, outerBoundaryVertexAt #-}
 
+--------------------------------------------------------------------------------
+-- end of te HasOuterBoundary class
+--------------------------------------------------------------------------------
+
+-- | Version of ifolding to build an 'IndexedFold1'
+--
+-- taken and modified directly from lens
+ifolding1       :: (Foldable1 f, Indexable i p, Contravariant g, Apply g)
+                => (s -> f (i, a)) -> Over p g s t a b
+ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
+{-# INLINE ifolding1 #-}
+
+
+-- toNonEmptyOf :: Getting (NonEmptyDList a) s a -> s -> NonEmpty a
+-- itoNonEmptyOf :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)
+-- itoNonEmptyOf   :: IndexedGetting i (Endo (NonEmpty (i, a))) s a -> s -> NonEmpty (i, a)
+-- itoNonEmptyOf  :: IndexedGetting i (NonEmptyDList a) (Indexed i a2 b) a
+--      -> (i -> a2 -> b) -> NonEmpty a
+-- itoNonEmptyOf l = toNonEmptyOf l . Indexed
+
+
+-- itoListOf l = ifoldrOf l (\i a -> ((i,a):)) []
+
+
+--------------------------------------------------------------------------------
+-- * HasOuterBoundary Helpers
+
+-- | Yield the minimum  vertex of a polygon according to the given comparison function.
+--
+-- running time \( O(n) \)
+minimumVertexBy     :: (HasOuterBoundary polygon)
+                    => (Vertex polygon -> Vertex polygon -> Ordering)
+                    -> polygon
+                    -> Vertex polygon
+minimumVertexBy cmp = fromMaybe (error "minimumVertexBy: absurd")
+                    . minimumByOf outerBoundary cmp
+
+-- | Yield the maximum vertex of a polygon according to the given comparison function.
+--
+-- running time \( O(n) \)
+maximumVertexBy     :: (HasOuterBoundary polygon)
+                    => (Vertex polygon -> Vertex polygon -> Ordering)
+                    -> polygon
+                    -> Vertex polygon
+maximumVertexBy cmp = fromMaybe (error "maximumVertexBy: absurd")
+                    . maximumByOf outerBoundary cmp
+
+-- | Compute the signed area times 2 of a simple polygon. The the
+-- vertices are in clockwise order, the signed area will be negative,
+-- if the verices are given in counter clockwise order, the area will
+-- be positive.
+--
+-- running time: \(O(n)\)
+signedArea2X      :: (Num r, HasOuterBoundary simplePolygon
+                     , Point_ point 2 r
+                     , Vertex simplePolygon ~ point 2 r
+                     ) => simplePolygon -> r
+signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
+                        | (p,q) <- poly ^..outerBoundaryEdges ]
+
+
+--------------------------------------------------------------------------------
 
 
 class HasHoles face face' where
@@ -175,10 +250,25 @@ class ( HasOuterBoundary (polygon point r)
   -- running time: \(O(n)\)
   area :: Fractional r => polygon point r -> r
 
+
+  -- | Finds the extreme points, minimum and maximum, in a given direction
+  --
+  -- running time: \(O(n)\)
+  extremes      :: (Num r, Ord r)
+                => Vector 2 r -> polygon point r -> (point 2 r, point 2 r)
+  extremes u pg = ( minimumVertexBy (cmpExtreme u) pg
+                  , maximumVertexBy (cmpExtreme u) pg
+                  )
+
+--------------------------------------------------------------------------------
+-- end of te Polygon_ class
 --------------------------------------------------------------------------------
 
-
-
+-- | Comparison that compares which point is 'larger' in the direction given by
+-- the vector u.
+cmpExtreme       :: (Num r, Ord r, Point_ point 2 r)
+                 => Vector 2 r -> point 2 r -> point 2 r -> Ordering
+cmpExtreme u p q = u `dot` (p .-. q) `compare` 0
 
 --------------------------------------------------------------------------------
 
