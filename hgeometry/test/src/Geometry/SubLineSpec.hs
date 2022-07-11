@@ -43,7 +43,7 @@ spec = do
         mySeg    = ClosedLineSegment (origin :+ 'a') (Point2 14 0 :+ 'b')
 
         myLine :: SubLine 2 () (UnBounded R) R
-        myLine   = fromLine $ lineThrough (Point2 @Point 0 0) (Point2 10 0)
+        myLine   = fromLine $ lineThrough (Point2 0 0) (Point2 10 0)
 
         myAnswer :: Interval (Either () Char) (UnBounded R)
         myAnswer = ClosedInterval (Val 0 :+ Right 'a') (Val (7 / 5) :+ Right 'b')

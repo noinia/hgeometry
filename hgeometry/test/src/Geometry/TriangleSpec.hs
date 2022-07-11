@@ -30,7 +30,7 @@ spec = do describe "intersection tests" $ do
                 `shouldBe` (coRec $ ClosedLineSegment (ext $ Point2 10 (3 :: Rational))
                                                       (ext $ Point2 3  (3 :: Rational)))
               (hor 10 `intersect` t)
-                `shouldBe` (coRec $ Point2 @Point 10 (10 :: Rational))
+                `shouldBe` (coRec $ Point2 10 (10 :: Rational))
               (hor 11 `intersect` t)
                 `shouldBe` (coRec NoIntersection)
           it "inTriangle same as inTriangleFrac" $ property $ \q (t :: Triangle 2 () R) ->

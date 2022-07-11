@@ -57,12 +57,12 @@ findExtremes (p :| pts ) = foldr f (STR p p []) pts
                          (GT,EQ) -> STR l r ms -- ditch q; it is the same as r
                          (GT,LT) -> STR l r (q:ms)
 
-    addIfNot a@(Point2 ax ay) (Point2 bx by) xs
+    addIfNot a@(Point2_ ax ay) (Point2_ bx by) xs
       | (ax,ay) /= (bx,by) = a:xs
       | otherwise          = xs
 
 incXdecY  :: (Ord r, Point_ point 2 r) => point 2 r -> point 2 r -> Ordering
-incXdecY (Point2 px py) (Point2 qx qy) = compare px qx <> compare qy py
+incXdecY (Point2_ px py) (Point2_ qx qy) = compare px qx <> compare qy py
 
 -- | include neigher left or right
 --

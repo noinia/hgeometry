@@ -178,8 +178,8 @@ disk p q r = match (f p `intersect` f q) $
 -- | Creates a circle from three points on the boundary
 from3Points :: (Fractional r, Point_ point 2 r)
             => point 2 r :+ p -> point 2 r :+ q -> point 2 r :+ s -> Circle () r
-from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
-    Circle (ext $ fromGenericPoint c) (squaredEuclideanDist c p)
+from3Points (p@(Point2_ px py) :+ _) (Point2_ qx qy :+ _) (Point2_ sx sy :+ _) =
+    Circle (ext c) (squaredEuclideanDist c $ fromGenericPoint p)
   where
     f  x y = x^2 + y^2
     fx x y = V3 (f x y) y       1

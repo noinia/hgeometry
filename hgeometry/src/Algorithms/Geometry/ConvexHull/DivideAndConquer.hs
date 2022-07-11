@@ -86,4 +86,4 @@ hull tangent lh rh = let Two (l :+ lh') (r :+ rh') = tangent (NonEmpty.reverse l
 --------------------------------------------------------------------------------
 
 incXdecY  :: (Ord r, Point_ point 2 r) => point 2 r -> point 2 r -> Ordering
-incXdecY (Point2 px py) (Point2 qx qy) = compare px qx <> compare qy py
+incXdecY (Point2_ px py) (Point2_ qx qy) = compare px qx <> compare qy py

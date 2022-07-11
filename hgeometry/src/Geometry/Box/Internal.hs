@@ -354,8 +354,8 @@ instance (Num r, Ord r) => HasSquaredEuclideanDistance (Box 2 p r) where
   pointClosestToWithDistance q bx =
       case ((q^.xCoord) `R.inRange` hor, (q^.yCoord) `R.inRange` ver) of
                       (False,False) -> if q^.yCoord < b
-                                       then closest (Point2 l b) (Point2 r b)
-                                       else closest (Point2 l t) (Point2 r t)
+                                       then closest (Point2_ l b) (Point2_ r b)
+                                       else closest (Point2_ l t) (Point2_ r t)
                       (True, False) -> if q^.yCoord < b
                                        then (q&yCoord .~ b, sq $ q^.yCoord - b)
                                        else (q&yCoord .~ t, sq $ q^.yCoord - t)

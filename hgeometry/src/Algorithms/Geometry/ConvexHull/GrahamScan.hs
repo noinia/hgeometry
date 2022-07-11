@@ -94,7 +94,7 @@ hull f pts         = hull' .  f
                    . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
 incXdecY  :: (Ord r, Point_ point 2 r) => point 2 r -> point 2 r -> Ordering
-incXdecY (Point2 px py) (Point2 qx qy) =
+incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
 
 

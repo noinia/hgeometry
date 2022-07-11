@@ -50,7 +50,7 @@ upperHull     ::  (Num r, Ord r, Point_ point 2 r) =>  NonEmpty (point 2 r) -> N
 upperHull pts = repeatedly cmp steepestCwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp (NonEmpty.toList pts)
-    cmp           = comparing (\(Point2 x y) -> (x, Down y))
+    cmp           = comparing (\(Point2_ x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
                     -- also use cmp as the comparator, so that we also select the last
                     -- vertical segment.
@@ -61,9 +61,9 @@ upperHull'     ::  (Num r, Ord r, Point_ point 2 r)
 upperHull' pts = pruneVertical $ repeatedly cmp steepestCwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp0 (NonEmpty.toList pts)
-    cmp0          = comparing (\(Point2 x y) -> (x, Down y))
+    cmp0          = comparing (\(Point2_ x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
-    cmp           = comparing (\(Point2 x y) -> (x, y))
+    cmp           = comparing (\(Point2_ x y) -> (x, y))
                     -- for the rest select them in normal
                     -- lexicographic order, this causes the last
                     -- vertical segment to be ignored.
@@ -76,9 +76,9 @@ lowerHull     ::  (Num r, Ord r, Point_ point 2 r) =>  NonEmpty (point 2 r) -> N
 lowerHull pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp0 (NonEmpty.toList pts)
-    cmp0          = comparing (\(Point2 x y) -> (x, Down y))
+    cmp0          = comparing (\(Point2_ x y) -> (x, Down y))
                     -- start from the topmost point that has minimum x-coord
-    cmp           = comparing (\(Point2 x y) -> (x, y))
+    cmp           = comparing (\(Point2_ x y) -> (x, y))
                     -- for the rest of the comparions use the normal
                     -- lexicographic comparing order.
 
@@ -90,7 +90,7 @@ lowerHull'     :: (Num r, Ord r, Point_ point 2 r) => NonEmpty (point 2 r) -> No
 lowerHull' pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
   where
     (s:_ :+ rest) = extractMinimaBy cmp (NonEmpty.toList pts)
-    cmp           = comparing (\(Point2 x y) -> (x, y))
+    cmp           = comparing (\(Point2_ x y) -> (x, y))
 
 -- | Find the next point in counter clockwise order, i.e. the point
 -- with minimum slope w.r.t. the given point.
