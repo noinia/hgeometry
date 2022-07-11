@@ -178,6 +178,11 @@ ifolding1       :: (Foldable1 f, Indexable i p, Contravariant g, Apply g)
 ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
 {-# INLINE ifolding1 #-}
 
+-- -- | The 'IndexedTraversal' of a 'TraversableWithIndex' container.
+-- itraversed1 :: TraversableWithIndex i t => IndexedTraversal1 i (t a) (t b) a b
+-- itraversed1 = conjoined traverse1 (itraverse1 . indexed)
+-- {-# INLINE [0] itraversed1 #-}
+
 
 -- toNonEmptyOf :: Getting (NonEmptyDList a) s a -> s -> NonEmpty a
 -- itoNonEmptyOf :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)

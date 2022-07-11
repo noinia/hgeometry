@@ -11,8 +11,8 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Point
-  ( Point_(..)
-  , Point(.., Point1, Point2, Point3, Point4)
+  ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , Point(Point, toVec, Point1, Point2, Point3, Point4)
   , origin, vector
   , pointFromList
   , projectPoint
