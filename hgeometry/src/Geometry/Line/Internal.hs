@@ -23,7 +23,6 @@ import           GHC.Generics (Generic)
 import           Geometry.Point.Class
 import           Geometry.Point.EuclideanDistance
 import           Geometry.Point.Internal
-import           Geometry.Point.Patterns
 import           Geometry.Point.Orientation.Degenerate
 import           Geometry.Properties
 import           Geometry.Vector

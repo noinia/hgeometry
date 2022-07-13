@@ -44,35 +44,25 @@ type OpenLineSegment   = LineSegmentF Open
 newtype LineSegmentF endPoint d point r =
   MkLineSegment (Interval endPoint (point d r))
 
-
-
 -- | Pattern for constructing line segments
 pattern LineSegment     :: endPoint (point d r)
                         -> endPoint (point d r)
                         -> LineSegmentF endPoint d point r
-pattern LineSegment s t <- (endPoints -> (s,t))
-  where
-    LineSegment s t = MkLineSegment $ Interval s t
+pattern LineSegment s t = MkLineSegment (Interval s t)
 {-# COMPLETE LineSegment #-}
-
 
 -- | Pattern for specifically creating Closed line segments
 pattern ClosedLineSegment     :: point d r -> point d r -> ClosedLineSegment d point r
-pattern ClosedLineSegment s t <- (endPoints -> (Closed s, Closed t))
-  where
-    ClosedLineSegment s t = LineSegment (Closed s) (Closed t)
+pattern ClosedLineSegment s t = LineSegment (Closed s) (Closed t)
+{-# COMPLETE ClosedLineSegment #-}
 
 -- | Pattern for specifically creating Open line segments
 pattern OpenLineSegment     :: point d r -> point d r -> OpenLineSegment d point r
-pattern OpenLineSegment s t <- (endPoints -> (Open s, Open t))
-  where
-    OpenLineSegment s t = LineSegment (Open s) (Open t)
+pattern OpenLineSegment s t = LineSegment (Open s) (Open t)
+{-# COMPLETE OpenLineSegment #-}
 
 --------------------------------------------------------------------------------
 
-
-endPoints :: LineSegmentF endPoint d point r -> (endPoint (point d r), endPoint (point d r))
-endPoints (MkLineSegment (Interval s t)) = (s,t)
 
 -- | Iso for turning a LineSegment into an interval.
 _WrappedInterval :: Control.Lens.Iso (LineSegmentF endPoint  d point r)
@@ -107,4 +97,4 @@ instance Control.Lens.Traversable endPoint => HasPoints (LineSegmentF endPoint d
 
 instance (EndPoint_ endPoint, Point_ point d r)
          => LineSegment_ (LineSegmentF endPoint) d point r where
-  uncheckedLineSegment = LineSegment
+  uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)

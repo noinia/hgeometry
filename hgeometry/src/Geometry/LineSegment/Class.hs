@@ -15,18 +15,20 @@ module Geometry.LineSegment.Class
   , interpolate
   ) where
 
-import Geometry.Interval.Class
-import Geometry.Interval.Boxed
-import Geometry.Interval.EndPoint
 import Control.Arrow ((&&&))
 import Control.Lens
 import Data.Kind
+import Data.Ord (comparing)
 import Data.Tuple (swap)
 import GHC.TypeNats
 import Geometry.Boundary
+import Geometry.Interval.Boxed
+import Geometry.Interval.Class
+import Geometry.Interval.EndPoint
 import Geometry.Point.Class
 import Geometry.Properties
-import           Geometry.Vector
+import Geometry.Vector
+
 -- import Data.Range (EndPoint(..))
 
 --------------------------------------------------------------------------------
@@ -35,7 +37,7 @@ class ( HasStart (lineSegment d point r) (point d r)
       , HasEnd   (lineSegment d point r) (point d r)
       , Point_ point d r
       ) => LineSegment_ lineSegment d point r where
-  {-# MINIMAL uncheckedLineSegment-}
+  {-# MINIMAL uncheckedLineSegment #-}
 
   -- | Create a segment
   --
@@ -44,8 +46,10 @@ class ( HasStart (lineSegment d point r) (point d r)
 
   -- | smart constructor that creates a valid segment, i.e. it
   -- validates that the endpoints are disjoint.
-  mkLineSegment :: point d r -> point d r -> Maybe (lineSegment d point r)
-
+  mkLineSegment                  :: Eq r => point d r -> point d r -> Maybe (lineSegment d point r)
+  mkLineSegment s t
+    | s^.asVector /= t^.asVector = Just $ uncheckedLineSegment s t
+    | otherwise                  = Nothing
 
 -- | Constructs a line segment from the start and end point
 pattern LineSegment_ :: forall lineSegment d point r. LineSegment_ lineSegment d point r
@@ -72,5 +76,52 @@ interpolate       :: forall lineSegment d point r
                   => r -> lineSegment d point r -> point d r
 interpolate lam (LineSegment_ s t) =
   fromVector $ (s^.asVector ^* (1-lam)) ^+^ (t^.asVector ^* lam)
+
+
+--------------------------------------------------------------------------------
+-- * Convenience functions for working with 2-dimensional line segments
+
+-- | Given a y-coordinate, compare the segments based on the
+-- x-coordinate of the intersection with the horizontal line through y
+ordAtY   :: (Fractional r, Ord r, LineSegment_ lineSegment 2 point r)
+         => r
+         -> lineSegment 2 point r -> lineSegment 2 point r -> Ordering
+ordAtY y = comparing (xCoordAt y)
+
+-- | Given an x-coordinate, compare the segments based on the
+-- y-coordinate of the intersection with the horizontal line through y
+ordAtX   :: (Fractional r, Ord r, LineSegment_ lineSegment 2 point r)
+         => r
+         -> lineSegment 2 point r -> lineSegment 2 point r -> Ordering
+ordAtX x = comparing (yCoordAt x)
+
+-- | Given a y coord and a line segment that intersects the horizontal line
+-- through y, compute the x-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
+xCoordAt :: (Fractional r, Ord r, LineSegment_ lineSegment 2 point r)
+         => r -> lineSegment 2 point r -> r
+xCoordAt y (LineSegment_ (Point2_ px py) (Point2_ qx qy))
+      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
+                                    -- precondition it intersects the sweep
+                                    -- line, we return the x-coord of the
+                                    -- rightmost endpoint.
+      | otherwise    = px + alpha * (qx - px)
+  where
+    alpha = (y - py) / (qy - py)
+
+-- | Given an x-coordinate and a line segment that intersects the vertical line
+-- through x, compute the y-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
+yCoordAt :: (Fractional r, Ord r, LineSegment_ lineSegment 2 point r)
+         => r -> lineSegment 2 point r -> r
+yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
+    | px == qx  = py `max` qy -- s is vertical, since by the precondition it
+                              -- intersects we return the y-coord of the topmost
+                              -- endpoint.
+    | otherwise = py + alpha * (qy - py)
+  where
+    alpha = (x - px) / (qx - px)
 
 --------------------------------------------------------------------------------

@@ -28,6 +28,8 @@ class Traversable endPoint => EndPoint_ endPoint where
   endPoint     :: Lens (endPoint r) (endPoint r') r r'
   -- | Report the type of the endpoint
   endPointType :: endPoint r -> EndPointType
+  -- | constructs a "default" enpoint
+  mkEndPoint :: r -> endPoint r
 
 -- | Possible endpoint types; open or closed
 data EndPointType = OpenEndPoint | ClosedEndPoint deriving (Show,Eq)
@@ -42,6 +44,8 @@ instance EndPoint_ EndPoint where
   endPoint     =
     lens (\(EndPoint _ p) -> p) (\(EndPoint t _) p -> EndPoint t p)
   endPointType (EndPoint t _) = t
+  -- | By default we consider endpoints closed
+  mkEndPoint = EndPoint ClosedEndPoint
 
 --------------------------------------------------------------------------------
 
@@ -51,7 +55,7 @@ newtype Closed r = Closed r deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 instance EndPoint_ Closed where
   endPoint = lens (\(Closed x) -> x) (\_ x -> Closed x)
   endPointType = const ClosedEndPoint
-
+  mkEndPoint = Closed
 
 --------------------------------------------------------------------------------
 
@@ -61,3 +65,4 @@ newtype Open r = Open r deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 instance EndPoint_ Open where
   endPoint = lens (\(Open x) -> x) (\_ x -> Open x)
   endPointType = const OpenEndPoint
+  mkEndPoint = Open
