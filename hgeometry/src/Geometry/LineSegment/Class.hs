@@ -1,140 +1,76 @@
-{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Geometry.LineSegment.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class representing line segments
+--
+--------------------------------------------------------------------------------
 module Geometry.LineSegment.Class
-  ( Interval_(..)
-  , Interval(Interval)
+  ( LineSegment_(..), pattern LineSegment_
 
-
-  , LineSegment_
+  , interpolate
   ) where
 
+import Geometry.Interval.Class
+import Geometry.Interval.Boxed
+import Geometry.Interval.EndPoint
+import Control.Arrow ((&&&))
 import Control.Lens
 import Data.Kind
+import Data.Tuple (swap)
 import GHC.TypeNats
 import Geometry.Boundary
+import Geometry.Point.Class
 import Geometry.Properties
+import           Geometry.Vector
 -- import Data.Range (EndPoint(..))
 
 --------------------------------------------------------------------------------
 
-class HasStart seg p where
-  start :: Lens' seg p
-
-class HasEnd seg p where
-  end :: Lens' seg p
-
--- type Interval_ :: ( (Type -> Type) -> Type -> Type )
---                -> (Type -> Type) -- ^ the endpoint
---                -> Type    -- ^ the numeric type
---                -> Constraint
-class ( HasStart (interval endPoint r) (endPoint r)
-      , HasEnd   (interval endPoint r) (endPoint r)
-      , EndPoint_ endPoint
-      ) => Interval_ interval endPoint r  where
-
-
-
-
---------------------------------------------------------------------------------
-
-inInterval       :: forall interval endPoint r. (Ord r, Interval_ interval endPoint r)
-                 => r -> interval endPoint r -> PointLocationResult
-x `inInterval` i =
-    case x `compare` (i^.start.endPoint @endPoint) of
-      LT -> Outside
-      EQ -> OnBoundary
-      GT -> case x `compare` (i^.end.endPoint @endPoint) of
-              LT -> Inside
-              EQ -> OnBoundary
-              GT -> Outside
-
-
-
-
---------------------------------------------------------------------------------
-
-data Interval endPoint r = Interval !(endPoint r) !(endPoint r)
-
-data EndPointType = OpenEndPoint | ClosedEndPoint deriving (Show,Eq)
-
-class EndPoint_ endPoint where
-  endPoint     :: Lens (endPoint r) (endPoint r') r r'
-  endPointType :: endPoint r -> EndPointType
-
-----------------------------------------
-
-data IntervalEndPoint r = IntervalEndPoint EndPointType r
-                        deriving (Show,Eq)
-
-instance EndPoint_ IntervalEndPoint where
-  endPoint     =
-    lens (\(IntervalEndPoint _ p) -> p) (\(IntervalEndPoint t _) p -> IntervalEndPoint t p)
-  endPointType (IntervalEndPoint t _) = t
-
-
-
-
---------------------------------------------------------------------------------
-
-
-
-instance HasStart (Interval endPoint r) (endPoint r) where
-  start = lens (\(Interval s _) -> s) (\(Interval _ t) s -> Interval s t)
-
-instance HasEnd (Interval endPoint r) (endPoint r) where
-  end   = lens (\(Interval _ t) -> t) (\(Interval s _) t -> Interval s t)
-
-instance EndPoint_ endPoint => Interval_ Interval endPoint r where
-
-
-
-
---------------------------------------------------------------------------------
-
--- data SegmentEndPoint point d r = SegmentEndPoint EndPointType (point d r)
---                         deriving (Show,Eq)
-
-
 class ( HasStart (lineSegment d point r) (point d r)
       , HasEnd   (lineSegment d point r) (point d r)
-
+      , Point_ point d r
       ) => LineSegment_ lineSegment d point r where
+  {-# MINIMAL uncheckedLineSegment-}
+
+  -- | Create a segment
+  --
+  -- pre: the points are disjoint
+  uncheckedLineSegment :: point d r -> point d r -> lineSegment d point r
+
+  -- | smart constructor that creates a valid segment, i.e. it
+  -- validates that the endpoints are disjoint.
+  mkLineSegment :: point d r -> point d r -> Maybe (lineSegment d point r)
 
 
-
-newtype LineSegmentF endPoint d point r =
-  MkLineSegment (Interval endPoint (point d r))
-
-
-
-_WrappedInterval :: Iso (LineSegment d point r)         (LineSegment d' point' r')
-                        (Interval IntervalEndPoint (point d r)) (Interval IntervalEndPoint (point' d' r'))
-_WrappedInterval = iso (\(MkLineSegment i) -> i) MkLineSegment
-
-
-
-instance HasStart (LineSegment d point r) (point d r) where
-  start = _WrappedInterval.start.endPoint @IntervalEndPoint
-
-instance HasEnd   (LineSegment d point r) (point d r) where
-  end   = _WrappedInterval.end.endPoint @IntervalEndPoint
-
-
-instance LineSegment_ LineSegment d point r where
-
+-- | Constructs a line segment from the start and end point
+pattern LineSegment_ :: forall lineSegment d point r. LineSegment_ lineSegment d point r
+                     => point d r -> point d r
+                     -> lineSegment d point r
+pattern LineSegment_ s t <- (startAndEnd -> (s,t))
+  where
+    LineSegment_ s t = uncheckedLineSegment s t
 
 --------------------------------------------------------------------------------
 
-newtype Closed r = Closed r deriving (Show,Eq,Ord)
+-- | Linearly interpolate the two endpoints with a value in the range [0,1]
+--
+-- >>> interpolate 0.5 $ ClosedLineSegment origin (Point2 10.0 10.0)
+-- Point2 5.0 5.0
+-- >>> interpolate 0.1 $ ClosedLineSegment origin (Point2 10.0 10.0)
+-- Point2 1.0 1.0
+-- >>> interpolate 0 $ ClosedLineSegment origin (Point2 10.0 10.0)
+-- Point2 0.0 0.0
+-- >>> interpolate 1 $ ClosedLineSegment origin (Point2 10.0 10.0)
+-- Point2 10.0 10.0
+interpolate       :: forall lineSegment d point r
+                     . (Fractional r, LineSegment_ lineSegment d point r)
+                  => r -> lineSegment d point r -> point d r
+interpolate lam (LineSegment_ s t) =
+  fromVector $ (s^.asVector ^* (1-lam)) ^+^ (t^.asVector ^* lam)
 
-instance EndPoint_ Closed where
-  endPoint = lens (\(Closed x) -> x) (\_ x -> Closed x)
-  endPointType = const ClosedEndPoint
-
-newtype ClosedLineSegment d point r = MkClosedLineSegment (Interval (point d) r)
-
--- _WrappedClosedInterval :: Iso (ClosedLineSegment d point r) (ClosedLineSegment d' point' r')
-
-
-
---                           (Interval IntervalEndPoint (point d r)) (Interval IntervalEndPoint (point' d' r'))
--- _WrappedClosedInterval = iso (\(MkClosedLineSegment i) -> i) MkClosedLineSegment
+--------------------------------------------------------------------------------
