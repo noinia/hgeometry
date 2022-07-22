@@ -81,13 +81,13 @@ instance Ixed (NonEmptyVector a) where
 
 instance Foldable1 NonEmptyVector
 instance Traversable1 NonEmptyVector where
-  traverse1 f v =
+  traverse1 f (NonEmptyVector v) =
       -- Get the length of the vector in /O(1)/ time
       let !n = F.length v
       -- Use fromListN to be more efficient in construction of resulting vector
       -- Also behaves better with compact regions, preventing runtime exceptions
       in (NonEmptyVector . Vector.fromListN n . F.toList)
-         <$> traverse1 f (toNonEmpty v)
+         <$> traverse1 f (NonEmpty.fromList $ F.toList v)
          -- notice that NonEmpty.fromList is suposedly safe since the vector is NonEmpty...
 
   {-# INLINE traverse1 #-}
@@ -105,10 +105,12 @@ newtype Cyclic v a = Cyclic (v a)
  deriving newtype (Functor,Foldable)
 
 instance Foldable1 v    => Foldable1    (Cyclic v)
-instance Traversable1 v => Traversable1 (Cyclic v)
 
+instance Traversable1 v => Traversable1 (Cyclic v) where
+  traverse1 f (Cyclic v) = Cyclic <$> traverse1 f v
 instance Traversable v => Traversable (Cyclic v) where
   traverse f (Cyclic v) = Cyclic <$> traverse f v
+
 
 instance FunctorWithIndex i v => FunctorWithIndex i (Cyclic v) where
   imap f (Cyclic v) = Cyclic $ imap f v
@@ -146,8 +148,6 @@ type instance Dimension (SimplePolygonF f point r) = 2
 type instance NumType   (SimplePolygonF f point r) = r
 
 deriving instance Eq (f (point 2 r)) => Eq (SimplePolygonF f point r)
-
-
 
 
 -- instance Wrapped   (SimplePolygonF f point r)
@@ -213,6 +213,12 @@ instance ( Point_ point 2 r
          ) => SimplePolygon_ (SimplePolygonF f) point r where
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
                          . NonEmpty.fromList . F.toList
+
+
+instance ( Show (point 2 r)
+         , SimplePolygon_ (SimplePolygonF f) point r
+         ) => Show (SimplePolygonF f point r) where
+  show = showSimplePolygon
 
 --------------------------------------------------------------------------------
 
