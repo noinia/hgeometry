@@ -5,12 +5,13 @@ module Geometry.Polygon.MultiPolygon
 
   ) where
 
-
 import           Control.Lens hiding (holes)
+import qualified Data.Foldable as F
 import           Data.Vector (Vector)
 -- import qualified Data.Vector as Vector
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple
+import           Geometry.Point.Class
 import           Geometry.Properties
 
 --------------------------------------------------------------------------------
@@ -63,6 +64,11 @@ instance HasOuterBoundary (MultiPolygon point r) where
     | i == 0    = undefined -- outerBoundaryPolygon . outerBoundaryVertexAt j
     | otherwise = error "outerBoundaryEdgeAt: starting vertex not on the outer boundary!"
 
-instance (Show (point 2 r)) => Show (MultiPolygon point r) where
+instance ( Show (point 2 r)
+         , SimplePolygon_ SimplePolygon point r
+         ) => Show (MultiPolygon point r) where
   show (MultiPolygon outerPG hs) = "MultiPolygon (" <> show (outerPG^..vertices) <> ") ("
                                                     <> show hs <> ")"
+
+instance (Point_ point 2 r) => Polygon_ MultiPolygon point r where
+  area (MultiPolygon outer hs) = area outer - sum [area h | h <- F.toList hs]

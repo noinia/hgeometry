@@ -247,7 +247,7 @@ class HasHoles face face' where
 class ( HasOuterBoundary (polygon point r)
       , Vertex      (polygon point r) ~ point 2 r
       , Point_ point 2 r
-      , VertexIx    (polygon point r) ~ Int
+      -- , VertexIx    (polygon point r) ~ Int
       ) => Polygon_ polygon point r where
 
   -- | The area of a polygon
