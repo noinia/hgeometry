@@ -128,7 +128,7 @@ isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
 
 -- | Test if point p lies on line l
 --
--- >>> origin `onLine` lineThrough origin (Point2 1 0)
+-- >>> (origin :: Point 2 Rational) `onLine` lineThrough origin (Point2 1 0)
 -- True
 -- >>> Point2 10 10 `onLine` lineThrough origin (Point2 2 2)
 -- True

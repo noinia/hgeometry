@@ -26,6 +26,7 @@ import  Geometry.Point.Internal
 
 --------------------------------------------------------------------------------
 -- $setup
+-- >>> import Geometry.Vector
 -- >>> :{
 -- let myVector :: Vector 3 Int
 --     myVector = Vector3 1 2 3

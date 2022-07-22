@@ -24,7 +24,10 @@ import Geometry.Vector
 
 -- $setup
 -- >>> import Geometry.Point.Internal
--- >>> let with p i = WithIndex i p
+-- >>> :{
+-- let with     :: Point 2 Int -> Int -> WithIndex (Point 2 Int)
+--     with p i = WithIndex i p
+-- :}
 
 
 --------------------------------------------------------------------------------

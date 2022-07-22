@@ -303,7 +303,7 @@ type Rectangle = Box 2
 -- |
 -- >>> width (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 1
--- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
+-- >>> width (boundingBoxList' [origin :: Point 2 Int])
 -- 0
 width :: Num r => Rectangle p r -> r
 width = widthIn @1
@@ -311,7 +311,7 @@ width = widthIn @1
 -- |
 -- >>> height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 2
--- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
+-- >>> height (boundingBoxList' [origin :: Point 2 Int])
 -- 0
 height :: Num r => Rectangle p r -> r
 height = widthIn @2

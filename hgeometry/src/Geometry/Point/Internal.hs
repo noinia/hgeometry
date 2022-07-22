@@ -41,6 +41,7 @@ import           Text.Read (Read (..), readListPrecDefault)
 
 --------------------------------------------------------------------------------
 -- $setup
+-- >>> import Geometry.Point.Class(origin)
 -- >>> :{
 -- let myVector :: Vector 3 Int
 --     myVector = Vector3 1 2 3

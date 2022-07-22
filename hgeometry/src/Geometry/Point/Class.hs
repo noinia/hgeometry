@@ -14,7 +14,7 @@ import qualified Geometry.Vector as Vector
 --------------------------------------------------------------------------------
 
 -- -- $setup
--- -- >>> import Geometry.Point.Internal (pattern Point2, pattern Point3, pattern Point4, origin)
+-- -- >>> import Geometry.Point(Point(Point,Point1,Point2,Point3,Point4))
 
 class ( Affine (point d)
       -- , Foldable (Diff (point d))
