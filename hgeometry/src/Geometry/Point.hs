@@ -42,6 +42,8 @@ module Geometry.Point
   , HasSquaredEuclideanDistance(..)
 
   , fromGenericPoint
+
+  , HasPoints(..)
   ) where
 
 import Geometry.Line.Internal

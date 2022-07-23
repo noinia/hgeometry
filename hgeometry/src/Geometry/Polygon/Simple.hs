@@ -27,6 +27,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Semigroup.Foldable
 import           GHC.Generics
 import           Geometry.Point
+import           Geometry.Transformation
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple.Class
 import           Geometry.Polygon.Simple.Implementation
@@ -162,7 +163,13 @@ instance TraversableWithIndex Int f
       => HasVertices (SimplePolygonF f point r) (SimplePolygonF f point' r') where
   vertices = _SimplePolygonF . itraversed
 
+instance TraversableWithIndex Int f =>
+         HasPoints (SimplePolygonF f point r) (SimplePolygonF f point' r') point point' where
+  allPoints = vertices
 
+-- instance ( TraversableWithIndex Int f
+--          , HasPoints (SimplePolygonF f point r) (SimplePolygonF f point r)
+--          ) => IsTransformable (SimplePolygonF f point r)
 
 -- instance HasVertices (SimplePolygon point r) (SimplePolygon point' r') where
 --   type Vertex   (SimplePolygon point r) = point 2 r
@@ -219,6 +226,7 @@ instance ( Show (point 2 r)
          , SimplePolygon_ (SimplePolygonF f) point r
          ) => Show (SimplePolygonF f point r) where
   show = showSimplePolygon
+
 
 --------------------------------------------------------------------------------
 

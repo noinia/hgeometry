@@ -1,3 +1,4 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -8,7 +9,7 @@
 --------------------------------------------------------------------------------
 module Geometry.Transformation.Internal where
 
-import           Control.Lens (iso,set,Iso,imap)
+import           Control.Lens (iso,set,Iso,imap,over)
 import           Geometry.Matrix
 import           Geometry.Matrix.Internal (mkRow)
 import           Geometry.Point
@@ -72,6 +73,14 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 -- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
+
+  default transformBy :: ( HasPoints g g Point Point
+                         , Arity (Dimension g)
+                         , Arity (Dimension g + 1)
+                         , Fractional (NumType g)
+                         )
+                => Transformation (Dimension g) (NumType g) -> g -> g
+  transformBy t = over (allPoints @g @g @Point @Point) (transformBy t)
 
 -- | Apply a transformation to a collection of objects.
 --

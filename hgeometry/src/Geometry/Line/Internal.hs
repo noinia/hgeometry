@@ -20,6 +20,7 @@ import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
+import           Geometry.Line.Class
 import           Geometry.Point.Class
 import           Geometry.Point.EuclideanDistance
 import           Geometry.Point.Internal
@@ -37,21 +38,16 @@ data Line d r = Line { _anchorPoint :: !(Point  d r)
                      , _direction   :: !(Vector d r)
                      } deriving Generic
 
--- | Line anchor point.
-anchorPoint :: Lens' (Line d r) (Point d r)
-anchorPoint = lens _anchorPoint (\line pt -> line{_anchorPoint=pt})
-
--- | Line direction.
-direction :: Lens' (Line d r) (Vector d r)
-direction = lens _direction (\line dir -> line{_direction=dir})
+instance Line_ Line d r where
+  mkLine (fromGenericPoint -> p) = Line p
+  anchorPoint = lens _anchorPoint (\line pt -> line{_anchorPoint=pt})
+  direction = lens _direction (\line dir -> line{_direction=dir})
 
 instance (Show r, Arity d) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
 
 -- -- TODO:
 -- instance (Read r, Arity d)   => Read (Line d r) where
-
-
 
 
 deriving instance (NFData r, Arity d) => NFData        (Line d r)
@@ -74,30 +70,6 @@ type instance NumType   (Line d r) = r
 
 -- ** Functions on lines
 
--- | A line may be constructed from two points.
-lineThrough     :: (Num r, Arity d, Point_ point d r) => point d r -> point d r -> Line d r
-lineThrough p q = Line (fromGenericPoint p) (q .-. p)
-
--- | Vertical line with a given X-coordinate.
-verticalLine   :: Num r => r -> Line 2 r
-verticalLine x = Line (Point2 x 0) (Vector2 0 1)
-
--- | Horizontal line with a given Y-coordinate.
-horizontalLine   :: Num r => r -> Line 2 r
-horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
-
--- | Given a line l with anchor point p and vector v, get the line
--- perpendicular to l that also goes through p. The resulting line m is
--- oriented such that v points into the left halfplane of m.
---
--- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
--- Line (Point2 3 4) (Vector2 (-2) (-1))
-perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
-perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
-
--- | Test if a vector is perpendicular to the line.
-isPerpendicularTo :: (Num r, Eq r) => Vector 2 r -> Line 2 r -> Bool
-v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
@@ -105,20 +77,10 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 (Line p u) `isIdenticalTo` (Line q v) = (p,u) == (q,v)
 
 
--- | Test if the two lines are parallel.
---
--- >>> lineThrough origin (Point2 1 0) `isParallelTo` lineThrough (Point2 1 1) (Point2 2 1)
--- True
--- >>> lineThrough origin (Point2 1 0) `isParallelTo` lineThrough (Point2 1 1) (Point2 2 2)
--- False
-isParallelTo                         :: (Eq r, Fractional r, Arity d)
-                                     => Line d r -> Line d r -> Bool
-(Line _ u) `isParallelTo` (Line _ v) = u `isScalarMultipleOf` v
 {-# RULES
 "isParallelTo/isParallelTo2" [3]
      forall (l1 :: forall r. Line 2 r) l2. isParallelTo l1 l2 = isParallelTo2 l1 l2
 #-}
-{-# INLINE[2] isParallelTo #-}
 
 -- | Check whether two lines are parallel
 isParallelTo2 :: (Eq r, Num r) => Line 2 r -> Line 2 r -> Bool
@@ -126,56 +88,9 @@ isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
     where
       denom       = vy * ux - vx * uy
 
--- | Test if point p lies on line l
---
--- >>> (origin :: Point 2 Rational) `onLine` lineThrough origin (Point2 1 0)
--- True
--- >>> Point2 10 10 `onLine` lineThrough origin (Point2 2 2)
--- True
--- >>> Point2 10 5 `onLine` lineThrough origin (Point2 2 2)
--- False
-onLine                :: (Eq r, Fractional r, Arity d, Point_ point d r)
-                      => point d r -> Line d r -> Bool
-(fromGenericPoint -> p) `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
-
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2 :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> Bool
 p `onLine2` (Line q v) = ccw (fromGenericPoint p) q (q .+^ v) == CoLinear
-
-
--- | Get the point at the given position along line, where 0 corresponds to the
--- anchorPoint of the line, and 1 to the point anchorPoint .+^ directionVector
-pointAt              :: (Num r, Arity d) => r -> Line d r -> Point d r
-pointAt a (Line p v) = p .+^ (a *^ v)
-
-
--- | Given point p and a line (Line q v), Get the scalar lambda s.t.
--- p = q + lambda v. If p does not lie on the line this returns a Nothing.
-toOffset              :: (Eq r, Fractional r, Arity d, Point_ point d r)
-                      => point d r -> Line d r -> Maybe r
-toOffset p (Line q v) = scalarMultiple (fromGenericPoint  p .-. q) v
-
-
--- | Given point p near a line (Line q v), get the scalar lambda s.t.
--- the distance between 'p' and 'q + lambda v' is minimized.
---
--- >>> toOffset' (Point2 1 1) (lineThrough origin $ Point2 10 10)
--- 0.1
---
--- >>> toOffset' (Point2 5 5) (lineThrough origin $ Point2 10 10)
--- 0.5
---
--- The point (6,4) is not on the line but we can still point closest to it.
--- >>> toOffset' (Point2 6 4) (lineThrough origin $ Point2 10 10)
--- 0.5
-toOffset'             :: (Eq r, Fractional r, Arity d, Point_ point d r)
-                      => point d r -> Line d r -> r
-toOffset' (fromGenericPoint -> p) (Line q v) = dot (p .-. q) v / quadrance v
--- toOffset' p = fromJust' . toOffset p
---   where
---     fromJust' (Just x) = x
---     fromJust' _        = error "toOffset: Nothing"
-
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
 type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
@@ -227,7 +142,8 @@ fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 -- returns Nothing if the line is vertical
 toLinearFunction                             :: forall r. (Fractional r, Ord r)
                                              => Line 2 r -> Maybe (r,r)
-toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine (0 :: r)) $
+toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect`
+                                                       verticalLine @Line @r 0) $
        (H $ \NoIntersection -> Nothing)    -- l is a vertical line
     :& (H $ \(Point2 _ b)   -> Just (vy / vx,b))
     :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
@@ -287,7 +203,9 @@ data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)
 -- LeftSide
 -- >>> Point2 5 5 `onSide` (lineThrough origin $ Point2 (-3) (-3))
 -- OnLine
-onSide                :: (Ord r, Num r, Point_ point 2 r) => point 2 r -> Line 2 r -> SideTest
+onSide                :: ( Ord r, Num r
+                         , Point_ point 2 r
+                         ) => point 2 r -> Line 2 r -> SideTest
 q `onSide` (Line p v) = let r    =  p .+^ v
                             -- f z         = (z^.xCoord, -z^.yCoord)
                             -- minBy g a b = F.minimumBy (comparing g) [a,b]
