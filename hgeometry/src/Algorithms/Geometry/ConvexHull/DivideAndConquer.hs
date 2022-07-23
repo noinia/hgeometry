@@ -17,29 +17,27 @@ module Algorithms.Geometry.ConvexHull.DivideAndConquer( convexHull
 
 import           Algorithms.DivideAndConquer
 import           Control.Arrow ((&&&))
-import           Control.Lens (view)
 import           Data.Ext
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util
 import           Geometry.Point
-import           Geometry.Polygon
-import           Geometry.Polygon.Convex
+import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
 -- given in clockwise order.
-convexHull           :: forall point r.
-                        ( Ord r, Num r, Point_ point 2 r
-                        , AsExt (point 2 r)
-                        , CoreOf (point 2 r) ~ Point 2 r
+convexHull            :: forall convexPolygon point r.
+                         ( Ord r, Num r, Point_ point 2 r
+                         , ConvexPolygon_ convexPolygon point r
                         )
-                     => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
-convexHull (p :| []) = mkConvexPolygon [p]
+                      => NonEmpty (point 2 r) -> convexPolygon point r
+convexHull (p :| []) = uncheckedFromCCWPoints [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts
   where
-    combine (l:|uh,_:|lh) = mkConvexPolygon $ l : uh <> reverse (init lh)
+    combine (l:|uh,_:|lh) = uncheckedFromCCWPoints $ l : uh <> reverse (init lh)
 
 
 ----------------------------------------

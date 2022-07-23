@@ -30,6 +30,7 @@ cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 --------------------------------------------------------------------------------
 
 class HasSquaredEuclideanDistance g where
+  {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}
   -- | Given a point q and a geometry g, the squared Euclidean distance between q and g.
   squaredEuclideanDistTo   :: ( Num (NumType g)
                               , Point_ point (Dimension  g) (NumType g))
@@ -51,4 +52,3 @@ class HasSquaredEuclideanDistance g where
                                  -> (point (Dimension g) (NumType g), NumType g)
   pointClosestToWithDistance q g = let p = pointClosestTo q g
                                    in (p, squaredEuclideanDist p q)
-  {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}

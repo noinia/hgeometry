@@ -23,7 +23,8 @@ import           Data.List.Util (extractMinimaBy)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup.Foldable
 import           Geometry.Point
-import           Geometry.Polygon.Convex (ConvexPolygon, mkConvexPolygon)
+import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Simple.Class
 import           Geometry.Vector
 
 --------------------------------------------------------------------------------
@@ -33,13 +34,13 @@ import           Geometry.Vector
 --
 -- running time: \(O(nh)\), where \(n\) is the number of input points
 -- and \(h\) is the complexity of the hull.
-convexHull            :: (Ord r, Num r, Point_ point 2 r
-                         , AsExt (point 2 r)
-                         , CoreOf (point 2 r) ~ Point 2 r
-                         )
-                      => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
-convexHull (p :| []) = mkConvexPolygon $ [p]
-convexHull pts       = mkConvexPolygon $ uh <> reverse lh
+convexHull            :: forall convexPolygon point r.
+                         ( Ord r, Num r, Point_ point 2 r
+                         , ConvexPolygon_ convexPolygon point r
+                        )
+                      => NonEmpty (point 2 r) -> convexPolygon point r
+convexHull (p :| []) = uncheckedFromCCWPoints [p]
+convexHull pts       = uncheckedFromCCWPoints $ uh <> reverse lh
   where
     lh = case NonEmpty.nonEmpty (NonEmpty.init $ lowerHull pts) of
            Nothing       -> []

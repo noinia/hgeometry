@@ -13,26 +13,25 @@ module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 ) where
 
 import           Control.Lens ((^.))
-import           Data.Ext
-import           Geometry.Point
-import           Geometry.Polygon
-import           Geometry.Polygon.Convex (ConvexPolygon, mkConvexPolygon)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Geometry.Point
+import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Simple.Class
 
 
 -- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is
 -- given in clockwise order.
-convexHull            :: (Ord r, Num r, Point_ point 2 r
-                        , AsExt (point 2 r)
-                        , CoreOf (point 2 r) ~ Point 2 r
+convexHull            :: forall convexPolygon point r.
+                         ( Ord r, Num r, Point_ point 2 r
+                         , ConvexPolygon_ convexPolygon point r
                         )
-                      => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
-convexHull (p :| []) = mkConvexPolygon [p]
+                      => NonEmpty (point 2 r) -> convexPolygon point r
+convexHull (p :| []) = uncheckedFromCCWPoints [p]
 convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in mkConvexPolygon . reverse $ lh ++ uh
+                       in uncheckedFromCCWPoints . reverse $ lh ++ uh
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --

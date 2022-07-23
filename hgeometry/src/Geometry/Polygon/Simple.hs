@@ -228,6 +228,12 @@ instance ( Show (point 2 r)
   show = showSimplePolygon
 
 
+instance HasSquaredEuclideanDistance (SimplePolygonF f point r) where
+  pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
+
+
+
+
 --------------------------------------------------------------------------------
 
 

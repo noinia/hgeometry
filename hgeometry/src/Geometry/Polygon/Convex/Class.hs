@@ -11,6 +11,12 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Convex.Class
-  (
+  ( ConvexPolygon_(..)
 
   ) where
+
+import Geometry.Polygon.Simple.Class
+
+
+class ( SimplePolygon_ convexPolygon point r
+      ) => ConvexPolygon_ convexPolygon point r where

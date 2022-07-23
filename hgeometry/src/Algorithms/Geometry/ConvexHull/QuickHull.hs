@@ -10,16 +10,15 @@ module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
 import           Control.Lens ((^.))
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry.Line
-import           Geometry.Point
-import           Geometry.Polygon
-import           Geometry.Polygon.Convex (ConvexPolygon, mkConvexPolygon)
-import           Geometry.Triangle
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           Data.Util
-import Geometry (fromGenericPoint)
+import           Geometry.Line
+import           Geometry.Point
+import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Simple.Class
+import           Geometry.Triangle
 
 
 -- import Data.Ratio
@@ -32,13 +31,13 @@ import Geometry (fromGenericPoint)
 -- clockwise order.
 --
 -- running time: \(O(n^2)\)
-convexHull            :: (Ord r, Fractional r, Point_ point 2 r
-                         , AsExt (point 2 r)
-                         , CoreOf (point 2 r) ~ Point 2 r
-                         )
-                      => NonEmpty (point 2 r) -> ConvexPolygon (ExtraOf (point 2 r)) r
-convexHull (p :| []) = mkConvexPolygon [p]
-convexHull ps        = mkConvexPolygon $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
+convexHull            :: forall convexPolygon point r.
+                         ( Ord r, Fractional r, Point_ point 2 r
+                         , ConvexPolygon_ convexPolygon point r
+                        )
+                      => NonEmpty (point 2 r) -> convexPolygon point r
+convexHull (p :| []) = uncheckedFromCCWPoints [p]
+convexHull ps        = uncheckedFromCCWPoints $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
   where
     STR l r mids  = findExtremes ps
     m             = lineThrough l r

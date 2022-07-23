@@ -20,6 +20,7 @@ module Geometry.Polygon.Class
   , HasOuterBoundary(..)
   , signedArea2X
   , minimumVertexBy, maximumVertexBy
+  , outerBoundaryEdgeSegments
 
   , Polygon_(..)
 
@@ -29,13 +30,18 @@ module Geometry.Polygon.Class
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup.Foldable
+import           Geometry.LineSegment.Class
 import           Geometry.Point.Class
 import           Geometry.Vector
 
+import           Control.Lens.Internal.Fold (NonEmptyDList(..))
 import           Data.Functor.Apply (Apply)
 import           Data.Functor.Contravariant (phantom)
+import           Data.Monoid (Endo(..))
+
 --------------------------------------------------------------------------------
 
 class HasVertices' graph where
@@ -145,10 +151,12 @@ class HasVertices' polygon => HasOuterBoundary polygon where
     => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
   outerBoundaryEdges = ifolding1 $
     \pg -> fmap ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
-         . NonEmpty.fromList
-         $ itoListOf outerBoundary pg
+         $ itoNonEmptyOf outerBoundary pg
+    -- \pg -> fmap ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
+    --      . NonEmpty.fromList
+    --      $ itoListOf outerBoundary pg
     -- this feels much more clunky than it should be somehow.
-    -- TODO: I would like an 'itoNonEmptyOf'
+    -- I would like an 'itoNonEmptyOf'
 
   -- | Get the edge that has the given vertex as its starting edge
   --
@@ -178,22 +186,9 @@ ifolding1       :: (Foldable1 f, Indexable i p, Contravariant g, Apply g)
 ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
 {-# INLINE ifolding1 #-}
 
--- -- | The 'IndexedTraversal' of a 'TraversableWithIndex' container.
--- itraversed1 :: TraversableWithIndex i t => IndexedTraversal1 i (t a) (t b) a b
--- itraversed1 = conjoined traverse1 (itraverse1 . indexed)
--- {-# INLINE [0] itraversed1 #-}
-
-
--- toNonEmptyOf :: Getting (NonEmptyDList a) s a -> s -> NonEmpty a
--- itoNonEmptyOf :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)
--- itoNonEmptyOf   :: IndexedGetting i (Endo (NonEmpty (i, a))) s a -> s -> NonEmpty (i, a)
--- itoNonEmptyOf  :: IndexedGetting i (NonEmptyDList a) (Indexed i a2 b) a
---      -> (i -> a2 -> b) -> NonEmpty a
--- itoNonEmptyOf l = toNonEmptyOf l . Indexed
-
-
--- itoListOf l = ifoldrOf l (\i a -> ((i,a):)) []
-
+-- | indexed version of 'toNonEmptyOf'
+itoNonEmptyOf   :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)
+itoNonEmptyOf l = flip getNonEmptyDList [] . ifoldMapOf l (\i a -> NonEmptyDList $ ((i,a) :|))
 
 --------------------------------------------------------------------------------
 -- * HasOuterBoundary Helpers
@@ -231,6 +226,20 @@ signedArea2X      :: (Num r, HasOuterBoundary simplePolygon
 signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
                         | (p,q) <- poly ^..outerBoundaryEdges ]
 
+
+-- | Get the line segments representing the outer boundary of the polygon.
+outerBoundaryEdgeSegments :: forall lineSegment polygon point r.
+                             ( LineSegment_ lineSegment 2 point r
+                             , HasOuterBoundary polygon
+                             , Vertex polygon ~ point 2 r
+                             )
+                          => IndexedFold1 (VertexIx polygon) polygon (lineSegment 2 point r)
+outerBoundaryEdgeSegments = outerBoundaryEdges . to toSeg
+  -- ifolding1
+  --                         $ over (mapped._2) toSeg . itoNonEmptyOf outerBoundaryEdges
+  where
+    toSeg :: (Vertex polygon, Vertex polygon) -> lineSegment 2 point r
+    toSeg = uncurry uncheckedLineSegment
 
 --------------------------------------------------------------------------------
 

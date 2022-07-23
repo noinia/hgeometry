@@ -13,11 +13,14 @@ module Geometry.Polygon.Simple.Implementation
 
   ) where
 
-
 import           Control.Lens
 import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import           Data.Aeson.Types (Parser)
+import           Data.Foldable (minimumBy)
+import           Data.Ord (comparing)
+import           Geometry.Point
+import           Geometry.LineSegment.Boxed
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple.Class
 
@@ -75,3 +78,20 @@ parseJSONSimplePolygon = withObject "Polygon" $ \o -> o .: "tag" >>= \case
                            (_ :: String)   -> fail "Not a SimplePolygon"
   where
     pSimple o = uncheckedFromCCWPoints @simplePolygon @point @r @[]  <$> o .: "vertices"
+
+
+
+--------------------------------------------------------------------------------
+-- * HasSquaredEuclideanDistance
+
+pointClosestToWithDistanceSimplePolygon      :: forall simplePolygon point r.
+                                                ( SimplePolygon_ simplePolygon point r
+                                                , Num r, Ord r
+                                                )
+                                             => point 2 r
+                                             -> simplePolygon point r
+                                             -> (point 2 r, r)
+pointClosestToWithDistanceSimplePolygon q poly =
+    minimumBy (comparing snd)
+  . map (pointClosestToWithDistance q) . id @[ClosedLineSegment 2 point r]
+  $ poly^..outerBoundaryEdgeSegments

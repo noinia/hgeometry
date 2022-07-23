@@ -19,12 +19,19 @@ module Geometry.LineSegment.Boxed
   ) where
 
 import Control.Lens
+import Data.Foldable (minimumBy)
+import Data.Ord (comparing)
+import Geometry.Boundary
 import Geometry.Interval.Boxed
 import Geometry.Interval.Class
 import Geometry.Interval.EndPoint
+import Geometry.Line.Class
+import Geometry.Line.Internal
 import Geometry.LineSegment.Class
-import Geometry.Point.Class
+import Geometry.Point
 import Geometry.Properties
+import Geometry.Vector
+
 
 --------------------------------------------------------------------------------
 
@@ -61,14 +68,18 @@ pattern OpenLineSegment     :: point d r -> point d r -> OpenLineSegment d point
 pattern OpenLineSegment s t = LineSegment (Open s) (Open t)
 {-# COMPLETE OpenLineSegment #-}
 
+
+type instance Dimension (LineSegmentF endPoint d point r) = d
+type instance NumType   (LineSegmentF endPoint d point r) = r
+
 --------------------------------------------------------------------------------
 
 
 -- | Iso for turning a LineSegment into an interval.
 _WrappedInterval :: Control.Lens.Iso (LineSegmentF endPoint  d point r)
-                        (LineSegmentF endPoint' d' point' r')
-                        (Interval endPoint (point d r))
-                        (Interval endPoint' (point' d' r'))
+                                     (LineSegmentF endPoint' d' point' r')
+                                     (Interval endPoint (point d r))
+                                     (Interval endPoint' (point' d' r'))
 _WrappedInterval = Control.Lens.iso (\(MkLineSegment i) -> i) MkLineSegment
 
 
@@ -95,6 +106,57 @@ instance Control.Lens.Traversable endPoint => HasPoints (LineSegmentF endPoint d
                                            (LineSegmentF endPoint d point' r) point point' where
   allPoints f (LineSegment s t) = LineSegment <$> Control.Lens.traverse f s <*> Control.Lens.traverse f t
 
+
+instance (Point_ point d r, EndPoint_ endPoint, Num r)
+         => HasSupportingLine (LineSegmentF endPoint d point r) where
+  supportingLine (LineSegment p q) = lineThrough (p^.endPoint) (q^.endPoint)
+
 instance (EndPoint_ endPoint, Point_ point d r)
          => LineSegment_ (LineSegmentF endPoint) d point r where
+
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
+
+  q `onSegment` seg = case scalarMultiple (q .-. u) (v .-. u) of
+                        Nothing -> False
+                        Just q' -> q' `inInterval` toInterval seg /= Outside
+    where
+      u = seg^.start
+      v = seg^.end
+
+toInterval     :: (Functor endPoint, Num r)
+               => (LineSegmentF endPoint) d point r -> Interval endPoint r
+toInterval seg = let Interval s t = seg^._WrappedInterval
+                 in Interval (0 <$ s) (1 <$ t)
+
+instance (Fractional r, Ord r)
+         => HasSquaredEuclideanDistance (ClosedLineSegment d point r) where
+  pointClosestToWithDistance = sqDistanceToSegArg
+
+-- | Squared distance from the point to the Segment s, and the point on s
+-- realizing it.
+--
+-- Note that if the segment is *open*, the closest point returned may
+-- be one of the (open) end points, even though technically the end
+-- point does not lie on the segment. (The true closest point then
+-- lies arbitrarily close to the end point).
+--
+-- >>> :{
+-- let ls = OpenLineSegment (Point2 0 0 :+ ()) (Point2 1 0 :+ ())
+--     p  = Point2 2 0
+-- in  fst (sqDistanceToSegArg p ls) == Point2 1 0
+-- :}
+-- True
+sqDistanceToSegArg                               :: forall point d r.
+                                                    ( Ord r
+                                                    , Fractional r
+                                                    , OnSegmentConstraint d r
+                                                    , Point_ point d r)
+                                                 => point d r -> ClosedLineSegment d point r
+                                                 -> (point d r, r)
+sqDistanceToSegArg q seg@(ClosedLineSegment s t) = minimumBy (comparing snd) pts
+  where
+    pts :: [(point d r, r)]
+    pts = (if fst m `onSegment` seg then (m :) else id) [f s, f t]
+    f   :: point d r -> (point d r, r)
+    f a = (q,squaredEuclideanDist a q)
+    m   = pointClosestToWithDistance q (supportingLine seg)

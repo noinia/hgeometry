@@ -55,7 +55,7 @@ import           Geometry.LineSegment hiding (endPoints)
 import           Geometry.Point
 import           Geometry.PolyLine (PolyLine(..))
 import           Geometry.Polygon
-import           Geometry.Polygon.Convex hiding (merge)
+import           Geometry.Polygon.Convex.New
 import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Vector hiding (init)
@@ -184,7 +184,7 @@ subBezier t u = fst . split u . snd . split t
 
 -- | Compute the convex hull of the control polygon of a 2-dimensional Bezier curve.
 --   Should also work in any dimension, but convex hull is not yet implemented.
-convexHullB :: (Ord r, Fractional r) => BezierSpline n 2 r -> ConvexPolygon () r
+convexHullB :: (Ord r, Fractional r) => BezierSpline n 2 r -> ConvexPolygon Point r
 convexHullB = convexHull . NonEmpty.fromList . F.toList . _controlPoints
 
 --------------------------------------------------------------------------------
@@ -425,8 +425,8 @@ parameterInterior treshold b p | sqrad (F.toList $ view controlPoints b) < (0.5 
   let (b1, b2) = split 0.5 b
       recurse1 =       0.5 * parameterInterior treshold b1 p
       recurse2 = 0.5 + 0.5 * parameterInterior treshold b2 p
-      chb1     = _simplePolygon $ convexHullB b1
-      chb2     = _simplePolygon $ convexHullB b2
+      chb1     = convexHullB b1
+      chb2     = convexHullB b2
       in1      = squaredEuclideanDistTo p chb1 < treshold^2
       in2      = squaredEuclideanDistTo p chb2 < treshold^2
       result |     in1 &&     in2 = betterFit b p recurse1 recurse2

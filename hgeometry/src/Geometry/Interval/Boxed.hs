@@ -43,3 +43,29 @@ instance HasEnd (Interval endPoint r) (endPoint r) where
 
 instance EndPoint_ endPoint => Interval_ Interval endPoint r where
   mkInterval = Interval
+
+
+
+-- type instance IntersectionOf r (Interval endPoint r) = [NoIntersection, r]
+-- GHC does not understand the r here cannot be 'Interval endPoint r' itself :(
+
+type instance IntersectionOf (Interval point r) (Interval point r)
+  = [NoIntersection, Interval point r]
+
+-- instance Ord r => Interval a r `HasIntersectionWith` Interval b r
+-- instance Ord r => Interval point r `IsIntersectableWith` Interval point r where
+
+--   nonEmptyIntersection = defaultNonEmptyIntersection
+
+--   (GInterval r) `intersect` (GInterval s) = match (r' `intersect` s') $
+--          H (\NoIntersection -> coRec NoIntersection)
+--       :& H (\(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
+--                                                          (u&unEndPoint %~ g) )
+--       :& RNil
+--     where
+--       r' :: Range (Arg r (r :+ Either a b))
+--       r' = fmap (\(x :+ a) -> Arg x (x :+ Left a))  r
+--       s' :: Range (Arg r (r :+ Either a b))
+--       s' = fmap (\(x :+ b) -> Arg x (x :+ Right b)) s
+
+--       g (Arg _ x) = x
