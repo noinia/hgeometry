@@ -25,19 +25,16 @@ module Geometry.Line.Class
   ) where
 
 import Control.Lens
-import Data.Function (on)
 import Geometry.Point.Class
-import Geometry.Point.EuclideanDistance
 import Geometry.Point.Internal
-import Geometry.Point.Orientation.Degenerate
-import Geometry.Properties
 import Geometry.Vector
-import Test.QuickCheck
-
+import Geometry.Properties
 
 --------------------------------------------------------------------------------
 
-class Line_ line d r where
+class ( NumType (line d r) ~ r
+      , Dimension (line d r) ~ d
+      ) => Line_ line d r where
   {-# MINIMAL mkLine, anchorPoint, direction#-}
   -- | Constructs the line through the given point with the given direction.
   mkLine :: Point_ point d r => point d r -> Vector d r -> line d r
@@ -80,7 +77,7 @@ onLine :: (Eq r, Fractional r, Point_ point d r, Line_ line d r) => point d r ->
 
 
 -- | constructs a line may be constructed from two points.
-lineThrough     :: (Num r, Point_ point d r, Line_ line d r) => point d r -> point d r -> line d r
+lineThrough     :: forall line point d r. (Num r, Point_ point d r, Line_ line d r) => point d r -> point d r -> line d r
 lineThrough p q = mkLine p (q .-. p)
 
 -- | Vertical line with a given X-coordinate.

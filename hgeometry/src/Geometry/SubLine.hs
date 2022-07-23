@@ -33,6 +33,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Geometry.Interval
 import           Geometry.Line.Internal
+import           Geometry.Line.Class
 import           Geometry.Point
 import           Geometry.Properties
 import           Geometry.Vector

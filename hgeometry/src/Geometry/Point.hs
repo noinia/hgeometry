@@ -46,9 +46,10 @@ module Geometry.Point
   , HasPoints(..)
   ) where
 
+import Geometry.Line.Class (perpendicularTo)
 import Geometry.Line.Internal
-import Geometry.Point.Class
 import Geometry.Point.Boxed
+import Geometry.Point.Class
 import Geometry.Point.EuclideanDistance
 import Geometry.Point.Orientation
 import Geometry.Point.Orientation.Degenerate

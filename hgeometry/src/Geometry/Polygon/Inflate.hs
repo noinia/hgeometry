@@ -10,22 +10,22 @@ module Geometry.Polygon.Inflate
   , inflate
   ) where
 
-import           Algorithms.Geometry.SSSP   (SSSP, sssp, triangulate)
+import           Algorithms.Geometry.SSSP (SSSP, sssp, triangulate)
 import           Control.Lens
 import           Data.Ext
-import           Geometry.Line         (lineThrough)
+import           Data.Intersection          (IsIntersectableWith (intersect),
+                                             NoIntersection (NoIntersection))
+import           Data.Maybe (catMaybes)
+import qualified Data.Vector as V
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Unboxed as VU
+import           Data.Vinyl (Rec (RNil, (:&)))
+import           Data.Vinyl.CoRec (Handler (H), match)
+import           Geometry.Line (Line, lineThrough)
 import           Geometry.LineSegment  (LineSegment (LineSegment, OpenLineSegment),
                                              interpolate, sqSegmentLength)
 import           Geometry.Point
 import           Geometry.Polygon.Core
-import           Data.Intersection          (IsIntersectableWith (intersect),
-                                             NoIntersection (NoIntersection))
-import           Data.Maybe                 (catMaybes)
-import qualified Data.Vector                as V
-import qualified Data.Vector.Circular       as CV
-import qualified Data.Vector.Unboxed        as VU
-import           Data.Vinyl                 (Rec (RNil, (:&)))
-import           Data.Vinyl.CoRec           (Handler (H), match)
 
 ----------------------------------------------------
 -- Implementation
@@ -44,7 +44,7 @@ markParents :: SSSP -> SimplePolygon p r -> SimplePolygon Parent r
 markParents t p = unsafeFromCircularVector $
   CV.imap (\i (pt :+ _) -> pt :+ t VU.! i) (p^.outerBoundaryVector)
 
-addSteinerPoints :: (Ord r, Fractional r) => SimplePolygon Parent r -> SimplePolygon Parent r
+addSteinerPoints :: forall r. (Ord r, Fractional r) => SimplePolygon Parent r -> SimplePolygon Parent r
 addSteinerPoints p = fromPoints $ concatMap worker [0 .. size p - 1]
   where
     worker nth = do
@@ -55,13 +55,14 @@ addSteinerPoints p = fromPoints $ concatMap worker [0 .. size p - 1]
         pointA = fetch nth
         pointB = fetch (nth+1)
         parent idx = p^.outerVertex idx.extra
-        lineA = lineThrough
+        lineA = lineThrough @Line
           (fetch (parent nth) ^. core)
           (fetch (parent (parent nth)) ^. core)
-        lineB = lineThrough
+        lineB = lineThrough @Line
           (fetch (parent (nth+1)) ^. core)
           (fetch (parent (parent (nth+1))) ^. core)
         edge = OpenLineSegment pointA pointB
+        getIntersection              :: LineSegment 2 p r -> Line 2 r -> Maybe (Point 2 r)
         getIntersection segment line =
           match (segment `intersect` line) (
                H (\NoIntersection -> Nothing)

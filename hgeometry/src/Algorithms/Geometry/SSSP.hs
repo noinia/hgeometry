@@ -15,37 +15,37 @@ module Algorithms.Geometry.SSSP
   , visibilitySensitive
   ) where
 
-import Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate')
-import Algorithms.Geometry.PolygonTriangulation.Types       (PolygonEdgeType)
+import           Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate')
+import           Algorithms.Geometry.PolygonTriangulation.Types (PolygonEdgeType)
 
-import           Algorithms.Graph.DFS            (adjacencyLists, dfs', dfsSensitive)
-import           Control.Lens                    ((^.))
+import           Algorithms.Graph.DFS (adjacencyLists, dfs', dfsSensitive)
+import           Control.Lens ((^.))
 import           Data.Bitraversable
 import           Data.Either
-import           Data.Ext                        (ext, extra, type (:+) (..))
-import qualified Data.FingerTree                 as F
-import           Geometry.Line              (lineThrough)
-import           Geometry.LineSegment       (LineSegment (ClosedLineSegment, LineSegment))
-import           Geometry.PlanarSubdivision (PolygonFaceData (..))
-import           Geometry.Point             (Point, ccw, pattern CCW, pattern CW)
-import           Geometry.Polygon
+import           Data.Ext (ext, extra, type (:+) (..))
+import qualified Data.FingerTree as F
 import           Data.Intersection
-import           Data.List                       (sortOn, (\\))
-import           Data.Maybe                      (fromMaybe)
-import           Data.PlanarGraph                (PlanarGraph)
-import qualified Data.PlanarGraph                as Graph
+import           Data.List (sortOn, (\\))
+import           Data.Maybe (fromMaybe)
+import           Data.PlanarGraph (PlanarGraph)
+import qualified Data.PlanarGraph as Graph
 import           Data.PlaneGraph                 (FaceId (..), PlaneGraph, VertexData (..),
                                                   VertexId, VertexId', dual, graph, incidentEdges,
                                                   leftFace, vertices)
-import qualified Data.PlaneGraph                 as PlaneGraph
-import           Data.Tree                       (Tree (Node))
-import qualified Data.Vector                     as V
-import qualified Data.Vector.Circular            as CV
-import qualified Data.Vector.Circular.Util       as CV
-import           Data.Vector.Unboxed             (Vector)
-import qualified Data.Vector.Unboxed             as VU
+import qualified Data.PlaneGraph as PlaneGraph
+import           Data.Tree (Tree (Node))
+import qualified Data.Vector as V
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
+import           Data.Vector.Unboxed (Vector)
+import qualified Data.Vector.Unboxed as VU
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
+import           Geometry.Line (Line, lineThrough)
+import           Geometry.LineSegment (LineSegment (ClosedLineSegment, LineSegment))
+import           Geometry.PlanarSubdivision (PolygonFaceData (..))
+import           Geometry.Point (Point, ccw, pattern CCW, pattern CW)
+import           Geometry.Polygon
 
 {-
 type AbsOffset = Int
@@ -160,9 +160,9 @@ visibilityFinger d =
           edge = ClosedLineSegment (ext edgeA) (ext edgeB)
           coneA = ringAccess $ funnelRightBottom f
           coneB = ringAccess $ funnelLeftBottom f
-          lineA = lineThrough (ringAccess $ funnelCusp f) coneA
-          lineB = lineThrough (ringAccess $ funnelCusp f) coneB
-          -- findIntersection :: Line 2 r -> Point 2 r
+          lineA = lineThrough @Line @Point @2 @r (ringAccess $ funnelCusp f) coneA
+          lineB = lineThrough @Line @Point @2 @r (ringAccess $ funnelCusp f) coneB
+          findIntersection      :: Line 2 r -> Either (Int,Int,Int) (Point 2 r)
           findIntersection line =
             match (edge `intersect` line) $
                H (\NoIntersection -> error "no intersection")

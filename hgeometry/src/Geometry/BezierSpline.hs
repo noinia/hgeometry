@@ -395,7 +395,7 @@ flat r b = let p = fst $ endPoints b
 --   twice the given tolerance. May return false negatives but not false positives.
 colinear :: (Ord r, Fractional r) => r -> BezierSpline 3 2 r -> Bool
 colinear eps (Bezier3 !a !b !c !d) = sqBound < eps*eps
-  where ld = flip squaredEuclideanDistTo (lineThrough a d)
+  where ld = flip squaredEuclideanDistTo (lineThrough @Line a d)
         sameSide = ccw a d b == ccw a d c
         maxDist = max (ld b) (ld c)
         sqBound

@@ -63,7 +63,7 @@ spec =
 
     it "intersecting line segment and line" $ do
       let s = ClosedLineSegment (ext origin) (ext $ Point2 10 (0 :: R))
-      (s `intersect` horizontalLine (0 :: R)) `shouldBe` coRec s
+      (s `intersect` horizontalLine @Line @R 0) `shouldBe` coRec s
 
 
 test1,test2,test3,test4 :: LineSegment 2 () Int

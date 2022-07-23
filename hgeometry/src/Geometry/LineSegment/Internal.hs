@@ -47,6 +47,7 @@ import           GHC.TypeLits
 import           Geometry.Box.Internal
 import           Geometry.Interval hiding (width, midPoint)
 import           Geometry.Line.Internal
+import           Geometry.Line.Class
 import           Geometry.Point
 import           Geometry.Properties
 import           Geometry.SubLine

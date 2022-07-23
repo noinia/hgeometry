@@ -130,7 +130,7 @@ q `inPolygon'` pg = if odd . length . mapMaybe intersectionPoint $ ups <> downs
     --
     -- See http://geomalgorithms.com/a03-_inclusion.html for more information.
     intersectionPoint =  F.find (\p -> p^.xCoord > q^.xCoord) . asA @(Point 2 r) . (`intersect` l)
-    l = horizontalLine $ q^.yCoord
+    l = horizontalLine @Line @r $ q^.yCoord
 
 
 -- | Test if a point lies strictly inside the polgyon.

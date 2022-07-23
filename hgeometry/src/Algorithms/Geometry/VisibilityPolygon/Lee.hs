@@ -340,7 +340,9 @@ firstHitAt     :: forall p r e. (Ord r, Fractional r)
 firstHitAt q p = computeIntersectionPoint <=< Set.lookupMin
   where
     computeIntersectionPoint s = fmap (:+ s) . asA @(Point 2 r)
-                               $ supportingLine (s^.core) `intersect` lineThrough p q
+                               $ supportingLine (s^.core)
+                                 `intersect`
+                                 lineThrough @Line @_ @2 @r p q
 
 -- | Given two points q and p, and a status structure retrieve the
 -- first segment in the status structure intersected by the ray from q
@@ -435,7 +437,7 @@ compareByDistanceToAt q p = comparing f
   where
     f (s :+ _) = fmap (squaredEuclideanDist q)
                . asA @(Point 2 r)
-               $ supportingLine s `intersect` lineThrough p q
+               $ supportingLine s `intersect` lineThrough @Line p q
 
 -- | Given two segments that share an endpoint, order them by their
 -- order around this common endpoint. I.e. if uv and uw share endpoint

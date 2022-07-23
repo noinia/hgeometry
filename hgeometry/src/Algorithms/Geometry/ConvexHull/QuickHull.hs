@@ -71,7 +71,7 @@ hull         :: (Fractional r, Ord r, Point_ point 2 r)
 hull _ _ []  = []
 hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
   where
-    m       = lineThrough l r
+    m       = lineThrough @Line l r
     mid     = F.maximumBy (comparing dist) pts
 
     dist p = p `squaredEuclideanDistTo` m

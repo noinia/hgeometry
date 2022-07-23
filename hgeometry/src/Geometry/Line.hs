@@ -46,6 +46,7 @@ import           Data.Ext
 import           Geometry.Boundary
 import           Geometry.Box
 import           Geometry.Line.Internal
+import           Geometry.Line.Class
 import           Geometry.LineSegment
 import           Geometry.Point.Internal
 import           Geometry.Properties
