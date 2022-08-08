@@ -15,125 +15,31 @@ module Geometry.Polygon.Simple
   ( SimplePolygon_(..)
   , SimplePolygon
   , SimplePolygonF
-
-
-  , Cyclic(..)
   ) where
 
 import           Control.Lens
+import           Data.Coerce
+import           Data.Cyclic
 import qualified Data.Foldable as F
 import qualified Data.Functor.Apply as Apply
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe
 import           Data.Semigroup.Foldable
+import qualified Data.Vector as Vector
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.NonEmpty as NonEmptyVector
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           GHC.Generics
 import           Geometry.Point
-import           Geometry.Transformation
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple.Class
 import           Geometry.Polygon.Simple.Implementation
 import           Geometry.Properties
-
-import           Data.Coerce
-import           Data.Maybe
-import qualified Data.Vector as Vector
-import qualified Data.Vector.Generic as GV
-
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Vector.NonEmpty as NonEmptyVector
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           Geometry.Transformation
 
 --------------------------------------------------------------------------------
 
-class HasFromFoldable f where
-  fromFoldable :: Foldable g => g a -> f a
-  fromFoldable = fromList . F.toList
-
-  fromList :: [a] -> f a
-  {-# MINIAL fromList #-}
-
--- instance HasFromFoldable1 [] where
---   fromList = id
-
-class HasFromFoldable1 f where
-  fromFoldable1 :: Foldable1 g => g a -> f a
-  fromFoldable1 = fromNonEmpty . toNonEmpty
-
-  fromNonEmpty :: NonEmpty a -> f a
-  {-# MINIAL fromNonEmpty #-}
-
-instance HasFromFoldable1 NonEmpty where
-  fromNonEmpty = id
-
-instance HasFromFoldable Vector.Vector  where
-  fromList = Vector.fromList
-
-instance HasFromFoldable1 NonEmptyVector  where
-  fromNonEmpty = NonEmptyVector.fromNonEmpty
-
-
---------------------------------------------------------------------------------
-
-
-type instance Index   (NonEmptyVector a) = Int
-type instance IxValue (NonEmptyVector a) = a
-
-instance Ixed (NonEmptyVector a) where
-  ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
-
-instance Foldable1 NonEmptyVector
-instance Traversable1 NonEmptyVector where
-  traverse1 f (NonEmptyVector v) =
-      -- Get the length of the vector in /O(1)/ time
-      let !n = F.length v
-      -- Use fromListN to be more efficient in construction of resulting vector
-      -- Also behaves better with compact regions, preventing runtime exceptions
-      in (NonEmptyVector . Vector.fromListN n . F.toList)
-         <$> traverse1 f (NonEmpty.fromList $ F.toList v)
-         -- notice that NonEmpty.fromList is suposedly safe since the vector is NonEmpty...
-
-  {-# INLINE traverse1 #-}
-
-instance FunctorWithIndex Int NonEmptyVector where
-  imap f (NonEmptyVector v) = NonEmptyVector $ imap f v
-instance FoldableWithIndex Int NonEmptyVector where
-  ifoldMap f (NonEmptyVector v) = ifoldMap f v
-instance TraversableWithIndex Int NonEmptyVector where
-  itraverse f (NonEmptyVector v) = NonEmptyVector <$> itraverse f v
-
---------------------------------------------------------------------------------
-
-newtype Cyclic v a = Cyclic (v a)
- deriving newtype (Functor,Foldable)
-
-instance Foldable1 v    => Foldable1    (Cyclic v)
-
-instance Traversable1 v => Traversable1 (Cyclic v) where
-  traverse1 f (Cyclic v) = Cyclic <$> traverse1 f v
-instance Traversable v => Traversable (Cyclic v) where
-  traverse f (Cyclic v) = Cyclic <$> traverse f v
-
-
-instance FunctorWithIndex i v => FunctorWithIndex i (Cyclic v) where
-  imap f (Cyclic v) = Cyclic $ imap f v
-instance FoldableWithIndex i v => FoldableWithIndex i (Cyclic v) where
-  ifoldMap f (Cyclic v) = ifoldMap f v
-instance TraversableWithIndex i v => TraversableWithIndex i (Cyclic v) where
-  itraverse f (Cyclic v) = Cyclic <$> itraverse f v
-
-instance HasFromFoldable v => HasFromFoldable (Cyclic v)  where
-  fromFoldable = Cyclic . fromFoldable
-  fromList = Cyclic . fromList
-
-instance HasFromFoldable1 v => HasFromFoldable1 (Cyclic v)  where
-  fromFoldable1 = Cyclic . fromFoldable1
-  fromNonEmpty  = Cyclic . fromNonEmpty
-
-type instance Index   (Cyclic v a) = Index   (v a)
-type instance IxValue (Cyclic v a) = IxValue (v a)
-
-instance (Index (v a) ~ Int, Foldable v, Ixed (v a)) => Ixed (Cyclic v a) where
-  ix i = \f (Cyclic v) -> let n = F.length v
-                          in Cyclic <$> ix (i `mod` n) f v
 
 --------------------------------------------------------------------------------
 

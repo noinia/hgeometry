@@ -331,14 +331,13 @@ rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 merge       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
             => convexPolygon point r  -> convexPolygon point r
             -> (convexPolygon point r, LineSegment 2 p r, LineSegment 2 p r)
-merge lp rp = (ConvexPolygon . unsafeFromPoints $ r' ++ l', lt, ut)
+merge lp rp = ( uncheckedFromCCWPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
 
     takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
-    rightElems  = F.toList . CV.rightElements
-    takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
+    takeAndRotate x y = takeUntil (== x) . rightElements . rotateTo' y . getVertices
 
     r' = takeAndRotate b d rp
     l' = takeAndRotate c a lp
