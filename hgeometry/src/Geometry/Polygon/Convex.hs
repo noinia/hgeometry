@@ -53,8 +53,8 @@ import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
-import qualified Data.Vector.Circular as CV
-import qualified Data.Vector.Circular.Util as CV
+-- import qualified Data.Vector.Circular as CV
+-- import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Mutable as Mut
 import qualified Data.Vector.NonEmpty as NE
 import qualified Data.Vector.Unboxed as VU
@@ -63,15 +63,20 @@ import           Geometry.Box (IsBoxable (..))
 import           Geometry.LineSegment
 import           Geometry.Point
 import           Geometry.Point.WithExtra
-import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
-                                                 outerBoundaryVector, outerVertex, size,
-                                                 unsafeFromPoints, unsafeFromVector,
-                                                 unsafeOuterBoundaryVector)
+-- import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
+--                                                  outerBoundaryVector, outerVertex, size,
+--                                                  unsafeFromPoints, unsafeFromVector,
+--                                                  unsafeOuterBoundaryVector)
 import           Geometry.Polygon.Extremes (cmpExtreme)
 import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Triangle
 import           Geometry.Vector
+import           Geometry.Polygon.Simple
+import           Geometry.Polygon.Class
+import           Geometry.Polygon.Convex.New
+import           Geometry.Polygon.Convex.Class
+
 -- import           Geometry.Ipe
 -- import Data.Ratio
 -- import Data.RealNumber.Rational
@@ -79,36 +84,36 @@ import           Geometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | Data Type representing a convex polygon
-newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
-                          deriving (Show,Eq,NFData)
+-- -- | Data Type representing a convex polygon
+-- newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
+--                           deriving (Show,Eq,NFData)
 
 
--- | constructs the convex polygon from a list of CCW points. this is unchecked
-mkConvexPolygon :: ( AsExt (point 2 r), Point_ point 2 r
-                   , CoreOf (point 2 r) ~ Point 2 r
-                   ) => [point 2 r] -> ConvexPolygon (ExtraOf (point 2 r)) r
-mkConvexPolygon = ConvexPolygon . unsafeFromPoints . map (view _Ext)
+-- -- | constructs the convex polygon from a list of CCW points. this is unchecked
+-- mkConvexPolygon :: ( AsExt (point 2 r), Point_ point 2 r
+--                    , CoreOf (point 2 r) ~ Point 2 r
+--                    ) => [point 2 r] -> ConvexPolygon (ExtraOf (point 2 r)) r
+-- mkConvexPolygon = ConvexPolygon . unsafeFromPoints . map (view _Ext)
 
 
--- | ConvexPolygons are isomorphic to SimplePolygons with the added constraint that they have no
---   reflex vertices.
-simplePolygon :: Iso (ConvexPolygon p1 r1) (ConvexPolygon p2 r2) (SimplePolygon p1 r1) (SimplePolygon p2 r2)
-simplePolygon = iso _simplePolygon ConvexPolygon
+-- -- | ConvexPolygons are isomorphic to SimplePolygons with the added constraint that they have no
+-- --   reflex vertices.
+-- simplePolygon :: Iso (ConvexPolygon p1 r1) (ConvexPolygon p2 r2) (SimplePolygon p1 r1) (SimplePolygon p2 r2)
+-- simplePolygon = iso _simplePolygon ConvexPolygon
 
-instance PointFunctor (ConvexPolygon p) where
-  pmap f (ConvexPolygon p) = ConvexPolygon $ pmap f p
+-- instance PointFunctor (ConvexPolygon p) where
+--   pmap f (ConvexPolygon p) = ConvexPolygon $ pmap f p
 
--- | Polygons are per definition 2 dimensional
-type instance Dimension (ConvexPolygon p r) = 2
-type instance NumType   (ConvexPolygon p r) = r
+-- -- | Polygons are per definition 2 dimensional
+-- type instance Dimension (ConvexPolygon p r) = 2
+-- type instance NumType   (ConvexPolygon p r) = r
 
 
-instance Fractional r => IsTransformable (ConvexPolygon p r) where
-  transformBy = transformPointFunctor
+-- instance Fractional r => IsTransformable (ConvexPolygon p r) where
+--   transformBy = transformPointFunctor
 
-instance IsBoxable (ConvexPolygon p r) where
-  boundingBox = boundingBox . _simplePolygon
+-- instance IsBoxable (ConvexPolygon p r) where
+--   boundingBox = boundingBox . _simplePolygon
 
 
 
@@ -158,13 +163,14 @@ dequeTop idx = do
 -- | \( O(n) \) Convex hull of a simple polygon.
 --
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
-convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -> ConvexPolygon p r
-convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
+convexPolygon   :: forall polygon point r. (Ord r, Num r, Polygon_ polygon point r)
+                => polygon point r -> ConvexPolygon point r
+convexPolygon p = uncheckedFromCCWPoints $ V.create $ runM (size p) $
     findStartingPoint 2
   where
 
     -- Find the first spot where 0,n-1,n is not colinear.
-    findStartingPoint :: Int -> M s (Point 2 r :+ p) ()
+    findStartingPoint :: Int -> M s (point 2 r) ()
     findStartingPoint nth = do
       let vPrev = NE.unsafeIndex vs (nth-1)
           vNth = NE.unsafeIndex vs nth
@@ -180,7 +186,7 @@ convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
           V.mapM_ build (NE.drop (nth+1) vs)
 
     v1 = NE.unsafeIndex vs 0
-    vs = CV.vector (p^.outerBoundaryVector)
+    vs = p^.outerBoundary
     build v = do
       botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
       topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
@@ -198,19 +204,12 @@ convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
         dequeRemove
         backtrackBot v
 
-
-
-
-
+-- withNeighbours :: Getting All (simplePolygon point r) (point 2 r, (point 2 r, point 2 r))
 
 
 -- | \( O(n) \) Check if a polygon is strictly convex.
-isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
-isConvex s =
-    CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
-  where
-    f a b c = ccw' a b c == CCW
-    vs = s ^. outerBoundaryVector
+isConvex :: (Ord r, Num r, SimplePolygon_ simplePolygon point r) => simplePolygon point r -> Bool
+isConvex = allOf withNeighbours (\(u,(v,w)) -> ccw u v w == CCW)
 
 -- | \( O(n) \) Verify that a convex polygon is strictly convex.
 verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
@@ -240,8 +239,9 @@ verifyConvex = isConvex . _simplePolygon
 -- running time: \(O(\log n)\)
 --
 --
-extremes     :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r
-             -> (Point 2 r :+ p, Point 2 r :+ p)
+extremes     :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+             => Vector 2 r -> convexPolygon point r
+             -> (point 2 r, point 2 r)
 extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 
 -- | Finds the extreme maximum point in the given direction. Based on
@@ -251,18 +251,18 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 -- pre: The input polygon is strictly convex.
 --
 -- running time: \(O(\log n)\)
-maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u = findMaxWith (\a b -> cmpExtreme u (a^.core) (b^.core))
+maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r )
+                 => Vector 2 r -> convexPolygon point r -> point 2 r
+maxInDirection u = findMaxWith (cmpExtreme u)
 
--- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
---        Use unsafe indexing.
+-- | Find the maximum vertex in a convex polygon using a binary search.
 -- \( O(\log n) \)
-findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
-             -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp p = CV.index v (worker 0 (F.length v))
+findMaxWith :: (ConvexPolygon_ convexPolygon point r)
+            => (point 2 r -> point 2 r -> Ordering)
+             -> convexPolygon p r -> point 2 r
+findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (size p))
   where
-    v = p ^. simplePolygon.outerBoundaryVector
-    a `icmp` b = CV.index v a `cmp` CV.index v b
+    a `icmp` b = p^.outerBoundaryVertexAt a `cmp` p^.outerBoundaryVertexAt b
     worker a b
       | localMaximum c = c
       | a+1==b         = b
@@ -278,52 +278,13 @@ findMaxWith cmp p = CV.index v (worker 0 (F.length v))
         c = (a+b) `div` 2
         localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
     isUpwards idx = idx `icmp` (idx+1) /= GT
+  -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
+  --        Use unsafe indexing.
 
-{- Convex binary search using sequences in \( O(log^2 n) \)
 
-findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
-                  -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
-  where
-    p' >=. q = (p' `cmp` q) /= LT
-
-    findMaxStart s@(viewl -> (a:<r))
-      | isLocalMax r a r = a
-      | otherwise        = findMax s
-    findMaxStart _       = error "absurd"
-
-    findMax s = let i         = F.length s `div` 2
-                    (ac,cb')  = S.splitAt i s
-                    (c :< cb) = viewl cb'
-                in findMax' ac c cb
-
-    findMax' ac c cb
-      | isLocalMax ac c cb = c
-      | otherwise          = binSearch ac c cb
-
-    -- | Given the vertices [a..] c [..b] find the exteral vtx
-    binSearch ac@(viewl -> a:<r) c cb = case (isUpwards a (r |> c), isUpwards c cb, a >=. c) of
-        (True,False,_)      -> findMax (ac |> c)
-        (True,True,True)    -> findMax (ac |> c)
-        (True,True,False)   -> findMax (c <| cb)
-        (False,True,_)      -> findMax (c <| cb)
-        (False,False,False) -> findMax (ac |> c)
-        (False,False,True)  -> findMax (c <| cb)
-    binSearch _                  _ _ = error "maxInDirection, binSearch: empty chain"
-
-    isLocalMax (viewr -> _ :> l) c (viewl -> r :< _) = c >=. l && c >=. r
-    isLocalMax (viewr -> _ :> l) c _                 = c >=. l
-    isLocalMax _                 c (viewl -> r :< _) = c >=. r
-    isLocalMax _                 _ _                 = True
-
-    -- the Edge from a to b is upwards w.r.t b if a is not larger than b
-    isUpwards a (viewl -> b :< _) = (a `cmp` b) /= GT
-    isUpwards _ _                 = error "isUpwards: no edge endpoint"
--}
-
-tangentCmp       :: (Num r, Ord r)
-                 => Point 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-tangentCmp o p q = case ccw o (p^.core) (q^.core) of
+tangentCmp       :: (Num r, Ord r, Point_ point 2 r)
+                 => point 2 r -> point 2 r -> point 2 r -> Ordering
+tangentCmp o p q = case ccw o p q of
                      CCW      -> LT -- q is left of the line from o to p
                      CoLinear -> EQ -- q is *on* the line from o to p
                      CW       -> GT -- q is right of the line from o to p
@@ -334,7 +295,8 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
 -- running time: \(O(\log n)\).
-leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+leftTangent        :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                   => convexPolygon point r -> point 2 r -> point 2 r
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
 -- | Given a convex polygon poly, and a point outside the polygon, find the
@@ -342,12 +304,9 @@ leftTangent poly q = findMaxWith (tangentCmp q) poly
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
 -- running time: \(O(\log n)\).
-rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+rightTangent        :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                    => convexPolygon point r -> point 2 r -> point 2 r
 rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
-
-
-
-
 
 
 -- * Merging Two convex Hulls
@@ -361,16 +320,17 @@ rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 -- Lee and Schachter
 -- International Journal of Computer and Information Sciences, Vol 9, No. 3, 1980
 --
--- : (combined hull, lower tangent that was added, upper tangent thtat was
+-- : (combined hull, lower tangent that was added, upper tangent that was
 -- added)
-
+--
 -- pre: - lp and rp are disjoint, and there is a vertical line separating
 --        the two polygons.
 --      - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-merge       :: (Num r, Ord r) => ConvexPolygon p r  -> ConvexPolygon p r
-            -> (ConvexPolygon p r, LineSegment 2 p r, LineSegment 2 p r)
+merge       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+            => convexPolygon point r  -> convexPolygon point r
+            -> (convexPolygon point r, LineSegment 2 p r, LineSegment 2 p r)
 merge lp rp = (ConvexPolygon . unsafeFromPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
@@ -402,10 +362,10 @@ coreEq = (==) `on` (^.core)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent       :: forall p r. (Num r, Ord r)
-                   => ConvexPolygon p r
-                   -> ConvexPolygon p r
-                   -> LineSegment 2 p r
+lowerTangent       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+                   => convexPolygon point r
+                   -> convexPolygon point r
+                   -> LineSegment 2 point r
 lowerTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
   where
     coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
@@ -450,9 +410,9 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
-upperTangent       :: forall p r. (Num r, Ord r)
-                   => ConvexPolygon p r
-                   -> ConvexPolygon p r
+upperTangent       :: forall p r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+                   => convexPolygon point r
+                   -> convexPolygon point r
                    -> LineSegment 2 p r
 upperTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
   where
@@ -496,8 +456,8 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 -- pre: input polygons are in CCW order.
 --
 -- running time: \(O(n+m)\).
-minkowskiSum     :: (Ord r, Num r)
-                 => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
+minkowskiSum     :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                 => convexPolygon point r -> convexPolygon point r -> convexPolygon point r
 minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
   where
     f p' = let (v:xs) = F.toList . bottomMost . getVertices $ p'
@@ -530,8 +490,8 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
 -- | \( O(\log n) \)
 --   Check if a point lies inside a convex polygon, on the boundary, or outside of the
 --   convex polygon.
-inConvex :: forall p r. (Num r, Ord r)
-         => Point 2 r -> ConvexPolygon p r
+inConvex :: forall p r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+         => Point 2 r -> convexPolygon point r
          -> PointLocationResult
 inConvex p (ConvexPolygon poly)
   | p `intersects` leftEdge  = OnBoundary
@@ -560,21 +520,24 @@ inConvex p (ConvexPolygon poly)
 -- Diameter
 
 -- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
-diameter :: (Ord r, Radical r) => ConvexPolygon p r -> r
+diameter   :: (Ord r, Radical r, ConvexPolygon_ convexPolygon point r)
+           => convexPolygon point r -> r
 diameter p = euclideanDist (a^.core) (b^.core)
   where
     (a,b) = diametralPair p
 
 -- | \( O(n) \)
 --   Computes the Euclidean diametral pair by scanning antipodal pairs.
-diametralPair :: (Ord r, Num r) => ConvexPolygon p r -> (Point 2 r :+ p, Point 2 r :+ p)
+diametralPair   :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                => convexPolygon point r -> (Point 2 r :+ p, Point 2 r :+ p)
 diametralPair p = (p^.simplePolygon.outerVertex a, p^.simplePolygon.outerVertex b)
   where
     (a,b) = diametralIndexPair p
 
 -- | \( O(n) \)
 --   Computes the Euclidean diametral pair by scanning antipodal pairs.
-diametralIndexPair :: (Ord r, Num r) => ConvexPolygon p r -> (Int, Int)
+diametralIndexPair   :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                     => convexPolygon point r -> (Int, Int)
 diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
   where
     fn (a1,b1) (a2,b2) =
@@ -582,7 +545,8 @@ diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
         `compare`
       squaredEuclideanDist (p^.simplePolygon.outerVertex a2.core) (p^.simplePolygon.outerVertex b2.core)
 
-antipodalPairs :: forall p r. (Ord r, Num r) => ConvexPolygon p r -> [(Int, Int)]
+antipodalPairs   :: forall p r. (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                 => convexPolygon point r -> [(Int, Int)]
 antipodalPairs p = worker 0 (CV.index vectors 0) 1
   where
     n = size (p^.simplePolygon)
@@ -624,7 +588,7 @@ bottomMost = CV.rotateToMinimumBy (comparing f)
 
 
 -- | Helper to get the vertices of a convex polygon
-getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
+getVertices :: convexPolygon point r -> CircularVector (Point 2 r :+ p)
 getVertices = view (simplePolygon.outerBoundaryVector)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true

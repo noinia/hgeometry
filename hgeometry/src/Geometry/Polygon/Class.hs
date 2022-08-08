@@ -15,12 +15,14 @@ module Geometry.Polygon.Class
   ( HasVertices(..), HasVertices'(..)
   , HasEdges(..)
 
+  , HasAdjacencies(..)
   , Neighbours(..)
 
   , HasOuterBoundary(..)
   , signedArea2X
   , minimumVertexBy, maximumVertexBy
   , outerBoundaryEdgeSegments
+  , outerBoundaryWithNeighbours
 
   , Polygon_(..)
 
@@ -96,11 +98,13 @@ class HasFaces' graph where
 
 --------------------------------------------------------------------------------
 
+-- | A 'Neighbours' is an indexed fold of vertices
 newtype Neighbours graph = Neighbours (IndexedFold (VertexIx graph) graph (Vertex graph))
 
-class HasAdjacencies graph where
+class HasVertices' graph => HasAdjacencies graph where
   -- | The neighbours of all vertices in the graph
   adjacencyLists :: IndexedFold (VertexIx graph) graph (Neighbours graph)
+  -- adjacencyLists = vertices . ito neighboursOf
 
   -- | The neighbours of a particular vertex u
   neighboursOf   :: VertexIx graph -> Neighbours graph
@@ -240,6 +244,23 @@ outerBoundaryEdgeSegments = outerBoundaryEdges . to toSeg
   where
     toSeg :: (Vertex polygon, Vertex polygon) -> lineSegment 2 point r
     toSeg = uncurry uncheckedLineSegment
+
+
+-- | A fold that associates each vertex on the boundary with its
+-- predecessor and successor (in that order) along the boundary.
+outerBoundaryWithNeighbours :: ( HasOuterBoundary polygon
+                               , Enum (VertexIx polygon)
+                               )
+                            =>  IndexedFold1 (VertexIx polygon)
+                                        polygon
+                                        (Vertex polygon, (Vertex polygon, Vertex polygon))
+outerBoundaryWithNeighbours = ifolding1 $
+    \pg -> fmap (\(i,u) -> (i, f pg i u)) $ itoNonEmptyOf outerBoundary pg
+  where
+    f pg i u = let v = pg^.outerBoundaryVertexAt (pred i)
+                   w = pg^.outerBoundaryVertexAt (succ i)
+               in (u, (v, w))
+
 
 --------------------------------------------------------------------------------
 

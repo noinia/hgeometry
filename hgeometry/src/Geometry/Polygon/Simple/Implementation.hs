@@ -86,7 +86,7 @@ parseJSONSimplePolygon = withObject "Polygon" $ \o -> o .: "tag" >>= \case
 
 pointClosestToWithDistanceSimplePolygon      :: forall simplePolygon point r.
                                                 ( SimplePolygon_ simplePolygon point r
-                                                , Num r, Ord r
+                                                , Fractional r, Ord r
                                                 )
                                              => point 2 r
                                              -> simplePolygon point r
@@ -95,3 +95,7 @@ pointClosestToWithDistanceSimplePolygon q poly =
     minimumBy (comparing snd)
   . map (pointClosestToWithDistance q) . id @[ClosedLineSegment 2 point r]
   $ poly^..outerBoundaryEdgeSegments
+
+
+
+--------------------------------------------------------------------------------

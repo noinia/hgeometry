@@ -232,6 +232,7 @@ instance HasSquaredEuclideanDistance (SimplePolygonF f point r) where
   pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
 
 
+-- instance HasAdjacencies (SimplePolygonF f point r) where
 
 
 --------------------------------------------------------------------------------

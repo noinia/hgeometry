@@ -30,7 +30,7 @@ import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import qualified Geometry.Point.Class as PointClass
-import           Geometry.Point.EuclideanDistance
+-- import           Geometry.Point.EuclideanDistance
 import           Geometry.Properties
 import           Geometry.Vector
 import           System.Random (Random (..))
@@ -149,9 +149,6 @@ instance (FromJSON r, Arity d, KnownNat d) => FromJSON (Point d r) where
 instance (ToJSON r, Arity d) => ToJSON (Point d r) where
   toJSON     = toJSON     . toVec
   toEncoding = toEncoding . toVec
-
-instance (Num r, Arity d) => HasSquaredEuclideanDistance (Point d r) where
-  pointClosestTo _ p = PointClass.fromVector . view PointClass.asVector $ p
 
 -- -- | Point representing the origin in d dimensions
 -- --

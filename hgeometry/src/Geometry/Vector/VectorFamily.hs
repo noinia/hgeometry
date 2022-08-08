@@ -94,7 +94,7 @@ instance Arity d => Affine (Vector d) where
 deriving instance (Arity d, Hashable r) => Hashable (Vector d r)
 
 instance Arity d => Ixed (Vector d r) where
-  ix = element'
+  ix i = singular $ element' i
 
 instance Arity d => V.Vector (Vector d) r where
   construct  = MKVector <$> V.construct

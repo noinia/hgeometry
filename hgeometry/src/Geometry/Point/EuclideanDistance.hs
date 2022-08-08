@@ -8,6 +8,7 @@ module Geometry.Point.EuclideanDistance
 import           Data.Ord (comparing)
 import qualified Data.Radical as Radical
 import           Geometry.Point.Class
+import           Geometry.Point.Internal (Point, fromGenericPoint)
 import           Geometry.Properties
 import           Geometry.Vector
 
@@ -41,7 +42,7 @@ class HasSquaredEuclideanDistance g where
   -- to the Squared Euclidean distance.
   pointClosestTo   :: (Num (NumType g), Point_ point (Dimension g) (NumType g))
                    => point (Dimension g) (NumType g) -> g
-                   -> point (Dimension g) (NumType g)
+                   -> Point (Dimension g) (NumType g)
   pointClosestTo q = fst . pointClosestToWithDistance q
 
   -- | Given q and g, computes the point p in g closest to q according
@@ -49,6 +50,7 @@ class HasSquaredEuclideanDistance g where
   -- distance realized by this point.
   pointClosestToWithDistance     :: (Num (NumType g), Point_ point (Dimension g) (NumType g))
                                  => point (Dimension g) (NumType g) -> g
-                                 -> (point (Dimension g) (NumType g), NumType g)
-  pointClosestToWithDistance q g = let p = pointClosestTo q g
-                                   in (p, squaredEuclideanDist p q)
+                                 -> (Point (Dimension g) (NumType g), NumType g)
+  pointClosestToWithDistance q g = let q' = fromGenericPoint q
+                                       p  = pointClosestTo q' g
+                                   in (p, squaredEuclideanDist p q')

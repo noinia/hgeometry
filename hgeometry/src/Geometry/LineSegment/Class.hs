@@ -13,12 +13,10 @@ module Geometry.LineSegment.Class
   ( LineSegment_(..), pattern LineSegment_
 
   , interpolate
-
-  , OnSegmentConstraint
+  , OnSegment(..)
   ) where
 
 import Control.Lens
-import Data.Kind
 import Data.Ord (comparing)
 import Geometry.Interval.Class
 import Geometry.Point.Class
@@ -26,17 +24,18 @@ import Geometry.Vector
 
 --------------------------------------------------------------------------------
 
-type family OnSegmentConstraint d r :: Constraint where
-  OnSegmentConstraint 1 r = ()
-  OnSegmentConstraint 2 r = Num r
-  OnSegmentConstraint d r = Fractional r
+class OnSegment lineSegment d point r where
+  -- | Test if a point lies on a line segment.
+  --
+  -- As a user, you should typically just use 'intersects' instead.
+  onSegment :: (Ord r, Point_ point' d r) => point' d r -> lineSegment d point r -> Bool
 
 
 class ( HasStart (lineSegment d point r) (point d r)
       , HasEnd   (lineSegment d point r) (point d r)
       , Point_ point d r
       ) => LineSegment_ lineSegment d point r where
-  {-# MINIMAL uncheckedLineSegment, onSegment #-}
+  {-# MINIMAL uncheckedLineSegment #-}
 
   -- | Create a segment
   --
@@ -50,11 +49,6 @@ class ( HasStart (lineSegment d point r) (point d r)
     | s^.asVector /= t^.asVector = Just $ uncheckedLineSegment s t
     | otherwise                  = Nothing
 
-  -- | Test if a point lies on a line segment.
-  --
-  -- As a user, you should typically just use 'intersects' instead.
-  onSegment :: (Ord r, OnSegmentConstraint d r)
-            => point d r -> lineSegment d point r -> Bool
 
 -- | Constructs a line segment from the start and end point
 pattern LineSegment_ :: forall lineSegment d point r. LineSegment_ lineSegment d point r

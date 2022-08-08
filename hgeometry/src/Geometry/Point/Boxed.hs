@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Geometry.Point.Boxed
@@ -22,7 +23,8 @@ module Geometry.Point.Boxed
   , PointFunctor(..)
   ) where
 
-import  Geometry.Point.Internal
+import Geometry.Point.EuclideanDistance
+import Geometry.Point.Internal
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -32,3 +34,6 @@ import  Geometry.Point.Internal
 --     myVector = Vector3 1 2 3
 --     myPoint = Point myVector
 -- :}
+
+instance Num r => HasSquaredEuclideanDistance (Point d r) where
+  pointClosestTo _ = id

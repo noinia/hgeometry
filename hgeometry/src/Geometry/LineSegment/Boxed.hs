@@ -76,21 +76,21 @@ type instance NumType   (LineSegmentF endPoint d point r) = r
 
 
 -- | Iso for turning a LineSegment into an interval.
-_WrappedInterval :: Control.Lens.Iso (LineSegmentF endPoint  d point r)
-                                     (LineSegmentF endPoint' d' point' r')
-                                     (Interval endPoint (point d r))
-                                     (Interval endPoint' (point' d' r'))
-_WrappedInterval = Control.Lens.iso (\(MkLineSegment i) -> i) MkLineSegment
+_WrappedInterval :: Iso (LineSegmentF endPoint  d point r)
+                        (LineSegmentF endPoint' d' point' r')
+                        (Interval endPoint (point d r))
+                        (Interval endPoint' (point' d' r'))
+_WrappedInterval = iso (\(MkLineSegment i) -> i) MkLineSegment
 
 
 instance (Functor endPoint, Functor (point d)) => Functor (LineSegmentF endPoint d point) where
   fmap f (LineSegment s t) = LineSegment (fmap (fmap f) s) (fmap (fmap f) t)
 instance (Foldable endPoint, Foldable (point d)) => Foldable (LineSegmentF endPoint d point) where
   foldMap f (LineSegment s t) = foldMap (foldMap f) s <> foldMap (foldMap f) t
-instance (Control.Lens.Traversable endPoint, Control.Lens.Traversable (point d))
-         => Control.Lens.Traversable (LineSegmentF endPoint d point) where
-  traverse f (LineSegment s t) = LineSegment <$> Control.Lens.traverse (Control.Lens.traverse f) s
-                                             <*> Control.Lens.traverse (Control.Lens.traverse f) t
+instance (Traversable endPoint, Traversable (point d))
+         => Traversable (LineSegmentF endPoint d point) where
+  traverse f (LineSegment s t) = LineSegment <$> traverse (traverse f) s
+                                             <*> traverse (traverse f) t
 
 instance EndPoint_ endPoint => HasStart (LineSegmentF endPoint d point r) (point d r) where
   start = _WrappedInterval.start.endPoint @endPoint
@@ -102,9 +102,10 @@ instance EndPoint_ endPoint => HasEnd   (LineSegmentF endPoint d point r) (point
 type instance NumType   (LineSegmentF endPoint d point r) = r
 type instance Dimension (LineSegmentF endPoint d point r) = d
 
-instance Control.Lens.Traversable endPoint => HasPoints (LineSegmentF endPoint d point r)
+instance Traversable endPoint => HasPoints (LineSegmentF endPoint d point r)
                                            (LineSegmentF endPoint d point' r) point point' where
-  allPoints f (LineSegment s t) = LineSegment <$> Control.Lens.traverse f s <*> Control.Lens.traverse f t
+  allPoints f (LineSegment s t) =
+    LineSegment <$> traverse f s <*> traverse f t
 
 
 instance (Point_ point d r, EndPoint_ endPoint, Num r)
@@ -116,21 +117,29 @@ instance (EndPoint_ endPoint, Point_ point d r)
 
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
-  q `onSegment` seg = case scalarMultiple (q .-. u) (v .-. u) of
+instance (EndPoint_ endPoint, Point_ point d r, Fractional r)
+         => OnSegment (LineSegmentF endPoint) d point r where
+
+  (fromGenericPoint @point-> q) `onSegment` seg = case scalarMultiple (q .-. u) (v .-. u) of
                         Nothing -> False
                         Just q' -> q' `inInterval` toInterval seg /= Outside
     where
       u = seg^.start
       v = seg^.end
 
+-- | get an interval from 0 to 1 corresponding to the segment, in
+-- particular, keeps the endpoints as they were.
 toInterval     :: (Functor endPoint, Num r)
                => (LineSegmentF endPoint) d point r -> Interval endPoint r
 toInterval seg = let Interval s t = seg^._WrappedInterval
                  in Interval (0 <$ s) (1 <$ t)
 
-instance (Fractional r, Ord r)
+instance (Fractional r, Ord r, Point_ point d r)
          => HasSquaredEuclideanDistance (ClosedLineSegment d point r) where
-  pointClosestToWithDistance = sqDistanceToSegArg
+  -- pointClosestToWithDistance   :: (Num (NumType g), Point_ point (Dimension g) (NumType g))
+  --                              => point (Dimension g) (NumType g) -> g
+  --                              -> (point (Dimension g) (NumType g), NumType g)
+  pointClosestToWithDistance q = sqDistanceToSegArg (fromGenericPoint @point q)
 
 -- | Squared distance from the point to the Segment s, and the point on s
 -- realizing it.
@@ -141,7 +150,7 @@ instance (Fractional r, Ord r)
 -- lies arbitrarily close to the end point).
 --
 -- >>> :{
--- let ls = OpenLineSegment (Point2 0 0 :+ ()) (Point2 1 0 :+ ())
+-- let ls = OpenLineSegment (Point2 0 0) (Point2 1 0)
 --     p  = Point2 2 0
 -- in  fst (sqDistanceToSegArg p ls) == Point2 1 0
 -- :}
@@ -149,14 +158,13 @@ instance (Fractional r, Ord r)
 sqDistanceToSegArg                               :: forall point d r.
                                                     ( Ord r
                                                     , Fractional r
-                                                    , OnSegmentConstraint d r
                                                     , Point_ point d r)
                                                  => point d r -> ClosedLineSegment d point r
-                                                 -> (point d r, r)
+                                                 -> (Point d r, r)
 sqDistanceToSegArg q seg@(ClosedLineSegment s t) = minimumBy (comparing snd) pts
   where
-    pts :: [(point d r, r)]
+    pts :: [(Point d r, r)]
     pts = (if fst m `onSegment` seg then (m :) else id) [f s, f t]
-    f   :: point d r -> (point d r, r)
-    f a = (q,squaredEuclideanDist a q)
+    f   :: point d r -> (Point d r, r)
+    f a = (fromGenericPoint q,squaredEuclideanDist a q)
     m   = pointClosestToWithDistance q (supportingLine seg)

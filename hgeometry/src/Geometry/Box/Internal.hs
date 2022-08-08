@@ -351,7 +351,7 @@ instance IsBoxable c => IsBoxable (c :+ e) where
 -- * Distances
 
 instance (Num r, Ord r) => HasSquaredEuclideanDistance (Box 2 p r) where
-  pointClosestToWithDistance q bx =
+  pointClosestToWithDistance (fromGenericPoint -> q) bx =
       case ((q^.xCoord) `R.inRange` hor, (q^.yCoord) `R.inRange` ver) of
                       (False,False) -> if q^.yCoord < b
                                        then closest (Point2_ l b) (Point2_ r b)
