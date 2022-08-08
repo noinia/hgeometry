@@ -16,7 +16,11 @@ module Geometry.Polygon.Convex.New
   ) where
 
 import           Control.Lens
+import           Data.Cyclic
 import qualified Data.Foldable as F
+import qualified Data.Vector as Vector
+import qualified Data.Vector.Generic as GV
+import           Data.Vector.NonEmpty.Util ()
 import           GHC.Generics
 import           Geometry.Point
 import           Geometry.Point.Class
@@ -25,10 +29,6 @@ import           Geometry.Polygon.Simple
 import           Geometry.Polygon.Simple.Class
 import           Geometry.Polygon.Simple.Implementation
 import           Geometry.Properties
-
-import           Data.Maybe
-import qualified Data.Vector as Vector
-import qualified Data.Vector.Generic as GV
 
 
 --------------------------------------------------------------------------------
@@ -102,7 +102,10 @@ instance ( SimplePolygon_ (SimplePolygonF f) point r
 --   | isConvex pg = Just (ConvexPolygon pg)
 --   | otherwise   = Nothing
 
-instance HasSquaredEuclideanDistance (ConvexPolygonF f point r) where
+instance ( SimplePolygon_ (ConvexPolygonF f) point r
+         , SimplePolygon_ (SimplePolygonF f) point r
+         , Ord r, Fractional r)
+       => HasSquaredEuclideanDistance (ConvexPolygonF f point r) where
   pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
   -- FIXME: we should be able to implement this in O(log n) time instead!!
 

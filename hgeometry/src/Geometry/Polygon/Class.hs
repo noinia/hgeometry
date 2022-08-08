@@ -29,20 +29,16 @@ module Geometry.Polygon.Class
   , numVertices, numEdges, numFaces
   ) where
 
-import           Control.Lens
-import qualified Data.Foldable as F
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (fromMaybe)
-import           Data.Semigroup.Foldable
-import           Geometry.LineSegment.Class
-import           Geometry.Point.Class
-import           Geometry.Vector
-
-import           Control.Lens.Internal.Fold (NonEmptyDList(..))
-import           Data.Functor.Apply (Apply)
-import           Data.Functor.Contravariant (phantom)
-import           Data.Monoid (Endo(..))
+import Control.Lens
+import Control.Lens.Internal.Fold (NonEmptyDList(..))
+import Data.Functor.Apply (Apply)
+import Data.Functor.Contravariant (phantom)
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe (fromMaybe)
+import Data.Semigroup.Foldable
+import Geometry.LineSegment.Class
+import Geometry.Point.Class
+import Geometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -264,11 +260,10 @@ outerBoundaryWithNeighbours = ifolding1 $
 
 --------------------------------------------------------------------------------
 
-
-class HasHoles face face' where
-  type HoleIx face
-  type Hole face
-  holes :: IndexedTraversal (HoleIx face) face face' (Hole face) (Hole face')
+-- class HasHoles face face' where
+--   type HoleIx face
+--   type Hole face
+--   holes :: IndexedTraversal (HoleIx face) face face' (Hole face) (Hole face')
 
 --------------------------------------------------------------------------------
 

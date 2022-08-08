@@ -18,31 +18,20 @@ module Geometry.Polygon.Simple
   ) where
 
 import           Control.Lens
-import           Data.Coerce
 import           Data.Cyclic
 import qualified Data.Foldable as F
-import qualified Data.Functor.Apply as Apply
-import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Foldable.Util
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
-import           Data.Semigroup.Foldable
-import qualified Data.Vector as Vector
-import qualified Data.Vector.Generic as GV
-import qualified Data.Vector.NonEmpty as NonEmptyVector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           Data.Vector.NonEmpty.Util ()
 import           GHC.Generics
 import           Geometry.Point
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple.Class
 import           Geometry.Polygon.Simple.Implementation
 import           Geometry.Properties
-import           Geometry.Transformation
 
 --------------------------------------------------------------------------------
-
-
---------------------------------------------------------------------------------
-
 
 -- | Simple polygons just store their vertices in CCCW order
 newtype SimplePolygonF f point r = MkSimplePolygon (f (point 2 r))
@@ -133,19 +122,14 @@ instance ( Show (point 2 r)
          ) => Show (SimplePolygonF f point r) where
   show = showSimplePolygon
 
-
-instance HasSquaredEuclideanDistance (SimplePolygonF f point r) where
-  pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
-
-
--- instance HasAdjacencies (SimplePolygonF f point r) where
-
+instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
+         => HasSquaredEuclideanDistance (SimplePolygonF f point r) where
+  pointClosestToWithDistance = pointClosestToWithDistanceSimplePolygon
 
 --------------------------------------------------------------------------------
 
-
-testPoly :: SimplePolygon Point Int
-testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
+_testPoly :: SimplePolygon Point Int
+_testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------

@@ -53,6 +53,7 @@ import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
+import           Geometry.Polygon.Convex.Tangents
 -- import qualified Data.Vector.Circular as CV
 -- import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Mutable as Mut
@@ -76,46 +77,6 @@ import           Geometry.Polygon.Simple
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Convex.New
 import           Geometry.Polygon.Convex.Class
-
--- import           Geometry.Ipe
--- import Data.Ratio
--- import Data.RealNumber.Rational
--- import Debug.Trace
-
---------------------------------------------------------------------------------
-
--- -- | Data Type representing a convex polygon
--- newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
---                           deriving (Show,Eq,NFData)
-
-
--- -- | constructs the convex polygon from a list of CCW points. this is unchecked
--- mkConvexPolygon :: ( AsExt (point 2 r), Point_ point 2 r
---                    , CoreOf (point 2 r) ~ Point 2 r
---                    ) => [point 2 r] -> ConvexPolygon (ExtraOf (point 2 r)) r
--- mkConvexPolygon = ConvexPolygon . unsafeFromPoints . map (view _Ext)
-
-
--- -- | ConvexPolygons are isomorphic to SimplePolygons with the added constraint that they have no
--- --   reflex vertices.
--- simplePolygon :: Iso (ConvexPolygon p1 r1) (ConvexPolygon p2 r2) (SimplePolygon p1 r1) (SimplePolygon p2 r2)
--- simplePolygon = iso _simplePolygon ConvexPolygon
-
--- instance PointFunctor (ConvexPolygon p) where
---   pmap f (ConvexPolygon p) = ConvexPolygon $ pmap f p
-
--- -- | Polygons are per definition 2 dimensional
--- type instance Dimension (ConvexPolygon p r) = 2
--- type instance NumType   (ConvexPolygon p r) = r
-
-
--- instance Fractional r => IsTransformable (ConvexPolygon p r) where
---   transformBy = transformPointFunctor
-
--- instance IsBoxable (ConvexPolygon p r) where
---   boundingBox = boundingBox . _simplePolygon
-
-
 
 --------------------------------------------------------------------------------
 -- Convex hull of simple polygon.
@@ -255,58 +216,10 @@ maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r )
                  => Vector 2 r -> convexPolygon point r -> point 2 r
 maxInDirection u = findMaxWith (cmpExtreme u)
 
--- | Find the maximum vertex in a convex polygon using a binary search.
--- \( O(\log n) \)
-findMaxWith :: (ConvexPolygon_ convexPolygon point r)
-            => (point 2 r -> point 2 r -> Ordering)
-             -> convexPolygon p r -> point 2 r
-findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (size p))
-  where
-    a `icmp` b = p^.outerBoundaryVertexAt a `cmp` p^.outerBoundaryVertexAt b
-    worker a b
-      | localMaximum c = c
-      | a+1==b         = b
-      | otherwise      =
-        case  (isUpwards a, isUpwards c, c `icmp` a /= LT) of
-          (True, False, _)      -> worker a c -- A is up, C is down, pick [a,c]
-          (True, True, True)    -> worker c b -- A is up, C is up, C is GTE A, pick [c,b]
-          (True, True, False)   -> worker a c -- A is up, C is LT A, pick [a,c]
-          (False, True, _)      -> worker c b -- A is down, C is up, pick [c,b]
-          (False, False, False) -> worker c b -- A is down, C is down, C is LT A, pick [c,b]
-          (False, _, True)      -> worker a c -- A is down, C is GTE A, pick [a,c]
-      where
-        c = (a+b) `div` 2
-        localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
-    isUpwards idx = idx `icmp` (idx+1) /= GT
-  -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
-  --        Use unsafe indexing.
 
 
-tangentCmp       :: (Num r, Ord r, Point_ point 2 r)
-                 => point 2 r -> point 2 r -> point 2 r -> Ordering
-tangentCmp o p q = case ccw o p q of
-                     CCW      -> LT -- q is left of the line from o to p
-                     CoLinear -> EQ -- q is *on* the line from o to p
-                     CW       -> GT -- q is right of the line from o to p
 
 
--- | Given a convex polygon poly, and a point outside the polygon, find the
---  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
---  s.t. the polygon lies completely to the right of the line from q to v.
---
--- running time: \(O(\log n)\).
-leftTangent        :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
-                   => convexPolygon point r -> point 2 r -> point 2 r
-leftTangent poly q = findMaxWith (tangentCmp q) poly
-
--- | Given a convex polygon poly, and a point outside the polygon, find the
---  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
---  s.t. the polygon lies completely to the left of the line from q to v.
---
--- running time: \(O(\log n)\).
-rightTangent        :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
-                    => convexPolygon point r -> point 2 r -> point 2 r
-rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 
 
 -- * Merging Two convex Hulls
@@ -348,104 +261,6 @@ rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
 
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
-
-
---------------------------------------------------------------------------------
--- * Computing Tangents
-
--- | Compute the lower tangent of the two polgyons
---
---   pre: - polygons lp and rp have at least 1 vertex
---        - lp and rp are disjoint, and there is a vertical line separating
---          the two polygons.
---        - The vertices of the polygons are given in clockwise order
---
--- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
-                   => convexPolygon point r
-                   -> convexPolygon point r
-                   -> LineSegment 2 point r
-lowerTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
-  where
-    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
-                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
-    lh = coerce' . CV.rightElements . rightMost . getVertices $ lp
-    rh = coerce' . CV.leftElements  . leftMost  . getVertices $ rp
-    (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
-
-
--- | Compute the lower tangent of the two convex chains lp and rp
---
---   pre: - the chains lp and rp have at least 1 vertex
---        - lp and rp are disjoint, and there is a vertical line
---          having lp on the left and rp on the right.
---        - The vertices in the left-chain are given in clockwise order, (right to left)
---        - The vertices in the right chain are given in counterclockwise order (left-to-right)
---
--- The result returned is the two endpoints l and r of the tangents,
--- and the remainders lc and rc of the chains (i.e.)  such that the lower hull
--- of both chains is: (reverse lc) ++ [l,h] ++ rc
---
--- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
--- respectively
-lowerTangent'       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r)
-                    => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
-lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
-  where
-    ne = NonEmpty.fromList
-    isRight' []    _ _ = False
-    isRight' (x:_) l r = ccw l r x /= CCW
-
-    go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
-                             | isRight' ls l r = go (ne ls) rh
-                             | otherwise       = Two (l :+ ls) (r :+ rs)
-
-
--- | Compute the upper tangent of the two polgyons
---
---   pre: - polygons lp and rp have at least 1 vertex
---        - lp and rp are disjoint, and there is a vertical line separating
---          the two polygons.
---        - The vertices of the polygons are given in clockwise order
---
--- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
-upperTangent       :: forall p r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
-                   => convexPolygon point r
-                   -> convexPolygon point r
-                   -> LineSegment 2 p r
-upperTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
-  where
-    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
-                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
-    lh = coerce' . CV.leftElements  . rightMost . getVertices $ lp
-    rh = coerce' . CV.rightElements . leftMost  . getVertices $ rp
-    (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
-
--- | Compute the upper tangent of the two convex chains lp and rp
---
---   pre: - the chains lp and rp have at least 1 vertex
---        - lp and rp are disjoint, and there is a vertical line
---          having lp on the left and rp on the right.
---        - The vertices in the left-chain are given in clockwise order, (right to left)
---        - The vertices in the right chain are given in counterclockwise order (left-to-right)
---
--- The result returned is the two endpoints l and r of the tangents,
--- and the remainders lc and rc of the chains (i.e.)  such that the upper hull
--- of both chains is: (reverse lc) ++ [l,h] ++ rc
---
--- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
--- respectively
-upperTangent'       :: (Ord r, Num r, Foldable1 f, Point_ point 2 r)
-                    => f (point 2 r) -> f (point 2 r) -> Two (point 2 r :+ [point 2 r])
-upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
-  where
-    ne = NonEmpty.fromList
-    isLeft' []    _ _ = False
-    isLeft' (x:_) l r = ccw l r x /= CW
-
-    go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
-                             | isLeft' ls l r = go (ne ls) rh
-                             | otherwise      = Two (l :+ ls) (r :+ rs)
 
 --------------------------------------------------------------------------------
 
@@ -519,17 +334,15 @@ inConvex p (ConvexPolygon poly)
 -- Diameter
 
 -- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
-diameter   :: (Ord r, Radical r, ConvexPolygon_ convexPolygon point r)
-           => convexPolygon point r -> r
-diameter p = euclideanDist (a^.core) (b^.core)
-  where
-    (a,b) = diametralPair p
+diameter :: (Ord r, Radical r, ConvexPolygon_ convexPolygon point r)
+         => convexPolygon point r -> r
+diameter = curry euclideanDist . diametralPair
 
 -- | \( O(n) \)
 --   Computes the Euclidean diametral pair by scanning antipodal pairs.
 diametralPair   :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
                 => convexPolygon point r -> (Point 2 r :+ p, Point 2 r :+ p)
-diametralPair p = (p^.simplePolygon.outerVertex a, p^.simplePolygon.outerVertex b)
+diametralPair p = (p^.outerBoundaryVertexAt a, p^.outerBoundaryVertexAt b)
   where
     (a,b) = diametralIndexPair p
 
@@ -548,7 +361,7 @@ antipodalPairs   :: forall p r. (Ord r, Num r, ConvexPolygon_ convexPolygon poin
                  => convexPolygon point r -> [(Int, Int)]
 antipodalPairs p = worker 0 (CV.index vectors 0) 1
   where
-    n = size (p^.simplePolygon)
+    n = size p
     vs = p^.simplePolygon.outerBoundaryVector
 
     worker a aElt b

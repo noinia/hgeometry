@@ -9,8 +9,8 @@ module Geometry.Polygon.Simple.Implementation
   , readsPrecSimplePolygon
   -- * Aeson
   , toJSONSimplePolgyon, parseJSONSimplePolygon
-
-
+  -- * HasSquaredEuclideanDistance
+  , pointClosestToWithDistanceSimplePolygon
   ) where
 
 import           Control.Lens
@@ -84,13 +84,14 @@ parseJSONSimplePolygon = withObject "Polygon" $ \o -> o .: "tag" >>= \case
 --------------------------------------------------------------------------------
 -- * HasSquaredEuclideanDistance
 
-pointClosestToWithDistanceSimplePolygon      :: forall simplePolygon point r.
+pointClosestToWithDistanceSimplePolygon      :: forall simplePolygon point point' r.
                                                 ( SimplePolygon_ simplePolygon point r
+                                                , Point_ point' 2 r
                                                 , Fractional r, Ord r
                                                 )
-                                             => point 2 r
+                                             => point' 2 r
                                              -> simplePolygon point r
-                                             -> (point 2 r, r)
+                                             -> (Point 2 r, r)
 pointClosestToWithDistanceSimplePolygon q poly =
     minimumBy (comparing snd)
   . map (pointClosestToWithDistance q) . id @[ClosedLineSegment 2 point r]

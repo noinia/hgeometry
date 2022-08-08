@@ -23,6 +23,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util
 import           Geometry.Point
 import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Convex.Tangents
 import           Geometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
