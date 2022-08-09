@@ -3,7 +3,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Cyclic
   ( Cyclic(..)
-  , rightElements, leftElements
+  , toCircularVector
   ) where
 
 --------------------------------------------------------------------------------
@@ -12,7 +12,8 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable.Util
 import           Data.Semigroup.Foldable
-
+import           Data.Vector.Circular (CircularVector(..))
+import           Data.Vector.NonEmpty (NonEmptyVector)
 --------------------------------------------------------------------------------
 
 -- | A cyclic sequence type
@@ -49,11 +50,6 @@ instance (Index (v a) ~ Int, Foldable v, Ixed (v a)) => Ixed (Cyclic v a) where
   ix i = \f (Cyclic v) -> let n = F.length v
                           in Cyclic <$> ix (i `mod` n) f v
 
-
--- | get the elements in in order of the cylic vector, i.e. "to the right"
-rightElements :: Foldable v => Cyclic v a -> [a]
-rightElements = F.toList
-
--- | get the elements in in reverse order of the cylic vector, i.e. "to the left"
-leftElements :: Foldable v => Cyclic v a -> [a]
-leftElements = reverse . rightElements
+-- | Turn the cyclic vector into a circular Vector
+toCircularVector            :: Cyclic NonEmptyVector a -> CircularVector a
+toCircularVector (Cyclic v) = CircularVector v 0

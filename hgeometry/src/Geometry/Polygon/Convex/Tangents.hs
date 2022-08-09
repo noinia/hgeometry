@@ -6,47 +6,19 @@ module Geometry.Polygon.Convex.Tangents
   , findMaxWith
   ) where
 
-import           Control.DeepSeq (NFData)
-import           Control.Lens (Iso, iso, over, view, (%~), (&), (^.))
-import           Control.Monad.Random
-import           Control.Monad.ST
-import           Control.Monad.State
-import           Data.Coerce
+import           Control.Lens ((^.),(^..))
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import qualified Data.IntSet as IS
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
-import           Data.Radical
 import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
-import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
--- import qualified Data.Vector.Circular as CV
--- import qualified Data.Vector.Circular.Util as CV
-import qualified Data.Vector.Mutable as Mut
-import qualified Data.Vector.NonEmpty as NE
-import qualified Data.Vector.Unboxed as VU
-import           Geometry.Boundary
-import           Geometry.Box (IsBoxable (..))
-import           Geometry.LineSegment
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
+import           Geometry.LineSegment.Boxed
 import           Geometry.Point
-import           Geometry.Point.WithExtra
--- import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
---                                                  outerBoundaryVector, outerVertex, size,
---                                                  unsafeFromPoints, unsafeFromVector,
---                                                  unsafeOuterBoundaryVector)
-import           Geometry.Polygon.Extremes (cmpExtreme)
-import           Geometry.Properties
-import           Geometry.Transformation
-import           Geometry.Triangle
-import           Geometry.Vector
-import           Geometry.Polygon.Simple
 import           Geometry.Polygon.Class
-import           Geometry.Polygon.Convex.New
 import           Geometry.Polygon.Convex.Class
 
 --------------------------------------------------------------------------------
@@ -80,12 +52,13 @@ tangentCmp o p q = case ccw o p q of
 
 -- | Find the maximum vertex in a convex polygon using a binary search.
 -- \( O(\log n) \)
-findMaxWith :: (ConvexPolygon_ convexPolygon point r)
+findMaxWith :: ( ConvexPolygon_ convexPolygon point r
+               )
             => (point 2 r -> point 2 r -> Ordering)
-             -> convexPolygon p r -> point 2 r
-findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (size p))
+             -> convexPolygon point r -> point 2 r
+findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (numVertices p))
   where
-    a `icmp` b = p^.outerBoundaryVertexAt a `cmp` p^.outerBoundaryVertexAt b
+    a `icmp` b = (p^.outerBoundaryVertexAt a) `cmp` (p^.outerBoundaryVertexAt b)
     worker a b
       | localMaximum c = c
       | a+1==b         = b
@@ -118,13 +91,11 @@ findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (size p))
 lowerTangent       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
                    => convexPolygon point r
                    -> convexPolygon point r
-                   -> LineSegment 2 point r
-lowerTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
+                   -> ClosedLineSegment 2 point r
+lowerTangent lp rp = ClosedLineSegment l r
   where
-    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
-                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
-    lh = coerce' . CV.rightElements . rightMost . getVertices $ lp
-    rh = coerce' . CV.leftElements  . leftMost  . getVertices $ rp
+    lh = CV.rightElements . rightMost . getVertices $ lp
+    rh = CV.leftElements  . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 
@@ -154,7 +125,6 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
                              | isRight' ls l r = go (ne ls) rh
                              | otherwise       = Two (l :+ ls) (r :+ rs)
 
-
 -- | Compute the upper tangent of the two polgyons
 --
 --   pre: - polygons lp and rp have at least 1 vertex
@@ -163,16 +133,14 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
-upperTangent       :: forall p r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+upperTangent       :: forall convexPolygon point r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
                    => convexPolygon point r
                    -> convexPolygon point r
-                   -> LineSegment 2 p r
-upperTangent lp rp = ClosedLineSegment (coerce l) (coerce r)
+                   -> ClosedLineSegment 2 point r
+upperTangent lp rp = ClosedLineSegment l r
   where
-    coerce' = coerce @(NE.NonEmptyVector (Point 2 r :+ p))
-                     @(NE.NonEmptyVector (WithExtra Point p 2 r))
-    lh = coerce' . CV.leftElements  . rightMost . getVertices $ lp
-    rh = coerce' . CV.rightElements . leftMost  . getVertices $ rp
+    lh = CV.leftElements  . rightMost . getVertices $ lp
+    rh = CV.rightElements . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
@@ -200,3 +168,22 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
     go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
                              | isLeft' ls l r = go (ne ls) rh
                              | otherwise      = Two (l :+ ls) (r :+ rs)
+
+
+
+--------------------------------------------------------------------------------
+
+
+-- | Rotate to the rightmost point (rightmost and topmost in case of ties)
+rightMost :: (Ord r, Point_ point 2 r)
+          => CircularVector (point 2 r) -> CircularVector (point 2 r)
+rightMost = CV.rotateToMaximumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
+
+-- | Rotate to the leftmost point (and bottommost in case of ties)
+leftMost :: (Ord r, Point_ point 2 r)
+         => CircularVector (point 2 r) -> CircularVector (point 2 r)
+leftMost = CV.rotateToMinimumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
+
+-- | get the vertices of a polygon as a circularvector
+getVertices   :: HasOuterBoundary polygon => polygon -> CircularVector (Vertex polygon)
+getVertices p = CV.unsafeFromListN (numVertices p) (p^..outerBoundary)

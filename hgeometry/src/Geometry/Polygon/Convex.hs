@@ -11,9 +11,7 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Convex
-  ( ConvexPolygon(..), simplePolygon
-  , mkConvexPolygon
-  , convexPolygon
+  ( convexPolygon
   , isConvex, verifyConvex
   , merge
   , lowerTangent, lowerTangent'
@@ -35,13 +33,14 @@ module Geometry.Polygon.Convex
   ) where
 
 import           Control.DeepSeq (NFData)
-import           Control.Lens (Iso, iso, over, view, (%~), (&), (^.))
+import           Control.Lens
 import           Control.Monad.Random
 import           Control.Monad.ST
 import           Control.Monad.State
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Foldable.Util
 import           Data.Function (on)
 import qualified Data.IntSet as IS
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -53,30 +52,29 @@ import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
-import           Geometry.Polygon.Convex.Tangents
--- import qualified Data.Vector.Circular as CV
--- import qualified Data.Vector.Circular.Util as CV
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Mutable as Mut
 import qualified Data.Vector.NonEmpty as NE
 import qualified Data.Vector.Unboxed as VU
 import           Geometry.Boundary
 import           Geometry.Box (IsBoxable (..))
-import           Geometry.LineSegment
+import           Geometry.LineSegment.Boxed
+import           Geometry.LineSegment.Class
 import           Geometry.Point
-import           Geometry.Point.WithExtra
--- import           Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
---                                                  outerBoundaryVector, outerVertex, size,
---                                                  unsafeFromPoints, unsafeFromVector,
---                                                  unsafeOuterBoundaryVector)
+-- import           Geometry.Point.WithExtra
+import           Geometry.Polygon.Class
+import           Geometry.Polygon.Convex.Class
+import           Geometry.Polygon.Convex.New
+import           Geometry.Polygon.Convex.Tangents
 import           Geometry.Polygon.Extremes (cmpExtreme)
+import           Geometry.Polygon.Simple
 import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Triangle
 import           Geometry.Vector
-import           Geometry.Polygon.Simple
-import           Geometry.Polygon.Class
-import           Geometry.Polygon.Convex.New
-import           Geometry.Polygon.Convex.Class
+import           Data.List.Alternating (withNeighbours)
+import           Data.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 -- Convex hull of simple polygon.
@@ -126,7 +124,7 @@ dequeTop idx = do
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
 convexPolygon   :: forall polygon point r. (Ord r, Num r, Polygon_ polygon point r)
                 => polygon point r -> ConvexPolygon point r
-convexPolygon p = uncheckedFromCCWPoints $ V.create $ runM (size p) $
+convexPolygon p = uncheckedFromCCWPoints $ NE.unsafeCreate $ runM (numVertices p) $
     findStartingPoint 2
   where
 
@@ -135,7 +133,7 @@ convexPolygon p = uncheckedFromCCWPoints $ V.create $ runM (size p) $
     findStartingPoint nth = do
       let vPrev = NE.unsafeIndex vs (nth-1)
           vNth = NE.unsafeIndex vs nth
-      case ccw' v1 vPrev vNth of
+      case ccw v1 vPrev vNth of
         CoLinear -> findStartingPoint (nth+1)
         CCW -> do
           dequePush v1 >> dequePush vPrev
@@ -147,20 +145,20 @@ convexPolygon p = uncheckedFromCCWPoints $ V.create $ runM (size p) $
           V.mapM_ build (NE.drop (nth+1) vs)
 
     v1 = NE.unsafeIndex vs 0
-    vs = p^.outerBoundary
+    vs = NE.unsafeFromList $ p^..outerBoundary -- FIXME
     build v = do
-      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
-      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      botTurn <- ccw <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw <$> dequeTop 1 <*> dequeTop 0    <*> pure v
       when (botTurn == CW || topTurn == CW) $ do
         backtrackTop v; dequePush v
         backtrackBot v; dequeInsert v
     backtrackTop v = do
-      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      turn <- ccw <$> dequeTop 1 <*> dequeTop 0 <*> pure v
       unless (turn == CCW) $ do
         dequePop
         backtrackTop v
     backtrackBot v = do
-      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      turn <- ccw <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
       unless (turn == CCW) $ do
         dequeRemove
         backtrackBot v
@@ -168,13 +166,14 @@ convexPolygon p = uncheckedFromCCWPoints $ V.create $ runM (size p) $
 -- withNeighbours :: Getting All (simplePolygon point r) (point 2 r, (point 2 r, point 2 r))
 
 
+
 -- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r, SimplePolygon_ simplePolygon point r) => simplePolygon point r -> Bool
-isConvex = allOf withNeighbours (\(u,(v,w)) -> ccw u v w == CCW)
+isConvex = allOf outerBoundaryWithNeighbours (\(u,(v,w)) -> ccw u v w == CCW)
 
 -- | \( O(n) \) Verify that a convex polygon is strictly convex.
-verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
-verifyConvex = isConvex . _simplePolygon
+verifyConvex :: (Ord r, Num r, Point_ point 2 r) => ConvexPolygon point r -> Bool
+verifyConvex = isConvex
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
@@ -243,24 +242,28 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 merge       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
             => convexPolygon point r  -> convexPolygon point r
-            -> (convexPolygon point r, LineSegment 2 p r, LineSegment 2 p r)
+            -> (convexPolygon point r, ClosedLineSegment 2 point r, ClosedLineSegment 2 point r)
 merge lp rp = ( uncheckedFromCCWPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
 
     takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
-    takeAndRotate x y = takeUntil (== x) . rightElements . rotateTo' y . getVertices
+    takeAndRotate x y
+      = takeUntil (\p -> fromGenericPoint p == fromGenericPoint @Point x)
+      . F.toList . CV.rightElements
+      . rotateTo' y . getVertices
 
     r' = takeAndRotate b d rp
     l' = takeAndRotate c a lp
 
 
-rotateTo'   :: Eq a => (a :+ b) -> CircularVector (a :+ b) -> CircularVector (a :+ b)
-rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
+-- | get the vertices of a polygon as a circularvector
+getVertices   :: HasOuterBoundary polygon => polygon -> CircularVector (Vertex polygon)
+getVertices p = CV.unsafeFromListN (numVertices p) (p^..outerBoundary)
 
-coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
-coreEq = (==) `on` (^.core)
+rotateTo' (fromGenericPoint @Point -> x) = fromJust
+                                         . CV.findRotateTo (\p -> fromGenericPoint p == x)
 
 --------------------------------------------------------------------------------
 
@@ -270,14 +273,19 @@ coreEq = (==) `on` (^.core)
 -- pre: input polygons are in CCW order.
 --
 -- running time: \(O(n+m)\).
-minkowskiSum     :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+minkowskiSum     :: forall convexPolygon point r. ( Ord r, Num r
+                    , ConvexPolygon_ convexPolygon point r
+                    )
                  => convexPolygon point r -> convexPolygon point r -> convexPolygon point r
-minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
+minkowskiSum p q = uncheckedFromCCWPoints $ merge' (f p) (f q)
   where
     f p' = let (v:xs) = F.toList . bottomMost . getVertices $ p'
            in v:xs++[v]
-    (v :+ ve) .+. (w :+ we) = v .+^ toVec w :+ (ve,we)
 
+    (.+.)   :: point 2 r -> point 2 r -> point 2 r
+    v .+. w = v .+^ (w^.asVector)
+
+    cmpAngle            :: point 2 r -> point 2 r -> point 2 r -> point 2 r -> Ordering
     cmpAngle v v' w w' =
       ccwCmpAround origin (Point $ v' .-. v) (Point $ w' .-. w)
 
@@ -285,12 +293,17 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
     merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
     merge' (v:vs)    ws@[w]    = v .+. w : merge' vs ws
     merge' (v:v':vs) (w:w':ws) = v .+. w :
-      case cmpAngle (v^.core) (v'^.core) (w^.core) (w'^.core) of
+      case cmpAngle v v' w w' of
         LT -> merge' (v':vs)   (w:w':ws)
         GT -> merge' (v:v':vs) (w':ws)
         EQ -> merge' (v':vs)   (w':ws)
     merge' _         _         = error "minkowskiSum: Should not happen"
 
+
+-- | Rotate to the leftmost point (and bottommost in case of ties)
+bottomMost :: (Ord r, Point_ point 2 r)
+         => CircularVector (point 2 r) -> CircularVector (point 2 r)
+bottomMost = CV.rotateToMinimumBy (comparing $ \p -> (p^.yCoord,p^.xCoord))
 
 --------------------------------------------------------------------------------
 -- inConvex
@@ -304,31 +317,35 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
 -- | \( O(\log n) \)
 --   Check if a point lies inside a convex polygon, on the boundary, or outside of the
 --   convex polygon.
-inConvex :: forall p r. (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
-         => Point 2 r -> convexPolygon point r
+inConvex :: forall convexPolygon point point' r.
+            (Num r, Ord r, ConvexPolygon_ convexPolygon point r, Point_ point' 2 r
+            )
+         => point' 2 r -> convexPolygon point r
          -> PointLocationResult
-inConvex p (ConvexPolygon poly)
-  | p `intersects` leftEdge  = OnBoundary
-  | p `intersects` rightEdge = OnBoundary
+inConvex (fromGenericPoint @point -> q) poly
+  | q `intersects` leftEdge  = OnBoundary
+  | q `intersects` rightEdge = OnBoundary
   | otherwise                = worker 1 n
   where
-    p'        = p :+ undefined
-    n         = size poly - 1
+    n         = numVertices poly - 1
     point0    = point 0
     leftEdge  = ClosedLineSegment point0 (point n)
     rightEdge = ClosedLineSegment point0 (point 1)
     worker a b
       | a+1 == b                        =
-        if p `intersects` ClosedLineSegment (point a) (point b)
+        if q `onSegment` ClosedLineSegment (point a) (point b)
           then OnBoundary
           else
-            if inTriangle p (Triangle point0 (point a) (point b)) == Outside
+            if inTriangle q (triangle point0 (point a) (point b)) == Outside
               then Outside
               else Inside
-      | ccw' point0 (point c) p' == CCW = worker c b
-      | otherwise                       = worker a c
+      | ccw point0 (point c) q == CCW = worker c b
+      | otherwise                     = worker a c
       where c = (a+b) `div` 2
-    point x = poly ^. outerVertex x
+    point i = poly ^. outerBoundaryVertexAt i
+
+    triangle a b c = Triangle' (fromGenericPoint a) (fromGenericPoint b) (fromGenericPoint c)
+
 
 --------------------------------------------------------------------------------
 -- Diameter
@@ -336,12 +353,12 @@ inConvex p (ConvexPolygon poly)
 -- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
 diameter :: (Ord r, Radical r, ConvexPolygon_ convexPolygon point r)
          => convexPolygon point r -> r
-diameter = curry euclideanDist . diametralPair
+diameter = uncurry euclideanDist . diametralPair
 
 -- | \( O(n) \)
 --   Computes the Euclidean diametral pair by scanning antipodal pairs.
 diametralPair   :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
-                => convexPolygon point r -> (Point 2 r :+ p, Point 2 r :+ p)
+                => convexPolygon point r -> (point 2 r, point 2 r)
 diametralPair p = (p^.outerBoundaryVertexAt a, p^.outerBoundaryVertexAt b)
   where
     (a,b) = diametralIndexPair p
@@ -353,79 +370,29 @@ diametralIndexPair   :: (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
 diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
   where
     fn (a1,b1) (a2,b2) =
-      squaredEuclideanDist (p^.simplePolygon.outerVertex a1.core) (p^.simplePolygon.outerVertex b1.core)
+      squaredEuclideanDist (p^.outerBoundaryVertexAt a1) (p^.outerBoundaryVertexAt b1)
         `compare`
-      squaredEuclideanDist (p^.simplePolygon.outerVertex a2.core) (p^.simplePolygon.outerVertex b2.core)
+      squaredEuclideanDist (p^.outerBoundaryVertexAt a2) (p^.outerBoundaryVertexAt b2)
 
-antipodalPairs   :: forall p r. (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+antipodalPairs   :: forall convexPolygon point r.
+                    (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
                  => convexPolygon point r -> [(Int, Int)]
-antipodalPairs p = worker 0 (CV.index vectors 0) 1
+antipodalPairs p = worker 0 (vectors V.! 0) 1
   where
-    n = size p
-    vs = p^.simplePolygon.outerBoundaryVector
-
+    n = numVertices p
     worker a aElt b
       | a == n = []
       | otherwise =
-        case ccw aElt (Point2 0 0) (CV.index vectors b) of
+        case ccw aElt origin (vectors V.! b) of
           CW -> worker a aElt (b+1)
-          _  ->
-            (a, b `mod` n) :
-            worker (a+1) (CV.index vectors (a+1)) b
+          _  -> (a, b `mod` n) : worker (a+1) (vectors V.! (a+1)) b
 
-    vectors :: CircularVector (Point 2 r)
-    vectors = CV.unsafeFromVector $ V.generate n $ \i ->
-      let Point p1 = point i
-          p2 = point (i+1)
-      in p2 .-^ p1
+    -- vectors :: Vector (point 2 r)
+    vectors = V.generate n $ \i -> point (i+1) .-. point i
 
-    point x = CV.index vs x ^. core
+    point x = p^.outerBoundaryVertexAt x
 
 --------------------------------------------------------------------------------
-
--- | Rotate to the rightmost point (rightmost and topmost in case of ties)
-rightMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
-rightMost = CV.rotateToMaximumBy (comparing (^.core))
-
--- | Rotate to the leftmost point (and bottommost in case of ties)
-leftMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
-leftMost = CV.rotateToMinimumBy (comparing (^.core))
-
--- | Rotate to the bottommost point (and leftmost in case of ties)
-bottomMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
-bottomMost = CV.rotateToMinimumBy (comparing f)
-  where
-    f p = (p^.core.yCoord,p^.core.xCoord)
-
-
-
--- | Helper to get the vertices of a convex polygon
-getVertices :: convexPolygon point r -> CircularVector (Point 2 r :+ p)
-getVertices = view (simplePolygon.outerBoundaryVector)
-
--- -- | rotate right while p 'current' 'rightNeibhour' is true
--- rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a
--- rotateRWhile p lst
---   | C.isEmpty lst = lst
---   | otherwise     = go lst
---     where
---       go xs = let cur = focus xs
---                   xs' = C.rotR xs
---                   nxt = focus' xs'
---               in if p cur nxt then go xs' else xs
-
--- test1 :: Num r => ConvexPolygon () r
--- test1 = ConvexPolygon . fromPoints . map ext . reverse $ [origin, Point2 1 4, Point2 5 6, Point2 10 3]
-
--- test2 :: Num r => ConvexPolygon () r
--- test2 = ConvexPolygon . fromPoints . map ext . reverse $ [Point2 11 6, Point2 10 10, Point2 15 18, Point2 12 5]
-
--- testA :: Num r => ConvexPolygon () r
--- testA = ConvexPolygon . fromPoints . map ext $ [origin, Point2 5 1, Point2 2 2]
-
--- testB :: Num r => ConvexPolygon () r
--- testB = ConvexPolygon . fromPoints . map ext $ [origin, Point2 5 3, Point2 (-2) 2, Point2 (-2) 1]
-
 
 
 
@@ -488,13 +455,15 @@ randomEdges n vMax = do
 
 -- | \( O(n \log n) \)
 --   Generate a uniformly random ConvexPolygon with @N@ vertices and a granularity of @vMax@.
-randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon () Rational)
+randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon Point Rational)
 randomConvex n _vMax | n < 3 =
   error "Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
-randomConvex n vMax = do
-  ~(v:vs) <- coerce . sortAround origin . coerce @[Vector 2 Int] @[Point 2 Int]  <$> randomEdges n vMax
-  let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
-      pRational = unsafeFromPoints $ map ext vertices
-      Point c = centroid pRational
-      pFinal = pRational & unsafeOuterBoundaryVector %~ CV.map (over core (.-^ c))
-  pure $ ConvexPolygon pFinal
+randomConvex n vMax = go <$> randomEdges n vMax
+  where
+    go = fromRandomEdges
+       . coerce . sortAround origin . coerce @[Vector 2 Int] @[Point 2 Int]
+    fromRandomEdges ~(v:vs) =
+      let vertices  = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
+          pRational = uncheckedFromCCWPoints vertices
+          c         = (centroid pRational)^.asVector
+      in pRational&vertices' %~ (.-^ c)

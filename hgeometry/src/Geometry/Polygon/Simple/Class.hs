@@ -25,6 +25,7 @@ import qualified Data.Foldable as F
 -- | A class representing simple polygons; i.e. polygons without holes
 -- (and without self intersections in the boundary.)
 class ( Polygon_ simplePolygon point r
+      , VertexIx (simplePolygon point r) ~ Int
       ) => SimplePolygon_ simplePolygon point r where
 
   -- | given the vertices of the polygon, in CCW order, constructs the

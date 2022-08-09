@@ -17,19 +17,13 @@ module Geometry.Polygon.Convex.New
 
 import           Control.Lens
 import           Data.Cyclic
-import qualified Data.Foldable as F
-import qualified Data.Vector as Vector
-import qualified Data.Vector.Generic as GV
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import           Data.Vector.NonEmpty.Util ()
-import           GHC.Generics
 import           Geometry.Point
-import           Geometry.Point.Class
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple
-import           Geometry.Polygon.Simple.Class
 import           Geometry.Polygon.Simple.Implementation
 import           Geometry.Properties
-
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +32,7 @@ newtype ConvexPolygonF f point r =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point r }
 
 
-type ConvexPolygon = ConvexPolygonF (Cyclic Vector.Vector)
+type ConvexPolygon = ConvexPolygonF (Cyclic NonEmptyVector)
 
 -- | ConvexPolygons are isomorphic to SimplePolygons with the added
 --   constraint that they have no reflex vertices.

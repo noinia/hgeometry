@@ -47,7 +47,7 @@ instance Affine (point d)  => Affine (WithExtra point extra d) where
   p .+^ v = p&_WithExtra.core %~ (.+^ v)
 
 instance (Point_ point d r) => Point_ (WithExtra point extra) d r where
-  fromVector v = WithExtra $ fromVector v :+ undefined --- FIXME: hack
+  fromVector v = WithExtra $ fromVector v :+ undefined --- FIXME: mempty
   asVector = _WithExtra . core . asVector
 
 

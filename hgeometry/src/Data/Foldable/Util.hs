@@ -18,7 +18,7 @@ class HasFromFoldable f where
   fromFoldable = fromList . F.toList
 
   fromList :: [a] -> f a
-  {-# MINIAL fromList #-}
+  {-# MINIMAL fromList #-}
 
 -- instance HasFromFoldable1 [] where
 --   fromList = id
@@ -28,7 +28,7 @@ class HasFromFoldable1 f where
   fromFoldable1 = fromNonEmpty . toNonEmpty
 
   fromNonEmpty :: NonEmpty a -> f a
-  {-# MINIAL fromNonEmpty #-}
+  {-# MINIMAL fromNonEmpty #-}
 
 instance HasFromFoldable1 NonEmpty where
   fromNonEmpty = id

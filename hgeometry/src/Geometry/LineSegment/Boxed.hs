@@ -117,6 +117,7 @@ instance (EndPoint_ endPoint, Point_ point d r)
 
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
+
 instance (EndPoint_ endPoint, Point_ point d r, Fractional r)
          => OnSegment (LineSegmentF endPoint) d point r where
 
