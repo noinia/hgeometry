@@ -13,7 +13,8 @@
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Class
   ( HasVertices(..), HasVertices'(..)
-  , HasEdges(..)
+  , HasEdges(..), HasEdges'(..)
+  , edgeSegments
 
   , HasAdjacencies(..)
   , Neighbours(..)
@@ -33,6 +34,7 @@ import Control.Lens
 import Control.Lens.Internal.Fold (NonEmptyDList(..))
 import Data.Functor.Apply (Apply)
 import Data.Functor.Contravariant (phantom)
+import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe (fromMaybe)
 import Data.Semigroup.Foldable
@@ -43,8 +45,8 @@ import Geometry.Vector
 --------------------------------------------------------------------------------
 
 class HasVertices' graph where
-  type Vertex   graph
-  type VertexIx graph
+  type Vertex   graph :: Type
+  type VertexIx graph :: Type
 
   -- | Traversal of all vertices in the graph, non type changing.
   vertices' :: IndexedTraversal' (VertexIx graph) graph (Vertex graph)
@@ -65,8 +67,8 @@ class HasVertices graph graph' where
 --------------------------------------------------------------------------------
 
 class HasEdges' graph where
-  type Edge   graph
-  type EdgeIx graph
+  type Edge   graph :: Type
+  type EdgeIx graph :: Type
   -- | Traversal of all edges in the graph, non type changing
   edges' :: IndexedTraversal' (EdgeIx graph) graph (Edge graph)
   default edges'
@@ -76,6 +78,19 @@ class HasEdges' graph where
 class HasEdges graph graph' where
   -- | Traversal of all edges in the graph
   edges :: IndexedTraversal (EdgeIx graph) graph graph' (Edge graph) (Edge graph')
+
+-- | Get all edge segments
+edgeSegments :: forall lineSegment polygon point r.
+                ( LineSegment_ lineSegment 2 point r
+                , HasEdges' polygon
+                , Vertex polygon ~ point 2 r
+                , Edge polygon ~ (point 2 r, point 2 r)
+                )
+             => IndexedFold (EdgeIx polygon) polygon (lineSegment 2 point r)
+edgeSegments = edges' . to toSeg
+  where
+    toSeg :: (Vertex polygon, Vertex polygon) -> lineSegment 2 point r
+    toSeg = uncurry uncheckedLineSegment
 
 --------------------------------------------------------------------------------
 
@@ -270,7 +285,8 @@ outerBoundaryWithNeighbours = ifolding1 $
 -- | A class representing (planar) polygons. The edges of the polygon
 -- may not intersect.
 class ( HasOuterBoundary (polygon point r)
-      , Vertex      (polygon point r) ~ point 2 r
+      , Vertex           (polygon point r) ~ point 2 r
+      -- , HasEdges'        (polygon point r)
       , Point_ point 2 r
       ) => Polygon_ polygon point r where
 

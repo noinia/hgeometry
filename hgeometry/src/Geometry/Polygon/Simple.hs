@@ -21,10 +21,12 @@ import           Control.Lens
 import           Data.Cyclic
 import qualified Data.Foldable as F
 import           Data.Foldable.Util
+import           Data.Kind (Type)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           Data.Vector.NonEmpty.Util ()
 import           GHC.Generics
+import           GHC.TypeNats
 import           Geometry.Point
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Simple.Class
@@ -34,6 +36,10 @@ import           Geometry.Properties
 --------------------------------------------------------------------------------
 
 -- | Simple polygons just store their vertices in CCCW order
+type SimplePolygonF              :: (Type -> Type)
+                                 -> (Nat -> Type -> Type)
+                                 -> Type
+                                 -> Type
 newtype SimplePolygonF f point r = MkSimplePolygon (f (point 2 r))
   deriving (Generic)
 
@@ -61,6 +67,12 @@ instance TraversableWithIndex Int f
 instance TraversableWithIndex Int f =>
          HasPoints (SimplePolygonF f point r) (SimplePolygonF f point' r') point point' where
   allPoints = vertices
+
+-- instance HasOuterBoundary (SimplePolygonF f point r) => HasEdges' (SimplePolygonF f point r) where
+--   type Edge   (SimplePolygonF f point r) = (point 2 r, point 2 r)
+--   type EdgeIx (SimplePolygonF f point r) = Int
+--   edges' = outerBoundaryEdges
+--     -- outerboundary edges is a fold, not a traversal
 
 -- instance ( TraversableWithIndex Int f
 --          , HasPoints (SimplePolygonF f point r) (SimplePolygonF f point r)

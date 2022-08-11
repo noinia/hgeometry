@@ -11,20 +11,22 @@
 --
 --------------------------------------------------------------------------------
 module Geometry.Polygon.Convex
-  ( convexPolygon
+  ( ConvexPolygon, ConvexPolygonF
+
+  , convexPolygon
   , isConvex, verifyConvex
   , merge
   , lowerTangent, lowerTangent'
   , upperTangent, upperTangent'
 
-  , extremes
+  -- , extremes
   , maxInDirection
 
   , leftTangent, rightTangent
 
   , minkowskiSum
   , bottomMost
-  , inConvex
+  -- , inConvex
   , randomConvex
 
   , diameter
@@ -32,24 +34,16 @@ module Geometry.Polygon.Convex
   , diametralIndexPair
   ) where
 
-import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Control.Monad.Random
 import           Control.Monad.ST
 import           Control.Monad.State
 import           Data.Coerce
-import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Foldable.Util
-import           Data.Function (on)
 import qualified Data.IntSet as IS
-import           Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Radical
-import           Data.Semigroup.Foldable (Foldable1 (..))
-import           Data.Util
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
@@ -57,23 +51,15 @@ import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Mutable as Mut
 import qualified Data.Vector.NonEmpty as NE
 import qualified Data.Vector.Unboxed as VU
-import           Geometry.Boundary
-import           Geometry.Box (IsBoxable (..))
 import           Geometry.LineSegment.Boxed
-import           Geometry.LineSegment.Class
 import           Geometry.Point
--- import           Geometry.Point.WithExtra
 import           Geometry.Polygon.Class
 import           Geometry.Polygon.Convex.Class
 import           Geometry.Polygon.Convex.New
 import           Geometry.Polygon.Convex.Tangents
 import           Geometry.Polygon.Extremes (cmpExtreme)
 import           Geometry.Polygon.Simple
-import           Geometry.Properties
-import           Geometry.Transformation
-import           Geometry.Triangle
 import           Geometry.Vector
-import           Data.List.Alternating (withNeighbours)
 import           Data.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
@@ -163,10 +149,6 @@ convexPolygon p = uncheckedFromCCWPoints $ NE.unsafeCreate $ runM (numVertices p
         dequeRemove
         backtrackBot v
 
--- withNeighbours :: Getting All (simplePolygon point r) (point 2 r, (point 2 r, point 2 r))
-
-
-
 -- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r, SimplePolygon_ simplePolygon point r) => simplePolygon point r -> Bool
 isConvex = allOf outerBoundaryWithNeighbours (\(u,(v,w)) -> ccw u v w == CCW)
@@ -174,23 +156,6 @@ isConvex = allOf outerBoundaryWithNeighbours (\(u,(v,w)) -> ccw u v w == CCW)
 -- | \( O(n) \) Verify that a convex polygon is strictly convex.
 verifyConvex :: (Ord r, Num r, Point_ point 2 r) => ConvexPolygon point r -> Bool
 verifyConvex = isConvex
-
--- mainWith inFile outFile = do
---     ePage <- readSinglePageFile inFile
---     case ePage of
---       Left err                         -> error "" -- err
---       Right (page :: IpePage Rational) -> case page^..content.traverse._withAttrs _IpePath _asSimplePolygon.core of
---         []         -> error "No points found"
---         polies@(_:_) -> do
---            -- let out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
---            -- print $ length $ edges' dt
---            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
---            -- writeIpeFile outFile . singlePageFromContent $ out
---            -- mapM_ (print . extremesNaive (v2 1 0)) polies
---            pure $ map (flip rightTangent (Point2 80 528)) polies
-
-
-
 
 -- | Finds the extreme points, minimum and maximum, in a given direction
 --
@@ -308,6 +273,8 @@ bottomMost = CV.rotateToMinimumBy (comparing $ \p -> (p^.yCoord,p^.xCoord))
 --------------------------------------------------------------------------------
 -- inConvex
 
+{-
+
 -- 1. Check if p is on left edge or right edge.
 -- 2. Do binary search:
 --       Find the largest n where p is on the right of 0 to n.
@@ -346,6 +313,7 @@ inConvex (fromGenericPoint @point -> q) poly
 
     triangle a b c = Triangle' (fromGenericPoint a) (fromGenericPoint b) (fromGenericPoint c)
 
+-}
 
 --------------------------------------------------------------------------------
 -- Diameter
@@ -375,7 +343,7 @@ diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
       squaredEuclideanDist (p^.outerBoundaryVertexAt a2) (p^.outerBoundaryVertexAt b2)
 
 antipodalPairs   :: forall convexPolygon point r.
-                    (Ord r, Num r, ConvexPolygon_ convexPolygon point r)
+                    (Ord r, Num r,  ConvexPolygon_ convexPolygon point r)
                  => convexPolygon point r -> [(Int, Int)]
 antipodalPairs p = worker 0 (vectors V.! 0) 1
   where
@@ -388,7 +356,7 @@ antipodalPairs p = worker 0 (vectors V.! 0) 1
           _  -> (a, b `mod` n) : worker (a+1) (vectors V.! (a+1)) b
 
     -- vectors :: Vector (point 2 r)
-    vectors = V.generate n $ \i -> point (i+1) .-. point i
+    vectors = V.generate n $ \i -> point (i+1) .-^ (point i)^.asVector
 
     point x = p^.outerBoundaryVertexAt x
 
@@ -435,8 +403,8 @@ randomBetween :: RandomGen g => Int -> Int -> Rand g (VU.Vector Int)
 randomBetween n vMax | vMax < n+1 = pure $ VU.replicate vMax 1
 randomBetween n vMax = worker (n-1) IS.empty
   where
-    gen from []     = [vMax-from]
-    gen from (x:xs) = (x-from) : gen x xs
+    gen from' []     = [vMax-from']
+    gen from' (x:xs) = (x-from') : gen x xs
     worker 0 seen = pure (VU.fromList (gen 0 $ IS.elems seen))
     worker i seen = do
       v <- getRandomR (1, vMax-1)
@@ -463,7 +431,7 @@ randomConvex n vMax = go <$> randomEdges n vMax
     go = fromRandomEdges
        . coerce . sortAround origin . coerce @[Vector 2 Int] @[Point 2 Int]
     fromRandomEdges ~(v:vs) =
-      let vertices  = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
-          pRational = uncheckedFromCCWPoints vertices
+      let pRational  = uncheckedFromCCWPoints
+                     $ fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
           c         = (centroid pRational)^.asVector
       in pRational&vertices' %~ (.-^ c)

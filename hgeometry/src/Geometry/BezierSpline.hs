@@ -54,8 +54,10 @@ import           Geometry.Line
 import           Geometry.LineSegment hiding (endPoints)
 import           Geometry.Point
 import           Geometry.PolyLine (PolyLine(..))
-import           Geometry.Polygon
-import           Geometry.Polygon.Convex.New
+-- import           Geometry.Polygon
+import           Geometry.Polygon.Convex
+import           Geometry.Polygon.Simple
+import           Geometry.Polygon.Class
 import           Geometry.Properties
 import           Geometry.Transformation
 import           Geometry.Vector hiding (init)
@@ -494,8 +496,8 @@ intersectPointsInterior treshold ps b =
 
 intersectInteriorInterior :: (KnownNat n, Ord r, RealFrac r) => r -> [Point 2 r] -> BezierSpline n 2 r -> BezierSpline n 2 r -> [Point 2 r]
 intersectInteriorInterior treshold forbidden a b =
-  let cha      = _simplePolygon $ convexHullB a
-      chb      = _simplePolygon $ convexHullB b
+  let cha      = convexHullB a
+      chb      = convexHullB b
       (a1, a2) = split 0.5 a
       (b1, b2) = split 0.5 b
       points   = F.toList (view controlPoints a)
@@ -544,9 +546,11 @@ instance (KnownNat n, Ord r, Fractional r) => (BezierSpline n 2 r) `IsIntersecta
 -- call convex hull first?
 intersectsP :: (Ord r, Fractional r) => SimplePolygon p r -> SimplePolygon p r -> Bool
 intersectsP p q | not $ boundingBox p `intersects` boundingBox q = False
-                | otherwise = or [a `intersects` b | a <- p & listEdges, b <- q & listEdges]
-                           || (any (flip insidePolygon p) $ map _core $ F.toList $ polygonVertices q)
-                           || (any (flip insidePolygon q) $ map _core $ F.toList $ polygonVertices p)
+                | otherwise = or [a `intersects` b | a <- p^..outerBoundaryEdges
+                                                   , b <- q^..outerBoundaryEdges
+                                                   ]
+                           || (any (flip insidePolygon p) $ q^..vertices')
+                           || (any (flip insidePolygon q) $ p^..vertices')
   -- first test bounding box?
 
 

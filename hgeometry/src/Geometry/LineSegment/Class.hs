@@ -14,21 +14,30 @@ module Geometry.LineSegment.Class
 
   , interpolate
   , OnSegment(..)
+
+
+  , ordAtY, ordAtX
+  , xCoordAt, yCoordAt
+
+  , orderedEndPoints
+  , segmentLength
   ) where
 
 import Control.Lens
 import Data.Ord (comparing)
+import Data.Radical
 import Geometry.Interval.Class
 import Geometry.Point.Class
+import Geometry.Point.EuclideanDistance
 import Geometry.Vector
-
 --------------------------------------------------------------------------------
 
 class OnSegment lineSegment d point r where
   -- | Test if a point lies on a line segment.
   --
   -- As a user, you should typically just use 'intersects' instead.
-  onSegment :: (Ord r, Point_ point' d r) => point' d r -> lineSegment d point r -> Bool
+  onSegment :: (Ord r, Num r, Point_ point' d r, Point_ point d r)
+            => point' d r -> lineSegment d point r -> Bool
 
 
 class ( HasStart (lineSegment d point r) (point d r)
@@ -124,3 +133,19 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
     alpha = (x - px) / (qx - px)
 
 --------------------------------------------------------------------------------
+
+-- | The left and right end point (or left below right if they have equal x-coords)
+orderedEndPoints     :: forall lineSegment point r. (Ord r, LineSegment_ lineSegment 2 point r)
+                     => lineSegment 2 point r -> (point 2 r, point 2 r)
+orderedEndPoints seg
+    | f start <= f end = (seg^.start,seg^.end)
+    | otherwise        = (seg^.end,seg^.start)
+  where
+    f   :: Lens' (lineSegment 2 point r) (point 2 r) -> (r,r)
+    f l = (seg^.l.xCoord, seg^.l.yCoord)
+
+
+-- | Length of the line segment
+segmentLength     :: forall lineSegment d point r. (Radical r, LineSegment_ lineSegment d point r)
+                  => lineSegment d point r -> r
+segmentLength seg = euclideanDist ((seg^.start) :: point d r) (seg^.end)

@@ -118,15 +118,53 @@ instance (EndPoint_ endPoint, Point_ point d r)
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
 
-instance (EndPoint_ endPoint, Point_ point d r, Fractional r)
-         => OnSegment (LineSegmentF endPoint) d point r where
+instance {-# OVERLAPPING #-} (d ~ 2)      => OnSegment (LineSegmentF Closed) d point r where
+  onSegment = onSegment2
+instance {-# OVERLAPPING #-} Fractional r => OnSegment (LineSegmentF Closed) d point r where
+  onSegment = onSegmentFractional
 
-  (fromGenericPoint @point-> q) `onSegment` seg = case scalarMultiple (q .-. u) (v .-. u) of
-                        Nothing -> False
-                        Just q' -> q' `inInterval` toInterval seg /= Outside
+-- instance {-# OVERLAPPING #-} (EndPoint_ endPoint, Point_ point d r, Fractional r)
+--          => OnSegment (LineSegmentF endPoint) d point r where
+--   onSegment = onSegmentFractional
+
+
+onSegment2                         :: forall endPoint point point' r.
+                                      ( Ord r, Num r, Point_ point' 2 r
+                                      , EndPoint_ endPoint, Point_ point 2 r
+                                      )
+                                   => point' 2 r
+                                   -> LineSegmentF endPoint 2 point r
+                                   -> Bool
+onSegment2 (fromGenericPoint @point -> q) seg@(LineSegment u v) =
+    case ccw q (seg^.start) (seg^.end) of
+      CoLinear -> let su = q `onSide` lu
+                      sv = q `onSide` lv
+                  in su /= sv
+                     && ((su == OnLine) `implies` isClosed u)
+                     && ((sv == OnLine) `implies` isClosed v)
+      _        -> False
     where
-      u = seg^.start
-      v = seg^.end
+      (Line _ w) = perpendicularTo $ supportingLine seg
+      lu = Line (u^.endPoint.to fromGenericPoint) w
+      lv = Line (v^.endPoint.to fromGenericPoint) w
+
+      a `implies` b = b || not a
+      isClosed p = endPointType p == ClosedEndPoint
+
+
+onSegmentFractional :: forall endPoint point d point' r.
+                       ( Ord r, Fractional r, Point_ point' d r
+                       , EndPoint_ endPoint, Point_ point d r
+                       )
+                    => point' d r
+                    -> LineSegmentF endPoint d point r
+                    -> Bool
+onSegmentFractional (fromGenericPoint @point-> q) seg = case scalarMultiple (q .-. u) (v .-. u) of
+    Nothing -> False
+    Just q' -> q' `inInterval` toInterval seg /= Outside
+  where
+    u = seg^.start
+    v = seg^.end
 
 -- | get an interval from 0 to 1 corresponding to the segment, in
 -- particular, keeps the endpoints as they were.
@@ -169,3 +207,7 @@ sqDistanceToSegArg q seg@(ClosedLineSegment s t) = minimumBy (comparing snd) pts
     f   :: point d r -> (Point d r, r)
     f a = (fromGenericPoint q,squaredEuclideanDist a q)
     m   = pointClosestToWithDistance q (supportingLine seg)
+
+
+
+--------------------------------------------------------------------------------

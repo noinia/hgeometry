@@ -72,3 +72,18 @@ instance ( Show (point 2 r)
 
 instance (Point_ point 2 r) => Polygon_ MultiPolygon point r where
   area (MultiPolygon outer hs) = area outer - sum [area h | h <- F.toList hs]
+
+
+
+
+-- inPolygon             :: forall polygon point point' r. (Fractional r, Ord r
+--                                                         , Polygon_ polygon point r
+--                                                         , Point_ point' 2 r
+--                                                         )
+--                       => point' 2 r -> polygon point r -> PointLocationResult
+-- q `inPolygon` pg
+--   | q `onBoundary` pg = OnBoundary
+--   | inHole            = Outside
+--   | otherwise         = q `inPolygon'` (pg^.outerBoundary)
+--   where
+--     inHole = any (q `insidePolygon`) $ holeList pg

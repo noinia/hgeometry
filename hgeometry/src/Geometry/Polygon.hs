@@ -148,7 +148,7 @@ instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Boundary (Polygon
                                . fmap (pointClosestToWithDistance q)
                                . listEdges . review _Boundary
 
-instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Polygon t p r) where
-  pointClosestToWithDistance q pg
-    | fromGenericPoint @Point q `intersects` pg = (q, 0)
-    | otherwise                                 = pointClosestToWithDistance q (Boundary pg)
+-- instance (Fractional r, Ord r) => HasSquaredEuclideanDistance (Polygon t p r) where
+--   pointClosestToWithDistance q pg
+--     | fromGenericPoint @Point q `intersects` pg = (q, 0)
+--     | otherwise                                 = pointClosestToWithDistance q (Boundary pg)

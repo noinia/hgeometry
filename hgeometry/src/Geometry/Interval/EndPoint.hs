@@ -11,6 +11,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Geometry.Interval.EndPoint
   ( EndPoint_(..)
+  , endPointType'
+  , mkOpen, mkClosed
 
   , EndPointType(..)
   , EndPoint(..)
@@ -39,6 +41,18 @@ data EndPointType = OpenEndPoint | ClosedEndPoint deriving (Show,Eq)
 -- | Data type modelling an endpoint that can both be open and closed.
 data EndPoint r = EndPoint !EndPointType !r
                 deriving (Show,Eq,Functor,Foldable,Traversable)
+
+-- | Create a closed endpoint
+mkClosed :: r -> EndPoint r
+mkClosed = EndPoint ClosedEndPoint
+-- | Create an Open endpoint
+mkOpen :: r -> EndPoint r
+mkOpen = EndPoint OpenEndPoint
+
+-- | Lens to access the endpoint type
+endPointType' :: Lens' (EndPoint r) EndPointType
+endPointType' = lens endPointType (\(EndPoint _ p) t -> EndPoint t p)
+
 
 instance EndPoint_ EndPoint where
   endPoint     =

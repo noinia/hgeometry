@@ -70,6 +70,7 @@ common setup
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+                    , StandaloneKindSignatures
   build-depends:
                 base                    >= 4.11      &&     < 5
               , hgeometry-combinatorial >= 0.15
@@ -307,7 +308,7 @@ library
                     -- Geometry.Polygon.Core
                     -- Geometry.Polygon.Extremes
 
-                    Algorithms.Geometry.InPolygon
+                    Geometry.Polygon.InPolygon
 
                     Algorithms.Geometry.LineSegmentIntersection.Types
                     Algorithms.Geometry.SmallestEnclosingBall.Types
