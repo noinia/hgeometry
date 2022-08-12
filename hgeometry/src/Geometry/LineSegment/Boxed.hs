@@ -16,6 +16,8 @@ module Geometry.LineSegment.Boxed
 
 
   , LineSegmentF
+
+  , flipSegment
   ) where
 
 import Control.Lens
@@ -117,15 +119,16 @@ instance (EndPoint_ endPoint, Point_ point d r)
 
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
+--------------------------------------------------------------------------------
 
-instance {-# OVERLAPPING #-} (d ~ 2)      => OnSegment (LineSegmentF Closed) d point r where
+
+instance {-# OVERLAPPING #-} (EndPoint_ endPoint, Point_ point 2 r)
+         => OnSegment (LineSegmentF endPoint) 2 point r where
   onSegment = onSegment2
-instance {-# OVERLAPPING #-} Fractional r => OnSegment (LineSegmentF Closed) d point r where
-  onSegment = onSegmentFractional
 
--- instance {-# OVERLAPPING #-} (EndPoint_ endPoint, Point_ point d r, Fractional r)
---          => OnSegment (LineSegmentF endPoint) d point r where
---   onSegment = onSegmentFractional
+instance {-# OVERLAPPING #-} (EndPoint_ endPoint, Point_ point d r, Fractional r)
+         => OnSegment (LineSegmentF endPoint) d point r where
+  onSegment = onSegmentFractional
 
 
 onSegment2                         :: forall endPoint point point' r.
@@ -166,6 +169,8 @@ onSegmentFractional (fromGenericPoint @point-> q) seg = case scalarMultiple (q .
     u = seg^.start
     v = seg^.end
 
+--------------------------------------------------------------------------------
+
 -- | get an interval from 0 to 1 corresponding to the segment, in
 -- particular, keeps the endpoints as they were.
 toInterval     :: (Functor endPoint, Num r)
@@ -203,7 +208,7 @@ sqDistanceToSegArg                               :: forall point d r.
 sqDistanceToSegArg q seg@(ClosedLineSegment s t) = minimumBy (comparing snd) pts
   where
     pts :: [(Point d r, r)]
-    pts = (if fst m `onSegment` seg then (m :) else id) [f s, f t]
+    pts = (if fst m `onSegmentFractional` seg then (m :) else id) [f s, f t]
     f   :: point d r -> (Point d r, r)
     f a = (fromGenericPoint q,squaredEuclideanDist a q)
     m   = pointClosestToWithDistance q (supportingLine seg)
@@ -211,3 +216,7 @@ sqDistanceToSegArg q seg@(ClosedLineSegment s t) = minimumBy (comparing snd) pts
 
 
 --------------------------------------------------------------------------------
+
+-- | flips the start and end point of the segment
+flipSegment                   :: LineSegmentF endPoint d point r -> LineSegmentF endPoint d point r
+flipSegment (LineSegment p q) = LineSegment q p

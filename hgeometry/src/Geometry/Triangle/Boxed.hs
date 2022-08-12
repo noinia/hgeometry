@@ -63,11 +63,11 @@ instance HasVertices' (Triangle d point r) where
 instance HasVertices (Triangle d point r) (Triangle d point' s) where
   vertices = conjoined traverseTri (itraverseTri . indexed)
     where
-      traverseTri f  (Triangle a b c) = Triangle <$> f   a <*> f   b <*> f   c
-      itraverseTri f (Triangle a b c) = Triangle <$> f 1 a <*> f 2 b <*> f 3 c
+      traverseTri f  (Triangle a b c) = Triangle <$> f            a <*> f   b <*> f   c
+      itraverseTri f (Triangle a b c) = Triangle <$> f (1 :: Int) a <*> f 2 b <*> f 3 c
 
 
-instance HasPoints (Triangle d point r) (Triangle d point' s) (point d r) (point' d s) where
+instance HasPoints (Triangle d point r) (Triangle d point' s) point point' where
   allPoints = vertices
 
 instance ( Arbitrary r, Num r, Ord r

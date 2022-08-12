@@ -78,7 +78,7 @@ module Geometry.Polygon
 
   ) where
 
-import           Algorithms.Geometry.InPolygon
+import           Geometry.Polygon.InPolygon
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC
 import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.Lens hiding (Simple)
