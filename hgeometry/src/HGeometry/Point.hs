@@ -1,0 +1,80 @@
+{-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Geometry.Point
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(d\)-dimensional points.
+--
+--------------------------------------------------------------------------------
+module Geometry.Point
+  ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , Point(Point, toVec, Point1, Point2, Point3, Point4)
+  , origin, vector
+  , pointFromList
+  , projectPoint
+  , coord
+  , xCoord, yCoord, zCoord
+
+  , PointFunctor(..)
+
+  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
+
+  , ccwCmpAround
+  , cwCmpAround
+  , ccwCmpAroundWith
+  , cwCmpAroundWith
+  , sortAround
+  , insertIntoCyclicOrder
+
+  , StrictCCW(SCCW, SCW)
+  , strictCcw
+
+
+  , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
+
+  , cmpByDistanceTo, cmpInDirection
+
+  , squaredEuclideanDist, euclideanDist
+  , HasSquaredEuclideanDistance(..)
+
+  , fromGenericPoint
+
+  , HasPoints(..)
+  ) where
+
+-- import HGeometry.Line.Class (perpendicularTo)
+-- import HGeometry.Line.Internal
+import HGeometry.Point.Boxed
+import HGeometry.Point.Class
+import HGeometry.Point.EuclideanDistance
+import HGeometry.Point.Orientation
+import HGeometry.Point.Orientation.Degenerate
+import HGeometry.Point.Quadrants
+import HGeometry.Vector
+
+--------------------------------------------------------------------------------
+
+-- | Compare the points with respect to the direction given by the
+-- vector, i.e. by taking planes whose normal is the given vector.
+--
+-- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 0)
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 0)
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 10)
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 10)
+-- GT
+-- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
+-- EQ
+cmpInDirection       :: (Ord r, Num r, Point_ point 2 r)
+                     => Vector 2 r -> point 2 r -> point 2 r -> Ordering
+cmpInDirection n p q = case p `onSide` perpendicularTo (Line (fromGenericPoint q) n) of
+                         LeftSide  -> LT
+                         OnLine    -> EQ
+                         RightSide -> GT
+  -- TODO: Generalize to arbitrary dimension
