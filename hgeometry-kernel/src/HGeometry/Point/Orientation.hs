@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Geometry.Point.Orientation
+-- Module      :  HGeometry.Point.Orientation
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -59,9 +59,6 @@ instance Show StrictCCW where
 -- SCCW
 -- >>> strictCcw (Point2 0 0 `with` 3) (Point2 2 2 `with` 1) (Point2 1 1 `with` 10)
 -- SCCW
-strictCcw      :: ( Num r, Ord r
-                  , Point_ point 2 r
-                  , HasIndex (point 2 r)
-                  )
-                => point 2 r -> point 2 r -> point 2 r -> StrictCCW
+strictCcw      :: ( Num r, Ord r, Point_ point 2 r, HasIndex point)
+                => point -> point -> point -> StrictCCW
 strictCcw p q r = MkSCCW . flipSign $ sideTest r (Vector2 p q)

@@ -1,8 +1,8 @@
-module Geometry.SoS.Determinant where
+module HGeometry.SoS.Determinant where
 
-import           Data.Sign
-import           Data.RealNumber.Symbolic
-import           Geometry.Matrix
+import Data.RealNumber.Symbolic
+import Data.Sign
+import HGeometry.Matrix
 
 
 -- | pre: computes the sign of the determinant

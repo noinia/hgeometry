@@ -1,7 +1,9 @@
 import Test.DocTest
 
+
 main :: IO ()
 main = doctest $ ["-isrc" ] ++ ghcExts ++ files
+
 
 ghcExts :: [String]
 ghcExts = map ("-X" ++)
@@ -32,12 +34,11 @@ ghcExts = map ("-X" ++)
           , "DeriveGeneric"
           , "FlexibleInstances"
           , "FlexibleContexts"
-          , "DerivingStrategies"
-          , "DerivingVia"
           ]
 
 files :: [String]
 files = map toFile modules
+
 
 toFile :: String -> String
 toFile = (\s -> "src/" <> s <> ".hs") . replace '.' '/'
@@ -51,25 +52,27 @@ replace a b = go
 
 modules :: [String]
 modules =
-  [ "Data.PlaneGraph.IO"
+  [
+  --   "Data.Range"
+  -- , "Data.CircularList.Util"
+  -- , "Data.Vector.Circular.Util"
+  -- , "Data.Permutation"
+  -- , "Data.CircularSeq"
+  -- , "Data.LSeq"
+  -- , "Data.PlanarGraph"
+  -- , "Data.PlanarGraph.Dart"
+  -- , "Data.PlanarGraph.Core"
+  -- , "Data.PlanarGraph.Mutable"
+  -- , "Data.PlanarGraph.Immutable"
+  -- , "Data.Tree.Util"
+  -- , "Data.Set.Util"
 
-  , "Geometry.Point"
-  , "Geometry.Vector"
-  , "Geometry.Transformation"
-  , "Geometry.Line"
-  , "Geometry.Line.Internal"
-  , "Geometry.Interval"
-  , "Geometry.LineSegment"
-  , "Geometry.PolyLine"
-  , "Geometry.Polygon"
-  , "Geometry.Ball"
-  , "Geometry.Box"
-  , "Geometry.HyperPlane"
+  -- , "Data.List.Util"
+  -- , "Data.List.Alternating"
+  -- , "Data.List.Zipper"
 
-  -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
-  , "Algorithms.Geometry.ConvexHull.Naive"
-  , "Algorithms.Geometry.ConvexHull.JarvisMarch"
+    "Data.Double.Approximate"
+  , "Data.Double.Shaman"
 
-  , "Geometry.SoS.Orientation"
-  , "Algorithms.Geometry.InPolygon"
+  , "Data.RealNumber.Symbolic"
   ]

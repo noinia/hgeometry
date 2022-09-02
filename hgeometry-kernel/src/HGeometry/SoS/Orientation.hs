@@ -9,7 +9,7 @@
 -- Orientation/side tests tests using Simulation of Simplicity.
 --
 --------------------------------------------------------------------------------
-module Geometry.SoS.Orientation
+module HGeometry.SoS.Orientation
   ( SoS
   , sideTest
   , sideTest'
@@ -20,11 +20,11 @@ import Data.Indexed
 import Data.RealNumber.Symbolic
 import Data.Sign
 import GHC.TypeNats
-import Geometry.Matrix
-import Geometry.Point.Class
-import Geometry.SoS.Determinant
-import Geometry.SoS.Point
-import Geometry.Vector
+import HGeometry.Matrix
+import HGeometry.Point.Class
+import HGeometry.SoS.Determinant
+import HGeometry.SoS.Point
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -70,8 +70,8 @@ type SoS d = (Arity d, HasDeterminant (d+1))
 -- Positive
 sideTest      :: ( SoS d, Num r, Ord r
                  , Point_ point d r
-                 , HasIndex (point d r))
-              => point d r -> Vector d (point d r) -> Sign
+                 , HasIndex point)
+              => point -> Vector d point -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 
 -- | Given a point q and a vector of d points defining a hyperplane,
@@ -79,7 +79,7 @@ sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 --
 -- TODO: Specify what the sign means
 sideTest'      :: (Num r, Ord r, Ord i, SoS d, Arity (d+1), Point_ point d (Symbolic i r))
-               => point d (Symbolic i r) -> Vector d (point d (Symbolic i r)) -> Sign
+               => point -> Vector d point -> Sign
 sideTest' q ps = sideTest'' $ cons q ps
 
 -- | Given a vector of points, tests if the point encoded in the first
@@ -87,11 +87,11 @@ sideTest' q ps = sideTest'' $ cons q ps
 -- (rows).
 sideTest'' :: ( Num r, Ord r, Ord i, HasDeterminant (d+1)
               , Point_ point d (Symbolic i r), Arity (d+1))
-           => Vector (d+1) (point d (Symbolic i r)) -> Sign
+           => Vector (d+1) point -> Sign
 sideTest'' = signDet . Matrix . fmap mkLambdaRow
 
 -- | Given a point produces the vector/row corresponding to this point
 -- in a homogeneous matrix represetnation. I.e. we add a 1 as an
 -- additonal column at the end.
-mkLambdaRow :: (Num r, Point_ point d r, Arity (d+1)) => point d r -> Vector (d+1) r
-mkLambdaRow = flip snoc 1 . view asVector
+mkLambdaRow :: (Num r, Point_ point d r, Arity (d+1)) => point -> Vector (d+1) r
+mkLambdaRow = flip snoc 1 . view vector
