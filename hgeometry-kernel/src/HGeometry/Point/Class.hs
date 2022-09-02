@@ -26,10 +26,22 @@ class (NumType point ~ r, NumType point' ~ s) => HasVector point point' r s wher
   vector :: ( Dimension point ~ d, Dimension point' ~ d)
          => Lens point point' (Vector d r) (Vector d s)
 
+-- | Affine space; essentially the same as Linear.Affine, but for
+-- points of kind Type rather than (Type -> Type).
+class Additive_ point where
+  type Diff_ point
+  -- | p .-. q represents the vector from q to p
+  (.-.) :: point -> point -> Diff_ point
+  -- | add a vector to a point
+  (.+^) :: point -> Diff_ point -> point
+  -- | subtract a vector from a point
+  (.-^) :: point -> Diff_ point -> point
+
 class ( Dimension point ~ d
       , NumType point   ~ r
       , Arity d
       , HasVector point point r r
+      , Additive_ point
       ) => Point_ point d r | point -> d
                             , point -> r where
 

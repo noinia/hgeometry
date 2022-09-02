@@ -1,9 +1,9 @@
 cabal-version:       3.4
-name:                hgeometry-combinatorial
+name:                hgeometry-kernel
 version:             1.0
-synopsis:            Data structures, and Data types.
+synopsis:            Basic Constant size Geometric Data types.
 description:
-    The Non-geometric data types and algorithms used in HGeometry.
+  Basic, constant size geometric data types used by HGeometry.
 homepage:            https://fstaals.net/software/hgeometry
 license:             BSD-3-Clause
 license-file:        LICENSE
@@ -53,6 +53,7 @@ common setup
 
   build-depends:
                 base                    >= 4.11      &&     < 5
+              , hgeometry-combinatorial >= 1.0
               -- , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
@@ -60,9 +61,9 @@ common setup
               , lens                    >= 4.2
               -- , semigroupoids           >= 5
               , semigroups              >= 0.18
-              -- , linear                  >= 1.10
-              -- , fixed-vector            >= 1.0
-              , vector-builder          >= 0.3.7
+              , linear                  >= 1.10
+              , fixed-vector            >= 1.0
+              -- , vector-builder          >= 0.3.7
               -- , vinyl                   >= 0.10
               , deepseq                 >= 1.1
               -- , fingertree              >= 0.1
@@ -72,38 +73,41 @@ common setup
               -- , quickcheck-instances    >= 0.3
               -- , reflection              >= 2.1
               -- , primitive               >= 0.6.3.0
-              , hashable                >= 1.2
-              , vector                  >= 0.11
+              -- , hashable                >= 1.2
+              -- , vector                  >= 0.11
               -- , data-clist              >= 0.1.2.3
-              , vector-circular         >= 0.1.4
-              , nonempty-vector         >= 0.2.0.0
+              -- , vector-circular         >= 0.1.4
+              -- , nonempty-vector         >= 0.2.0.0
               , text                    >= 2.0
               -- , vector-algorithms
               , witherable              >= 0.4
 
               , aeson                   >= 1.0
-              , yaml                    >= 0.8
-              , math-functions          >= 0.3.4
+              -- , yaml                    >= 0.8
 
               , mtl                     >= 2.2
               , template-haskell
 
 --------------------------------------------------------------------------------
--- * Main HGeometry Library
+-- * Main HGeometry-Kernel Library
 
 library
   import: setup
   hs-source-dirs: src
   exposed-modules:
-    Data.Radical
-    Data.RealNumber.Rational
+    HGeometry
+    HGeometry.Properties
+
+
+    HGeometry.Vector
+
+    HGeometry.Point.Class
+
 
   other-modules:
-    Data.Double.Approximate Data.Double.Shaman
-
-    -- HGeometry.Vector.VectorFamily
-    -- HGeometry.Vector.VectorFamilyPeano
-    -- HGeometry.Vector.VectorFixed
+    HGeometry.Vector.VectorFamily
+    HGeometry.Vector.VectorFamilyPeano
+    HGeometry.Vector.VectorFixed
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
@@ -142,7 +146,7 @@ test-suite hspec
   hs-source-dirs:       test
   main-is:              Main.hs
 
-  build-depends: hgeometry-combinatorial
+  build-depends: hgeometry-kernel
                , hspec         >= 2.9
   ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
