@@ -16,11 +16,6 @@ module HGeometry.Point.Boxed
   ( Point(..)
   , vector
   , fromGenericPoint
-  -- , pattern Point1
-  -- , pattern Point2
-  -- , pattern Point3
-  -- , pattern Point4
-  , PointFunctor(..)
   ) where
 
 import HGeometry.Point.Class

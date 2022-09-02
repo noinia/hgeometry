@@ -16,10 +16,8 @@ import           HGeometry.Vector
 -- * Distances
 
 -- | Squared Euclidean distance between two points
-squaredEuclideanDist :: ( Num r
-                        , Point_ point d
-                        r) => point -> point -> r
-squaredEuclideanDist = qdA
+squaredEuclideanDist     :: (Num r, Point_ point d r) => point -> point -> r
+squaredEuclideanDist p q = quadrance $ p .-. q
 
 -- | Euclidean distance between two points
 euclideanDist     :: (Radical.Radical r, Arity d, Point_ point d r) => point -> point -> r

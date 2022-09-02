@@ -27,6 +27,7 @@ import           Data.List (intersperse)
 import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import qualified Linear.Affine as LinearA
 -- import           Geometry.Point.EuclideanDistance
 import           HGeometry.Properties
 import qualified HGeometry.Point.Class as PointClass
@@ -131,11 +132,17 @@ instance (Arity d, Uniform r) => Uniform (Point d r) where
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
 
-instance Arity d =>  Affine (Point d) where
+instance Arity d =>  LinearA.Affine (Point d) where
   type Diff (Point d) = Vector d
 
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
+
+instance Arity d => PointClass.Affine_ (Point d r) where
+  -- type Diff_ (Point d r) = Vector d r
+  p .-. q = toVec p ^-^ toVec q
+  p .+^ v = Point $ toVec p ^+^ v
+  p .-^ v = Point $ toVec p ^-^ v
 
 instance (FromJSON r, Arity d, KnownNat d) => FromJSON (Point d r) where
   parseJSON = fmap Point . parseJSON

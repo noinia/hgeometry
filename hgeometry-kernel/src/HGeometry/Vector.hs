@@ -14,8 +14,7 @@ module HGeometry.Vector(
     module HGeometry.Vector.VectorFamily
   , module LV
   , C(..)
-  , Affine(..)
-  , quadrance, qdA, distanceA
+  , quadrance
   , dot, norm, signorm
   , isScalarMultipleOf
   , scalarMultiple, sameDirection
@@ -28,12 +27,11 @@ import           Control.Applicative (liftA2)
 import           Control.Lens (Lens')
 import           Control.Monad.State
 import qualified Data.Foldable as F
+import qualified Data.Vector.Fixed as FV
+import           GHC.TypeLits
 import           HGeometry.Properties
 import           HGeometry.Vector.VectorFamily
 import           HGeometry.Vector.VectorFixed (C (..))
-import qualified Data.Vector.Fixed as FV
-import           GHC.TypeLits
-import           Linear.Affine (Affine (..), distanceA, qdA)
 import           Linear.Metric (dot, norm, quadrance, signorm)
 import           Linear.Vector as LV hiding (E (..))
 import           System.Random (Random (..))

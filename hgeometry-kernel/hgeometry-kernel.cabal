@@ -95,19 +95,23 @@ library
   import: setup
   hs-source-dirs: src
   exposed-modules:
-    HGeometry
+    HGeometry.Kernel
     HGeometry.Properties
 
 
     HGeometry.Vector
 
     HGeometry.Point.Class
+    HGeometry.Point.Boxed
 
 
   other-modules:
     HGeometry.Vector.VectorFamily
     HGeometry.Vector.VectorFamilyPeano
     HGeometry.Vector.VectorFixed
+
+    HGeometry.Point.Internal
+    HGeometry.Point.EuclideanDistance
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
