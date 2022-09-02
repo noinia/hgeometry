@@ -53,12 +53,12 @@ common setup
 
   build-depends:
                 base                    >= 4.11      &&     < 5
-              -- , bifunctors              >= 4.1
+              , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
               -- , dlist                   >= 0.7
               , lens                    >= 4.2
-              -- , semigroupoids           >= 5
+              , semigroupoids           >= 5
               , semigroups              >= 0.18
               -- , linear                  >= 1.10
               -- , fixed-vector            >= 1.0
@@ -97,6 +97,14 @@ library
   exposed-modules:
     Data.Radical
     Data.RealNumber.Rational
+
+    Data.Sign
+    Data.Indexed
+
+    -- Data.Intersection
+
+    Data.Ext
+
 
   other-modules:
     Data.Double.Approximate Data.Double.Shaman

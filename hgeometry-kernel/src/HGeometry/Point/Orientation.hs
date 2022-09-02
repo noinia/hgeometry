@@ -8,7 +8,7 @@
 -- Strict orientation tests using SoS
 --
 --------------------------------------------------------------------------------
-module Geometry.Point.Orientation
+module HGeometry.Point.Orientation
   ( StrictCCW
   , pattern SCCW, pattern SCW
   , strictCcw
@@ -16,14 +16,14 @@ module Geometry.Point.Orientation
 
 import Data.Indexed
 import Data.Sign
-import Geometry.Point.Class
-import Geometry.SoS.Orientation
-import Geometry.Vector
+import HGeometry.Point.Class
+import HGeometry.SoS.Orientation
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> import Geometry.Point.Internal
+-- >>> import HGeometry.Point.Internal
 -- >>> :{
 -- let with     :: Point 2 Int -> Int -> WithIndex (Point 2 Int)
 --     with p i = WithIndex i p

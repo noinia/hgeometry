@@ -14,7 +14,7 @@ import qualified HGeometry.Vector as Vector
 --------------------------------------------------------------------------------
 
 -- -- $setup
--- -- >>> import Geometry.Point(Point(Point,Point1,Point2,Point3,Point4))
+-- -- >>> import HGeometry.Point(Point(Point,Point1,Point2,Point3,Point4))
 
 class (NumType point ~ r, NumType point' ~ s) => HasVector point point' r s where
   -- | Lens to access the vector corresponding to this point.
