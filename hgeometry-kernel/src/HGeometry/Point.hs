@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Geometry.Point
+-- Module      :  HGeometry.Point
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Geometry.Point
+module HGeometry.Point
   ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , Point(Point, toVec, Point1, Point2, Point3, Point4)
   , origin, vector
@@ -72,7 +72,7 @@ import HGeometry.Vector
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
 cmpInDirection       :: (Ord r, Num r, Point_ point 2 r)
-                     => Vector 2 r -> point 2 r -> point 2 r -> Ordering
+                     => Vector 2 r -> point -> point -> Ordering
 cmpInDirection n p q = case p `onSide` perpendicularTo (Line (fromGenericPoint q) n) of
                          LeftSide  -> LT
                          OnLine    -> EQ
