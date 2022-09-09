@@ -27,6 +27,9 @@ class ( NumType hyperPlane ~ r
   hyperplaneCoefficients :: hyperPlane -> Vector (d+1) r
 
 
+class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
+  -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
+  evalAt :: Point_ point (d-1) r => point -> hyperPlane -> r
 
 -- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
 -- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
@@ -40,9 +43,22 @@ instance HyperPlane_ (NonVerticalHyperPlane d r) d r where
   -- hyperPlaneTrough = undefined
   -- hyperplaneCoefficients (NonVerticalHyperPlane v) = undefined
 
+-- instance NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
+--   evalAt p h = ((p^.vector) |> 1) `dot` h^.coefficients
+
+
 
 pattern Line     :: r -> r -> NonVerticalHyperPlane 2 r
 pattern Line a b = NonVerticalHyperPlane (Vector2 a b)
 
+
+
 pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
+
+
+
+-- intersectionPoint                           :: HyperPlane_ line 2 r
+--                                             => line -> line -> Maybe (Point 2 r)
+-- intersectionPoint (Line a1 b1) (Line a2 b2) = undefined
+--   where
