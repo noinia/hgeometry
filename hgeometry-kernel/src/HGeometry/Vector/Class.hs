@@ -2,14 +2,19 @@
 module HGeometry.Vector.Class
   ( Vector_(..), pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , element
+  , xComponent, yComponent, zComponent, wComponent
+  , HasElements(..)
 
   , prefix
+
+
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
-  , HasElements(..)
+  , Metric_(..)
   ) where
 
 import           Control.Arrow ((&&&))
 import           Control.Lens hiding (element, elements)
+import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
 import           Data.Proxy
@@ -17,11 +22,12 @@ import           Data.Type.Ord
 import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector.Additive
+import           HGeometry.Vector.Metric
 
 --------------------------------------------------------------------------------
 
-
 -- | A type class for vectors
+type Vector_ :: Type -> Nat -> Type -> Constraint
 class ( NumType vector   ~ r
       , Dimension vector ~ d
       , IxValue vector ~ r
@@ -124,3 +130,48 @@ prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toList
 --   element = undefined
 --   -- for whatever reason I may want some specialized implementation here.
 --   pattern V2 x y = MyV2 x y
+
+
+
+--------------------------------------------------------------------------------
+-- * Helper functions specific to two and three dimensional vectors
+
+-- | Shorthand to access the first component
+--
+-- >>> Vector3 1 2 3 ^. xComponent
+-- 1
+-- >>> Vector2 1 2 & xComponent .~ 10
+-- Vector2 10 2
+xComponent :: (0 < d, Vector_ vector d r) => IndexedLens' Int vector r
+xComponent = element @0
+{-# INLINABLE xComponent #-}
+
+-- | Shorthand to access the second component
+--
+-- >>> Vector3 1 2 3 ^. yComponent
+-- 2
+-- >>> Vector2 1 2 & yComponent .~ 10
+-- Vector2 1 10
+yComponent :: (1 < d, Vector_ vector d r) => IndexedLens' Int vector r
+yComponent = element @1
+{-# INLINABLE yComponent #-}
+
+-- | Shorthand to access the third component
+--
+-- >>> Vector3 1 2 3 ^. zComponent
+-- 3
+-- >>> Vector3 1 2 3 & zComponent .~ 10
+-- Vector3 1 2 10
+zComponent :: (2 < d, Vector_ vector d r) => IndexedLens' Int vector r
+zComponent = element @2
+{-# INLINABLE zComponent #-}
+
+-- | Shorthand to access the forth component
+--
+-- >>> Vector4 1 2 3 4 ^. wComponent
+-- 4
+-- >>> Vector4 1 2 3 4 & wComponent .~ 10
+-- Vector4 1 2 3 10
+wComponent :: (3 < d, Vector_ vector d r) => IndexedLens' Int vector r
+wComponent = element @3
+{-# INLINABLE wComponent #-}

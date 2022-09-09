@@ -20,6 +20,7 @@ import           Control.Monad
 import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
+import           Data.Type.Ord
 import           HGeometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
                                                       VectorFamilyF)
 import qualified HGeometry.Vector.VectorFamilyPeano as Fam
@@ -95,6 +96,9 @@ instance Arity d => Affine (Vector d) where
 instance Arity d => Ixed (Vector d r) where
   ix i = singular $ element' i
 
+
+
+
 instance Arity d => V.Vector (Vector d) r where
   construct  = MKVector <$> V.construct
   inspect    = V.inspect . _unV
@@ -134,7 +138,7 @@ instance (Read r, Arity d) => Read (Vector d r) where
 instance (Arity d) => Read1 (Vector d) where
   liftReadPrec rp _rl = readData $
       readUnaryWith (replicateM d rp) constr $ \rs ->
-        case vectorFromList rs of
+        case V.fromListM rs of
           Just p -> p
           _      -> error "internal error in Geometry.Vector read instance."
     where
@@ -182,10 +186,6 @@ pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
 --------------------------------------------------------------------------------
 
 -- | \( O(n) \) Convert from a list to a non-empty vector.
-vectorFromList :: Arity d => [r] -> Maybe (Vector d r)
-vectorFromList = V.fromListM
-
--- | \( O(n) \) Convert from a list to a non-empty vector.
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
@@ -196,23 +196,11 @@ destruct v = (L.head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
   -- FIXME: this implementaion of tail is not particularly nice
 
 -- | \( O(1) \) First element. Since arity is at least 1, this function is total.
-head   :: (Arity d, 1 <= d) => Vector d r -> r
-head = view $ element @0
+head   :: (Arity d, 0 < d) => Vector d r -> r
+head = view . singular $ element' 0
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors
-
--- | Lens into the i th element
-element :: forall i d r. (Arity d, KnownNat i, (i + 1) <= d)
-        => IndexedLens' Int (Vector d r) r
-element = elementProxy (C @i)
-{-# INLINE element #-}
-
--- | Lens into the i th element
-elementProxy   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
-               => proxy i -> IndexedLens' Int (Vector d r) r
-elementProxy _ = singular $ element' $ fromInteger . natVal $ C @i
-{-# INLINE elementProxy #-}
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
@@ -243,14 +231,14 @@ init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
 init = vectorFromListUnsafe . L.init . F.toList
 
 -- | \( O(1) \) Last element. Since the vector is non-empty, runtime bounds checks are bypassed.
-last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
-last = view $ element @d
+last :: forall d r. (KnownNat d, Arity (d + 1), d < d+1) => Vector (d + 1) r -> r
+last = view . singular $ element' (fromIntegral . natVal $ Proxy @d)
 
--- | Get a prefix of i elements of a vector
-prefix :: forall i d r. (Arity d, Arity i, i <= d)
-       => Vector d r -> Vector i r
-prefix = let i = fromInteger . natVal $ (C :: C i)
-         in vectorFromListUnsafe . take i . F.toList
+-- -- | Get a prefix of i elements of a vector
+-- prefix :: forall i d r. (Arity d, Arity i, i <= d)
+--        => Vector d r -> Vector i r
+-- prefix = let i = fromInteger . natVal $ (C :: C i)
+--          in vectorFromListUnsafe . take i . F.toList
 
 --------------------------------------------------------------------------------
 -- * Specific on 3-dimensional vectors

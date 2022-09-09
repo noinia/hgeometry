@@ -4,19 +4,24 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module HGeometry.Point.Class where
 
-import           Control.Lens
+import           Control.Lens hiding (elements, element)
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
-import           HGeometry.Vector
 import qualified HGeometry.Vector as Vector
+import           HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
 -- -- $setup
 -- -- >>> import HGeometry.Point(Point(Point,Point1,Point2,Point3,Point4))
 
-class (NumType point ~ r, NumType point' ~ s) => HasVector point point' r s where
+class ( NumType point ~ r
+      , NumType point' ~ s
+      , Vector_ (Diff_ point) (Dimension point) r
+      ) => HasVector point point' r s where
+  type Diff_ point
+
   -- | Lens to access the vector corresponding to this point.
   --
   -- >>> (Point3 1 2 3) ^. vector
@@ -24,28 +29,34 @@ class (NumType point ~ r, NumType point' ~ s) => HasVector point point' r s wher
   -- >>> origin & vector .~ Vector3 1 2 3
   -- Point3 1 2 3
   vector :: ( Dimension point ~ d, Dimension point' ~ d)
-         => Lens point point' (Vector d r) (Vector d s)
+         => Lens point point' (Diff_ point) (Diff_ point')
 
 -- | Affine space; essentially the same as Linear.Affine, but for
 -- points of kind Type rather than (Type -> Type).
-class Affine_ point where
+class ( Vector_ (Diff_ point) (Dimension point) (NumType point)
+      , Additive_ (Diff_ point)
+      ) => Affine_ point where
+
   -- | p .-. q represents the vector from q to p
-  (.-.) :: Num (NumType point) => point -> point -> Vector (Dimension point) (NumType point)
+  (.-.) :: Num (NumType point) => point -> point -> Diff_ point
+
   -- | add a vector to a point
-  (.+^) :: Num (NumType point) => point -> Vector (Dimension point) (NumType point) -> point
+  (.+^) :: Num (NumType point) => point -> Diff_ point -> point
+
   -- | subtract a vector from a point
-  (.-^) :: Num (NumType point) => point -> Vector (Dimension point) (NumType point) -> point
+  (.-^) :: Num (NumType point) => point -> Diff_ point -> point
+  p .-^ v = p .+^ negated v
+  {-# MINIMAL (.-.), (.+^) #-}
 
 class ( Dimension point ~ d
       , NumType point   ~ r
-      , Arity d
       , HasVector point point r r
       , Affine_ point
       ) => Point_ point d r | point -> d
                             , point -> r where
 
   -- | Construct a point from a vector
-  fromVector :: Vector d r -> point
+  fromVector :: Vector_ vector d r => vector -> point
 
   -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
   --
@@ -54,12 +65,13 @@ class ( Dimension point ~ d
   -- (2,20)
   -- Point2 () ()
   coordinates :: forall point' s. ( HasVector point point' r s
+                                  , HasElements (Diff_ point) (Diff_ point')
                                   , Point_ point' d s
                                   ) => IndexedTraversal Int point point' r s
   coordinates = vector @point @point' . tr
     where
-      tr :: IndexedTraversal Int (Vector d r) (Vector d s) r s
-      tr = reindexed (+1) itraversed
+      tr :: IndexedTraversal Int (Diff_ point) (Diff_ point') r s
+      tr = reindexed (+1) elements
   {-# INLINE coordinates #-}
 
   -- | Get the coordinate in a given dimension. Consider using 'coord'
@@ -73,34 +85,34 @@ class ( Dimension point ~ d
   -- Point3 1 2 4
   coordProxy    :: (1 <= i, i <= d, KnownNat i)
                 => proxy i -> IndexedLens' Int point r
-  coordProxy px = singular $ unsafeCoord (fromIntegral . natVal $ px)
+  coordProxy px = singular $ uncheckedCoord (fromIntegral . natVal $ px)
   {-# INLINE coordProxy #-}
 
   -- | Get the coordinate in a given dimension. This operation is unsafe in the
   -- sense that no bounds are checked. Consider using `coord` instead.
   --
   --
-  -- >>> Point3 1 2 3 ^. unsafeCoord 2
+  -- >>> Point3 1 2 3 ^. uncheckedCoord 2
   -- 2
-  unsafeCoord   :: Int -> IndexedTraversal' Int point r
-  unsafeCoord i = vector . elem'
+  uncheckedCoord   :: Int -> IndexedTraversal' Int point r
+  uncheckedCoord i = vector . elem'
     where
-      elem' :: IndexedTraversal' Int (Vector d r) r
-      elem' = Vector.element' (i - 1)
-                -- vectors are 0 indexed, whereas we are  indexed.
-  {-# INLINE  unsafeCoord #-}
+      elem' :: IndexedTraversal' Int (Diff_ point) r
+      elem' = iix (i - 1)
+                -- vectors are 0 indexed, whereas we are 1 indexed.
+  {-# INLINE  uncheckedCoord #-}
 
   {-# MINIMAL fromVector #-}
 
 
-  -- | Get the coordinate in a given dimension
-  --
-  -- >>> Point3 1 2 3 ^. coord @2
-  -- 2
-  -- >>> Point3 1 2 3 & coord @1 .~ 10
-  -- Point3 10 2 3
-  -- >>> Point3 1 2 3 & coord @3 %~ (+1)
-  -- Point3 1 2 4
+-- | Get the coordinate in a given dimension
+--
+-- >>> Point3 1 2 3 ^. coord @2
+-- 2
+-- >>> Point3 1 2 3 & coord @1 .~ 10
+-- Point3 10 2 3
+-- >>> Point3 1 2 3 & coord @3 %~ (+1)
+-- Point3 1 2 4
 coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point_ point d r)
       => IndexedLens' Int point r
 coord = coordProxy $ Proxy @i
@@ -110,35 +122,35 @@ coord = coordProxy $ Proxy @i
 
 -- | A bidirectional pattern synonym for 1 dimensional points.
 pattern Point1_   :: Point_ point 1 r => r -> point
-pattern Point1_ x <- (view vector -> Vector1 x)
+pattern Point1_ x <- (view vector -> Vector1_ x)
   where
-    Point1_ x = fromVector (Vector1 x)
+    Point1_ x = fromVector (Vector.Vector1 x)
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
 pattern Point2_     :: Point_ point 2 r => r -> r -> point
-pattern Point2_ x y <- (view vector -> Vector2 x y)
+pattern Point2_ x y <- (view vector -> Vector2_ x y)
   where
-    Point2_ x y = fromVector (Vector2 x y)
+    Point2_ x y = fromVector (Vector.Vector2 x y)
 
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
 pattern Point3_       :: Point_ point 3 r => r -> r -> r -> point
-pattern Point3_ x y z <- (view vector -> Vector3 x y z)
+pattern Point3_ x y z <- (view vector -> Vector3_ x y z)
   where
-    Point3_ x y z = fromVector (Vector3 x y z)
+    Point3_ x y z = fromVector (Vector.Vector3 x y z)
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
 pattern Point4_         :: Point_ point 4 r => r -> r -> r -> r -> point
-pattern Point4_ x y z w <- (view vector -> Vector4 x y z w)
+pattern Point4_ x y z w <- (view vector -> Vector4_ x y z w)
   where
-    Point4_ x y z w = fromVector (Vector4 x y z w)
+    Point4_ x y z w = fromVector (Vector.Vector4 x y z w)
 
 -- | Point representing the origin in d dimensions
 --
 -- >>> origin :: Point 4 Int
 -- Point4 0 0 0 0
-origin :: (Arity d, Num r, Point_ point d r) => point
-origin = fromVector $ pure 0
+origin :: forall point d r. (Num r, Point_ point d r) => point
+origin = fromVector $ zero @(Diff_ point)
 
 --------------------------------------------------------------------------------
 
@@ -151,15 +163,15 @@ origin = fromVector $ pure 0
 -- Nothing
 -- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
 -- Nothing
-pointFromList :: (Arity d, Point_ point d r) => [r] -> Maybe point
-pointFromList = fmap fromVector . Vector.vectorFromList
+pointFromList :: forall point d r. (Point_ point d r) => [r] -> Maybe point
+pointFromList = fmap (fromVector @point @d @r @(Diff_ point)) . vectorFromList
 
 -- | Project a point down into a lower dimension.
-projectPoint :: forall i d r point point'. ( Arity i, i <= d
-                , Point_ point d r
-                , Point_ point' i r
+projectPoint :: forall i d r point point'. ( i <= d, KnownNat i
+                                           , Point_ point  d r
+                                           , Point_ point' i r
                 ) => point -> point'
-projectPoint = fromVector . prefix @i @d @r . view vector
+projectPoint = fromVector @point' @i @r @(Diff_ point') . prefix . view vector
 
 --------------------------------------------------------------------------------
 
@@ -207,6 +219,7 @@ wCoord = coord @4
 
 --------------------------------------------------------------------------------
 
+-- | Data types that store points
 class HasPoints s t point point' where
   -- | Traversal over all points in the structure
   allPoints :: ( Point_ point  d r
