@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module HGeometry.Point.Class where
 
-import           Control.Lens hiding (elements, element)
+import           Control.Lens
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
@@ -65,13 +65,13 @@ class ( Dimension point ~ d
   -- (2,20)
   -- Point2 () ()
   coordinates :: forall point' s. ( HasVector point point' r s
-                                  , HasElements (Diff_ point) (Diff_ point')
+                                  , HasComponents (Diff_ point) (Diff_ point')
                                   , Point_ point' d s
                                   ) => IndexedTraversal Int point point' r s
   coordinates = vector @point @point' . tr
     where
       tr :: IndexedTraversal Int (Diff_ point) (Diff_ point') r s
-      tr = reindexed (+1) elements
+      tr = reindexed (+1) components
   {-# INLINE coordinates #-}
 
   -- | Get the coordinate in a given dimension. Consider using 'coord'

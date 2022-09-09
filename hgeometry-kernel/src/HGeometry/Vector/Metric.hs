@@ -2,7 +2,7 @@ module HGeometry.Vector.Metric
   ( Metric_(..)
   ) where
 
-import           Control.Lens hiding (elements)
+import           Control.Lens
 import           Data.Radical
 import           HGeometry.Properties
 import           HGeometry.Vector.Additive
@@ -18,7 +18,7 @@ class Additive_ vector => Metric_ vector where
   -- | Compute the inner product of two vectors or (equivalently)
   -- convert a vector f a into a covector f a -> a.
   dot :: Num (NumType vector) => vector -> vector -> NumType vector
-  dot u v = sumOf elements $ liftI2 (*) u v
+  dot u v = sumOf components $ liftI2 (*) u v
 
   -- | Compute the squared norm. The name quadrance arises from Norman
   -- J. Wildberger's rational trigonometry.

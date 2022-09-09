@@ -42,8 +42,8 @@ type instance Dimension (Vector d r) = d
 type instance NumType   (Vector d r) = r
 
 
-instance Arity d => HasElements (Vector d r) (Vector d s) where
-  elements = itraversed
+instance Arity d => HasComponents (Vector d r) (Vector d s) where
+  components = itraversed
 
 instance Arity d => Additive_ (Vector d r) where
   zero = pure 0

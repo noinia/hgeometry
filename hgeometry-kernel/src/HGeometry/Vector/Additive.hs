@@ -1,23 +1,23 @@
 module HGeometry.Vector.Additive
   ( Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
-  , HasElements(..)
+  , HasComponents(..)
   ) where
 
-import           Control.Lens hiding (elements)
+import           Control.Lens
 import qualified Data.Foldable as F
 import           HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
-class HasElements vector vector' where
-  -- | An Indexed Traversal over the elements of a vector
-  elements :: IndexedTraversal Int vector vector' (NumType vector) (NumType vector')
+class HasComponents vector vector' where
+  -- | An Indexed Traversal over the components of a vector
+  components :: IndexedTraversal Int vector vector' (NumType vector) (NumType vector')
 
 infixl 6 ^+^, ^-^
 infixl 7 ^*, *^, ^/
 
 -- | Basically a copy of the Linear.Additive class
-class HasElements vector vector => Additive_ vector where
+class HasComponents vector vector => Additive_ vector where
   -- | zero vector
   zero :: Num (NumType vector) => vector
 
@@ -48,27 +48,27 @@ class HasElements vector vector => Additive_ vector where
 
 -- | unit vector
 unit :: forall vector. (Additive_ vector, Num (NumType vector)) => vector
-unit = over elements (const 1) (zero @vector)
+unit = over components (const 1) (zero @vector)
 {-# INLINABLE unit #-}
 
 -- | negate v
-negated :: (Num (NumType vector), HasElements vector vector) => vector -> vector
+negated :: (Num (NumType vector), HasComponents vector vector) => vector -> vector
 negated = ((-1) *^)
 {-# INLINABLE negated #-}
 
 -- | left scalar multiplication
-(*^)   :: (Num (NumType vector), HasElements vector vector) => NumType vector -> vector -> vector
-s *^ v = over elements (s*) v
+(*^)   :: (Num (NumType vector), HasComponents vector vector) => NumType vector -> vector -> vector
+s *^ v = over components (s*) v
 {-# INLINABLE (*^) #-}
 
 -- | right scalar multiplication
-(^*)   :: (Num (NumType vector), HasElements vector vector)
+(^*)   :: (Num (NumType vector), HasComponents vector vector)
        => vector -> NumType vector -> vector
 v ^* s = s *^ v
 {-# INLINABLE (^*) #-}
 
 -- | scalar division
-(^/)   :: (HasElements vector vector, Fractional (NumType vector))
+(^/)   :: (HasComponents vector vector, Fractional (NumType vector))
        => vector -> NumType vector -> vector
 v ^/ s = v ^* (1/s)
 {-# INLINABLE (^/) #-}
@@ -88,8 +88,8 @@ basis = basisFor zero
 -- argument is drawn.
 basisFor :: (Additive_ vector, Num (NumType vector)) => vector -> [vector]
 basisFor = \t ->
-   ifoldMapOf elements ?? t $ \i _ ->
+   ifoldMapOf components ?? t $ \i _ ->
      return                  $
-       iover  elements ?? t $ \j _ ->
+       iover  components ?? t $ \j _ ->
          if i == j then 1 else 0
 {-# INLINABLE basisFor #-}

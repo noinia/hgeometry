@@ -23,6 +23,7 @@ import           Control.Lens (imap)
 import           Data.Coerce
 import           HGeometry.Matrix.Internal (mkRow)
 import           HGeometry.Vector
+import           HGeometry.Vector.VectorFamily (Vector(..))
 import           HGeometry.Vector.VectorFamilyPeano
 import           Linear.Matrix (M22, M33, M44, (!*!), (!*))
 import qualified Linear.Matrix as Lin
