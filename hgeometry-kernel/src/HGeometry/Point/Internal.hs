@@ -13,7 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point.Internal
   ( Point(Point, toVec, Point1, Point2, Point3, Point4)
-  , fromGenericPoint
+  , Arity
   ) where
 
 import           Control.DeepSeq
@@ -186,14 +186,6 @@ pattern Point4 x y z w = (Point (Vector4 x y z w))
 
 
 --------------------------------------------------------------------------------
--- | Convert a generic point into this specific point.
-fromGenericPoint :: forall point genericPoint d r. ( PointClass.Point_ genericPoint d r
-                                                   , PointClass.Point_ point  d r
-                                                   ) => genericPoint -> point
-fromGenericPoint = PointClass.fromVector . view PointClass.vector
-{-# SPECIALIZE INLINE
-   fromGenericPoint :: Arity d
-                    => PointClass.Point_ genericPoint d r => genericPoint -> Point d r #-}
 
 instance PointClass.HasPoints (Point d r) (Point d s) (Point d r) (Point d s) where
   allPoints = \f p -> f p
@@ -213,6 +205,4 @@ vector' = lens toVec (const Point)
 {-# INLINABLE vector' #-}
 
 instance Arity d => PointClass.Point_ (Point d r) d r where
-  fromVector = Point
-  {-# SPECIALIZE INLINE fromVector :: Arity d => Vector d r -> Point d r #-}
-  -- FIXME: use a rewrite rule here I guess
+  fromVector = Point . vectorFromVector

@@ -19,7 +19,7 @@ import Data.Indexed
 import Data.Ratio.Generalized
 import Data.RealNumber.Symbolic
 import HGeometry.Point.Class
-import HGeometry.Point.Boxed(Point, fromGenericPoint)
+import HGeometry.Point.Boxed(Point, Arity)
 -- import Geometry.Vector
 -- import Test.QuickCheck (Arbitrary(..))
 
@@ -27,10 +27,10 @@ import HGeometry.Point.Boxed(Point, fromGenericPoint)
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: forall point d r. (Point_ point d r, HasIndex point, Num r)
+toSymbolic    :: forall point d r. (Point_ point d r, HasIndex point, Num r, Arity d)
               => point -> Point d (Symbolic SoSI r)
 toSymbolic p = let i  = sosIndex p
-                   p' = fromGenericPoint @(Point d r) p
+                   p' = pointFromPoint @point @(Point d r) p
                in p'&coordinates %@~ \j x -> perturb x $ MkSoS i j
 
 -- | Drops the pertubations in a point
@@ -41,11 +41,11 @@ fromSymbolic = fmap roundToConstant
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: ( Point_ point d r
+toSoSRational :: ( Point_ point d r, Arity d
                  , HasIndex point, Eq r, Num r)
               => point -> Point d (SoSRational SoSI r)
 toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
-{-# HLINT ignore "Avoid lambda using `infix`" #-}
+
 
 -- | Drops the pertubations
 fromSoSRational :: (Functor f, Fractional r) => f (SoSRational i r) -> f r

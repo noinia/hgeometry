@@ -8,7 +8,7 @@ module HGeometry.Point.EuclideanDistance
 import           Data.Ord (comparing)
 import qualified Data.Radical as Radical
 import           HGeometry.Point.Class
-import           HGeometry.Point.Internal (Point, fromGenericPoint)
+import           HGeometry.Point.Internal (Point)
 import           HGeometry.Properties
 import           HGeometry.Vector
 
@@ -33,23 +33,26 @@ cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 class HasSquaredEuclideanDistance g where
   {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}
   -- | Given a point q and a geometry g, the squared Euclidean distance between q and g.
-  squaredEuclideanDistTo   :: ( Num (NumType g)
+  squaredEuclideanDistTo   :: ( Num (NumType g), Arity (Dimension g)
                               , Point_ point (Dimension  g) (NumType g))
                            => point -> g -> NumType g
   squaredEuclideanDistTo q = snd . pointClosestToWithDistance q
 
   -- | Given q and g, computes the point p in g closest to q according
   -- to the Squared Euclidean distance.
-  pointClosestTo   :: (Num (NumType g), Point_ point (Dimension g) (NumType g))
+  pointClosestTo   :: ( Num (NumType g), Arity (Dimension g)
+                      , Point_ point (Dimension g) (NumType g))
                    => point -> g -> Point (Dimension g) (NumType g)
   pointClosestTo q = fst . pointClosestToWithDistance q
 
   -- | Given q and g, computes the point p in g closest to q according
   -- to the Squared Euclidean distance. Returns both the point and the
   -- distance realized by this point.
-  pointClosestToWithDistance     :: (Num (NumType g), Point_ point (Dimension g) (NumType g))
+  pointClosestToWithDistance     :: ( Num (NumType g)
+                                    , Arity (Dimension g)
+                                    , Point_ point (Dimension g) (NumType g))
                                  => point -> g
                                  -> (Point (Dimension g) (NumType g), NumType g)
-  pointClosestToWithDistance q g = let q' = fromGenericPoint q
+  pointClosestToWithDistance q g = let q' = pointFromPoint q
                                        p  = pointClosestTo q' g
                                    in (p, squaredEuclideanDist p q')

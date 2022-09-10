@@ -14,11 +14,9 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point.Boxed
   ( Point(..)
-  , vector
-  , fromGenericPoint
+  , Arity
   ) where
 
-import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.Internal
 

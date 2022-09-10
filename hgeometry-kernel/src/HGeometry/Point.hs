@@ -13,13 +13,14 @@
 module HGeometry.Point
   ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , Point(Point, toVec, Point1, Point2, Point3, Point4)
+  , Arity
   , origin, vector
-  , pointFromList
-  , projectPoint
-  , coord
-  , xCoord, yCoord, zCoord
+  , pointFromPoint, pointFromList
 
-  , PointFunctor(..)
+  , coord
+  , xCoord, yCoord, zCoord, wCoord
+
+  , projectPoint
 
   , CCW(CCW, CW, CoLinear), ccw, isCoLinear
 
@@ -40,8 +41,6 @@ module HGeometry.Point
 
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
-
-  , fromGenericPoint
 
   , HasPoints(..)
   ) where

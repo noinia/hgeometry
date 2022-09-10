@@ -5,6 +5,7 @@ module HGeometry.Vector.Class
   , xComponent, yComponent, zComponent, wComponent
   , HasComponents(..)
 
+  , vectorFromVector
   , prefix
 
 
@@ -50,18 +51,29 @@ class ( NumType vector   ~ r
 
   {-# MINIMAL vectorFromList #-}
 
+  -- | Convert an arbitrary vector into another vector
+vectorFromVector :: forall vector vector' d r. (Vector_ vector d r, Vector_ vector' d r)
+                 => vector -> vector'
+vectorFromVector = uncheckedVectorFromList . toListOf components
+{-# INLINE[1] vectorFromVector #-}
+{-# RULES
+  "vectorFromVector/sameType"
+      forall vector. forall (v :: vector). vectorFromVector @vector @vector v = v
+  #-}
 
 -- | A bidirectional pattern synonym for 1 dimensional vectors.
 pattern Vector1_   :: Vector_ vector 1 r => r -> vector
 pattern Vector1_ x <- (view (component @0) -> x)
   where
     Vector1_ x = uncheckedVectorFromList [x]
+{-# COMPLETE Vector1_ #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional vectors.
 pattern Vector2_     :: Vector_ vector 2 r => r -> r -> vector
 pattern Vector2_ x y <- (view (component @0) &&& view (component @1) -> (x,y))
   where
     Vector2_ x y = uncheckedVectorFromList [x,y]
+{-# COMPLETE Vector2_ #-}
 
 
 -- | A bidirectional pattern synonym for 3 dimensional vectors.
@@ -70,6 +82,7 @@ pattern Vector3_ x y z <- (view (component @0) &&& view (component @1) &&& view 
                           -> (x,(y,z)))
   where
     Vector3_ x y z = uncheckedVectorFromList [x,y,z]
+{-# COMPLETE Vector3_ #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional vectors.
 pattern Vector4_         :: Vector_ vector 4 r => r -> r -> r -> r -> vector
@@ -78,8 +91,7 @@ pattern Vector4_ x y z w <- (   (view (component @0) &&& view (component @1)
                             -> (x,(y,(z,w))))
   where
     Vector4_ x y z w = uncheckedVectorFromList [x,y,z,w]
-
-
+{-# COMPLETE Vector4_ #-}
 
 
 -- | Lens to access te i^t component.

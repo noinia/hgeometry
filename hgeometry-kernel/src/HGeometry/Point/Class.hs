@@ -2,7 +2,17 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module HGeometry.Point.Class where
+module HGeometry.Point.Class
+  ( HasVector(..)
+  , Affine_(..)
+  , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , origin
+  , pointFromPoint, pointFromList
+  , coord, xCoord, yCoord, zCoord, wCoord
+
+  , projectPoint
+  , HasPoints(..)
+  ) where
 
 import           Control.Lens
 import           Data.Proxy (Proxy(..))
@@ -34,7 +44,7 @@ class ( NumType point ~ r
 -- | Affine space; essentially the same as Linear.Affine, but for
 -- points of kind Type rather than (Type -> Type).
 class ( Vector_ (Diff_ point) (Dimension point) (NumType point)
-      , Additive_ (Diff_ point)
+      , Metric_ (Diff_ point)
       ) => Affine_ point where
 
   -- | p .-. q represents the vector from q to p
@@ -118,6 +128,18 @@ coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point_ point d r)
 coord = coordProxy $ Proxy @i
 {-# INLINE coord #-}
 
+-- | Convert a generic point into this specific point.
+pointFromPoint :: forall point point' d r.
+                  ( Point_ point  d r
+                  , Point_ point' d r
+                  ) => point -> point'
+pointFromPoint = fromVector . view vector
+{-# INLINE[1] pointFromPoint #-}
+{-# RULES
+  "pointFromPoint/sameType"
+      forall point. forall (p :: point). pointFromPoint @point @point p = p
+  #-}
+
 --------------------------------------------------------------------------------
 
 -- | A bidirectional pattern synonym for 1 dimensional points.
@@ -125,12 +147,14 @@ pattern Point1_   :: Point_ point 1 r => r -> point
 pattern Point1_ x <- (view vector -> Vector1_ x)
   where
     Point1_ x = fromVector (Vector.Vector1 x)
+{-# COMPLETE Point1_ #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
 pattern Point2_     :: Point_ point 2 r => r -> r -> point
 pattern Point2_ x y <- (view vector -> Vector2_ x y)
   where
     Point2_ x y = fromVector (Vector.Vector2 x y)
+{-# COMPLETE Point2_ #-}
 
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
@@ -138,12 +162,14 @@ pattern Point3_       :: Point_ point 3 r => r -> r -> r -> point
 pattern Point3_ x y z <- (view vector -> Vector3_ x y z)
   where
     Point3_ x y z = fromVector (Vector.Vector3 x y z)
+{-# COMPLETE Point3_ #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
 pattern Point4_         :: Point_ point 4 r => r -> r -> r -> r -> point
 pattern Point4_ x y z w <- (view vector -> Vector4_ x y z w)
   where
     Point4_ x y z w = fromVector (Vector.Vector4 x y z w)
+{-# COMPLETE Point4_ #-}
 
 -- | Point representing the origin in d dimensions
 --

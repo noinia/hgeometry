@@ -74,8 +74,8 @@ ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
             --   GT -> CCW
             --   EQ -> CoLinear
      where
-       Vector2 ux uy = q .-. p
-       Vector2 vx vy = r .-. p
+       Vector2_ ux uy = q .-. p
+       Vector2_ vx vy = r .-. p
       --  _z             = ux * vy - uy * vx
 {-# SPECIALIZE INLINE
      ccw :: (Ord r, Num r) => Boxed.Point 2 r -> Boxed.Point 2 r -> Boxed.Point 2 r -> CCW #-}
@@ -86,8 +86,8 @@ ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
 isCoLinear       :: (Eq r, Num r, Point_ point 2 r) => point -> point -> point -> Bool
 isCoLinear p q r = (ux * vy) == (uy * vx)
      where
-       Vector2 ux uy = q .-. p
-       Vector2 vx vy = r .-. p
+       Vector2_ ux uy = q .-. p
+       Vector2_ vx vy = r .-. p
 
 -- -- Given three points p q and r determine the orientation when going from p to r via q.
 -- ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
@@ -106,12 +106,15 @@ sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 -- direction.
 --
 -- pre: the points p,q /= c
-ccwCmpAroundWith                              :: (Ord r, Num r, Point_ point 2 r)
-                                              => Vector 2 r
+ccwCmpAroundWith                              :: (Ord r, Num r
+                                                 , Point_ point 2 r
+                                                 , Vector_ vector 2 r
+                                                 )
+                                              => vector
                                               -> point
                                               -> point -> point
                                               -> Ordering
-ccwCmpAroundWith z@(Vector2 zx zy) c q r =
+ccwCmpAroundWith z@(Vector2_ zx zy) c q r =
     case (ccw c a q, ccw c a r) of
       (CCW,CCW)      -> cmp
       (CCW,CW)       -> LT
@@ -132,8 +135,8 @@ ccwCmpAroundWith z@(Vector2 zx zy) c q r =
                                (True, False)  -> LT
                                (False, True)  -> GT
   where
-    a = c .+^ z
-    b = c .+^ Vector2 (-zy) zx
+    a = c .+^ vectorFromVector z
+    b = c .+^ Vector2_ (-zy) zx
     -- b is on a perpendicular vector to z
 
     -- test if the point lies on the ray defined by z, starting in c
@@ -169,7 +172,7 @@ ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 -- respect to the positive x-axis.
 cwCmpAround :: (Num r, Ord r, Point_ point 2 r)
             => point -> point -> point -> Ordering
-cwCmpAround = cwCmpAroundWith (Vector2 1 0)
+cwCmpAround = cwCmpAroundWith (Vector2_ 1 0)
 
 -- | \( O(n) \)
 -- Given a center c, a new point p, and a list of points ps, sorted in
