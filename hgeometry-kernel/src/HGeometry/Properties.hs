@@ -12,12 +12,12 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Properties(
-  -- module Data.Intersection
-    Dimension
+    module Data.Intersection
+  , Dimension
   , NumType
   ) where
 
--- import Data.Intersection
+import Data.Intersection
 import Data.Kind
 -- import Data.Range
 import GHC.TypeLits
