@@ -7,14 +7,14 @@ module HGeometry.Vector.Class
 
   , vectorFromVector
   , prefix
-
+  , cons, snoc
 
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , Metric_(..)
   ) where
 
 import           Control.Arrow ((&&&))
-import           Control.Lens
+import           Control.Lens hiding (cons,snoc)
 import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
@@ -114,11 +114,15 @@ prefix :: forall i d vector vector' r. ( i <= d, KnownNat i
        => vector -> vector'
 prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toListOf components
 
--- cons     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
---          => r -> vector -> vector'
--- cons x v = uncheckedVectorFromList $ x : (v^..components)
+-- | Add an element to the front of the vector
+cons     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
+         => r -> vector -> vector'
+cons x v = uncheckedVectorFromList $ x : (v^..components)
 
-
+-- | Add an element to the back of the vector.
+snoc     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
+         => vector -> r -> vector'
+snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
 
 --------------------------------------------------------------------------------
 

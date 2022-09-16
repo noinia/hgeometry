@@ -155,8 +155,8 @@ ccwCmpAroundWith z@(Vector2_ zx zy) c q r =
 -- direction.
 --
 -- pre: the points p,q /= c
-cwCmpAroundWith     :: (Ord r, Num r, Point_ point 2 r)
-                    => Vector 2 r
+cwCmpAroundWith     :: (Ord r, Num r, Point_ point 2 r, Vector_ vector 2 r)
+                    => vector
                     -> point
                     -> point -> point
                     -> Ordering
@@ -172,7 +172,7 @@ ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 -- respect to the positive x-axis.
 cwCmpAround :: (Num r, Ord r, Point_ point 2 r)
             => point -> point -> point -> Ordering
-cwCmpAround = cwCmpAroundWith (Vector2_ 1 0)
+cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 
 -- | \( O(n) \)
 -- Given a center c, a new point p, and a list of points ps, sorted in
