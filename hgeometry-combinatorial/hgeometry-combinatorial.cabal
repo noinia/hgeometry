@@ -123,7 +123,7 @@ library
   extra-libraries: m
 
 
-library hgeometry-combinatorial-quickcheckinstances
+library quickcheckinstances
   import: setup
   visibility: public
 
@@ -180,7 +180,7 @@ test-suite hspec
 
 
   build-depends: hgeometry-combinatorial
-               , hgeometry-combinatorial:hgeometry-combinatorial-quickcheckinstances
+               , hgeometry-combinatorial:quickcheckinstances
                , hspec                   >= 2.9
                , QuickCheck
                , quickcheck-instances

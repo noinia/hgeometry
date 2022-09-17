@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Combinatorial.Instances where
 
 import Test.QuickCheck
