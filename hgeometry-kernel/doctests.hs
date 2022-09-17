@@ -51,25 +51,19 @@ replace a b = go
 
 modules :: [String]
 modules =
-  [ "Data.PlaneGraph.IO"
-
-  , "Geometry.Point"
-  , "Geometry.Vector"
-  , "Geometry.Transformation"
-  , "Geometry.Line"
-  , "Geometry.Line.Internal"
-  , "Geometry.Interval"
-  , "Geometry.LineSegment"
-  , "Geometry.PolyLine"
-  , "Geometry.Polygon"
-  , "Geometry.Ball"
-  , "Geometry.Box"
-  , "Geometry.HyperPlane"
-
-  -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
-  , "Algorithms.Geometry.ConvexHull.Naive"
-  , "Algorithms.Geometry.ConvexHull.JarvisMarch"
-
-  , "Geometry.SoS.Orientation"
-  , "Algorithms.Geometry.InPolygon"
+  [ -- "Data.PlaneGraph.IO"
+    "HGeometry.Point"
+  , "HGeometry.Vector"
+  , "HGeometry.Transformation"
+  , "HGeometry.Line"
+  , "HGeometry.Line.Internal"
+  -- , "HGeometry.Interval"
+  -- , "HGeometry.LineSegment"
+  -- , "HGeometry.PolyLine"
+  -- , "HGeometry.Polygon"
+  -- , "HGeometry.Ball"
+  -- , "HGeometry.Box"
+  , "HGeometry.HyperPlane"
+  , "HGeometry.SoS.Orientation"
+  -- , "Algorithms.Geometry.InPolygon"
   ]

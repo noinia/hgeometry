@@ -38,13 +38,31 @@ class ( NumType hyperPlane ~ r
     where
       a = hyperPlaneCoefficients h
 
-  {-# MINIMAL hyperPlaneTrough #-}
-
   -- | Get the normal vector of the hyperlane.
   normalVector :: HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
   default normalVector :: ( d <= (d+1), KnownNat ((d+1)-d), Arity d, Arity (d+1)
                           ) => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
   normalVector = suffix . hyperPlaneEquation
+
+  -- | Test if a point lies on a hyperplane.
+  onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
+  default onHyperPlane :: ( Point_ point d r, Eq r, Num r
+                          , Arity (d+1), Arity d, d < d+1, d<= d+1 -- silly constraints
+                          ) => point -> hyperPlane -> Bool
+  q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
+    where
+      (a,a0) = unsnoc $ hyperPlaneEquation h
+
+  -- | Test if a point lies on a hyperplane.
+  onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
+  default onSideTest :: ( Point_ point d r, Ord r, Num r
+                        , Arity (d+1), Arity d, d < d+1, d<= d+1 -- silly constraints
+                        ) => point -> hyperPlane -> Ordering
+  q `onSideTest` h = (a0 + (a `dot` (q^.vector))) `compare` 0
+    where
+      (a,a0) = unsnoc $ hyperPlaneEquation h
+
+  {-# MINIMAL hyperPlaneTrough #-}
 
 --------------------------------------------------------------------------------
 

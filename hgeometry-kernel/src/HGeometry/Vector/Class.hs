@@ -100,8 +100,8 @@ pattern Vector3_ x y z <- (view (component @0) &&& view (component @1) &&& view 
 
 -- | A bidirectional pattern synonym for 4 dimensional vectors.
 pattern Vector4_         :: Vector_ vector 4 r => r -> r -> r -> r -> vector
-pattern Vector4_ x y z w <- (   (view (component @0) &&& view (component @1)
-                             &&& view (component @2) &&& view (component @3))
+pattern Vector4_ x y z w <- (    view (component @0) &&& view (component @1)
+                             &&& view (component @2) &&& view (component @3)
                             -> (x,(y,(z,w))))
   where
     Vector4_ x y z w = uncheckedVectorFromList [x,y,z,w]

@@ -18,6 +18,7 @@ import qualified Data.Traversable as T
 import           GHC.Generics (Generic)
 import           HGeometry.Line.Class
 import           HGeometry.Point.Class
+import           HGeometry.HyperPlane.Class
 import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
@@ -32,6 +33,23 @@ import           HGeometry.Vector
 data Line d r = Line { _anchorPoint :: !(Point  d r)
                      , _direction   :: !(Vector d r)
                      } deriving Generic
+
+-- | Vertical line with a given X-coordinate.
+verticalLine   :: Num r => r -> Line 2 r
+verticalLine x = Line (Point2 x 0) (Vector2 0 1)
+
+-- | Horizontal line with a given Y-coordinate.
+horizontalLine   :: Num r => r -> Line 2 r
+horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
+
+instance HyperPlane_ (Line 2 r) 2 r where
+  hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
+
+  hyperPlaneEquation (Line p v) = Vector3 a b c
+    where
+      a = undefined
+      b = undefined
+      c = undefined
 
 -- instance Line_ Line d r where
 --   mkLine (fromGenericPoint -> p) = Line p
@@ -77,15 +95,15 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 --      forall (l1 :: forall r. Line 2 r) l2. isParallelTo l1 l2 = isParallelTo2 l1 l2
 -- #-}
 
--- | Check whether two lines are parallel
-isParallelTo2 :: (Eq r, Num r) => Line 2 r -> Line 2 r -> Bool
-isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
-    where
-      denom       = vy * ux - vx * uy
+-- -- | Check whether two lines are parallel
+-- isParallelTo2 :: (Eq r, Num r) => Line 2 r -> Line 2 r -> Bool
+-- isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
+--     where
+--       denom       = vy * ux - vx * uy
 
--- | Specific 2d version of testing if apoint lies on a line.
-onLine2 :: (Ord r, Num r, Point_ point 2 r) => point -> Line 2 r -> Bool
-p `onLine2` (Line q v) = ccw (pointFromPoint p) q (q .+^ v) == CoLinear
+-- -- | Specific 2d version of testing if apoint lies on a line.
+-- onLine2 :: (Ord r, Num r, Point_ point 2 r) => point -> Line 2 r -> Bool
+-- p `onLine2` (Line q v) = ccw (pointFromPoint p) q (q .+^ v) == CoLinear
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
 data instance IntersectionOf (Line 2 r) (Line 2 r) = PointIntersection (Point 2 r)
@@ -94,11 +112,14 @@ data instance IntersectionOf (Line 2 r) (Line 2 r) = PointIntersection (Point 2 
 type instance Intersection (Line 2 r) (Line 2 r) = Maybe (IntersectionOf (Line 2 r)  (Line 2 r))
 
 instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Line 2 r where
-  l1 `intersects` l2@(Line q _) = not (l1 `isParallelTo2` l2) || q `onLine2` l1
+  l1 `intersects` l2@(Line q _) =
+    not (l1 `isParallelTo` l2) || q `onLine` l1
+
+
 
 instance (Ord r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
   l@(Line p ~(Vector2 ux uy)) `intersect` (Line q ~v@(Vector2 vx vy))
-      | areParallel = if q `onLine2` l then Just $ LineIntersection l
+      | areParallel = if q `onLine` l then Just $ LineIntersection l
                                        else Nothing
       | otherwise   = Just $ PointIntersection r
     where
@@ -130,6 +151,7 @@ instance HasSupportingLine (Line d r) where
 -- | Create a line from the linear function ax + b
 fromLinearFunction     :: Num r => r -> r -> Line 2 r
 fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
+
 
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
@@ -220,6 +242,19 @@ bisector     :: (Fractional r, Point_ point 2 r) => point -> point -> Line 2 r
 bisector p q = let v = q .-. p
                    h = pointFromPoint $ p .+^ (v ^/ 2)
                in perpendicularTo (Line h v)
+
+-- | Given a line l with anchor point p and vector v, get the line
+-- perpendicular to l that also goes through p. The resulting line m is
+-- oriented such that v points into the left halfplane of m.
+--
+-- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
+-- Line (Point2 3 4) (Vector2 (-2) (-1))
+perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
+perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
+
+-- | Test if a vector is perpendicular to the line.
+isPerpendicularTo :: (Num r, Eq r) => Vector 2 r -> Line 2 r -> Bool
+v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 
 
 -- | Compares the lines on slope. Vertical lines are considered larger than

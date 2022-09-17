@@ -19,15 +19,18 @@ class Additive_ vector => Metric_ vector where
   -- convert a vector f a into a covector f a -> a.
   dot :: Num (NumType vector) => vector -> vector -> NumType vector
   dot u v = sumOf components $ liftI2 (*) u v
+  {-# INLINE dot #-}
 
   -- | Compute the squared norm. The name quadrance arises from Norman
   -- J. Wildberger's rational trigonometry.
   quadrance   :: Num (NumType vector) => vector -> NumType vector
   quadrance v = dot v v
+  {-# INLINE quadrance #-}
 
   -- | Compute the quadrance of the difference
   qd     :: Num (NumType vector) => vector -> vector -> NumType vector
   qd u v = quadrance $ u ^-^ v
+  {-# INLINE qd #-}
 
   -- -- | Compute the distance between two vectors in a metric space
   -- distance :: Radical (NumType vector) => vector -> vector -> NumType vector
@@ -35,8 +38,11 @@ class Additive_ vector => Metric_ vector where
   -- | Compute the norm of a vector in a metric space
   norm :: Radical (NumType vector) => vector -> NumType vector
   norm = sqrt . quadrance
+  {-# INLINE norm #-}
 
   -- | Convert a non-zero vector to unit vector.
   signorm   :: (Radical (NumType vector), Fractional (NumType vector)) => vector -> vector
   signorm v = v ^/ norm v
+  {-# INLINE signorm #-}
+
   {-# MINIMAL #-}
