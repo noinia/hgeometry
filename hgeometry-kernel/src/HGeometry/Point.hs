@@ -70,8 +70,8 @@ import HGeometry.Vector
 -- GT
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
-cmpInDirection       :: (Ord r, Num r, Point_ point 2 r)
-                     => Vector 2 r -> point -> point -> Ordering
+cmpInDirection       :: (Ord r, Num r, Point_ point 2 r, vector ~ Diff_ point)
+                     => vector -> point -> point -> Ordering
 cmpInDirection n p q = case p `onSide` perpendicularTo (Line (fromGenericPoint q) n) of
                          LeftSide  -> LT
                          OnLine    -> EQ

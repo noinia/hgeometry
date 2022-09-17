@@ -6,15 +6,17 @@ module HGeometry.Vector.Class
   , HasComponents(..)
 
   , vectorFromVector
-  , prefix
+  , prefix, suffix
   , cons, snoc
+  , uncons, unsnoc
+  , vZipWith
 
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , Metric_(..)
   ) where
 
 import           Control.Arrow ((&&&))
-import           Control.Lens hiding (cons,snoc)
+import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
 import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
@@ -24,6 +26,7 @@ import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector.Additive
 import           HGeometry.Vector.Metric
+import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
@@ -60,6 +63,17 @@ vectorFromVector = uncheckedVectorFromList . toListOf components
   "vectorFromVector/sameType"
       forall vector. forall (v :: vector). vectorFromVector @vector @vector v = v
   #-}
+
+
+-- | Zip two vectors together using the given function.
+--
+vZipWith         :: forall vector vector' vector'' d a b c.
+                   (Vector_ vector d a, Vector_ vector' d b, Vector_ vector'' d c)
+                => (a -> b -> c) -> vector -> vector' -> vector''
+vZipWith f va vb = uncheckedVectorFromList $ List.zipWith f (va^..components) (vb^..components)
+
+--------------------------------------------------------------------------------
+
 
 -- | A bidirectional pattern synonym for 1 dimensional vectors.
 pattern Vector1_   :: Vector_ vector 1 r => r -> vector
@@ -114,6 +128,13 @@ prefix :: forall i d vector vector' r. ( i <= d, KnownNat i
        => vector -> vector'
 prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toListOf components
 
+-- | Take a suffix of length i  of the vector
+suffix :: forall i d vector vector' r. ( i <= d, KnownNat (d-i)
+                                       , Vector_ vector d r, Vector_ vector' i r)
+       => vector -> vector'
+suffix = uncheckedVectorFromList . List.genericDrop (natVal $ Proxy @(d-i)) . toListOf components
+
+
 -- | Add an element to the front of the vector
 cons     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
          => r -> vector -> vector'
@@ -123,6 +144,22 @@ cons x v = uncheckedVectorFromList $ x : (v^..components)
 snoc     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
          => vector -> r -> vector'
 snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
+
+--------------------------------------------------------------------------------
+
+-- | Extract the first element from the vector
+uncons   :: forall vector vector' d r.
+            ( Vector_ vector (d+1) r, Vector_ vector' d r
+            , 0 < d+1, d <= d+1, KnownNat ((d+1)-d) -- these are silly
+            ) => vector -> (r, vector')
+uncons v = ( v^.component @0, suffix v)
+
+-- | Extract the last element from the vector
+unsnoc   :: forall vector vector' d r.
+            (Vector_ vector (d+1) r, Vector_ vector' d r
+            , d < d+1, d <= d+1, KnownNat d -- these are silly
+            ) => vector -> (vector',r)
+unsnoc v = ( prefix v, v^.component @d )
 
 --------------------------------------------------------------------------------
 
@@ -191,3 +228,5 @@ zComponent = component @2
 wComponent :: (3 < d, Vector_ vector d r) => IndexedLens' Int vector r
 wComponent = component @3
 {-# INLINABLE wComponent #-}
+
+--------------------------------------------------------------------------------
