@@ -45,6 +45,9 @@ common setup
     , ScopedTypeVariables
     , DerivingStrategies
     , DerivingVia
+    , GeneralizedNewtypeDeriving
+    , DeriveGeneric
+    , DeriveFunctor
     , PatternSynonyms
     , TupleSections
     , LambdaCase
@@ -68,8 +71,6 @@ common setup
               -- , fingertree              >= 0.1
               , MonadRandom             >= 0.5
               , random                  >= 1.2
-              -- , QuickCheck              >= 2.5
-              -- , quickcheck-instances    >= 0.3
               -- , reflection              >= 2.1
               -- , primitive               >= 0.6.3.0
               , hashable                >= 1.2
@@ -122,6 +123,19 @@ library
   extra-libraries: m
 
 
+library hgeometry-combinatorial-quickcheckinstances
+  import: setup
+  visibility: public
+
+  hs-source-dirs: qc_src
+  exposed-modules:
+    HGeometry.Combinatorial.Instances
+
+  build-depends: hgeometry-combinatorial
+               , QuickCheck              >= 2.5
+               , quickcheck-instances    >= 0.3
+
+
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
@@ -159,8 +173,19 @@ test-suite hspec
   hs-source-dirs:       test
   main-is:              Main.hs
 
+  other-modules:
+      Data.Ratio.GeneralizedSpec
+      Data.RealNumber.RationalSpec
+      Data.RealNumber.SymbolicSpec
+
+
   build-depends: hgeometry-combinatorial
-               , hspec         >= 2.9
+               , hgeometry-combinatorial:hgeometry-combinatorial-quickcheckinstances
+               , hspec                   >= 2.9
+               , QuickCheck
+               , quickcheck-instances
+
+
   ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures
@@ -169,5 +194,8 @@ test-suite hspec
                  -fno-warn-orphans
 
   build-tool-depends: hspec-discover:hspec-discover
+
+  default-extensions:
+      RankNTypes
 
   other-modules: Spec

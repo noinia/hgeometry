@@ -48,8 +48,6 @@ import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
 import           Data.Ratio.Generalized (GRatio, (%))
 import           Data.Sign (Sign(..))
--- import           Test.QuickCheck (Arbitrary(..), listOf)
--- import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 -- * EpsFolds
@@ -191,8 +189,6 @@ instance Ord i => Ord (EpsFold i) where
 
 -- something goes wrong when the one of the epsfolds is empty.
 
--- instance (Arbitrary i, Ord i) => Arbitrary (EpsFold i) where
---   arbitrary = mkEpsFold . take 4 <$> listOf arbitrary
 
 
 -- | Test if the epsfold has no pertubation at all (i.e. if it is \(\Pi_{\emptyset}\)
@@ -265,8 +261,6 @@ instance (Ord i, Ord r, Num r) => Ord (Term i r) where
   -- ordering. If the signs are different then we can base the
   -- ordering on that.
 
--- instance (Arbitrary r, Arbitrary (EpsFold i), Ord i) => Arbitrary (Term i r) where
---   arbitrary = Term <$> arbitrary <*> arbitrary
 
 --------------------------------------------------------------------------------
 -- * Symbolic
@@ -355,8 +349,6 @@ instance (Show i, Show r) => Show (Symbolic i r) where
     where
       app_prec = 10
 
--- instance (Arbitrary r, Ord i, Arbitrary (EpsFold i)) => Arbitrary (Symbolic i r) where
---   arbitrary = Sum <$> arbitrary
 
 
 

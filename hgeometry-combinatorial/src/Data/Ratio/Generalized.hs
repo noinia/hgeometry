@@ -72,6 +72,3 @@ instance (Num a, Eq a) => Fractional (GRatio a) where
     -- dividing by zero.  however, if c is zero then (c % d) would be
     -- zero, so there is no need to explicitly handle that; i.e. that
     -- is a something the user must do
-
--- instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
---   arbitrary = (:%) <$> arbitrary <*> (arbitrary `suchThat` (/= 0))
