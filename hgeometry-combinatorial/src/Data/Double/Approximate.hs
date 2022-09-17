@@ -15,6 +15,7 @@ module Data.Double.Approximate
   , DoubleRelAbs(..)
   ) where
 
+import Prelude hiding (sqrt)
 import Control.DeepSeq
 import Data.Proxy
 import GHC.TypeLits
@@ -22,6 +23,7 @@ import Numeric.MathFunctions.Comparison
 import Numeric.MathFunctions.Constants
 import System.Random
 import Text.Read
+import Data.Radical
 
 -- | Relatively safe double floating-point type with a relative error
 --   margin of 10 <https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs>
@@ -89,3 +91,4 @@ instance Show (DoubleRelAbs abs rel) where
 instance Read (DoubleRelAbs abs rel) where
   readPrec = DoubleRelAbs <$> readPrec
 
+instance Radical (DoubleRelAbs abs rel)

@@ -71,8 +71,8 @@ modules =
   -- , "Data.List.Alternating"
   -- , "Data.List.Zipper"
 
-    "Data.Double.Approximate"
-  , "Data.Double.Shaman"
+  --   "Data.Double.Approximate"
+  -- , "Data.Double.Shaman"
 
-  , "Data.RealNumber.Symbolic"
+   "Data.RealNumber.Symbolic"
   ]

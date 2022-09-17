@@ -12,8 +12,6 @@ module Data.Radical
   ( Radical(..)
   ) where
 
-import           Data.Double.Approximate
-import           Data.Double.Shaman
 import qualified Prelude
 import           Prelude hiding (sqrt)
 
@@ -28,6 +26,3 @@ class Num r => Radical r where
 
 instance Radical Float
 instance Radical Double
-instance Radical (DoubleRelAbs abs rel)
-instance Radical (SDouble n)
-instance Radical Shaman

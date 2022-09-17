@@ -22,6 +22,7 @@ import Numeric.MathFunctions.Comparison ( addUlps)
 import Numeric.MathFunctions.Constants
 import GHC.TypeLits
 import Data.Double.Approximate
+import qualified Data.Radical as Radical 
 
 -- | Double-precision floating point numbers that throw exceptions if
 --   the accumulated errors grow large enough to cause unstable branching.
@@ -55,6 +56,8 @@ instance Show (SDouble n) where
 
 instance Read (SDouble n) where
   readsPrec d inp = [ (SDouble v, r) | (v, r) <- readsPrec d inp ]
+
+instance Radical.Radical (SDouble n)
 
 
 -- shamanUlpDistance :: Shaman -> Word64
@@ -141,6 +144,8 @@ instance Read Shaman where
       | (shamanValue, '±':t) <- reads r
       , (shamanError, t') <- reads t]
     where app_prec = 10
+
+instance Radical.Radical Shaman
 
 -- | Number of significant bits (base 2).
 significativeBits :: Shaman -> Double
