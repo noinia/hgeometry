@@ -101,16 +101,21 @@ instance (Fractional r, Arity d, Arity (d + 1), d < d+1
 --
 -- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
-translation   :: (Num r, Arity d, Arity (d + 1))
-              => Vector d r -> Transformation d r
+translation   :: ( Num r, Arity d, Arity (d + 1)
+                 , d < d+1
+                 , Vector_ vector d r
+                 )
+              => vector -> Transformation d r
 translation v = Transformation . Matrix $ imap transRow (snoc v 1)
 
 -- | Create scaling transformation from a vector.
 --
 -- >>> transformBy (scaling $ Vector2 2 (-1)) $ Point2 2 3
 -- Point2 4.0 (-3.0)
-scaling   :: (Num r, Arity d, Arity (d + 1))
-          => Vector d r -> Transformation d r
+scaling   :: ( Num r, Arity d, Arity (d + 1)
+             , Vector_ vector d r
+             )
+          => vector -> Transformation d r
 scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 
 -- | Create scaling transformation from a scalar that is applied
@@ -122,8 +127,8 @@ scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 -- True
 -- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
 -- True
-uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
-uniformScaling = scaling . pure
+uniformScaling :: forall d r. (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
+uniformScaling = scaling . pure @(Vector d)
 
 
 --------------------------------------------------------------------------------
@@ -135,7 +140,9 @@ uniformScaling = scaling . pure
 -- Point2 3.0 5.0
 translateBy :: ( IsTransformable g, Num (NumType g)
                , Arity (Dimension g), Arity (Dimension g + 1)
-               ) => Vector (Dimension g) (NumType g) -> g -> g
+               , Dimension g < Dimension g + 1
+               , Vector_ vector (Dimension g) (NumType g)
+               ) => vector -> g -> g
 translateBy = transformBy . translation
 
 -- | Scale a given point.
@@ -144,7 +151,8 @@ translateBy = transformBy . translation
 -- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
            , Arity (Dimension g), Arity (Dimension g + 1)
-           ) => Vector (Dimension g) (NumType g) -> g -> g
+           , Vector_ vector (Dimension g) (NumType g)
+           ) => vector -> g -> g
 scaleBy = transformBy . scaling
 
 

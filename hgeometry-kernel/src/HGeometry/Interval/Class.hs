@@ -11,6 +11,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Class
   ( Interval_(..), pattern Interval_
+  , ClosedInterval_(..)
+  , OpenInterval_(..)
+  , IntervalOf
 
   , HasStart(..)
   , HasEnd(..)
@@ -20,13 +23,13 @@ module HGeometry.Interval.Class
 
   , shiftLeft
   , flipInterval
+  , module HGeometry.Interval.EndPoint
   ) where
 
 import Control.Lens
 import Data.Tuple (swap)
 import HGeometry.Boundary
 import HGeometry.Interval.EndPoint
-import HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
@@ -46,49 +49,58 @@ startAndEnd i = (i^.start,i^.end)
 
 --------------------------------------------------------------------------------
 
+type family IntervalOf (et :: EndPointType) r
+
 -- | A class for types representing Intervals
-class ( HasStart (interval endPoint) endPoint
-      , HasEnd   (interval endPoint) endPoint
-      , EndPoint_ endPoint
-      , NumType   (interval endPoint) ~ r
-      ) => Interval_ interval endPoint where
+class ( HasStart interval endPoint
+      , HasEnd   interval endPoint
+      ) => Interval_ interval endPoint | interval -> endPoint where
 
   -- | Construct an interval given its start and end point.
-  mkInterval :: endPoint -> endPoint -> interval endPoint
+  mkInterval :: endPoint -> endPoint -> interval
+
+class Interval_ interval r => ClosedInterval_ interval r
+
+class Interval_ interval r => OpenInterval_ interval r
+
 
 --------------------------------------------------------------------------------
 
 -- | Pattern to match on intervals or construct them.
 pattern Interval_     :: Interval_ interval endPoint
-                      => endPoint -> endPoint -> interval endPoint
+                      => endPoint -> endPoint -> interval
 pattern Interval_ s t <- (startAndEnd -> (s,t))
   where
     Interval_ s t = mkInterval s t
 {-# COMPLETE Interval_ #-}
 
+
 -- | Compute where the given query value is with respect to the interval.
 --
 -- Note that even if the boundary of the interval is open we may
 -- return "OnBoundary".
-inInterval       :: forall interval endPoint r.
-                    ( Ord r, Interval_ interval endPoint
-                    , r ~ NumType (interval endPoint)
+inInterval       :: forall interval r.
+                    ( Ord r
+                    , Interval_ interval r
                     )
-                 => r -> interval endPoint -> PointLocationResult
+                 => r -> interval -> PointLocationResult
 x `inInterval` i =
-    case x `compare` (i^.start.endPoint @endPoint) of
+    case x `compare` (i^.start) of
       LT -> Outside
       EQ -> OnBoundary
-      GT -> case x `compare` (i^.end.endPoint @endPoint) of
+      GT -> case x `compare` (i^.end) of
               LT -> Inside
               EQ -> OnBoundary
               GT -> Outside
 
+
 -- | Shifts the interval to the left by delta
-shiftLeft       :: (Num r, Functor interval, Functor endPoint)
-                => r -> interval endPoint -> interval endPoint
-shiftLeft delta = fmap (fmap subtract delta)
+shiftLeft       :: ( Num r
+                   , Functor interval
+                   )
+                => r -> interval r -> interval r
+shiftLeft delta = fmap (subtract delta)
 
 -- | Flips the start and endpoint of the interval.
-flipInterval :: Interval_ interval endPoint => interval endPoint -> interval endPoint
+flipInterval :: Interval_ interval endPoint => interval -> interval
 flipInterval = uncurry mkInterval . swap . startAndEnd
