@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
@@ -60,7 +61,7 @@ class ( NumType hyperPlane ~ r
 
   -- | Get the normal vector of the hyperlane.
   normalVector :: Num r => hyperPlane -> VectorFor hyperPlane
-  default normalVector :: ( d <= d+1, KnownNat ((d+1)-d)
+  default normalVector :: ( KnownNat d
                           , Num r
                           )
                        => HyperPlane_ hyperPlane d r => hyperPlane -> VectorFor hyperPlane
@@ -70,7 +71,7 @@ class ( NumType hyperPlane ~ r
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
   default onHyperPlane :: ( Point_ point d r, Eq r, Num r
                           , KnownNat d
-                          , d < d+1, d<= d+1 -- silly constraints
+                          , d < d+1
                           ) => point -> hyperPlane -> Bool
   q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
     where
@@ -80,7 +81,7 @@ class ( NumType hyperPlane ~ r
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
   default onSideTest :: ( Point_ point d r, Ord r, Num r
                         , KnownNat d
-                        , d < d+1, d<= d+1 -- silly constraints
+                        , d < d+1 -- silly constraints
                         ) => point -> hyperPlane -> Ordering
   q `onSideTest` h = (a0 + (a `dot` (q^.vector))) `compare` 0
     where
@@ -97,7 +98,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   evalAt     :: ( Num r
                 , Metric_ (VectorFor hyperPlane)
-                , (d-1)+1 ~ d
+                , 1 <= d
                 ) => Point_ point (d-1) r => point -> hyperPlane -> r
   evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
 
@@ -109,7 +110,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   hyperPlaneCoefficients :: hyperPlane -> VectorFor hyperPlane
   default hyperPlaneCoefficients :: ( Fractional r, KnownNat d
-                                    , d < d+1, d <= d+1
+                                    , d < d+1
                                     ) => hyperPlane -> VectorFor hyperPlane
   hyperPlaneCoefficients h = a ^/ (-x)
     where

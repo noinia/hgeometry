@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 module HGeometry.Vector.Class
   ( Vector_(..), pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , component
@@ -137,7 +138,7 @@ prefix :: forall i d vector vector' r. ( i <= d, KnownNat i
 prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toListOf components
 
 -- | Take a suffix of length i  of the vector
-suffix :: forall i d vector vector' r. ( i <= d, KnownNat (d-i)
+suffix :: forall i d vector vector' r. ( i <= d, KnownNat i, KnownNat d
                                        , Vector_ vector d r, Vector_ vector' i r)
        => vector -> vector'
 suffix = uncheckedVectorFromList . List.genericDrop (natVal $ Proxy @(d-i)) . toListOf components
@@ -158,14 +159,16 @@ snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
 -- | Extract the first element from the vector
 uncons   :: forall vector vector' d r.
             ( Vector_ vector (d+1) r, Vector_ vector' d r
-            , 0 < d+1, d <= d+1, KnownNat ((d+1)-d) -- these are silly
+            , 0 < d+1 -- this one is silly
+            , KnownNat d
             ) => vector -> (r, vector')
 uncons v = ( v^.component @0, suffix v)
 
 -- | Extract the last element from the vector
 unsnoc   :: forall vector vector' d r.
             (Vector_ vector (d+1) r, Vector_ vector' d r
-            , d < d+1, d <= d+1, KnownNat d -- these are silly
+            , d < d+1 -- these are silly
+            , KnownNat d
             ) => vector -> (vector',r)
 unsnoc v = ( prefix v, v^.component @d )
 

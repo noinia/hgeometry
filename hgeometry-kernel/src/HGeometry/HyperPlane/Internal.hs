@@ -1,4 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlane.Internal
   ( HyperPlane(..)
   , MkHyperPlaneConstraints
@@ -30,7 +32,9 @@ type instance VectorFor (HyperPlane d r) = Vector d r
 -- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
 -- these are satisfied by default, it is just that the typechecker does not realize that.
 type MkHyperPlaneConstraints d =
-  (Arity d, Arity (d+1), d <= d+1, d < d+1,KnownNat ((d+1)-d), 0 < d+1, 0 < d)
+  (Arity d, Arity (d+1)
+  , d < d+1
+  )
 
 instance MkHyperPlaneConstraints d => HyperPlane_ (HyperPlane d r) d r where
   type EquationFor (HyperPlane d r) = Vector (d+1) r

@@ -159,7 +159,9 @@ scaleUniformlyBy = transformBy  . uniformScaling
 
 
 -- | Row in a translation matrix
-transRow     :: forall n r. (Arity n, Arity (n + 1), Num r)
+transRow     :: forall n r. (Arity n, Arity (n + 1)
+                            , n < n+1
+                            , Num r)
              => Int -> r -> Vector (n + 1) r
 transRow i x = set (V.component @n) x $ mkRow i 1
 
