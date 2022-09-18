@@ -2,14 +2,11 @@
 module HGeometry.HyperPlane.Internal
   ( HyperPlane(..)
   , MkHyperPlaneConstraints
-  , fromPointAndNormal
   ) where
 
-import Control.Lens hiding (snoc,cons,unsnoc,uncons)
 import GHC.TypeNats
 import Data.Type.Ord
 import HGeometry.HyperPlane.Class
-import HGeometry.Point.Class
 import HGeometry.Properties
 import HGeometry.Vector
 
@@ -23,19 +20,10 @@ newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
 
 type instance NumType   (HyperPlane d r) = r
 type instance Dimension (HyperPlane d r) = d
+type instance VectorFor (HyperPlane d r) = Vector d r
 
 --------------------------------------------------------------------------------
 
--- | Construct a Hyperplane from a point and a normal.
-fromPointAndNormal     :: ( Point_ point d r
-                          , vector ~ VectorFor point
-                          , Num r
-                          , Arity (d+1)
-                          )
-                       => point -> vector -> HyperPlane d r
-fromPointAndNormal q n = HyperPlane $ cons a0 n
-  where
-    a0 = negate $ (q^.vector) `dot` n
 
 --------------------------------------------------------------------------------
 
@@ -45,7 +33,10 @@ type MkHyperPlaneConstraints d =
   (Arity d, Arity (d+1), d <= d+1, d < d+1,KnownNat ((d+1)-d), 0 < d+1, 0 < d)
 
 instance MkHyperPlaneConstraints d => HyperPlane_ (HyperPlane d r) d r where
+  type EquationFor (HyperPlane d r) = Vector (d+1) r
   hyperPlaneEquation (HyperPlane v) = v
+  hyperPlaneFromEquation = HyperPlane
+
 
 --  hyperPlaneTrough pts = fromPointAndNormal p0 n
 --    where

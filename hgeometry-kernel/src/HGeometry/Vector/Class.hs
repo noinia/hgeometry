@@ -14,6 +14,7 @@ module HGeometry.Vector.Class
 
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , Metric_(..)
+  , VectorFor
   ) where
 
 import           Control.Arrow ((&&&))
@@ -237,3 +238,6 @@ wComponent = component @3
 {-# INLINABLE wComponent #-}
 
 --------------------------------------------------------------------------------
+
+-- | Defines the vector type corresponding to a particular point
+type family VectorFor point

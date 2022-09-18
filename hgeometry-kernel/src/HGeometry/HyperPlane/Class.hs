@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
   , NonVerticalHyperPlane_(..)
@@ -10,17 +11,23 @@ import Data.Type.Ord
 import GHC.TypeNats
 import HGeometry.Point.Class
 import HGeometry.Properties
-import HGeometry.Vector (Vector, Arity, sameDirection)
+import HGeometry.Vector (sameDirection)
 import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
-
 -- | A class to represent hyperplanes in d-dimensional space.
 class ( NumType hyperPlane ~ r
       , Dimension hyperPlane ~ d
+      , NumType (EquationFor hyperPlane) ~ r
+      , Vector_ (VectorFor hyperPlane) d r
+      , Vector_ (EquationFor hyperPlane) (d+1) r
       ) => HyperPlane_ hyperPlane d r | hyperPlane -> d
                                       , hyperPlane -> r where
+  type EquationFor hyperPlane
+
+  -- | Given the equation, construct the hyperplane form it.
+  hyperPlaneFromEquation :: EquationFor hyperPlane -> hyperPlane
 
   -- -- | Constructs the hyperplane through d points
   -- hyperPlaneTrough :: Num r => Point_ point d r => Vector d point -> hyperPlane
@@ -30,24 +37,40 @@ class ( NumType hyperPlane ~ r
   -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
   --
   -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\)
-  hyperPlaneEquation :: hyperPlane -> Vector (d+1) r
-  default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r, Num r
-                                , Arity (d+1), Arity d)
-                             => hyperPlane -> Vector (d+1) r
+  hyperPlaneEquation :: ( Num r
+                        ) => hyperPlane -> EquationFor hyperPlane
+  default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
+                                , Num r
+                                )
+                             => hyperPlane -> EquationFor hyperPlane
   hyperPlaneEquation h = snoc a (-1)
     where
       a = hyperPlaneCoefficients h
 
+  -- | Construct a Hyperplane from a point and a normal.
+  fromPointAndNormal     :: ( Point_ point d r
+                            , vector ~ VectorFor point
+                            , Num r
+                            )
+                         => point -> vector -> hyperPlane
+  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
+    where
+      a0 = negate $ (q^.vector) `dot` n
+
+
   -- | Get the normal vector of the hyperlane.
-  normalVector :: HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
-  default normalVector :: ( d <= d+1, KnownNat ((d+1)-d), Arity d, Arity (d+1)
-                          ) => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
+  normalVector :: Num r => hyperPlane -> VectorFor hyperPlane
+  default normalVector :: ( d <= d+1, KnownNat ((d+1)-d)
+                          , Num r
+                          )
+                       => HyperPlane_ hyperPlane d r => hyperPlane -> VectorFor hyperPlane
   normalVector = suffix . hyperPlaneEquation
 
   -- | Test if a point lies on a hyperplane.
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
   default onHyperPlane :: ( Point_ point d r, Eq r, Num r
-                          , Arity (d+1), Arity d, d < d+1, d<= d+1 -- silly constraints
+                          , KnownNat d
+                          , d < d+1, d<= d+1 -- silly constraints
                           ) => point -> hyperPlane -> Bool
   q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
     where
@@ -56,7 +79,8 @@ class ( NumType hyperPlane ~ r
   -- | Test if a point lies on a hyperplane.
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
   default onSideTest :: ( Point_ point d r, Ord r, Num r
-                        , Arity (d+1), Arity d, d < d+1, d<= d+1 -- silly constraints
+                        , KnownNat d
+                        , d < d+1, d<= d+1 -- silly constraints
                         ) => point -> hyperPlane -> Ordering
   q `onSideTest` h = (a0 + (a `dot` (q^.vector))) `compare` 0
     where
@@ -72,7 +96,8 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   evalAt     :: ( Num r
-                , Arity (d-1), Arity d, (d-1)+1 ~ d
+                , Metric_ (VectorFor hyperPlane)
+                , (d-1)+1 ~ d
                 ) => Point_ point (d-1) r => point -> hyperPlane -> r
   evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
 
@@ -82,10 +107,10 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   --  \( a_0 + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
-  hyperPlaneCoefficients :: hyperPlane -> Vector d r
-  default hyperPlaneCoefficients :: ( Fractional r
-                                    , d < d+1, d <= d+1, KnownNat d, Arity (d+1), Arity d
-                                    ) => hyperPlane -> Vector d r
+  hyperPlaneCoefficients :: hyperPlane -> VectorFor hyperPlane
+  default hyperPlaneCoefficients :: ( Fractional r, KnownNat d
+                                    , d < d+1, d <= d+1
+                                    ) => hyperPlane -> VectorFor hyperPlane
   hyperPlaneCoefficients h = a ^/ (-x)
     where
       (a,x) = unsnoc $ hyperPlaneEquation h
@@ -98,6 +123,6 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 -- | Test if two hyperplanes are parallel.
 isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       , HyperPlane_ hyperPlane' d r
-                      , Num r, Eq r, Arity d
+                      , Num r, Eq r
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)

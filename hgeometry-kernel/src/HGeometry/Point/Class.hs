@@ -3,8 +3,7 @@
 {-# LANGUAGE UndecidableInstances  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module HGeometry.Point.Class
-  ( VectorFor
-  , HasVector(..)
+  ( HasVector(..)
   , Affine_(..)
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , origin
@@ -29,9 +28,6 @@ import           HGeometry.Vector.Class
 -- >>> import HGeometry.Point
 -- >>> import HGeometry.Vector
 -- >>> let myPoint = Point3 1 2 3 :: Point 3 Int
-
--- | Defines the vector type corresponding to a particular point
-type family VectorFor point
 
 class ( NumType point ~ r
       , NumType point' ~ s

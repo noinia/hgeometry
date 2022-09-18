@@ -12,7 +12,6 @@ module HGeometry.HyperPlane
   ( module HGeometry.HyperPlane.Class
   , HyperPlane(..)
   , MkHyperPlaneConstraints
-  , fromPointAndNormal
   ) where
 
 --------------------------------------------------------------------------------

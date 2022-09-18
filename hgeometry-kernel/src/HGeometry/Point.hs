@@ -46,14 +46,17 @@ module HGeometry.Point
   , PointFor
   ) where
 
+import Control.Lens ((^.))
+import Data.Type.Ord
+import GHC.TypeLits
+import HGeometry.HyperPlane
 import HGeometry.Point.Boxed
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
-import HGeometry.HyperPlane.Class
-import HGeometry.HyperPlane
+import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
@@ -74,8 +77,16 @@ import HGeometry.HyperPlane
 -- GT
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
-cmpInDirection       :: ( Ord r, Num r, Point_ point d r, vector ~ VectorFor point
-                        , MkHyperPlaneConstraints d
+cmpInDirection       :: forall vector point d r.
+                        ( Ord r, Num r, Point_ point d r
+                        , vector ~ VectorFor point
+                        , Arity (d+1), Arity d
+                        , d < d+1, d <= d+1, 0 < d+1, 0 < d
+                        , KnownNat ((d+1)-d)
                         )
                      => vector -> point -> point -> Ordering
-cmpInDirection n p q = p `onSideTest` fromPointAndNormal q n
+cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n
+  where
+    fromPointAndNormal' q' n' = HyperPlane $ cons a0 n'
+      where
+        a0 = negate $ (q'^.vector) `dot` n'

@@ -5,6 +5,7 @@ module HGeometry.Line.Class
 
 
 import HGeometry.Point.Class
+import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 

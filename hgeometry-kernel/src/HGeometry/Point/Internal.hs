@@ -140,7 +140,6 @@ instance Arity d =>  LinearA.Affine (Point d) where
   p .+^ v = Point $ toVec p ^+^ v
 
 instance Arity d => PointClass.Affine_ (Point d r) where
-  -- type VectorFor (Point d r) = Vector d r
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
   p .-^ v = Point $ toVec p ^-^ v
@@ -191,7 +190,7 @@ pattern Point4 x y z w = (Point (Vector4 x y z w))
 instance PointClass.HasPoints (Point d r) (Point d s) (Point d r) (Point d s) where
   allPoints = \f p -> f p
 
-type instance PointClass.VectorFor (Point d r) = Vector d r
+type instance VectorFor (Point d r) = Vector d r
 
 instance Arity d => PointClass.HasVector (Point d r) (Point d s) r s where
   vector = vector'

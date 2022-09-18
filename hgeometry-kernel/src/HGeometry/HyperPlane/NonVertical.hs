@@ -7,6 +7,8 @@ import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.Properties
 import HGeometry.Vector
+import GHC.TypeLits
+
 --------------------------------------------------------------------------------
 
 -- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
@@ -16,10 +18,17 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
+type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
 
 instance ( MkHyperPlaneConstraints d
          , Fractional r
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
+  type EquationFor (NonVerticalHyperPlane d r) = Vector (d+1) r
+
+  -- | pre: the last component is not zero
+  hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-x)
+    where
+      (a,x) = unsnoc e
 
 instance ( MkHyperPlaneConstraints d
          , Fractional r
