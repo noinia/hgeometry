@@ -60,10 +60,6 @@ instance Show CCW where
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Rational))
 -- CoLinear
 --
--- If you can't use 'Rational', try 'SafeDouble' instead of 'Double':
--- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
--- CoLinear
---
 ccw       :: (Ord r, Num r, Point_ point 2 r)
           => point -> point -> point -> CCW
 ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)

@@ -29,6 +29,7 @@ import HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import HGeometry.Point
 -- >>> let with p i = WithIndex i p
 
 

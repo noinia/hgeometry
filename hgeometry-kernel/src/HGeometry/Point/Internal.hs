@@ -40,7 +40,8 @@ import           Text.Read (Read (..), readListPrecDefault)
 
 --------------------------------------------------------------------------------
 -- $setup
--- >>> import HGeometry.Point.Class(origin)
+-- >>> import HGeometry.Point
+-- >>> import HGeometry.Vector
 -- >>> :{
 -- let myVector :: Vector 3 Int
 --     myVector = Vector3 1 2 3
@@ -196,9 +197,9 @@ instance Arity d => PointClass.HasVector (Point d r) (Point d s) r s where
 
 -- | Lens to access the vector corresponding to this point.
 --
--- >>> (Point3 1 2 3) ^. vector
+-- >>> (Point3 1 2 3 :: Point 3 Int) ^. vector
 -- Vector3 1 2 3
--- >>> origin & vector .~ Vector3 1 2 3
+-- >>> (Point3 4 4 4 :: Point 3 Int) & vector .~ (Vector3 1 2 3 :: Vector 3 Int)
 -- Point3 1 2 3
 vector' :: Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
 vector' = lens toVec (const Point)

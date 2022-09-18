@@ -56,6 +56,10 @@ import HGeometry.HyperPlane
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import HGeometry.Vector
+
+
 -- | Compare the points with respect to the direction given by the
 -- vector, i.e. by taking planes whose normal is the given vector.
 --

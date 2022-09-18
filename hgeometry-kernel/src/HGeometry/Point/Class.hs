@@ -25,6 +25,8 @@ import           HGeometry.Vector.Class
 
 -- $setup
 -- >>> import HGeometry.Point
+-- >>> import HGeometry.Vector
+-- >>> let myPoint = Point3 1 2 3 :: Point 3 Int
 
 class ( NumType point ~ r
       , NumType point' ~ s
@@ -34,10 +36,10 @@ class ( NumType point ~ r
 
   -- | Lens to access the vector corresponding to this point.
   --
-  -- >>> (Point3 1 2 3) ^. vector
+  -- >>> myPoint ^. vector
   -- Vector3 1 2 3
-  -- >>> origin & vector .~ Vector3 1 2 3
-  -- Point3 1 2 3
+  -- >>> myPoint & vector .~ Vector3 3 2 1
+  -- Point3 3 2 1
   vector :: ( Dimension point ~ d, Dimension point' ~ d)
          => Lens point point' (Diff_ point) (Diff_ point')
 
@@ -70,7 +72,7 @@ class ( Dimension point ~ d
 
   -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
   --
-  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20)
+  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
   -- (1,10)
   -- (2,20)
   -- Point2 () ()
@@ -87,11 +89,11 @@ class ( Dimension point ~ d
   -- | Get the coordinate in a given dimension. Consider using 'coord'
   -- instead, this is just a way of implementing that function more easily.
   --
-  -- >>> Point3 1 2 3 ^. coordProxy (Proxy @2)
+  -- >>> myPoint ^. coordProxy (Proxy @2)
   -- 2
-  -- >>> Point3 1 2 3 & coordProxy (Proxy @1) .~ 10
+  -- >>> myPoint & coordProxy (Proxy @1) .~ 10
   -- Point3 10 2 3
-  -- >>> Point3 1 2 3 & coordProxy (Proxy @3) %~ (+1)
+  -- >>> myPoint & coordProxy (Proxy @3) %~ (+1)
   -- Point3 1 2 4
   coordProxy    :: (1 <= i, i <= d, KnownNat i)
                 => proxy i -> IndexedLens' Int point r
@@ -101,9 +103,8 @@ class ( Dimension point ~ d
   -- | Get the coordinate in a given dimension. This operation is unsafe in the
   -- sense that no bounds are checked. Consider using `coord` instead.
   --
-  --
-  -- >>> Point3 1 2 3 ^. uncheckedCoord 2
-  -- 2
+  -- >>> myPoint ^.. uncheckedCoord 2
+  -- [2]
   uncheckedCoord   :: Int -> IndexedTraversal' Int point r
   uncheckedCoord i = vector . elem'
     where
@@ -117,11 +118,11 @@ class ( Dimension point ~ d
 
 -- | Get the coordinate in a given dimension
 --
--- >>> Point3 1 2 3 ^. coord @2
+-- >>> myPoint ^. coord @2
 -- 2
--- >>> Point3 1 2 3 & coord @1 .~ 10
+-- >>> myPoint & coord @1 .~ 10
 -- Point3 10 2 3
--- >>> Point3 1 2 3 & coord @3 %~ (+1)
+-- >>> myPoint & coord @3 %~ (+1)
 -- Point3 1 2 4
 coord :: forall i point d r. (1 <= i, i <= d, KnownNat i, Point_ point d r)
       => IndexedLens' Int point r
@@ -204,7 +205,7 @@ projectPoint = fromVector @point' @i @r @(Diff_ point') . prefix . view vector
 
 -- | Shorthand to access the first coordinate
 --
--- >>> Point3 1 2 3 ^. xCoord
+-- >>> myPoint ^. xCoord
 -- 1
 -- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 10 2
@@ -216,7 +217,7 @@ xCoord = coord @1
 --
 -- >>> Point2 1 2 ^. yCoord
 -- 2
--- >>> Point3 1 2 3 & yCoord %~ (+1)
+-- >>> myPoint & yCoord %~ (+1)
 -- Point3 1 3 3
 yCoord :: (2 <= d, Point_ point d r) => Lens' point r
 yCoord = coord @2
@@ -224,9 +225,9 @@ yCoord = coord @2
 
 -- | Shorthand to access the third coordinate
 --
--- >>> Point3 1 2 3 ^. zCoord
+-- >>> myPoint ^. zCoord
 -- 3
--- >>> Point3 1 2 3 & zCoord %~ (+1)
+-- >>> myPoint & zCoord %~ (+1)
 -- Point3 1 2 4
 zCoord :: (3 <= d, Point_ point d r) => Lens' point r
 zCoord = coord @3
@@ -234,9 +235,9 @@ zCoord = coord @3
 
 -- | Shorthand to access the fourth coordinate
 --
--- >>> Point4 1 2 3 4 ^. wCoord
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) ^. wCoord
 -- 4
--- >>> Point4 1 2 3 4 & wCoord %~ (+1)
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) & wCoord %~ (+1)
 -- Point4 1 2 3 5
 wCoord :: (4 <= d, Point_ point d r) => Lens' point r
 wCoord = coord @4
