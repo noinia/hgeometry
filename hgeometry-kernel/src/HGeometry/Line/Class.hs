@@ -12,7 +12,7 @@ import HGeometry.Point.Class
 class Line_ line d r where
   -- | Constructs a line through a point and a vector
   fromPointAndVec ::  ( Point_ point d r
-                      , vector ~ Diff_ point
+                      , vector ~ VectorFor point
                       , Line_ line d r
                       , Num r
                       ) => point -> vector -> line

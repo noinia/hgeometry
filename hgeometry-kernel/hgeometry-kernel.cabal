@@ -145,17 +145,17 @@ library
     HGeometry.HyperPlane.Internal
 
 
-library quickcheckinstances-kernel
-  import: setup
-  visibility: public
-
-  hs-source-dirs: qc_src
-  exposed-modules:
-    HGeometry.Kernel.Instances
-
-  build-depends: hgeometry-kernel
-               , QuickCheck              >= 2.5
-               , quickcheck-instances    >= 0.3
+-- library quickcheckinstances-kernel
+--   import: setup
+--   visibility: public
+--
+--   hs-source-dirs: qc_src
+--   exposed-modules:
+--     HGeometry.Kernel.Instances
+--
+--   build-depends: hgeometry-kernel
+--                , QuickCheck              >= 2.5
+--                , quickcheck-instances    >= 0.3
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
@@ -195,7 +195,7 @@ test-suite hspec-kernel
   main-is:              Main.hs
 
   build-depends: hgeometry-kernel
-               , hgeometry-kernel:quickcheckinstances-kernel
+               -- , hgeometry-kernel:quickcheckinstances-kernel
                , hspec                   >= 2.9
                , QuickCheck
                , quickcheck-instances

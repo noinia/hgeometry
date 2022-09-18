@@ -28,7 +28,7 @@ type instance Dimension (HyperPlane d r) = d
 
 -- | Construct a Hyperplane from a point and a normal.
 fromPointAndNormal     :: ( Point_ point d r
-                          , vector ~ Diff_ point
+                          , vector ~ VectorFor point
                           , Num r
                           , Arity (d+1)
                           )

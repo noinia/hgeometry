@@ -43,6 +43,7 @@ module HGeometry.Point
   , HasSquaredEuclideanDistance(..)
 
   , HasPoints(..)
+  , PointFor
   ) where
 
 import HGeometry.Point.Boxed
@@ -73,7 +74,7 @@ import HGeometry.HyperPlane
 -- GT
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
-cmpInDirection       :: ( Ord r, Num r, Point_ point d r, vector ~ Diff_ point
+cmpInDirection       :: ( Ord r, Num r, Point_ point d r, vector ~ VectorFor point
                         , MkHyperPlaneConstraints d
                         )
                      => vector -> point -> point -> Ordering
