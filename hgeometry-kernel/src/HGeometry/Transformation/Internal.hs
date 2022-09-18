@@ -1,5 +1,6 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Transformation.Internal
@@ -10,18 +11,14 @@
 module HGeometry.Transformation.Internal where
 
 import           Control.Lens (iso,set,Iso,imap,over)
+import           Data.Type.Ord
+import           GHC.TypeLits
 import           HGeometry.Matrix
 import           HGeometry.Matrix.Internal (mkRow)
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified HGeometry.Vector as V
-import           GHC.TypeLits
-
-{- $setup
->>> import Geometry.LineSegment
->>> import Data.Ext
--}
 
 --------------------------------------------------------------------------------
 -- * Transformations
@@ -74,42 +71,28 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
-  default transformBy :: ( HasPoints g g Point Point
-                         , Arity (Dimension g)
-                         , Arity (Dimension g + 1)
+  default transformBy :: ( HasPoints g g (Point (Dimension g) (NumType g))
+                                         (Point (Dimension g) (NumType g))
+                         , Arity (Dimension g), Dimension g < Dimension g + 1
+                         , Arity (Dimension g+1)
                          , Fractional (NumType g)
                          )
-                => Transformation (Dimension g) (NumType g) -> g -> g
-  transformBy t = over (allPoints @g @g @Point @Point) (transformBy t)
+                      => Transformation (Dimension g) (NumType g) -> g -> g
+  transformBy t = over (allPoints @g @g @(Point (Dimension g) (NumType g))
+                                        @(Point (Dimension g) (NumType g)))
+                       (transformBy t)
 
--- | Apply a transformation to a collection of objects.
---
--- >>> transformAllBy (uniformScaling 2) [Point1 1, Point1 2, Point1 3]
--- [Point1 2.0,Point1 4.0,Point1 6.0]
-transformAllBy :: (Functor c, IsTransformable g)
-               => Transformation (Dimension g) (NumType g) -> c g -> c g
-transformAllBy t = fmap (transformBy t)
-
--- | Apply transformation to a PointFunctor, ie something that contains
---   points. Polygons, triangles, line segments, etc, are all PointFunctors.
---
--- >>> transformPointFunctor (uniformScaling 2) $ OpenLineSegment (Point1 1 :+ ()) (Point1 2 :+ ())
--- OpenLineSegment (Point1 2.0 :+ ()) (Point1 4.0 :+ ())
-transformPointFunctor   :: ( PointFunctor g, Fractional r, d ~ Dimension (g r)
-                           , Arity d, Arity (d + 1)
-                           ) => Transformation d r -> g r -> g r
-transformPointFunctor t = pmap (transformBy t)
-
-instance (Fractional r, Arity d, Arity (d + 1))
+instance (Fractional r, Arity d, Arity (d + 1), d < d+1)
          => IsTransformable (Point d r) where
   transformBy t = Point . transformBy t . toVec
 
-instance (Fractional r, Arity d, Arity (d + 1))
+instance (Fractional r, Arity d, Arity (d + 1), d < d+1
+         )
          => IsTransformable (Vector d r) where
   transformBy (Transformation m) v = f $ m `mult` snoc v 1
     where
-      f u   = (/ V.last u) <$> V.init u
-
+      f u = let (u',x) = unsnoc u
+            in (/ x) <$> u'
 
 --------------------------------------------------------------------------------
 -- * Common transformations
@@ -176,13 +159,9 @@ scaleUniformlyBy = transformBy  . uniformScaling
 
 
 -- | Row in a translation matrix
--- transRow     :: forall n r. ( Arity n, Arity (n- 1), ((n - 1) + 1) ~ n
---                             , Num r) => Int -> r -> Vector n r
--- transRow i x = set (V.element (Proxy :: Proxy (n-1))) x $ mkRow i 1
-
 transRow     :: forall n r. (Arity n, Arity (n + 1), Num r)
              => Int -> r -> Vector (n + 1) r
-transRow i x = set (V.element @n) x $ mkRow i 1
+transRow i x = set (V.component @n) x $ mkRow i 1
 
 --------------------------------------------------------------------------------
 -- * 3D Rotations

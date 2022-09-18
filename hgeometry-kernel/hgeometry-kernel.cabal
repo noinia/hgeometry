@@ -47,6 +47,9 @@ common setup
     , ScopedTypeVariables
     , DerivingStrategies
     , DerivingVia
+    , GeneralizedNewtypeDeriving
+    , DeriveGeneric
+    , DeriveFunctor
     , PatternSynonyms
     , TupleSections
     , LambdaCase
@@ -71,8 +74,6 @@ common setup
               -- , fingertree              >= 0.1
               , MonadRandom             >= 0.5
               , random                  >= 1.2
-              -- , QuickCheck              >= 2.5
-              -- , quickcheck-instances    >= 0.3
               -- , reflection              >= 2.1
               -- , primitive               >= 0.6.3.0
               -- , hashable                >= 1.2
@@ -89,6 +90,8 @@ common setup
 
               , mtl                     >= 2.2
               , template-haskell
+
+              , ghc-typelits-natnormalise >= 0.7.6
 
 --------------------------------------------------------------------------------
 -- * Main HGeometry-Kernel Library
@@ -110,9 +113,12 @@ library
     HGeometry.Point.Class
     HGeometry.Point.Boxed
 
+    HGeometry.Line
     HGeometry.Line.Class
 
+    HGeometry.HyperPlane
     HGeometry.HyperPlane.Class
+    HGeometry.HyperPlane.NonVertical
 
     HGeometry.SoS.Point
     HGeometry.SoS.Orientation
@@ -136,6 +142,21 @@ library
 
     HGeometry.Matrix.Internal
 
+    HGeometry.HyperPlane.Internal
+
+
+library quickcheckinstances-kernel
+  import: setup
+  visibility: public
+
+  hs-source-dirs: qc_src
+  exposed-modules:
+    HGeometry.Kernel.Instances
+
+  build-depends: hgeometry-kernel
+               , QuickCheck              >= 2.5
+               , quickcheck-instances    >= 0.3
+
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
@@ -156,7 +177,7 @@ library
 --------------------------------------------------------------------------------
 -- * Test Suites
 
-test-suite doctests
+test-suite doctests-kernel
   type:          exitcode-stdio-1.0
   ghc-options:   -threaded
   main-is:       doctests.hs
@@ -166,7 +187,7 @@ test-suite doctests
                , QuickCheck
                , quickcheck-instances
 
-test-suite hspec
+test-suite hspec-kernel
   import: setup
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
@@ -174,7 +195,11 @@ test-suite hspec
   main-is:              Main.hs
 
   build-depends: hgeometry-kernel
-               , hspec         >= 2.9
+               , hgeometry-kernel:quickcheckinstances-kernel
+               , hspec                   >= 2.9
+               , QuickCheck
+               , quickcheck-instances
+
   ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures

@@ -23,8 +23,8 @@ import           HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
--- -- $setup
--- -- >>> import HGeometry.Point(Point(Point,Point1,Point2,Point3,Point4))
+-- $setup
+-- >>> import HGeometry.Point
 
 class ( NumType point ~ r
       , NumType point' ~ s

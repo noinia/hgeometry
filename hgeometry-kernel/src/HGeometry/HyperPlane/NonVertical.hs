@@ -1,0 +1,32 @@
+{-# LANGUAGE UndecidableInstances #-}
+module HGeometry.HyperPlane.NonVertical
+  ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
+  ) where
+
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
+import HGeometry.Properties
+import HGeometry.Vector
+--------------------------------------------------------------------------------
+
+-- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
+-- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
+-- coefficients of te hyperplane.
+newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
+
+type instance NumType   (NonVerticalHyperPlane d r) = r
+type instance Dimension (NonVerticalHyperPlane d r) = d
+
+instance ( MkHyperPlaneConstraints d
+         , Fractional r
+         ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
+
+instance ( MkHyperPlaneConstraints d
+         , Fractional r
+         ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
+
+--------------------------------------------------------------------------------
+-- * Specific 3D Functions
+
+pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
+pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)

@@ -23,7 +23,7 @@ import HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> import HGeometry.Point.Internal
+-- >>> import HGeometry.Point
 -- >>> :{
 -- let with     :: Point 2 Int -> Int -> WithIndex (Point 2 Int)
 --     with p i = WithIndex i p

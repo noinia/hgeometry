@@ -1,9 +1,13 @@
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.HyperPlane.Internal
-  (
-
+  ( HyperPlane(..)
+  , MkHyperPlaneConstraints
+  , fromPointAndNormal
   ) where
 
+import Control.Lens hiding (snoc,cons,unsnoc,uncons)
 import GHC.TypeNats
+import Data.Type.Ord
 import HGeometry.HyperPlane.Class
 import HGeometry.Point.Class
 import HGeometry.Properties
@@ -11,23 +15,41 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
--- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
--- coefficients of te hyperplane.
-newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
+-- | A Hyperplane in d-dimensions, described by
+--
+-- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
+-- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
+newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
 
-type instance NumType   (NonVerticalHyperPlane d r) = r
-type instance Dimension (NonVerticalHyperPlane d r) = d
-
-instance HyperPlane_ (NonVerticalHyperPlane d r) d r where
-  -- hyperPlaneTrough = undefined
-  -- hyperplaneCoefficients (NonVerticalHyperPlane v) = undefined
-
+type instance NumType   (HyperPlane d r) = r
+type instance Dimension (HyperPlane d r) = d
 
 --------------------------------------------------------------------------------
 
-pattern Line     :: r -> r -> NonVerticalHyperPlane 2 r
-pattern Line a b = NonVerticalHyperPlane (Vector2 a b)
+-- | Construct a Hyperplane from a point and a normal.
+fromPointAndNormal     :: ( Point_ point d r
+                          , vector ~ Diff_ point
+                          , Num r
+                          , Arity (d+1)
+                          )
+                       => point -> vector -> HyperPlane d r
+fromPointAndNormal q n = HyperPlane $ cons a0 n
+  where
+    a0 = negate $ (q^.vector) `dot` n
 
-pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
-pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
+--------------------------------------------------------------------------------
+
+-- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
+-- these are satisfied by default, it is just that the typechecker does not realize that.
+type MkHyperPlaneConstraints d =
+  (Arity d, Arity (d+1), d <= d+1, d < d+1,KnownNat ((d+1)-d), 0 < d+1, 0 < d)
+
+instance MkHyperPlaneConstraints d => HyperPlane_ (HyperPlane d r) d r where
+  hyperPlaneEquation (HyperPlane v) = v
+
+--  hyperPlaneTrough pts = fromPointAndNormal p0 n
+--    where
+--      p0 = pts^.component @0
+--      -- (p0, pts') = uncons pts
+--      -- vecs = (.-. p0) <$> pts'
+--      n = error "hyperPlaneTrhough: undefined!"

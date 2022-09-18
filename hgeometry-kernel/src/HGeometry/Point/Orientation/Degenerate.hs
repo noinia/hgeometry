@@ -25,7 +25,7 @@ import qualified Data.List as L
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> import Data.Double.Approximate
+-- >>> import HGeometry.Point
 
 -- | Data type for expressing the orientation of three points, with
 -- the option of allowing Colinearities.

@@ -45,15 +45,14 @@ module HGeometry.Point
   , HasPoints(..)
   ) where
 
--- import HGeometry.Line.Class (perpendicularTo)
--- import HGeometry.Line.Internal
 import HGeometry.Point.Boxed
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
-import HGeometry.Vector
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane
 
 --------------------------------------------------------------------------------
 
@@ -70,10 +69,8 @@ import HGeometry.Vector
 -- GT
 -- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
 -- EQ
-cmpInDirection       :: (Ord r, Num r, Point_ point 2 r, vector ~ Diff_ point)
+cmpInDirection       :: ( Ord r, Num r, Point_ point d r, vector ~ Diff_ point
+                        , MkHyperPlaneConstraints d
+                        )
                      => vector -> point -> point -> Ordering
-cmpInDirection n p q = case p `onSide` perpendicularTo (Line (fromGenericPoint q) n) of
-                         LeftSide  -> LT
-                         OnLine    -> EQ
-                         RightSide -> GT
-  -- TODO: Generalize to arbitrary dimension
+cmpInDirection n p q = p `onSideTest` fromPointAndNormal q n

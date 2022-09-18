@@ -22,7 +22,7 @@ ghcExts = map ("-X" ++)
           , "MultiParamTypeClasses"
           , "LambdaCase"
           , "TupleSections"
-
+          , "FunctionalDependencies"
 
           , "StandaloneDeriving"
           , "GeneralizedNewtypeDeriving"
@@ -56,7 +56,7 @@ modules =
   , "HGeometry.Vector"
   , "HGeometry.Transformation"
   , "HGeometry.Line"
-  , "HGeometry.Line.Internal"
+  -- , "HGeometry.Line.Internal"
   -- , "HGeometry.Interval"
   -- , "HGeometry.LineSegment"
   -- , "HGeometry.PolyLine"

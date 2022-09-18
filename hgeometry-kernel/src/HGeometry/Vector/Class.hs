@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.Vector.Class
   ( Vector_(..), pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , component
@@ -27,6 +28,12 @@ import           HGeometry.Properties
 import           HGeometry.Vector.Additive
 import           HGeometry.Vector.Metric
 import           Prelude hiding (zipWith)
+
+--------------------------------------------------------------------------------
+
+{- $setup
+>>> import HGeometry.Vector
+-}
 
 --------------------------------------------------------------------------------
 

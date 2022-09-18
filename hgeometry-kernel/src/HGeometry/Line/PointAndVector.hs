@@ -42,8 +42,12 @@ verticalLine x = Line (Point2 x 0) (Vector2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 
+instance Arity d => Line_ (Line d r) d r where
+  fromPointAndVec p v = Line (pointFromPoint p) (vectorFromVector v)
+
+
 instance HyperPlane_ (Line 2 r) 2 r where
-  hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
+  -- hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
 
   hyperPlaneEquation (Line p v) = Vector3 a b c
     where
@@ -68,9 +72,19 @@ deriving instance Arity d             => Functor       (Line d)
 deriving instance Arity d             => F.Foldable    (Line d)
 deriving instance Arity d             => T.Traversable (Line d)
 
-instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
-  l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
+deriving instance (Arity d, Eq r)     => Eq (Line d r)
 
+
+
+--instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
+--  l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
+
+
+-- | Test if a point lies on the line
+onLine :: ( Point_ point d r
+          , Line_ line d r
+          ) => point -> line -> Bool
+onLine = undefined
 
 
 -- instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
@@ -158,7 +172,7 @@ fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 -- returns Nothing if the line is vertical
 toLinearFunction                             :: forall r. (Fractional r, Ord r)
                                              => Line 2 r -> Maybe (r,r)
-toLinearFunction l@(Line _ ~(Vector2 vx vy)) = case l `intersect` verticalLine @Line @r 0 of
+toLinearFunction l@(Line _ ~(Vector2 vx vy)) = case l `intersect` verticalLine @r 0 of
   Nothing                               -> Nothing -- l is vertical
   Just (PointIntersection (Point2 _ b)) -> Just (vy / vx,b)
   Just (LineIntersection _)             -> Nothing -- l is a vertical line (through x=0)
@@ -241,7 +255,7 @@ q `liesBelow` l = q `onSideUpDown` l == Below
 bisector     :: (Fractional r, Point_ point 2 r) => point -> point -> Line 2 r
 bisector p q = let v = q .-. p
                    h = pointFromPoint $ p .+^ (v ^/ 2)
-               in perpendicularTo (Line h v)
+               in perpendicularTo (Line h $ vectorFromVector v)
 
 -- | Given a line l with anchor point p and vector v, get the line
 -- perpendicular to l that also goes through p. The resulting line m is

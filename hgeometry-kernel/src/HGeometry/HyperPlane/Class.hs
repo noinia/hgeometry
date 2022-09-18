@@ -22,8 +22,8 @@ class ( NumType hyperPlane ~ r
       ) => HyperPlane_ hyperPlane d r | hyperPlane -> d
                                       , hyperPlane -> r where
 
-  -- | Constructs the hyperplane through d points
-  hyperPlaneTrough :: Point_ point d r => Vector d point -> hyperPlane
+  -- -- | Constructs the hyperplane through d points
+  -- hyperPlaneTrough :: Num r => Point_ point d r => Vector d point -> hyperPlane
 
   -- | A hyperplane \(h) has coefficients \(a_i \in \mathbb{R}\) so that
   -- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
@@ -40,7 +40,7 @@ class ( NumType hyperPlane ~ r
 
   -- | Get the normal vector of the hyperlane.
   normalVector :: HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
-  default normalVector :: ( d <= (d+1), KnownNat ((d+1)-d), Arity d, Arity (d+1)
+  default normalVector :: ( d <= d+1, KnownNat ((d+1)-d), Arity d, Arity (d+1)
                           ) => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
   normalVector = suffix . hyperPlaneEquation
 
@@ -62,7 +62,7 @@ class ( NumType hyperPlane ~ r
     where
       (a,a0) = unsnoc $ hyperPlaneEquation h
 
-  {-# MINIMAL hyperPlaneTrough #-}
+--  {-# MINIMAL hyperPlaneTrough #-}
 
 --------------------------------------------------------------------------------
 
