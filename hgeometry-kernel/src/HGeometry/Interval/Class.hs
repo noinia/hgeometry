@@ -23,12 +23,14 @@ module HGeometry.Interval.Class
 
   , shiftLeft
   , flipInterval
+  , duration
   , module HGeometry.Interval.EndPoint
   ) where
 
 import Control.Lens
 import Data.Tuple (swap)
 import HGeometry.Boundary
+import HGeometry.Properties
 import HGeometry.Interval.EndPoint
 
 --------------------------------------------------------------------------------
@@ -54,15 +56,22 @@ type family IntervalOf (et :: EndPointType) r
 -- | A class for types representing Intervals
 class ( HasStart interval endPoint
       , HasEnd   interval endPoint
+      , EndPoint_ endPoint
+      , NumType interval ~ NumType endPoint
       ) => Interval_ interval endPoint | interval -> endPoint where
 
   -- | Construct an interval given its start and end point.
   mkInterval :: endPoint -> endPoint -> interval
 
-class Interval_ interval r => ClosedInterval_ interval r
+class -- Interval_ interval (EndPoint Closed r) =>
+      ClosedInterval_ interval r | interval -> r where
+  -- | Construct an interval given its start and end point.
+  mkClosedInterval :: r -> r -> interval
 
-class Interval_ interval r => OpenInterval_ interval r
-
+class -- Interval_ interval (EndPoint Closed r) =>
+      OpenInterval_ interval r | interval -> r where
+  -- | Construct an interval given its start and end point.
+  mkOpenInterval :: r -> r -> interval
 
 --------------------------------------------------------------------------------
 
@@ -104,3 +113,9 @@ shiftLeft delta = fmap (subtract delta)
 -- | Flips the start and endpoint of the interval.
 flipInterval :: Interval_ interval endPoint => interval -> interval
 flipInterval = uncurry mkInterval . swap . startAndEnd
+
+-- | Get the duration, or length of an interval.
+duration   :: forall interval endPoint. ( Interval_ interval endPoint
+                                        , Num (NumType interval)
+              ) => interval -> NumType interval
+duration i = i^.end.(endPoint @_ @endPoint) - i^.start.(endPoint @_ @endPoint)

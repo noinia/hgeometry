@@ -18,10 +18,12 @@ module HGeometry.Box.Class
 import Control.Lens
 import Data.Type.Ord
 import GHC.TypeLits
+import HGeometry.Interval.Boxed (ClosedInterval)
+import HGeometry.Interval.Class
 import HGeometry.Point.Class
 import HGeometry.Properties
+import HGeometry.Vector (Vector)
 import HGeometry.Vector.Class
-import HGeometry.Interval.Class
 -- import HGeometry.Interval.EndPoint
 
 --------------------------------------------------------------------------------
@@ -44,17 +46,15 @@ class ( HasMinPoint box point
   -- | Get a vector with the extent of the box in each dimension. Note
   -- that the resulting vector is 0 indexed whereas one would normally
   -- count dimensions starting at zero.
-  extent :: ( Vector_ vector d (IntervalOf Closed r)
-            , ClosedInterval_ (IntervalOf Closed r) r
-            , NumType (IntervalOf Closed r) ~ r
+  extent :: ( Vector_ vector d (ClosedInterval r)
             , NumType box ~ r
             , Num r
-            ) => box -> vector
+            ) => box -> ClosedInterval r
 
 -- | Rectangles are two dimensional boxes.
 type Rectangle_ rectangle = Box_ rectangle 2
 
-
+-- | The data type for boxes
 type family BoxFor g
 
 -- | Types for which we can compute an axis parallel boundingbox
@@ -82,7 +82,7 @@ instance HasMaxPoint (Box d point) point where
 instance ( Affine_ point
          , Point_ point d (NumType point)
          ) => Box_ (Box d point) d point where
-  extent (Box p q) = vZipWith mkInterval (p^.vector) (q^.vector)
+  extent (Box p q) = vZipWith mkClosedInterval (p^.vector) (q^.vector)
 
 type instance BoxFor (Box d point) = Box d point
 

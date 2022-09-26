@@ -42,10 +42,16 @@ instance HasStart (Interval endPoint r) (endPoint r) where
 instance HasEnd (Interval endPoint r) (endPoint r) where
   end   = lens (\(Interval _ t) -> t) (\(Interval s _) t -> Interval s t)
 
-instance EndPoint_ (endPoint r) => Interval_ (Interval endPoint r) (endPoint r) where
+instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+         ) => Interval_ (Interval endPoint r) (endPoint r) where
   mkInterval = Interval
 
 
+instance ClosedInterval_ (ClosedInterval r) r where
+  mkClosedInterval s e = Interval (ClosedE s) (ClosedE e)
+
+instance OpenInterval_ (OpenInterval r) r where
+  mkOpenInterval s e = Interval (OpenE s) (OpenE e)
 
 
 -- type instance IntersectionOf r (Interval endPoint r) = [NoIntersection, r]
