@@ -27,11 +27,13 @@ module HGeometry.Interval.Class
   , module HGeometry.Interval.EndPoint
   ) where
 
+
 import Control.Lens
 import Data.Tuple (swap)
+import Data.Kind (Type,Constraint)
 import HGeometry.Boundary
-import HGeometry.Properties
 import HGeometry.Interval.EndPoint
+import HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
@@ -53,7 +55,9 @@ startAndEnd i = (i^.start,i^.end)
 
 type family IntervalOf (et :: EndPointType) r
 
+
 -- | A class for types representing Intervals
+type Interval_ :: Type -> Type -> Constraint
 class ( HasStart interval endPoint
       , HasEnd   interval endPoint
       , EndPoint_ endPoint
@@ -63,15 +67,21 @@ class ( HasStart interval endPoint
   -- | Construct an interval given its start and end point.
   mkInterval :: endPoint -> endPoint -> interval
 
-class -- Interval_ interval (EndPoint Closed r) =>
+
+type ClosedInterval_ :: Type -> Type -> Constraint
+class Interval_ interval (EndPoint Closed r) =>
       ClosedInterval_ interval r | interval -> r where
   -- | Construct an interval given its start and end point.
-  mkClosedInterval :: r -> r -> interval
+  mkClosedInterval     :: r -> r -> interval
+  mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
+  {-# MINIMAL #-}
 
-class -- Interval_ interval (EndPoint Closed r) =>
+class Interval_ interval (EndPoint Open r) =>
       OpenInterval_ interval r | interval -> r where
   -- | Construct an interval given its start and end point.
-  mkOpenInterval :: r -> r -> interval
+  mkOpenInterval     :: r -> r -> interval
+  mkOpenInterval s e = mkInterval (OpenE s) (OpenE e)
+  {-# MINIMAL #-}
 
 --------------------------------------------------------------------------------
 

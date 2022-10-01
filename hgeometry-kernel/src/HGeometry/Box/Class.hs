@@ -40,16 +40,19 @@ class HasMaxPoint box point where
 class ( HasMinPoint box point
       , HasMaxPoint box point
       , Point_ (PointFor box) d (NumType box)
+      , PointFor box ~ point
+      , Dimension box ~ d
       ) => Box_ box d point | box -> d
                             , box -> point where
 
   -- | Get a vector with the extent of the box in each dimension. Note
   -- that the resulting vector is 0 indexed whereas one would normally
   -- count dimensions starting at zero.
-  extent :: ( Vector_ vector d (ClosedInterval r)
+  extent :: ( Vector_ vector d interval
+            , ClosedInterval_  interval r
             , NumType box ~ r
             , Num r
-            ) => box -> ClosedInterval r
+            ) => box -> vector
 
 -- | Rectangles are two dimensional boxes.
 type Rectangle_ rectangle = Box_ rectangle 2
@@ -95,11 +98,27 @@ instance (Box_ (Box d point) d (NumType point)
 -- | Get the size of the box (in all dimensions). Note that the
 -- resulting vector is 0 indexed whereas one would normally count
 -- dimensions starting at zero.
-size :: ( Vector_ vector d r
-        , vector ~ VectorFor (PointFor box)
+size :: forall box d point vector vector' interval r. ( Box_ box d point
+        , Vector_ vector d r
         , Num r
+        , NumType box ~ r
+        , NumType interval ~ r
+        , Vector_ vector' d interval
+        , NumType (IntervalOf Closed r) ~ r
+        , HasComponents vector' vector
+        , ClosedInterval_ interval r
+
+
+        , vector' ~ Vector d (IntervalOf Closed r)
         ) => box -> vector
-size = undefined -- extent
+size = f . extent'
+  where
+    extent' :: box -> vector'
+    extent' = extent
+
+    f :: vector' -> vector
+    f = over components duration
+
 
 -- Given a dimension, get the width of the box in that dimension.
 -- Dimensions are 0 indexed.
@@ -107,8 +126,9 @@ widthIn :: forall i box d point r. ( Box_ box d point
                                    , r ~ NumType box
                                    , i < d, KnownNat i
                                    , Num r
+                                   -- , NumType (IntervalOf Closed r) ~ r
                                    ) => box -> r
-widthIn = view (component @i) . size
+widthIn = undefined -- view (component @i) . undefined -- size
 
 -- | Get the width of a rectangle.
 width :: ( Box_ box d point, 0 < d, r ~ NumType box, Num r

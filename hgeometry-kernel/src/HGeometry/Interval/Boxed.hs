@@ -47,12 +47,9 @@ instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
   mkInterval = Interval
 
 
-instance ClosedInterval_ (ClosedInterval r) r where
-  mkClosedInterval s e = Interval (ClosedE s) (ClosedE e)
+instance ClosedInterval_ (ClosedInterval r) r
 
-instance OpenInterval_ (OpenInterval r) r where
-  mkOpenInterval s e = Interval (OpenE s) (OpenE e)
-
+instance OpenInterval_ (OpenInterval r) r
 
 -- type instance IntersectionOf r (Interval endPoint r) = [NoIntersection, r]
 -- GHC does not understand the r here cannot be 'Interval endPoint r' itself :(
