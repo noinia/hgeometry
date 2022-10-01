@@ -10,9 +10,10 @@ import GHC.Generics (Generic)
 import HGeometry.Properties
 import HGeometry.Vector.Class
 import System.Random (Random (..))
-import System.Random.Stateful (UniformRange(..), Uniform(..))
+import System.Random.Stateful (UniformRange(..), Uniform(..), uniformListM)
 
--- import HGeometry.Point.PointF
+import HGeometry.Point.PointF
+import System.Random.Stateful
 
 --------------------------------------------------------------------------------
 
@@ -20,8 +21,15 @@ type R = Int
 
 --------------------------------------------------------------------------------
 
--- type Point2 = PointF Vec2
+type Point2 = PointF Vec2
 
+randomPoints   :: (Uniform point
+
+                  ) => Int -> gen -> IO [point]
+randomPoints n = replicateM n . uniformM
+
+-- test :: IO [Point2]
+-- test = getStdGen >>= uniformListM 10
 
 --------------------------------------------------------------------------------
 

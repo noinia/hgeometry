@@ -63,7 +63,7 @@ pattern OpenE x = EndPoint x
 
 
 -- | Data type modelling an endpoint that can both be open and closed.
-data AnEndPoint r = AnEndPoint {-# UNPACK #-}!EndPointType !r
+data AnEndPoint r = AnEndPoint !EndPointType !r
                   deriving (Show,Eq,Functor,Foldable,Traversable)
 
 type instance NumType (AnEndPoint r) = r

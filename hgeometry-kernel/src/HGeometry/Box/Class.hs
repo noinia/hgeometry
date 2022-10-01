@@ -22,7 +22,7 @@ import HGeometry.Interval.Boxed (ClosedInterval)
 import HGeometry.Interval.Class
 import HGeometry.Point.Class
 import HGeometry.Properties
-import HGeometry.Vector (Vector)
+import HGeometry.Vector
 import HGeometry.Vector.Class
 -- import HGeometry.Interval.EndPoint
 
@@ -98,25 +98,22 @@ instance (Box_ (Box d point) d (NumType point)
 -- | Get the size of the box (in all dimensions). Note that the
 -- resulting vector is 0 indexed whereas one would normally count
 -- dimensions starting at zero.
-size :: forall box d point vector vector' interval r. ( Box_ box d point
+size :: forall box d point vector interval r. ( Box_ box d point
         , Vector_ vector d r
         , Num r
         , NumType box ~ r
         , NumType interval ~ r
-        , Vector_ vector' d interval
         , NumType (IntervalOf Closed r) ~ r
-        , HasComponents vector' vector
+        , HasComponents (Vector d (IntervalOf Closed r)) vector
         , ClosedInterval_ interval r
-
-
-        , vector' ~ Vector d (IntervalOf Closed r)
+        -- , Vector_ vector' d interval
+        -- , vector' ~ Vector d (IntervalOf Closed r)
+        , ClosedInterval_ (IntervalOf 'Closed r) r
+        , Arity d
         ) => box -> vector
-size = f . extent'
+size = f . extent
   where
-    extent' :: box -> vector'
-    extent' = extent
-
-    f :: vector' -> vector
+    f :: Vector d (IntervalOf Closed r) -> vector
     f = over components duration
 
 
