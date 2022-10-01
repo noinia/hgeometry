@@ -23,10 +23,10 @@ type R = Int
 
 type Point2 = PointF Vec2
 
-randomPoints   :: (Uniform point
+-- randomPoints   :: (Uniform point
 
-                  ) => Int -> gen -> IO [point]
-randomPoints n = replicateM n . uniformM
+--                   ) => Int -> gen -> IO [point]
+-- randomPoints n = replicateM n . uniformM
 
 -- test :: IO [Point2]
 -- test = getStdGen >>= uniformListM 10
