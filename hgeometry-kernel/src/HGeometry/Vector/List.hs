@@ -3,11 +3,14 @@ module HGeometry.Vector.List
   ( ListVector(..)
   ) where
 
-import Control.Applicative (liftA2)
-import Control.Lens
-import GHC.Generics
-import HGeometry.Properties
-import HGeometry.Vector.Class
+import           Control.Applicative (liftA2)
+import           Control.Lens
+import qualified Data.List as List
+import           Data.Proxy
+import           GHC.Generics
+import           GHC.TypeLits
+import           HGeometry.Properties
+import           HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
@@ -49,10 +52,8 @@ instance Metric_ (ListVector d r)
 
 instance Vector_ (ListVector d r) d r where
   vectorFromList = Just . ListVector
-  -- FIXME: implement this properlty; i.e. check that we actually have d elements
-
-
---   mkVector = undefined
+  -- xs = let d = natVal $ Proxy @d
+  --                     in if List.genericLength xs == d then Just (ListVector xs) else Nothing
 
 
 -- type family ArityX d :: Constraint where
