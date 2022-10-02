@@ -13,7 +13,7 @@ module HGeometry.Interval.Class
   ( Interval_(..), pattern Interval_
   , ClosedInterval_(..)
   , OpenInterval_(..)
-  , IntervalOf
+  , IntervalFor
 
   , HasStart(..)
   , HasEnd(..)
@@ -53,8 +53,10 @@ startAndEnd i = (i^.start,i^.end)
 
 --------------------------------------------------------------------------------
 
-type family IntervalOf (et :: EndPointType) r
+-- type family IntervalOf (et :: EndPointType) r
 
+-- | Types that output intervals should use this type
+type family IntervalFor g
 
 -- | A class for types representing Intervals
 type Interval_ :: Type -> Type -> Constraint

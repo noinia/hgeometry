@@ -81,6 +81,7 @@ instance Vector_ v 2 (NumType v) => HasComponents Vec2 v where
 
 
 instance Vector_ Vec2 2 R where
+--  mkVector = Vec2
   vectorFromList = \case
     [x,y] -> Just $ Vec2 x y
     _     -> Nothing

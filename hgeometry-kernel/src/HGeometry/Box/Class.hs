@@ -42,14 +42,15 @@ class ( HasMinPoint box point
       , Point_ (PointFor box) d (NumType box)
       , PointFor box ~ point
       , Dimension box ~ d
+      , NumType box ~ NumType point
       ) => Box_ box d point | box -> d
                             , box -> point where
 
   -- | Get a vector with the extent of the box in each dimension. Note
   -- that the resulting vector is 0 indexed whereas one would normally
   -- count dimensions starting at zero.
-  extent :: ( Vector_ vector d interval
-            , ClosedInterval_  interval r
+  extent :: ( Vector_ vector d (IntervalFor box)
+            , ClosedInterval_  (IntervalFor box) r
             , NumType box ~ r
             , Num r
             ) => box -> vector
@@ -93,27 +94,27 @@ instance (Box_ (Box d point) d (NumType point)
          ) => IsBoxable (Box d point) where
   boundingBox = id
 
+type instance IntervalFor (Box d point) = ClosedInterval (NumType point)
+
 --------------------------------------------------------------------------------
 
 -- | Get the size of the box (in all dimensions). Note that the
 -- resulting vector is 0 indexed whereas one would normally count
 -- dimensions starting at zero.
-size :: forall box d point vector interval r. ( Box_ box d point
+size :: forall box d point vector r.
+        ( Box_ box d point
         , Vector_ vector d r
+        , r ~ NumType box
         , Num r
-        , NumType box ~ r
-        , NumType interval ~ r
-        , NumType (IntervalOf Closed r) ~ r
-        , HasComponents (Vector d (IntervalOf Closed r)) vector
-        , ClosedInterval_ interval r
+        , HasComponents (Vector d (IntervalFor box)) vector
+        , ClosedInterval_ (IntervalFor box) r
         -- , Vector_ vector' d interval
         -- , vector' ~ Vector d (IntervalOf Closed r)
-        , ClosedInterval_ (IntervalOf 'Closed r) r
         , Arity d
         ) => box -> vector
 size = f . extent
   where
-    f :: Vector d (IntervalOf Closed r) -> vector
+    f :: Vector d (IntervalFor box) -> vector
     f = over components duration
 
 
@@ -125,7 +126,7 @@ widthIn :: forall i box d point r. ( Box_ box d point
                                    , Num r
                                    -- , NumType (IntervalOf Closed r) ~ r
                                    ) => box -> r
-widthIn = undefined -- view (component @i) . undefined -- size
+widthIn = undefined -- view (component @i) . size
 
 -- | Get the width of a rectangle.
 width :: ( Box_ box d point, 0 < d, r ~ NumType box, Num r

@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
@@ -6,6 +7,8 @@ module HGeometry.Vector.Class
   , component
   , xComponent, yComponent, zComponent, wComponent
   , HasComponents(..)
+
+  -- , ConstructVector
 
   , vectorFromVector
   , prefix, suffix
@@ -39,6 +42,11 @@ import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
+-- type ConstructVector :: Type -> Nat -> Type
+-- type family ConstructVector vector d where
+--   ConstructVector vector 0 = vector
+--   ConstructVector vector d = NumType vector -> ConstructVector vector (d-1)
+
 -- | A type class for vectors
 type Vector_ :: Type -> Nat -> Type -> Constraint
 class ( NumType vector   ~ r
@@ -57,6 +65,9 @@ class ( NumType vector   ~ r
       iix'   :: Ixed s => Index s -> IndexedLens' (Index s) s (IxValue s)
       iix' j = singular $ iix j
   {-# INLINE componentProxy #-}
+
+  -- -- | Construct a vector from a d-arity function
+  -- mkVector :: KnownNat d => ConstructVector vector d
 
   -- | try to construct a vector from a list of exactly d coordinates.
   vectorFromList :: [r] -> Maybe vector

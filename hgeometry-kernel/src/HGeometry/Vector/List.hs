@@ -1,11 +1,12 @@
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Vector.List
   ( ListVector(..)
   ) where
 
 import Control.Applicative (liftA2)
 import Control.Lens
-import HGeometry.Properties
 import GHC.Generics
+import HGeometry.Properties
 import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
@@ -49,3 +50,24 @@ instance Metric_ (ListVector d r)
 instance Vector_ (ListVector d r) d r where
   vectorFromList = Just . ListVector
   -- FIXME: implement this properlty; i.e. check that we actually have d elements
+
+
+--   mkVector = undefined
+
+
+-- type family ArityX d :: Constraint where
+--   ArityX 0 = ()
+--   ArityX d = (KnownNat d, ArityX (d-1))
+
+-- construct     :: forall d r. ArityX d
+--               => Proxy d -> Proxy r -> ConstructVector (ListVector d r) d
+-- construct d _ = go [] d
+--   where
+--     go       :: forall i. ArityX i
+--              => [r]
+--              -> Proxy i
+--              -> ConstructVector (ListVector i r) i
+--     go acc i = case i `cmpNat` Proxy @0 of
+--                  LTI -> error "absurd"
+--                  EQI -> ListVector (reverse acc)
+--                  GTI -> undefined -- \x -> go (x:acc) (Proxy @(i-1))
