@@ -3,6 +3,8 @@ module HGeometry.Point.PointF
   ( PointF(..)
   ) where
 
+
+import Control.DeepSeq
 import Control.Lens
 import Control.Monad (replicateM)
 import Data.Aeson
@@ -14,11 +16,14 @@ import GHC.TypeLits
 import HGeometry.Point.Class
 import HGeometry.Properties
 import HGeometry.Vector.Class
-import System.Random.Stateful (UniformRange(..), Uniform(..))
-import Control.DeepSeq
 import System.Random (Random (..))
+import System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
 import Text.Read (Read (..), readListPrecDefault)
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
 
@@ -91,3 +96,42 @@ instance Uniform v => Uniform (PointF v) where
 
 instance (UniformRange v) => UniformRange (PointF v) where
   uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
+
+
+newtype instance UMV.MVector s (PointF v) = MV_PointF (UMV.MVector s v)
+newtype instance UV.Vector     (PointF v) = V_PointF  (UV.Vector     v)
+
+
+-- deriving instance GMV.MVector UMV.MVector v => GMV.MVector UMV.MVector (PointF v)
+-- instance UV.Unbox v => UV.Unbox (PointF v)
+
+instance GMV.MVector UMV.MVector v => GMV.MVector UMV.MVector (PointF v) where
+  basicLength (MV_PointF v) = GMV.basicLength v
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (MV_PointF v) = MV_PointF $ GMV.basicUnsafeSlice s l v
+  {-# INLINE basicUnsafeSlice #-}
+  basicOverlaps  (MV_PointF v) (MV_PointF v') = GMV.basicOverlaps v v'
+  {-# INLINE basicOverlaps #-}
+  basicUnsafeNew n = MV_PointF <$> GMV.basicUnsafeNew n
+  {-# INLINE basicUnsafeNew #-}
+  basicInitialize (MV_PointF v) = GMV.basicInitialize v
+  {-# INLINE basicInitialize#-}
+  basicUnsafeRead (MV_PointF v) i = Point <$> GMV.basicUnsafeRead v i
+  {-# INLINE basicUnsafeRead #-}
+  basicUnsafeWrite (MV_PointF v) i (Point p) = GMV.basicUnsafeWrite v i p
+  {-# INLINE basicUnsafeWrite #-}
+
+instance GV.Vector UV.Vector v => GV.Vector UV.Vector (PointF v) where
+
+  basicUnsafeFreeze (MV_PointF mv) = V_PointF <$> GV.basicUnsafeFreeze mv
+  {-# INLINE basicUnsafeFreeze #-}
+  basicUnsafeThaw (V_PointF v) = MV_PointF <$> GV.basicUnsafeThaw v
+  {-# INLINE basicUnsafeThaw #-}
+  basicLength (V_PointF v) = GV.basicLength v
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (V_PointF v) = V_PointF $ GV.basicUnsafeSlice s l v
+  {-# INLINE basicUnsafeSlice #-}
+  basicUnsafeIndexM (V_PointF v) i = Point <$> GV.basicUnsafeIndexM v i
+  {-# INLINE basicUnsafeIndexM #-}
+
+instance UV.Unbox v => UV.Unbox (PointF v)
