@@ -18,13 +18,12 @@ import           Data.Kind
 import           Data.Proxy
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as UV
--- import qualified Data.Vector.Generic as GV
--- import qualified Data.Vector.Generic.Mutable as GMV
 import           GHC.Generics
 import           GHC.TypeLits
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
 import           HGeometry.Vector.Helper
+import           HGeometry.Vector.Optimal.Defs
 import qualified Linear.V2 as L2
 import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
@@ -74,19 +73,6 @@ pattern Vector4 x y z w = (V_4 (L4.V4 x y z w))
 
 --------------------------------------------------------------------------------
 
--- | Small vectors have a specific representation
-data Optimize d = Zero | One | Two | Three | Four | Large d
-
--- | Type family to choose a particular representation based on dimension.
-type Choose :: Nat -> Optimize Nat
-type family Choose d = result | result -> d where
-  Choose 0 = Zero
-  Choose 1 = One
-  Choose 2 = Two
-  Choose 3 = Three
-  Choose 4 = Four
-  Choose d = Large d
-
 -- | Whether the vector is unboxed or boxed.
 data Boxing = Unboxed | Boxed deriving (Show,Eq)
 
@@ -102,7 +88,7 @@ type family ChooseBoxed r where
 
 -- | The implementation of the vector, we can pick an optimal
 -- representation for a given dimension and type.
-type VectorImpl :: Optimize Nat -> Boxing -> Type -> Type
+type VectorImpl :: ByDimension Nat -> Boxing -> Type -> Type
 data family VectorImpl o b r
 
 --------------------------------------------------------------------------------
@@ -150,9 +136,6 @@ newtype instance VectorImpl (Large d) Boxed r = V_LargeB (V.Vector r)
 
 --------------------------------------------------------------------------------
 -- * Unboxed implementations, specialized to each type
-
-
-
 
 
 -- | Large unboxed vectors of an unboxable type
