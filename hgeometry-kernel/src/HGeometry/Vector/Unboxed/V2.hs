@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.Vector.Unpacked.V2
+module HGeometry.Vector.Unboxed.V2
   ( Vec2(..)
   ) where
 
