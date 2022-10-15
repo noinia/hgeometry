@@ -5,10 +5,10 @@ module HGeometry.Vector.List
 
 import           Control.Applicative (liftA2)
 import           Control.Lens
-import qualified Data.List as List
-import           Data.Proxy
+-- import qualified Data.List as List
+-- import           Data.Proxy
 import           GHC.Generics
-import           GHC.TypeLits
+-- import           GHC.TypeLits
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
 

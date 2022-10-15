@@ -4,22 +4,23 @@ module HGeometry.Point.PointF
   ) where
 
 
-import Control.DeepSeq
-import Control.Lens
-import Control.Monad (replicateM)
-import Data.Aeson
-import Data.Functor.Classes
-import Data.List (intersperse)
-import Data.Proxy
-import GHC.Generics (Generic)
-import GHC.TypeLits
-import HGeometry.Point.Class
-import HGeometry.Properties
-import HGeometry.Vector.Class
-import System.Random (Random (..))
-import System.Random.Stateful (UniformRange(..), Uniform(..))
+import           Control.DeepSeq
+import           Control.Lens
+import           Control.Monad (replicateM)
+import           Data.Aeson
+import           Data.Functor.Classes
+import           Data.List (intersperse)
+import           Data.Proxy
+import           GHC.Generics (Generic)
+import           GHC.TypeLits
+import           HGeometry.Point.Class
+import           HGeometry.Point.EuclideanDistance
+import           HGeometry.Properties
+import           HGeometry.Vector.Class
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
-import Text.Read (Read (..), readListPrecDefault)
+import           Text.Read (Read (..), readListPrecDefault)
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed.Mutable as UMV
@@ -88,8 +89,11 @@ instance ( Vector_ v d r
 instance HasPoints (PointF v) (PointF v') (PointF v) (PointF v') where
   allPoints = id
 
--- instance Num (NumType v) => HasSquaredEuclideanDistance (PointF v) where
---   pointClosestTo _ = id
+instance ( Num (NumType v)
+         , Metric_ v
+         , Vector_ v (Dimension v) (NumType v)
+         ) => HasSquaredEuclideanDistance (PointF v) where
+  pointClosestTo _ = pointFromPoint
 
 instance Uniform v => Uniform (PointF v) where
   uniformM gen = Point <$> uniformM gen

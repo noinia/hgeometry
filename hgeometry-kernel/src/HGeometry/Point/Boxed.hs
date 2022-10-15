@@ -13,12 +13,14 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Point.Boxed
-  ( Point(..)
-  , Arity
+  ( Point
+  , PointF(..)
   ) where
 
-import HGeometry.Point.EuclideanDistance
-import HGeometry.Point.Internal
+-- import HGeometry.Point.EuclideanDistance
+import HGeometry.Point.PointF
+import HGeometry.Vector
+-- import HGeometry.Point.Internal
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -29,5 +31,7 @@ import HGeometry.Point.Internal
 --     myPoint = Point myVector
 -- :}
 
-instance Num r => HasSquaredEuclideanDistance (Point d r) where
-  pointClosestTo _ = id
+type Point d r = PointF (Vector d r)
+
+-- instance (Num r) => HasSquaredEuclideanDistance (Point d r) where
+--   pointClosestTo _ = pointFromPoint

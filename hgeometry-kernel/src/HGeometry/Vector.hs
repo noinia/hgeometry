@@ -12,8 +12,9 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector(
     module HGeometry.Vector.Class
-  , Vector(Vector,Vector1,Vector2,Vector3,Vector4)
-  , Arity
+  , Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
+  -- , Vector(Vector,Vector1,Vector2,Vector3,Vector4)
+  -- , Arity
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection
@@ -21,7 +22,7 @@ module HGeometry.Vector(
 
 import           Control.Lens
 import           HGeometry.Vector.Class
-import           HGeometry.Vector.Internal
+import           HGeometry.Vector.Optimal
 import qualified HGeometry.Vector.List as ListVector
 
 
@@ -108,5 +109,6 @@ scalarMultiple' u v = g . foldOf components
     g No      = Nothing
     g Maybe   = error "scalarMultiple': found a Maybe, which means the vectors either have length zero, or one of them is all Zero!"
     g (Yes x) = Just x
-{-# SPECIALIZE
-    scalarMultiple' :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}
+
+-- {-# SPECIALIZE
+--     scalarMultiple' :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}

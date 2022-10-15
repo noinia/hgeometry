@@ -1,9 +1,8 @@
 module HGeometry.Matrix.Class
   ( Matrix_(..)
-
+  , HasDeterminant(..)
+  , Invertible(..)
   ) where
-
-
 
 import           Control.Arrow ((&&&))
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
@@ -42,6 +41,9 @@ class ( r ~ NumType matrix
   mult  :: ( Vector_ vector m r
            , Vector_ vector' n r
            , Num r) => matrix -> vector -> vector'
+
+
+
 
 
 -- | Dimensions for which we can compute the determinant of a matrix
