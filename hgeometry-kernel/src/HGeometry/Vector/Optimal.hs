@@ -4,7 +4,6 @@ module HGeometry.Vector.Optimal
   ( Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
   , VectorImpl
   , Choose
-  , Optimize(..)
   , ChooseBoxed
   , Boxing(..)
   ) where
@@ -73,9 +72,6 @@ pattern Vector4 x y z w = (V_4 (L4.V4 x y z w))
 
 --------------------------------------------------------------------------------
 
--- | Whether the vector is unboxed or boxed.
-data Boxing = Unboxed | Boxed deriving (Show,Eq)
-
 -- | Specify whether to use a boxed (default) or unboxed vector for a
 -- given number type.
 type ChooseBoxed :: Type -> Boxing
@@ -136,6 +132,7 @@ newtype instance VectorImpl (Large d) Boxed r = V_LargeB (V.Vector r)
 
 --------------------------------------------------------------------------------
 -- * Unboxed implementations, specialized to each type
+
 
 
 -- | Large unboxed vectors of an unboxable type

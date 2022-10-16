@@ -2,6 +2,7 @@
 module HGeometry.Vector.Optimal.Defs
   ( ByDimension(..)
   , Choose
+  , Boxing(..)
   ) where
 
 import           GHC.TypeLits
@@ -20,3 +21,6 @@ type family Choose d = result | result -> d where
   Choose 3 = Three
   Choose 4 = Four
   Choose d = Large d
+
+-- | Whether the vector is unboxed or boxed.
+data Boxing = Unboxed | Boxed deriving (Show,Eq)

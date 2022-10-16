@@ -62,6 +62,12 @@ instance FromJSON Vec2
 instance ToJSON Vec2
 
 
+instance Field1 Vec2 Vec2 R R where
+  _1 = lens (\(Vec2 x _) -> x) (\(Vec2 _ y) x -> Vec2 x y)
+instance Field2 Vec2 Vec2 R R where
+  _2 = lens (\(Vec2 _ y) -> y) (\(Vec2 x _) y -> Vec2 x y)
+
+
 instance Ixed Vec2 where
   ix i f v@(Vec2 x y) = case i of
                           0 -> flip Vec2 y <$> f x
