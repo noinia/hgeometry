@@ -12,9 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector(
     module HGeometry.Vector.Class
-  , Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
-  -- , Vector(Vector,Vector1,Vector2,Vector3,Vector4)
-  -- , Arity
+  , module HGeometry.Vector.Optimal
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection
