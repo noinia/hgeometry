@@ -10,6 +10,7 @@ import           Data.Bifunctor (Bifunctor (first))
 import           Data.Bitraversable
 import           Data.Either (partitionEithers)
 import           Data.Ext
+import           Data.Traversable
 import           Geometry.Ball (Disk, disk)
 import           Geometry.Boundary (PointLocationResult (..))
 import           Geometry.Box (IsBoxable (..))
@@ -46,6 +47,9 @@ deriving instance (Arity d, Eq r, Eq p)         => Eq     (Triangle d p r)
 
 instance (Arity d, NFData r, NFData p) => NFData (Triangle d p r)
 
+instance Arity d => Functor (Triangle d p) where fmap = fmapDefault
+instance Arity d => Foldable (Triangle d p) where foldMap = foldMapDefault
+instance Arity d => Traversable (Triangle d p) where traverse = bitraverse pure
 instance Arity d => Bifunctor  (Triangle d) where bimap = bimapDefault
 instance Arity d => Bifoldable (Triangle d) where bifoldMap = bifoldMapDefault
 

@@ -15,6 +15,7 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Traversable
 import           Geometry.Box
 import           Geometry.LineSegment
 import           Geometry.Point
@@ -67,6 +68,11 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (PolyLine d p
 
 instance PointFunctor (PolyLine d p) where
   pmap f = over points (fmap (first f))
+
+instance Arity d => Foldable (PolyLine d p) where
+  foldMap = foldMapDefault
+instance Arity d => Traversable (PolyLine d p) where
+  traverse = bitraverse pure
 
 instance Arity d => Bifunctor (PolyLine d) where
   bimap = bimapDefault
