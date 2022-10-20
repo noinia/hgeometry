@@ -1,6 +1,7 @@
 -- | Tree-related utilities.
 module Data.Tree.Util where
 
+import           Data.Traversable
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -27,6 +28,13 @@ import           Data.Tree
 
 -- | Nodes in a tree are typically either an internal node or a leaf node
 data TreeNode v a = InternalNode v | LeafNode a deriving (Show,Eq)
+
+instance Functor (TreeNode a) where
+  fmap = fmapDefault
+instance Foldable (TreeNode a) where
+  foldMap = foldMapDefault
+instance Traversable (TreeNode a) where
+  traverse = bitraverse pure
 
 instance Bifunctor TreeNode where
   bimap = bimapDefault

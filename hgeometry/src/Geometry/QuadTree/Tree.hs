@@ -17,6 +17,7 @@ import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Apply
+import           Data.Traversable
 import           Geometry.Point
 import           Geometry.QuadTree.Cell
 import           Geometry.QuadTree.Quadrants
@@ -38,6 +39,15 @@ data Tree v p = Leaf !p
               | Node !v (Quadrants (Tree v p)) -- quadrants are stored lazily on purpose
               deriving (Show,Eq)
 makePrisms ''Tree
+  
+instance Functor (Tree a) where
+  fmap = fmapDefault
+
+instance Foldable (Tree a) where
+  foldMap = foldMapDefault
+
+instance Traversable (Tree a) where
+  traverse = bitraverse pure
 
 instance Bifunctor Tree where
   bimap = bimapDefault

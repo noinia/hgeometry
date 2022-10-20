@@ -16,14 +16,24 @@ module Data.List.Alternating(
 import Prelude hiding (reverse)
 import Control.Lens
 import Data.Bifoldable
+import Data.Bifunctor
 import Data.Bitraversable
 import Data.Ext
+import Data.Traversable
 import qualified Data.List as List
 
 --------------------------------------------------------------------------------
 
 -- | A (non-empty) alternating list of @a@\'s and @b@\'s
 data Alternating a b = Alternating a [b :+ a] deriving (Show,Eq,Ord)
+
+  
+instance Functor (Alternating a) where
+  fmap = fmapDefault
+instance Foldable (Alternating a) where
+  foldMap = foldMapDefault
+instance Traversable (Alternating a) where
+  traverse = bitraverse pure
 
 instance Bifunctor Alternating where
   bimap = bimapDefault

@@ -32,6 +32,7 @@ import           Data.Ord (comparing, Down(..))
 import           Data.Range
 import qualified Data.Set as Set
 import           Data.Util
+import           Data.Bifunctor (first)
 --------------------------------------------------------------------------------
 
 -- | Internal nodes store the max x-value from the left subtree and
@@ -39,6 +40,9 @@ import           Data.Util
 data NodeData p r = NodeData { _splitPoint :: !r
                              , _maxVal     :: !(Maybe (Point 2 r :+ p))
                              } deriving (Show,Eq)
+
+instance Functor (NodeData c) where
+  fmap f (NodeData x m) = NodeData (f x) (first (fmap f) <$> m)
 
 instance Bifunctor NodeData where
   bimap f g (NodeData x m) = NodeData (g x) (bimap (fmap g) f <$> m)
@@ -57,13 +61,25 @@ newtype PrioritySearchTree p r =
     PrioritySearchTree { _unPrioritySearchTree :: BinLeafTree (NodeData p r) (LeafData p r) }
   deriving (Show,Eq)
 
+instance Functor (PrioritySearchTree c) where
+  -- ^ note that this is not necessarily safe, as mapping over r can
+  -- invalidate the invariants. Users are responsible for making sure
+  -- this does not happen.
+  fmap f (PrioritySearchTree t) = 
+      PrioritySearchTree $ bimap mapNodeData mapLeafData t
+    where
+      mapNodeData = fmap f
+      mapLeafData = bimap f (map $ first (fmap f))
+
 instance Bifunctor PrioritySearchTree where
   -- ^ note that this is not necessarily safe, as mapping over r can
   -- invalidate the invariants. Users are responsible for making sure
   -- this does not happen.
-  bimap f g (PrioritySearchTree t) = PrioritySearchTree . bimap (bimap f g) h $ t
+  bimap f g (PrioritySearchTree t) =
+      PrioritySearchTree $ bimap mapNodeData mapLeafData t
     where
-      h = bimap g (map $ bimap (fmap g) f)
+      mapNodeData = bimap f g
+      mapLeafData = bimap g (map $ bimap (fmap g) f)
 
 --------------------------------------------------------------------------------
 
