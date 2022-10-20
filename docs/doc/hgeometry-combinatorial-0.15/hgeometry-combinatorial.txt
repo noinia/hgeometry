@@ -626,6 +626,9 @@ instance (GHC.Show.Show core, GHC.Show.Show extra) => GHC.Show.Show (core Data.E
 instance Data.Ext.AsExt (c Data.Ext.:+ e)
 instance (t GHC.Types.~ c) => Data.Ext.AsA t c
 instance Data.Ext.AsA (c Data.Ext.:+ e) c
+instance GHC.Base.Functor ((Data.Ext.:+) c)
+instance Data.Foldable.Foldable ((Data.Ext.:+) c)
+instance Data.Traversable.Traversable ((Data.Ext.:+) c)
 instance Data.Bifunctor.Bifunctor (Data.Ext.:+)
 instance Data.Functor.Bind.Class.Biapply (Data.Ext.:+)
 instance Data.Biapplicative.Biapplicative (Data.Ext.:+)
@@ -1253,6 +1256,9 @@ reverse :: Alternating a b -> Alternating a b
 instance (GHC.Classes.Ord a, GHC.Classes.Ord b) => GHC.Classes.Ord (Data.List.Alternating.Alternating a b)
 instance (GHC.Classes.Eq a, GHC.Classes.Eq b) => GHC.Classes.Eq (Data.List.Alternating.Alternating a b)
 instance (GHC.Show.Show a, GHC.Show.Show b) => GHC.Show.Show (Data.List.Alternating.Alternating a b)
+instance GHC.Base.Functor (Data.List.Alternating.Alternating a)
+instance Data.Foldable.Foldable (Data.List.Alternating.Alternating a)
+instance Data.Traversable.Traversable (Data.List.Alternating.Alternating a)
 instance Data.Bifunctor.Bifunctor Data.List.Alternating.Alternating
 instance Data.Bifoldable.Bifoldable Data.List.Alternating.Alternating
 instance Data.Bitraversable.Bitraversable Data.List.Alternating.Alternating
@@ -1645,7 +1651,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_avIc a_avRM. Lens (Permutation a_avIc) (Permutation a_avRM) (Vector (Orbit a_avIc)) (Vector (Orbit a_avRM))
+orbits :: forall a_avSt a_aw23. Lens (Permutation a_avSt) (Permutation a_aw23) (Vector (Orbit a_avSt)) (Vector (Orbit a_aw23))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
@@ -1755,11 +1761,17 @@ instance GHC.Base.Functor Data.PlanarGraph.AdjRep.Face
 instance GHC.Generics.Generic (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.ToJSON.ToJSON f => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Face f)
 instance Data.Aeson.Types.FromJSON.FromJSON f => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Face f)
+instance GHC.Base.Functor (Data.PlanarGraph.AdjRep.Vtx v)
+instance Data.Foldable.Foldable (Data.PlanarGraph.AdjRep.Vtx v)
+instance Data.Traversable.Traversable (Data.PlanarGraph.AdjRep.Vtx v)
 instance Data.Bifunctor.Bifunctor Data.PlanarGraph.AdjRep.Vtx
 instance Data.Bifoldable.Bifoldable Data.PlanarGraph.AdjRep.Vtx
 instance Data.Bitraversable.Bitraversable Data.PlanarGraph.AdjRep.Vtx
 instance (Data.Aeson.Types.ToJSON.ToJSON v, Data.Aeson.Types.ToJSON.ToJSON e) => Data.Aeson.Types.ToJSON.ToJSON (Data.PlanarGraph.AdjRep.Vtx v e)
 instance (Data.Aeson.Types.FromJSON.FromJSON v, Data.Aeson.Types.FromJSON.FromJSON e) => Data.Aeson.Types.FromJSON.FromJSON (Data.PlanarGraph.AdjRep.Vtx v e)
+instance GHC.Base.Functor (Data.PlanarGraph.AdjRep.Gr v)
+instance Data.Foldable.Foldable (Data.PlanarGraph.AdjRep.Gr v)
+instance Data.Traversable.Traversable (Data.PlanarGraph.AdjRep.Gr v)
 instance Data.Bifunctor.Bifunctor Data.PlanarGraph.AdjRep.Gr
 instance Data.Bifoldable.Bifoldable Data.PlanarGraph.AdjRep.Gr
 instance Data.Bitraversable.Bitraversable Data.PlanarGraph.AdjRep.Gr
@@ -4696,6 +4708,9 @@ instance (GHC.Classes.Eq v, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Tree.Util.
 instance (GHC.Show.Show v, GHC.Show.Show a) => GHC.Show.Show (Data.Tree.Util.TreeNode v a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Tree.Util.Zipper a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Tree.Util.Zipper a)
+instance GHC.Base.Functor (Data.Tree.Util.TreeNode a)
+instance Data.Foldable.Foldable (Data.Tree.Util.TreeNode a)
+instance Data.Traversable.Traversable (Data.Tree.Util.TreeNode a)
 instance Data.Bifunctor.Bifunctor Data.Tree.Util.TreeNode
 instance Data.Bifoldable.Bifoldable Data.Tree.Util.TreeNode
 instance Data.Bitraversable.Bitraversable Data.Tree.Util.TreeNode

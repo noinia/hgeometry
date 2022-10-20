@@ -21,10 +21,10 @@
 </span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-22"></span><span>
 </span><span id="line-23"></span><span class="hs-comment">-- | Data type representing the graph in its JSON/Yaml format</span><span>
-</span><span id="line-24"></span><span id="local-6989586621679266088"><span id="local-6989586621679266089"></span></span><span class="hs-keyword">data</span><span> </span><span id="Gr"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span></span><span> </span><span id="local-6989586621679266280"><span class="annot"><a href="#local-6989586621679266280"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679266279"><span class="annot"><a href="#local-6989586621679266279"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Gr"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="adjacencies"><span class="annot"><span class="annottext">Gr v f -&gt; [v]
-</span><a href="Data.PlanarGraph.AdjRep.html#adjacencies"><span class="hs-identifier hs-var hs-var">adjacencies</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679266280"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-24"></span><span id="local-6989586621679268096"><span id="local-6989586621679268097"></span></span><span class="hs-keyword">data</span><span> </span><span id="Gr"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span></span><span> </span><span id="local-6989586621679268380"><span class="annot"><a href="#local-6989586621679268380"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679268379"><span class="annot"><a href="#local-6989586621679268379"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Gr"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="adjacencies"><span class="annot"><span class="annottext">Gr v f -&gt; [v]
+</span><a href="Data.PlanarGraph.AdjRep.html#adjacencies"><span class="hs-identifier hs-var hs-var">adjacencies</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679268380"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-25"></span><span>                 </span><span class="hs-special">,</span><span> </span><span id="faces"><span class="annot"><span class="annottext">Gr v f -&gt; [f]
-</span><a href="Data.PlanarGraph.AdjRep.html#faces"><span class="hs-identifier hs-var hs-var">faces</span></a></span></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679266279"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">]</span><span>
+</span><a href="Data.PlanarGraph.AdjRep.html#faces"><span class="hs-identifier hs-var hs-var">faces</span></a></span></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679268379"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-26"></span><span>                 </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Gr v f -&gt; Rep (Gr v f) x)
 -&gt; (forall x. Rep (Gr v f) x -&gt; Gr v f) -&gt; Generic (Gr v f)
 forall x. Rep (Gr v f) x -&gt; Gr v f
@@ -35,7 +35,7 @@ forall v f x. Rep (Gr v f) x -&gt; Gr v f
 forall v f x. Gr v f -&gt; Rep (Gr v f) x
 $cto :: forall v f x. Rep (Gr v f) x -&gt; Gr v f
 $cfrom :: forall v f x. Gr v f -&gt; Rep (Gr v f) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679266076"><span id="local-6989586621679266078"><span id="local-6989586621679266080"><span class="annot"><span class="annottext">Int -&gt; Gr v f -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679268084"><span id="local-6989586621679268086"><span id="local-6989586621679268088"><span class="annot"><span class="annottext">Int -&gt; Gr v f -&gt; ShowS
 [Gr v f] -&gt; ShowS
 Gr v f -&gt; String
 (Int -&gt; Gr v f -&gt; ShowS)
@@ -51,7 +51,7 @@ show :: Gr v f -&gt; String
 $cshow :: forall v f. (Show v, Show f) =&gt; Gr v f -&gt; String
 showsPrec :: Int -&gt; Gr v f -&gt; ShowS
 $cshowsPrec :: forall v f. (Show v, Show f) =&gt; Int -&gt; Gr v f -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679266071"><span id="local-6989586621679266073"><span class="annot"><span class="annottext">Gr v f -&gt; Gr v f -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679268079"><span id="local-6989586621679268081"><span class="annot"><span class="annottext">Gr v f -&gt; Gr v f -&gt; Bool
 (Gr v f -&gt; Gr v f -&gt; Bool)
 -&gt; (Gr v f -&gt; Gr v f -&gt; Bool) -&gt; Eq (Gr v f)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -62,52 +62,94 @@ $c/= :: forall v f. (Eq v, Eq f) =&gt; Gr v f -&gt; Gr v f -&gt; Bool
 $c== :: forall v f. (Eq v, Eq f) =&gt; Gr v f -&gt; Gr v f -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679266065"><span id="local-6989586621679266067"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-29"></span><span>  </span><span id="local-6989586621679266063"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; Gr a c -&gt; Gr b d
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679266061"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679266061"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679266060"><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679266060"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679266059"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266059"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679266058"><span class="annot"><span class="annottext">[c]
-</span><a href="#local-6989586621679266058"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[b] -&gt; [d] -&gt; Gr b d
+</span><span id="line-28"></span><span id="local-6989586621679268077"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679268074"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679268077"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>  </span><span id="local-6989586621679268072"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Gr v a -&gt; Gr v b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679268071"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679268071"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679268070"><span class="annot"><span class="annottext">[v]
+</span><a href="#local-6989586621679268070"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679268069"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268069"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[v] -&gt; [b] -&gt; Gr v b
 forall v f. [v] -&gt; [f] -&gt; Gr v f
-</span><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; [a] -&gt; [b]
+</span><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span><span> </span><span class="annot"><span class="annottext">[v]
+</span><a href="#local-6989586621679268070"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; [a] -&gt; [b]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679266061"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266059"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(c -&gt; d) -&gt; [c] -&gt; [d]
-forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679266060"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[c]
-</span><a href="#local-6989586621679266058"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679266051"><span id="local-6989586621679266053"><span id="local-6989586621679266056"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-32"></span><span>  </span><span id="local-6989586621679266049"><span class="annot"><span class="annottext">bifoldMap :: (a -&gt; m) -&gt; (b -&gt; m) -&gt; Gr a b -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></span></span><span> </span><span id="local-6989586621679266047"><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679266047"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679266046"><span class="annot"><span class="annottext">b -&gt; m
-</span><a href="#local-6989586621679266046"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679266045"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266045"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679266044"><span class="annot"><span class="annottext">[b]
-</span><a href="#local-6989586621679266044"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; [a] -&gt; m
+</span><a href="#local-6989586621679268071"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268069"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-30"></span><span id="local-6989586621679268068"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679268035"><span id="local-6989586621679268037"><span id="local-6989586621679268039"><span id="local-6989586621679268041"><span id="local-6989586621679268043"><span id="local-6989586621679268045"><span id="local-6989586621679268047"><span id="local-6989586621679268049"><span id="local-6989586621679268051"><span id="local-6989586621679268053"><span id="local-6989586621679268055"><span id="local-6989586621679268057"><span id="local-6989586621679268059"><span id="local-6989586621679268061"><span id="local-6989586621679268063"><span id="local-6989586621679268066"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679268068"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679268033"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; Gr v a -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span id="local-6989586621679268031"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679268031"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><span class="annottext">[v]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679268030"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268030"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; [a] -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679266047"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266045"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+</span><a href="#local-6989586621679268031"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268030"><span class="hs-identifier hs-var">fs</span></a></span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679268029"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679268020"><span id="local-6989586621679268022"><span id="local-6989586621679268024"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679268029"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679268018"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; Gr v a -&gt; f (Gr v b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621679268016"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679268016"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679268015"><span class="annot"><span class="annottext">[v]
+</span><a href="#local-6989586621679268015"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679268014"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268014"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[v] -&gt; [b] -&gt; Gr v b
+forall v f. [v] -&gt; [f] -&gt; Gr v f
+</span><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span><span> </span><span class="annot"><span class="annottext">[v]
+</span><a href="#local-6989586621679268015"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">([b] -&gt; Gr v b) -&gt; f [b] -&gt; f (Gr v b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; [a] -&gt; f [b]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679268016"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268014"><span class="hs-identifier hs-var">fs</span></a></span></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679268008"><span id="local-6989586621679268010"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679268006"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; Gr a c -&gt; Gr b d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679268004"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679268004"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679268003"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679268003"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679268002"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268002"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679268001"><span class="annot"><span class="annottext">[c]
+</span><a href="#local-6989586621679268001"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[b] -&gt; [d] -&gt; Gr b d
+forall v f. [v] -&gt; [f] -&gt; Gr v f
+</span><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; [a] -&gt; [b]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679268004"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679268002"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(c -&gt; d) -&gt; [c] -&gt; [d]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679268003"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[c]
+</span><a href="#local-6989586621679268001"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267994"><span id="local-6989586621679267996"><span id="local-6989586621679267999"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679267992"><span class="annot"><span class="annottext">bifoldMap :: (a -&gt; m) -&gt; (b -&gt; m) -&gt; Gr a b -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></span></span><span> </span><span id="local-6989586621679267990"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679267990"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679267989"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679267989"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679267988"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679267988"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679267987"><span class="annot"><span class="annottext">[b]
+</span><a href="#local-6989586621679267987"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; [a] -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679267990"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679267988"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(b -&gt; m) -&gt; [b] -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; m
-</span><a href="#local-6989586621679266046"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[b]
-</span><a href="#local-6989586621679266044"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621679266038"><span class="annot"><span class="annottext">bitraverse :: (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; Gr a b -&gt; f (Gr c d)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></span></span><span> </span><span id="local-6989586621679266036"><span class="annot"><span class="annottext">a -&gt; f c
-</span><a href="#local-6989586621679266036"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679266035"><span class="annot"><span class="annottext">b -&gt; f d
-</span><a href="#local-6989586621679266035"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679266034"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266034"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679266033"><span class="annot"><span class="annottext">[b]
-</span><a href="#local-6989586621679266033"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[c] -&gt; [d] -&gt; Gr c d
+</span><a href="#local-6989586621679267989"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[b]
+</span><a href="#local-6989586621679267987"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679267982"><span class="annot"><span class="annottext">bitraverse :: (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; Gr a b -&gt; f (Gr c d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></span></span><span> </span><span id="local-6989586621679267980"><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679267980"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679267979"><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679267979"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span id="local-6989586621679267978"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679267978"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679267977"><span class="annot"><span class="annottext">[b]
+</span><a href="#local-6989586621679267977"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[c] -&gt; [d] -&gt; Gr c d
 forall v f. [v] -&gt; [f] -&gt; Gr v f
 </span><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-var">Gr</span></a></span><span> </span><span class="annot"><span class="annottext">([c] -&gt; [d] -&gt; Gr c d) -&gt; f [c] -&gt; f ([d] -&gt; Gr c d)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -116,46 +158,46 @@ forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
-</span><a href="#local-6989586621679266036"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679266034"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">f ([d] -&gt; Gr c d) -&gt; f [d] -&gt; f (Gr c d)
+</span><a href="#local-6989586621679267980"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679267978"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">f ([d] -&gt; Gr c d) -&gt; f [d] -&gt; f (Gr c d)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">(b -&gt; f d) -&gt; [b] -&gt; f [d]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
-</span><a href="#local-6989586621679266035"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[b]
-</span><a href="#local-6989586621679266033"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span id="local-6989586621679266029"><span id="local-6989586621679266030"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679266022"><span id="local-6989586621679266024"><span id="local-6989586621679266027"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679266030"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679266029"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679266030"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679266029"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-38"></span><span>  </span><span id="local-6989586621679266020"><span class="annot"><span class="annottext">toEncoding :: Gr v f -&gt; Encoding
+</span><a href="#local-6989586621679267979"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">[b]
+</span><a href="#local-6989586621679267977"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679267975"><span id="local-6989586621679267976"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267968"><span id="local-6989586621679267970"><span id="local-6989586621679267973"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267976"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267975"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267976"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267975"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621679267966"><span class="annot"><span class="annottext">toEncoding :: Gr v f -&gt; Encoding
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Gr v f -&gt; Encoding
 forall a.
 (Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
 Options -&gt; a -&gt; Encoding
 </span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
 </span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span><span>
-</span><span id="line-39"></span><span id="local-6989586621679266015"><span id="local-6989586621679266016"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679266011"><span id="local-6989586621679266013"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679266016"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679266015"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679266016"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679266015"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span class="hs-comment">----------------------------------------</span><span>
-</span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-comment">-- | A vertex, represented by an id, its adjacencies, and its data.</span><span>
-</span><span id="line-44"></span><span id="local-6989586621679266008"><span id="local-6989586621679266009"></span></span><span class="hs-keyword">data</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span id="local-6989586621679266187"><span class="annot"><a href="#local-6989586621679266187"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679266188"><span class="annot"><a href="#local-6989586621679266188"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="id"><span class="annot"><span class="annottext">Vtx v e -&gt; Int
+</span><span id="line-45"></span><span id="local-6989586621679267961"><span id="local-6989586621679267962"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267957"><span id="local-6989586621679267959"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267962"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267961"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Gr"><span class="hs-identifier hs-type">Gr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267962"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267961"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- | A vertex, represented by an id, its adjacencies, and its data.</span><span>
+</span><span id="line-50"></span><span id="local-6989586621679267954"><span id="local-6989586621679267955"></span></span><span class="hs-keyword">data</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span id="local-6989586621679268216"><span class="annot"><a href="#local-6989586621679268216"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679268217"><span class="annot"><a href="#local-6989586621679268217"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Vtx"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="id"><span class="annot"><span class="annottext">Vtx v e -&gt; Int
 </span><a href="Data.PlanarGraph.AdjRep.html#id"><span class="hs-identifier hs-var hs-var">id</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-45"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="adj"><span class="annot"><span class="annottext">Vtx v e -&gt; [(Int, e)]
-</span><a href="Data.PlanarGraph.AdjRep.html#adj"><span class="hs-identifier hs-var hs-var">adj</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679266188"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ adjacent vertices + data</span><span>
-</span><span id="line-46"></span><span>                                        </span><span class="hs-comment">-- on the edge. Some</span><span>
-</span><span id="line-47"></span><span>                                        </span><span class="hs-comment">-- functions, like</span><span>
-</span><span id="line-48"></span><span>                                        </span><span class="hs-comment">-- 'fromAdjRep' may assume</span><span>
-</span><span id="line-49"></span><span>                                        </span><span class="hs-comment">-- that the adjacencies are</span><span>
-</span><span id="line-50"></span><span>                                        </span><span class="hs-comment">-- given in counterclockwise</span><span>
-</span><span id="line-51"></span><span>                                        </span><span class="hs-comment">-- order around the</span><span>
-</span><span id="line-52"></span><span>                                        </span><span class="hs-comment">-- vertices. This is not (yet)</span><span>
-</span><span id="line-53"></span><span>                                        </span><span class="hs-comment">-- enforced by the data type.</span><span>
-</span><span id="line-54"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="vData"><span class="annot"><span class="annottext">Vtx v e -&gt; v
-</span><a href="Data.PlanarGraph.AdjRep.html#vData"><span class="hs-identifier hs-var hs-var">vData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679266187"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-55"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Vtx v e -&gt; Rep (Vtx v e) x)
+</span><span id="line-51"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="adj"><span class="annot"><span class="annottext">Vtx v e -&gt; [(Int, e)]
+</span><a href="Data.PlanarGraph.AdjRep.html#adj"><span class="hs-identifier hs-var hs-var">adj</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679268217"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ adjacent vertices + data</span><span>
+</span><span id="line-52"></span><span>                                        </span><span class="hs-comment">-- on the edge. Some</span><span>
+</span><span id="line-53"></span><span>                                        </span><span class="hs-comment">-- functions, like</span><span>
+</span><span id="line-54"></span><span>                                        </span><span class="hs-comment">-- 'fromAdjRep' may assume</span><span>
+</span><span id="line-55"></span><span>                                        </span><span class="hs-comment">-- that the adjacencies are</span><span>
+</span><span id="line-56"></span><span>                                        </span><span class="hs-comment">-- given in counterclockwise</span><span>
+</span><span id="line-57"></span><span>                                        </span><span class="hs-comment">-- order around the</span><span>
+</span><span id="line-58"></span><span>                                        </span><span class="hs-comment">-- vertices. This is not (yet)</span><span>
+</span><span id="line-59"></span><span>                                        </span><span class="hs-comment">-- enforced by the data type.</span><span>
+</span><span id="line-60"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="vData"><span class="annot"><span class="annottext">Vtx v e -&gt; v
+</span><a href="Data.PlanarGraph.AdjRep.html#vData"><span class="hs-identifier hs-var hs-var">vData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679268216"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-61"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Vtx v e -&gt; Rep (Vtx v e) x)
 -&gt; (forall x. Rep (Vtx v e) x -&gt; Vtx v e) -&gt; Generic (Vtx v e)
 forall x. Rep (Vtx v e) x -&gt; Vtx v e
 forall x. Vtx v e -&gt; Rep (Vtx v e) x
@@ -165,7 +207,7 @@ forall v e x. Rep (Vtx v e) x -&gt; Vtx v e
 forall v e x. Vtx v e -&gt; Rep (Vtx v e) x
 $cto :: forall v e x. Rep (Vtx v e) x -&gt; Vtx v e
 $cfrom :: forall v e x. Vtx v e -&gt; Rep (Vtx v e) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679265996"><span id="local-6989586621679265998"><span id="local-6989586621679266000"><span class="annot"><span class="annottext">Int -&gt; Vtx v e -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679267942"><span id="local-6989586621679267944"><span id="local-6989586621679267946"><span class="annot"><span class="annottext">Int -&gt; Vtx v e -&gt; ShowS
 [Vtx v e] -&gt; ShowS
 Vtx v e -&gt; String
 (Int -&gt; Vtx v e -&gt; ShowS)
@@ -181,7 +223,7 @@ show :: Vtx v e -&gt; String
 $cshow :: forall v e. (Show e, Show v) =&gt; Vtx v e -&gt; String
 showsPrec :: Int -&gt; Vtx v e -&gt; ShowS
 $cshowsPrec :: forall v e. (Show e, Show v) =&gt; Int -&gt; Vtx v e -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679265992"><span id="local-6989586621679265994"><span class="annot"><span class="annottext">Vtx v e -&gt; Vtx v e -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679267938"><span id="local-6989586621679267940"><span class="annot"><span class="annottext">Vtx v e -&gt; Vtx v e -&gt; Bool
 (Vtx v e -&gt; Vtx v e -&gt; Bool)
 -&gt; (Vtx v e -&gt; Vtx v e -&gt; Bool) -&gt; Eq (Vtx v e)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -191,99 +233,161 @@ $c/= :: forall v e. (Eq e, Eq v) =&gt; Vtx v e -&gt; Vtx v e -&gt; Bool
 == :: Vtx v e -&gt; Vtx v e -&gt; Bool
 $c== :: forall v e. (Eq e, Eq v) =&gt; Vtx v e -&gt; Vtx v e -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265987"><span id="local-6989586621679265989"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>  </span><span id="local-6989586621679265986"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; Vtx a c -&gt; Vtx b d
-</span><a href="#local-6989586621679265986"><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679265985"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679265985"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679265984"><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679265984"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679265983"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679265983"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679265982"><span class="annot"><span class="annottext">[(Int, c)]
-</span><a href="#local-6989586621679265982"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621679265981"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265981"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, d)] -&gt; b -&gt; Vtx b d
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679267937"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267934"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267937"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679267933"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Vtx v a -&gt; Vtx v b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679267932"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679267932"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679267931"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267931"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267930"><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267930"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621679267929"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679267929"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, b)] -&gt; v -&gt; Vtx v b
 forall v e. Int -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e
 </span><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679265983"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, c) -&gt; (Int, d)) -&gt; [(Int, c)] -&gt; [(Int, d)]
+</span><a href="#local-6989586621679267931"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, a) -&gt; (Int, b)) -&gt; [(Int, a)] -&gt; [(Int, b)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (Int, a) -&gt; (Int, b)
+forall (p :: * -&gt; * -&gt; *) b c a.
+Bifunctor p =&gt;
+(b -&gt; c) -&gt; p a b -&gt; p a c
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679267932"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267930"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679267929"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-65"></span><span id="local-6989586621679267928"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267895"><span id="local-6989586621679267897"><span id="local-6989586621679267899"><span id="local-6989586621679267901"><span id="local-6989586621679267903"><span id="local-6989586621679267905"><span id="local-6989586621679267907"><span id="local-6989586621679267909"><span id="local-6989586621679267911"><span id="local-6989586621679267913"><span id="local-6989586621679267915"><span id="local-6989586621679267917"><span id="local-6989586621679267919"><span id="local-6989586621679267921"><span id="local-6989586621679267923"><span id="local-6989586621679267926"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267928"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679267894"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; Vtx v a -&gt; m
+</span><a href="#local-6989586621679267894"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span id="local-6989586621679267893"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679267893"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679267892"><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267892"><span class="hs-identifier hs-var">ads</span></a></span></span><span> </span><span class="annot"><span class="annottext">v
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, a) -&gt; m) -&gt; [(Int, a)] -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679267893"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; ((Int, a) -&gt; a) -&gt; (Int, a) -&gt; m
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int, a) -&gt; a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267892"><span class="hs-identifier hs-var">ads</span></a></span></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679267890"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267881"><span id="local-6989586621679267883"><span id="local-6989586621679267885"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267890"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679267880"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; Vtx v a -&gt; f (Vtx v b)
+</span><a href="#local-6989586621679267880"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679267879"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679267879"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679267878"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267878"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267877"><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267877"><span class="hs-identifier hs-var">adjs</span></a></span></span><span> </span><span id="local-6989586621679267876"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679267876"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, b)] -&gt; v -&gt; Vtx v b
+forall v e. Int -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e
+</span><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267878"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, b)] -&gt; v -&gt; Vtx v b) -&gt; f [(Int, b)] -&gt; f (v -&gt; Vtx v b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">((Int, a) -&gt; f (Int, b)) -&gt; [(Int, a)] -&gt; f [(Int, b)]
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; (Int, a) -&gt; f (Int, b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679267879"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, a)]
+</span><a href="#local-6989586621679267877"><span class="hs-identifier hs-var">adjs</span></a></span><span> </span><span class="annot"><span class="annottext">f (v -&gt; Vtx v b) -&gt; f v -&gt; f (Vtx v b)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">v -&gt; f v
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679267876"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267871"><span id="local-6989586621679267873"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679267870"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; Vtx a c -&gt; Vtx b d
+</span><a href="#local-6989586621679267870"><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679267869"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679267869"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679267868"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679267868"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679267867"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267867"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267866"><span class="annot"><span class="annottext">[(Int, c)]
+</span><a href="#local-6989586621679267866"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621679267865"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267865"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, d)] -&gt; b -&gt; Vtx b d
+forall v e. Int -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e
+</span><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267867"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, c) -&gt; (Int, d)) -&gt; [(Int, c)] -&gt; [(Int, d)]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(c -&gt; d) -&gt; (Int, c) -&gt; (Int, d)
 forall (p :: * -&gt; * -&gt; *) b c a.
 Bifunctor p =&gt;
 (b -&gt; c) -&gt; p a b -&gt; p a c
 </span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679265984"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, c)]
-</span><a href="#local-6989586621679265982"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679265985"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265981"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265974"><span id="local-6989586621679265976"><span id="local-6989586621679265979"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-60"></span><span>  </span><span id="local-6989586621679265973"><span class="annot"><span class="annottext">bifoldMap :: (a -&gt; m) -&gt; (b -&gt; m) -&gt; Vtx a b -&gt; m
-</span><a href="#local-6989586621679265973"><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span id="local-6989586621679265972"><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679265972"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679265971"><span class="annot"><span class="annottext">b -&gt; m
-</span><a href="#local-6989586621679265971"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679265970"><span class="annot"><span class="annottext">[(Int, b)]
-</span><a href="#local-6989586621679265970"><span class="hs-identifier hs-var">ads</span></a></span></span><span> </span><span id="local-6989586621679265969"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265969"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, b) -&gt; m) -&gt; [(Int, b)] -&gt; m
+</span><a href="#local-6989586621679267868"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, c)]
+</span><a href="#local-6989586621679267866"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679267869"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267865"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267858"><span id="local-6989586621679267860"><span id="local-6989586621679267863"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679267857"><span class="annot"><span class="annottext">bifoldMap :: (a -&gt; m) -&gt; (b -&gt; m) -&gt; Vtx a b -&gt; m
+</span><a href="#local-6989586621679267857"><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span id="local-6989586621679267856"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679267856"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679267855"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679267855"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679267854"><span class="annot"><span class="annottext">[(Int, b)]
+</span><a href="#local-6989586621679267854"><span class="hs-identifier hs-var">ads</span></a></span></span><span> </span><span id="local-6989586621679267853"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267853"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, b) -&gt; m) -&gt; [(Int, b)] -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; m
-</span><a href="#local-6989586621679265971"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; m) -&gt; ((Int, b) -&gt; b) -&gt; (Int, b) -&gt; m
+</span><a href="#local-6989586621679267855"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; m) -&gt; ((Int, b) -&gt; b) -&gt; (Int, b) -&gt; m
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int, b) -&gt; b
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, b)]
-</span><a href="#local-6989586621679265970"><span class="hs-identifier hs-var">ads</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+</span><a href="#local-6989586621679267854"><span class="hs-identifier hs-var">ads</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679265972"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265969"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-62"></span><span>  </span><span id="local-6989586621679265964"><span class="annot"><span class="annottext">bitraverse :: (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; Vtx a b -&gt; f (Vtx c d)
-</span><a href="#local-6989586621679265964"><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></a></span></span><span> </span><span id="local-6989586621679265963"><span class="annot"><span class="annottext">a -&gt; f c
-</span><a href="#local-6989586621679265963"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679265962"><span class="annot"><span class="annottext">b -&gt; f d
-</span><a href="#local-6989586621679265962"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679265961"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679265961"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679265960"><span class="annot"><span class="annottext">[(Int, b)]
-</span><a href="#local-6989586621679265960"><span class="hs-identifier hs-var">adjs</span></a></span></span><span> </span><span id="local-6989586621679265959"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265959"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, d)] -&gt; c -&gt; Vtx c d
+</span><a href="#local-6989586621679267856"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267853"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679267849"><span class="annot"><span class="annottext">bitraverse :: (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; Vtx a b -&gt; f (Vtx c d)
+</span><a href="#local-6989586621679267849"><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></a></span></span><span> </span><span id="local-6989586621679267848"><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679267848"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679267847"><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679267847"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span id="local-6989586621679267846"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267846"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267845"><span class="annot"><span class="annottext">[(Int, b)]
+</span><a href="#local-6989586621679267845"><span class="hs-identifier hs-var">adjs</span></a></span></span><span> </span><span id="local-6989586621679267844"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267844"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [(Int, d)] -&gt; c -&gt; Vtx c d
 forall v e. Int -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e
 </span><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679265961"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, d)] -&gt; c -&gt; Vtx c d) -&gt; f [(Int, d)] -&gt; f (c -&gt; Vtx c d)
+</span><a href="#local-6989586621679267846"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, d)] -&gt; c -&gt; Vtx c d) -&gt; f [(Int, d)] -&gt; f (c -&gt; Vtx c d)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">((Int, b) -&gt; f (Int, d)) -&gt; [(Int, b)] -&gt; f [(Int, d)]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
-</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; f Int) -&gt; (b -&gt; f d) -&gt; (Int, b) -&gt; f (Int, d)
-forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
-(Bitraversable t, Applicative f) =&gt;
-(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; t a b -&gt; f (t c d)
-</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; f Int
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
-</span><a href="#local-6989586621679265962"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, b)]
-</span><a href="#local-6989586621679265960"><span class="hs-identifier hs-var">adjs</span></a></span><span> </span><span class="annot"><span class="annottext">f (c -&gt; Vtx c d) -&gt; f c -&gt; f (Vtx c d)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(b -&gt; f d) -&gt; (Int, b) -&gt; f (Int, d)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679267847"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, b)]
+</span><a href="#local-6989586621679267845"><span class="hs-identifier hs-var">adjs</span></a></span><span> </span><span class="annot"><span class="annottext">f (c -&gt; Vtx c d) -&gt; f c -&gt; f (Vtx c d)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
-</span><a href="#local-6989586621679265963"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679265959"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span id="local-6989586621679265957"><span id="local-6989586621679265958"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265950"><span id="local-6989586621679265952"><span id="local-6989586621679265955"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265958"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265957"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265958"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265957"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621679265949"><span class="annot"><span class="annottext">toEncoding :: Vtx v e -&gt; Encoding
-</span><a href="#local-6989586621679265949"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Vtx v e -&gt; Encoding
+</span><a href="#local-6989586621679267848"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679267844"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679267842"><span id="local-6989586621679267843"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267835"><span id="local-6989586621679267837"><span id="local-6989586621679267840"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267843"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267842"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267843"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267842"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679267834"><span class="annot"><span class="annottext">toEncoding :: Vtx v e -&gt; Encoding
+</span><a href="#local-6989586621679267834"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Vtx v e -&gt; Encoding
 forall a.
 (Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
 Options -&gt; a -&gt; Encoding
 </span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
 </span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span><span>
-</span><span id="line-66"></span><span id="local-6989586621679265947"><span id="local-6989586621679265948"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265943"><span id="local-6989586621679265945"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265948"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265947"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265948"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265947"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span class="hs-comment">----------------------------------------</span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-comment">-- | Faces</span><span>
-</span><span id="line-71"></span><span id="local-6989586621679265941"><span id="local-6989586621679265942"></span></span><span class="hs-keyword">data</span><span> </span><span id="Face"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span id="local-6989586621679265940"><span class="annot"><a href="#local-6989586621679265940"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Face"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="incidentEdge"><span class="annot"><span class="annottext">Face f -&gt; (Int, Int)
+</span><span id="line-79"></span><span id="local-6989586621679267832"><span id="local-6989586621679267833"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267828"><span id="local-6989586621679267830"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267833"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267832"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267833"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267832"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- | Faces</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679267826"><span id="local-6989586621679267827"></span></span><span class="hs-keyword">data</span><span> </span><span id="Face"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span id="local-6989586621679267825"><span class="annot"><a href="#local-6989586621679267825"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Face"><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="incidentEdge"><span class="annot"><span class="annottext">Face f -&gt; (Int, Int)
 </span><a href="Data.PlanarGraph.AdjRep.html#incidentEdge"><span class="hs-identifier hs-var hs-var">incidentEdge</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ an edge (u,v) s.t. the face</span><span>
-</span><span id="line-72"></span><span>                                               </span><span class="hs-comment">-- is right from (u,v)</span><span>
-</span><span id="line-73"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="fData"><span class="annot"><span class="annottext">Face f -&gt; f
-</span><a href="Data.PlanarGraph.AdjRep.html#fData"><span class="hs-identifier hs-var hs-var">fData</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679265940"><span class="hs-identifier hs-type">f</span></a></span><span>
-</span><span id="line-74"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Face f -&gt; Rep (Face f) x)
+</span><span id="line-85"></span><span>                                               </span><span class="hs-comment">-- is right from (u,v)</span><span>
+</span><span id="line-86"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="fData"><span class="annot"><span class="annottext">Face f -&gt; f
+</span><a href="Data.PlanarGraph.AdjRep.html#fData"><span class="hs-identifier hs-var hs-var">fData</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679267825"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-87"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Face f -&gt; Rep (Face f) x)
 -&gt; (forall x. Rep (Face f) x -&gt; Face f) -&gt; Generic (Face f)
 forall x. Rep (Face f) x -&gt; Face f
 forall x. Face f -&gt; Rep (Face f) x
@@ -293,7 +397,7 @@ forall f x. Rep (Face f) x -&gt; Face f
 forall f x. Face f -&gt; Rep (Face f) x
 $cto :: forall f x. Rep (Face f) x -&gt; Face f
 $cfrom :: forall f x. Face f -&gt; Rep (Face f) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679265931"><span id="local-6989586621679265933"><span class="annot"><span class="annottext">a -&gt; Face b -&gt; Face a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679267816"><span id="local-6989586621679267818"><span class="annot"><span class="annottext">a -&gt; Face b -&gt; Face a
 (a -&gt; b) -&gt; Face a -&gt; Face b
 (forall a b. (a -&gt; b) -&gt; Face a -&gt; Face b)
 -&gt; (forall a b. a -&gt; Face b -&gt; Face a) -&gt; Functor Face
@@ -306,7 +410,7 @@ forall (f :: * -&gt; *).
 $c&lt;$ :: forall a b. a -&gt; Face b -&gt; Face a
 fmap :: (a -&gt; b) -&gt; Face a -&gt; Face b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Face a -&gt; Face b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679265896"><span id="local-6989586621679265898"><span id="local-6989586621679265900"><span id="local-6989586621679265902"><span id="local-6989586621679265904"><span id="local-6989586621679265906"><span id="local-6989586621679265908"><span id="local-6989586621679265910"><span id="local-6989586621679265912"><span id="local-6989586621679265914"><span id="local-6989586621679265916"><span id="local-6989586621679265918"><span id="local-6989586621679265920"><span id="local-6989586621679265922"><span id="local-6989586621679265924"><span id="local-6989586621679265926"><span id="local-6989586621679265928"><span class="annot"><span class="annottext">Face a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679267782"><span id="local-6989586621679267784"><span id="local-6989586621679267786"><span id="local-6989586621679267788"><span id="local-6989586621679267790"><span id="local-6989586621679267792"><span id="local-6989586621679267794"><span id="local-6989586621679267796"><span id="local-6989586621679267798"><span id="local-6989586621679267800"><span id="local-6989586621679267802"><span id="local-6989586621679267804"><span id="local-6989586621679267806"><span id="local-6989586621679267808"><span id="local-6989586621679267810"><span id="local-6989586621679267812"><span id="local-6989586621679267814"><span class="annot"><span class="annottext">Face a -&gt; Bool
 (a -&gt; m) -&gt; Face a -&gt; m
 (a -&gt; b -&gt; b) -&gt; b -&gt; Face a -&gt; b
 (forall m. Monoid m =&gt; Face m -&gt; m)
@@ -391,7 +495,7 @@ foldMap :: (a -&gt; m) -&gt; Face a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Face a -&gt; m
 fold :: Face m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Face m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679265885"><span id="local-6989586621679265887"><span id="local-6989586621679265889"><span id="local-6989586621679265891"><span class="annot"><span class="annottext">Functor Face
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679267772"><span id="local-6989586621679267774"><span id="local-6989586621679267776"><span id="local-6989586621679267778"><span class="annot"><span class="annottext">Functor Face
 Foldable Face
 Functor Face
 -&gt; Foldable Face
@@ -441,7 +545,7 @@ Applicative f =&gt;
 (a -&gt; f b) -&gt; Face a -&gt; f (Face b)
 $cp2Traversable :: Foldable Face
 $cp1Traversable :: Functor Face
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679265878"><span id="local-6989586621679265880"><span id="local-6989586621679265882"><span class="annot"><span class="annottext">Int -&gt; Face f -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679267766"><span id="local-6989586621679267768"><span id="local-6989586621679267770"><span class="annot"><span class="annottext">Int -&gt; Face f -&gt; ShowS
 [Face f] -&gt; ShowS
 Face f -&gt; String
 (Int -&gt; Face f -&gt; ShowS)
@@ -457,7 +561,7 @@ show :: Face f -&gt; String
 $cshow :: forall f. Show f =&gt; Face f -&gt; String
 showsPrec :: Int -&gt; Face f -&gt; ShowS
 $cshowsPrec :: forall f. Show f =&gt; Int -&gt; Face f -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679265874"><span id="local-6989586621679265876"><span class="annot"><span class="annottext">Face f -&gt; Face f -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679267762"><span id="local-6989586621679267764"><span class="annot"><span class="annottext">Face f -&gt; Face f -&gt; Bool
 (Face f -&gt; Face f -&gt; Bool)
 -&gt; (Face f -&gt; Face f -&gt; Bool) -&gt; Eq (Face f)
 forall f. Eq f =&gt; Face f -&gt; Face f -&gt; Bool
@@ -467,18 +571,18 @@ $c/= :: forall f. Eq f =&gt; Face f -&gt; Face f -&gt; Bool
 == :: Face f -&gt; Face f -&gt; Bool
 $c== :: forall f. Eq f =&gt; Face f -&gt; Face f -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span id="local-6989586621679265873"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265866"><span id="local-6989586621679265868"><span id="local-6989586621679265871"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265873"><span class="hs-identifier hs-type">f</span></a></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265873"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-77"></span><span>  </span><span id="local-6989586621679265865"><span class="annot"><span class="annottext">toEncoding :: Face f -&gt; Encoding
-</span><a href="#local-6989586621679265865"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Face f -&gt; Encoding
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679267761"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267754"><span id="local-6989586621679267756"><span id="local-6989586621679267759"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267761"><span class="hs-identifier hs-type">f</span></a></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267761"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621679267753"><span class="annot"><span class="annottext">toEncoding :: Face f -&gt; Encoding
+</span><a href="#local-6989586621679267753"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Face f -&gt; Encoding
 forall a.
 (Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
 Options -&gt; a -&gt; Encoding
 </span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
 </span><span class="hs-identifier hs-var">defaultOptions</span></span></span><span>
-</span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span id="local-6989586621679265864"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265860"><span id="local-6989586621679265862"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679265864"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265864"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
-</span><span id="line-80"></span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-83"></span></pre></body></html>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span id="local-6989586621679267752"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679267748"><span id="local-6989586621679267750"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679267752"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.AdjRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679267752"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-96"></span></pre></body></html>

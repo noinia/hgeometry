@@ -32,15 +32,16 @@
 </span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Range</span></span><span>
 </span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
 </span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
-</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- | Internal nodes store the max x-value from the left subtree and</span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- the point that has globally the max-y coordinate.</span><span>
-</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="NodeData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span id="local-6989586621680019763"><span class="annot"><a href="#local-6989586621680019763"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680019764"><span class="annot"><a href="#local-6989586621680019764"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NodeData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_splitPoint"><span class="annot"><span class="annottext">NodeData p r -&gt; r
-</span><a href="Geometry.PrioritySearchTree.html#_splitPoint"><span class="hs-identifier hs-var hs-var">_splitPoint</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680019764"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-40"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_maxVal"><span class="annot"><span class="annottext">NodeData p r -&gt; Maybe (Point 2 r :+ p)
-</span><a href="Geometry.PrioritySearchTree.html#_maxVal"><span class="hs-identifier hs-var hs-var">_maxVal</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019764"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019763"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-41"></span><span>                             </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680019616"><span id="local-6989586621680019618"><span id="local-6989586621680019620"><span class="annot"><span class="annottext">Int -&gt; NodeData p r -&gt; ShowS
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">first</span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | Internal nodes store the max x-value from the left subtree and</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- the point that has globally the max-y coordinate.</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">data</span><span> </span><span id="NodeData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span id="local-6989586621680027138"><span class="annot"><a href="#local-6989586621680027138"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680027139"><span class="annot"><a href="#local-6989586621680027139"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NodeData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_splitPoint"><span class="annot"><span class="annottext">NodeData p r -&gt; r
+</span><a href="Geometry.PrioritySearchTree.html#_splitPoint"><span class="hs-identifier hs-var hs-var">_splitPoint</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680027139"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-41"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_maxVal"><span class="annot"><span class="annottext">NodeData p r -&gt; Maybe (Point 2 r :+ p)
+</span><a href="Geometry.PrioritySearchTree.html#_maxVal"><span class="hs-identifier hs-var hs-var">_maxVal</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680027139"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680027138"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>                             </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680026966"><span id="local-6989586621680026968"><span id="local-6989586621680026970"><span class="annot"><span class="annottext">Int -&gt; NodeData p r -&gt; ShowS
 [NodeData p r] -&gt; ShowS
 NodeData p r -&gt; String
 (Int -&gt; NodeData p r -&gt; ShowS)
@@ -58,7 +59,7 @@ show :: NodeData p r -&gt; String
 $cshow :: forall p r. (Show r, Show p) =&gt; NodeData p r -&gt; String
 showsPrec :: Int -&gt; NodeData p r -&gt; ShowS
 $cshowsPrec :: forall p r. (Show r, Show p) =&gt; Int -&gt; NodeData p r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680019611"><span id="local-6989586621680019613"><span class="annot"><span class="annottext">NodeData p r -&gt; NodeData p r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680026961"><span id="local-6989586621680026963"><span class="annot"><span class="annottext">NodeData p r -&gt; NodeData p r -&gt; Bool
 (NodeData p r -&gt; NodeData p r -&gt; Bool)
 -&gt; (NodeData p r -&gt; NodeData p r -&gt; Bool) -&gt; Eq (NodeData p r)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -68,18 +69,40 @@ $c/= :: forall p r. (Eq r, Eq p) =&gt; NodeData p r -&gt; NodeData p r -&gt; Boo
 == :: NodeData p r -&gt; NodeData p r -&gt; Bool
 $c== :: forall p r. (Eq r, Eq p) =&gt; NodeData p r -&gt; NodeData p r -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680019605"><span id="local-6989586621680019607"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621680019603"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; NodeData a c -&gt; NodeData b d
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621680019601"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680019601"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680019600"><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019600"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680019599"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621680019599"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680019598"><span class="annot"><span class="annottext">Maybe (Point 2 c :+ a)
-</span><a href="#local-6989586621680019598"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d -&gt; Maybe (Point 2 d :+ b) -&gt; NodeData b d
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span id="local-6989586621680026959"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680026956"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026959"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621680026954"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; NodeData c a -&gt; NodeData c b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621680026953"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026953"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680026952"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680026952"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026951"><span class="annot"><span class="annottext">Maybe (Point 2 a :+ c)
+</span><a href="#local-6989586621680026951"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; Maybe (Point 2 b :+ c) -&gt; NodeData c b
+forall p r. r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
+</span><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026953"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680026952"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 a -&gt; Point 2 b) -&gt; (Point 2 a :+ c) -&gt; Point 2 b :+ c
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Point 2 a -&gt; Point 2 b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026953"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Point 2 a :+ c) -&gt; Point 2 b :+ c)
+-&gt; Maybe (Point 2 a :+ c) -&gt; Maybe (Point 2 b :+ c)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 a :+ c)
+</span><a href="#local-6989586621680026951"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680026945"><span id="local-6989586621680026947"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621680026943"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; NodeData a c -&gt; NodeData b d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621680026941"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026941"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680026940"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621680026940"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680026939"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621680026939"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026938"><span class="annot"><span class="annottext">Maybe (Point 2 c :+ a)
+</span><a href="#local-6989586621680026938"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d -&gt; Maybe (Point 2 d :+ b) -&gt; NodeData b d
 forall p r. r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
 </span><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019600"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621680019599"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 c -&gt; Point 2 d)
+</span><a href="#local-6989586621680026940"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621680026939"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 c -&gt; Point 2 d)
 -&gt; (a -&gt; b) -&gt; (Point 2 c :+ a) -&gt; Point 2 d :+ b
 forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
@@ -87,15 +110,15 @@ Bifunctor p =&gt;
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(c -&gt; d) -&gt; Point 2 c -&gt; Point 2 d
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019600"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680019601"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 c :+ a) -&gt; Point 2 d :+ b)
+</span><a href="#local-6989586621680026940"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026941"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 c :+ a) -&gt; Point 2 d :+ b)
 -&gt; Maybe (Point 2 c :+ a) -&gt; Maybe (Point 2 d :+ b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 c :+ a)
-</span><a href="#local-6989586621680019598"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span id="local-6989586621680019664"><span id="local-6989586621680019665"><span class="annot"><a href="Geometry.PrioritySearchTree.html#maxVal"><span class="hs-identifier hs-type">maxVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019665"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019664"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019664"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019665"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-47"></span><span id="maxVal"><span class="annot"><span class="annottext">maxVal :: (Maybe (Point 2 r :+ p) -&gt; f (Maybe (Point 2 r :+ p)))
+</span><a href="#local-6989586621680026938"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621680027015"><span id="local-6989586621680027016"><span class="annot"><a href="Geometry.PrioritySearchTree.html#maxVal"><span class="hs-identifier hs-type">maxVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027016"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027015"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680027015"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680027016"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-51"></span><span id="maxVal"><span class="annot"><span class="annottext">maxVal :: (Maybe (Point 2 r :+ p) -&gt; f (Maybe (Point 2 r :+ p)))
 -&gt; NodeData p r -&gt; f (NodeData p r)
 </span><a href="Geometry.PrioritySearchTree.html#maxVal"><span class="hs-identifier hs-var hs-var">maxVal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NodeData p r -&gt; Maybe (Point 2 r :+ p))
 -&gt; (NodeData p r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r)
@@ -107,26 +130,26 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
 </span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">NodeData p r -&gt; Maybe (Point 2 r :+ p)
 forall p r. NodeData p r -&gt; Maybe (Point 2 r :+ p)
-</span><a href="Geometry.PrioritySearchTree.html#_maxVal"><span class="hs-identifier hs-var hs-var">_maxVal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680019594"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019594"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680019593"><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
-</span><a href="#local-6989586621680019593"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
+</span><a href="Geometry.PrioritySearchTree.html#_maxVal"><span class="hs-identifier hs-var hs-var">_maxVal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680026935"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026935"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680026934"><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><a href="#local-6989586621680026934"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
 forall p r. r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
 </span><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019594"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
-</span><a href="#local-6989586621680019593"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">type</span><span> </span><span id="LeafData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-var">LeafData</span></a></span></span><span> </span><span id="local-6989586621680019592"><span class="annot"><a href="#local-6989586621680019592"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680019591"><span class="annot"><a href="#local-6989586621680019591"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="annot"><a href="#local-6989586621680019591"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019591"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019592"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><a href="#local-6989586621680026935"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><a href="#local-6989586621680026934"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span class="hs-comment">-- | A priority search tree storing points in \(\mathbb{R}^2) that</span><span>
-</span><span id="line-55"></span><span class="hs-comment">-- have an additional payload of type p.</span><span>
-</span><span id="line-56"></span><span class="hs-keyword">newtype</span><span> </span><span id="PrioritySearchTree"><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span></span><span> </span><span id="local-6989586621680019729"><span class="annot"><a href="#local-6989586621680019729"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680019728"><span class="annot"><a href="#local-6989586621680019728"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-57"></span><span>    </span><span id="PrioritySearchTree"><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unPrioritySearchTree"><span class="annot"><span class="annottext">PrioritySearchTree p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="Geometry.PrioritySearchTree.html#_unPrioritySearchTree"><span class="hs-identifier hs-var hs-var">_unPrioritySearchTree</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019729"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019728"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019729"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019728"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680019583"><span id="local-6989586621680019585"><span id="local-6989586621680019587"><span class="annot"><span class="annottext">Int -&gt; PrioritySearchTree p r -&gt; ShowS
+</span><span id="line-54"></span><span class="hs-keyword">type</span><span> </span><span id="LeafData"><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-var">LeafData</span></a></span></span><span> </span><span id="local-6989586621680026933"><span class="annot"><a href="#local-6989586621680026933"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680026932"><span class="annot"><a href="#local-6989586621680026932"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="annot"><a href="#local-6989586621680026932"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680026932"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680026933"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | A priority search tree storing points in \(\mathbb{R}^2) that</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- have an additional payload of type p.</span><span>
+</span><span id="line-60"></span><span class="hs-keyword">newtype</span><span> </span><span id="PrioritySearchTree"><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span></span><span> </span><span id="local-6989586621680027090"><span class="annot"><a href="#local-6989586621680027090"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680027089"><span class="annot"><a href="#local-6989586621680027089"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-61"></span><span>    </span><span id="PrioritySearchTree"><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unPrioritySearchTree"><span class="annot"><span class="annottext">PrioritySearchTree p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="Geometry.PrioritySearchTree.html#_unPrioritySearchTree"><span class="hs-identifier hs-var hs-var">_unPrioritySearchTree</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027090"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027089"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027090"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027089"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680026924"><span id="local-6989586621680026926"><span id="local-6989586621680026928"><span class="annot"><span class="annottext">Int -&gt; PrioritySearchTree p r -&gt; ShowS
 [PrioritySearchTree p r] -&gt; ShowS
 PrioritySearchTree p r -&gt; String
 (Int -&gt; PrioritySearchTree p r -&gt; ShowS)
@@ -148,7 +171,7 @@ showsPrec :: Int -&gt; PrioritySearchTree p r -&gt; ShowS
 $cshowsPrec :: forall p r.
 (Show r, Show p) =&gt;
 Int -&gt; PrioritySearchTree p r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680019579"><span id="local-6989586621680019581"><span class="annot"><span class="annottext">PrioritySearchTree p r -&gt; PrioritySearchTree p r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680026920"><span id="local-6989586621680026922"><span class="annot"><span class="annottext">PrioritySearchTree p r -&gt; PrioritySearchTree p r -&gt; Bool
 (PrioritySearchTree p r -&gt; PrioritySearchTree p r -&gt; Bool)
 -&gt; (PrioritySearchTree p r -&gt; PrioritySearchTree p r -&gt; Bool)
 -&gt; Eq (PrioritySearchTree p r)
@@ -165,50 +188,107 @@ $c== :: forall p r.
 (Eq r, Eq p) =&gt;
 PrioritySearchTree p r -&gt; PrioritySearchTree p r -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680019574"><span id="local-6989586621680019576"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-61"></span><span>  </span><span class="hs-comment">-- ^ note that this is not necessarily safe, as mapping over r can</span><span>
-</span><span id="line-62"></span><span>  </span><span class="hs-comment">-- invalidate the invariants. Users are responsible for making sure</span><span>
-</span><span id="line-63"></span><span>  </span><span class="hs-comment">-- this does not happen.</span><span>
-</span><span id="line-64"></span><span>  </span><span id="local-6989586621680019573"><span class="annot"><span class="annottext">bimap :: (a -&gt; b)
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span id="local-6989586621680026919"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680026916"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026919"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-comment">-- ^ note that this is not necessarily safe, as mapping over r can</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- invalidate the invariants. Users are responsible for making sure</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- this does not happen.</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621680026915"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; PrioritySearchTree c a -&gt; PrioritySearchTree c b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621680026914"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026914"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span id="local-6989586621680026913"><span class="annot"><span class="annottext">BinLeafTree (NodeData c a) (LeafData c a)
+</span><a href="#local-6989586621680026913"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-69"></span><span>      </span><span class="annot"><span class="annottext">BinLeafTree (NodeData c b) (LeafData c b) -&gt; PrioritySearchTree c b
+forall p r.
+BinLeafTree (NodeData p r) (LeafData p r) -&gt; PrioritySearchTree p r
+</span><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData c b) (LeafData c b)
+ -&gt; PrioritySearchTree c b)
+-&gt; BinLeafTree (NodeData c b) (LeafData c b)
+-&gt; PrioritySearchTree c b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(NodeData c a -&gt; NodeData c b)
+-&gt; (LeafData c a -&gt; LeafData c b)
+-&gt; BinLeafTree (NodeData c a) (LeafData c a)
+-&gt; BinLeafTree (NodeData c b) (LeafData c b)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">NodeData c a -&gt; NodeData c b
+</span><a href="#local-6989586621680026912"><span class="hs-identifier hs-var">mapNodeData</span></a></span><span> </span><span class="annot"><span class="annottext">LeafData c a -&gt; LeafData c b
+</span><a href="#local-6989586621680026911"><span class="hs-identifier hs-var">mapLeafData</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData c a) (LeafData c a)
+</span><a href="#local-6989586621680026913"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>      </span><span id="local-6989586621680026912"><span class="annot"><span class="annottext">mapNodeData :: NodeData c a -&gt; NodeData c b
+</span><a href="#local-6989586621680026912"><span class="hs-identifier hs-var hs-var">mapNodeData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; NodeData c a -&gt; NodeData c b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026914"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-72"></span><span>      </span><span id="local-6989586621680026911"><span class="annot"><span class="annottext">mapLeafData :: LeafData c a -&gt; LeafData c b
+</span><a href="#local-6989586621680026911"><span class="hs-identifier hs-var hs-var">mapLeafData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b)
+-&gt; ([Point 2 a :+ c] -&gt; [Point 2 b :+ c])
+-&gt; LeafData c a
+-&gt; LeafData c b
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026914"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 a :+ c) -&gt; Point 2 b :+ c)
+-&gt; [Point 2 a :+ c] -&gt; [Point 2 b :+ c]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(((Point 2 a :+ c) -&gt; Point 2 b :+ c)
+ -&gt; [Point 2 a :+ c] -&gt; [Point 2 b :+ c])
+-&gt; ((Point 2 a :+ c) -&gt; Point 2 b :+ c)
+-&gt; [Point 2 a :+ c]
+-&gt; [Point 2 b :+ c]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 a -&gt; Point 2 b) -&gt; (Point 2 a :+ c) -&gt; Point 2 b :+ c
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Point 2 a -&gt; Point 2 b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026914"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680026906"><span id="local-6989586621680026908"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-comment">-- ^ note that this is not necessarily safe, as mapping over r can</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- invalidate the invariants. Users are responsible for making sure</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">-- this does not happen.</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621680026905"><span class="annot"><span class="annottext">bimap :: (a -&gt; b)
 -&gt; (c -&gt; d) -&gt; PrioritySearchTree a c -&gt; PrioritySearchTree b d
-</span><a href="#local-6989586621680019573"><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621680019572"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680019572"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680019571"><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019571"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span id="local-6989586621680019570"><span class="annot"><span class="annottext">BinLeafTree (NodeData a c) (LeafData a c)
-</span><a href="#local-6989586621680019570"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData b d) (LeafData b d) -&gt; PrioritySearchTree b d
+</span><a href="#local-6989586621680026905"><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621680026904"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026904"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680026903"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621680026903"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span id="local-6989586621680026902"><span class="annot"><span class="annottext">BinLeafTree (NodeData a c) (LeafData a c)
+</span><a href="#local-6989586621680026902"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-79"></span><span>      </span><span class="annot"><span class="annottext">BinLeafTree (NodeData b d) (LeafData b d) -&gt; PrioritySearchTree b d
 forall p r.
 BinLeafTree (NodeData p r) (LeafData p r) -&gt; PrioritySearchTree p r
 </span><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData b d) (LeafData b d)
  -&gt; PrioritySearchTree b d)
--&gt; (BinLeafTree (NodeData a c) (LeafData a c)
-    -&gt; BinLeafTree (NodeData b d) (LeafData b d))
--&gt; BinLeafTree (NodeData a c) (LeafData a c)
+-&gt; BinLeafTree (NodeData b d) (LeafData b d)
 -&gt; PrioritySearchTree b d
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(NodeData a c -&gt; NodeData b d)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(NodeData a c -&gt; NodeData b d)
 -&gt; (LeafData a c -&gt; LeafData b d)
 -&gt; BinLeafTree (NodeData a c) (LeafData a c)
 -&gt; BinLeafTree (NodeData b d) (LeafData b d)
 forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
 (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
-</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (c -&gt; d) -&gt; NodeData a c -&gt; NodeData b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">NodeData a c -&gt; NodeData b d
+</span><a href="#local-6989586621680026901"><span class="hs-identifier hs-var">mapNodeData</span></a></span><span> </span><span class="annot"><span class="annottext">LeafData a c -&gt; LeafData b d
+</span><a href="#local-6989586621680026900"><span class="hs-identifier hs-var">mapLeafData</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData a c) (LeafData a c)
+</span><a href="#local-6989586621680026902"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>      </span><span id="local-6989586621680026901"><span class="annot"><span class="annottext">mapNodeData :: NodeData a c -&gt; NodeData b d
+</span><a href="#local-6989586621680026901"><span class="hs-identifier hs-var hs-var">mapNodeData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (c -&gt; d) -&gt; NodeData a c -&gt; NodeData b d
 forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
 (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680019572"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019571"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LeafData a c -&gt; LeafData b d
-</span><a href="#local-6989586621680019568"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData a c) (LeafData a c)
- -&gt; PrioritySearchTree b d)
--&gt; BinLeafTree (NodeData a c) (LeafData a c)
--&gt; PrioritySearchTree b d
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData a c) (LeafData a c)
-</span><a href="#local-6989586621680019570"><span class="hs-identifier hs-var">t</span></a></span><span>
-</span><span id="line-65"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-66"></span><span>      </span><span id="local-6989586621680019568"><span class="annot"><span class="annottext">h :: LeafData a c -&gt; LeafData b d
-</span><a href="#local-6989586621680019568"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(c -&gt; d)
+</span><a href="#local-6989586621680026904"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621680026903"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-82"></span><span>      </span><span id="local-6989586621680026900"><span class="annot"><span class="annottext">mapLeafData :: LeafData a c -&gt; LeafData b d
+</span><a href="#local-6989586621680026900"><span class="hs-identifier hs-var hs-var">mapLeafData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(c -&gt; d)
 -&gt; ([Point 2 c :+ a] -&gt; [Point 2 d :+ b])
 -&gt; LeafData a c
 -&gt; LeafData b d
@@ -216,7 +296,7 @@ forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
 (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019571"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 c :+ a) -&gt; Point 2 d :+ b)
+</span><a href="#local-6989586621680026903"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 c :+ a) -&gt; Point 2 d :+ b)
 -&gt; [Point 2 c :+ a] -&gt; [Point 2 d :+ b]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(((Point 2 c :+ a) -&gt; Point 2 d :+ b)
@@ -233,23 +313,23 @@ Bifunctor p =&gt;
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(c -&gt; d) -&gt; Point 2 c -&gt; Point 2 d
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621680019571"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621680019572"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-comment">-- | Creates a Priority Search Tree for 3-sided range queries of the</span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- form \([x_l,x_r] \times [y,\infty)\).</span><span>
-</span><span id="line-72"></span><span class="hs-comment">--</span><span>
-</span><span id="line-73"></span><span class="hs-comment">-- the base tree will be static.</span><span>
-</span><span id="line-74"></span><span class="hs-comment">--</span><span>
-</span><span id="line-75"></span><span class="hs-comment">-- pre: all points have unique x-coordinates</span><span>
-</span><span id="line-76"></span><span class="hs-comment">--</span><span>
-</span><span id="line-77"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
-</span><span id="line-78"></span><span id="local-6989586621680019566"><span id="local-6989586621680019567"><span class="annot"><a href="Geometry.PrioritySearchTree.html#createTree"><span class="hs-identifier hs-type">createTree</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019567"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019567"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019566"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019566"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019567"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
-</span><span id="line-79"></span><span id="createTree"><span class="annot"><span class="annottext">createTree :: NonEmpty (Point 2 r :+ p) -&gt; PrioritySearchTree p r
-</span><a href="Geometry.PrioritySearchTree.html#createTree"><span class="hs-identifier hs-var hs-var">createTree</span></a></span></span><span> </span><span id="local-6989586621680019565"><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621680019565"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r) -&gt; PrioritySearchTree p r
+</span><a href="#local-6989586621680026903"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680026904"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- | Creates a Priority Search Tree for 3-sided range queries of the</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- form \([x_l,x_r] \times [y,\infty)\).</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- the base tree will be static.</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- pre: all points have unique x-coordinates</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
+</span><span id="line-94"></span><span id="local-6989586621680026898"><span id="local-6989586621680026899"><span class="annot"><a href="Geometry.PrioritySearchTree.html#createTree"><span class="hs-identifier hs-type">createTree</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680026899"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680026899"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680026898"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026898"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026899"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-95"></span><span id="createTree"><span class="annot"><span class="annottext">createTree :: NonEmpty (Point 2 r :+ p) -&gt; PrioritySearchTree p r
+</span><a href="Geometry.PrioritySearchTree.html#createTree"><span class="hs-identifier hs-var hs-var">createTree</span></a></span></span><span> </span><span id="local-6989586621680026897"><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621680026897"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r) -&gt; PrioritySearchTree p r
 forall p r.
 BinLeafTree (NodeData p r) (LeafData p r) -&gt; PrioritySearchTree p r
 </span><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-var">PrioritySearchTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData p r) (LeafData p r)
@@ -275,11 +355,11 @@ Ord r =&gt;
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 </span><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-var">insert</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019562"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621680019565"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-80"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-81"></span><span>    </span><span id="local-6989586621680019562"><span class="annot"><span class="annottext">t :: BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019562"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+</span><a href="#local-6989586621680026894"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621680026897"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621680026894"><span class="annot"><span class="annottext">t :: BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026894"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
   (BinLeafTree (NodeData p r) (LeafData p r))
   (SP (BinLeafTree (NodeData p r) (LeafData p r)) r)
   (BinLeafTree (NodeData p r) (LeafData p r))
@@ -292,7 +372,7 @@ forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
   (BinLeafTree (NodeData p r) (LeafData p r))
 forall s t a b. Field1 s t a b =&gt; Lens s t a b
 </span><span class="hs-identifier hs-var">_1</span></span><span>
-</span><span id="line-82"></span><span>      </span><span class="annot"><span class="annottext">(SP (BinLeafTree (NodeData p r) (LeafData p r)) r
+</span><span id="line-98"></span><span>      </span><span class="annot"><span class="annottext">(SP (BinLeafTree (NodeData p r) (LeafData p r)) r
  -&gt; BinLeafTree (NodeData p r) (LeafData p r))
 -&gt; (NonEmpty (Point 2 r :+ p)
     -&gt; SP (BinLeafTree (NodeData p r) (LeafData p r)) r)
@@ -308,12 +388,12 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; SP (BinLeafTree (NodeData p r) (LeafData p r)) r
 forall b v a.
 (b -&gt; v -&gt; b -&gt; b) -&gt; (a -&gt; b) -&gt; BinLeafTree v a -&gt; b
-</span><span class="hs-identifier hs-var">foldUp</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680019557"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019557"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680019556"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019556"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Size
-</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680019555"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019555"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680019554"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019554"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><span class="hs-identifier hs-var">foldUp</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680026888"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026888"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680026887"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026887"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Size
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680026886"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026886"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680026885"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026885"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; r -&gt; SP (BinLeafTree (NodeData p r) (LeafData p r)) r
 forall a b. a -&gt; b -&gt; SP a b
 </span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
@@ -323,16 +403,16 @@ forall a b. a -&gt; b -&gt; SP a b
 forall v a.
 BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
 </span><span class="hs-identifier hs-var">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019557"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
+</span><a href="#local-6989586621680026888"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
 forall p r. r -&gt; Maybe (Point 2 r :+ p) -&gt; NodeData p r
 </span><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019556"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><a href="#local-6989586621680026887"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019555"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019554"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-83"></span><span>               </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Elem</span></span><span> </span><span id="local-6989586621680019551"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019551"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026886"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026885"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>               </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Elem</span></span><span> </span><span id="local-6989586621680026882"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026882"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; r -&gt; SP (BinLeafTree (NodeData p r) (LeafData p r)) r
 forall a b. a -&gt; b -&gt; SP a b
 </span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LeafData p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
@@ -340,9 +420,9 @@ forall v a. a -&gt; BinLeafTree v a
 </span><span class="hs-identifier hs-var">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; [Point 2 r :+ p] -&gt; LeafData p r
 forall a b. a -&gt; b -&gt; SP a b
 </span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019551"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019551"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span>      </span><span class="annot"><span class="annottext">(BinLeafTree Size (Elem r)
+</span><a href="#local-6989586621680026882"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026882"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>      </span><span class="annot"><span class="annottext">(BinLeafTree Size (Elem r)
  -&gt; SP (BinLeafTree (NodeData p r) (LeafData p r)) r)
 -&gt; (NonEmpty (Point 2 r :+ p) -&gt; BinLeafTree Size (Elem r))
 -&gt; NonEmpty (Point 2 r :+ p)
@@ -358,7 +438,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[r] -&gt; NonEmpty r
 forall a. [a] -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span>
-</span><span id="line-85"></span><span>      </span><span class="annot"><span class="annottext">([r] -&gt; NonEmpty r)
+</span><span id="line-101"></span><span>      </span><span class="annot"><span class="annottext">([r] -&gt; NonEmpty r)
 -&gt; (NonEmpty (Point 2 r :+ p) -&gt; [r])
 -&gt; NonEmpty (Point 2 r :+ p)
 -&gt; NonEmpty r
@@ -373,7 +453,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[r] -&gt; Set r
 forall a. Ord a =&gt; [a] -&gt; Set a
 </span><span class="hs-identifier hs-var">Set.fromList</span></span><span> </span><span class="hs-comment">-- remove duplicates + sort</span><span>
-</span><span id="line-86"></span><span>      </span><span class="annot"><span class="annottext">([r] -&gt; Set r)
+</span><span id="line-102"></span><span>      </span><span class="annot"><span class="annottext">([r] -&gt; Set r)
 -&gt; (NonEmpty (Point 2 r :+ p) -&gt; [r])
 -&gt; NonEmpty (Point 2 r :+ p)
 -&gt; Set r
@@ -408,23 +488,23 @@ forall a. NonEmpty a -&gt; [a]
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621680019565"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-87"></span><span>
-</span><span id="line-88"></span><span class="hs-comment">-- | Inserts a point into the priority search tree</span><span>
-</span><span id="line-89"></span><span class="hs-comment">--</span><span>
-</span><span id="line-90"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
-</span><span id="line-91"></span><span id="local-6989586621680019712"><span id="local-6989586621680019713"><span class="annot"><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-type">insert</span></a></span><span>                          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-92"></span><span>                                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019712"><span class="hs-identifier hs-type">p</span></a></span><span>
-</span><span id="line-93"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019712"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019712"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-94"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019712"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019712"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019713"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-95"></span><span id="insert"><span class="annot"><span class="annottext">insert :: (Point 2 r :+ p)
+</span><a href="#local-6989586621680026897"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- | Inserts a point into the priority search tree</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-107"></span><span id="local-6989586621680027066"><span id="local-6989586621680027067"><span class="annot"><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-type">insert</span></a></span><span>                          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-108"></span><span>                                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680027066"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-109"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027066"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027066"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027066"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027066"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027067"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-111"></span><span id="insert"><span class="annot"><span class="annottext">insert :: (Point 2 r :+ p)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-var hs-var">insert</span></a></span></span><span> </span><span id="local-6989586621680019541"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019541"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-96"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680019540"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019540"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680019539"><span class="annot"><span class="annottext">[Point 2 r :+ p]
-</span><a href="#local-6989586621680019539"><span class="hs-identifier hs-var">ps</span></a></span></span><span class="hs-special">)</span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LeafData p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-var hs-var">insert</span></a></span></span><span> </span><span id="local-6989586621680026872"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026872"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-112"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680026871"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026871"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026870"><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621680026870"><span class="hs-identifier hs-var">ps</span></a></span></span><span class="hs-special">)</span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LeafData p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 forall v a. a -&gt; BinLeafTree v a
 </span><span class="hs-identifier hs-var">Leaf</span></span><span> </span><span class="annot"><span class="annottext">(LeafData p r -&gt; BinLeafTree (NodeData p r) (LeafData p r))
 -&gt; LeafData p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
@@ -432,21 +512,21 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; [Point 2 r :+ p] -&gt; LeafData p r
 forall a b. a -&gt; b -&gt; SP a b
 </span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019540"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019541"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026871"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026872"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Point 2 r :+ p]
-</span><a href="#local-6989586621680019539"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-97"></span><span>      </span><span class="hs-comment">-- TODO: In case we have multiple points with the same x-coord, these points</span><span>
-</span><span id="line-98"></span><span>      </span><span class="hs-comment">-- are not really in decreasing y-order.</span><span>
-</span><span id="line-99"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621680019538"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019538"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680019537"><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019537"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621680019536"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019536"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Maybe r
-</span><a href="#local-6989586621680019535"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe r -&gt; Maybe r -&gt; Bool
+</span><a href="#local-6989586621680026870"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-comment">-- TODO: In case we have multiple points with the same x-coord, these points</span><span>
+</span><span id="line-114"></span><span>      </span><span class="hs-comment">-- are not really in decreasing y-order.</span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621680026869"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026869"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680026868"><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026868"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621680026867"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026867"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Maybe r
+</span><a href="#local-6989586621680026866"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe r -&gt; Maybe r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019537"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r -&gt; Getting (First r) (NodeData p r) r -&gt; Maybe r
+</span><a href="#local-6989586621680026868"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r -&gt; Getting (First r) (NodeData p r) r -&gt; Maybe r
 forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
 </span><span class="hs-operator hs-var">^?</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 r :+ p)
  -&gt; Const (First r) (Maybe (Point 2 r :+ p)))
@@ -491,7 +571,7 @@ forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (2 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-100"></span><span>                   </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><span id="line-116"></span><span>                   </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; Maybe (Point 2 r :+ p)
@@ -503,9 +583,9 @@ BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; Maybe (Point 2 r :+ p)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019530"><span class="hs-identifier hs-var">node'</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019538"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019537"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r -&gt; (NodeData p r -&gt; NodeData p r) -&gt; NodeData p r
+</span><a href="#local-6989586621680026861"><span class="hs-identifier hs-var">node'</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026869"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026868"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r -&gt; (NodeData p r -&gt; NodeData p r) -&gt; NodeData p r
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 r :+ p) -&gt; Identity (Maybe (Point 2 r :+ p)))
 -&gt; NodeData p r -&gt; Identity (NodeData p r)
@@ -515,9 +595,9 @@ forall p r. Lens' (NodeData p r) (Maybe (Point 2 r :+ p))
 -&gt; (Point 2 r :+ p) -&gt; NodeData p r -&gt; NodeData p r
 forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019541"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019536"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019537"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026872"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026867"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026868"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">NodeData p r
 -&gt; Getting
      (Maybe (Point 2 r :+ p)) (NodeData p r) (Maybe (Point 2 r :+ p))
 -&gt; Maybe (Point 2 r :+ p)
@@ -526,10 +606,10 @@ forall s a. s -&gt; Getting a s a -&gt; a
   (Maybe (Point 2 r :+ p)) (NodeData p r) (Maybe (Point 2 r :+ p))
 forall p r. Lens' (NodeData p r) (Maybe (Point 2 r :+ p))
 </span><a href="Geometry.PrioritySearchTree.html#maxVal"><span class="hs-identifier hs-var">maxVal</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>                   </span><span class="hs-comment">-- push the existing point down</span><span>
-</span><span id="line-102"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-117"></span><span>                   </span><span class="hs-comment">-- push the existing point down</span><span>
+</span><span id="line-118"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>                 </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-103"></span><span>                   </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><span id="line-119"></span><span>                   </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; Maybe (Point 2 r :+ p)
@@ -541,21 +621,21 @@ BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; Maybe (Point 2 r :+ p)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019530"><span class="hs-identifier hs-var">node'</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019538"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019537"><span class="hs-identifier hs-var">d</span></a></span><span>                             </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019536"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Maybe (Point 2 r :+ p)
+</span><a href="#local-6989586621680026861"><span class="hs-identifier hs-var">node'</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026869"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026868"><span class="hs-identifier hs-var">d</span></a></span><span>                             </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026867"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Maybe (Point 2 r :+ p)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019541"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-104"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-105"></span><span>    </span><span id="local-6989586621680019535"><span class="annot"><span class="annottext">py :: Maybe r
-</span><a href="#local-6989586621680019535"><span class="hs-identifier hs-var hs-var">py</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Maybe r
+</span><a href="#local-6989586621680026872"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-121"></span><span>    </span><span id="local-6989586621680026866"><span class="annot"><span class="annottext">py :: Maybe r
+</span><a href="#local-6989586621680026866"><span class="hs-identifier hs-var hs-var">py</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Maybe r
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Maybe r) -&gt; r -&gt; Maybe r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019541"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+</span><a href="#local-6989586621680026872"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
 -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
@@ -571,19 +651,19 @@ forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (2 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span>
-</span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span>    </span><span id="local-6989586621680019530"><span class="annot"><span class="annottext">node' :: BinLeafTree (NodeData p r) (LeafData p r)
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621680026861"><span class="annot"><span class="annottext">node' :: BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; Maybe (Point 2 r :+ p)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019530"><span class="hs-identifier hs-var hs-var">node'</span></a></span></span><span> </span><span id="local-6989586621680019527"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019527"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680019526"><span class="annot"><span class="annottext">d :: NodeData p r
-</span><a href="#local-6989586621680019526"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680019525"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019525"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680019524"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-108"></span><span>      </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><a href="#local-6989586621680026861"><span class="hs-identifier hs-var hs-var">node'</span></a></span></span><span> </span><span id="local-6989586621680026858"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026858"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680026857"><span class="annot"><span class="annottext">d :: NodeData p r
+</span><a href="#local-6989586621680026857"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680026856"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026856"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680026855"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026855"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-124"></span><span>      </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
@@ -591,12 +671,12 @@ Lens' (point d r) r
 forall v a.
 BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
 </span><span class="hs-identifier hs-var">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019527"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019526"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-comment">-- no new insertion necessary anymore</span><span>
-</span><span id="line-109"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680019523"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019523"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019523"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+</span><a href="#local-6989586621680026858"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026857"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026855"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-comment">-- no new insertion necessary anymore</span><span>
+</span><span id="line-125"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680026854"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026854"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026854"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
 -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
@@ -614,7 +694,7 @@ Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019525"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026856"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
@@ -629,11 +709,11 @@ Ord r =&gt;
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 </span><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-var">insert</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019523"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019527"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019526"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-110"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026854"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026858"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026857"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026855"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-126"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; NodeData p r
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
@@ -641,8 +721,8 @@ Ord r =&gt;
 forall v a.
 BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
 </span><span class="hs-identifier hs-var">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019527"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
-</span><a href="#local-6989586621680019526"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+</span><a href="#local-6989586621680026858"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData p r
+</span><a href="#local-6989586621680026857"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 forall r p.
@@ -651,28 +731,28 @@ Ord r =&gt;
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 </span><a href="Geometry.PrioritySearchTree.html#insert"><span class="hs-identifier hs-var">insert</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019523"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019524"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-111"></span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span class="hs-comment">-- | Given a three sided range \([x_l,x_r],y\) report all points in</span><span>
-</span><span id="line-115"></span><span class="hs-comment">-- the range \([x_l,x_r] \times [y,\infty)\). The points are reported</span><span>
-</span><span id="line-116"></span><span class="hs-comment">-- in decreasing order of \(y\)-coordinate.</span><span>
-</span><span id="line-117"></span><span class="hs-comment">--</span><span>
-</span><span id="line-118"></span><span class="hs-comment">-- running time: \(O(\log n + k)\), where \(k\) is the number of reported points.</span><span>
-</span><span id="line-119"></span><span id="local-6989586621680019520"><span id="local-6989586621680019521"><span class="annot"><a href="Geometry.PrioritySearchTree.html#queryRange"><span class="hs-identifier hs-type">queryRange</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019521"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-120"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621680019521"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621680019521"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019520"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019521"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019521"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019520"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
-</span><span id="line-121"></span><span id="queryRange"><span class="annot"><span class="annottext">queryRange :: (Range r, r) -&gt; PrioritySearchTree p r -&gt; [Point 2 r :+ p]
-</span><a href="Geometry.PrioritySearchTree.html#queryRange"><span class="hs-identifier hs-var hs-var">queryRange</span></a></span></span><span> </span><span id="local-6989586621680019519"><span class="annot"><span class="annottext">(Range r, r)
-</span><a href="#local-6989586621680019519"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Range r, r)
+</span><a href="#local-6989586621680026854"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026855"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- | Given a three sided range \([x_l,x_r],y\) report all points in</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- the range \([x_l,x_r] \times [y,\infty)\). The points are reported</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- in decreasing order of \(y\)-coordinate.</span><span>
+</span><span id="line-133"></span><span class="hs-comment">--</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- running time: \(O(\log n + k)\), where \(k\) is the number of reported points.</span><span>
+</span><span id="line-135"></span><span id="local-6989586621680026851"><span id="local-6989586621680026852"><span class="annot"><a href="Geometry.PrioritySearchTree.html#queryRange"><span class="hs-identifier hs-type">queryRange</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680026852"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-136"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621680026852"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621680026852"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PrioritySearchTree.html#PrioritySearchTree"><span class="hs-identifier hs-type">PrioritySearchTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026851"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026852"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680026852"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680026851"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-137"></span><span id="queryRange"><span class="annot"><span class="annottext">queryRange :: (Range r, r) -&gt; PrioritySearchTree p r -&gt; [Point 2 r :+ p]
+</span><a href="Geometry.PrioritySearchTree.html#queryRange"><span class="hs-identifier hs-var hs-var">queryRange</span></a></span></span><span> </span><span id="local-6989586621680026850"><span class="annot"><span class="annottext">(Range r, r)
+</span><a href="#local-6989586621680026850"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
 forall r p.
 Ord r =&gt;
 (Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
 </span><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-var">queryRange'</span></a></span><span> </span><span class="annot"><span class="annottext">(Range r, r)
-</span><a href="#local-6989586621680019519"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p])
+</span><a href="#local-6989586621680026850"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p])
 -&gt; (PrioritySearchTree p r
     -&gt; BinLeafTree (NodeData p r) (LeafData p r))
 -&gt; PrioritySearchTree p r
@@ -682,29 +762,29 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall p r.
 PrioritySearchTree p r -&gt; BinLeafTree (NodeData p r) (LeafData p r)
 </span><a href="Geometry.PrioritySearchTree.html#_unPrioritySearchTree"><span class="hs-identifier hs-var hs-var">_unPrioritySearchTree</span></a></span><span>
-</span><span id="line-122"></span><span>
-</span><span id="line-123"></span><span class="hs-comment">-- | Implementation fo the query function.</span><span>
-</span><span id="line-124"></span><span id="local-6989586621680019643"><span id="local-6989586621680019644"><span class="annot"><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-type">queryRange'</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-125"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019643"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019643"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-126"></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680019644"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680019643"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
-</span><span id="line-127"></span><span id="queryRange%27"><span class="annot"><span class="annottext">queryRange' :: (Range r, r)
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Implementation fo the query function.</span><span>
+</span><span id="line-140"></span><span id="local-6989586621680026994"><span id="local-6989586621680026995"><span class="annot"><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-type">queryRange'</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-141"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026994"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#LeafData"><span class="hs-identifier hs-type">LeafData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026994"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680026995"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680026994"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-143"></span><span id="queryRange%27"><span class="annot"><span class="annottext">queryRange' :: (Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
-</span><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-var hs-var">queryRange'</span></a></span></span><span> </span><span id="local-6989586621680019517"><span class="annot"><span class="annottext">q :: (Range r, r)
-</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621680019516"><span class="annot"><span class="annottext">Range r
-</span><a href="#local-6989586621680019516"><span class="hs-identifier hs-var">qr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680019515"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019515"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-128"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680019514"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019514"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680019513"><span class="annot"><span class="annottext">[Point 2 r :+ p]
-</span><a href="#local-6989586621680019513"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019514"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Range r -&gt; Bool
+</span><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-var hs-var">queryRange'</span></a></span></span><span> </span><span id="local-6989586621680026848"><span class="annot"><span class="annottext">q :: (Range r, r)
+</span><a href="#local-6989586621680026848"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621680026847"><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621680026847"><span class="hs-identifier hs-var">qr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680026846"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026846"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-144"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621680026845"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026845"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026844"><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621680026844"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026845"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Range r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; Range a -&gt; Bool
 </span><span class="hs-operator hs-var">`inRange`</span></span><span> </span><span class="annot"><span class="annottext">Range r
-</span><a href="#local-6989586621680019516"><span class="hs-identifier hs-var">qr</span></a></span><span>                     </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-129"></span><span>                        </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026847"><span class="hs-identifier hs-var">qr</span></a></span><span>                     </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-145"></span><span>                        </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
-</span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680019510"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019510"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019510"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+</span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680026841"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026841"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026841"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
 -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
@@ -722,22 +802,22 @@ Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019515"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
-</span><a href="#local-6989586621680019513"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-130"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026846"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621680026844"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-146"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-131"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><span id="line-147"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r :+ p)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
 </span><span class="hs-identifier">_</span></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-132"></span><span>      </span><span class="hs-comment">-- nothing stored here, or lower</span><span>
-</span><span id="line-133"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621680019509"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019509"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680019508"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019508"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680019507"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019507"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span id="local-6989586621680019506"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019506"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019507"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+</span><span id="line-148"></span><span>      </span><span class="hs-comment">-- nothing stored here, or lower</span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621680026840"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026840"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PrioritySearchTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621680026839"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026839"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680026838"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026838"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span id="local-6989586621680026837"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026837"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026838"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
 -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
@@ -755,30 +835,30 @@ Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019515"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019505"><span class="hs-identifier hs-var">mrep</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019507"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026846"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026836"><span class="hs-identifier hs-var">mrep</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026838"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
 forall extra.
 [Point 2 r :+ extra]
 -&gt; [Point 2 r :+ extra] -&gt; [Point 2 r :+ extra]
-</span><a href="#local-6989586621680019504"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019503"><span class="hs-identifier hs-var">goL</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019508"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019509"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019502"><span class="hs-identifier hs-var">goR</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019508"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019506"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-134"></span><span>                                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026835"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026834"><span class="hs-identifier hs-var">goL</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026839"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026840"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026833"><span class="hs-identifier hs-var">goR</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026839"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026837"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>                                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-135"></span><span>                                     </span><span class="hs-comment">-- all stuff below here has lower</span><span>
-</span><span id="line-136"></span><span>                                     </span><span class="hs-comment">-- y-coord, so outside the range.</span><span>
-</span><span id="line-137"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-138"></span><span>    </span><span id="local-6989586621680019505"><span class="annot"><span class="annottext">mrep :: (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019505"><span class="hs-identifier hs-var hs-var">mrep</span></a></span></span><span> </span><span id="local-6989586621680019501"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019501"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019501"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+</span><span id="line-151"></span><span>                                     </span><span class="hs-comment">-- all stuff below here has lower</span><span>
+</span><span id="line-152"></span><span>                                     </span><span class="hs-comment">-- y-coord, so outside the range.</span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-154"></span><span>    </span><span id="local-6989586621680026836"><span class="annot"><span class="annottext">mrep :: (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026836"><span class="hs-identifier hs-var hs-var">mrep</span></a></span></span><span> </span><span id="local-6989586621680026832"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026832"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026832"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
 -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
@@ -796,16 +876,16 @@ Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Range r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; Range a -&gt; Bool
 </span><span class="hs-operator hs-var">`inRange`</span></span><span> </span><span class="annot"><span class="annottext">Range r
-</span><a href="#local-6989586621680019516"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680019501"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-139"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026847"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680026832"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-155"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>                     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-140"></span><span>
-</span><span id="line-141"></span><span>    </span><span id="local-6989586621680019503"><span class="annot"><span class="annottext">goL :: r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019503"><span class="hs-identifier hs-var hs-var">goL</span></a></span></span><span> </span><span id="local-6989586621680019500"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019500"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680019499"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019499"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Range r
-</span><a href="#local-6989586621680019516"><span class="hs-identifier hs-var">qr</span></a></span><span class="annot"><span class="annottext">Range r
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span>    </span><span id="local-6989586621680026834"><span class="annot"><span class="annottext">goL :: r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026834"><span class="hs-identifier hs-var hs-var">goL</span></a></span></span><span> </span><span id="local-6989586621680026831"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026831"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026830"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026830"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621680026847"><span class="hs-identifier hs-var">qr</span></a></span><span class="annot"><span class="annottext">Range r
 -&gt; Getting (EndPoint r) (Range r) (EndPoint r) -&gt; EndPoint r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (EndPoint r) (Range r) (EndPoint r)
@@ -815,28 +895,28 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; EndPoint r
 forall a. a -&gt; EndPoint a
 </span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019500"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Range r, r)
+</span><a href="#local-6989586621680026831"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
 forall r p.
 Ord r =&gt;
 (Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
 </span><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-var">queryRange'</span></a></span><span> </span><span class="annot"><span class="annottext">(Range r, r)
-</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019499"><span class="hs-identifier hs-var">t'</span></a></span><span>
-</span><span id="line-142"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026848"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026830"><span class="hs-identifier hs-var">t'</span></a></span><span>
+</span><span id="line-158"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-143"></span><span>
-</span><span id="line-144"></span><span>    </span><span id="local-6989586621680019502"><span class="annot"><span class="annottext">goR :: r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
-</span><a href="#local-6989586621680019502"><span class="hs-identifier hs-var hs-var">goR</span></a></span></span><span> </span><span id="local-6989586621680019496"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019496"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680019495"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019495"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r -&gt; EndPoint r
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621680026833"><span class="annot"><span class="annottext">goR :: r -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
+</span><a href="#local-6989586621680026833"><span class="hs-identifier hs-var hs-var">goR</span></a></span></span><span> </span><span id="local-6989586621680026827"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680026827"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680026826"><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026826"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r -&gt; EndPoint r
 forall a. a -&gt; EndPoint a
 </span><span class="hs-identifier hs-var">Open</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680019496"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; EndPoint r -&gt; Bool
+</span><a href="#local-6989586621680026827"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; EndPoint r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Range r
-</span><a href="#local-6989586621680019516"><span class="hs-identifier hs-var">qr</span></a></span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621680026847"><span class="hs-identifier hs-var">qr</span></a></span><span class="annot"><span class="annottext">Range r
 -&gt; Getting (EndPoint r) (Range r) (EndPoint r) -&gt; EndPoint r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (EndPoint r) (Range r) (EndPoint r)
@@ -848,14 +928,14 @@ Ord r =&gt;
 (Range r, r)
 -&gt; BinLeafTree (NodeData p r) (LeafData p r) -&gt; [Point 2 r :+ p]
 </span><a href="Geometry.PrioritySearchTree.html#queryRange%27"><span class="hs-identifier hs-var">queryRange'</span></a></span><span> </span><span class="annot"><span class="annottext">(Range r, r)
-</span><a href="#local-6989586621680019517"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
-</span><a href="#local-6989586621680019495"><span class="hs-identifier hs-var">t'</span></a></span><span>
-</span><span id="line-145"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680026848"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData p r) (LeafData p r)
+</span><a href="#local-6989586621680026826"><span class="hs-identifier hs-var">t'</span></a></span><span>
+</span><span id="line-161"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-146"></span><span>
-</span><span id="line-147"></span><span>    </span><span id="local-6989586621680019504"><span class="annot"><span class="annottext">merge :: [Point 2 r :+ extra]
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>    </span><span id="local-6989586621680026835"><span class="annot"><span class="annottext">merge :: [Point 2 r :+ extra]
 -&gt; [Point 2 r :+ extra] -&gt; [Point 2 r :+ extra]
-</span><a href="#local-6989586621680019504"><span class="hs-identifier hs-var hs-var">merge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ extra) -&gt; (Point 2 r :+ extra) -&gt; Ordering)
+</span><a href="#local-6989586621680026835"><span class="hs-identifier hs-var hs-var">merge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ extra) -&gt; (Point 2 r :+ extra) -&gt; Ordering)
 -&gt; [Point 2 r :+ extra]
 -&gt; [Point 2 r :+ extra]
 -&gt; [Point 2 r :+ extra]
@@ -893,4 +973,4 @@ forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (2 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-148"></span></pre></body></html>
+</span><span id="line-164"></span></pre></body></html>
