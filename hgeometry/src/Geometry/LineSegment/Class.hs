@@ -32,7 +32,7 @@ import Geometry.Point.EuclideanDistance
 import Geometry.Vector
 --------------------------------------------------------------------------------
 
-class OnSegment lineSegment d point r where
+class Point_ point d r => OnSegment lineSegment d point r where
   -- | Test if a point lies on a line segment.
   --
   -- As a user, you should typically just use 'intersects' instead.
