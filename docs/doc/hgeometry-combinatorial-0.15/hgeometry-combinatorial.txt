@@ -900,6 +900,26 @@ instance Data.Foldable.Foldable Data.CircularSeq.CSeq
 instance GHC.Base.Functor Data.CircularSeq.CSeq
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.CircularSeq.CSeq a)
 
+module Data.Foldable.Sort
+
+-- | Sort a collection using the given comparator using intro-sort
+--   (essentially quicksort).
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the time to do a comparison.
+sortBy :: forall vector f a. (Foldable f, Vector vector a) => (a -> a -> Ordering) -> f a -> vector a
+
+-- | Sort the given collection using intro sort.
+--   
+--   &lt;math&gt;
+sort :: forall vector f a. (Foldable f, Vector vector a, Ord a) => f a -> vector a
+
+-- | Sort the collection using the given "cheap" function; i.e. the
+--   function f is called at every comparison
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the time required to evaluate the
+--   function
+sortOnCheap :: forall vector f a b. (Foldable f, Vector vector a, Ord b) => (a -> b) -> f a -> vector a
+
 
 -- | Things that have an index.
 module Data.Indexed
@@ -1651,7 +1671,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_avSt a_aw23. Lens (Permutation a_avSt) (Permutation a_aw23) (Vector (Orbit a_avSt)) (Vector (Orbit a_aw23))
+orbits :: forall a_avWV a_aw6v. Lens (Permutation a_avWV) (Permutation a_aw6v) (Vector (Orbit a_avWV)) (Vector (Orbit a_aw6v))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
