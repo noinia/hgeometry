@@ -13,7 +13,8 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Point
-  ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  ( Point
+  , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , PointF(Point, toVec)
   , origin, vector
   , pointFromPoint, pointFromList
@@ -51,7 +52,6 @@ import Control.Lens ((^.))
 import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.HyperPlane
-import HGeometry.Point.Boxed
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation
@@ -59,6 +59,7 @@ import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.Quadrants
 import HGeometry.Vector.Class
 import HGeometry.Vector.Optimal (VectorFamily)
+import HGeometry.Point.Optimal
 
 --------------------------------------------------------------------------------
 
