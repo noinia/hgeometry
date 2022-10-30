@@ -19,7 +19,7 @@ module HGeometry.Point.Boxed
 
 -- import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.PointF
-import HGeometry.Vector
+import HGeometry.Vector.Boxed
 -- import HGeometry.Point.Internal
 
 --------------------------------------------------------------------------------
@@ -31,6 +31,7 @@ import HGeometry.Vector
 --     myPoint = Point myVector
 -- :}
 
+-- | Optimzied point type
 type Point d r = PointF (Vector d r)
 
 -- instance (Num r) => HasSquaredEuclideanDistance (Point d r) where
