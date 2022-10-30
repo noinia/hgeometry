@@ -1,13 +1,18 @@
 module HGeometry.Matrix.Internal where
 
-import           Control.Lens (set)
-import qualified Data.Vector.Fixed as FV
-import           HGeometry.Vector
+import           Control.Lens (set, ix)
+import           HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 -- * Helper functions to easily create matrices
 
 -- | Creates a row with zeroes everywhere, except at position i, where the
 -- value is the supplied value.
-mkRow     :: forall d r. (Arity d, Num r) => Int -> r -> Vector d r
-mkRow i x = set (FV.element i) x zero
+mkRow     :: forall vector d r.
+             ( Num r
+             , Vector_ vector d r
+             , Additive_ vector
+             )
+          => Int -> r
+          -> vector
+mkRow i x = set (ix i) x zero

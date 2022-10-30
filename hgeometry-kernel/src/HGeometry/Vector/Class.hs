@@ -8,7 +8,7 @@ module HGeometry.Vector.Class
   , xComponent, yComponent, zComponent, wComponent
   , HasComponents(..)
 
-  -- , ConstructVector
+  , ConstructVector, ConstructableVector_(..)
 
   , vectorFromVector
   , prefix, suffix
@@ -43,10 +43,10 @@ import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
--- type ConstructVector :: Type -> Nat -> Type
--- type family ConstructVector vector d where
---   ConstructVector vector 0 = vector
---   ConstructVector vector d = NumType vector -> ConstructVector vector (d-1)
+type ConstructVector :: Type -> Nat -> Type
+type family ConstructVector vector d where
+  ConstructVector vector 0 = vector
+  ConstructVector vector d = NumType vector -> ConstructVector vector (d-1)
 
 -- | A type class for vectors
 type Vector_ :: Type -> Nat -> Type -> Constraint
@@ -67,13 +67,15 @@ class ( NumType vector   ~ r
       iix' j = singular $ iix j
   {-# INLINE componentProxy #-}
 
-  -- -- | Construct a vector from a d-arity function
-  -- mkVector :: KnownNat d => ConstructVector vector d
-
   -- | try to construct a vector from a list of exactly d coordinates.
   vectorFromList :: [r] -> Maybe vector
 
   {-# MINIMAL vectorFromList #-}
+
+class Vector_ vector d r => ConstructableVector_ vector d r where
+  -- | Construct a vector from a d-arity function, or a list if d is large
+  mkVector :: ConstructVector vector d
+
 
   -- | Convert an arbitrary vector into another vector
 vectorFromVector :: forall vector vector' d r. (Vector_ vector d r, Vector_ vector' d r)

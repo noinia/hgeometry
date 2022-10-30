@@ -102,7 +102,8 @@ instance (HasV2 r) => Vector_ (V2 r) 2 r where
     [x,y] -> Just $ mkV2 x y
     _     -> Nothing
   {-# INLINE vectorFromList #-}
-
+  -- mkVector = mkV2
+  -- {-# INLINE mkVector #-}
 
 instance HasV2 r => Additive_ (V2 r) where
   zero   = mkV2 0 0

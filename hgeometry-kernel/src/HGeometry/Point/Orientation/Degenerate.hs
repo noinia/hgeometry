@@ -74,7 +74,8 @@ ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
        Vector2_ vx vy = r .-. p
       --  _z             = ux * vy - uy * vx
 {-# SPECIALIZE INLINE
-     ccw :: (Ord r, Num r) => Boxed.Point 2 r -> Boxed.Point 2 r -> Boxed.Point 2 r -> CCW #-}
+     ccw :: (Ord r, Num r, HasV2 r)
+         => Boxed.Point 2 r -> Boxed.Point 2 r -> Boxed.Point 2 r -> CCW #-}
 
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
 --
@@ -93,7 +94,7 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
 -- Sort the points arround the given point p in counter clockwise order with
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.
-sortAround   :: (Ord r, Num r, Point_ point 2 r)
+sortAround   :: (Ord r, Num r, HasV2 r, Point_ point 2 r)
              => point -> [point] -> [point]
 sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 
@@ -160,13 +161,13 @@ cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-ccwCmpAround :: (Num r, Ord r, Point_ point 2 r)
+ccwCmpAround :: (Num r, Ord r, HasV2 r, Point_ point 2 r)
              => point -> point -> point -> Ordering
 ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 
 -- | Clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-cwCmpAround :: (Num r, Ord r, Point_ point 2 r)
+cwCmpAround :: (Num r, Ord r, HasV2 r, Point_ point 2 r)
             => point -> point -> point -> Ordering
 cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 
@@ -174,7 +175,7 @@ cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 -- Given a center c, a new point p, and a list of points ps, sorted in
 -- counter clockwise order around c. Insert p into the cyclic order. The focus
 -- of the returned cyclic list is the new point p.
-insertIntoCyclicOrder   :: (Ord r, Num r, Point_ point 2 r)
+insertIntoCyclicOrder   :: (Ord r, Num r, HasV2 r, Point_ point 2 r)
                         => point -> point
                         -> C.CList point -> C.CList point
 insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c <> cmpByDistanceTo c)

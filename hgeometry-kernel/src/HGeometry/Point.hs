@@ -1,5 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Point
@@ -12,8 +14,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point
   ( Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
-  , Point(Point, toVec, Point1, Point2, Point3, Point4)
-  , Arity
+  , PointF(Point, toVec)
   , origin, vector
   , pointFromPoint, pointFromList
 
@@ -22,19 +23,19 @@ module HGeometry.Point
 
   , projectPoint
 
-  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
-
-  , ccwCmpAround
-  , cwCmpAround
-  , ccwCmpAroundWith
-  , cwCmpAroundWith
-  , sortAround
-  , insertIntoCyclicOrder
-
-  , StrictCCW(SCCW, SCW)
-  , strictCcw
-
-
+--  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
+--
+--  , ccwCmpAround
+--  , cwCmpAround
+--  , ccwCmpAroundWith
+--  , cwCmpAroundWith
+--  , sortAround
+--  , insertIntoCyclicOrder
+--
+--  , StrictCCW(SCCW, SCW)
+--  , strictCcw
+--
+--
   , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
   , cmpByDistanceTo, cmpInDirection
@@ -53,8 +54,8 @@ import HGeometry.HyperPlane
 import HGeometry.Point.Boxed
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
-import HGeometry.Point.Orientation
-import HGeometry.Point.Orientation.Degenerate
+-- import HGeometry.Point.Orientation
+-- import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
 import HGeometry.Vector.Class
 
@@ -80,9 +81,8 @@ import HGeometry.Vector.Class
 cmpInDirection       :: forall vector point d r.
                         ( Ord r, Num r, Point_ point d r
                         , vector ~ VectorFor point
-                        , Arity (d+1), Arity d
                         , d < d+1, d <= d+1, 0 < d+1, 0 < d
-                        , KnownNat ((d+1)-d)
+                        , KnownNat ((d+1)-d), KnownNat d
                         )
                      => vector -> point -> point -> Ordering
 cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n

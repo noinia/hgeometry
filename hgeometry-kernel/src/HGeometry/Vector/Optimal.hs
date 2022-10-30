@@ -2,6 +2,8 @@
 module HGeometry.Vector.Optimal
   ( Vector(Vector1, Vector2, Vector3, Vector4)
   , V2.HasV2(..)
+  , V3.HasV3(..)
+  , V4.HasV4(..)
   ) where
 
 import           Control.Applicative

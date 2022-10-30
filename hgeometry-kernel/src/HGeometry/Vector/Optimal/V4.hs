@@ -81,6 +81,8 @@ instance HasV4 r => Vector_ (V4 r) 4 r where
     [x,y,z,w] -> Just $ mkV4 x y z w
     _         -> Nothing
   {-# INLINE vectorFromList #-}
+  -- mkVector = mkV4
+  -- {-# INLINE mkVector #-}
 
 instance HasV4 r => Additive_ (V4 r) where
   zero   = mkV4 0 0 0 0

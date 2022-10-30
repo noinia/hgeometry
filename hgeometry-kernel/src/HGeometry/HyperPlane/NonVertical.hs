@@ -20,7 +20,7 @@ type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
 
-instance ( MkHyperPlaneConstraints d
+instance ( MkHyperPlaneConstraints d r
          , Fractional r
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
   type EquationFor (NonVerticalHyperPlane d r) = Vector (d+1) r
@@ -30,12 +30,12 @@ instance ( MkHyperPlaneConstraints d
     where
       (a,x) = unsnoc e
 
-instance ( MkHyperPlaneConstraints d
+instance ( MkHyperPlaneConstraints d r
          , Fractional r
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
 
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
 
-pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
+pattern Plane       :: HasV3 r => r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)

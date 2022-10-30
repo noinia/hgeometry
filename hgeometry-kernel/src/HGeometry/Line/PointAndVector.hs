@@ -19,7 +19,7 @@ import           GHC.Generics (Generic)
 import           HGeometry.Line.Class
 import           HGeometry.Point.Class
 import           HGeometry.HyperPlane.Class
-import           HGeometry.Point.Internal
+-- import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties
@@ -42,7 +42,7 @@ verticalLine x = Line (Point2 x 0) (Vector2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 
-instance Arity d => Line_ (Line d r) d r where
+instance Line_ (Line d r) d r where
   fromPointAndVec p v = Line (pointFromPoint p) (vectorFromVector v)
 
 
@@ -60,7 +60,7 @@ instance HyperPlane_ (Line 2 r) 2 r where
 --   anchorPoint = lens _anchorPoint (\line pt -> line{_anchorPoint=pt})
 --   direction = lens _direction (\line dir -> line{_direction=dir})
 
-instance (Show r, Arity d) => Show (Line d r) where
+instance (Show r) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
 
 -- -- TODO:

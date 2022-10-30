@@ -31,12 +31,14 @@ type instance VectorFor (HyperPlane d r) = Vector d r
 
 -- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
 -- these are satisfied by default, it is just that the typechecker does not realize that.
-type MkHyperPlaneConstraints d =
-  (Arity d, Arity (d+1)
-  , d < d+1
+type MkHyperPlaneConstraints d r =
+  ( d < d+1, KnownNat d
+  , Vector_ (Vector (d+1) r) (d+1) r
+  , Vector_ (Vector d r)     d r
   )
 
-instance MkHyperPlaneConstraints d => HyperPlane_ (HyperPlane d r) d r where
+instance ( MkHyperPlaneConstraints d r
+         ) => HyperPlane_ (HyperPlane d r) d r where
   type EquationFor (HyperPlane d r) = Vector (d+1) r
   hyperPlaneEquation (HyperPlane v) = v
   hyperPlaneFromEquation = HyperPlane

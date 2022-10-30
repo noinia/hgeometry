@@ -58,6 +58,11 @@ instance (KnownNat d, UV.Unbox r) => Vector_ (LargeVector d r) d r where
                         in if UV.length v == d then Just (coerce v) else Nothing
   {-# INLINE vectorFromList #-}
   -- FIXME: rewrite rule for vector
+  -- mkVector = case sameNat (Proxy @d) (Proxy @0) of
+  --              Just Refl -> LargeVector UV.empty
+  --              Nothing   -> case sameNat (Proxy @d) (Proxy @1) of
+
+  -- {-# INLINE mkVector #-}
 
 
 

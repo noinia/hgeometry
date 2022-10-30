@@ -151,7 +151,7 @@ pattern Point1_ x <- (view vector -> Vector1_ x)
 {-# COMPLETE Point1_ #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
-pattern Point2_     :: Point_ point 2 r => r -> r -> point
+pattern Point2_     :: (Point_ point 2 r, Vector.HasV2 r) => r -> r -> point
 pattern Point2_ x y <- (view vector -> Vector2_ x y)
   where
     Point2_ x y = fromVector (Vector.Vector2 x y)
@@ -159,14 +159,14 @@ pattern Point2_ x y <- (view vector -> Vector2_ x y)
 
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
-pattern Point3_       :: Point_ point 3 r => r -> r -> r -> point
+pattern Point3_       :: (Point_ point 3 r, Vector.HasV3 r) => r -> r -> r -> point
 pattern Point3_ x y z <- (view vector -> Vector3_ x y z)
   where
     Point3_ x y z = fromVector (Vector.Vector3 x y z)
 {-# COMPLETE Point3_ #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
-pattern Point4_         :: Point_ point 4 r => r -> r -> r -> r -> point
+pattern Point4_         :: (Point_ point 4 r, Vector.HasV4 r) => r -> r -> r -> r -> point
 pattern Point4_ x y z w <- (view vector -> Vector4_ x y z w)
   where
     Point4_ x y z w = fromVector (Vector.Vector4 x y z w)

@@ -11,7 +11,6 @@
 module HGeometry.HyperPlane
   ( module HGeometry.HyperPlane.Class
   , HyperPlane(..)
-  , MkHyperPlaneConstraints
   ) where
 
 --------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ import Data.Indexed
 import Data.Ratio.Generalized
 import Data.RealNumber.Symbolic
 import HGeometry.Point.Class
-import HGeometry.Point.Boxed(Point, Arity)
+import HGeometry.Point.Boxed(Point)
 -- import Geometry.Vector
 -- import Test.QuickCheck (Arbitrary(..))
 
@@ -27,11 +27,11 @@ import HGeometry.Point.Boxed(Point, Arity)
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: forall point d r. (Point_ point d r, HasIndex point, Num r, Arity d)
+toSymbolic    :: forall point d r. (Point_ point d r, HasIndex point, Num r)
               => point -> Point d (Symbolic SoSI r)
 toSymbolic p = let i  = sosIndex p
-                   p' = pointFromPoint @point @(Point d r) p
-               in p'&coordinates %@~ \j x -> perturb x $ MkSoS i j
+                   -- p' = pointFromPoint @point @(Point d r) p
+               in p&coordinates %@~ \j x -> perturb x $ MkSoS i j
 
 -- | Drops the pertubations in a point
 fromSymbolic :: (Functor f, Num r) => f (Symbolic i r) -> f r
@@ -41,10 +41,10 @@ fromSymbolic = fmap roundToConstant
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: ( Point_ point d r, Arity d
+toSoSRational :: ( Point_ point d r
                  , HasIndex point, Eq r, Num r)
               => point -> Point d (SoSRational SoSI r)
-toSoSRational = fmap (\x -> sosRational x 1) . toSymbolic
+toSoSRational = over coordinates (\x -> sosRational x 1) . toSymbolic
 
 
 -- | Drops the pertubations
@@ -68,3 +68,5 @@ data SoSI = MkSoS {-# UNPACK #-}!Index -- ^ original index
 
 -- instance Arbitrary SoSI where
 --   arbitrary = MkSoS <$> arbitrary <*> arbitrary
+
+-- type instance Vector d (Symbolic SoSI r) =
