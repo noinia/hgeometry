@@ -120,10 +120,12 @@ instance ( HasComponents (VectorFamily d r) v
 instance Vector_ (VectorFamily d r) d r => Vector_ (Vector d r) d r where
   vectorFromList = fmap MkVector . vectorFromList @(VectorFamily d r)
 
-deriving newtype instance (Additive_ (VectorFamily d r)
+deriving newtype instance ( Additive_ (VectorFamily d r)
                           , NumType (VectorFamily d r) ~ r
                           ) => Additive_ (Vector d r)
--- deriving instance Metric_ (VectorFamily d r)   => Metric_   (Vector d r)
+deriving newtype instance ( Metric_ (VectorFamily d r)
+                          , NumType (VectorFamily d r) ~ r
+                          ) => Metric_   (Vector d r)
 
 
 
