@@ -37,5 +37,6 @@ instance ( MkHyperPlaneConstraints d r
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
 
-pattern Plane       :: HasV3 r => r -> r -> r -> NonVerticalHyperPlane 3 r
+pattern Plane       :: ConstructableVector_ (VectorFamily 3 r) 3 r
+                    => r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)

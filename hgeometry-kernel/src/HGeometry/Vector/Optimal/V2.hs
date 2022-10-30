@@ -182,23 +182,25 @@ instance HasV2 Int where
   mkV2 = V2Int
   {-# INLINE mkV2 #-}
 
+
+
 --------------------------------------------------------------------------------
 
-newtype Boxed r = Boxed r
-  deriving newtype (Show,Eq,Ord)
+-- newtype Boxed r = Boxed r
+--   deriving newtype (Show,Eq,Ord)
 
-newtype instance V2 (Boxed r) = V2Boxed (L2.V2 r)
+-- newtype instance V2 (Boxed r) = V2Boxed (L2.V2 r)
 
-instance Field1 (V2 (Boxed r)) (V2 (Boxed r)) (Boxed r) (Boxed r) where
-  _1 = lens (\(V2Boxed v) -> Boxed $ view _1 v)
-            (\(V2Boxed v) (Boxed x) -> V2Boxed $ set _1 x v)
-  {-# INLINE _1 #-}
+-- instance Field1 (V2 (Boxed r)) (V2 (Boxed r)) (Boxed r) (Boxed r) where
+--   _1 = lens (\(V2Boxed v) -> Boxed $ view _1 v)
+--             (\(V2Boxed v) (Boxed x) -> V2Boxed $ set _1 x v)
+--   {-# INLINE _1 #-}
 
-instance Field2 (V2 (Boxed r)) (V2 (Boxed r)) (Boxed r) (Boxed r) where
-  _2 = lens (\(V2Boxed v ) -> Boxed $ view _2 v)
-            (\(V2Boxed v) (Boxed x) -> V2Boxed $ set _2 x v)
-  {-# INLINE _2 #-}
+-- instance Field2 (V2 (Boxed r)) (V2 (Boxed r)) (Boxed r) (Boxed r) where
+--   _2 = lens (\(V2Boxed v ) -> Boxed $ view _2 v)
+--             (\(V2Boxed v) (Boxed x) -> V2Boxed $ set _2 x v)
+--   {-# INLINE _2 #-}
 
-instance HasV2 (Boxed r) where
-  mkV2 (Boxed x) (Boxed y) = V2Boxed $ L2.V2 x y
-  {-# INLINE mkV2 #-}
+-- instance HasV2 (Boxed r) where
+--   mkV2 (Boxed x) (Boxed y) = V2Boxed $ L2.V2 x y
+--   {-# INLINE mkV2 #-}

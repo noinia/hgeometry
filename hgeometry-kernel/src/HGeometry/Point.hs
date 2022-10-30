@@ -58,6 +58,7 @@ import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
 import HGeometry.Vector.Class
+import HGeometry.Vector.Optimal (VectorFamily)
 
 --------------------------------------------------------------------------------
 
@@ -83,6 +84,8 @@ cmpInDirection       :: forall vector point d r.
                         , vector ~ VectorFor point
                         , d < d+1, d <= d+1, 0 < d+1, 0 < d
                         , KnownNat ((d+1)-d), KnownNat d
+                        , Vector_ (VectorFamily d r) d r
+                        , Vector_ (VectorFamily (d+1) r) (d+1) r
                         )
                      => vector -> point -> point -> Ordering
 cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n

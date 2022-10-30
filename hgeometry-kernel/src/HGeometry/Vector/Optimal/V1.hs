@@ -1,6 +1,5 @@
 module HGeometry.Vector.Optimal.V1
   ( V1(Vector1)
-  , HasV1(..)
   ) where
 
 import Control.Lens
@@ -13,17 +12,13 @@ import System.Random.Stateful (UniformRange(..), Uniform(..))
 
 --------------------------------------------------------------------------------
 
+-- | Wrapper around r's
 newtype V1 r = Vector1 r
-  deriving (Show,Eq,Ord,Generic,Functor,Foldable,Traversable
-           -- ,Uniform,UniformRange
+  deriving (Show,Eq,Ord,Generic,Functor,Foldable,Traversable, Random
            )
 
 instance Field1 (V1 r) (V1 s) r s where
   _1 = lens coerce (\_ x -> coerce x)
-
-class Field1 (V1 r) (V1 r) r r => HasV1 r where
-  mkV1 :: r -> V1 r
-  mkV1 = Vector1
 
 --------------------------------------------------------------------------------
 
@@ -35,7 +30,6 @@ type instance Index   (V1 r)   = Int
 instance TraversableWithIndex Int V1
 instance FoldableWithIndex Int V1
 instance FunctorWithIndex Int V1
-
 
 instance Ixed (V1 r) where
   ix i f v@(Vector1 x) = case i of
@@ -50,3 +44,14 @@ instance Vector_ (V1 r) 1 r where
     [x] -> Just $ coerce x
     _   -> Nothing
   {-# INLINE vectorFromList #-}
+
+instance ConstructableVector_ (V1 r) 1 r where
+  mkVector = Vector1
+
+
+
+instance UniformRange r => UniformRange (V1 r) where
+  uniformRM rng gen = Vector1 <$> uniformRM (coerce rng) gen
+
+instance Uniform r => Uniform (V1 r) where
+  uniformM gen = Vector1 <$> uniformM gen
