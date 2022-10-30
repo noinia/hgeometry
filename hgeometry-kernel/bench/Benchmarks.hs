@@ -55,6 +55,6 @@ main = do
       , bench "introSort unpacked boxed" $ nf (sort @Boxed.Vector) pts
       , bench "introSort boxed"   $ nf (sort @Boxed.Vector) boxedPts
       , bench "introSort unpacked unboxed" $ nf (sort @UnBoxed.Vector) pts
-      -- , bench "introSort optimal points" $ nf (sort @UnBoxed.Vector) optPts
+      , bench "introSort optimal points" $ nf (sort @UnBoxed.Vector) optPts
       ]
     ]

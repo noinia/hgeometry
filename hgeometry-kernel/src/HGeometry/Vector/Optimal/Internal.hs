@@ -22,6 +22,10 @@ import qualified HGeometry.Vector.Optimal.V1 as V1
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 import           Text.Read (Read (..), readListPrecDefault)
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
 
@@ -145,3 +149,50 @@ instance UniformRange (VectorFamily d r) => UniformRange (Vector d r) where
 
 instance Uniform (VectorFamily d r) => Uniform (Vector d r) where
   uniformM gen = MkVector <$> uniformM gen
+
+
+
+
+
+--------------------------------------------------------------------------------
+-- Vector instances, so we can store a Vector (from the vector
+-- package) of Vectors (our vectors) efficiently
+
+newtype instance UMV.MVector s (Vector d r) = MV_Vec (UMV.MVector s (VectorFamily d r))
+newtype instance UV.Vector     (Vector d r) = V_Vec (UV.Vector     (VectorFamily d r))
+
+instance GMV.MVector UMV.MVector (VectorFamily d r)
+      => GMV.MVector UMV.MVector (Vector d r) where
+  basicLength (MV_Vec v) = GMV.basicLength v
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (MV_Vec v) = MV_Vec $ GMV.basicUnsafeSlice s l v
+  {-# INLINE basicUnsafeSlice #-}
+  basicOverlaps  (MV_Vec v) (MV_Vec v') = GMV.basicOverlaps v v'
+  {-# INLINE basicOverlaps #-}
+  basicUnsafeNew n = MV_Vec <$> GMV.basicUnsafeNew n
+  {-# INLINE basicUnsafeNew #-}
+  basicInitialize (MV_Vec v) = GMV.basicInitialize v
+  {-# INLINE basicInitialize#-}
+  basicUnsafeRead (MV_Vec v) i = MkVector <$> GMV.basicUnsafeRead v i
+  {-# INLINE basicUnsafeRead #-}
+  basicUnsafeWrite (MV_Vec v) i (MkVector vf) = GMV.basicUnsafeWrite v i vf
+
+  {-# INLINE basicUnsafeWrite #-}
+
+
+
+instance GV.Vector UV.Vector (VectorFamily d r)
+      => GV.Vector UV.Vector (Vector d r) where
+
+  basicUnsafeFreeze (MV_Vec mv) = V_Vec <$> GV.basicUnsafeFreeze mv
+  {-# INLINE basicUnsafeFreeze #-}
+  basicUnsafeThaw (V_Vec v) = MV_Vec <$> GV.basicUnsafeThaw v
+  {-# INLINE basicUnsafeThaw #-}
+  basicLength (V_Vec v) = GV.basicLength v
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (V_Vec v) = V_Vec $ GV.basicUnsafeSlice s l v
+  {-# INLINE basicUnsafeSlice #-}
+  basicUnsafeIndexM (V_Vec v) i = MkVector <$> GV.basicUnsafeIndexM v i
+  {-# INLINE basicUnsafeIndexM #-}
+
+instance UV.Unbox (VectorFamily d r) => UV.Unbox (Vector d r)
