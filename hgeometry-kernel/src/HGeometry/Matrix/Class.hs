@@ -21,6 +21,10 @@ class HasElements matrix matrix' where
   -- a (row,column) index pair.
   elements :: IndexedTraversal (Int,Int) matrix matrix' (NumType matrix) (NumType matrix')
 
+
+
+
+
 -- | A matrix of n rows, each of m columns, storing values of type r.
 type Matrix_ :: Type -> Nat -> Nat -> Type -> Constraint
 class ( r ~ NumType matrix
@@ -33,6 +37,11 @@ class ( r ~ NumType matrix
                                 , matrix -> r where
   -- | Produces the Identity Matrix.
   identityMatrix :: Num r => matrix
+
+  -- | Given a list of the elements in the matrix, in row by row
+  -- order, constructs the matrix.
+  -- requires that there are exactly n*m elements.
+  matrixFromList :: [r] -> Maybe matrix
 
   -- | Matrix multiplication
   (!*!)     :: ( Matrix_ matrix'  m m' r
@@ -58,10 +67,17 @@ class ( r ~ NumType matrix
   -- | Traversal over all columns
   columns :: IndexedTraversal' Int matrix (Vector n r)
 
-  {-# MINIMAL identityMatrix, (!*!), rows, columns #-}
+  {-# MINIMAL identityMatrix, matrixFromList, (!*!), rows, columns #-}
 
 infixl 7 !*!
 infixl 7 !*
+
+
+-- class Matrix_ matrix n m r => ConstructableMatrix_ matrix n m r where
+--   fromList
+
+
+
 
 -- | Dimensions for which we can compute the determinant of a matrix
 class HasDeterminant d where

@@ -29,6 +29,11 @@ import qualified Linear.Matrix as Lin
 -- | A matrix of n rows, each of m columns, storing values of type r.
 newtype Matrix n m r = Matrix (Vector n (Vector m r))
 
+
+-- transpose :: Matrix n m r -> Matrix m n r
+-- transpose = undefined
+
+
 type instance NumType (Matrix n m r) = r
 type instance Index   (Matrix n m r) = (Int,Int)
 type instance IxValue (Matrix n m r) = r
@@ -38,16 +43,12 @@ _MatrixVector :: Iso (Matrix n m r)          (Matrix n m s)
                      (Vector n (Vector m r)) (Vector n (Vector m s))
 _MatrixVector = iso (\(Matrix v) -> v) Matrix
 
--- deriving instance (Show r, KnownNat m, KnownNat n
---                   -- , Vector_ (VectorFamily m r) m r
---                   -- , Vector_ (VectorFamily )
---                   ) => Show (Matrix n m r)
--- deriving instance (Eq r, , Arity m)   => Eq (Matrix n m r)
--- deriving instance (Ord r, , Arity m)  => Ord (Matrix n m r)
--- deriving instance (, Arity m)         => Functor (Matrix n m)
--- deriving instance (, Arity m)         => Foldable (Matrix n m)
--- deriving instance (, Arity m)         => Traversable (Matrix n m)
-
+deriving newtype instance ( Show r, KnownNat m, KnownNat n
+                          , OptVector_ m r
+                          , OptVector_ n (Vector m r)
+                          ) => Show (Matrix n m r)
+deriving newtype instance ( Eq (VectorFamily n (Vector m r)))  => Eq  (Matrix n m r)
+deriving newtype instance ( Ord (VectorFamily n (Vector m r))) => Ord (Matrix n m r)
 
 instance ( OptVector_ n (Vector m r)
          , OptVector_ m r
@@ -73,6 +74,12 @@ instance ( OptVector_ n (Vector m r)
   identityMatrix = Matrix $ generate mkRow
     where
       mkRow i = zero&ix i .~ 1
+
+  ma !*! mb = ma&rows %~ \row -> vzipWith (*^) row mb
+
+
+    -- fmap (\ f' -> Foldable.foldl' (^+^) zero $ liftI2 (*^) f' mb) ma
+
 
   -- (Matrix a) !*! (Matrix b) = Matrix $ a Lin.!*! b
 
@@ -107,7 +114,7 @@ instance ( OptVector_ n (Vector m r)
 -- --------------------------------------------------------------------------------
 -- -- Boilerplate code for converting between Matrix and M22/M33/M44.
 
--- withM22 :: (M22 a -> M22 b) -> Matrix 2 2 a -> Matrix 2 2 b
+-- withM22   :: (M22 a -> M22 b) -> Matrix 2 2 a -> Matrix 2 2 b
 -- withM22 f = coerce . f . coerce
 
 -- withM33 :: (M33 a -> M33 b) -> Matrix 3 3 a -> Matrix 3 3 b

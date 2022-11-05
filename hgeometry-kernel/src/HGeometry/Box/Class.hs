@@ -46,7 +46,7 @@ class ( HasMinPoint box point
       ) => Box_ box d point | box -> d
                             , box -> point where
 
-  type Extent box
+  -- type Extent box
 
   -- | Get a vector with the extent of the box in each dimension. Note
   -- that the resulting vector is 0 indexed whereas one would normally
@@ -55,7 +55,7 @@ class ( HasMinPoint box point
             , ClosedInterval_ (IntervalFor box) r
             , NumType box ~ r
             , Num r
-            ) => box -> Extent box
+            ) => box -> Vector d r
 
 -- | Rectangles are two dimensional boxes.
 type Rectangle_ rectangle = Box_ rectangle 2

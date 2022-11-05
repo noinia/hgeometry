@@ -1,4 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
@@ -26,31 +25,31 @@ import qualified HGeometry.Vector as V
 -- | A type representing a Transformation for d dimensional objects
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (d + 1) (d + 1) r }
 
+
 -- | Transformations and Matrices are isomorphic.
 transformationMatrix :: Iso (Transformation d r)       (Transformation d       s)
                             (Matrix (d + 1) (d + 1) r) (Matrix (d + 1) (d + 1) s)
 transformationMatrix = iso _transformationMatrix Transformation
 
-deriving instance (Show r, Arity (d + 1)) => Show (Transformation d r)
-deriving instance (Eq r, Arity (d + 1))   => Eq (Transformation d r)
-deriving instance (Ord r, Arity (d + 1))  => Ord (Transformation d r)
-deriving instance Arity (d + 1)           => Functor (Transformation d)
-deriving instance Arity (d + 1)           => Foldable (Transformation d)
-deriving instance Arity (d + 1)           => Traversable (Transformation d)
+deriving newtype instance (Show r) => Show (Transformation d r)
+deriving newtype instance (Eq r)   => Eq (Transformation d r)
+deriving newtype instance (Ord r)  => Ord (Transformation d r)
 
 type instance NumType (Transformation d r) = r
 
 -- | Compose transformations (right to left)
-(|.|) :: (Num r, Arity (d + 1)) => Transformation d r -> Transformation d r -> Transformation d r
-(Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
+(|.|)                                     :: (Num r)
+                                          => Transformation d r -> Transformation d r
+                                          -> Transformation d r
+(Transformation f) |.| (Transformation g) = Transformation $ f !*! g
 
 -- | Identity transformation; i.e. the transformation which does not change anything.
-identity :: (Num r, Arity (d + 1)) => Transformation d r
+identity :: (Num r) => Transformation d r
 identity = Transformation identityMatrix
 
-instance (Num r, Arity (d+1)) => Semigroup (Transformation d r) where
+instance (Num r) => Semigroup (Transformation d r) where
   (<>) = (|.|)
-instance (Num r, Arity (d+1)) => Monoid (Transformation d r) where
+instance (Num r) => Monoid (Transformation d r) where
   mempty = identity
 
 
@@ -73,8 +72,9 @@ class IsTransformable g where
 
   default transformBy :: ( HasPoints g g (Point (Dimension g) (NumType g))
                                          (Point (Dimension g) (NumType g))
-                         , Arity (Dimension g), Dimension g < Dimension g + 1
-                         , Arity (Dimension g+1)
+                         , Dimension g < Dimension g + 1
+                         -- , Arity (Dimension g),
+                         -- , Arity (Dimension g+1)
                          , Fractional (NumType g)
                          )
                       => Transformation (Dimension g) (NumType g) -> g -> g
@@ -82,14 +82,11 @@ class IsTransformable g where
                                         @(Point (Dimension g) (NumType g)))
                        (transformBy t)
 
-instance (Fractional r, Arity d, Arity (d + 1), d < d+1)
-         => IsTransformable (Point d r) where
+instance (Fractional r, d < d+1) => IsTransformable (Point d r) where
   transformBy t = Point . transformBy t . toVec
 
-instance (Fractional r, Arity d, Arity (d + 1), d < d+1
-         )
-         => IsTransformable (Vector d r) where
-  transformBy (Transformation m) v = f $ m `mult` snoc v 1
+instance (Fractional r, d < d+1) => IsTransformable (Vector d r) where
+  transformBy (Transformation m) v = f $ m !* snoc v 1
     where
       f u = let (u',x) = unsnoc u
             in (/ x) <$> u'
@@ -101,8 +98,7 @@ instance (Fractional r, Arity d, Arity (d + 1), d < d+1
 --
 -- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
-translation   :: ( Num r, Arity d, Arity (d + 1)
-                 , d < d+1
+translation   :: ( Num r
                  , Vector_ vector d r
                  )
               => vector -> Transformation d r
@@ -112,7 +108,7 @@ translation v = Transformation . Matrix $ imap transRow (snoc v 1)
 --
 -- >>> transformBy (scaling $ Vector2 2 (-1)) $ Point2 2 3
 -- Point2 4.0 (-3.0)
-scaling   :: ( Num r, Arity d, Arity (d + 1)
+scaling   :: ( Num r
              , Vector_ vector d r
              )
           => vector -> Transformation d r
@@ -127,7 +123,7 @@ scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 -- True
 -- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
 -- True
-uniformScaling :: forall d r. (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
+uniformScaling :: forall d r. (Num r) => r -> Transformation d r
 uniformScaling = scaling . pure @(Vector d)
 
 
@@ -139,7 +135,6 @@ uniformScaling = scaling . pure @(Vector d)
 -- >>> translateBy (Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
 translateBy :: ( IsTransformable g, Num (NumType g)
-               , Arity (Dimension g), Arity (Dimension g + 1)
                , Dimension g < Dimension g + 1
                , Vector_ vector (Dimension g) (NumType g)
                ) => vector -> g -> g
@@ -150,7 +145,6 @@ translateBy = transformBy . translation
 -- >>> scaleBy (Vector2 2 (-1)) $ Point2 2 3
 -- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
-           , Arity (Dimension g), Arity (Dimension g + 1)
            , Vector_ vector (Dimension g) (NumType g)
            ) => vector -> g -> g
 scaleBy = transformBy . scaling
@@ -161,14 +155,12 @@ scaleBy = transformBy . scaling
 -- >>> scaleUniformlyBy 5 $ Point2 2 3
 -- Point2 10.0 15.0
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
-                    , Arity (Dimension g), Arity (Dimension g + 1)
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 
 
 -- | Row in a translation matrix
-transRow     :: forall n r. (Arity n, Arity (n + 1)
-                            , n < n+1
+transRow     :: forall n r. (, n < n+1
                             , Num r)
              => Int -> r -> Vector (n + 1) r
 transRow i x = set (V.component @n) x $ mkRow i 1
