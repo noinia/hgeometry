@@ -52,17 +52,5 @@ replace a b = go
 modules :: [String]
 modules =
   [ -- "Data.PlaneGraph.IO"
-    "HGeometry.Point"
-  , "HGeometry.Transformation"
-  , "HGeometry.Line"
-  -- , "HGeometry.Line.Internal"
-  -- , "HGeometry.Interval"
-  -- , "HGeometry.LineSegment"
-  -- , "HGeometry.PolyLine"
-  -- , "HGeometry.Polygon"
-  -- , "HGeometry.Ball"
-  -- , "HGeometry.Box"
-  , "HGeometry.HyperPlane"
-  , "HGeometry.SoS.Orientation"
-  -- , "Algorithms.Geometry.InPolygon"
+    "HGeometry.Vector"
   ]

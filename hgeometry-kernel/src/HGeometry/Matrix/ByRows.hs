@@ -75,7 +75,7 @@ instance ( OptVector_ n (Vector m r)
     where
       mkRow i = zero&ix i .~ 1
 
-  ma !*! mb = ma&rows %~ \row -> vzipWith (*^) row mb
+  -- ma !*! mb = ma&rows %~ \row -> vzipWith (*^) row mb
 
 
     -- fmap (\ f' -> Foldable.foldl' (^+^) zero $ liftI2 (*^) f' mb) ma

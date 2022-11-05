@@ -1,9 +1,9 @@
 cabal-version:       3.4
-name:                hgeometry-kernel
+name:                hgeometry-vector
 version:             1.0
-synopsis:            Basic Constant size Geometric Data types.
+synopsis:            Small Vectors with type level tags and an optimized representation
 description:
-  Basic, constant size geometric data types used by HGeometry.
+  Vectors with type level tags and an optimized representation
 homepage:            https://fstaals.net/software/hgeometry
 license:             BSD-3-Clause
 license-file:        LICENSE
@@ -58,8 +58,7 @@ common setup
 
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 0.15
-              , hgeometry-vector        >= 1.0
+              , hgeometry-combinatorial >= 1.0
               -- , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
@@ -68,7 +67,7 @@ common setup
               -- , semigroupoids           >= 5
               , semigroups              >= 0.18
               , linear                  >= 1.10
-              , fixed-vector            >= 1.0
+              -- , fixed-vector            >= 1.0
               -- , vector-builder          >= 0.3.7
               -- , vinyl                   >= 0.10
               , deepseq                 >= 1.1
@@ -79,10 +78,10 @@ common setup
               -- , primitive               >= 0.6.3.0
               -- , hashable                >= 1.2
               , vector                  >= 0.11
-              , data-clist              >= 0.1.2.3
+              -- , data-clist              >= 0.1.2.3
               -- , vector-circular         >= 0.1.4
               -- , nonempty-vector         >= 0.2.0.0
-              , text                    >= 2.0
+              -- , text                    >= 2.0
               -- , vector-algorithms
               , witherable              >= 0.4
 
@@ -96,74 +95,64 @@ common setup
               , ghc-typelits-knownnat     >= 0.7.6
 
 --------------------------------------------------------------------------------
--- * Main HGeometry-Kernel Library
+-- * Main HGeometry-Vector Library
 
 library
   import: setup
   hs-source-dirs: src
   exposed-modules:
-    HGeometry.Kernel
+    HGeometry.Properties
 
-    HGeometry.Matrix
-    HGeometry.Matrix.Class
+    HGeometry.Vector
+    HGeometry.Vector.Class
+    HGeometry.Vector.Optimal
+    HGeometry.Vector.Boxed
+    HGeometry.Vector.List
 
-    HGeometry.Point
-    HGeometry.Point.Class
-    HGeometry.Point.Boxed
-    HGeometry.Point.PointF
---
---    HGeometry.Line
---    HGeometry.Line.Class
---
-    HGeometry.HyperPlane
-    HGeometry.HyperPlane.Class
-    HGeometry.HyperPlane.NonVertical
---
---    HGeometry.Box.Class
---
---    HGeometry.SoS.Point
---    HGeometry.SoS.Orientation
---    HGeometry.SoS.Determinant
---
---    HGeometry.Interval.Class
---    HGeometry.Interval.Boxed
---    HGeometry.Interval.EndPoint
---
---    HGeometry.Boundary
---
---    HGeometry.Transformation
+    -- HGeometry.Matrix
+    -- HGeometry.Matrix.Class
+
+    -- HGeometry.Point
+    -- HGeometry.Point.Class
+    -- HGeometry.Point.Boxed
+    -- HGeometry.Point.PointF
+
+    HGeometry.Vector.Unboxed.V2
 
   other-modules:
-    HGeometry.Point.Optimal
-    -- HGeometry.Point.Internal
-    HGeometry.Point.EuclideanDistance
---    HGeometry.Point.Orientation
---    HGeometry.Point.Orientation.Degenerate
-    HGeometry.Point.Quadrants
---
-   HGeometry.Matrix.ByRows
---
---    HGeometry.Transformation.Internal
---
-   HGeometry.HyperPlane.Internal
+    HGeometry.Vector.Additive
+    HGeometry.Vector.Metric
 
+    -- HGeometry.Vector.Internal
+    -- HGeometry.Vector.VectorFamily
+    -- HGeometry.Vector.VectorFamilyPeano
+    -- HGeometry.Vector.VectorFixed
+    HGeometry.Vector.Optimal.Internal
+    HGeometry.Vector.Optimal.V1
+    HGeometry.Vector.Optimal.V2
+    HGeometry.Vector.Optimal.V3
+    HGeometry.Vector.Optimal.V4
+    HGeometry.Vector.Optimal.Large
 
--- library quickcheckinstances-kernel
+    HGeometry.Vector.Optimal.Defs
+    HGeometry.Vector.Helper
+
+-- library quickcheckinstances-vector
 --   import: setup
 --   visibility: public
 --
 --   hs-source-dirs: qc_src
 --   exposed-modules:
---     HGeometry.Kernel.Instances
+--     HGeometry.Vector.Instances
 --
---   build-depends: hgeometry-kernel
+--   build-depends: hgeometry-vector
 --                , QuickCheck              >= 2.5
 --                , quickcheck-instances    >= 0.3
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
-benchmark hgeometry-kernel-benchmarks
+benchmark hgeometry-vector-benchmarks
   import: setup
   hs-source-dirs: bench
 
@@ -173,7 +162,7 @@ benchmark hgeometry-kernel-benchmarks
   other-modules:
   build-depends: tasty-bench              >= 0.3
                , tasty                    >= 1.4
-               , hgeometry-kernel
+               , hgeometry-vector
                , hgeometry-combinatorial
                , random
                -- , deepseq-generics
@@ -183,7 +172,7 @@ benchmark hgeometry-kernel-benchmarks
 --------------------------------------------------------------------------------
 -- * Test Suites
 
-test-suite doctests-kernel
+test-suite doctests-vector
   type:          exitcode-stdio-1.0
   ghc-options:   -threaded
   main-is:       doctests.hs
@@ -193,15 +182,15 @@ test-suite doctests-kernel
                , QuickCheck
                , quickcheck-instances
 
-test-suite hspec-kernel
+test-suite hspec-vector
   import: setup
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
   hs-source-dirs:       test
   main-is:              Main.hs
 
-  build-depends: hgeometry-kernel
-               -- , hgeometry-kernel:quickcheckinstances-kernel
+  build-depends: hgeometry-vector
+               -- , hgeometry-vector:quickcheckinstances-vector
                , hspec                   >= 2.9
                , QuickCheck
                , quickcheck-instances
