@@ -1,30 +1,33 @@
 module HGeometry.Matrix.Class
   ( Matrix_(..)
+  , HasElements(..)
   , HasDeterminant(..)
   , Invertible(..)
   ) where
 
-import           Control.Arrow ((&&&))
-import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
-import           Data.Kind
-import qualified Data.List as List
-import           Data.Maybe (fromMaybe)
-import           Data.Proxy
-import           Data.Type.Ord
-import           GHC.TypeNats
-import           HGeometry.Properties
-import           HGeometry.Vector.Class
-import           Prelude hiding (zipWith)
+import Control.Lens hiding (cons,snoc,uncons,unsnoc)
+import Data.Kind
+import GHC.TypeNats
+import HGeometry.Properties
+import HGeometry.Vector
+import HGeometry.Vector.List
+import Prelude hiding (zipWith)
 
 
 --------------------------------------------------------------------------------
+
+class HasElements matrix matrix' where
+  -- | IndexedTraversal over the elements of the matrix, each index is
+  -- a (row,column) index pair.
+  elements :: IndexedTraversal (Int,Int) matrix matrix' (NumType matrix) (NumType matrix')
 
 -- | A matrix of n rows, each of m columns, storing values of type r.
 type Matrix_ :: Type -> Nat -> Nat -> Type -> Constraint
 class ( r ~ NumType matrix
       , Ixed matrix
       , IxValue matrix ~ r
-      , Index matrix ~ (Int,Int) -- row, col
+      , Index matrix ~ (Int,Int) -- ^ row, col
+      , HasElements matrix matrix
       ) => Matrix_ matrix n m r | matrix -> n
                                 , matrix -> m
                                 , matrix -> r where
@@ -32,19 +35,33 @@ class ( r ~ NumType matrix
   identityMatrix :: Num r => matrix
 
   -- | Matrix multiplication
-  multM :: ( Matrix_ matrix'  m m' r
-           , Matrix_ matrix'' n m' r
-           , Num r
-           ) => matrix -> matrix' -> matrix''
+  (!*!)     :: ( Matrix_ matrix'  m m' r
+               , Matrix_ matrix'' n m' r
+               , Num r
+               ) => matrix -> matrix' -> matrix''
+  -- ma !*! mb = generateMatrix $ \(i,j) -> row i ma `dot` column j mb
+
+  -- ma !*! mb = fmap (\ f' -> Foldable.foldl' (^+^) zero $ liftI2 (*^) f' mb) ma
 
   -- | Multiply a matrix and a vector.
-  mult  :: ( Vector_ vector m r
-           , Vector_ vector' n r
-           , Num r) => matrix -> vector -> vector'
+  (!*)  :: ( Vector_ vector n r, Num r
+           , OptVector_ m r
+           ) => matrix -> vector -> vector
+  m !* v = vZipWith f (ListVector @n $ m^..rows) v
+    where
+      f       :: Vector m r -> r -> r
+      f row x = sumOf components $ x *^ row
 
+  -- | traversal over all rows
+  rows :: IndexedTraversal' Int matrix (Vector m r)
 
+  -- | Traversal over all columns
+  columns :: IndexedTraversal' Int matrix (Vector n r)
 
+  {-# MINIMAL identityMatrix, (!*!), rows, columns #-}
 
+infixl 7 !*!
+infixl 7 !*
 
 -- | Dimensions for which we can compute the determinant of a matrix
 class HasDeterminant d where

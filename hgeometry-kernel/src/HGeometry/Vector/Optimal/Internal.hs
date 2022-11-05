@@ -2,6 +2,7 @@
 module HGeometry.Vector.Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily
+  , OptVector_
   ) where
 
 import           Control.Applicative
@@ -39,11 +40,16 @@ type instance NumType  (Vector d r)  = r
 type instance IxValue  (Vector d r)  = r
 type instance Index    (Vector d r)  = Int
 
+
+
 -- | The type family to specialize vector implementations.
 --
 --
 type VectorFamily :: Nat -> Type -> Type
 type family VectorFamily d r
+
+-- | Shorthand for the constraint that our optimal vector is a vector
+type OptVector_ d r = Vector_ (VectorFamily d r) d r
 
 -- can I somehow convince GHC to only accept type family delcarations
 -- for which: NumType (VectorFamily d r) ~ r. Basically, anything that
