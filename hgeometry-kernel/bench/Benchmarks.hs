@@ -4,7 +4,7 @@ import           Test.Tasty.Bench
 import qualified Data.List as List
 import           HGeometry.Point.PointF
 import           HGeometry.Point
-import           HGeometry.Vector.Unboxed.V2
+import           ManualV2
 import           System.Random
 
 import qualified HGeometry.Point.Boxed as BoxedPoint
