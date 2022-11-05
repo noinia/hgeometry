@@ -1,10 +1,10 @@
-module HGeometry.Vector.Optimal.V1
+module Optimal.V1
   ( V1(Vector1)
   ) where
 
 import Control.Lens
 import Data.Coerce
-import GHC.Generics(Generic)
+import GHC.Generics (Generic)
 import HGeometry.Properties
 import HGeometry.Vector.Class
 import System.Random (Random (..))

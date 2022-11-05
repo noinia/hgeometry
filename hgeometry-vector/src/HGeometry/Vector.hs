@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector(
     module HGeometry.Vector.Class
-  , module HGeometry.Vector.Optimal
+  , module Optimal
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection
@@ -20,8 +20,8 @@ module HGeometry.Vector(
 
 import           Control.Lens
 import           HGeometry.Vector.Class
-import           HGeometry.Vector.Optimal
 import qualified HGeometry.Vector.List as ListVector
+import           Optimal -- optimal vector type
 
 
 -- | Given two colinar vectors, u and v, test if they point in the same direction, i.e.

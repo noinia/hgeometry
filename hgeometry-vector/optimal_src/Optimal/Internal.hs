@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.Vector.Optimal.Internal
+module Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily
   , OptVector_
@@ -16,7 +16,7 @@ import           HGeometry.Properties
 import           HGeometry.Vector.Class
 import           HGeometry.Vector.Helper
 -- import qualified HGeometry.Vector.Optimal.Large as Large
-import qualified HGeometry.Vector.Optimal.V1 as V1
+import qualified Optimal.V1 as V1
 -- import qualified HGeometry.Vector.Optimal.V2 as V2
 -- import qualified HGeometry.Vector.Optimal.V3 as V3
 -- import qualified HGeometry.Vector.Optimal.V4 as V4

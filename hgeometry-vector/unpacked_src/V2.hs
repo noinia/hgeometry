@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.Vector.Unboxed.V2
+module V2
   ( Vec2(..)
   ) where
 
@@ -8,19 +8,19 @@ import           Control.Lens
 import           Control.Monad.State
 import           Data.Aeson
 import qualified Data.Vector.Generic as GV
+import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
 import qualified Data.Vector.Generic.Mutable as GMV
-import qualified Data.Vector.Unboxed.Mutable as UMV
 import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UMV
 import           GHC.Generics (Generic)
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
+import           R
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
-import Data.Vector.Generic.Mutable (MVector(basicInitialize))
 
 --------------------------------------------------------------------------------
 
-type R = Int
 
 --------------------------------------------------------------------------------
 
