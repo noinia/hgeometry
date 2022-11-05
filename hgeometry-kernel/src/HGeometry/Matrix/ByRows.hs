@@ -47,8 +47,8 @@ deriving newtype instance ( Show r, KnownNat m, KnownNat n
                           , OptVector_ m r
                           , OptVector_ n (Vector m r)
                           ) => Show (Matrix n m r)
-deriving newtype instance ( Eq (VectorFamily n (Vector m r)))  => Eq  (Matrix n m r)
-deriving newtype instance ( Ord (VectorFamily n (Vector m r))) => Ord (Matrix n m r)
+deriving newtype instance ( Eq (VectorFamily' n (Vector m r)))  => Eq  (Matrix n m r)
+deriving newtype instance ( Ord (VectorFamily' n (Vector m r))) => Ord (Matrix n m r)
 
 instance ( OptVector_ n (Vector m r)
          , OptVector_ m r
@@ -69,7 +69,7 @@ instance ( OptVector_ n (Vector m r)
 instance ( OptVector_ n (Vector m r)
          , OptVector_ m r
          , KnownNat n
-         , Additive_ (VectorFamily m r)
+         , Additive_ (VectorFamily' m r)
          ) => Matrix_ (Matrix n m r) n m r where
   identityMatrix = Matrix $ generate mkRow
     where

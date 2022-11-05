@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
-module HGeometry.Vector.Optimal.Defs
+module Optimal.Defs
   ( ByDimension(..)
   , Choose
   , Boxing(..)

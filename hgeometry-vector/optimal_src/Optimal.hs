@@ -2,16 +2,12 @@ module Optimal
   ( module Optimal.Internal
   ) where
 
+import qualified Boxed
 import           Data.RealNumber.Rational
 import qualified Double.V2
 import qualified Float.V2
 import qualified Int.V2
 import           Optimal.Internal
-
--- import qualified HGeometry.Vector.Optimal.V2 as V2
--- import qualified HGeometry.Vector.Unboxed.V2 as V2
-
--- import qualified HGeometry.Vector.Boxed as Boxed
 
 --------------------------------------------------------------------------------
 
@@ -25,7 +21,8 @@ type instance VectorFamily 2 Float = Float.V2.Vec2
 -- bleh, apparently I can't define this for arbitrary d here :(
 -- I guess that is somewhat to be expected; since we may still want to define
 -- the various boxed versions separately
--- type instance VectorFamily (d+2) (RealNumber n) = Boxed.Vector (d+2) (RealNumber n)
+type instance VectorFamily d (RealNumber n) = Boxed.Vector d (RealNumber n)
+type instance VectorFamily d (Vector d' r)  = Boxed.Vector d (Vector d' r)
 
 -- type instance VectorFamily 2 (RealNumber n) = Boxed.Vector 2 (RealNumber n)
 -- type instance VectorFamily 3 (RealNumber n) = Boxed.Vector 3 (RealNumber n)
