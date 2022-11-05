@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.Vector.Boxed
+module Boxed
   ( Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
   ) where
 

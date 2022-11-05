@@ -120,6 +120,15 @@ library unpacked
   build-depends: hgeometry-vector:class
 
 --------------------------------------------------------------------------------
+-- * boxed Library
+
+library boxed
+  import: setup
+  hs-source-dirs: boxed_src
+  exposed-modules: Boxed
+  build-depends: hgeometry-vector:class
+
+--------------------------------------------------------------------------------
 -- * HGeometry-Vector NumType Library
 
 library numtypes
@@ -158,6 +167,7 @@ library optimal
   build-depends: hgeometry-vector:class
                , hgeometry-vector:unpacked
                , hgeometry-vector:numtypes
+               , hgeometry-vector:boxed
 
 --------------------------------------------------------------------------------
 -- * Main HGeometry-Vector Library
@@ -170,10 +180,10 @@ library
       HGeometry.Properties
     , HGeometry.Vector.Class
     , HGeometry.Vector.Optimal
+    , HGeometry.Vector.Boxed
 
   exposed-modules:
     HGeometry.Vector
-    HGeometry.Vector.Boxed
     HGeometry.Vector.List
 
   other-modules:
@@ -184,9 +194,11 @@ library
     -- HGeometry.Vector.VectorFixed
 
   mixins:
-    hgeometry-vector:optimal (Optimal as HGeometry.Vector.Optimal)
+      hgeometry-vector:optimal (Optimal as HGeometry.Vector.Optimal)
+    , hgeometry-vector:boxed   (Boxed as HGeometry.Vector.Boxed)
   build-depends: hgeometry-vector:class
                , hgeometry-vector:optimal
+               , hgeometry-vector:boxed
 
 --------------------------------------------------------------------------------
 
