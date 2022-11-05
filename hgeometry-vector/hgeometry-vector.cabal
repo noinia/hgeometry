@@ -169,7 +169,7 @@ library
   reexported-modules:
       HGeometry.Properties
     , HGeometry.Vector.Class
-    , Optimal as HGeometry.Vector.Optimal
+    , HGeometry.Vector.Optimal
 
   exposed-modules:
     HGeometry.Vector
@@ -183,7 +183,8 @@ library
     -- HGeometry.Vector.VectorFamilyPeano
     -- HGeometry.Vector.VectorFixed
 
-
+  mixins:
+    hgeometry-vector:optimal (Optimal as HGeometry.Vector.Optimal)
   build-depends: hgeometry-vector:class
                , hgeometry-vector:optimal
 
