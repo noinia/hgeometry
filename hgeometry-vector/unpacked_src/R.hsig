@@ -1,13 +1,13 @@
 signature R where
 
+import           Control.DeepSeq
 import           Data.Aeson (ToJSON,FromJSON)
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
-import           Control.DeepSeq
+import           System.Random.Stateful (UniformRange(..))
 
 -- | Numeric data type representing real numbers
 data R
@@ -21,7 +21,7 @@ instance Show R
 instance ToJSON R
 instance FromJSON R
 
-instance Uniform R
+-- instance Uniform R
 instance UniformRange R
 instance Random R
 

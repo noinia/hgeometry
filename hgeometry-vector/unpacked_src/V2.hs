@@ -17,7 +17,7 @@ import           HGeometry.Properties
 import           HGeometry.Vector.Class
 import           R
 import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           System.Random.Stateful (UniformRange(..) ) -- , Uniform(..))
 
 --------------------------------------------------------------------------------
 
@@ -55,11 +55,12 @@ zipWithM' f (Vec2 x y) (Vec2 x' y') = Vec2 <$> f x x' <*> f y y'
 replicateM'   :: Applicative f => f R -> f Vec2
 replicateM' x = Vec2 <$> x <*> x
 
-instance Uniform Vec2 where
-  uniformM gen = replicateM' (uniformM gen)
+-- instance Uniform Vec2 where
+--   uniformM gen = replicateM' (uniformM gen)
 
 instance FromJSON Vec2
-instance ToJSON Vec2
+instance ToJSON Vec2 where
+  toEncoding = genericToEncoding defaultOptions
 
 
 instance Field1 Vec2 Vec2 R R where

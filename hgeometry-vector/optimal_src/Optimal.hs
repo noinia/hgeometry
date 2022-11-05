@@ -3,6 +3,8 @@ module Optimal
   ) where
 
 import           Data.RealNumber.Rational
+import qualified Double.V2
+import qualified Float.V2
 import qualified Int.V2
 import           Optimal.Internal
 
@@ -14,7 +16,10 @@ import           Optimal.Internal
 --------------------------------------------------------------------------------
 
 -- type instance VectorFamily 2 Int = V2.V2 Int
+
 type instance VectorFamily 2 Int = Int.V2.Vec2
+type instance VectorFamily 2 Double = Double.V2.Vec2
+type instance VectorFamily 2 Float = Float.V2.Vec2
 
 
 -- bleh, apparently I can't define this for arbitrary d here :(
