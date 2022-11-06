@@ -2,7 +2,7 @@
 module Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily, VectorFamily'
-  , OptVector_
+  , OptVector_, OptConstructableVector_
   ) where
 
 import           Control.Applicative
@@ -60,6 +60,9 @@ type family VectorFamily d r
 -- | Shorthand for the constraint that our optimal vector is a vector
 type OptVector_ d r = Vector_ (VectorFamily' d r) d r
 
+-- | Shorthand for the constraint that our optimal vector is a constructable vector
+type OptConstructableVector_ d r = ConstructableVector_ (VectorFamily d r) d r
+
 ---------------------------------------------------------------------------------
 -- * Constructors for Small vectors
 
@@ -68,21 +71,21 @@ pattern Vector1   :: r -> Vector 1 r
 pattern Vector1 x = MkVector (V1.Vector1 x)
 
 -- | Construct a 2 dimensional vector
-pattern Vector2     :: forall r. ConstructableVector_ (VectorFamily 2 r) 2 r
+pattern Vector2     :: forall r. OptConstructableVector_ 2 r
                     => r -> r -> Vector 2 r
 pattern Vector2 x y <- MkVector (Vector2_ x y)
   where
     Vector2 x y = MkVector $ mkVector @(VectorFamily 2 r) x y
 
 -- | Construct a 3 dimensional vector
-pattern Vector3       :: forall r. ConstructableVector_ (VectorFamily 3 r) 3 r
+pattern Vector3       :: forall r. OptConstructableVector_ 3 r
                       => r -> r -> r -> Vector 3 r
 pattern Vector3 x y z <- MkVector (Vector3_ x y z)
   where
     Vector3 x y z = MkVector $ mkVector @(VectorFamily 3 r) x y z
 
 -- | Construct a 4 dimensional vector
-pattern Vector4         :: forall r. ConstructableVector_ (VectorFamily 4 r) 4 r
+pattern Vector4         :: forall r. OptConstructableVector_ 4 r
                         => r -> r -> r -> r -> Vector 4 r
 pattern Vector4 x y z w <- MkVector (Vector4_ x y z w)
   where

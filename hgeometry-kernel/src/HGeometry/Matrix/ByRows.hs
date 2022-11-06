@@ -15,13 +15,12 @@ module HGeometry.Matrix.ByRows(
   ) where
 
 import           Control.Lens
-import           Data.Coerce
 import           GHC.TypeNats
 import           HGeometry.Matrix.Class
 import           HGeometry.Vector
 import           HGeometry.Properties
-import           Linear.Matrix (M22, M33, M44)
-import qualified Linear.Matrix as Lin
+-- import           Linear.Matrix (M22, M33, M44)
+-- import qualified Linear.Matrix as Lin
 
 --------------------------------------------------------------------------------
 -- * Matrices
