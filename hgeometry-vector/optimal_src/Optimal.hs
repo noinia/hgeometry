@@ -4,18 +4,26 @@ module Optimal
 
 import qualified Boxed
 import           Data.RealNumber.Rational
-import qualified Double.V2
-import qualified Float.V2
-import qualified Int.V2
+import qualified Double.Unpacked
+import qualified Float.Unpacked
+import qualified Int.Unpacked
 import           Optimal.Internal
 
 --------------------------------------------------------------------------------
 
 -- type instance VectorFamily 2 Int = V2.V2 Int
 
-type instance VectorFamily 2 Int = Int.V2.Vec2
-type instance VectorFamily 2 Double = Double.V2.Vec2
-type instance VectorFamily 2 Float = Float.V2.Vec2
+type instance VectorFamily 2 Int    = Int.Unpacked.Vec2
+type instance VectorFamily 2 Double = Double.Unpacked.Vec2
+type instance VectorFamily 2 Float  = Float.Unpacked.Vec2
+
+type instance VectorFamily 3 Int    = Int.Unpacked.Vec3
+type instance VectorFamily 3 Double = Double.Unpacked.Vec3
+type instance VectorFamily 3 Float  = Float.Unpacked.Vec3
+
+type instance VectorFamily 4 Int    = Int.Unpacked.Vec4
+type instance VectorFamily 4 Double = Double.Unpacked.Vec4
+type instance VectorFamily 4 Float  = Float.Unpacked.Vec4
 
 
 -- bleh, apparently I can't define this for arbitrary d here :(

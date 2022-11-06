@@ -116,7 +116,12 @@ library unpacked
   import: setup
   hs-source-dirs: unpacked_src
   signatures: R
-  exposed-modules: V2
+  exposed-modules:
+    Unpacked
+    V2
+    V3
+    V4
+    VLarge
   build-depends: hgeometry-vector:class
 
 --------------------------------------------------------------------------------
@@ -161,9 +166,9 @@ library optimal
 --     Int.V2
 
   mixins:
-      hgeometry-vector:unpacked (V2 as Int.V2)    requires (R as Int)
-    , hgeometry-vector:unpacked (V2 as Double.V2) requires (R as Double)
-    , hgeometry-vector:unpacked (V2 as Float.V2)  requires (R as Float)
+      hgeometry-vector:unpacked (Unpacked as Int.Unpacked)    requires (R as Int)
+    , hgeometry-vector:unpacked (Unpacked as Double.Unpacked) requires (R as Double)
+    , hgeometry-vector:unpacked (Unpacked as Float.Unpacked)  requires (R as Float)
   build-depends: hgeometry-vector:class
                , hgeometry-vector:unpacked
                , hgeometry-vector:numtypes
