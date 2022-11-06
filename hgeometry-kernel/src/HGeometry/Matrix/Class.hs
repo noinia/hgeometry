@@ -23,7 +23,6 @@ class HasElements matrix matrix' where
   -- a (row,column) index pair.
   elements :: IndexedTraversal (Int,Int) matrix matrix' (NumType matrix) (NumType matrix')
 
-
 -- | A matrix of n rows, each of m columns, storing values of type r.
 type Matrix_ :: Type -> Nat -> Nat -> Type -> Constraint
 class ( r ~ NumType matrix
@@ -74,12 +73,14 @@ class ( r ~ NumType matrix
                , Num r
                , OptVector_ m r, KnownNat m
                , OptVector_ n r, KnownNat n
-               , Metric_ (Vector m r)
+               , Additive_ (Vector m r)
                ) => matrix -> matrix' -> matrix''
-  ma !*! mb = generateMatrix $ \(i,j) -> row' i ma `dot` column' j mb
+  ma !*! mb = generateMatrix $ \(i,j) -> row' i ma `dot'` column' j mb
     where
       row' i    = fromMaybe (error "absurd: row i out of range") . row i
       column' j = fromMaybe (error "absurd: column j out of range") . column j
+
+      dot' u v = sumOf components $ liftI2 (*) u v
 
   -- | Multiply a matrix and a vector.
   (!*)  :: ( Vector_ vector n r, Num r
@@ -130,9 +131,17 @@ infixl 7 !*
 class HasDeterminant d where
   det :: (Num r, Matrix_ matrix d d r) => matrix -> r
 
+instance HasDeterminant 1 where
+  det m = m^?!ix (0,0)
+
+
+
+
 -- | Class of matrices that are invertible.
 class Invertible n r where
   inverse' :: (Matrix_ matrix n n r) => matrix -> matrix
+
+
 
 
 

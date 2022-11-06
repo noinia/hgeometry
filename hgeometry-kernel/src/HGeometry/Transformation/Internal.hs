@@ -1,5 +1,7 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+-- {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+-- {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Transformation.Internal
@@ -9,14 +11,15 @@
 --------------------------------------------------------------------------------
 module HGeometry.Transformation.Internal where
 
-import           Control.Lens (iso,set,Iso,imap,over)
+import           Control.Lens (iso,set,Iso,imap,over,ix,iover)
 import           Data.Type.Ord
 import           GHC.TypeLits
 import           HGeometry.Matrix
-import           HGeometry.Matrix.Internal (mkRow)
+-- import           HGeometry.Matrix.Internal (mkRow)
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
+import           HGeometry.Vector.List (ListVector(..))
 import qualified HGeometry.Vector as V
 
 --------------------------------------------------------------------------------
@@ -31,27 +34,32 @@ transformationMatrix :: Iso (Transformation d r)       (Transformation d       s
                             (Matrix (d + 1) (d + 1) r) (Matrix (d + 1) (d + 1) s)
 transformationMatrix = iso _transformationMatrix Transformation
 
-deriving newtype instance (Show r) => Show (Transformation d r)
-deriving newtype instance (Eq r)   => Eq (Transformation d r)
-deriving newtype instance (Ord r)  => Ord (Transformation d r)
+deriving stock   instance (Show (Matrix (d+1) (d+1) r)) => Show (Transformation d r)
+deriving newtype instance (Eq (Matrix (d+1) (d+1) r))   => Eq (Transformation d r)
+deriving newtype instance (Ord (Matrix (d+1) (d+1) r))  => Ord (Transformation d r)
 
 type instance NumType (Transformation d r) = r
 
+type OptMatrix_ d r = ( OptVector_ d r
+                      , OptVector_ d (Vector d r)
+                      , Additive_ (VectorFamily' d r)
+                      , KnownNat d
+                      )
+
 -- | Compose transformations (right to left)
-(|.|)                                     :: (Num r)
+(|.|)                                     :: (Num r, OptMatrix_ (d+1) r)
                                           => Transformation d r -> Transformation d r
                                           -> Transformation d r
 (Transformation f) |.| (Transformation g) = Transformation $ f !*! g
 
 -- | Identity transformation; i.e. the transformation which does not change anything.
-identity :: (Num r) => Transformation d r
+identity :: (Num r, OptMatrix_ (d+1) r) => Transformation d r
 identity = Transformation identityMatrix
 
-instance (Num r) => Semigroup (Transformation d r) where
+instance (Num r, OptMatrix_ (d+1) r) => Semigroup (Transformation d r) where
   (<>) = (|.|)
-instance (Num r) => Monoid (Transformation d r) where
+instance (Num r, OptMatrix_ (d+1) r) => Monoid (Transformation d r) where
   mempty = identity
-
 
 -- if it exists?
 
@@ -59,9 +67,10 @@ instance (Num r) => Monoid (Transformation d r) where
 --
 -- >>> inverseOf $ translation (Vector2 (10.0) (5.0))
 -- Transformation {_transformationMatrix = Matrix (Vector3 (Vector3 1.0 0.0 (-10.0)) (Vector3 0.0 1.0 (-5.0)) (Vector3 0.0 0.0 1.0))}
-inverseOf :: (Fractional r, Invertible (d + 1) r)
+inverseOf :: (Fractional r, OptMatrix_ (d+1) r, Invertible (d + 1) r)
           => Transformation d r -> Transformation d r
 inverseOf = Transformation . inverse' . _transformationMatrix
+
 
 --------------------------------------------------------------------------------
 -- * Transformable geometry objects
@@ -70,26 +79,36 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
-  default transformBy :: ( HasPoints g g (Point (Dimension g) (NumType g))
-                                         (Point (Dimension g) (NumType g))
-                         , Dimension g < Dimension g + 1
-                         -- , Arity (Dimension g),
-                         -- , Arity (Dimension g+1)
-                         , Fractional (NumType g)
+  default transformBy :: forall d r.( d ~ Dimension g, r ~ NumType g
+                         , HasPoints g g (Point d r) (Point d r)
+                         , OptVector_ d r
+                         , OptMatrix_ (d+1) r
+                         , KnownNat d
+                         , d < d+1
+                         , Fractional r
+                         , Metric_ (VectorFamily' d r)
                          )
                       => Transformation (Dimension g) (NumType g) -> g -> g
-  transformBy t = over (allPoints @g @g @(Point (Dimension g) (NumType g))
-                                        @(Point (Dimension g) (NumType g)))
+  transformBy t = over (allPoints @g @g @(Point d r) @(Point d r))
                        (transformBy t)
+  -- not sure why we need the Metric_ constraint; it claims it is due to the use of allPoints
 
-instance (Fractional r, d < d+1) => IsTransformable (Point d r) where
+instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
+         , d < d+1, KnownNat d
+         ) => IsTransformable (Point d r) where
   transformBy t = Point . transformBy t . toVec
 
-instance (Fractional r, d < d+1) => IsTransformable (Vector d r) where
+
+
+instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
+         , d < d+1, KnownNat d
+         ) => IsTransformable (Vector d r) where
   transformBy (Transformation m) v = f $ m !* snoc v 1
     where
+      f   :: Vector (d+1) r -> Vector d r
       f u = let (u',x) = unsnoc u
-            in (/ x) <$> u'
+            in u' ^/ x
+
 
 --------------------------------------------------------------------------------
 -- * Common transformations
@@ -98,21 +117,34 @@ instance (Fractional r, d < d+1) => IsTransformable (Vector d r) where
 --
 -- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
-translation   :: ( Num r
+translation   :: forall d r vector. ( Num r
                  , Vector_ vector d r
+                 , d < d+1, KnownNat d
+                 , OptMatrix_ (d+1) r
+                 , HasComponents (VectorFamily' (d+1) r)
+                                 (VectorFamily' (d+1) (Vector (d+1) r))
+                 , Additive_ (VectorFamily' (d+1) r)
                  )
               => vector -> Transformation d r
-translation v = Transformation . Matrix $ imap transRow (snoc v 1)
+translation v = Transformation . Matrix
+             $ iover components transRow (snoc v 1 :: Vector (d+1) r)
 
 -- | Create scaling transformation from a vector.
 --
 -- >>> transformBy (scaling $ Vector2 2 (-1)) $ Point2 2 3
 -- Point2 4.0 (-3.0)
-scaling   :: ( Num r
+scaling   :: forall d r vector. ( Num r
              , Vector_ vector d r
+             , d < d+1, KnownNat d
+             , OptMatrix_ (d+1) r
+             , HasComponents (VectorFamily' (d+1) r)
+                             (VectorFamily' (d+1) (Vector (d+1) r))
+             , Additive_ (VectorFamily' (d+1) r)
              )
           => vector -> Transformation d r
-scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
+scaling v = Transformation . Matrix
+          $ iover components mkRow (snoc v 1 :: Vector (d+1) r)
+
 
 -- | Create scaling transformation from a scalar that is applied
 --   to all dimensions.
@@ -123,8 +155,20 @@ scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 -- True
 -- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
 -- True
-uniformScaling :: forall d r. (Num r) => r -> Transformation d r
-uniformScaling = scaling . pure @(Vector d)
+uniformScaling :: forall d r. (Num r, d < d+1, KnownNat d
+                              , OptMatrix_ (d+1) r
+                              , HasComponents (VectorFamily' (d+1) r)
+                                              (VectorFamily' (d+1) (Vector (d+1) r))
+                              ) => r -> Transformation d r
+uniformScaling = scaling . pure @(ListVector d)
+
+
+test :: Point 2 Double
+test = transformBy (uniformScaling 5) $ Point2 2 3
+
+{-
+
+
 
 
 --------------------------------------------------------------------------------
@@ -158,12 +202,29 @@ scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 
+-}
 
 -- | Row in a translation matrix
-transRow     :: forall n r. (, n < n+1
-                            , Num r)
+transRow     :: forall n r . ( n < n+1, Num r, OptVector_ (n+1) r, KnownNat n
+                             , Additive_ (VectorFamily' (n+1) r)
+                             )
              => Int -> r -> Vector (n + 1) r
 transRow i x = set (V.component @n) x $ mkRow i 1
+
+-- | Creates a row with zeroes everywhere, except at position i, where the
+-- value is the supplied value.
+mkRow     :: forall vector d r.
+             ( Num r
+             , Vector_ vector d r
+             , Additive_ vector
+             )
+          => Int -> r
+          -> vector
+mkRow i x = set (ix i) x zero
+
+
+{-
+
 
 --------------------------------------------------------------------------------
 -- * 3D Rotations
@@ -212,3 +273,5 @@ reflectionH :: Num r => Transformation 2 r
 reflectionH = Transformation . Matrix $ Vector3 (Vector3 (-1) 0  0)
                                                 (Vector3   0  1  0)
                                                 (Vector3   0  0  1)
+
+-}

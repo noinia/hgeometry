@@ -13,7 +13,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Point
-  ( Point
+  ( Point, pattern Point1, pattern Point2, pattern Point3, pattern Point4
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , PointF(Point, toVec)
   , origin, vector

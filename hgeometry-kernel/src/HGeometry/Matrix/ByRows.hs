@@ -22,7 +22,6 @@ import           HGeometry.Vector
 import           HGeometry.Properties
 import           Linear.Matrix (M22, M33, M44)
 import qualified Linear.Matrix as Lin
-import HGeometry.Vector (vectorFromVector)
 
 --------------------------------------------------------------------------------
 -- * Matrices
@@ -44,10 +43,10 @@ _MatrixVector :: Iso (Matrix n m r)          (Matrix n m s)
                      (Vector n (Vector m r)) (Vector n (Vector m s))
 _MatrixVector = iso (\(Matrix v) -> v) Matrix
 
-deriving newtype instance ( Show r, KnownNat m, KnownNat n
-                          , OptVector_ m r
-                          , OptVector_ n (Vector m r)
-                          ) => Show (Matrix n m r)
+deriving stock instance ( Show r, KnownNat m, KnownNat n
+                        , OptVector_ m r
+                        , OptVector_ n (Vector m r)
+                        ) => Show (Matrix n m r)
 deriving newtype instance ( Eq (VectorFamily' n (Vector m r)))  => Eq  (Matrix n m r)
 deriving newtype instance ( Ord (VectorFamily' n (Vector m r))) => Ord (Matrix n m r)
 
@@ -81,9 +80,10 @@ instance ( OptVector_ n (Vector m r)
 
   rows = _MatrixVector .> components
 
+test :: Matrix 2 2 Int
+test = identityMatrix
+
 --  columns = undefined
-
-
 
 -- instance Fractional r => Invertible 2 r where
 --   -- >>> inverse' $ Matrix $ Vector2 (Vector2 1 2) (Vector2 3 4.0)
