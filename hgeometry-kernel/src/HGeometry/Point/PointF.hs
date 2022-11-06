@@ -41,10 +41,11 @@ type instance NumType   (PointF v) = NumType v
 type instance VectorFor (PointF v) = v
 
 
-instance ( Vector_ v (Dimension v) (NumType v)
+instance ( Vector_ v (Dimension v) (IxValue v)
          , Metric_ v
-         , Show (NumType v)
+         , Show (IxValue v)
          , KnownNat (Dimension v)
+         , NumType v ~ IxValue v
          ) => Show (PointF v) where
   showsPrec k p = showParen (k > app_prec) $
                     showString constr . showChar ' ' .
@@ -54,10 +55,11 @@ instance ( Vector_ v (Dimension v) (NumType v)
       constr   = "Point" <> show (fromIntegral (natVal @(Dimension v) Proxy))
       unwordsS = foldr (.) id . intersperse (showChar ' ')
 
-instance ( Vector_ v (Dimension v) (NumType v)
+instance ( Vector_ v (Dimension v) (IxValue v)
          , Metric_ v
-         , Read (NumType v)
+         , Read (IxValue v)
          , KnownNat (Dimension v)
+         , IxValue v ~ NumType v
          ) => Read (PointF v) where
   readPrec = readData $
       readUnaryWith (replicateM d readPrec) constr $ \rs ->
@@ -69,8 +71,9 @@ instance ( Vector_ v (Dimension v) (NumType v)
       constr   = "Point" <> show d
   readListPrec = readListPrecDefault
 
-instance ( Vector_ v (Dimension v) (NumType v)
+instance ( Vector_ v (Dimension v) (IxValue v)
          , Metric_ v
+         , IxValue v ~ NumType v
          ) => Affine_ (PointF v) where
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
@@ -78,20 +81,23 @@ instance ( Vector_ v (Dimension v) (NumType v)
 
 instance ( Vector_ v  d r
          , Vector_ v' d s
+         , NumType v ~ r, NumType v' ~ s
          ) => HasVector (PointF v) (PointF v') r s where
   vector = lens toVec (const Point)
 
 instance ( Vector_ v d r
          , Metric_ v
+         , NumType v ~ r
          ) => Point_ (PointF v) d r where
   fromVector = Point . vectorFromVector
 
 instance HasPoints (PointF v) (PointF v') (PointF v) (PointF v') where
   allPoints = id
 
-instance ( Num (NumType v)
+instance ( Num (IxValue v)
          , Metric_ v
-         , Vector_ v (Dimension v) (NumType v)
+         , Vector_ v (Dimension v) (IxValue v)
+         , IxValue v ~ NumType v
          ) => HasSquaredEuclideanDistance (PointF v) where
   pointClosestTo _ = pointFromPoint
 

@@ -106,13 +106,13 @@ instance ( Ixed (VectorFamily' d r)
 
 instance {-# OVERLAPPING #-}
          ( HasComponents (VectorFamily' d r) (VectorFamily' d s)
-         , NumType (VectorFamily' d r) ~ r
-         , NumType (VectorFamily' d s) ~ s)
+         , IxValue (VectorFamily' d r) ~ r
+         , IxValue (VectorFamily' d s) ~ s)
       => HasComponents (Vector d r)     (Vector d s) where
   components f (MkVector v) = MkVector <$> components f v
 
 instance ( HasComponents (VectorFamily' d r) v
-         , NumType (VectorFamily' d r) ~ r
+         , IxValue (VectorFamily' d r) ~ r
          ) => HasComponents (Vector d r) v where
   components f (MkVector v) = components f v
 
@@ -120,10 +120,10 @@ instance Vector_ (VectorFamily' d r) d r => Vector_ (Vector d r) d r where
   vectorFromList = fmap MkVector . vectorFromList @(VectorFamily' d r)
 
 deriving newtype instance ( Additive_ (VectorFamily' d r)
-                          , NumType (VectorFamily' d r) ~ r
+                          , IxValue (VectorFamily' d r) ~ r
                           ) => Additive_ (Vector d r)
 deriving newtype instance ( Metric_ (VectorFamily' d r)
-                          , NumType (VectorFamily' d r) ~ r
+                          , IxValue (VectorFamily' d r) ~ r
                           ) => Metric_   (Vector d r)
 
 

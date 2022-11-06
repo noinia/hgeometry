@@ -4,7 +4,6 @@ module HGeometry.Vector.Metric
 
 import           Control.Lens
 import           Data.Radical
-import           HGeometry.Properties
 import           HGeometry.Vector.Additive
 import           Prelude hiding (sqrt)
 
@@ -17,31 +16,31 @@ import           Prelude hiding (sqrt)
 class Additive_ vector => Metric_ vector where
   -- | Compute the inner product of two vectors or (equivalently)
   -- convert a vector f a into a covector f a -> a.
-  dot :: Num (NumType vector) => vector -> vector -> NumType vector
+  dot :: Num (IxValue vector) => vector -> vector -> IxValue vector
   dot u v = sumOf components $ liftI2 (*) u v
   {-# INLINE dot #-}
 
   -- | Compute the squared norm. The name quadrance arises from Norman
   -- J. Wildberger's rational trigonometry.
-  quadrance   :: Num (NumType vector) => vector -> NumType vector
+  quadrance   :: Num (IxValue vector) => vector -> IxValue vector
   quadrance v = dot v v
   {-# INLINE quadrance #-}
 
   -- | Compute the quadrance of the difference
-  qd     :: Num (NumType vector) => vector -> vector -> NumType vector
+  qd     :: Num (IxValue vector) => vector -> vector -> IxValue vector
   qd u v = quadrance $ u ^-^ v
   {-# INLINE qd #-}
 
   -- -- | Compute the distance between two vectors in a metric space
-  -- distance :: Radical (NumType vector) => vector -> vector -> NumType vector
+  -- distance :: Radical (IxValue vector) => vector -> vector -> IxValue vector
 
   -- | Compute the norm of a vector in a metric space
-  norm :: Radical (NumType vector) => vector -> NumType vector
+  norm :: Radical (IxValue vector) => vector -> IxValue vector
   norm = sqrt . quadrance
   {-# INLINE norm #-}
 
   -- | Convert a non-zero vector to unit vector.
-  signorm   :: (Radical (NumType vector), Fractional (NumType vector)) => vector -> vector
+  signorm   :: (Radical (IxValue vector), Fractional (IxValue vector)) => vector -> vector
   signorm v = v ^/ norm v
   {-# INLINE signorm #-}
 

@@ -46,12 +46,11 @@ import           Prelude hiding (zipWith)
 type ConstructVector :: Type -> Nat -> Type
 type family ConstructVector vector d where
   ConstructVector vector 0 = vector
-  ConstructVector vector d = NumType vector -> ConstructVector vector (d-1)
+  ConstructVector vector d = IxValue vector -> ConstructVector vector (d-1)
 
 -- | A type class for vectors
 type Vector_ :: Type -> Nat -> Type -> Constraint
-class ( NumType vector   ~ r
-      , Dimension vector ~ d
+class ( Dimension vector ~ d
       , IxValue vector ~ r
       , Index vector ~ Int
       , Ixed vector
