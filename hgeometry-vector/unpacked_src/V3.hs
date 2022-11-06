@@ -92,6 +92,9 @@ instance Vector_ Vec3 3 R where
     _       -> Nothing
   {-# INLINE vectorFromList #-}
 
+instance ConstructableVector_ Vec3 3 R where
+  mkVector = Vec3
+
 instance Additive_ Vec3 where
   zero   = Vec3 0 0 0
   liftU2 f (Vec3 x y z) (Vec3 x' y' z') = Vec3 (f x x') (f y y') (f z z')

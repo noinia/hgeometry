@@ -96,6 +96,9 @@ instance Vector_ Vec4 4 R where
     _         -> Nothing
   {-# INLINE vectorFromList #-}
 
+instance ConstructableVector_ Vec4 4 R where
+  mkVector = Vec4
+
 instance Additive_ Vec4 where
   zero   = Vec4 0 0 0 0
   liftU2 f (Vec4 x y z w) (Vec4 x' y' z' w') = Vec4 (f x x') (f y y') (f z z') (f w w')

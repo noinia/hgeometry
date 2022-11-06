@@ -11,11 +11,10 @@
 --------------------------------------------------------------------------------
 module HGeometry.Transformation.Internal where
 
-import           Control.Lens (iso,set,Iso,imap,over,ix,iover)
+import           Control.Lens (iso,set,Iso,over,ix,iover)
 import           Data.Type.Ord
 import           GHC.TypeLits
 import           HGeometry.Matrix
--- import           HGeometry.Matrix.Internal (mkRow)
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -46,6 +45,11 @@ type OptMatrix_ d r = ( OptVector_ d r
                       , KnownNat d
                       )
 
+type ConstructableMatrix_ d r =
+  ( ConstructableVector_ (VectorFamily d r) d r
+  , ConstructableVector_ (VectorFamily d (Vector d r)) d (Vector d r)
+  )
+
 -- | Compose transformations (right to left)
 (|.|)                                     :: (Num r, OptMatrix_ (d+1) r)
                                           => Transformation d r -> Transformation d r
@@ -74,6 +78,15 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 
 --------------------------------------------------------------------------------
 -- * Transformable geometry objects
+
+type TransformationConstraints g =
+  ( Dimension g < Dimension g + 1
+  , KnownNat (Dimension g)
+  , OptMatrix_ (Dimension g+1) (NumType g)
+  , HasComponents (VectorFamily' (Dimension g+1) (NumType g))
+                  (VectorFamily' (Dimension g+1) (Vector (Dimension g+1) (NumType g)))
+  , Additive_ (VectorFamily' (Dimension g+1) (NumType g))
+  )
 
 -- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
@@ -163,10 +176,12 @@ uniformScaling :: forall d r. (Num r, d < d+1, KnownNat d
 uniformScaling = scaling . pure @(ListVector d)
 
 
-test :: Point 2 Double
-test = transformBy (uniformScaling 5) $ Point2 2 3
+-- test :: Point 2 Double
+-- test = transformBy (uniformScaling 5) $ Point2 2 3
 
-{-
+-- test2 :: Point 2 Double
+-- test2 = transformBy (scaling $ Vector2 2 5) $ Point2 2 3
+
 
 
 
@@ -178,9 +193,10 @@ test = transformBy (uniformScaling 5) $ Point2 2 3
 --
 -- >>> translateBy (Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
-translateBy :: ( IsTransformable g, Num (NumType g)
-               , Dimension g < Dimension g + 1
+translateBy :: ( IsTransformable g
+               , Num (NumType g)
                , Vector_ vector (Dimension g) (NumType g)
+               , TransformationConstraints g
                ) => vector -> g -> g
 translateBy = transformBy . translation
 
@@ -190,6 +206,7 @@ translateBy = transformBy . translation
 -- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
            , Vector_ vector (Dimension g) (NumType g)
+           , TransformationConstraints g
            ) => vector -> g -> g
 scaleBy = transformBy . scaling
 
@@ -199,10 +216,10 @@ scaleBy = transformBy . scaling
 -- >>> scaleUniformlyBy 5 $ Point2 2 3
 -- Point2 10.0 15.0
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
+                    , TransformationConstraints g
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 
--}
 
 -- | Row in a translation matrix
 transRow     :: forall n r . ( n < n+1, Num r, OptVector_ (n+1) r, KnownNat n
@@ -222,10 +239,6 @@ mkRow     :: forall vector d r.
           -> vector
 mkRow i x = set (ix i) x zero
 
-
-{-
-
-
 --------------------------------------------------------------------------------
 -- * 3D Rotations
 
@@ -233,25 +246,32 @@ mkRow i x = set (ix i) x zero
 -- construct the appropriate rotation that does this.
 --
 --
-rotateTo                 :: Num r => Vector 3 (Vector 3 r) -> Transformation 3 r
-rotateTo (Vector3 u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
-                                                             (snoc v        0)
-                                                             (snoc w        0)
-                                                             (Vector4 0 0 0 1)
+rotateTo                 :: ( Num r
+                            , OptVector_ 3 r
+                            , ConstructableMatrix_ 4 r
+                            ) => Vector 3 (Vector 3 r) -> Transformation 3 r
+rotateTo (Vector3_ u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
+                                                              (snoc v        0)
+                                                              (snoc w        0)
+                                                              (Vector4 0 0 0 1)
+
 
 --------------------------------------------------------------------------------
 -- * 2D Transformations
 
 -- | Skew transformation that keeps the y-coordinates fixed and shifts
 -- the x coordinates.
-skewX        :: Num r => r -> Transformation 2 r
+skewX        :: ( Num r
+                , ConstructableMatrix_ 3 r
+                ) => r -> Transformation 2 r
 skewX lambda = Transformation . Matrix $ Vector3 (Vector3 1 lambda 0)
                                                  (Vector3 0 1      0)
                                                  (Vector3 0 0      1)
 
+
 -- | Create a matrix that corresponds to a rotation by 'a' radians counter-clockwise
 --   around the origin.
-rotation :: Floating r => r -> Transformation 2 r
+rotation   :: (Floating r, ConstructableMatrix_ 3 r) => r -> Transformation 2 r
 rotation a = Transformation . Matrix $ Vector3 (Vector3 (cos a) (- sin a) 0)
                                                (Vector3 (sin a) (  cos a) 0)
                                                (Vector3 0       0         1)
@@ -259,19 +279,20 @@ rotation a = Transformation . Matrix $ Vector3 (Vector3 (cos a) (- sin a) 0)
 -- | Create a matrix that corresponds to a reflection in a line through the origin
 --   which makes an angle of 'a' radians with the positive 'x'-asis, in counter-clockwise
 --   orientation.
-reflection :: Floating r => r -> Transformation 2 r
+reflection   :: ( Floating r
+                , ConstructableMatrix_ 3 r
+                , Additive_ (VectorFamily 3 r)
+                ) => r -> Transformation 2 r
 reflection a = rotation a |.| reflectionV |.| rotation (-a)
 
 -- | Vertical reflection
-reflectionV :: Num r => Transformation 2 r
+reflectionV :: (Num r, ConstructableMatrix_ 3 r) => Transformation 2 r
 reflectionV = Transformation . Matrix $ Vector3 (Vector3 1   0  0)
                                                 (Vector3 0 (-1) 0)
                                                 (Vector3 0   0  1)
 
 -- | Horizontal reflection
-reflectionH :: Num r => Transformation 2 r
+reflectionH :: (Num r, ConstructableMatrix_ 3 r) => Transformation 2 r
 reflectionH = Transformation . Matrix $ Vector3 (Vector3 (-1) 0  0)
                                                 (Vector3   0  1  0)
                                                 (Vector3   0  0  1)
-
--}

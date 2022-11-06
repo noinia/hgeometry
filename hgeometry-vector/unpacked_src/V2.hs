@@ -94,6 +94,9 @@ instance Vector_ Vec2 2 R where
     _     -> Nothing
   {-# INLINE vectorFromList #-}
 
+instance ConstructableVector_ Vec2 2 R where
+  mkVector = Vec2
+
 instance Additive_ Vec2 where
   zero   = Vec2 0 0
   liftU2 f (Vec2 x y) (Vec2 x' y') = Vec2 (f x x') (f y y')

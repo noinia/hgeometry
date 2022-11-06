@@ -3,14 +3,14 @@ module HGeometry.Vector.List
   ( ListVector(..)
   ) where
 
-import           Control.Applicative (liftA2)
-import           Control.Lens
+import Control.Applicative (liftA2)
+import Control.Lens
 -- import qualified Data.List as List
--- import           Data.Proxy
-import           GHC.Generics
--- import           GHC.TypeLits
-import           HGeometry.Properties
-import           HGeometry.Vector.Class
+import Data.Proxy
+import GHC.Generics
+import GHC.TypeNats
+import HGeometry.Properties
+import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
@@ -19,9 +19,14 @@ newtype ListVector d r = ListVector [r]
                        deriving ( Show,Eq,Ord,Functor,Foldable,Traversable
                                 , FunctorWithIndex Int
                                 , FoldableWithIndex Int
-                                , Applicative
                                 , Generic
                                 )
+
+instance KnownNat d => Applicative (ListVector d) where
+  pure x = let d = fromIntegral . natVal $ Proxy @d
+           in ListVector $ replicate d x
+  (ListVector fs) <*> (ListVector xs) = ListVector $ zipWith ($) fs xs
+
 
 instance Wrapped (ListVector d r)
 instance Rewrapped (ListVector d r) (ListVector d s)
@@ -43,12 +48,14 @@ type instance IxValue (ListVector d r) = r
 instance HasComponents (ListVector d r) (ListVector d s) where
   components = itraversed
 
-instance Additive_ (ListVector d r) where
-  zero = pure 0
+instance KnownNat d => Additive_ (ListVector d r) where
+  zero  = pure 0
   liftU2 = liftA2
-  liftI2 = liftA2
 
-instance Metric_ (ListVector d r)
+  -- (ListVector v) (ListVector w) = ListVector $ zipWith f v w
+  liftI2 = liftA2 -- f (ListVector v) (ListVector w) = ListVector $ zipWith f v w
+
+instance KnownNat d => Metric_ (ListVector d r)
 
 instance Vector_ (ListVector d r) d r where
   vectorFromList = Just . ListVector
