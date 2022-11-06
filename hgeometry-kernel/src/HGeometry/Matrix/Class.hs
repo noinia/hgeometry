@@ -5,14 +5,16 @@ module HGeometry.Matrix.Class
   , Invertible(..)
   ) where
 
-import Control.Lens hiding (cons,snoc,uncons,unsnoc)
-import Data.Kind
-import GHC.TypeNats
-import HGeometry.Properties
-import HGeometry.Vector
-import HGeometry.Vector.List
-import Prelude hiding (zipWith)
-
+import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
+import           Data.Kind
+import qualified Data.List as List
+import           Data.Maybe (fromMaybe)
+import           Data.Proxy
+import           GHC.TypeNats
+import           HGeometry.Properties
+import           HGeometry.Vector
+import           HGeometry.Vector.List (ListVector(..))
+import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
@@ -20,9 +22,6 @@ class HasElements matrix matrix' where
   -- | IndexedTraversal over the elements of the matrix, each index is
   -- a (row,column) index pair.
   elements :: IndexedTraversal (Int,Int) matrix matrix' (NumType matrix) (NumType matrix')
-
-
-
 
 
 -- | A matrix of n rows, each of m columns, storing values of type r.
@@ -37,20 +36,50 @@ class ( r ~ NumType matrix
                                 , matrix -> r where
   -- | Produces the Identity Matrix.
   identityMatrix :: Num r => matrix
+  identityMatrix = generateMatrix $ \(i,j) -> if i == j then 1 else 0
+
+  -- | Given a function that specifies the values, generate the matrix
+  generateMatrix :: ((Int,Int) -> r) -> matrix
 
   -- | Given a list of the elements in the matrix, in row by row
   -- order, constructs the matrix.
   -- requires that there are exactly n*m elements.
-  matrixFromList :: [r] -> Maybe matrix
+  matrixFromList    :: ( KnownNat n, KnownNat m
+                       , OptVector_  m r
+                       ) => [r] -> Maybe matrix
+  matrixFromList xs = do rs  <- go n xs
+                         rs' <- vectorFromList @(ListVector n (Vector m r)) rs
+                         pure $ matrixFromRows rs'
+    where
+      m = fromIntegral $ natVal $ Proxy @m
+      n = fromIntegral $ natVal $ Proxy @n
+
+      go 0  [] = Just []
+      go 0  _  = Nothing
+      go n' ys = let (r,rest) = List.splitAt m ys
+                 in do r'    <- vectorFromList @(Vector m r) r
+                       rest' <- go (n'-1) rest
+                       pure (r':rest')
+
+  -- | Given a list of the elements in the matrix, in row by row
+  -- order, constructs the matrix.
+  -- requires that there are exactly n*m elements.
+  matrixFromRows :: ( Vector_ rowVector n (Vector m r)
+                    , OptVector_ m r
+                    ) => rowVector -> matrix
 
   -- | Matrix multiplication
   (!*!)     :: ( Matrix_ matrix'  m m' r
                , Matrix_ matrix'' n m' r
                , Num r
+               , OptVector_ m r, KnownNat m
+               , OptVector_ n r, KnownNat n
+               , Metric_ (Vector m r)
                ) => matrix -> matrix' -> matrix''
-  -- ma !*! mb = generateMatrix $ \(i,j) -> row i ma `dot` column j mb
-
-  -- ma !*! mb = fmap (\ f' -> Foldable.foldl' (^+^) zero $ liftI2 (*^) f' mb) ma
+  ma !*! mb = generateMatrix $ \(i,j) -> row' i ma `dot` column' j mb
+    where
+      row' i    = fromMaybe (error "absurd: row i out of range") . row i
+      column' j = fromMaybe (error "absurd: column j out of range") . column j
 
   -- | Multiply a matrix and a vector.
   (!*)  :: ( Vector_ vector n r, Num r
@@ -58,16 +87,34 @@ class ( r ~ NumType matrix
            ) => matrix -> vector -> vector
   m !* v = vZipWith f (ListVector @n $ m^..rows) v
     where
-      f       :: Vector m r -> r -> r
-      f row x = sumOf components $ x *^ row
+      f        :: Vector m r -> r -> r
+      f row' x = sumOf components $ x *^ row'
 
   -- | traversal over all rows
   rows :: IndexedTraversal' Int matrix (Vector m r)
 
-  -- | Traversal over all columns
-  columns :: IndexedTraversal' Int matrix (Vector n r)
+--  -- | Traversal over all columns
+--  columns :: IndexedTraversal' Int matrix (Vector n r)
 
-  {-# MINIMAL identityMatrix, matrixFromList, (!*!), rows, columns #-}
+
+
+  -- | Access the i^th row in the matrix.
+  --
+  row     :: (OptVector_ m r, KnownNat m) => Int -> matrix -> Maybe (Vector m r)
+  row i m = generateA $ \j -> m ^? ix (i,j)
+
+  -- row'   :: (OptVector_ m r, KnownNat m) => Int -> Traversal' matrix (Vector m r)
+  -- row' i = traversal go
+  --   where
+  --     go focus m =
+    -- generate $ \j -> m ^?! ix (i,j)
+
+  -- | Access the j^th column in the matrix.
+  column     :: (OptVector_ n r, KnownNat n) => Int -> matrix -> Maybe (Vector n r)
+  column j m = generateA $ \i -> m ^? ix (i,j)
+
+
+  {-# MINIMAL generateMatrix, matrixFromRows, rows #-}
 
 infixl 7 !*!
 infixl 7 !*

@@ -15,7 +15,7 @@ module HGeometry.Vector.Class
   , cons, snoc
   , uncons, unsnoc
   , vZipWith
-  , generate
+  , generate, generateA
 
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , Metric_(..)
@@ -97,8 +97,18 @@ vZipWith f va vb = uncheckedVectorFromList $ List.zipWith f (va^..components) (v
 
 -- | Constructs a vector using the given function
 generate   :: forall vector d r. (Vector_ vector d r, KnownNat d) => (Int -> r) -> vector
-generate f = let d = fromIntegral $ natVal $ Proxy @d
-             in uncheckedVectorFromList [ f i | i <- [0..(d-1)]]
+generate f = runIdentity $ generateA (Identity . f)
+
+-- | Constructs a vector using the given function.
+generateA :: forall vector d r f. (Vector_ vector d r
+                                  , KnownNat d
+                                  , Applicative f
+                                  ) => (Int -> f r) -> f vector
+generateA f = let d = fromIntegral $ natVal $ Proxy @d
+              in uncheckedVectorFromList <$> traverse f [0..(d-1)]
+
+
+                  -- [ f i | i <- [0..(d-1)]]
 
 --------------------------------------------------------------------------------
 

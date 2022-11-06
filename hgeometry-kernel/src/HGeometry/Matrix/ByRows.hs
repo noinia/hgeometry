@@ -22,6 +22,7 @@ import           HGeometry.Vector
 import           HGeometry.Properties
 import           Linear.Matrix (M22, M33, M44)
 import qualified Linear.Matrix as Lin
+import HGeometry.Vector (vectorFromVector)
 
 --------------------------------------------------------------------------------
 -- * Matrices
@@ -68,20 +69,15 @@ instance ( OptVector_ n (Vector m r)
 
 instance ( OptVector_ n (Vector m r)
          , OptVector_ m r
-         , KnownNat n
+         , KnownNat n, KnownNat m
          , Additive_ (VectorFamily' m r)
          ) => Matrix_ (Matrix n m r) n m r where
-  identityMatrix = Matrix $ generate mkRow
+
+  matrixFromRows = Matrix . vectorFromVector
+
+  generateMatrix f = Matrix $ generate mkRow
     where
-      mkRow i = zero&ix i .~ 1
-
-  -- ma !*! mb = ma&rows %~ \row -> vzipWith (*^) row mb
-
-
-    -- fmap (\ f' -> Foldable.foldl' (^+^) zero $ liftI2 (*^) f' mb) ma
-
-
-  -- (Matrix a) !*! (Matrix b) = Matrix $ a Lin.!*! b
+      mkRow i = generate (\j -> f (i,j))
 
   rows = _MatrixVector .> components
 

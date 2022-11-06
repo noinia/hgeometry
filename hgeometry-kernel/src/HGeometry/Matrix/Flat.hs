@@ -81,9 +81,6 @@ instance ( KnownNat n, KnownNat m
                    in Matrix <$> generate $ \i -> let (a,b) = quotRem i m
                                                   in if a == b then 1 else 0
 
-  (!*!) = undefined
-
-  (!*) = undefined
 
   rows = undefined
 
