@@ -28,12 +28,12 @@
 </span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span class="hs-comment">-- | Specify the planar subdivison as a tree of components</span><span>
-</span><span id="line-31"></span><span id="local-6989586621680027646"><span id="local-6989586621680027647"></span></span><span class="hs-keyword">data</span><span> </span><span id="PlanarSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-var">PlanarSD</span></a></span></span><span> </span><span id="local-6989586621680027810"><span class="annot"><a href="#local-6989586621680027810"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027809"><span class="annot"><a href="#local-6989586621680027809"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027811"><span class="annot"><a href="#local-6989586621680027811"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027808"><span class="annot"><a href="#local-6989586621680027808"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlanarSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-var">PlanarSD</span></a></span></span><span>
+</span><span id="line-31"></span><span id="local-6989586621680027661"><span id="local-6989586621680027662"></span></span><span class="hs-keyword">data</span><span> </span><span id="PlanarSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-var">PlanarSD</span></a></span></span><span> </span><span id="local-6989586621680027825"><span class="annot"><a href="#local-6989586621680027825"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027824"><span class="annot"><a href="#local-6989586621680027824"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027826"><span class="annot"><a href="#local-6989586621680027826"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027823"><span class="annot"><a href="#local-6989586621680027823"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlanarSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-var">PlanarSD</span></a></span></span><span>
 </span><span id="line-32"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="outerFace"><span class="annot"><span class="annottext">PlanarSD v e f r -&gt; f
-</span><a href="Geometry.PlanarSubdivision.TreeRep.html#outerFace"><span class="hs-identifier hs-var hs-var">outerFace</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680027811"><span class="hs-identifier hs-type">f</span></a></span><span>           </span><span class="hs-comment">-- ^ outer face</span><span>
+</span><a href="Geometry.PlanarSubdivision.TreeRep.html#outerFace"><span class="hs-identifier hs-var hs-var">outerFace</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680027826"><span class="hs-identifier hs-type">f</span></a></span><span>           </span><span class="hs-comment">-- ^ outer face</span><span>
 </span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="components"><span class="annot"><span class="annottext">PlanarSD v e f r -&gt; [InnerSD v e f r]
-</span><a href="Geometry.PlanarSubdivision.TreeRep.html#components"><span class="hs-identifier hs-var hs-var">components</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027810"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027809"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027811"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027808"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ for each component, an inner</span><span>
-</span><span id="line-34"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680027637"><span id="local-6989586621680027639"><span id="local-6989586621680027641"><span class="annot"><span class="annottext">Int -&gt; PlanarSD v e f r -&gt; ShowS
+</span><a href="Geometry.PlanarSubdivision.TreeRep.html#components"><span class="hs-identifier hs-var hs-var">components</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027825"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027824"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027826"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027823"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ for each component, an inner</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680027652"><span id="local-6989586621680027654"><span id="local-6989586621680027656"><span class="annot"><span class="annottext">Int -&gt; PlanarSD v e f r -&gt; ShowS
 [PlanarSD v e f r] -&gt; ShowS
 PlanarSD v e f r -&gt; String
 (Int -&gt; PlanarSD v e f r -&gt; ShowS)
@@ -63,7 +63,7 @@ showsPrec :: Int -&gt; PlanarSD v e f r -&gt; ShowS
 $cshowsPrec :: forall v e f r.
 (Show f, Show r, Show e, Show v) =&gt;
 Int -&gt; PlanarSD v e f r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680027632"><span id="local-6989586621680027634"><span class="annot"><span class="annottext">PlanarSD v e f r -&gt; PlanarSD v e f r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680027647"><span id="local-6989586621680027649"><span class="annot"><span class="annottext">PlanarSD v e f r -&gt; PlanarSD v e f r -&gt; Bool
 (PlanarSD v e f r -&gt; PlanarSD v e f r -&gt; Bool)
 -&gt; (PlanarSD v e f r -&gt; PlanarSD v e f r -&gt; Bool)
 -&gt; Eq (PlanarSD v e f r)
@@ -93,29 +93,29 @@ $cfrom :: forall v e f r x. PlanarSD v e f r -&gt; Rep (PlanarSD v e f r) x
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- | InnerSD is essentially a component</span><span>
-</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span id="InnerSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-var">InnerSD</span></a></span></span><span> </span><span id="local-6989586621680027627"><span class="annot"><a href="#local-6989586621680027627"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027626"><span class="annot"><a href="#local-6989586621680027626"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027625"><span class="annot"><a href="#local-6989586621680027625"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027624"><span class="annot"><a href="#local-6989586621680027624"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027627"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027626"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027624"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027627"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027626"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027625"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027624"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span id="InnerSD"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-var">InnerSD</span></a></span></span><span> </span><span id="local-6989586621680027642"><span class="annot"><a href="#local-6989586621680027642"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027641"><span class="annot"><a href="#local-6989586621680027641"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027640"><span class="annot"><a href="#local-6989586621680027640"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027639"><span class="annot"><a href="#local-6989586621680027639"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-type">Vtx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027642"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027641"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027639"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027642"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027641"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027640"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027639"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span id="local-6989586621680027621"><span id="local-6989586621680027622"><span id="local-6989586621680027623"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027618"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027623"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027622"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027621"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-40"></span><span>  </span><span id="local-6989586621680027616"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; PlanarSD v e f a -&gt; PlanarSD v e f b
+</span><span id="line-39"></span><span id="local-6989586621680027636"><span id="local-6989586621680027637"><span id="local-6989586621680027638"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027633"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027638"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027637"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027636"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621680027631"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; PlanarSD v e f a -&gt; PlanarSD v e f b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; PlanarSD v e f a -&gt; PlanarSD v e f b
 forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
 </span><span class="hs-identifier hs-var">fmapDefault</span></span></span></span></span><span>
-</span><span id="line-41"></span><span id="local-6989586621680027612"><span id="local-6989586621680027613"><span id="local-6989586621680027614"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027579"><span id="local-6989586621680027581"><span id="local-6989586621680027583"><span id="local-6989586621680027585"><span id="local-6989586621680027587"><span id="local-6989586621680027589"><span id="local-6989586621680027591"><span id="local-6989586621680027593"><span id="local-6989586621680027595"><span id="local-6989586621680027597"><span id="local-6989586621680027599"><span id="local-6989586621680027601"><span id="local-6989586621680027603"><span id="local-6989586621680027605"><span id="local-6989586621680027607"><span id="local-6989586621680027610"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027614"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027613"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027612"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>  </span><span id="local-6989586621680027577"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; PlanarSD v e f a -&gt; m
+</span><span id="line-41"></span><span id="local-6989586621680027627"><span id="local-6989586621680027628"><span id="local-6989586621680027629"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027594"><span id="local-6989586621680027596"><span id="local-6989586621680027598"><span id="local-6989586621680027600"><span id="local-6989586621680027602"><span id="local-6989586621680027604"><span id="local-6989586621680027606"><span id="local-6989586621680027608"><span id="local-6989586621680027610"><span id="local-6989586621680027612"><span id="local-6989586621680027614"><span id="local-6989586621680027616"><span id="local-6989586621680027618"><span id="local-6989586621680027620"><span id="local-6989586621680027622"><span id="local-6989586621680027625"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027629"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027628"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027627"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621680027592"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; PlanarSD v e f a -&gt; m
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; PlanarSD v e f a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Traversable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMapDefault</span></span></span></span></span><span>
-</span><span id="line-43"></span><span id="local-6989586621680027572"><span id="local-6989586621680027573"><span id="local-6989586621680027574"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027563"><span id="local-6989586621680027565"><span id="local-6989586621680027567"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027574"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027573"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027572"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621680027561"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; PlanarSD v e f a -&gt; f (PlanarSD v e f b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621680027559"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680027559"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span id="local-6989586621680027558"><span class="annot"><span class="annottext">f
-</span><a href="#local-6989586621680027558"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680027557"><span class="annot"><span class="annottext">[InnerSD v e f a]
-</span><a href="#local-6989586621680027557"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f -&gt; [InnerSD v e f b] -&gt; PlanarSD v e f b
+</span><span id="line-43"></span><span id="local-6989586621680027587"><span id="local-6989586621680027588"><span id="local-6989586621680027589"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027578"><span id="local-6989586621680027580"><span id="local-6989586621680027582"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027589"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027588"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027587"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621680027576"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; PlanarSD v e f a -&gt; f (PlanarSD v e f b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621680027574"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621680027574"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span id="local-6989586621680027573"><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621680027573"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680027572"><span class="annot"><span class="annottext">[InnerSD v e f a]
+</span><a href="#local-6989586621680027572"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f -&gt; [InnerSD v e f b] -&gt; PlanarSD v e f b
 forall v e f r. f -&gt; [InnerSD v e f r] -&gt; PlanarSD v e f r
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-var">PlanarSD</span></a></span><span> </span><span class="annot"><span class="annottext">f
-</span><a href="#local-6989586621680027558"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">([InnerSD v e f b] -&gt; PlanarSD v e f b)
+</span><a href="#local-6989586621680027573"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">([InnerSD v e f b] -&gt; PlanarSD v e f b)
 -&gt; f [InnerSD v e f b] -&gt; f (PlanarSD v e f b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(InnerSD v e f a -&gt; f (InnerSD v e f b))
@@ -128,26 +128,26 @@ forall (g :: * -&gt; *) r r' v e f.
 Applicative g =&gt;
 (r -&gt; g r') -&gt; InnerSD v e f r -&gt; g (InnerSD v e f r')
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-var">traverseInnerSD</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680027559"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[InnerSD v e f a]
-</span><a href="#local-6989586621680027557"><span class="hs-identifier hs-var">cs</span></a></span></span></span></span><span>
+</span><a href="#local-6989586621680027574"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[InnerSD v e f a]
+</span><a href="#local-6989586621680027572"><span class="hs-identifier hs-var">cs</span></a></span></span></span></span><span>
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span>
-</span><span id="line-47"></span><span id="local-6989586621680027551"><span id="local-6989586621680027552"><span id="local-6989586621680027553"><span id="local-6989586621680027554"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027544"><span id="local-6989586621680027546"><span id="local-6989586621680027549"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027554"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027553"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027552"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027551"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027553"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027552"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027551"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027554"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-48"></span><span>  </span><span id="local-6989586621680027542"><span class="annot"><span class="annottext">toEncoding :: PlanarSD v e f r -&gt; Encoding
+</span><span id="line-47"></span><span id="local-6989586621680027566"><span id="local-6989586621680027567"><span id="local-6989586621680027568"><span id="local-6989586621680027569"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027559"><span id="local-6989586621680027561"><span id="local-6989586621680027564"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027568"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027567"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027566"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027568"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027567"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027566"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621680027557"><span class="annot"><span class="annottext">toEncoding :: PlanarSD v e f r -&gt; Encoding
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; PlanarSD v e f r -&gt; Encoding
 forall a.
 (Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
 Options -&gt; a -&gt; Encoding
 </span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
 </span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span></span></span><span>
-</span><span id="line-49"></span><span id="local-6989586621680027535"><span id="local-6989586621680027536"><span id="local-6989586621680027537"><span id="local-6989586621680027538"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027531"><span id="local-6989586621680027533"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027538"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027537"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027536"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027535"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027537"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027536"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027535"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027538"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-49"></span><span id="local-6989586621680027550"><span id="local-6989586621680027551"><span id="local-6989586621680027552"><span id="local-6989586621680027553"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027546"><span id="local-6989586621680027548"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027553"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027552"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027551"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027550"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#PlanarSD"><span class="hs-identifier hs-type">PlanarSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027552"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027551"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027550"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027553"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-comment">-- | traverse for InnerSD.</span><span>
-</span><span id="line-53"></span><span id="local-6989586621680027799"><span id="local-6989586621680027800"><span id="local-6989586621680027801"><span id="local-6989586621680027802"><span id="local-6989586621680027803"><span id="local-6989586621680027804"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-type">traverseInnerSD</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621680027804"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680027803"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680027804"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027802"><span class="hs-identifier hs-type">r'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027801"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027800"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027799"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027803"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680027804"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027801"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027800"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027799"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027802"><span class="hs-identifier hs-type">r'</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621680027814"><span id="local-6989586621680027815"><span id="local-6989586621680027816"><span id="local-6989586621680027817"><span id="local-6989586621680027818"><span id="local-6989586621680027819"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-type">traverseInnerSD</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621680027819"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680027818"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680027819"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027817"><span class="hs-identifier hs-type">r'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027816"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027815"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027814"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027818"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680027819"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027816"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027815"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027814"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027817"><span class="hs-identifier hs-type">r'</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
 </span><span id="line-54"></span><span id="traverseInnerSD"><span class="annot"><span class="annottext">traverseInnerSD :: (r -&gt; g r') -&gt; InnerSD v e f r -&gt; g (InnerSD v e f r')
-</span><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-var hs-var">traverseInnerSD</span></a></span></span><span> </span><span id="local-6989586621680027529"><span class="annot"><span class="annottext">r -&gt; g r'
-</span><a href="#local-6989586621680027529"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vtx v e r -&gt; g (Vtx v e r'))
+</span><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-var hs-var">traverseInnerSD</span></a></span></span><span> </span><span id="local-6989586621680027544"><span class="annot"><span class="annottext">r -&gt; g r'
+</span><a href="#local-6989586621680027544"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vtx v e r -&gt; g (Vtx v e r'))
 -&gt; (Face v e f r -&gt; g (Face v e f r'))
 -&gt; InnerSD v e f r
 -&gt; g (InnerSD v e f r')
@@ -159,22 +159,22 @@ forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; g r'
-</span><a href="#local-6989586621680027529"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r -&gt; g r') -&gt; Face v e f r -&gt; g (Face v e f r')
+</span><a href="#local-6989586621680027544"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r -&gt; g r') -&gt; Face v e f r -&gt; g (Face v e f r')
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; g r'
-</span><a href="#local-6989586621680027529"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680027544"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span id="local-6989586621680027526"><span id="local-6989586621680027527"></span></span><span class="hs-keyword">data</span><span> </span><span id="Face"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span id="local-6989586621680027691"><span class="annot"><a href="#local-6989586621680027691"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027690"><span class="annot"><a href="#local-6989586621680027690"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027692"><span class="annot"><a href="#local-6989586621680027692"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027689"><span class="annot"><a href="#local-6989586621680027689"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Face"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="incidentEdge"><span class="annot"><span class="annottext">Face v e f r -&gt; (Int, Int)
+</span><span id="line-57"></span><span id="local-6989586621680027541"><span id="local-6989586621680027542"></span></span><span class="hs-keyword">data</span><span> </span><span id="Face"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span id="local-6989586621680027706"><span class="annot"><a href="#local-6989586621680027706"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621680027705"><span class="annot"><a href="#local-6989586621680027705"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621680027707"><span class="annot"><a href="#local-6989586621680027707"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680027704"><span class="annot"><a href="#local-6989586621680027704"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Face"><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="incidentEdge"><span class="annot"><span class="annottext">Face v e f r -&gt; (Int, Int)
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#incidentEdge"><span class="hs-identifier hs-var hs-var">incidentEdge</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
 </span><span id="line-58"></span><span>                           </span><span class="hs-comment">-- ^ an edge (u,v) s.t. the face</span><span>
 </span><span id="line-59"></span><span>                            </span><span class="hs-comment">-- is right from (u,v)</span><span>
 </span><span id="line-60"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="fData"><span class="annot"><span class="annottext">Face v e f r -&gt; f
-</span><a href="Geometry.PlanarSubdivision.TreeRep.html#fData"><span class="hs-identifier hs-var hs-var">fData</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680027692"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><a href="Geometry.PlanarSubdivision.TreeRep.html#fData"><span class="hs-identifier hs-var hs-var">fData</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621680027707"><span class="hs-identifier hs-type">f</span></a></span><span>
 </span><span id="line-61"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="holes"><span class="annot"><span class="annottext">Face v e f r -&gt; [InnerSD v e f r]
-</span><a href="Geometry.PlanarSubdivision.TreeRep.html#holes"><span class="hs-identifier hs-var hs-var">holes</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027691"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027690"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027692"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027689"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><a href="Geometry.PlanarSubdivision.TreeRep.html#holes"><span class="hs-identifier hs-var hs-var">holes</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#InnerSD"><span class="hs-identifier hs-type">InnerSD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027706"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027705"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027707"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027704"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-62"></span><span>                         </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall x. Face v e f r -&gt; Rep (Face v e f r) x)
 -&gt; (forall x. Rep (Face v e f r) x -&gt; Face v e f r)
 -&gt; Generic (Face v e f r)
@@ -186,7 +186,7 @@ forall v e f r x. Rep (Face v e f r) x -&gt; Face v e f r
 forall v e f r x. Face v e f r -&gt; Rep (Face v e f r) x
 $cto :: forall v e f r x. Rep (Face v e f r) x -&gt; Face v e f r
 $cfrom :: forall v e f r x. Face v e f r -&gt; Rep (Face v e f r) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680027514"><span id="local-6989586621680027516"><span id="local-6989586621680027518"><span class="annot"><span class="annottext">Int -&gt; Face v e f r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680027529"><span id="local-6989586621680027531"><span id="local-6989586621680027533"><span class="annot"><span class="annottext">Int -&gt; Face v e f r -&gt; ShowS
 [Face v e f r] -&gt; ShowS
 Face v e f r -&gt; String
 (Int -&gt; Face v e f r -&gt; ShowS)
@@ -216,7 +216,7 @@ showsPrec :: Int -&gt; Face v e f r -&gt; ShowS
 $cshowsPrec :: forall v e f r.
 (Show f, Show r, Show e, Show v) =&gt;
 Int -&gt; Face v e f r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680027510"><span id="local-6989586621680027512"><span class="annot"><span class="annottext">Face v e f r -&gt; Face v e f r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680027525"><span id="local-6989586621680027527"><span class="annot"><span class="annottext">Face v e f r -&gt; Face v e f r -&gt; Bool
 (Face v e f r -&gt; Face v e f r -&gt; Bool)
 -&gt; (Face v e f r -&gt; Face v e f r -&gt; Bool) -&gt; Eq (Face v e f r)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -233,30 +233,30 @@ $c== :: forall v e f r.
 Face v e f r -&gt; Face v e f r -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span id="local-6989586621680027507"><span id="local-6989586621680027508"><span id="local-6989586621680027509"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027504"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027509"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027508"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027507"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621680027503"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Face v e f a -&gt; Face v e f b
+</span><span id="line-64"></span><span id="local-6989586621680027522"><span id="local-6989586621680027523"><span id="local-6989586621680027524"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027519"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027524"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027523"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027522"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621680027518"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; Face v e f a -&gt; Face v e f b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Face v e f a -&gt; Face v e f b
 forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
 </span><span class="hs-identifier hs-var">fmapDefault</span></span></span></span></span><span>
-</span><span id="line-66"></span><span id="local-6989586621680027500"><span id="local-6989586621680027501"><span id="local-6989586621680027502"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027467"><span id="local-6989586621680027469"><span id="local-6989586621680027471"><span id="local-6989586621680027473"><span id="local-6989586621680027475"><span id="local-6989586621680027477"><span id="local-6989586621680027479"><span id="local-6989586621680027481"><span id="local-6989586621680027483"><span id="local-6989586621680027485"><span id="local-6989586621680027487"><span id="local-6989586621680027489"><span id="local-6989586621680027491"><span id="local-6989586621680027493"><span id="local-6989586621680027495"><span id="local-6989586621680027498"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027502"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027501"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027500"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-67"></span><span>  </span><span id="local-6989586621680027466"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; Face v e f a -&gt; m
-</span><a href="#local-6989586621680027466"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Face v e f a -&gt; m
+</span><span id="line-66"></span><span id="local-6989586621680027515"><span id="local-6989586621680027516"><span id="local-6989586621680027517"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027482"><span id="local-6989586621680027484"><span id="local-6989586621680027486"><span id="local-6989586621680027488"><span id="local-6989586621680027490"><span id="local-6989586621680027492"><span id="local-6989586621680027494"><span id="local-6989586621680027496"><span id="local-6989586621680027498"><span id="local-6989586621680027500"><span id="local-6989586621680027502"><span id="local-6989586621680027504"><span id="local-6989586621680027506"><span id="local-6989586621680027508"><span id="local-6989586621680027510"><span id="local-6989586621680027513"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027517"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027516"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027515"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621680027481"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; Face v e f a -&gt; m
+</span><a href="#local-6989586621680027481"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Face v e f a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Traversable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMapDefault</span></span></span></span></span><span>
-</span><span id="line-68"></span><span id="local-6989586621680027463"><span id="local-6989586621680027464"><span id="local-6989586621680027465"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027454"><span id="local-6989586621680027456"><span id="local-6989586621680027458"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027465"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027464"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027463"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-69"></span><span>  </span><span id="local-6989586621680027453"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; Face v e f a -&gt; f (Face v e f b)
-</span><a href="#local-6989586621680027453"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621680027452"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680027452"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span id="local-6989586621680027451"><span class="annot"><span class="annottext">(Int, Int)
-</span><a href="#local-6989586621680027451"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027450"><span class="annot"><span class="annottext">f
-</span><a href="#local-6989586621680027450"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680027449"><span class="annot"><span class="annottext">[InnerSD v e f a]
-</span><a href="#local-6989586621680027449"><span class="hs-identifier hs-var">hs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; f -&gt; [InnerSD v e f b] -&gt; Face v e f b
+</span><span id="line-68"></span><span id="local-6989586621680027478"><span id="local-6989586621680027479"><span id="local-6989586621680027480"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027469"><span id="local-6989586621680027471"><span id="local-6989586621680027473"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027480"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027479"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027478"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621680027468"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; Face v e f a -&gt; f (Face v e f b)
+</span><a href="#local-6989586621680027468"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621680027467"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621680027467"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span id="local-6989586621680027466"><span class="annot"><span class="annottext">(Int, Int)
+</span><a href="#local-6989586621680027466"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027465"><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621680027465"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680027464"><span class="annot"><span class="annottext">[InnerSD v e f a]
+</span><a href="#local-6989586621680027464"><span class="hs-identifier hs-var">hs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; f -&gt; [InnerSD v e f b] -&gt; Face v e f b
 forall v e f r.
 (Int, Int) -&gt; f -&gt; [InnerSD v e f r] -&gt; Face v e f r
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int)
-</span><a href="#local-6989586621680027451"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">f
-</span><a href="#local-6989586621680027450"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">([InnerSD v e f b] -&gt; Face v e f b)
+</span><a href="#local-6989586621680027466"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621680027465"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">([InnerSD v e f b] -&gt; Face v e f b)
 -&gt; f [InnerSD v e f b] -&gt; f (Face v e f b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(InnerSD v e f a -&gt; f (InnerSD v e f b))
@@ -269,19 +269,19 @@ forall (g :: * -&gt; *) r r' v e f.
 Applicative g =&gt;
 (r -&gt; g r') -&gt; InnerSD v e f r -&gt; g (InnerSD v e f r')
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#traverseInnerSD"><span class="hs-identifier hs-var">traverseInnerSD</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621680027452"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[InnerSD v e f a]
-</span><a href="#local-6989586621680027449"><span class="hs-identifier hs-var">hs</span></a></span></span></span></span><span>
+</span><a href="#local-6989586621680027467"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[InnerSD v e f a]
+</span><a href="#local-6989586621680027464"><span class="hs-identifier hs-var">hs</span></a></span></span></span></span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span id="local-6989586621680027445"><span id="local-6989586621680027446"><span id="local-6989586621680027447"><span id="local-6989586621680027448"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027438"><span id="local-6989586621680027440"><span id="local-6989586621680027443"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027448"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027447"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027446"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027445"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027447"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027446"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027448"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027445"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621680027437"><span class="annot"><span class="annottext">toEncoding :: Face v e r f -&gt; Encoding
-</span><a href="#local-6989586621680027437"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Face v e r f -&gt; Encoding
+</span><span id="line-72"></span><span id="local-6989586621680027460"><span id="local-6989586621680027461"><span id="local-6989586621680027462"><span id="local-6989586621680027463"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027453"><span id="local-6989586621680027455"><span id="local-6989586621680027458"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027463"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027462"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027461"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027460"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027462"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027461"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027463"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027460"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621680027452"><span class="annot"><span class="annottext">toEncoding :: Face v e r f -&gt; Encoding
+</span><a href="#local-6989586621680027452"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Face v e r f -&gt; Encoding
 forall a.
 (Generic a, GToJSON' Encoding Zero (Rep a)) =&gt;
 Options -&gt; a -&gt; Encoding
 </span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
 </span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span></span></span><span>
-</span><span id="line-74"></span><span id="local-6989586621680027433"><span id="local-6989586621680027434"><span id="local-6989586621680027435"><span id="local-6989586621680027436"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027429"><span id="local-6989586621680027431"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027436"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027435"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027434"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027433"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027435"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027434"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027433"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-74"></span><span id="local-6989586621680027448"><span id="local-6989586621680027449"><span id="local-6989586621680027450"><span id="local-6989586621680027451"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680027444"><span id="local-6989586621680027446"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027451"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027450"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027449"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621680027448"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-type">Face</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027450"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027449"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027451"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680027448"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span>
 </span><span id="line-77"></span><span>
@@ -304,91 +304,91 @@ forall v e f r. f -&gt; [InnerSD v e f r] -&gt; PlanarSD v e f r
 -&gt; InnerSD Int () String (RealNumber 3)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
 </span><span class="hs-identifier hs-var">Gr</span></span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027427"><span class="hs-identifier hs-var">ads1</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
+</span><a href="#local-6989586621680027442"><span class="hs-identifier hs-var">ads1</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
 forall v e r. [Face v e String r]
-</span><a href="#local-6989586621680027426"><span class="hs-identifier hs-var">fs1</span></a></span><span>
+</span><a href="#local-6989586621680027441"><span class="hs-identifier hs-var">fs1</span></a></span><span>
 </span><span id="line-87"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
 -&gt; [Face Int () String (RealNumber 3)]
 -&gt; InnerSD Int () String (RealNumber 3)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
 </span><span class="hs-identifier hs-var">Gr</span></span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027425"><span class="hs-identifier hs-var">ads2</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
-</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var">fs2</span></a></span><span>
+</span><a href="#local-6989586621680027440"><span class="hs-identifier hs-var">ads2</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
+</span><a href="#local-6989586621680027439"><span class="hs-identifier hs-var">fs2</span></a></span><span>
 </span><span id="line-88"></span><span>                               </span><span class="hs-special">]</span><span>
 </span><span id="line-89"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-90"></span><span>    </span><span class="hs-comment">-- hole 1 in the outer face</span><span>
-</span><span id="line-91"></span><span>    </span><span id="local-6989586621680027427"><span class="annot"><span class="annottext">ads1 :: [Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027427"><span class="hs-identifier hs-var hs-var">ads1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621680027442"><span class="annot"><span class="annottext">ads1 :: [Vtx Int () (RealNumber 3)]
+</span><a href="#local-6989586621680027442"><span class="hs-identifier hs-var hs-var">ads1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span>    </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">11</span></span><span class="hs-special">]</span><span>
 </span><span id="line-92"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">8</span></span><span>   </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">11</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">]</span><span>
 </span><span id="line-93"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">11</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">11</span></span><span>  </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">12</span></span><span class="hs-special">]</span><span>
 </span><span id="line-94"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">12</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">7</span></span><span>   </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">11</span></span><span class="hs-special">]</span><span>
 </span><span id="line-95"></span><span>           </span><span class="hs-special">]</span><span>
-</span><span id="line-96"></span><span>    </span><span id="local-6989586621680027426"><span class="annot"><span class="annottext">fs1 :: [Face v e String r]
-</span><a href="#local-6989586621680027426"><span class="hs-identifier hs-var hs-var">fs1</span></a></span></span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621680027441"><span class="annot"><span class="annottext">fs1 :: [Face v e String r]
+</span><a href="#local-6989586621680027441"><span class="hs-identifier hs-var hs-var">fs1</span></a></span></span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
 forall v e f r.
 (Int, Int) -&gt; f -&gt; [InnerSD v e f r] -&gt; Face v e f r
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
@@ -397,169 +397,169 @@ forall v e f r.
 </span><span class="hs-string">&quot;f_1&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-97"></span><span>
 </span><span id="line-98"></span><span>    </span><span class="hs-comment">-- hole 2 in the outer face</span><span>
-</span><span id="line-99"></span><span>    </span><span id="local-6989586621680027425"><span class="annot"><span class="annottext">ads2 :: [Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027425"><span class="hs-identifier hs-var hs-var">ads2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621680027440"><span class="annot"><span class="annottext">ads2 :: [Vtx Int () (RealNumber 3)]
+</span><a href="#local-6989586621680027440"><span class="hs-identifier hs-var hs-var">ads2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span class="hs-special">]</span><span>
 </span><span id="line-100"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">10</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span class="hs-special">]</span><span>
 </span><span id="line-101"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">9</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">9</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="hs-special">]</span><span>
 </span><span id="line-102"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">10</span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span class="hs-special">]</span><span>
 </span><span id="line-103"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">5</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="hs-special">]</span><span>
 </span><span id="line-104"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">15</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">3</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">6</span></span><span class="hs-special">]</span><span>
 </span><span id="line-105"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">6</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">20</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">6</span></span><span class="hs-special">)</span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">]</span><span>
 </span><span id="line-106"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">10</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">14</span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">6</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">]</span><span>
 </span><span id="line-107"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">13</span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="hs-special">]</span><span>
 </span><span id="line-108"></span><span>           </span><span class="hs-special">]</span><span>
-</span><span id="line-109"></span><span>    </span><span id="local-6989586621680027424"><span class="annot"><span class="annottext">fs2 :: [Face Int () String (RealNumber 3)]
-</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var hs-var">fs2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int)
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621680027439"><span class="annot"><span class="annottext">fs2 :: [Face Int () String (RealNumber 3)]
+</span><a href="#local-6989586621680027439"><span class="hs-identifier hs-var hs-var">fs2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int)
 -&gt; String
 -&gt; [InnerSD Int () String (RealNumber 3)]
 -&gt; Face Int () String (RealNumber 3)
@@ -570,9 +570,9 @@ forall v e f r.
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_2&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">InnerSD Int () String (RealNumber 3)
 forall v e r. Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027420"><span class="hs-identifier hs-var">f5</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InnerSD Int () String (RealNumber 3)
+</span><a href="#local-6989586621680027435"><span class="hs-identifier hs-var">f5</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InnerSD Int () String (RealNumber 3)
 forall v e r. Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027419"><span class="hs-identifier hs-var">f6</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621680027434"><span class="hs-identifier hs-var">f6</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-110"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Int, Int)
 -&gt; String
 -&gt; [InnerSD Int () String (RealNumber 3)]
@@ -593,11 +593,11 @@ forall v e f r.
 </span><span class="hs-number">2</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_4&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">InnerSD Int () String (RealNumber 3)
-</span><a href="#local-6989586621680027418"><span class="hs-identifier hs-var">f7</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621680027433"><span class="hs-identifier hs-var">f7</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-112"></span><span>          </span><span class="hs-special">]</span><span>
 </span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span>    </span><span id="local-6989586621680027420"><span class="annot"><span class="annottext">f5 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027420"><span class="hs-identifier hs-var hs-var">f5</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621680027435"><span class="annot"><span class="annottext">f5 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
+</span><a href="#local-6989586621680027435"><span class="hs-identifier hs-var hs-var">f5</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
 -&gt; [Face v e String r]
 -&gt; Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
@@ -606,51 +606,51 @@ forall v f. [v] -&gt; [f] -&gt; Gr v f
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">16</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">3</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">8</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">17</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">18</span></span><span class="hs-special">]</span><span>
 </span><span id="line-115"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">17</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span>    </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">7</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">16</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">18</span></span><span class="hs-special">]</span><span>
 </span><span id="line-116"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">18</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">16</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">17</span></span><span class="hs-special">]</span><span>
 </span><span id="line-117"></span><span>            </span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
 forall v e f r.
@@ -660,8 +660,8 @@ forall v e f r.
 </span><span class="hs-number">17</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_5&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-118"></span><span>
-</span><span id="line-119"></span><span>    </span><span id="local-6989586621680027419"><span class="annot"><span class="annottext">f6 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027419"><span class="hs-identifier hs-var hs-var">f6</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621680027434"><span class="annot"><span class="annottext">f6 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
+</span><a href="#local-6989586621680027434"><span class="hs-identifier hs-var hs-var">f6</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
 -&gt; [Face v e String r]
 -&gt; Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
@@ -670,51 +670,51 @@ forall v f. [v] -&gt; [f] -&gt; Gr v f
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">15</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">3</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">3</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">14</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">13</span></span><span class="hs-special">]</span><span>
 </span><span id="line-120"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">13</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">6</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">14</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">15</span></span><span class="hs-special">]</span><span>
 </span><span id="line-121"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">14</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">3</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">6</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">13</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">15</span></span><span class="hs-special">]</span><span>
 </span><span id="line-122"></span><span>            </span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
 forall v e f r.
@@ -724,8 +724,8 @@ forall v e f r.
 </span><span class="hs-number">14</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_6&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-123"></span><span>
-</span><span id="line-124"></span><span>    </span><span id="local-6989586621680027418"><span class="annot"><span class="annottext">f7 :: InnerSD Int () String (RealNumber 3)
-</span><a href="#local-6989586621680027418"><span class="hs-identifier hs-var hs-var">f7</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
+</span><span id="line-124"></span><span>    </span><span id="local-6989586621680027433"><span class="annot"><span class="annottext">f7 :: InnerSD Int () String (RealNumber 3)
+</span><a href="#local-6989586621680027433"><span class="hs-identifier hs-var hs-var">f7</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
 -&gt; [Face Int () String (RealNumber 3)]
 -&gt; InnerSD Int () String (RealNumber 3)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
@@ -734,85 +734,85 @@ forall v f. [v] -&gt; [f] -&gt; Gr v f
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">19</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">9</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">20</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">23</span></span><span class="hs-special">]</span><span>
 </span><span id="line-125"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">20</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span>   </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">19</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">21</span></span><span class="hs-special">]</span><span>
 </span><span id="line-126"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">21</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">15</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">20</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">22</span></span><span class="hs-special">]</span><span>
 </span><span id="line-127"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">22</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">17</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">5</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">21</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">23</span></span><span class="hs-special">]</span><span>
 </span><span id="line-128"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">23</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">15</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">8</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">19</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">22</span></span><span class="hs-special">]</span><span>
 </span><span id="line-129"></span><span>            </span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Int)
 -&gt; String
@@ -825,10 +825,10 @@ forall v e f r.
 </span><span class="hs-number">19</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_7&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">InnerSD Int () String (RealNumber 3)
 forall v e r. Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027417"><span class="hs-identifier hs-var">f8</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621680027432"><span class="hs-identifier hs-var">f8</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-130"></span><span>
-</span><span id="line-131"></span><span>    </span><span id="local-6989586621680027417"><span class="annot"><span class="annottext">f8 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
-</span><a href="#local-6989586621680027417"><span class="hs-identifier hs-var hs-var">f8</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621680027432"><span class="annot"><span class="annottext">f8 :: Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
+</span><a href="#local-6989586621680027432"><span class="hs-identifier hs-var hs-var">f8</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
 -&gt; [Face v e String r]
 -&gt; Gr (Vtx Int () (RealNumber 3)) (Face v e String r)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
@@ -837,51 +837,51 @@ forall v f. [v] -&gt; [f] -&gt; Gr v f
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">24</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">14</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">6</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">25</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">26</span></span><span class="hs-special">]</span><span>
 </span><span id="line-132"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">25</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">13</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">8</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">24</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">26</span></span><span class="hs-special">]</span><span>
 </span><span id="line-133"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">26</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">12</span></span><span>  </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">5</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">24</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">25</span></span><span class="hs-special">]</span><span>
 </span><span id="line-134"></span><span>            </span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
 forall v e f r.
@@ -891,22 +891,22 @@ forall v e f r.
 </span><span class="hs-number">25</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;f_8&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-135"></span><span>
-</span><span id="line-136"></span><span>    </span><span id="local-6989586621680027421"><span class="annot"><span class="annottext">e :: a -&gt; (a, ())
-</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027416"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680027416"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680027416"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621680027436"><span class="annot"><span class="annottext">e :: a -&gt; (a, ())
+</span><a href="#local-6989586621680027436"><span class="hs-identifier hs-var hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027431"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680027431"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680027431"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-137"></span><span>
-</span><span id="line-138"></span><span>    </span><span id="local-6989586621680027423"><span class="annot"><span class="annottext">vtx :: Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var hs-var">vtx</span></a></span></span><span> </span><span id="local-6989586621680027415"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027415"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680027414"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680027414"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680027413"><span class="annot"><span class="annottext">[(Int, e)]
-</span><a href="#local-6989586621680027413"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Int -&gt; Vtx Int e r
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621680027438"><span class="annot"><span class="annottext">vtx :: Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
+</span><a href="#local-6989586621680027438"><span class="hs-identifier hs-var hs-var">vtx</span></a></span></span><span> </span><span id="local-6989586621680027430"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027430"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680027429"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680027429"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680027428"><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680027428"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Int -&gt; Vtx Int e r
 forall v e r. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
 </span><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027415"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680027414"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
-</span><a href="#local-6989586621680027413"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027415"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621680027430"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680027429"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680027428"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027430"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-139"></span><span>
 </span><span id="line-140"></span><span>
 </span><span id="line-141"></span><span class="hs-comment">-- the simplest planar subdivision I could think of: a single triagnle</span><span>
@@ -922,84 +922,84 @@ forall v e f r. f -&gt; [InnerSD v e f r] -&gt; PlanarSD v e f r
 -&gt; InnerSD Int () String (RealNumber 3)
 forall v f. [v] -&gt; [f] -&gt; Gr v f
 </span><span class="hs-identifier hs-var">Gr</span></span><span> </span><span class="annot"><span class="annottext">[Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027411"><span class="hs-identifier hs-var">ads</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
+</span><a href="#local-6989586621680027426"><span class="hs-identifier hs-var">ads</span></a></span><span> </span><span class="annot"><span class="annottext">[Face Int () String (RealNumber 3)]
 forall v e r. [Face v e String r]
-</span><a href="#local-6989586621680027410"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621680027425"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-144"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-145"></span><span>    </span><span id="local-6989586621680027411"><span class="annot"><span class="annottext">ads :: [Vtx Int () (RealNumber 3)]
-</span><a href="#local-6989586621680027411"><span class="hs-identifier hs-var hs-var">ads</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-145"></span><span>    </span><span id="local-6989586621680027426"><span class="annot"><span class="annottext">ads :: [Vtx Int () (RealNumber 3)]
+</span><a href="#local-6989586621680027426"><span class="hs-identifier hs-var hs-var">ads</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027409"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>  </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-146"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027409"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">]</span><span>
 </span><span id="line-147"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Point 2 (RealNumber 3)
 -&gt; [(Int, ())]
 -&gt; Vtx Int () (RealNumber 3)
 forall r e. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027409"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var">vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber 3 -&gt; RealNumber 3 -&gt; Point 2 (RealNumber 3)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><a href="Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">RealNumber 3
 </span><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, ())
 forall a. a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-148"></span><span>          </span><span class="hs-special">]</span><span>
-</span><span id="line-149"></span><span>    </span><span id="local-6989586621680027410"><span class="annot"><span class="annottext">fs :: [Face v e String r]
-</span><a href="#local-6989586621680027410"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621680027425"><span class="annot"><span class="annottext">fs :: [Face v e String r]
+</span><a href="#local-6989586621680027425"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; String -&gt; [InnerSD v e String r] -&gt; Face v e String r
 forall v e f r.
 (Int, Int) -&gt; f -&gt; [InnerSD v e f r] -&gt; Face v e f r
 </span><a href="Geometry.PlanarSubdivision.TreeRep.html#Face"><span class="hs-identifier hs-var">Face</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;interior&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
-</span><span id="line-150"></span><span>    </span><span id="local-6989586621680027408"><span class="annot"><span class="annottext">e :: a -&gt; (a, ())
-</span><a href="#local-6989586621680027408"><span class="hs-identifier hs-var hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027407"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680027407"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621680027407"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-151"></span><span>    </span><span id="local-6989586621680027409"><span class="annot"><span class="annottext">vtx :: Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
-</span><a href="#local-6989586621680027409"><span class="hs-identifier hs-var hs-var">vtx</span></a></span></span><span> </span><span id="local-6989586621680027406"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027406"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680027405"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680027405"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680027404"><span class="annot"><span class="annottext">[(Int, e)]
-</span><a href="#local-6989586621680027404"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Int -&gt; Vtx Int e r
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621680027423"><span class="annot"><span class="annottext">e :: a -&gt; (a, ())
+</span><a href="#local-6989586621680027423"><span class="hs-identifier hs-var hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680027422"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680027422"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680027422"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>    </span><span id="local-6989586621680027424"><span class="annot"><span class="annottext">vtx :: Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Vtx Int e r
+</span><a href="#local-6989586621680027424"><span class="hs-identifier hs-var hs-var">vtx</span></a></span></span><span> </span><span id="local-6989586621680027421"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680027420"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680027420"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680027419"><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680027419"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; Int -&gt; Vtx Int e r
 forall v e r. Int -&gt; Point 2 r -&gt; [(Int, e)] -&gt; v -&gt; Vtx v e r
 </span><a href="Data.PlaneGraph.AdjRep.html#Vtx"><span class="hs-identifier hs-var">Vtx</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027406"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680027405"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
-</span><a href="#local-6989586621680027404"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621680027406"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680027420"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[(Int, e)]
+</span><a href="#local-6989586621680027419"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680027421"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-152"></span></pre></body></html>

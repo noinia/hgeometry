@@ -920,6 +920,17 @@ sort :: forall vector f a. (Foldable f, Vector vector a, Ord a) => f a -> vector
 --   function
 sortOnCheap :: forall vector f a b. (Foldable f, Vector vector a, Ord b) => (a -> b) -> f a -> vector a
 
+module Data.Foldable.Util
+class HasFromFoldable f
+fromFoldable :: (HasFromFoldable f, Foldable g) => g a -> f a
+fromList :: HasFromFoldable f => [a] -> f a
+class HasFromFoldable1 f
+fromFoldable1 :: (HasFromFoldable1 f, Foldable1 g) => g a -> f a
+fromNonEmpty :: HasFromFoldable1 f => NonEmpty a -> f a
+instance Data.Foldable.Util.HasFromFoldable1 GHC.Base.NonEmpty
+instance Data.Foldable.Util.HasFromFoldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Data.Foldable.Util.HasFromFoldable Data.Vector.Vector
+
 
 -- | Things that have an index.
 module Data.Indexed
@@ -1671,7 +1682,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_avWV a_aw6v. Lens (Permutation a_avWV) (Permutation a_aw6v) (Vector (Orbit a_avWV)) (Vector (Orbit a_aw6v))
+orbits :: forall a_aw3c a_awcM. Lens (Permutation a_aw3c) (Permutation a_awcM) (Vector (Orbit a_aw3c)) (Vector (Orbit a_awcM))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
@@ -5290,6 +5301,14 @@ isShiftOf :: Eq a => CircularVector a -> CircularVector a -> Bool
 withIndicesRight :: CircularVector a -> CircularVector (Int :+ a)
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
+
+module Data.Vector.NonEmpty.Util
+instance Control.Lens.At.Ixed (Data.Vector.NonEmpty.Internal.NonEmptyVector a)
+instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Data.Semigroup.Traversable.Class.Traversable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.FunctorWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.FoldableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.TraversableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
 
 
 module Data.Yaml.Util
