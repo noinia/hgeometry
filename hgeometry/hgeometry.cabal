@@ -59,7 +59,8 @@ common setup
 
   build-depends:
                 base                    >= 4.11      &&     < 5
-              , hgeometry-combinatorial >= 1.0
+              , hgeometry-combinatorial >= 0.14
+              , hgeometry-vector        >= 1.0
               , hgeometry-kernel        >= 1.0
               , hiraffe                 >= 0.1
               -- , bifunctors              >= 4.1
@@ -67,7 +68,7 @@ common setup
               , containers              >= 0.5.9
               -- , dlist                   >= 0.7
               , lens                    >= 4.2
-              -- , semigroupoids           >= 5
+              , semigroupoids           >= 5
               , semigroups              >= 0.18
               , linear                  >= 1.10
               , fixed-vector            >= 1.0
@@ -84,7 +85,7 @@ common setup
               -- , hashable                >= 1.2
               , vector                  >= 0.11
               -- , data-clist              >= 0.1.2.3
-              , vector-circular         >= 0.1.4
+              -- , vector-circular         >= 0.1.4
               , nonempty-vector         >= 0.2.0.0
               , text                    >= 2.0
               -- , vector-algorithms
@@ -105,6 +106,7 @@ library
   exposed-modules:
     HGeometry
 
+    HGeometry.Polygon.Class
 
   -- other-modules:
     -- HGeometry.Vector.VectorFamily

@@ -1,11 +1,11 @@
 write-ghc-environment-files: always
 tests: true
 packages:
-    -- hgeometry
+    hgeometry
     -- hiraffe
     hgeometry-vector
     hgeometry-kernel
-    hgeometry-combinatorial
+    -- hgeometry-combinatorial
 
 -- allow-newer:
 --   vector-circular
@@ -14,3 +14,13 @@ packages:
 --   flags: +jsaddle
 -- package reanimate
 --   flags: +no-hgeometry
+
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hiraffe
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hgeometry
+    subdir: hgeometry-combinatorial
