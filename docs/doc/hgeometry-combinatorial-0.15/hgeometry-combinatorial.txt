@@ -931,6 +931,26 @@ instance Data.Foldable.Util.HasFromFoldable1 GHC.Base.NonEmpty
 instance Data.Foldable.Util.HasFromFoldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Data.Foldable.Util.HasFromFoldable Data.Vector.Vector
 
+module Data.Cyclic
+
+-- | A cyclic sequence type
+newtype Cyclic v a
+Cyclic :: v a -> Cyclic v a
+
+-- | Turn the cyclic vector into a circular Vector
+toCircularVector :: Cyclic NonEmptyVector a -> CircularVector a
+instance Data.Foldable.Foldable v => Data.Foldable.Foldable (Data.Cyclic.Cyclic v)
+instance GHC.Base.Functor v => GHC.Base.Functor (Data.Cyclic.Cyclic v)
+instance Data.Semigroup.Foldable.Class.Foldable1 v => Data.Semigroup.Foldable.Class.Foldable1 (Data.Cyclic.Cyclic v)
+instance Data.Semigroup.Traversable.Class.Traversable1 v => Data.Semigroup.Traversable.Class.Traversable1 (Data.Cyclic.Cyclic v)
+instance Data.Traversable.Traversable v => Data.Traversable.Traversable (Data.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.FunctorWithIndex i v => Control.Lens.Indexed.FunctorWithIndex i (Data.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.FoldableWithIndex i v => Control.Lens.Indexed.FoldableWithIndex i (Data.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.TraversableWithIndex i v => Control.Lens.Indexed.TraversableWithIndex i (Data.Cyclic.Cyclic v)
+instance Data.Foldable.Util.HasFromFoldable v => Data.Foldable.Util.HasFromFoldable (Data.Cyclic.Cyclic v)
+instance Data.Foldable.Util.HasFromFoldable1 v => Data.Foldable.Util.HasFromFoldable1 (Data.Cyclic.Cyclic v)
+instance (Control.Lens.At.Index (v a) GHC.Types.~ GHC.Types.Int, Data.Foldable.Foldable v, Control.Lens.At.Ixed (v a)) => Control.Lens.At.Ixed (Data.Cyclic.Cyclic v a)
+
 
 -- | Things that have an index.
 module Data.Indexed
@@ -1682,7 +1702,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_aw3c a_awcM. Lens (Permutation a_aw3c) (Permutation a_awcM) (Vector (Orbit a_aw3c)) (Vector (Orbit a_awcM))
+orbits :: forall a_axrY a_axBy. Lens (Permutation a_axrY) (Permutation a_axBy) (Vector (Orbit a_axrY)) (Vector (Orbit a_axBy))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
