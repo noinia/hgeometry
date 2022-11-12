@@ -31,7 +31,7 @@ import           HGeometry.Polygon.Simple.Class
 
 areaSimplePolygon :: ( Fractional r
                      , SimplePolygon_ simplePolygon point r
-                     ) => simplePolygon point r -> r
+                     ) => simplePolygon -> r
 areaSimplePolygon = signedArea
 
 --------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ areaSimplePolygon = signedArea
 showSimplePolygon    :: ( SimplePolygon_ simplePolygon point r
                         , Show point
                         )
-                     => simplePolygon point r -> String
+                     => simplePolygon -> String
 showSimplePolygon pg = "SimplePolygon " <> show (pg^..outerBoundary)
 
 --------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ showSimplePolygon pg = "SimplePolygon " <> show (pg^..outerBoundary)
 readsPrecSimplePolygon   :: forall simplePolygon point r.
                             ( Read point
                             , SimplePolygon_ simplePolygon point r
-                            ) => Int -> ReadS (simplePolygon point r)
+                            ) => Int -> ReadS simplePolygon
 readsPrecSimplePolygon d = readParen (d > app_prec) $ \r ->
       [ (uncheckedFromCCWPoints @simplePolygon @point @r @[] vs, t)
       | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
@@ -63,7 +63,7 @@ readsPrecSimplePolygon d = readParen (d > app_prec) $ \r ->
 
 toJSONSimplePolgyon    :: ( ToJSON point
                           , SimplePolygon_ simplePolygon point r
-                          ) => simplePolygon point r -> Value
+                          ) => simplePolygon -> Value
 toJSONSimplePolgyon pg = object [ "tag"      Aeson..= ("SimplePolygon" :: String)
                                 , "vertices" Aeson..= (pg^..outerBoundary)
                                 ]
@@ -72,7 +72,7 @@ toJSONSimplePolgyon pg = object [ "tag"      Aeson..= ("SimplePolygon" :: String
 parseJSONSimplePolygon :: forall simplePolygon point r.
                           ( FromJSON point
                           , SimplePolygon_ simplePolygon point r
-                          ) => Value -> Parser (simplePolygon point r)
+                          ) => Value -> Parser simplePolygon
 parseJSONSimplePolygon = withObject "Polygon" $ \o -> o .: "tag" >>= \case
                            "SimplePolygon" -> pSimple o
                            (_ :: String)   -> fail "Not a SimplePolygon"
@@ -91,8 +91,8 @@ pointClosestToWithDistanceSimplePolygon      :: forall simplePolygon point point
                                                 , Point_ point' 2 r
                                                 , Fractional r, Ord r
                                                 )
-                                             => point' 2 r
-                                             -> simplePolygon point r
+                                             => point'
+                                             -> simplePolygon
                                              -> (Point 2 r, r)
 pointClosestToWithDistanceSimplePolygon q poly =
     minimumBy (comparing snd)

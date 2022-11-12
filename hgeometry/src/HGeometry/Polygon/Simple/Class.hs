@@ -26,7 +26,7 @@ import           Hiraffe.Graph
 -- | A class representing simple polygons; i.e. polygons without holes
 -- (and without self intersections in the boundary.)
 class ( Polygon_ simplePolygon point r
-      , VertexIx (simplePolygon point r) ~ Int
+      , VertexIx simplePolygon ~ Int
       , Point_ point 2 r
       ) => SimplePolygon_ simplePolygon point r where
 
@@ -37,14 +37,14 @@ class ( Polygon_ simplePolygon point r
   --      - at least 3 vertices, not all colinear
   --      - no repeated vertices
   --      - no self-inttersections
-  uncheckedFromCCWPoints :: Foldable f => f point -> simplePolygon point r
+  uncheckedFromCCWPoints :: Foldable f => f point -> simplePolygon
 
   -- | given the vertices of the polygon, constructs the polygon. The
   -- vertices are numbered in the order they are given.
-  fromPoints :: Foldable f => f point -> Maybe (simplePolygon point r)
+  fromPoints :: Foldable f => f point -> Maybe simplePolygon
 
   -- | Compute the centroid of a simple polygon.
-  centroid      :: Fractional r => simplePolygon point r -> point
+  centroid      :: Fractional r => simplePolygon -> point
   centroid poly = fromVector $ sum' xs ^/ (6 * signedArea poly)
     where
       xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
@@ -58,7 +58,7 @@ class ( Polygon_ simplePolygon point r
 -- are given in counter clockwise order (as they should be), the area
 -- will be positive.
 signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
-                => simplePolygon point r -> r
+                => simplePolygon -> r
 signedArea poly = signedArea2X poly / 2
 
 -- | Compute the area times 2 of a simple polygon. When the vertices
@@ -70,7 +70,7 @@ signedArea poly = signedArea2X poly / 2
 --
 -- running time: \(O(n)\)
 area2X :: (Num r, SimplePolygon_ simplePolygon point r)
-       => simplePolygon point r -> r
+       => simplePolygon -> r
 area2X = signedArea2X
 
 

@@ -18,12 +18,12 @@ module HGeometry.Polygon.Simple
   ) where
 
 import           Control.Lens
--- import           Data.Cyclic
+import           Data.Cyclic
 import qualified Data.Foldable as F
-import           Data.Foldable.Sort
+import           Data.Foldable.Util
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
--- import           Data.Vector.NonEmpty.Util ()
+import           Data.Vector.NonEmpty.Util ()
 import           GHC.Generics
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
@@ -50,12 +50,19 @@ _SimplePolygonF :: Iso (SimplePolygonF f point) (SimplePolygonF f' point')
                        (f point)                (f' point' )
 _SimplePolygonF = iso (\(MkSimplePolygon vs) -> vs) MkSimplePolygon
 
-instance TraversableWithIndex Int f
+instance (TraversableWithIndex Int f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         )
       => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
   vertices = _SimplePolygonF . itraversed
 
-instance TraversableWithIndex Int f =>
-         HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
+instance (TraversableWithIndex Int f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
   allPoints = vertices
 
 -- instance ( TraversableWithIndex Int f
@@ -76,8 +83,8 @@ instance ( TraversableWithIndex Int f
          , Index (f point) ~ Int
          )
       => HasVertices' (SimplePolygonF f point) where
-  type Vertex   (SimplePolygonF f point r) = point
-  type VertexIx (SimplePolygonF f point r) = Int
+  type Vertex   (SimplePolygonF f point) = point
+  type VertexIx (SimplePolygonF f point) = Int
   vertexAt i = _SimplePolygonF . iix i
 
 
@@ -98,7 +105,7 @@ instance ( Point_ point 2 r
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int
-         ) => Polygon_ (SimplePolygonF f) point r where
+         ) => Polygon_ (SimplePolygonF f point) point r where
   area = areaSimplePolygon
 
 instance ( Point_ point 2 r
@@ -108,13 +115,13 @@ instance ( Point_ point 2 r
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int
-         ) => SimplePolygon_ (SimplePolygonF f) point r where
+         ) => SimplePolygon_ (SimplePolygonF f point) point r where
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
                          . NonEmpty.fromList . F.toList
 
 
 instance ( Show point
-         , SimplePolygon_ (SimplePolygonF f) point r
+         , SimplePolygon_ (SimplePolygonF f point) point r
          ) => Show (SimplePolygonF f point) where
   show = showSimplePolygon
 

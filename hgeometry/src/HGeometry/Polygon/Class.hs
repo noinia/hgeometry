@@ -186,22 +186,22 @@ outerBoundaryWithNeighbours = ifolding1 $
 
 -- | A class representing (planar) polygons. The edges of the polygon
 -- may not intersect.
-class ( HasOuterBoundary (polygon point r)
-      , Vertex      (polygon point r) ~ point
+class ( HasOuterBoundary polygon
+      , Vertex      polygon ~ point
       , Point_ point 2 r
       ) => Polygon_ polygon point r where
 
   -- | The area of a polygon
   --
   -- running time: \(O(n)\)
-  area :: Fractional r => polygon point r -> r
+  area :: Fractional r => polygon -> r
 
 
   -- | Finds the extreme points, minimum and maximum, in a given direction
   --
   -- running time: \(O(n)\)
   extremes      :: (Num r, Ord r, Point_ point 2 r, VectorFor point ~ vector)
-                => vector -> polygon point r -> (point, point)
+                => vector -> polygon -> (point, point)
   extremes u pg = ( minimumVertexBy (cmpExtreme u) pg
                   , maximumVertexBy (cmpExtreme u) pg
                   )
