@@ -25,6 +25,7 @@ import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F
+import           Data.Traversable
 import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
@@ -155,6 +156,13 @@ instance (Ord r, Arity d) => Box d p r `IsIntersectableWith` Box d q r where
     where
       f = maybe (coRec NoIntersection) (coRec . fromExtent)
       r `intersect'` s = asA @(R.Range r) $ r `intersect` s
+
+instance Arity d => Functor (Box d p) where
+  fmap = fmapDefault
+instance Arity d => Foldable (Box d p) where
+  foldMap = foldMapDefault
+instance Arity d => Traversable (Box d p) where
+  traverse = bitraverse pure
 
 instance Arity d => Bifunctor (Box d) where
   bimap = bimapDefault

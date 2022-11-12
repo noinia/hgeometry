@@ -170,6 +170,12 @@ _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs
 instance Functor (Polygon t p) where
   fmap = bimap id
 
+instance Foldable (Polygon t p) where
+  foldMap = bifoldMap (const mempty) 
+  
+instance Traversable (Polygon t p) where
+  traverse = bitraverse pure
+
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
 

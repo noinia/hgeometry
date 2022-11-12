@@ -37,6 +37,14 @@ import Test.QuickCheck
 data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded,Generic,NFData)
 infixr 1 :+
 
+instance Functor ((:+) c) where
+  fmap f (c :+ e) = c :+ f e
+
+instance Foldable ((:+) c) where
+  foldMap f (_ :+ e) = f e
+
+instance Traversable ((:+) c) where
+  traverse f (c :+ e) = (:+) c <$> f e
 
 instance Bifunctor (:+) where
   bimap f g (c :+ e) = f c :+ g e
