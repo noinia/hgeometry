@@ -939,6 +939,8 @@ Cyclic :: v a -> Cyclic v a
 
 -- | Turn the cyclic vector into a circular Vector
 toCircularVector :: Cyclic NonEmptyVector a -> CircularVector a
+instance forall k (v :: k -> *) (a :: k). GHC.Generics.Generic (Data.Cyclic.Cyclic v a)
+instance forall k (v :: k -> *) (a :: k). Control.DeepSeq.NFData (v a) => Control.DeepSeq.NFData (Data.Cyclic.Cyclic v a)
 instance Data.Foldable.Foldable v => Data.Foldable.Foldable (Data.Cyclic.Cyclic v)
 instance GHC.Base.Functor v => GHC.Base.Functor (Data.Cyclic.Cyclic v)
 instance Data.Semigroup.Foldable.Class.Foldable1 v => Data.Semigroup.Foldable.Class.Foldable1 (Data.Cyclic.Cyclic v)
@@ -1702,7 +1704,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_axrY a_axBy. Lens (Permutation a_axrY) (Permutation a_axBy) (Vector (Orbit a_axrY)) (Vector (Orbit a_axBy))
+orbits :: forall a_axv9 a_axEJ. Lens (Permutation a_axv9) (Permutation a_axEJ) (Vector (Orbit a_axv9)) (Vector (Orbit a_axEJ))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
