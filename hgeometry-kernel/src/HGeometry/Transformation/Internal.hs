@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
@@ -88,23 +89,27 @@ type TransformationConstraints g =
   , Additive_ (VectorFamily' (Dimension g+1) (NumType g))
   )
 
+-- | Bunch of constraints we need for the default implementation of transformBy
+type DefaultTransformByConstraints g d r =
+  ( d ~ Dimension g, r ~ NumType g
+  , HasPoints g g (Point d r) (Point d r)
+  , OptVector_ d r
+  , OptMatrix_ (d+1) r
+  , KnownNat d
+  , d < d+1
+  , Fractional r
+  , Metric_ (VectorFamily' d r)
+  )
+
 -- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
-  default transformBy :: forall d r.( d ~ Dimension g, r ~ NumType g
-                         , HasPoints g g (Point d r) (Point d r)
-                         , OptVector_ d r
-                         , OptMatrix_ (d+1) r
-                         , KnownNat d
-                         , d < d+1
-                         , Fractional r
-                         , Metric_ (VectorFamily' d r)
-                         )
+  default transformBy :: forall d r. ( DefaultTransformByConstraints g d r )
                       => Transformation (Dimension g) (NumType g) -> g -> g
   transformBy t = over (allPoints @g @g @(Point d r) @(Point d r))
                        (transformBy t)
-  -- not sure why we need the Metric_ constraint; it claims it is due to the use of allPoints
+  -- We need the metric constraint since Point_ requires Affine_, and Affine_ requires Metric
 
 instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
          , d < d+1, KnownNat d
