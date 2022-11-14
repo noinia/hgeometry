@@ -25,14 +25,14 @@ module HGeometry.Point
   , projectPoint
 
   , Affine_(..)
---  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
---
---  , ccwCmpAround
---  , cwCmpAround
---  , ccwCmpAroundWith
---  , cwCmpAroundWith
---  , sortAround
---  , insertIntoCyclicOrder
+ , CCW(CCW, CW, CoLinear), ccw, isCoLinear
+
+ , ccwCmpAround
+ , cwCmpAround
+ , ccwCmpAroundWith
+ , cwCmpAroundWith
+ , sortAround
+ , insertIntoCyclicOrder
 --
 --  , StrictCCW(SCCW, SCW)
 --  , strictCcw
@@ -56,7 +56,7 @@ import HGeometry.HyperPlane
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation
--- import HGeometry.Point.Orientation.Degenerate
+import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
 import HGeometry.Vector.Class
 import HGeometry.Vector.Optimal (VectorFamily')

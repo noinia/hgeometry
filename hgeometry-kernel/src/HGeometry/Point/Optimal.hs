@@ -20,17 +20,17 @@ pattern Point1 x = Point (Vector1 x)
 {-# COMPLETE Point1 #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
-pattern Point2       :: OptConstructableVector_ 2 r => r -> r -> Point 2 r
+pattern Point2       :: OptCVector_ 2 r => r -> r -> Point 2 r
 pattern Point2 x y = Point (Vector2 x y)
 {-# COMPLETE Point2 #-}
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
-pattern Point3       :: OptConstructableVector_ 3 r => r -> r -> r -> Point 3 r
+pattern Point3       :: OptCVector_ 3 r => r -> r -> r -> Point 3 r
 pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
-pattern Point4         :: OptConstructableVector_ 4 r
+pattern Point4         :: OptCVector_ 4 r
                        => r -> r -> r -> r -> Point 4 r
 pattern Point4 x y z w = (Point (Vector4 x y z w))
 {-# COMPLETE Point4 #-}

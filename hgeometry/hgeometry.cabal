@@ -102,18 +102,25 @@ common setup
 
 library
   import: setup
-  hs-source-dirs: src
+  hs-source-dirs: src polygon_src
   exposed-modules:
     HGeometry
 
     HGeometry.Polygon.Class
+
+    HGeometry.Polygon.Simple
     HGeometry.Polygon.Simple.Class
+
+    HGeometry.Polygon.Convex
     HGeometry.Polygon.Convex.Class
 
-  -- other-modules:
-    -- HGeometry.Vector.VectorFamily
-    -- HGeometry.Vector.VectorFamilyPeano
-    -- HGeometry.Vector.VectorFixed
+    HGeometry.ConvexHull
+    HGeometry.ConvexHull.GrahamScan
+
+
+  other-modules:
+    HGeometry.Polygon.Simple.Implementation
+    HGeometry.Polygon.Convex.Implementation
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
