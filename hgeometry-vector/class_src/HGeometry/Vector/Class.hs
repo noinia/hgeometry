@@ -24,6 +24,7 @@ module HGeometry.Vector.Class
 
 import           Control.Arrow ((&&&))
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
+import           Data.Ext
 import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
@@ -272,3 +273,5 @@ wComponent = component @3
 
 -- | Defines the vector type corresponding to a particular point
 type family VectorFor point
+
+type instance VectorFor (point :+ extra) = VectorFor point

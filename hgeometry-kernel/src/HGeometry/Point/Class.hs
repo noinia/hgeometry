@@ -272,9 +272,6 @@ class HasPoints s t point point' where
 
 --------------------------------------------------------------------------------
 
-type instance NumType   (core :+ extra) = NumType core
-type instance Dimension (core :+ extra) = Dimension core
-type instance VectorFor (core :+ extra) = VectorFor core
 
 instance HasVector point point' r s => HasVector (point :+ extra) (point' :+ extra) r s where
   vector = core.vector

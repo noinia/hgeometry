@@ -21,7 +21,7 @@ import Data.Intersection
 import Data.Kind
 -- import Data.Range
 import GHC.TypeLits
-
+import Data.Ext
 -------------------------------------------------------------------------------
 
 -- | A type family for types that are associated with a dimension. The
@@ -33,9 +33,8 @@ type family NumType t :: Type
 
 --------------------------------------------------------------------------------
 
-
--- type instance NumType   (core :+ ext) = NumType   core
--- type instance Dimension (core :+ ext) = Dimension core
+type instance NumType   (core :+ extra) = NumType core
+type instance Dimension (core :+ extra) = Dimension core
 
 type instance NumType [t] = NumType t
 -- type instance NumType (Range a) = a
