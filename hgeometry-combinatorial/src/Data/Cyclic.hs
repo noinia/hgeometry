@@ -8,17 +8,20 @@ module Data.Cyclic
 
 --------------------------------------------------------------------------------
 
+import           Control.DeepSeq (NFData)
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable.Util
 import           Data.Semigroup.Foldable
 import           Data.Vector.Circular (CircularVector(..))
 import           Data.Vector.NonEmpty (NonEmptyVector)
+import           GHC.Generics (Generic)
 --------------------------------------------------------------------------------
 
 -- | A cyclic sequence type
 newtype Cyclic v a = Cyclic (v a)
- deriving newtype (Functor,Foldable)
+ deriving newtype (Functor,Foldable,NFData)
+ deriving (Generic)
 
 instance Foldable1 v    => Foldable1    (Cyclic v)
 
