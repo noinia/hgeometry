@@ -16,6 +16,8 @@ module HGeometry.Point.Class
   ) where
 
 import           Control.Lens
+import           Data.Ext
+import           Data.Function (on)
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
@@ -265,3 +267,22 @@ class HasPoints s t point point' where
                , NumType t ~ r'
                , Dimension s ~ d, Dimension t ~ d
                ) => Traversal s t point point'
+
+
+
+--------------------------------------------------------------------------------
+
+type instance NumType   (core :+ extra) = NumType core
+type instance Dimension (core :+ extra) = Dimension core
+type instance VectorFor (core :+ extra) = VectorFor core
+
+instance HasVector point point' r s => HasVector (point :+ extra) (point' :+ extra) r s where
+  vector = core.vector
+
+instance Affine_ point => Affine_ (point :+ extra) where
+  (.-.)   = (.-.) `on` view core
+  p .+^ v = p&core %~ (.+^ v)
+
+instance (Point_ point d r, Monoid extra) => Point_ (point :+ extra) d r where
+  {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
+  fromVector v = fromVector v :+ mempty
