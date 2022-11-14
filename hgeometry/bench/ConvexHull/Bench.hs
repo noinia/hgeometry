@@ -16,15 +16,18 @@ import           Data.RealNumber.Rational
 import           Test.Tasty.Bench
 import           Data.Hashable
 import qualified Data.List as List
+import           System.Random.Stateful (Uniform(..), UniformRange(..))
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
+-- instance Uniform (VectorFamily 2 Int)
+
 instance (Uniform core, Uniform extra) => Uniform (core :+ extra)
 
 instance (UniformRange core, UniformRange extra) => UniformRange (core :+ extra) where
-  -- uniformRM (lc :+ le, hc :+ he) g = (:+) <$> uniformRM (lc, hc) g <*> unfiormRM (le,he) g
+  uniformRM (lc :+ le, hc :+ he) g = (:+) <$> uniformRM (lc, hc) g <*> uniformRM (le,he) g
 
 -- instance Uniform r => Uniform (Vector d r)
 
@@ -44,10 +47,10 @@ gen = mkStdGen (hash "convex hull")
 -- | Benchmark building the convexHull
 benchmark    :: Benchmark
 benchmark = bgroup "ConvexHull" $
-      [ bgroup ("1e"++show i ++ "/RealNumber") (convexHullFractional $ genPts @R n)
-      | i <- [3, 4::Int]
-      , let n = 10^i
-      ] ++
+--      [ bgroup ("1e"++show i ++ "/RealNumber") (convexHullFractional $ genPts @R n)
+--      | i <- [3, 4::Int]
+--      , let n = 10^i
+--      ] ++
       [ bgroup ("1e"++show i ++ "/Int") (convexHullNum $ genPts @Int n)
       | i <- [4, 5::Int]
       , let n = 10^i
@@ -56,9 +59,10 @@ benchmark = bgroup "ConvexHull" $
       -- | i <- [4, 5::Int]
       -- , let n = 10^i
       -- ] ++
-      [ bgroup ("1e"++show i ++ "/Double") (convexHullFractional $ genPts @Double n)
-      | i <- [4, 5::Int]
-      , let n = 10^i ]
+--      [ bgroup ("1e"++show i ++ "/Double") (convexHullFractional $ genPts @Double n)
+--      | i <- [4, 5::Int]
+--      , let n = 10^i ]
+      []
   where
     convexHullFractional pts =
                 [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
