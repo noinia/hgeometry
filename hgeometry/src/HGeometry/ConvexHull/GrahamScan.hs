@@ -14,12 +14,15 @@ module HGeometry.ConvexHull.GrahamScan
   ) where
 
 import           Control.Lens ((^.))
+import           Data.Foldable.Sort
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Vector as Vector
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Vector
+
 
 --------------------------------------------------------------------------------
 
@@ -30,7 +33,7 @@ import           HGeometry.Vector
 convexHull            :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
                       => NonEmpty point -> ConvexPolygon point
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
-convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
+convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
                        in uncheckedFromCCWPoints . reverse $ lh ++ uh
@@ -92,7 +95,7 @@ hull               :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
                    -> NonEmpty point -> NonEmpty point
 hull _ h@(_ :| []) = h
 hull f pts         = hull' .  f
-                   . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
+                   . Vector.toList . sortBy incXdecY $ pts
 
 incXdecY :: (Ord r, Point_ point 2 r, OptCVector_ 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
