@@ -125,18 +125,19 @@ library
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
--- benchmark benchmarks
---   import: setup
---   hs-source-dirs: benchmark
+benchmark benchmarks
+  import: setup
+  hs-source-dirs: bench
 
---   main-is: Benchmarks.hs
---   type: exitcode-stdio-1.0
+  main-is: ConvexHull/Bench.hs
+  type: exitcode-stdio-1.0
 
---   other-modules:
---   build-depends: tasty-bench
---                , hgeometry
---                , deepseq-generics
---                , optparse-applicative
+  other-modules:
+  build-depends: tasty-bench
+               , hgeometry
+               , deepseq-generics
+               , optparse-applicative
+               , hashable              >= 1.4
 
 
 --------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ import           HGeometry.Vector.Class
 import qualified Linear.V2 as L2
 import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
+import           System.Random.Stateful (Uniform(..), UniformRange(..))
 
 --------------------------------------------------------------------------------
 
@@ -202,6 +203,22 @@ instance KnownNat d => Vector_ (VectorImpl (Large d) r) d r where
   {-# INLINE vectorFromList #-}
   -- FIXME: rewrite rule for vector
 
+instance ConstructableVector_ (VectorImpl Zero r) 0 r where
+  mkVector = V_0 ()
+instance ConstructableVector_ (VectorImpl One r) 1 r where
+  mkVector = Vector1
+instance ConstructableVector_ (VectorImpl Two r) 2 r where
+  mkVector = Vector2
+instance ConstructableVector_ (VectorImpl Three r) 3 r where
+  mkVector = Vector3
+instance ConstructableVector_ (VectorImpl Four r) 4 r where
+  mkVector = Vector4
+
+-- instance KnownNat d => ConstructableVector_ (VectorImpl (Large d) r) d r where
+--   mkVector -- requires arity d
+
+
+
 instance ( Applicative (VectorImpl o)
          , TraversableWithIndex Int (VectorImpl o)
          ) => Additive_ (VectorImpl o r) where
@@ -224,3 +241,36 @@ instance ( Applicative (VectorImpl o)
   {-# SPECIALIZE instance Metric_ (VectorImpl Three r)     #-}
   {-# SPECIALIZE instance Metric_ (VectorImpl Four r)      #-}
   {-# SPECIALIZE instance Metric_ (VectorImpl (Large d) r) #-}
+
+instance Uniform (VectorImpl Zero r)
+instance Uniform r => Uniform (VectorImpl One r) where
+  uniformM g = Vector1 <$> uniformM g
+instance Uniform r => Uniform (VectorImpl Two r) where
+  uniformM g = Vector2 <$> uniformM g <*> uniformM g
+instance Uniform r => Uniform (VectorImpl Three r) where
+  uniformM g = Vector3 <$> uniformM g <*> uniformM g <*> uniformM g
+instance Uniform r => Uniform (VectorImpl Four r) where
+  uniformM g = Vector4 <$> uniformM g <*> uniformM g <*> uniformM g <*> uniformM g
+instance Uniform r => Uniform (VectorImpl (Large d) r) where
+  uniformM g = sequenceA $ pure (uniformM g)
+
+instance UniformRange r => UniformRange (VectorImpl One r) where
+  uniformRM (Vector1 low, Vector1 high) g = Vector1 <$> uniformRM (low, high) g
+
+instance UniformRange r => UniformRange (VectorImpl Two r) where
+  uniformRM (Vector2 lx ly, Vector2 hx hy) g = Vector2 <$> uniformRM (lx, hx) g
+                                                       <*> uniformRM (ly, hy) g
+
+instance UniformRange r => UniformRange (VectorImpl Three r) where
+  uniformRM (Vector3 lx ly lz, Vector3 hx hy hz) g = Vector3 <$> uniformRM (lx, hx) g
+                                                             <*> uniformRM (ly, hy) g
+                                                             <*> uniformRM (lz, hz) g
+
+instance UniformRange r => UniformRange (VectorImpl Four r) where
+  uniformRM (Vector4 lx ly lz lw, Vector4 hx hy hz hw) g = Vector4 <$> uniformRM (lx, hx) g
+                                                                   <*> uniformRM (ly, hy) g
+                                                                   <*> uniformRM (lz, hz) g
+                                                                   <*> uniformRM (lw, hw) g
+
+instance UniformRange r => UniformRange (VectorImpl (Large d) r) where
+  uniformRM (lv, hv) g = sequenceA $ liftA2 (\lx hx -> uniformRM (lx,hx) g) lv hv

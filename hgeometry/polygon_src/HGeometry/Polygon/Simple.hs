@@ -17,6 +17,7 @@ module HGeometry.Polygon.Simple
   , SimplePolygonF
   ) where
 
+import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Data.Cyclic
 import qualified Data.Foldable as F
@@ -36,6 +37,7 @@ import           Hiraffe.Graph
 -- | Simple polygons just store their vertices in CCCW order
 newtype SimplePolygonF f point = MkSimplePolygon (f point)
   deriving (Generic)
+  deriving newtype (NFData)
 
 -- | By default we store simple polygons as non-empty circular vectors.
 type SimplePolygon = SimplePolygonF (Cyclic NonEmptyVector)

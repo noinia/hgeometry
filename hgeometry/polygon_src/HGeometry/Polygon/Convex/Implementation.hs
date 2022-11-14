@@ -14,6 +14,7 @@ module HGeometry.Polygon.Convex.Implementation
   , ConvexPolygonF
   ) where
 
+import Control.DeepSeq (NFData)
 import Control.Lens
 import Data.Cyclic
 import Data.Vector.NonEmpty (NonEmptyVector)
@@ -30,7 +31,7 @@ import Hiraffe.Graph
 -- | Convex polygons
 newtype ConvexPolygonF f point =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point }
-
+  deriving newtype (NFData)
 
 type ConvexPolygon = ConvexPolygonF (Cyclic NonEmptyVector)
 
