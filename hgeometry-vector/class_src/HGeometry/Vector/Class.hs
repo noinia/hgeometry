@@ -40,6 +40,8 @@ import           Prelude hiding (zipWith)
 
 {- $setup
 >>> import HGeometry.Vector
+>>> let myVec2 = Vector2 10 20 :: Vector 2 Int
+>>> let myVec3 = Vector3 1 2 3 :: Vector 3 Int
 -}
 
 --------------------------------------------------------------------------------
@@ -68,12 +70,18 @@ class ( Dimension vector ~ d
   {-# INLINE componentProxy #-}
 
   -- | try to construct a vector from a list of exactly d coordinates.
+  --
+  -- >>> vectorFromList [1..3] :: Maybe (Vector 4 Int)
+  -- Nothing
+  -- >>> vectorFromList [1..3] :: Maybe (Vector 3 Int)
+  -- Just (Vector3 1 2 3)
   vectorFromList :: [r] -> Maybe vector
 
   {-# MINIMAL vectorFromList #-}
 
 class Vector_ vector d r => ConstructableVector_ vector d r where
-  -- | Construct a vector from a d-arity function, or a list if d is large
+  -- | Construct a vector from a d-arity function.
+  --
   mkVector :: ConstructVector vector d
 
 
@@ -147,6 +155,15 @@ pattern Vector4_ x y z w <- (    view (component @0) &&& view (component @1)
 
 
 -- | Lens to access te i^t component.
+--
+-- >>> myVec3 ^. component @0
+-- 1
+-- >>> myVec3 ^. component @1
+-- 2
+-- >>> myVec3 & component @1 %~ (*5)
+-- Vector3 1 10 3
+-- >>> myVec2 & component @1 %~ (*5)
+-- Vector2 10 100
 component :: forall i vector d r. (Vector_ vector d r, i < d, KnownNat i)
         => IndexedLens' Int vector r
 component = componentProxy (Proxy @i)
@@ -161,12 +178,18 @@ uncheckedVectorFromList = fromMaybe (error "uncheckedVectorFromList") . vectorFr
 --------------------------------------------------------------------------------
 
 -- | Take a prefix of length i of the vector
+--
+-- >>> prefix myVec3 :: Vector 2 Int
+-- Vector2 1 2
 prefix :: forall i d vector vector' r. ( i <= d, KnownNat i
                                        , Vector_ vector d r, Vector_ vector' i r)
        => vector -> vector'
 prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toListOf components
 
 -- | Take a suffix of length i  of the vector
+--
+-- >>> suffix myVec3 :: Vector 2 Int
+-- Vector2 2 3
 suffix :: forall i d vector vector' r. ( i <= d, KnownNat i, KnownNat d
                                        , Vector_ vector d r, Vector_ vector' i r)
        => vector -> vector'
