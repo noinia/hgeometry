@@ -9,6 +9,6 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
-
-pattern Line     :: r -> r -> NonVerticalHyperPlane 2 r
+pattern Line     :: OptCVector_ 2 r => r -> r -> NonVerticalHyperPlane 2 r
 pattern Line a b = NonVerticalHyperPlane (Vector2 a b)
+{-# COMPLETE Line #-}
