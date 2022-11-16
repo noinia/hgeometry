@@ -640,6 +640,8 @@ instance (GHC.Base.Semigroup core, GHC.Base.Semigroup extra) => GHC.Base.Semigro
 instance (Data.Aeson.Types.ToJSON.ToJSON core, Data.Aeson.Types.ToJSON.ToJSON extra) => Data.Aeson.Types.ToJSON.ToJSON (core Data.Ext.:+ extra)
 instance (Data.Aeson.Types.FromJSON.FromJSON core, Data.Aeson.Types.FromJSON.FromJSON extra) => Data.Aeson.Types.FromJSON.FromJSON (core Data.Ext.:+ extra)
 instance (Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary e) => Test.QuickCheck.Arbitrary.Arbitrary (c Data.Ext.:+ e)
+instance (System.Random.Internal.Uniform core, System.Random.Internal.Uniform extra) => System.Random.Internal.Uniform (core Data.Ext.:+ extra)
+instance (System.Random.Internal.UniformRange core, System.Random.Internal.UniformRange extra) => System.Random.Internal.UniformRange (core Data.Ext.:+ extra)
 
 
 module Data.CircularSeq
@@ -1704,7 +1706,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_axv9 a_axEJ. Lens (Permutation a_axv9) (Permutation a_axEJ) (Vector (Orbit a_axv9)) (Vector (Orbit a_axEJ))
+orbits :: forall a_axwV a_axGv. Lens (Permutation a_axwV) (Permutation a_axGv) (Vector (Orbit a_axwV)) (Vector (Orbit a_axGv))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
