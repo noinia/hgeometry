@@ -29,6 +29,7 @@ import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
 import GHC.Generics (Generic)
 import Test.QuickCheck
+import System.Random.Stateful (Uniform(..), UniformRange(..))
 
 --------------------------------------------------------------------------------
 
@@ -84,6 +85,11 @@ instance (FromJSON core, FromJSON extra) => FromJSON (core :+ extra) where
 
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
+
+instance (Uniform core, Uniform extra) => Uniform (core :+ extra)
+
+instance (UniformRange core, UniformRange extra) => UniformRange (core :+ extra) where
+  uniformRM (lc :+ le, hc :+ he) g = (:+) <$> uniformRM (lc, hc) g <*> uniformRM (le,he) g
 
 -- instance (Default a, Default b) => Default (a :+ b) where
 --   def = def :+ def
@@ -161,3 +167,5 @@ instance AsExt (c :+ e) where
 --   type CoreOf (CoreOnly core) = core
 --   type ExtraOf (CoreOnly core) = ()
 --   _Ext = iso (\(CoreOnly c) -> ext c) (CoreOnly . view core)
+
+--------------------------------------------------------------------------------
