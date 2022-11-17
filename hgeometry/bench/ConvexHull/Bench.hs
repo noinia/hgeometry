@@ -6,6 +6,9 @@ import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 -- import qualified HGeometry.ConvexHull.QuickHull        as QuickHull
 
 import qualified ConvexHull.GrahamV2 as GrahamV2
+import qualified ConvexHull.GrahamInt as GrahamInt
+  -- hand written implementation for Int, this should be the fastest possible somehow.
+  -- FIXME: currently still uses merge-sort, switch to quicksort/introsort
 
 import           Control.DeepSeq
 import           System.Random
@@ -44,8 +47,9 @@ runBenchmark = do
                 ]
   where
     chBench     :: NonEmpty (Point 2 Int) -> [Benchmark]
-    chBench pts = [ bench "GrahamScan"   $ nf GrahamScan.convexHull pts
-                  , bench "GrahamScanV2" $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
+    chBench pts = [ bench "GrahamScan"    $ nf GrahamScan.convexHull pts
+                  , bench "GrahamScanV2"  $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
+                  , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
                   ]
 
 -- | Benchmark building the convexHull
