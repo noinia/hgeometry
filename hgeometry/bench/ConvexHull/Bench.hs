@@ -15,8 +15,10 @@ import           Control.DeepSeq
 import           System.Random
 -- import           Data.Double.Approximate
 import           Data.Ext
-import           Control.Lens (over)
+import           Control.Lens
 import           HGeometry.Point
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -37,8 +39,39 @@ type R = RealNumber 5
 -- instance Uniform r => Uniform (Vector d r)
 
 
+
 gen :: StdGen
 gen = genByName "convex hull"
+
+
+
+-- runBenchmark :: IO ()
+-- runBenchmark = do
+--     let pts = take' (10^(4 :: Int)) $ randomPoints @(Point 2 Int) gen 100000
+--     let pg = force $ GrahamScan.convexHull pts
+--     print (lengthOf outerBoundary pg)
+
+--------------------------------------------------------------------------------
+
+myConvexHull :: NonEmpty      (PointF (VectorFamily 2 Int))
+             -> ConvexPolygon (PointF (VectorFamily 2 Int))
+myConvexHull = GrahamScan.convexHull
+
+-- this already seems to make a difference versus just using Point 2 Int:
+
+    -- 1e4Int
+    --   GrahamScan:        OK (0.80s)
+    --     112  ms ± 1.8 ms
+    --   GrahamScanAnnot:   OK (0.59s)
+    --     83.2 ms ± 6.1 ms
+
+-- still a far cry off from the
+
+      -- GrahamScanFastest: OK (0.32s)
+      --   2.33 ms ± 125 μs
+
+-- though
+--------------------------------------------------------------------------------
 
 runBenchmark :: IO ()
 runBenchmark = do
@@ -49,10 +82,15 @@ runBenchmark = do
   where
     chBench     :: NonEmpty (Point 2 Int) -> [Benchmark]
     chBench pts = [ bench "GrahamScan"    $ nf GrahamScan.convexHull pts
+                  , bench "GrahamScanAnnot"    $ nf myConvexHull pts'
                   , bench "GrahamScanV2"  $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
                   , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
                   , bench "GrahamScanFastest" $ nf GrahamFastest.convexHull (GrahamFastest.fromP <$> pts)
                   ]
+      where
+        pts' = force (pointFromPoint <$> pts)
+
+
 
 -- | Benchmark building the convexHull
 benchmark                  :: NFData point
