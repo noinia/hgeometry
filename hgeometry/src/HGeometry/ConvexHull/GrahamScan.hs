@@ -1,3 +1,4 @@
+  -- {-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.ConvexHull.GrahamScan
@@ -22,7 +23,6 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Vector
-
 
 --------------------------------------------------------------------------------
 

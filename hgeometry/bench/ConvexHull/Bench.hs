@@ -44,7 +44,8 @@ runBenchmark = do
                 ]
   where
     chBench     :: NonEmpty (Point 2 Int) -> [Benchmark]
-    chBench pts = [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
+    chBench pts = [ bench "GrahamScan"   $ nf GrahamScan.convexHull pts
+                  , bench "GrahamScanV2" $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
                   ]
 
 -- | Benchmark building the convexHull
