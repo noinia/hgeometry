@@ -12,7 +12,6 @@ import           Data.Monoid
 import           GHC.Generics
 import           HGeometry.Point
 
--- FIXME: use the faster sorting version
 
 
 data MyPoint = MyPoint {-# UNPACK #-}!Int
