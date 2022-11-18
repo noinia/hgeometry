@@ -23,7 +23,7 @@ import           Data.Foldable (toList)
 import           Data.Kind
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Geometry.Ball
 import           Geometry.BezierSpline
 import           Geometry.Boundary
