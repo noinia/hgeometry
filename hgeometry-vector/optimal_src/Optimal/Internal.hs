@@ -103,6 +103,7 @@ instance ( Ixed (VectorFamily' d r)
          , Index (VectorFamily' d r) ~ Int
          ) => Ixed (Vector d r) where
   ix i f (MkVector v) = MkVector <$> ix i f v
+  {-# INLINE ix #-}
 
 instance {-# OVERLAPPING #-}
          ( HasComponents (VectorFamily' d r) (VectorFamily' d s)
@@ -110,11 +111,14 @@ instance {-# OVERLAPPING #-}
          , IxValue (VectorFamily' d s) ~ s)
       => HasComponents (Vector d r)     (Vector d s) where
   components f (MkVector v) = MkVector <$> components f v
+  {-# INLINE components #-}
 
 instance ( HasComponents (VectorFamily' d r) v
          , IxValue (VectorFamily' d r) ~ r
          ) => HasComponents (Vector d r) v where
   components f (MkVector v) = components f v
+  {-# INLINE components #-}
+
 
 instance Vector_ (VectorFamily' d r) d r => Vector_ (Vector d r) d r where
   vectorFromList = fmap MkVector . vectorFromList @(VectorFamily' d r)

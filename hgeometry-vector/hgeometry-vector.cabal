@@ -139,6 +139,7 @@ library boxed
 
 library numtypes
   import: setup
+  visibility: public
   hs-source-dirs: numtypes_src
   exposed-modules:
     Int
@@ -243,15 +244,16 @@ benchmark hgeometry-vector-benchmarks
 --------------------------------------------------------------------------------
 -- * Test Suites
 
-test-suite doctests-vector
-  type:          exitcode-stdio-1.0
-  main-is:       doctests.hs
-  build-depends: base
-               , doctest             >= 0.8
-               , QuickCheck
-               , quickcheck-instances
-
-  build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+--
+-- test-suite doctests-vector
+--   type:          exitcode-stdio-1.0
+--   main-is:       doctests.hs
+--   build-depends: base
+--                , doctest             >= 0.8
+--                , QuickCheck
+--                , quickcheck-instances
+--
+--   build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 test-suite hspec-vector
   import: setup

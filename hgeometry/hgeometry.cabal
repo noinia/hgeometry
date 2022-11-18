@@ -137,11 +137,18 @@ benchmark benchmarks
     ConvexHull.GrahamV2
     ConvexHull.GrahamInt
     ConvexHull.GrahamFastest
+    ConvexHull.GrahamClassy
 
     Util
 
+
+  mixins:
+      hgeometry-vector:unpacked (Unpacked as Int.Unpacked)    requires (R as Int)
+
   build-depends: tasty-bench
                , hgeometry
+               , hgeometry-vector:unpacked
+               , hgeometry-vector:numtypes
                , deepseq-generics
                , optparse-applicative
                , hashable              >= 1.4

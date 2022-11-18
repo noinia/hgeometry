@@ -11,6 +11,8 @@ import qualified ConvexHull.GrahamFastest as GrahamFastest
   -- hand written implementation for Int, this should be the fastest possible somehow.
   -- FIXME: currently still uses merge-sort, switch to quicksort/introsort
 
+import qualified ConvexHull.GrahamClassy as GrahamClassy
+
 import           Control.DeepSeq
 import           System.Random
 -- import           Data.Double.Approximate
@@ -86,6 +88,7 @@ runBenchmark = do
                   , bench "GrahamScanV2"  $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
                   , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
                   , bench "GrahamScanFastest" $ nf GrahamFastest.convexHull (GrahamFastest.fromP <$> pts)
+                  , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
                   ]
       where
         pts' = force (pointFromPoint <$> pts)

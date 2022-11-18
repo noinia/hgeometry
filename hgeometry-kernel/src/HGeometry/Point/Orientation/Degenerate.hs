@@ -73,9 +73,9 @@ ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
        Vector2_ ux uy = q .-. p
        Vector2_ vx vy = r .-. p
       --  _z             = ux * vy - uy * vx
--- {-# SPECIALIZE INLINE
---      ccw :: (Ord r, Num r, OptCVector_ 2 r, Metric_ (VectorFamily 2 r))
---          => Optimal.Point 2 r -> Optimal.Point 2 r -> Optimal.Point 2 r -> CCW #-}
+{-# INLINE ccw #-}
+     -- ccw :: (Ord r, Num r, OptCVector_ 2 r, Metric_ (VectorFamily 2 r))
+     --     => Optimal.Point 2 r -> Optimal.Point 2 r -> Optimal.Point 2 r -> CCW #-}
 
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
 --
