@@ -47,7 +47,7 @@ import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
 import qualified Data.Vector as V

@@ -9,15 +9,15 @@ module Geometry.SoS.ConvexHull
 import           Algorithms.DivideAndConquer
 import           Control.Lens (over, view)
 import           Data.Ext
-import           Data.Indexed
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.RealNumber.Symbolic
 import           Data.Semigroup.Foldable (Foldable1 (..))
 import           Data.Util
 import           Geometry.Point
-import           Geometry.Vector
 import           Geometry.SoS.Point
+import           Geometry.Vector
+import           HGeometry.Indexed
+import           HGeometry.Number.Real.Symbolic
 --------------------------------------------------------------------------------
 
 -- | \(O(n \log n)\) time LowerHull using divide and conquer. The resulting Hull is

@@ -15,7 +15,7 @@ import qualified Algorithms.Geometry.Diameter.Naive as Naive
 import           Control.Lens ((^.))
 import           Data.Ext (core, type (:+))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Geometry.Point
 import qualified Geometry.Polygon.Convex as Convex
 

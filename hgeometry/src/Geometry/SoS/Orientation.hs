@@ -16,9 +16,9 @@ module Geometry.SoS.Orientation
   ) where
 
 import Control.Lens hiding (snoc,cons)
-import Data.Indexed
-import Data.RealNumber.Symbolic
-import Data.Sign
+import HGeometry.Indexed
+import HGeometry.Number.Real.Symbolic
+import HGeometry.Sign
 import GHC.TypeNats
 import Geometry.Matrix
 import Geometry.Point.Class

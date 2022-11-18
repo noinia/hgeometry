@@ -15,9 +15,9 @@ module Geometry.SoS.Point
   ) where
 
 import Control.Lens hiding (Index)
-import Data.Indexed
-import Data.Ratio.Generalized
-import Data.RealNumber.Symbolic
+import HGeometry.Indexed
+import HGeometry.Number.Ratio.Generalized
+import HGeometry.Number.Real.Symbolic
 import Geometry.Point.Class
 import Geometry.Point.Internal
 import Geometry.Vector

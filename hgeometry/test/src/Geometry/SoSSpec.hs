@@ -1,20 +1,20 @@
 module Geometry.SoSSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
-import qualified Geometry.SoS.ConvexHull as StrictConvexHull
 import           Control.Lens
 import           Data.Ext
-import           Data.Indexed
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.RealNumber.Rational
-import           Data.RealNumber.Symbolic
 import           Geometry.Point
+import           Geometry.Polygon.Convex (lowerTangent)
+import qualified Geometry.SoS.ConvexHull as StrictConvexHull
 import           Geometry.SoS.Orientation ()
 import           Geometry.SoS.Point
+import           HGeometry.Indexed
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Symbolic
 import           Test.Hspec
 import           Test.QuickCheck
-import Geometry.Polygon.Convex (lowerTangent)
 
 --------------------------------------------------------------------------------
 

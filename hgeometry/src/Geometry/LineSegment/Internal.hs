@@ -40,7 +40,7 @@ import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits

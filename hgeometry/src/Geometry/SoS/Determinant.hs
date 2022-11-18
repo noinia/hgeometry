@@ -1,7 +1,7 @@
 module Geometry.SoS.Determinant where
 
-import           Data.Sign
-import           Data.RealNumber.Symbolic
+import           HGeometry.Sign
+import           HGeometry.Number.Real.Symbolic
 import           Geometry.Matrix
 
 

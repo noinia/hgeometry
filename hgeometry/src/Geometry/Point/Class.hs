@@ -6,7 +6,7 @@ module Geometry.Point.Class where
 
 import           Control.Lens
 import           Data.Ext
-import           Data.Indexed
+import           HGeometry.Indexed
 import           GHC.TypeNats
 import           Geometry.Point.Internal (Point)
 import qualified Geometry.Point.Internal as Internal

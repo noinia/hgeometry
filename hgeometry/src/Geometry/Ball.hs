@@ -18,8 +18,7 @@ import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
 import qualified Data.List as L
-import           Data.Radical as Radical
-import qualified Data.Radical as Radical
+import qualified HGeometry.Number.Radical as Radical
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
