@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.RealNumber.Symbolic
+-- Module      :  HGeometry.Number.Real.Symbolic
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -19,7 +19,7 @@
 --
 --
 --------------------------------------------------------------------------------
-module Data.RealNumber.Symbolic(
+module HGeometry.Number.Real.Symbolic(
     EpsFold
   , eps, mkEpsFold
   , evalEps
@@ -46,8 +46,8 @@ import qualified Data.List as List
 import qualified Data.Map.Merge.Strict as Map
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (isNothing)
-import           Data.Ratio.Generalized (GRatio, (%))
-import           Data.Sign (Sign(..))
+import           HGeometry.Number.Ratio.Generalized (GRatio, (%))
+import           HGeometry.Sign (Sign(..))
 import           Test.QuickCheck (Arbitrary(..), listOf)
 import           Test.QuickCheck.Instances ()
 

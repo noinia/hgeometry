@@ -2,8 +2,9 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-module Data.Vector.NonEmpty.Util
-  (  ) where
+module HGeometry.Vector.NonEmpty.Util
+  (
+  ) where
 
 import           Control.Lens
 import qualified Data.Foldable as F
@@ -28,10 +29,9 @@ instance Traversable1 NonEmptyVector where
       let !n = F.length v
       -- Use fromListN to be more efficient in construction of resulting vector
       -- Also behaves better with compact regions, preventing runtime exceptions
-      in (NonEmptyVector . Vector.fromListN n . F.toList)
+      in NonEmptyVector . Vector.fromListN n . F.toList
          <$> traverse1 f (NonEmpty.fromList $ F.toList v)
          -- notice that NonEmpty.fromList is suposedly safe since the vector is NonEmpty...
-
   {-# INLINE traverse1 #-}
 
 instance FunctorWithIndex Int NonEmptyVector where

@@ -1,7 +1,7 @@
 module Data.Ratio.GeneralizedSpec where
 
 import qualified Data.Ratio as Ratio
-import           Data.Ratio.Generalized
+import           HGeometry.Number.Ratio.Generalized
 import           Test.Hspec
 import           Test.QuickCheck
 --------------------------------------------------------------------------------

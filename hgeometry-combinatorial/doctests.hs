@@ -71,5 +71,5 @@ modules =
   , "Data.Double.Approximate"
   , "Data.Double.Shaman"
 
-  , "Data.RealNumber.Symbolic"
+  , "HGeometry.Number.Real.Symbolic"
   ]

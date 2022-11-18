@@ -1,4 +1,4 @@
-module Data.Foldable.Util
+module HGeometry.Foldable.Util
   ( HasFromFoldable(..)
   ,  HasFromFoldable1(..)
   ) where

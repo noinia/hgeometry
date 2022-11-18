@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Ratio.Generalized
+-- Module      :  HGeometry.Number.Ratio.Generalized
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,7 +8,7 @@
 -- Generalized Ratio type that accepts arbitrary 'Num a' types rather
 -- than just Integral ones as in Data.Ratio
 --------------------------------------------------------------------------------
-module Data.Ratio.Generalized
+module HGeometry.Number.Ratio.Generalized
   ( GRatio
   , (%)
   , numerator, denominator

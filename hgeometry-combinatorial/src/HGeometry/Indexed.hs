@@ -1,7 +1,7 @@
 {-# LANGUAGE  ScopedTypeVariables  #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Indexed
+-- Module      :  HGeometry.Indexed
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- Things that have an index.
 --
 --------------------------------------------------------------------------------
-module Data.Indexed
+module HGeometry.Indexed
   ( HasIndex(..)
   , Index
   , WithIndex(..), theValue
