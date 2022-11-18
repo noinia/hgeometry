@@ -18,7 +18,7 @@ import           Data.Maybe (mapMaybe)
 import           Data.Measured.Class
 import           Data.Measured.Size
 import           Data.Proxy
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Data.Semigroup
 import qualified Data.Set as Set
 import           GHC.TypeLits

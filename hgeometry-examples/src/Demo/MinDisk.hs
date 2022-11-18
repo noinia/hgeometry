@@ -8,7 +8,7 @@ import           Control.Monad.Random.Strict
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Radical
+import           HGeometry.Number.Radical
 import qualified Data.Traversable as Tr
 import           Geometry
 import           Ipe
