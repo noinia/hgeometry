@@ -48,4 +48,6 @@ import qualified ConvexHull.Bench as ConvexHull
 -- --   ]
 
 main :: IO ()
-main = do ConvexHull.runBenchmark
+main = do
+          ConvexHull.runBenchmark
+          -- ConvexHull.runProfile

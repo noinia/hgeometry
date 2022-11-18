@@ -1,4 +1,8 @@
-module ConvexHull.Bench (runBenchmark, benchmark ) where
+module ConvexHull.Bench (
+    runBenchmark
+  , benchmark
+  , runProfile
+  ) where
 
 -- import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
@@ -11,9 +15,8 @@ import qualified ConvexHull.GrahamFastest as GrahamFastest
   -- hand written implementation for Int, this should be the fastest possible somehow.
   -- FIXME: currently still uses merge-sort, switch to quicksort/introsort
 
-import qualified ConvexHull.GrahamClassy as GrahamClassy
-
 import           Control.DeepSeq
+import qualified ConvexHull.GrahamClassy as GrahamClassy
 import           System.Random
 -- import           Data.Double.Approximate
 import           Data.Ext
@@ -47,11 +50,11 @@ gen = genByName "convex hull"
 
 
 
--- runBenchmark :: IO ()
--- runBenchmark = do
---     let pts = take' (10^(4 :: Int)) $ randomPoints @(Point 2 Int) gen 100000
---     let pg = force $ GrahamScan.convexHull pts
---     print (lengthOf outerBoundary pg)
+runProfile :: IO ()
+runProfile = do
+    let pts = take' (10^(4 :: Int)) $ randomPoints @(Point 2 Int) gen 100000
+    let pg = force $ GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
+    print (lengthOf outerBoundary pg)
 
 --------------------------------------------------------------------------------
 
@@ -75,6 +78,7 @@ myConvexHull = GrahamScan.convexHull
 -- though
 --------------------------------------------------------------------------------
 
+
 runBenchmark :: IO ()
 runBenchmark = do
     let intPts = randomPoints @(Point 2 Int) gen 100000
@@ -89,6 +93,8 @@ runBenchmark = do
                   , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
                   , bench "GrahamScanFastest" $ nf GrahamFastest.convexHull (GrahamFastest.fromP <$> pts)
                   , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
+
+                  , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
                   ]
       where
         pts' = force (pointFromPoint <$> pts)

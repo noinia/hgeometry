@@ -1,4 +1,5 @@
 module ConvexHull.GrahamClassy( convexHull
+                              , sort'
                               -- , upperHull
                               -- , lowerHull
                               , fromP
@@ -24,6 +25,9 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified Int.Unpacked
 --------------------------------------------------------------------------------
+
+sort' :: NonEmpty MyPoint -> NonEmpty MyPoint
+sort' = NonEmpty.fromList . UV.toList . sort
 
 
 -- data MyVector = MyVector {-# UNPACK #-}!Int
