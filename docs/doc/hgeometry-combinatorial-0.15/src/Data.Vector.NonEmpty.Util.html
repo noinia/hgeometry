@@ -15,16 +15,16 @@
 </span><span id="line-15"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><span class="hs-identifier hs-var">Index</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282862"><span class="annot"><a href="#local-6989586621679282862"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><span class="hs-identifier hs-var">IxValue</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282861"><span class="annot"><a href="#local-6989586621679282861"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679282861"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><span class="hs-identifier hs-var">Index</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272822"><span class="annot"><a href="#local-6989586621679272822"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><span class="hs-identifier hs-var">IxValue</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272821"><span class="annot"><a href="#local-6989586621679272821"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679272821"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-20"></span><span>
-</span><span id="line-21"></span><span id="local-6989586621679282860"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679282860"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-22"></span><span>  </span><span id="local-6989586621679282857"><span class="annot"><span class="annottext">ix :: Index (NonEmptyVector a)
+</span><span id="line-21"></span><span id="local-6989586621679272820"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679272820"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621679272817"><span class="annot"><span class="annottext">ix :: Index (NonEmptyVector a)
 -&gt; Traversal' (NonEmptyVector a) (IxValue (NonEmptyVector a))
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ix</span></span></span><span> </span><span id="local-6989586621679282855"><span class="annot"><span class="annottext">Index (NonEmptyVector a)
-</span><a href="#local-6989586621679282855"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679282854"><span class="annot"><span class="annottext">IxValue (NonEmptyVector a) -&gt; f (IxValue (NonEmptyVector a))
-</span><a href="#local-6989586621679282854"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282852"><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282852"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; NonEmptyVector a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ix</span></span></span><span> </span><span id="local-6989586621679272815"><span class="annot"><span class="annottext">Index (NonEmptyVector a)
+</span><a href="#local-6989586621679272815"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679272814"><span class="annot"><span class="annottext">IxValue (NonEmptyVector a) -&gt; f (IxValue (NonEmptyVector a))
+</span><a href="#local-6989586621679272814"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272812"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272812"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; NonEmptyVector a
 forall a. Vector a -&gt; NonEmptyVector a
 </span><span class="hs-identifier hs-var">NonEmptyVector</span></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; NonEmptyVector a)
 -&gt; f (Vector a) -&gt; f (NonEmptyVector a)
@@ -36,23 +36,23 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
 </span><span class="hs-identifier hs-var">ix</span></span><span> </span><span class="annot"><span class="annottext">Index (Vector a)
 Index (NonEmptyVector a)
-</span><a href="#local-6989586621679282855"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue (Vector a) -&gt; f (IxValue (Vector a))
+</span><a href="#local-6989586621679272815"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue (Vector a) -&gt; f (IxValue (Vector a))
 IxValue (NonEmptyVector a) -&gt; f (IxValue (NonEmptyVector a))
-</span><a href="#local-6989586621679282854"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282852"><span class="hs-identifier hs-var">v</span></a></span></span><span>
+</span><a href="#local-6989586621679272814"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272812"><span class="hs-identifier hs-var">v</span></a></span></span><span>
 </span><span id="line-23"></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679282844"><span id="local-6989586621679282846"><span id="local-6989586621679282848"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span></span></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679282838"><span class="annot"><span class="hs-identifier hs-type">Traversable1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>  </span><span id="local-6989586621679282836"><span class="annot"><span class="annottext">traverse1 :: (a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></span></span><span> </span><span id="local-6989586621679282834"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679282834"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282833"><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282833"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679272804"><span id="local-6989586621679272806"><span id="local-6989586621679272808"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span></span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679272798"><span class="annot"><span class="hs-identifier hs-type">Traversable1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>  </span><span id="local-6989586621679272796"><span class="annot"><span class="annottext">traverse1 :: (a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></span></span><span> </span><span id="local-6989586621679272794"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679272794"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272793"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272793"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-27"></span><span>      </span><span class="hs-comment">-- Get the length of the vector in /O(1)/ time</span><span>
-</span><span id="line-28"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679282832"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679282832"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Int
+</span><span id="line-28"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679272792"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679272792"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282833"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679272793"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-29"></span><span>      </span><span class="hs-comment">-- Use fromListN to be more efficient in construction of resulting vector</span><span>
 </span><span id="line-30"></span><span>      </span><span class="hs-comment">-- Also behaves better with compact regions, preventing runtime exceptions</span><span>
 </span><span id="line-31"></span><span>      </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
@@ -63,7 +63,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [b] -&gt; Vector b
 forall a. Int -&gt; [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">Vector.fromListN</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679282832"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">([b] -&gt; Vector b) -&gt; (NonEmpty b -&gt; [b]) -&gt; NonEmpty b -&gt; Vector b
+</span><a href="#local-6989586621679272792"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">([b] -&gt; Vector b) -&gt; (NonEmpty b -&gt; [b]) -&gt; NonEmpty b -&gt; Vector b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty b -&gt; [b]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
@@ -76,23 +76,23 @@ forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable1 t, Apply f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679282834"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; NonEmpty a
+</span><a href="#local-6989586621679272794"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; NonEmpty a
 forall a. [a] -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; NonEmpty a) -&gt; [a] -&gt; NonEmpty a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282833"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679272793"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-33"></span><span>         </span><span class="hs-comment">-- notice that NonEmpty.fromList is suposedly safe since the vector is NonEmpty...</span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">traverse1</span></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679282823"><span class="annot"><span class="hs-identifier hs-type">FunctorWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-38"></span><span>  </span><span id="local-6989586621679282821"><span class="annot"><span class="annottext">imap :: (Int -&gt; a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">imap</span></span></span><span> </span><span id="local-6989586621679282819"><span class="annot"><span class="annottext">Int -&gt; a -&gt; b
-</span><a href="#local-6989586621679282819"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282818"><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282818"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679272783"><span class="annot"><span class="hs-identifier hs-type">FunctorWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679272781"><span class="annot"><span class="annottext">imap :: (Int -&gt; a -&gt; b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">imap</span></span></span><span> </span><span id="local-6989586621679272779"><span class="annot"><span class="annottext">Int -&gt; a -&gt; b
+</span><a href="#local-6989586621679272779"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272778"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272778"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
 forall a. Vector a -&gt; NonEmptyVector a
 </span><span class="hs-identifier hs-var">NonEmptyVector</span></span><span> </span><span class="annot"><span class="annottext">(Vector b -&gt; NonEmptyVector b) -&gt; Vector b -&gt; NonEmptyVector b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -101,24 +101,24 @@ forall i (f :: * -&gt; *) a b.
 FunctorWithIndex i f =&gt;
 (i -&gt; a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">imap</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; b
-</span><a href="#local-6989586621679282819"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282818"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679282806"><span id="local-6989586621679282808"><span id="local-6989586621679282810"><span id="local-6989586621679282812"><span id="local-6989586621679282814"><span class="annot"><span class="hs-identifier hs-type">FoldableWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-40"></span><span>  </span><span id="local-6989586621679282804"><span class="annot"><span class="annottext">ifoldMap :: (Int -&gt; a -&gt; m) -&gt; NonEmptyVector a -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ifoldMap</span></span></span><span> </span><span id="local-6989586621679282802"><span class="annot"><span class="annottext">Int -&gt; a -&gt; m
-</span><a href="#local-6989586621679282802"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282801"><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282801"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; m) -&gt; Vector a -&gt; m
+</span><a href="#local-6989586621679272779"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272778"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679272766"><span id="local-6989586621679272768"><span id="local-6989586621679272770"><span id="local-6989586621679272772"><span id="local-6989586621679272774"><span class="annot"><span class="hs-identifier hs-type">FoldableWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679272764"><span class="annot"><span class="annottext">ifoldMap :: (Int -&gt; a -&gt; m) -&gt; NonEmptyVector a -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ifoldMap</span></span></span><span> </span><span id="local-6989586621679272762"><span class="annot"><span class="annottext">Int -&gt; a -&gt; m
+</span><a href="#local-6989586621679272762"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272761"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272761"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; m) -&gt; Vector a -&gt; m
 forall i (f :: * -&gt; *) m a.
 (FoldableWithIndex i f, Monoid m) =&gt;
 (i -&gt; a -&gt; m) -&gt; f a -&gt; m
 </span><span class="hs-identifier hs-var">ifoldMap</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; m
-</span><a href="#local-6989586621679282802"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282801"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679282795"><span class="annot"><span class="hs-identifier hs-type">TraversableWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>  </span><span id="local-6989586621679282793"><span class="annot"><span class="annottext">itraverse :: (Int -&gt; a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">itraverse</span></span></span><span> </span><span id="local-6989586621679282791"><span class="annot"><span class="annottext">Int -&gt; a -&gt; f b
-</span><a href="#local-6989586621679282791"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679282790"><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282790"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
+</span><a href="#local-6989586621679272762"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272761"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679272755"><span class="annot"><span class="hs-identifier hs-type">TraversableWithIndex</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621679272753"><span class="annot"><span class="annottext">itraverse :: (Int -&gt; a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">itraverse</span></span></span><span> </span><span id="local-6989586621679272751"><span class="annot"><span class="annottext">Int -&gt; a -&gt; f b
+</span><a href="#local-6989586621679272751"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmptyVector</span></span><span> </span><span id="local-6989586621679272750"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272750"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; NonEmptyVector b
 forall a. Vector a -&gt; NonEmptyVector a
 </span><span class="hs-identifier hs-var">NonEmptyVector</span></span><span> </span><span class="annot"><span class="annottext">(Vector b -&gt; NonEmptyVector b)
 -&gt; f (Vector b) -&gt; f (NonEmptyVector b)
@@ -128,6 +128,6 @@ forall i (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (TraversableWithIndex i t, Applicative f) =&gt;
 (i -&gt; a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">itraverse</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; f b
-</span><a href="#local-6989586621679282791"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679282790"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679272751"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679272750"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-43"></span></pre></body></html>
