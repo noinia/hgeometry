@@ -1,4 +1,4 @@
-module ConvexHull.Bench (
+module ConvexHull.GrahamBench (
     runBenchmark
   , benchmark
   , runProfile
