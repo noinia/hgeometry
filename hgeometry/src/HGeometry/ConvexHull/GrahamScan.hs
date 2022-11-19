@@ -37,6 +37,9 @@ convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
                        in uncheckedFromCCWPoints . reverse $ lh ++ uh
+-- {-# INLINABLE convexHull #-}
+
+-- {-# SPECIALIZE convexHull :: NonEmpty (Point 2 Int) -> ConvexPolygon (Point 2 Int) #-}
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --
@@ -50,6 +53,7 @@ convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
 -- running time: \(O(n\log n)\)
 upperHull  :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
 upperHull = NonEmpty.reverse . hull id
+-- {-# INLINABLE upperHull#-}
 
 -- | Computes the upper hull, making sure that there are no vertical segments.
 --
@@ -57,6 +61,7 @@ upperHull = NonEmpty.reverse . hull id
 --
 upperHull'  :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
 upperHull' = NonEmpty.reverse . dropVertical . hull id
+--{-# INLINABLE upperHull' #-}
 
 -- | Helper function to remove vertical segments from the hull.
 --
@@ -67,7 +72,7 @@ dropVertical = \case
   h@(_ :| [])                                  -> h
   h@(p :| (q : rest)) | p^.xCoord == q^.xCoord -> q :| rest
                       | otherwise              -> h
-
+--{-# INLINABLE dropVertical #-}
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --
@@ -81,12 +86,14 @@ dropVertical = \case
 -- running time: \(O(n\log n)\)
 lowerHull :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
 lowerHull = hull reverse
+--{-# INLINABLE lowerHull #-}
 
 -- | Computes the lower hull, making sure there are no vertical
 -- segments. (Note that the only such segment could be the first
 -- segment).
 lowerHull' :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
 lowerHull' = dropVertical . hull reverse
+--{-# INLINABLE lowerHull' #-}
 
 -- | Helper function so that that can compute both the upper or the lower hull, depending
 -- on the function f
@@ -96,11 +103,12 @@ hull               :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
 hull _ h@(_ :| []) = h
 hull f pts         = hull' .  f
                    . Vector.toList . sortBy incXdecY $ pts
+--{-# INLINABLE hull #-}
 
 incXdecY :: (Ord r, Point_ point 2 r, OptCVector_ 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
-
+--{-# INLINABLE incXdecY #-}
 
 -- | Given a sequence of points that is sorted on increasing
 -- x-coordinate and decreasing y-coordinate, computes the upper
@@ -119,6 +127,8 @@ upperHullFromSorted :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> Non
 upperHullFromSorted = \case
   h@(_ :| [])  -> h
   pts          -> hull' $ NonEmpty.toList pts
+--{-# INLINABLE upperHullFromSorted  #-}
+
 
 -- | Computes the upper hull from a sorted input. Removes the last vertical segment.
 --
@@ -126,6 +136,7 @@ upperHullFromSorted = \case
 -- running time: \(O(n)\).
 upperHullFromSorted' :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 upperHullFromSorted' = dropVertical . upperHullFromSorted
+--{-# INLINABLE upperHullFromSorted'  #-}
 
 
 -- | Precondition: The list of input points is sorted
@@ -143,6 +154,8 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
 hull' _ = error
   "Algorithms.Geometry.ConvexHull.GrahamScan.hull' requires a list with at least \
   \two elements."
+--{-# INLINABLE hull' #-}
 
 rightTurn       :: (Ord r, Num r, Point_ point 2 r) => point -> point -> point -> Bool
 rightTurn a b c = ccw a b c == CW
+--{-# INLINABLE rightTurn  #-}

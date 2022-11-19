@@ -9,6 +9,7 @@ import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 -- import qualified HGeometry.ConvexHull.JarvisMarch      as JarvisMarch
 -- import qualified HGeometry.ConvexHull.QuickHull        as QuickHull
 
+
 import qualified ConvexHull.GrahamV2 as GrahamV2
 import qualified ConvexHull.GrahamInt as GrahamInt
 import qualified ConvexHull.GrahamFastest as GrahamFastest
@@ -17,6 +18,8 @@ import qualified ConvexHull.GrahamFastest as GrahamFastest
 
 import           Control.DeepSeq
 import qualified ConvexHull.GrahamClassy as GrahamClassy
+import           Data.Foldable.Sort
+import qualified Data.Vector.Unboxed as UV
 import           System.Random
 -- import           Data.Double.Approximate
 import           Data.Ext
@@ -58,9 +61,22 @@ runProfile = do
 
 --------------------------------------------------------------------------------
 
-myConvexHull :: NonEmpty      (PointF (VectorFamily 2 Int))
-             -> ConvexPolygon (PointF (VectorFamily 2 Int))
+-- myConvexHull :: NonEmpty      (PointF (VectorFamily 2 Int))
+--              -> ConvexPolygon (PointF (VectorFamily 2 Int))
+-- myConvexHull = GrahamScan.convexHull
+
+myConvexHull :: NonEmpty      (Point 2 Double)
+             -> ConvexPolygon (Point 2 Double)
 myConvexHull = GrahamScan.convexHull
+
+
+sort' :: NonEmpty      (Point 2 Int) ->
+         NonEmpty      (Point 2 Int)
+sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
+
+incXdecY :: (Ord r, Point_ point 2 r, OptCVector_ 2 r) => point -> point -> Ordering
+incXdecY (Point2_ px py) (Point2_ qx qy) =
+  compare px qx <> compare qy py
 
 -- this already seems to make a difference versus just using Point 2 Int:
 
@@ -95,9 +111,10 @@ runBenchmark = do
                   , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
 
                   , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
+                  , bench "Sort" $ nf sort' pts
                   ]
       where
-        pts' = force (pointFromPoint <$> pts)
+        pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)
 
 
 
