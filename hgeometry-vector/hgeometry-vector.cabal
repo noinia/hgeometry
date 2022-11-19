@@ -159,6 +159,7 @@ library optimal
 
   other-modules:
     Optimal.Internal
+    Optimal.Wrap
     -- HGeometry.Vector.Optimal.V2
     -- HGeometry.Vector.Optimal.V3
     -- HGeometry.Vector.Optimal.V4
@@ -202,7 +203,7 @@ library
     -- HGeometry.Vector.VectorFixed
 
   mixins:
-      hgeometry-vector:optimal (Optimal as HGeometry.Vector.Optimal)
+      hgeometry-vector:optimal (Optimal      as HGeometry.Vector.Optimal)
     , hgeometry-vector:boxed   (Boxed as HGeometry.Vector.Boxed)
   build-depends: hgeometry-vector:class
                , hgeometry-vector:optimal

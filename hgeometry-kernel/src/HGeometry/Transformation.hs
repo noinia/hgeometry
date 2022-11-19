@@ -55,20 +55,22 @@ fitToBox r g = transformBy (fitToBoxTransform r g) g
 
 -- | Given a rectangle r and a geometry g with its boundingbox,
 -- compute a transformation can fit g to r.
-fitToBoxTransform     :: forall g r rectangle.
+fitToBoxTransform     :: forall g r rectangle point.
                          ( IsTransformable g
                          , IsBoxable g
                          , NumType g ~ r, Dimension g ~ 2
                          , Ord r, Fractional r
-                         , Rectangle_ rectangle r
+                         , Rectangle_ rectangle point, Point_ point 2 r
+                         , OptVector_ 2 r, OptVector_ 3 r
+
+                         , Additive_ (VectorFamily 3 r)
+
+
                       ) => rectangle -> g -> Transformation 2 r
 fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
   where
-
     b = boundingBox g
     v1  :: Vector d r
-    v1  = (-1) *^ b^.minPoint.vector
+    v1  = negated $ b^.minPoint.vector
     v2  = r^.minPoint.vector
-    lam = undefined
-
---      minimum $ (/) <$> Box.size r <*> Box.size b
+    lam = minimum $ (/) <$> Box.size r <*> Box.size b

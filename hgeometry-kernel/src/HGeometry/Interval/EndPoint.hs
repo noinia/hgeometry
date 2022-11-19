@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes  #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Interval.EndPoint
@@ -8,7 +10,6 @@
 -- Endpoints of intervals
 --
 --------------------------------------------------------------------------------
-{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.EndPoint
   ( EndPoint_(..)
   , HasEndPoint(..)
@@ -20,6 +21,7 @@ module HGeometry.Interval.EndPoint
 
 import Control.Lens
 import HGeometry.Properties
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -43,6 +45,10 @@ data EndPointType = Open | Closed deriving (Show,Eq)
 newtype EndPoint (et :: EndPointType) r = EndPoint r deriving (Show,Eq,Ord)
 
 type instance NumType   (EndPoint et r) = r
+
+type instance VectorFamily 2 (EndPoint et r) = WrapVector 2 r (EndPoint et r)
+
+
 
 instance HasEndPoint (EndPoint et r) (EndPoint et r') where
   endPoint = lens (\(EndPoint x) -> x) (\_ x -> EndPoint x)
@@ -75,3 +81,6 @@ instance EndPoint_ (AnEndPoint r) where
   endPointType (AnEndPoint t _) = t
   -- | By default we consider endpoints closed
   mkEndPoint = AnEndPoint Closed
+
+
+--------------------------------------------------------------------------------

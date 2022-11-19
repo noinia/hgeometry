@@ -1,5 +1,7 @@
 module Optimal
   ( module Optimal.Internal
+  -- * Helper with which we can easily implement Optimal vectors for newtypes
+  , WrapVector(..)
   ) where
 
 import qualified Boxed
@@ -8,6 +10,7 @@ import qualified Double.Unpacked
 import qualified Float.Unpacked
 import qualified Int.Unpacked
 import           Optimal.Internal
+import           Optimal.Wrap
 
 --------------------------------------------------------------------------------
 

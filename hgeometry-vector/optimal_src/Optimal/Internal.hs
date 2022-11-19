@@ -123,6 +123,16 @@ instance ( HasComponents (VectorFamily' d r) v
 instance Vector_ (VectorFamily' d r) d r => Vector_ (Vector d r) d r where
   vectorFromList = fmap MkVector . vectorFromList @(VectorFamily' d r)
 
+instance ( ConstructableVector_ (VectorFamily' d r) d r
+         , Coercible (ConstructVector (VectorFamily' d r) d)
+                     (ConstructVector (Vector        d r) d)
+           -- somehow the above should be true, since functions are
+           -- coercible. But somehow GHC doesn't see that.
+         ) => ConstructableVector_ (Vector d r) d r where
+  mkVector = coerce @(ConstructVector (VectorFamily' d r) d)
+                    @(ConstructVector (Vector        d r) d)
+                    (mkVector @(VectorFamily' d r) @d)
+
 deriving newtype instance ( Additive_ (VectorFamily' d r)
                           , IxValue (VectorFamily' d r) ~ r
                           ) => Additive_ (Vector d r)
