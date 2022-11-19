@@ -19,13 +19,11 @@ module HGeometry.Box.Class
   , width
   , height
 
-  , IsBoxable(..)
 
   , size
   ) where
 
 import Control.Lens
-import Data.Kind
 import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.Interval
@@ -63,41 +61,9 @@ class ( HasMinPoint box point
 -- | Rectangles are two dimensional boxes.
 type Rectangle_ rectangle point = (Box_ rectangle point, Dimension rectangle ~ 2)
 
--- | Types for which we can compute an axis parallel boundingbox
-class IsBoxable g where
-  -- | Compute the axis-parallel boundingbox of the given geometry.
-  boundingBox :: g -> Box (Point (Dimension g) (NumType g))
 
 
 --------------------------------------------------------------------------------
-
--- | D-dimensional boxes.
-type Box       :: Type -> Type
-data Box point = Box !point !point
-  deriving (Show,Eq,Ord)
-
--- type instance PointFor  (Box point) = point
-type instance Dimension (Box point) = Dimension point
-type instance NumType   (Box point) = NumType point
-
-instance HasMinPoint (Box point) point where
-  minPoint = lens (\(Box p _) -> p) (\(Box _ q) p -> Box p q)
-
-instance HasMaxPoint (Box point) point where
-  maxPoint = lens (\(Box _ q) -> q) (\(Box p _) q -> Box p q)
-
-instance ( Affine_ point
-         , Point_ point (Dimension point) (NumType point)
-         , OptCVector_ 2 (NumType point)
-         ) => Box_ (Box point) point where
-  extent (Box p q) = vZipWith ClosedInterval (p^.vector) (q^.vector)
-
-instance ( Box_ (Box point) r
-         , Point_ point d r
-         , OptVector_ d r
-         , Metric_ (VectorFamily' d r)
-         ) => IsBoxable (Box point) where
-  boundingBox (Box p q) = Box (pointFromPoint p) (pointFromPoint q)
 
 --------------------------------------------------------------------------------
 

@@ -11,8 +11,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Optimal
-  (
-
+  ( LineSegment(LineSegment, ClosedLineSegment, OpenLineSegment)
+  , ClosedLineSegment
+  , OpenLineSegment
   ) where
 
 
@@ -36,16 +37,20 @@ type OpenLineSegment point   = LineSegment (EndPoint Open) point
 pattern LineSegment     :: OptCVector_ 2 (endPoint point)
                         => endPoint point -> endPoint point -> LineSegment endPoint point
 pattern LineSegment p q = MkLineSegment (Interval p q)
+{-# COMPLETE LineSegment #-}
+
 
 -- | Construct a closed interval
 pattern ClosedLineSegment     :: OptCVector_ 2 point
                               =>  point -> point -> ClosedLineSegment point
 pattern ClosedLineSegment s t = LineSegment (ClosedE s) (ClosedE t)
+{-# COMPLETE ClosedLineSegment #-}
 
 -- | Construct an open ended interval
 pattern OpenLineSegment     :: OptCVector_ 2 point
                             =>  point -> point -> OpenLineSegment point
 pattern OpenLineSegment s t = LineSegment (OpenE s) (OpenE t)
+{-# COMPLETE OpenLineSegment #-}
 
 type instance NumType   (LineSegment endPoint point) = NumType point
 type instance Dimension (LineSegment endPoint point) = Dimension point

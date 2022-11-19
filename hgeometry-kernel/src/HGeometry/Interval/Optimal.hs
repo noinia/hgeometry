@@ -39,11 +39,13 @@ pattern Interval s t = MkInterval (Vector2 s t)
 pattern ClosedInterval     :: OptCVector_ 2 r
                            =>  r -> r -> ClosedInterval r
 pattern ClosedInterval s t = Interval (ClosedE s) (ClosedE t)
+{-# COMPLETE ClosedInterval #-}
 
 -- | Construct an open ended interval
 pattern OpenInterval     :: OptCVector_ 2 r
                          =>  r -> r -> OpenInterval r
 pattern OpenInterval s t = Interval (OpenE s) (OpenE t)
+{-# COMPLETE OpenInterval #-}
 
 type instance NumType   (Interval endPoint r) = r
 type instance Dimension (Interval endPoint r) = 1
