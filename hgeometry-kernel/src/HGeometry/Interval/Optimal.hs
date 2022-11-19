@@ -25,6 +25,7 @@ import HGeometry.Vector
 newtype Interval endPoint r = MkInterval (Vector 2 (endPoint r))
 
 type ClosedInterval r = Interval (EndPoint Closed) r
+
 type OpenInterval r   = Interval (EndPoint Open) r
 
 

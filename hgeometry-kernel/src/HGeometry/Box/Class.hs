@@ -37,20 +37,20 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
-class HasMinPoint box point where
+class HasMinPoint box point | box -> point where
   -- | Lens to access the lexicographically smallest point
   minPoint :: Lens' box point
 
-class HasMaxPoint box point where
+class HasMaxPoint box point | box -> point where
   -- | Lens to access the lexicographically largest point
   maxPoint :: Lens' box point
 
 -- | d-dimensional Boxes
 class ( HasMinPoint box point
       , HasMaxPoint box point
-      , Point_ (PointFor box) (Dimension box) (NumType box)
-      , PointFor box ~ point
-      , NumType box ~ NumType point
+      , Point_ point (Dimension box) (NumType box)
+      -- , PointFor box ~ point
+      -- , NumType box ~ NumType point
       ) => Box_ box point | box -> point where
 
   -- | Get a vector with the extent of the box in each dimension. Note
@@ -82,7 +82,7 @@ type Box       :: Type -> Type
 data Box point = Box !point !point
   deriving (Show,Eq,Ord)
 
-type instance PointFor  (Box point) = point
+-- type instance PointFor  (Box point) = point
 type instance Dimension (Box point) = Dimension point
 type instance NumType   (Box point) = NumType point
 
@@ -99,7 +99,7 @@ instance ( Affine_ point
 
 -- type instance BoxFor (Box point) = Box point
 
-instance ( Box_ (Box point) (NumType point)
+instance ( Box_ (Box point) r
          , Point_ point d r
          , OptVector_ d r
          , Metric_ (VectorFamily' d r)

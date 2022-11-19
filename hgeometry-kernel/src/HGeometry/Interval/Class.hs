@@ -38,12 +38,12 @@ import HGeometry.Properties
 --------------------------------------------------------------------------------
 
 -- | Things that have a start point
-class HasStart seg p where
+class HasStart seg p | seg -> p where
   -- | Lens to access the start point
   start :: Lens' seg p
 
 -- | Things that have an end point
-class HasEnd seg p where
+class HasEnd seg p | seg -> p where
   -- | Lens to access the ending point
   end :: Lens' seg p
 
