@@ -30,7 +30,7 @@ import           HGeometry.Vector
 -- given in clockwise order.
 --
 -- pre: input contains at least three points
-convexHull            :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
+convexHull            :: (Ord r, Num r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
@@ -51,7 +51,7 @@ convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
 -- vertical. Use 'upperHull'' if such an edge should not be reported.
 --
 -- running time: \(O(n\log n)\)
-upperHull  :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
+upperHull  :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 upperHull = NonEmpty.reverse . hull id
 -- {-# INLINABLE upperHull#-}
 
@@ -59,7 +59,7 @@ upperHull = NonEmpty.reverse . hull id
 --
 -- The upper hull is given from left to right
 --
-upperHull'  :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
+upperHull'  :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 upperHull' = NonEmpty.reverse . dropVertical . hull id
 --{-# INLINABLE upperHull' #-}
 
@@ -84,20 +84,20 @@ dropVertical = \case
 -- vertical. Use 'lowerHull'' if such an edge should not be reported.
 --
 -- running time: \(O(n\log n)\)
-lowerHull :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
+lowerHull :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 lowerHull = hull reverse
 --{-# INLINABLE lowerHull #-}
 
 -- | Computes the lower hull, making sure there are no vertical
 -- segments. (Note that the only such segment could be the first
 -- segment).
-lowerHull' :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r) => NonEmpty point -> NonEmpty point
+lowerHull' :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 lowerHull' = dropVertical . hull reverse
 --{-# INLINABLE lowerHull' #-}
 
 -- | Helper function so that that can compute both the upper or the lower hull, depending
 -- on the function f
-hull               :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
+hull               :: (Ord r, Num r, Point_ point 2 r)
                    => ([point] -> [point])
                    -> NonEmpty point -> NonEmpty point
 hull _ h@(_ :| []) = h
@@ -105,7 +105,7 @@ hull f pts         = hull' .  f
                    . Vector.toList . sortBy incXdecY $ pts
 --{-# INLINABLE hull #-}
 
-incXdecY :: (Ord r, Point_ point 2 r, OptCVector_ 2 r) => point -> point -> Ordering
+incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
 --{-# INLINABLE incXdecY #-}

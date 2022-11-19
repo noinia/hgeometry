@@ -28,7 +28,7 @@ import           Data.Util
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
 -- given in clockwise order.
-convexHull            :: (Ord r, Num r, Point_ point 2 r, OptCVector_ 2 r)
+convexHull            :: (Ord r, Num r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts

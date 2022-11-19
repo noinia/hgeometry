@@ -80,7 +80,7 @@ sort' :: NonEmpty      (Point 2 Int) ->
          NonEmpty      (Point 2 Int)
 sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
 
-incXdecY :: (Ord r, Point_ point 2 r, OptCVector_ 2 r) => point -> point -> Ordering
+incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
 
