@@ -1,6 +1,6 @@
 module HGeometry.Point.Optimal
-  ( Point, pattern Point1, pattern Point2, pattern Point3, pattern Point4
-  , PointF(..)
+  ( Point -- , pattern Point1, pattern Point2, pattern Point3, pattern Point4
+  , PointF(Point, toVec, Point1, Point2, Point3, Point4)
   ) where
 
 import HGeometry.Point.PointF
