@@ -14,6 +14,8 @@ module HGeometry.LineSegment.Class
 
   , interpolate
   , OnSegment(..)
+
+  , HasStart(..), HasEnd(..)
   ) where
 
 import Control.Lens
@@ -25,6 +27,8 @@ import HGeometry.Vector
 
 
 --------------------------------------------------------------------------------
+
+-- not sure why I made this a separate class again...
 
 class OnSegment lineSegment where
   -- | Test if a point lies on a line segment.
