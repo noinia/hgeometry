@@ -902,92 +902,6 @@ instance Data.Foldable.Foldable Data.CircularSeq.CSeq
 instance GHC.Base.Functor Data.CircularSeq.CSeq
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.CircularSeq.CSeq a)
 
-module Data.Foldable.Sort
-
--- | Sort a collection using the given comparator using intro-sort
---   (essentially quicksort).
---   
---   &lt;math&gt;, where &lt;math&gt; is the time to do a comparison.
-sortBy :: forall vector f a. (Foldable f, Vector vector a) => (a -> a -> Ordering) -> f a -> vector a
-
--- | Sort the given collection using intro sort.
---   
---   &lt;math&gt;
-sort :: forall vector f a. (Foldable f, Vector vector a, Ord a) => f a -> vector a
-
--- | Sort the collection using the given "cheap" function; i.e. the
---   function f is called at every comparison
---   
---   &lt;math&gt;, where &lt;math&gt; is the time required to evaluate the
---   function
-sortOnCheap :: forall vector f a b. (Foldable f, Vector vector a, Ord b) => (a -> b) -> f a -> vector a
-
-module Data.Foldable.Util
-class HasFromFoldable f
-fromFoldable :: (HasFromFoldable f, Foldable g) => g a -> f a
-fromList :: HasFromFoldable f => [a] -> f a
-class HasFromFoldable1 f
-fromFoldable1 :: (HasFromFoldable1 f, Foldable1 g) => g a -> f a
-fromNonEmpty :: HasFromFoldable1 f => NonEmpty a -> f a
-instance Data.Foldable.Util.HasFromFoldable1 GHC.Base.NonEmpty
-instance Data.Foldable.Util.HasFromFoldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Data.Foldable.Util.HasFromFoldable Data.Vector.Vector
-
-module Data.Cyclic
-
--- | A cyclic sequence type
-newtype Cyclic v a
-Cyclic :: v a -> Cyclic v a
-
--- | Turn the cyclic vector into a circular Vector
-toCircularVector :: Cyclic NonEmptyVector a -> CircularVector a
-instance forall k (v :: k -> *) (a :: k). GHC.Generics.Generic (Data.Cyclic.Cyclic v a)
-instance forall k (v :: k -> *) (a :: k). Control.DeepSeq.NFData (v a) => Control.DeepSeq.NFData (Data.Cyclic.Cyclic v a)
-instance Data.Foldable.Foldable v => Data.Foldable.Foldable (Data.Cyclic.Cyclic v)
-instance GHC.Base.Functor v => GHC.Base.Functor (Data.Cyclic.Cyclic v)
-instance Data.Semigroup.Foldable.Class.Foldable1 v => Data.Semigroup.Foldable.Class.Foldable1 (Data.Cyclic.Cyclic v)
-instance Data.Semigroup.Traversable.Class.Traversable1 v => Data.Semigroup.Traversable.Class.Traversable1 (Data.Cyclic.Cyclic v)
-instance Data.Traversable.Traversable v => Data.Traversable.Traversable (Data.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.FunctorWithIndex i v => Control.Lens.Indexed.FunctorWithIndex i (Data.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.FoldableWithIndex i v => Control.Lens.Indexed.FoldableWithIndex i (Data.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.TraversableWithIndex i v => Control.Lens.Indexed.TraversableWithIndex i (Data.Cyclic.Cyclic v)
-instance Data.Foldable.Util.HasFromFoldable v => Data.Foldable.Util.HasFromFoldable (Data.Cyclic.Cyclic v)
-instance Data.Foldable.Util.HasFromFoldable1 v => Data.Foldable.Util.HasFromFoldable1 (Data.Cyclic.Cyclic v)
-instance (Control.Lens.At.Index (v a) GHC.Types.~ GHC.Types.Int, Data.Foldable.Foldable v, Control.Lens.At.Ixed (v a)) => Control.Lens.At.Ixed (Data.Cyclic.Cyclic v a)
-
-
--- | Things that have an index.
-module Data.Indexed
-
--- | Types that have an index.
-class HasIndex a
-
--- | Get the index of a given <tt>a</tt>
-sosIndex :: HasIndex a => a -> Index
-
--- | A type of Indices
-type Index = Int
-
--- | Associate a value of type <tt>a</tt> with an Index.
-data WithIndex a
-WithIndex :: {-# UNPACK #-} !Index -> a -> WithIndex a
-
--- | Lens to manipulate the value of the <a>WithIndex</a>
-theValue :: Lens (WithIndex a) (WithIndex b) a b
-
--- | Label each element with its index.
-labelWithIndex :: Traversable t => t a -> t (WithIndex a)
-
--- | Label each element with its index using the given labelling function.
-labelWith :: Traversable t => (Index -> a -> b) -> t a -> t b
-
--- | Label each element with its index using the given labelling function.
---   Returns the new collection as well as its size.
-labelWith' :: forall t a b. Traversable t => (Index -> a -> b) -> t a -> (t b, Int)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Indexed.WithIndex a)
-instance Control.Lens.Tuple.Field1 (Data.Indexed.WithIndex a) (Data.Indexed.WithIndex b) a b
-instance Data.Indexed.HasIndex (Data.Indexed.WithIndex a)
-
 
 -- | Defines a data type for representing intersections. Mostly useful for
 --   the more geometric types.
@@ -1706,7 +1620,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_axwV a_axGv. Lens (Permutation a_axwV) (Permutation a_axGv) (Vector (Orbit a_axwV)) (Vector (Orbit a_axGv))
+orbits :: forall a_avNq a_avX0. Lens (Permutation a_avNq) (Permutation a_avX0) (Vector (Orbit a_avNq)) (Vector (Orbit a_avX0))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
@@ -2678,24 +2592,6 @@ mstEdges :: Ord e => PlanarGraph s w v e f -> [Dart s]
 makeTree :: forall s w v e f. PlanarGraph s w v e f -> [Dart s] -> Tree (VertexId s w)
 
 
--- | Types that support computing Square roots
-module Data.Radical
-
--- | Types that support taking a square root.
-class Num r => Radical r
-
--- | Computes the square root of the number
-sqrt :: Radical r => r -> r
-
--- | Computes the square root of the number
-sqrt :: (Radical r, Floating r) => r -> r
-instance Data.Radical.Radical GHC.Types.Float
-instance Data.Radical.Radical GHC.Types.Double
-instance Data.Radical.Radical (Data.Double.Approximate.DoubleRelAbs abs rel)
-instance Data.Radical.Radical (Data.Double.Shaman.SDouble n)
-instance Data.Radical.Radical Data.Double.Shaman.Shaman
-
-
 -- | Data type for representing Generic Ranges (Intervals) and functions
 --   that work with them.
 module Data.Range
@@ -2906,92 +2802,6 @@ instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Range.EndPoint a)
 instance Test.QuickCheck.Arbitrary.Arbitrary r => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.EndPoint r)
 
 
--- | Generalized Ratio type that accepts arbitrary 'Num a' types rather
---   than just Integral ones as in Data.Ratio
-module Data.Ratio.Generalized
-
--- | Generalized Ratio type that accepts more general "base" types than
---   just Integral ones. That does mean we cannot normalize the
---   intermediate expressions, so expect the numbers to become big quite
---   quickly!
---   
---   invariant: the denominator is not zero
-data GRatio a
-
--- | smart constructor to construct a GRatio. Throws an exception if the
---   denominator is zero.
-(%) :: (Eq a, Num a) => a -> a -> GRatio a
-
--- | Get the numerator
-numerator :: GRatio a -> a
-
--- | Get the denominator
-denominator :: GRatio a -> a
-instance GHC.Show.Show a => GHC.Show.Show (Data.Ratio.Generalized.GRatio a)
-instance (GHC.Classes.Eq a, GHC.Num.Num a) => GHC.Classes.Eq (Data.Ratio.Generalized.GRatio a)
-instance (GHC.Classes.Ord a, GHC.Num.Num a) => GHC.Classes.Ord (Data.Ratio.Generalized.GRatio a)
-instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Num.Num (Data.Ratio.Generalized.GRatio a)
-instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Real.Fractional (Data.Ratio.Generalized.GRatio a)
-instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Num.Num a, GHC.Classes.Eq a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Ratio.Generalized.GRatio a)
-
-
-module Data.RealNumber.Rational
-
--- | Real Numbers represented using Rational numbers. The number type
---   itself is exact in the sense that we can represent any rational
---   number.
---   
---   The parameter, a natural number, represents the precision (in number
---   of decimals behind the period) with which we display the numbers when
---   printing them (using Show).
---   
---   If the number cannot be displayed exactly a '~' is printed after the
---   number.
-newtype RealNumber (p :: Nat)
-RealNumber :: Rational -> RealNumber (p :: Nat)
-
--- | Fixed-precision representation of a <a>RealNumber</a>. If there's
---   insufficient precision to accurately represent the <a>RealNumber</a>
---   then the <a>Lossy</a> constructor will be used.
-data AsFixed p
-Exact :: !Fixed p -> AsFixed p
-Lossy :: !Fixed p -> AsFixed p
-
--- | Cast <a>RealNumber</a> to a fixed-precision number. Data-loss caused
---   by insufficient precision will be marked by the <a>Lossy</a>
---   constructor.
-asFixed :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
-
--- | Cast <a>RealNumber</a> to a fixed-precision number. Data is silently
---   lost if there's insufficient precision.
-toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
-
--- | Cast a fixed-precision number to a <a>RealNumber</a>.
-fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
-
--- | (Kind) This is the kind of type-level natural numbers.
-data Nat
-instance Control.DeepSeq.NFData (Data.RealNumber.Rational.RealNumber p)
-instance Data.Aeson.Types.FromJSON.FromJSON (Data.RealNumber.Rational.RealNumber p)
-instance Data.Aeson.Types.ToJSON.ToJSON (Data.RealNumber.Rational.RealNumber p)
-instance Data.Hashable.Class.Hashable (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Generics.Generic (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Real.RealFrac (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Real.Real (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Real.Fractional (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Num.Num (Data.RealNumber.Rational.RealNumber p)
-instance GHC.TypeNats.KnownNat p => Data.Data.Data (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Classes.Ord (Data.RealNumber.Rational.RealNumber p)
-instance GHC.Classes.Eq (Data.RealNumber.Rational.RealNumber p)
-instance forall k (p :: k). GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
-instance forall k (p :: k). Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
-instance GHC.TypeNats.KnownNat p => GHC.Show.Show (Data.RealNumber.Rational.RealNumber p)
-instance GHC.TypeNats.KnownNat p => Data.Fixed.HasResolution (Data.RealNumber.Rational.NatPrec p)
-instance GHC.TypeNats.KnownNat p => GHC.Read.Read (Data.RealNumber.Rational.RealNumber p)
-instance GHC.TypeNats.KnownNat p => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Rational.RealNumber p)
-instance System.Random.Random (Data.RealNumber.Rational.RealNumber p)
-
-
 module Data.Sequence.Util
 
 -- | Partition the seq s given a monotone predicate p into (xs,ys) such
@@ -3093,213 +2903,6 @@ deleteAllBy :: (a -> a -> Ordering) -> a -> Set a -> Set a
 --   </pre>
 queryBy :: (a -> a -> Ordering) -> (forall b. Ord b => b -> Set b -> t b) -> a -> Set a -> t a
 instance GHC.Show.Show Data.Set.Util.S
-
-
--- | Signs of expressions
-module Data.Sign
-
--- | The sign of an expression
-data Sign
-Negative :: Sign
-Positive :: Sign
-
--- | Flip Positive <a>=</a> Negative.
-flipSign :: Sign -> Sign
-
--- | Given the terms, in decreasing order of significance, computes the
---   sign
---   
---   i.e. expects a list of terms, we base the sign on the sign of the
---   first non-zero term.
---   
---   pre: the list contains at least one such a term.
-signFromTerms :: (Num r, Eq r) => [r] -> Sign
-instance GHC.Enum.Bounded Data.Sign.Sign
-instance GHC.Enum.Enum Data.Sign.Sign
-instance GHC.Classes.Ord Data.Sign.Sign
-instance GHC.Classes.Eq Data.Sign.Sign
-instance GHC.Show.Show Data.Sign.Sign
-
-
--- | Defines a type 'Symbolic i r' that represents "indexed" numbers of
---   type r that have been "symbolically" perturbed by some arbitraryily
---   small &lt;math&gt;.
---   
---   With indexed numbers we mean that every number has some index, and the
---   size of the pertubation &lt;math&gt; is proportional to this index.
---   
---   This is useful for implementing a more general form of "Simulation of
---   Simplicity" as described in:
-module Data.RealNumber.Symbolic
-
--- | Let &lt;math&gt; be a bag with indices, let &lt;math&gt; be an upper
---   bound on the number of times a single item may occur in (mathcal{I}),
---   and let &lt;math&gt; be a function mapping indices to real numbers
---   that satisfies:
---   
---   <ol>
---   <li>&lt;math&gt;, for all &lt;math&gt;,</li>
---   <li>&lt;math&gt;, for all &lt;math&gt;</li>
---   </ol>
---   
---   Note that such a function exists:
---   
---   begin{lemma} label{lem:condition_2} Let &lt;math&gt; and &lt;math&gt;.
---   The function &lt;math&gt; satisfies condition 2. end{lemma}
---   
---   begin{proof} By transitivity it suffices to argue this for
---   &lt;math&gt;:
---   
---   begin{align*} &amp;qquad prod_{0 leq i leq j} varepsilon(i)^c &gt;
---   varepsilon(j+1) \ equiv &amp;qquad prod_{0 leq i leq j}
---   (delta^{d^i})^c &gt; delta^{d^{j+1}}\ equiv &amp;qquad prod_{0 leq i
---   leq j} delta^{cd^i} &gt; delta^{d^{j+1}} \ equiv &amp;qquad
---   delta^{sum_{0 leq i leq j} cd^i} &gt; delta^{d^{j+1}} &amp; text{using
---   } delta in (0,1)\ equiv &amp;qquad sum_{0 leq i leq j} cd^i &lt;
---   d^{j+1} \ equiv &amp;qquad csum_{0 leq i leq j} d^i &lt; d^{j+1} \
---   end{align*}
---   
---   We prove this by induction.
---   
---   For the base case &lt;math&gt;: we have &lt;math&gt;, which is
---   trivially true.
---   
---   For the step case we have the induction hypothesis &lt;math&gt;, and
---   we have to prove that &lt;math&gt;:
---   
---   begin{align*} csum_{0 leq i leq j+1} d^i &amp;= cd^{j+1} + csum_{0 leq
---   i leq j} d^i \ &amp;&lt; cd^{j+1} + d^{j+1} &amp; text{using IH} \
---   &amp;= (c+1)d^{j+1} &amp; text{using that } c+1 leq d \ &amp;leq
---   dd^{j+1} \ &amp;=d^{j+2} end{align*} This completes the proof.
---   end{proof}
---   
---   An EpsFold now represents the term
---   
---   &lt;math&gt;
---   
---   for some bag &lt;math&gt;.
---   
---   Let &lt;math&gt; be some sub-bag of &lt;math&gt;. Note that condition
---   2 implies that:
---   
---   &lt;math&gt;, for all &lt;math&gt;
---   
---   This means that when comparing two EpsFolds, say &lt;math&gt; and
---   &lt;math&gt;, representing bags &lt;math&gt; and &lt;math&gt;,
---   respectively. It suffices to compare the largest index (j in
---   mathcal{I}_1setminusmathcal{I}_2) with the largest index (k in
---   mathcal{I}_2setminusmathcal{I}_1). We have that
---   
---   &lt;math&gt; if and only if &lt;math&gt;.
-data EpsFold i
-
--- | Creates the term &lt;math&gt;
-eps :: i -> EpsFold i
-
--- | Constructs an epsfold from a list of elements
-mkEpsFold :: Ord i => [i] -> EpsFold i
-
--- | Evaluate an eps-fold using the choice of eps from the lemma above,
---   i.e. &lt;math&gt; &gt;&gt;&gt; evalEps 2 (1/2) $ mkEpsFold [1] 0.25
---   &gt;&gt;&gt; evalEps 2 (1/2) $ mkEpsFold [2] 6.25e-2 &gt;&gt;&gt;
---   evalEps 2 (1/2) $ mkEpsFold [1,2] 1.5625e-2
-evalEps :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
-
--- | Test if the epsfold has no pertubation at all (i.e. if it is
---   &lt;math&gt;
-hasNoPertubation :: EpsFold i -> Bool
-
--- | Gets the factors
-factors :: EpsFold i -> Bag i
-
--- | computes a base <tt>d</tt> that can be used as:
---   
---   &lt;math&gt;
-suitableBase :: EpsFold i -> Int
-
--- | A term 'Term c es' represents a term:
---   
---   &lt;math&gt;
---   
---   for a constant c and an arbitrarily small value &lt;math&gt;,
---   parameterized by i.
-data Term i r
-Term :: !r -> EpsFold i -> Term i r
-
--- | Creates a singleton term
-term :: r -> i -> Term i r
-
--- | Lens to access the constant <tt>c</tt> in the term.
-constantFactor :: Lens' (Term i r) r
-
--- | Represents a Sum of terms, i.e. given a sequence of terms Term
---   &lt;math&gt; &lt;math&gt; s where &lt;math&gt; is a constant and
---   &lt;math&gt; is a set of indices, a Symbolic represents an expression
---   of the form:
---   
---   &lt;math&gt;
---   
---   The terms are represented in order of decreasing significance.
---   
---   The main idea in this type is that, if symbolic values contains
---   &lt;math&gt; terms we can always order them. That is, two Symbolic
---   terms will be equal only if:
---   
---   <ul>
---   <li>they contain *only* a constant term (that is equal)</li>
---   <li>they contain the exact same &lt;math&gt;-fold.</li>
---   </ul>
-data Symbolic i r
-
--- | Creates a constant symbolic value
-constant :: Ord i => r -> Symbolic i r
-
--- | Creates a symbolic vlaue with a single indexed term. If you just need
---   a constant (i.e. non-indexed), use <a>constant</a>
-symbolic :: Ord i => r -> i -> Symbolic i r
-
--- | given the value c and the index i, creates the perturbed value
---   &lt;math&gt;
-perturb :: (Num r, Ord i) => r -> i -> Symbolic i r
-
--- | Produces a list of terms, in decreasing order of significance
-toTerms :: Symbolic i r -> [Term i r]
-
--- | Computing the Sign of an expression. (Nothing represents zero)
-signOf :: (Num r, Eq r) => Symbolic i r -> Maybe Sign
-
--- | Drops all the epsilon terms
-roundToConstant :: Num r => Symbolic i r -> r
-
--- | Number type representing
-type SoSRational i r = GRatio (Symbolic i r)
-
--- | Helper to construct sosRationals
-sosRational :: (Ord i, Eq r, Num r) => Symbolic i r -> Symbolic i r -> SoSRational i r
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.RealNumber.Symbolic.Bag a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.RealNumber.Symbolic.Bag a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.RealNumber.Symbolic.Bag a)
-instance GHC.Classes.Ord i => GHC.Base.Monoid (Data.RealNumber.Symbolic.EpsFold i)
-instance GHC.Classes.Ord i => GHC.Base.Semigroup (Data.RealNumber.Symbolic.EpsFold i)
-instance GHC.Base.Functor (Data.RealNumber.Symbolic.Symbolic i)
-instance GHC.Base.Functor (Data.RealNumber.Symbolic.Term i)
-instance (GHC.Classes.Ord i, GHC.Classes.Eq r) => GHC.Classes.Eq (Data.RealNumber.Symbolic.Term i r)
-instance (GHC.Show.Show i, GHC.Show.Show r) => GHC.Show.Show (Data.RealNumber.Symbolic.Term i r)
-instance (GHC.Classes.Ord i, GHC.Classes.Ord r, GHC.Num.Num r) => GHC.Classes.Ord (Data.RealNumber.Symbolic.Term i r)
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.EpsFold i), GHC.Classes.Ord i) => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.Term i r)
-instance (GHC.Classes.Ord i, GHC.Classes.Eq r, GHC.Num.Num r) => GHC.Classes.Eq (Data.RealNumber.Symbolic.Symbolic i r)
-instance (GHC.Classes.Ord i, GHC.Classes.Ord r, GHC.Num.Num r) => GHC.Classes.Ord (Data.RealNumber.Symbolic.Symbolic i r)
-instance (GHC.Classes.Ord i, GHC.Num.Num r, GHC.Classes.Eq r) => GHC.Num.Num (Data.RealNumber.Symbolic.Symbolic i r)
-instance (GHC.Show.Show i, GHC.Show.Show r) => GHC.Show.Show (Data.RealNumber.Symbolic.Symbolic i r)
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord i, Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.EpsFold i)) => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.Symbolic i r)
-instance GHC.Show.Show i => GHC.Show.Show (Data.RealNumber.Symbolic.EpsFold i)
-instance GHC.Classes.Ord i => GHC.Classes.Eq (Data.RealNumber.Symbolic.EpsFold i)
-instance GHC.Classes.Ord i => GHC.Classes.Ord (Data.RealNumber.Symbolic.EpsFold i)
-instance (Test.QuickCheck.Arbitrary.Arbitrary i, GHC.Classes.Ord i) => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.EpsFold i)
-instance Data.Foldable.Foldable Data.RealNumber.Symbolic.Bag
-instance GHC.Classes.Ord k => GHC.Base.Semigroup (Data.RealNumber.Symbolic.Bag k)
-instance GHC.Classes.Ord k => GHC.Base.Monoid (Data.RealNumber.Symbolic.Bag k)
-instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Classes.Ord a) => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Symbolic.Bag a)
 
 
 -- | Tree-related utilities.
@@ -4008,14 +3611,6 @@ withIndicesRight :: CircularVector a -> CircularVector (Int :+ a)
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
 
-module Data.Vector.NonEmpty.Util
-instance Control.Lens.At.Ixed (Data.Vector.NonEmpty.Internal.NonEmptyVector a)
-instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Data.Semigroup.Traversable.Class.Traversable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.FunctorWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.FoldableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.TraversableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
-
 
 module Data.Yaml.Util
 
@@ -4052,6 +3647,414 @@ instance GHC.Read.Read a => GHC.Read.Read (Data.Yaml.Util.Versioned a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Yaml.Util.Versioned a)
 instance Data.Aeson.Types.FromJSON.FromJSON Data.Yaml.Util.V
 instance Data.Aeson.Types.ToJSON.ToJSON a => Data.Aeson.Types.ToJSON.ToJSON (Data.Yaml.Util.Versioned a)
+
+module HGeometry.Foldable.Sort
+
+-- | Sort a collection using the given comparator using intro-sort
+--   (essentially quicksort).
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the time to do a comparison.
+sortBy :: forall vector f a. (Foldable f, Vector vector a) => (a -> a -> Ordering) -> f a -> vector a
+
+-- | Sort the given collection using intro sort.
+--   
+--   &lt;math&gt;
+sort :: forall vector f a. (Foldable f, Vector vector a, Ord a) => f a -> vector a
+
+-- | Sort the collection using the given "cheap" function; i.e. the
+--   function f is called at every comparison
+--   
+--   &lt;math&gt;, where &lt;math&gt; is the time required to evaluate the
+--   function
+sortOnCheap :: forall vector f a b. (Foldable f, Vector vector a, Ord b) => (a -> b) -> f a -> vector a
+
+module HGeometry.Foldable.Util
+class HasFromFoldable f
+fromFoldable :: (HasFromFoldable f, Foldable g) => g a -> f a
+fromList :: HasFromFoldable f => [a] -> f a
+class HasFromFoldable1 f
+fromFoldable1 :: (HasFromFoldable1 f, Foldable1 g) => g a -> f a
+fromNonEmpty :: HasFromFoldable1 f => NonEmpty a -> f a
+instance HGeometry.Foldable.Util.HasFromFoldable1 GHC.Base.NonEmpty
+instance HGeometry.Foldable.Util.HasFromFoldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance HGeometry.Foldable.Util.HasFromFoldable Data.Vector.Vector
+
+module HGeometry.Cyclic
+
+-- | A cyclic sequence type
+newtype Cyclic v a
+Cyclic :: v a -> Cyclic v a
+
+-- | Turn the cyclic vector into a circular Vector
+toCircularVector :: Cyclic NonEmptyVector a -> CircularVector a
+instance forall k (v :: k -> *) (a :: k). GHC.Generics.Generic (HGeometry.Cyclic.Cyclic v a)
+instance forall k (v :: k -> *) (a :: k). Control.DeepSeq.NFData (v a) => Control.DeepSeq.NFData (HGeometry.Cyclic.Cyclic v a)
+instance Data.Foldable.Foldable v => Data.Foldable.Foldable (HGeometry.Cyclic.Cyclic v)
+instance GHC.Base.Functor v => GHC.Base.Functor (HGeometry.Cyclic.Cyclic v)
+instance Data.Semigroup.Foldable.Class.Foldable1 v => Data.Semigroup.Foldable.Class.Foldable1 (HGeometry.Cyclic.Cyclic v)
+instance Data.Semigroup.Traversable.Class.Traversable1 v => Data.Semigroup.Traversable.Class.Traversable1 (HGeometry.Cyclic.Cyclic v)
+instance Data.Traversable.Traversable v => Data.Traversable.Traversable (HGeometry.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.FunctorWithIndex i v => Control.Lens.Indexed.FunctorWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.FoldableWithIndex i v => Control.Lens.Indexed.FoldableWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance Control.Lens.Indexed.TraversableWithIndex i v => Control.Lens.Indexed.TraversableWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance HGeometry.Foldable.Util.HasFromFoldable v => HGeometry.Foldable.Util.HasFromFoldable (HGeometry.Cyclic.Cyclic v)
+instance HGeometry.Foldable.Util.HasFromFoldable1 v => HGeometry.Foldable.Util.HasFromFoldable1 (HGeometry.Cyclic.Cyclic v)
+instance (Control.Lens.At.Index (v a) GHC.Types.~ GHC.Types.Int, Data.Foldable.Foldable v, Control.Lens.At.Ixed (v a)) => Control.Lens.At.Ixed (HGeometry.Cyclic.Cyclic v a)
+
+
+-- | Things that have an index.
+module HGeometry.Indexed
+
+-- | Types that have an index.
+class HasIndex a
+
+-- | Get the index of a given <tt>a</tt>
+sosIndex :: HasIndex a => a -> Index
+
+-- | A type of Indices
+type Index = Int
+
+-- | Associate a value of type <tt>a</tt> with an Index.
+data WithIndex a
+WithIndex :: {-# UNPACK #-} !Index -> a -> WithIndex a
+
+-- | Lens to manipulate the value of the <a>WithIndex</a>
+theValue :: Lens (WithIndex a) (WithIndex b) a b
+
+-- | Label each element with its index.
+labelWithIndex :: Traversable t => t a -> t (WithIndex a)
+
+-- | Label each element with its index using the given labelling function.
+labelWith :: Traversable t => (Index -> a -> b) -> t a -> t b
+
+-- | Label each element with its index using the given labelling function.
+--   Returns the new collection as well as its size.
+labelWith' :: forall t a b. Traversable t => (Index -> a -> b) -> t a -> (t b, Int)
+instance GHC.Show.Show a => GHC.Show.Show (HGeometry.Indexed.WithIndex a)
+instance Control.Lens.Tuple.Field1 (HGeometry.Indexed.WithIndex a) (HGeometry.Indexed.WithIndex b) a b
+instance HGeometry.Indexed.HasIndex (HGeometry.Indexed.WithIndex a)
+
+
+-- | Types that support computing Square roots
+module HGeometry.Number.Radical
+
+-- | Types that support taking a square root.
+class Num r => Radical r
+
+-- | Computes the square root of the number
+sqrt :: Radical r => r -> r
+
+-- | Computes the square root of the number
+sqrt :: (Radical r, Floating r) => r -> r
+instance HGeometry.Number.Radical.Radical GHC.Types.Float
+instance HGeometry.Number.Radical.Radical GHC.Types.Double
+instance HGeometry.Number.Radical.Radical (Data.Double.Approximate.DoubleRelAbs abs rel)
+instance HGeometry.Number.Radical.Radical (Data.Double.Shaman.SDouble n)
+instance HGeometry.Number.Radical.Radical Data.Double.Shaman.Shaman
+
+
+-- | Generalized Ratio type that accepts arbitrary 'Num a' types rather
+--   than just Integral ones as in Data.Ratio
+module HGeometry.Number.Ratio.Generalized
+
+-- | Generalized Ratio type that accepts more general "base" types than
+--   just Integral ones. That does mean we cannot normalize the
+--   intermediate expressions, so expect the numbers to become big quite
+--   quickly!
+--   
+--   invariant: the denominator is not zero
+data GRatio a
+
+-- | smart constructor to construct a GRatio. Throws an exception if the
+--   denominator is zero.
+(%) :: (Eq a, Num a) => a -> a -> GRatio a
+
+-- | Get the numerator
+numerator :: GRatio a -> a
+
+-- | Get the denominator
+denominator :: GRatio a -> a
+instance GHC.Show.Show a => GHC.Show.Show (HGeometry.Number.Ratio.Generalized.GRatio a)
+instance (GHC.Classes.Eq a, GHC.Num.Num a) => GHC.Classes.Eq (HGeometry.Number.Ratio.Generalized.GRatio a)
+instance (GHC.Classes.Ord a, GHC.Num.Num a) => GHC.Classes.Ord (HGeometry.Number.Ratio.Generalized.GRatio a)
+instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Num.Num (HGeometry.Number.Ratio.Generalized.GRatio a)
+instance (GHC.Num.Num a, GHC.Classes.Eq a) => GHC.Real.Fractional (HGeometry.Number.Ratio.Generalized.GRatio a)
+instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Num.Num a, GHC.Classes.Eq a) => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Ratio.Generalized.GRatio a)
+
+
+module HGeometry.Number.Real.Rational
+
+-- | Real Numbers represented using Rational numbers. The number type
+--   itself is exact in the sense that we can represent any rational
+--   number.
+--   
+--   The parameter, a natural number, represents the precision (in number
+--   of decimals behind the period) with which we display the numbers when
+--   printing them (using Show).
+--   
+--   If the number cannot be displayed exactly a '~' is printed after the
+--   number.
+newtype RealNumber (p :: Nat)
+RealNumber :: Rational -> RealNumber (p :: Nat)
+
+-- | Fixed-precision representation of a <a>RealNumber</a>. If there's
+--   insufficient precision to accurately represent the <a>RealNumber</a>
+--   then the <a>Lossy</a> constructor will be used.
+data AsFixed p
+Exact :: !Fixed p -> AsFixed p
+Lossy :: !Fixed p -> AsFixed p
+
+-- | Cast <a>RealNumber</a> to a fixed-precision number. Data-loss caused
+--   by insufficient precision will be marked by the <a>Lossy</a>
+--   constructor.
+asFixed :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
+
+-- | Cast <a>RealNumber</a> to a fixed-precision number. Data is silently
+--   lost if there's insufficient precision.
+toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
+
+-- | Cast a fixed-precision number to a <a>RealNumber</a>.
+fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
+
+-- | (Kind) This is the kind of type-level natural numbers.
+data Nat
+instance Control.DeepSeq.NFData (HGeometry.Number.Real.Rational.RealNumber p)
+instance Data.Aeson.Types.FromJSON.FromJSON (HGeometry.Number.Real.Rational.RealNumber p)
+instance Data.Aeson.Types.ToJSON.ToJSON (HGeometry.Number.Real.Rational.RealNumber p)
+instance Data.Hashable.Class.Hashable (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Generics.Generic (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Real.RealFrac (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Real.Real (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Real.Fractional (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Num.Num (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.TypeNats.KnownNat p => Data.Data.Data (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Classes.Ord (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.Classes.Eq (HGeometry.Number.Real.Rational.RealNumber p)
+instance forall k (p :: k). GHC.Classes.Eq (HGeometry.Number.Real.Rational.AsFixed p)
+instance forall k (p :: k). Data.Fixed.HasResolution p => GHC.Show.Show (HGeometry.Number.Real.Rational.AsFixed p)
+instance GHC.TypeNats.KnownNat p => GHC.Show.Show (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.TypeNats.KnownNat p => Data.Fixed.HasResolution (HGeometry.Number.Real.Rational.NatPrec p)
+instance GHC.TypeNats.KnownNat p => GHC.Read.Read (HGeometry.Number.Real.Rational.RealNumber p)
+instance GHC.TypeNats.KnownNat p => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Rational.RealNumber p)
+instance System.Random.Random (HGeometry.Number.Real.Rational.RealNumber p)
+
+
+module Data.RealNumber.Rational
+
+
+-- | Signs of expressions
+module HGeometry.Sign
+
+-- | The sign of an expression
+data Sign
+Negative :: Sign
+Positive :: Sign
+
+-- | Flip Positive <a>=</a> Negative.
+flipSign :: Sign -> Sign
+
+-- | Given the terms, in decreasing order of significance, computes the
+--   sign
+--   
+--   i.e. expects a list of terms, we base the sign on the sign of the
+--   first non-zero term.
+--   
+--   pre: the list contains at least one such a term.
+signFromTerms :: (Num r, Eq r) => [r] -> Sign
+instance GHC.Enum.Bounded HGeometry.Sign.Sign
+instance GHC.Enum.Enum HGeometry.Sign.Sign
+instance GHC.Classes.Ord HGeometry.Sign.Sign
+instance GHC.Classes.Eq HGeometry.Sign.Sign
+instance GHC.Show.Show HGeometry.Sign.Sign
+
+
+-- | Defines a type 'Symbolic i r' that represents "indexed" numbers of
+--   type r that have been "symbolically" perturbed by some arbitraryily
+--   small &lt;math&gt;.
+--   
+--   With indexed numbers we mean that every number has some index, and the
+--   size of the pertubation &lt;math&gt; is proportional to this index.
+--   
+--   This is useful for implementing a more general form of "Simulation of
+--   Simplicity" as described in:
+module HGeometry.Number.Real.Symbolic
+
+-- | Let &lt;math&gt; be a bag with indices, let &lt;math&gt; be an upper
+--   bound on the number of times a single item may occur in (mathcal{I}),
+--   and let &lt;math&gt; be a function mapping indices to real numbers
+--   that satisfies:
+--   
+--   <ol>
+--   <li>&lt;math&gt;, for all &lt;math&gt;,</li>
+--   <li>&lt;math&gt;, for all &lt;math&gt;</li>
+--   </ol>
+--   
+--   Note that such a function exists:
+--   
+--   begin{lemma} label{lem:condition_2} Let &lt;math&gt; and &lt;math&gt;.
+--   The function &lt;math&gt; satisfies condition 2. end{lemma}
+--   
+--   begin{proof} By transitivity it suffices to argue this for
+--   &lt;math&gt;:
+--   
+--   begin{align*} &amp;qquad prod_{0 leq i leq j} varepsilon(i)^c &gt;
+--   varepsilon(j+1) \ equiv &amp;qquad prod_{0 leq i leq j}
+--   (delta^{d^i})^c &gt; delta^{d^{j+1}}\ equiv &amp;qquad prod_{0 leq i
+--   leq j} delta^{cd^i} &gt; delta^{d^{j+1}} \ equiv &amp;qquad
+--   delta^{sum_{0 leq i leq j} cd^i} &gt; delta^{d^{j+1}} &amp; text{using
+--   } delta in (0,1)\ equiv &amp;qquad sum_{0 leq i leq j} cd^i &lt;
+--   d^{j+1} \ equiv &amp;qquad csum_{0 leq i leq j} d^i &lt; d^{j+1} \
+--   end{align*}
+--   
+--   We prove this by induction.
+--   
+--   For the base case &lt;math&gt;: we have &lt;math&gt;, which is
+--   trivially true.
+--   
+--   For the step case we have the induction hypothesis &lt;math&gt;, and
+--   we have to prove that &lt;math&gt;:
+--   
+--   begin{align*} csum_{0 leq i leq j+1} d^i &amp;= cd^{j+1} + csum_{0 leq
+--   i leq j} d^i \ &amp;&lt; cd^{j+1} + d^{j+1} &amp; text{using IH} \
+--   &amp;= (c+1)d^{j+1} &amp; text{using that } c+1 leq d \ &amp;leq
+--   dd^{j+1} \ &amp;=d^{j+2} end{align*} This completes the proof.
+--   end{proof}
+--   
+--   An EpsFold now represents the term
+--   
+--   &lt;math&gt;
+--   
+--   for some bag &lt;math&gt;.
+--   
+--   Let &lt;math&gt; be some sub-bag of &lt;math&gt;. Note that condition
+--   2 implies that:
+--   
+--   &lt;math&gt;, for all &lt;math&gt;
+--   
+--   This means that when comparing two EpsFolds, say &lt;math&gt; and
+--   &lt;math&gt;, representing bags &lt;math&gt; and &lt;math&gt;,
+--   respectively. It suffices to compare the largest index (j in
+--   mathcal{I}_1setminusmathcal{I}_2) with the largest index (k in
+--   mathcal{I}_2setminusmathcal{I}_1). We have that
+--   
+--   &lt;math&gt; if and only if &lt;math&gt;.
+data EpsFold i
+
+-- | Creates the term &lt;math&gt;
+eps :: i -> EpsFold i
+
+-- | Constructs an epsfold from a list of elements
+mkEpsFold :: Ord i => [i] -> EpsFold i
+
+-- | Evaluate an eps-fold using the choice of eps from the lemma above,
+--   i.e. &lt;math&gt; &gt;&gt;&gt; evalEps 2 (1/2) $ mkEpsFold [1] 0.25
+--   &gt;&gt;&gt; evalEps 2 (1/2) $ mkEpsFold [2] 6.25e-2 &gt;&gt;&gt;
+--   evalEps 2 (1/2) $ mkEpsFold [1,2] 1.5625e-2
+evalEps :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
+
+-- | Test if the epsfold has no pertubation at all (i.e. if it is
+--   &lt;math&gt;
+hasNoPertubation :: EpsFold i -> Bool
+
+-- | Gets the factors
+factors :: EpsFold i -> Bag i
+
+-- | computes a base <tt>d</tt> that can be used as:
+--   
+--   &lt;math&gt;
+suitableBase :: EpsFold i -> Int
+
+-- | A term 'Term c es' represents a term:
+--   
+--   &lt;math&gt;
+--   
+--   for a constant c and an arbitrarily small value &lt;math&gt;,
+--   parameterized by i.
+data Term i r
+Term :: !r -> EpsFold i -> Term i r
+
+-- | Creates a singleton term
+term :: r -> i -> Term i r
+
+-- | Lens to access the constant <tt>c</tt> in the term.
+constantFactor :: Lens' (Term i r) r
+
+-- | Represents a Sum of terms, i.e. given a sequence of terms Term
+--   &lt;math&gt; &lt;math&gt; s where &lt;math&gt; is a constant and
+--   &lt;math&gt; is a set of indices, a Symbolic represents an expression
+--   of the form:
+--   
+--   &lt;math&gt;
+--   
+--   The terms are represented in order of decreasing significance.
+--   
+--   The main idea in this type is that, if symbolic values contains
+--   &lt;math&gt; terms we can always order them. That is, two Symbolic
+--   terms will be equal only if:
+--   
+--   <ul>
+--   <li>they contain *only* a constant term (that is equal)</li>
+--   <li>they contain the exact same &lt;math&gt;-fold.</li>
+--   </ul>
+data Symbolic i r
+
+-- | Creates a constant symbolic value
+constant :: Ord i => r -> Symbolic i r
+
+-- | Creates a symbolic vlaue with a single indexed term. If you just need
+--   a constant (i.e. non-indexed), use <a>constant</a>
+symbolic :: Ord i => r -> i -> Symbolic i r
+
+-- | given the value c and the index i, creates the perturbed value
+--   &lt;math&gt;
+perturb :: (Num r, Ord i) => r -> i -> Symbolic i r
+
+-- | Produces a list of terms, in decreasing order of significance
+toTerms :: Symbolic i r -> [Term i r]
+
+-- | Computing the Sign of an expression. (Nothing represents zero)
+signOf :: (Num r, Eq r) => Symbolic i r -> Maybe Sign
+
+-- | Drops all the epsilon terms
+roundToConstant :: Num r => Symbolic i r -> r
+
+-- | Number type representing
+type SoSRational i r = GRatio (Symbolic i r)
+
+-- | Helper to construct sosRationals
+sosRational :: (Ord i, Eq r, Num r) => Symbolic i r -> Symbolic i r -> SoSRational i r
+instance GHC.Classes.Ord a => GHC.Classes.Ord (HGeometry.Number.Real.Symbolic.Bag a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (HGeometry.Number.Real.Symbolic.Bag a)
+instance GHC.Show.Show a => GHC.Show.Show (HGeometry.Number.Real.Symbolic.Bag a)
+instance GHC.Classes.Ord i => GHC.Base.Monoid (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance GHC.Classes.Ord i => GHC.Base.Semigroup (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance GHC.Base.Functor (HGeometry.Number.Real.Symbolic.Symbolic i)
+instance GHC.Base.Functor (HGeometry.Number.Real.Symbolic.Term i)
+instance (GHC.Classes.Ord i, GHC.Classes.Eq r) => GHC.Classes.Eq (HGeometry.Number.Real.Symbolic.Term i r)
+instance (GHC.Show.Show i, GHC.Show.Show r) => GHC.Show.Show (HGeometry.Number.Real.Symbolic.Term i r)
+instance (GHC.Classes.Ord i, GHC.Classes.Ord r, GHC.Num.Num r) => GHC.Classes.Ord (HGeometry.Number.Real.Symbolic.Term i r)
+instance (Test.QuickCheck.Arbitrary.Arbitrary r, Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.EpsFold i), GHC.Classes.Ord i) => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.Term i r)
+instance (GHC.Classes.Ord i, GHC.Classes.Eq r, GHC.Num.Num r) => GHC.Classes.Eq (HGeometry.Number.Real.Symbolic.Symbolic i r)
+instance (GHC.Classes.Ord i, GHC.Classes.Ord r, GHC.Num.Num r) => GHC.Classes.Ord (HGeometry.Number.Real.Symbolic.Symbolic i r)
+instance (GHC.Classes.Ord i, GHC.Num.Num r, GHC.Classes.Eq r) => GHC.Num.Num (HGeometry.Number.Real.Symbolic.Symbolic i r)
+instance (GHC.Show.Show i, GHC.Show.Show r) => GHC.Show.Show (HGeometry.Number.Real.Symbolic.Symbolic i r)
+instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord i, Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.EpsFold i)) => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.Symbolic i r)
+instance GHC.Show.Show i => GHC.Show.Show (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance GHC.Classes.Ord i => GHC.Classes.Eq (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance GHC.Classes.Ord i => GHC.Classes.Ord (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance (Test.QuickCheck.Arbitrary.Arbitrary i, GHC.Classes.Ord i) => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.EpsFold i)
+instance Data.Foldable.Foldable HGeometry.Number.Real.Symbolic.Bag
+instance GHC.Classes.Ord k => GHC.Base.Semigroup (HGeometry.Number.Real.Symbolic.Bag k)
+instance GHC.Classes.Ord k => GHC.Base.Monoid (HGeometry.Number.Real.Symbolic.Bag k)
+instance (Test.QuickCheck.Arbitrary.Arbitrary a, GHC.Classes.Ord a) => Test.QuickCheck.Arbitrary.Arbitrary (HGeometry.Number.Real.Symbolic.Bag a)
+
+module HGeometry.Vector.NonEmpty.Util
+instance Control.Lens.At.Ixed (Data.Vector.NonEmpty.Internal.NonEmptyVector a)
+instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Data.Semigroup.Traversable.Class.Traversable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.FunctorWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.FoldableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Control.Lens.Indexed.TraversableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
 
 
 -- | Implements Fishyer-Yates shuffle.
