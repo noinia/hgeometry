@@ -1,8 +1,8 @@
 module Data.RealNumber.SymbolicSpec where
 
 import Data.Traversable
-import Data.Indexed
-import Data.RealNumber.Symbolic
+import HGeometry.Indexed
+import HGeometry.Number.Real.Symbolic
 import GHC.Generics
 import System.Random
 import System.Random.Stateful

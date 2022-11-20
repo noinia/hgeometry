@@ -35,7 +35,7 @@ import           Data.Ext
 import           Data.Kind (Type)
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Geometry.Ball
 import           Geometry.Box
 import           Geometry.Ellipse (Ellipse, _EllipseCircle)

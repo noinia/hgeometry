@@ -1,14 +1,14 @@
 {-# LANGUAGE DefaultSignatures #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Radical
+-- Module      :  HGeometry.Number.Radical
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
 -- Types that support computing Square roots
 --------------------------------------------------------------------------------
-module Data.Radical
+module HGeometry.Number.Radical
   ( Radical(..)
   ) where
 

@@ -1,4 +1,4 @@
-module Data.Foldable.Sort
+module HGeometry.Foldable.Sort
   ( sortBy
   , sort
   , sortOnCheap

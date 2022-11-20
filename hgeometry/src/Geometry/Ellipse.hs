@@ -18,7 +18,7 @@ module Geometry.Ellipse(
 
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Radical as Radical
+import qualified HGeometry.Number.Radical as Radical
 import           Geometry.Ball
 import           Geometry.Matrix
 import           Geometry.Point

@@ -43,7 +43,7 @@ import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
 import           Data.List (sort)
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Radical as Radical
+import qualified HGeometry.Number.Radical as Radical
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import           Data.Traversable (fmapDefault,foldMapDefault)

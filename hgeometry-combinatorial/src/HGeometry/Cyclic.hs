@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
-module Data.Cyclic
+module HGeometry.Cyclic
   ( Cyclic(..)
   , toCircularVector
   ) where
@@ -11,11 +11,11 @@ module Data.Cyclic
 import           Control.DeepSeq (NFData)
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Foldable.Util
 import           Data.Semigroup.Foldable
 import           Data.Vector.Circular (CircularVector(..))
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           GHC.Generics (Generic)
+import           HGeometry.Foldable.Util
 --------------------------------------------------------------------------------
 
 -- | A cyclic sequence type

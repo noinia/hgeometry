@@ -28,7 +28,7 @@ import           Control.Monad.ST (ST,runST)
 import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           Geometry.Box.Internal
 import           Geometry.Point
 -- import           Geometry.Properties

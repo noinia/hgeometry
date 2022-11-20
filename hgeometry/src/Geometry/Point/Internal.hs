@@ -43,7 +43,7 @@ import           Data.Hashable
 import           Data.List (intersperse)
 import           Data.Ord (comparing)
 import           Data.Proxy
-import qualified Data.Radical as Radical
+import qualified HGeometry.Number.Radical as Radical
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Geometry.Properties

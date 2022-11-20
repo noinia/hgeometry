@@ -1,13 +1,13 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Sign
+-- Module      :  HGeometry.Sign
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
 -- Signs of expressions
 --------------------------------------------------------------------------------
-module Data.Sign where
+module HGeometry.Sign where
 
 import qualified Data.List as List
 import           Data.Maybe

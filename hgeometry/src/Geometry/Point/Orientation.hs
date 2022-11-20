@@ -14,8 +14,8 @@ module Geometry.Point.Orientation
   , strictCcw
   ) where
 
-import Data.Indexed
-import Data.Sign
+import HGeometry.Indexed
+import HGeometry.Sign
 import Geometry.Point.Class
 import Geometry.SoS.Orientation
 import Geometry.Vector
