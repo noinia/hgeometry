@@ -12,7 +12,7 @@ module HGeometry.Point.Class
 
   , projectPoint
   , PointFor
-  , HasPoints(..)
+  , HasPoints(..), HasPoints'
   ) where
 
 import           Control.Lens
@@ -259,16 +259,17 @@ wCoord = coord @4
 type family PointFor t
 
 -- | Data types that store points
-class HasPoints s t point point' where
+class HasPoints s t point point' | s -> point
+                                 , t -> point' where
   -- | Traversal over all points in the structure
   allPoints :: ( Point_ point  d r
                , Point_ point' d r'
                , NumType s ~ r
                , NumType t ~ r'
                , Dimension s ~ d, Dimension t ~ d
-               ) => Traversal s t point point'
+               ) => Traversal1 s t point point'
 
-
+type HasPoints' s point = HasPoints s s point point
 
 --------------------------------------------------------------------------------
 

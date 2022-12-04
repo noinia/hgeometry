@@ -22,6 +22,7 @@ module HGeometry.Interval.EndPoint
 import Control.Lens
 import HGeometry.Properties
 import HGeometry.Vector
+import Data.Semigroup.Foldable.Class
 
 --------------------------------------------------------------------------------
 
@@ -45,7 +46,13 @@ data EndPointType = Open | Closed deriving (Show,Eq)
 --------------------------------------------------------------------------------
 
 -- | EndPoint with a type safe tag
-newtype EndPoint (et :: EndPointType) r = EndPoint r deriving (Show,Eq,Ord)
+newtype EndPoint (et :: EndPointType) r = EndPoint r
+  deriving stock (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+instance Foldable1 (EndPoint et)
+instance Traversable1 (EndPoint et) where
+  traverse1 f (EndPoint x) = EndPoint <$> f x
+
 
 type instance NumType   (EndPoint et r) = r
 type instance IxValue   (EndPoint et r) = r
@@ -78,6 +85,11 @@ data AnEndPoint r = AnEndPoint !EndPointType !r
 
 type instance NumType (AnEndPoint r) = r
 type instance IxValue (AnEndPoint r) = r
+
+instance Foldable1 AnEndPoint
+instance Traversable1 AnEndPoint where
+  traverse1 f (AnEndPoint et x) = AnEndPoint et <$> f x
+
 
 instance IsEndPoint (AnEndPoint r) (AnEndPoint r') where
   _endPoint = lens (\(AnEndPoint _ p) -> p) (\(AnEndPoint t _) p -> AnEndPoint t p)

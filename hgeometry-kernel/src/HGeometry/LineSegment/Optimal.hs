@@ -17,13 +17,15 @@ module HGeometry.LineSegment.Optimal
 
 
 import Control.Lens
+import Data.Functor.Apply
+import HGeometry.Box.Boxable
+import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint
 import HGeometry.Interval.Optimal
-import HGeometry.Interval.Class
 import HGeometry.LineSegment.Class
+import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
-import HGeometry.Point
 
 --------------------------------------------------------------------------------
 
@@ -97,3 +99,19 @@ instance ( IxValue (endPoint point) ~ point
          , EndPoint_ (endPoint point)
          , Point_ point (Dimension point) (NumType point)
          ) => LineSegment_ (LineSegment endPoint point) point where
+
+instance ( OptCVector_ 2 (endPoint point)
+         , OptCVector_ 2 (endPoint point')
+         , Traversable1 endPoint
+         , Dimension point ~ Dimension point'
+         , Point_ point  (Dimension point) (NumType point)
+         , Point_ point' (Dimension point) (NumType point')
+         ) => HasPoints (LineSegment endPoint point) (LineSegment endPoint point')
+                        point                        point' where
+  allPoints f (LineSegment s t) = liftF2 LineSegment (traverse1 f s) (traverse1 f t)
+
+
+instance ( OptCVector_ 2 (endPoint point)
+         , Traversable1 endPoint
+         , Point_ point  (Dimension point) (NumType point)
+         ) => IsBoxable (LineSegment endPoint point)

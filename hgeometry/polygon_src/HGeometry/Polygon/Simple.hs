@@ -60,12 +60,12 @@ instance (TraversableWithIndex Int f
       => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
   vertices = _SimplePolygonF . itraversed
 
-instance (TraversableWithIndex Int f
+instance ( Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
          ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
-  allPoints = vertices
+  allPoints = _SimplePolygonF . traversed1
 
 -- instance ( TraversableWithIndex Int f
 --          , HasPoints (SimplePolygonF f point r) (SimplePolygonF f point r)
@@ -158,17 +158,17 @@ class AsCyclic v where
   -- itraverseLeftFrom i =
 
 
-  -- | Given an index i, returns an "rightwards" (i.e. clockwise)
-  -- IndexedFold of the cyclic structure, starting from the
-  -- element with index i.
-  ifoldRightFrom :: Int -> IndexedFold Int (Cyclic v a) a
-  ifoldRightFrom = itraverseRightFrom
+  -- -- | Given an index i, returns an "rightwards" (i.e. clockwise)
+  -- -- IndexedFold of the cyclic structure, starting from the
+  -- -- element with index i.
+  -- ifoldRightFrom :: Int -> IndexedFold Int (Cyclic v a) a
+  -- ifoldRightFrom = itraverseRightFrom
 
-  -- | Given an index i, returns an "leftward" (i.e. count clockwise)
-  -- IndexedFold of the cyclic structure, starting from the
-  -- element with index i.
-  ifoldLeftFrom :: Int -> IndexedFold Int (Cyclic v a) a
-  ifoldLeftFrom = itraverseLeftFrom
+  -- -- | Given an index i, returns an "leftward" (i.e. count clockwise)
+  -- -- IndexedFold of the cyclic structure, starting from the
+  -- -- element with index i.
+  -- ifoldLeftFrom :: Int -> IndexedFold Int (Cyclic v a) a
+  -- ifoldLeftFrom = itraverseLeftFrom
 
 -- instance AsCyclic NonEmptyVector where
 --   itraverseRightFrom i pafb (Cyclic v) = Cyclic <$> do v' <-

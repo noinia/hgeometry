@@ -45,7 +45,7 @@ module HGeometry.Point
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
 
-  , HasPoints(..)
+  , HasPoints(..), HasPoints'
   , PointFor
   ) where
 
