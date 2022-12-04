@@ -9,7 +9,7 @@ import           System.Random
 
 import qualified HGeometry.Point.Boxed as BoxedPoint
 
-import           Data.Foldable.Sort
+import           HGeometry.Foldable.Sort
 import qualified Data.Vector as Boxed
 import qualified Data.Vector.Unboxed as UnBoxed
 

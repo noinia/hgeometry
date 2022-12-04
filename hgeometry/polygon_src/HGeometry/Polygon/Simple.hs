@@ -19,12 +19,12 @@ module HGeometry.Polygon.Simple
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
-import           Data.Cyclic
+import           HGeometry.Cyclic
 import qualified Data.Foldable as F
-import           Data.Foldable.Util
+import           HGeometry.Foldable.Util
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           Data.Vector.NonEmpty.Util ()
+import           HGeometry.Vector.NonEmpty.Util ()
 import           GHC.Generics
 import           HGeometry.Point
 import           HGeometry.Polygon.Class

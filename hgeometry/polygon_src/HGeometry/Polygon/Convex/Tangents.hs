@@ -16,7 +16,7 @@ import           Data.Util
 -- import           Data.Vector.Circular (CircularVector)
 -- import qualified Data.Vector.Circular as CV
 -- import qualified Data.Vector.Circular.Util as CV
--- import           Geometry.LineSegment.Boxed
+import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Convex.Class
@@ -88,10 +88,10 @@ findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (numVertices p))
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+lowerTangent       :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r, Point_ point 2 r)
                    => convexPolygon
                    -> convexPolygon
-                   -> ClosedLineSegment 2 point r
+                   -> ClosedLineSegment point
 lowerTangent lp rp = ClosedLineSegment l r
   where
     lh = CV.rightElements . rightMost . getVertices $ lp

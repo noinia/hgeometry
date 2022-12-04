@@ -16,9 +16,9 @@ module HGeometry.Polygon.Convex.Implementation
 
 import Control.DeepSeq (NFData)
 import Control.Lens
-import Data.Cyclic
+import HGeometry.Cyclic
 import Data.Vector.NonEmpty (NonEmptyVector)
-import Data.Vector.NonEmpty.Util ()
+import HGeometry.Vector.NonEmpty.Util ()
 import HGeometry.Point
 import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple

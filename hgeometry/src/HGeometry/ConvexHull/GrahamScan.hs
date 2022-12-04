@@ -15,14 +15,13 @@ module HGeometry.ConvexHull.GrahamScan
   ) where
 
 import           Control.Lens ((^.))
-import           Data.Foldable.Sort
+import           HGeometry.Foldable.Sort
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector as Vector
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 

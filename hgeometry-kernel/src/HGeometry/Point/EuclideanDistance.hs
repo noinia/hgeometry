@@ -6,7 +6,7 @@ module HGeometry.Point.EuclideanDistance
 
 
 import           Data.Ord (comparing)
-import qualified Data.Radical as Radical
+import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point.Class
 import           HGeometry.Properties
 import           HGeometry.Vector

@@ -3,7 +3,7 @@ module HGeometry.Vector.Metric
   ) where
 
 import           Control.Lens
-import           Data.Radical
+import           HGeometry.Number.Radical
 import           HGeometry.Vector.Additive
 import           Prelude hiding (sqrt)
 

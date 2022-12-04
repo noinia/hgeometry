@@ -8,11 +8,10 @@ import           Control.Lens
 import           Control.Monad.State
 import           Data.Aeson
 import           Data.Proxy
-import qualified Data.Vector.Generic as GV
-import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
-import qualified Data.Vector.Generic.Mutable as GMV
+-- import qualified Data.Vector.Generic as GV
+-- import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
-import qualified Data.Vector.Unboxed.Mutable as UMV
+-- import qualified Data.Vector.Unboxed.Mutable as UMV
 import           GHC.Generics (Generic)
 import           GHC.TypeNats
 import           HGeometry.Properties

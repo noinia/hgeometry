@@ -18,7 +18,7 @@ import qualified ConvexHull.GrahamFastest as GrahamFastest
 
 import           Control.DeepSeq
 import qualified ConvexHull.GrahamClassy as GrahamClassy
-import           Data.Foldable.Sort
+import           HGeometry.Foldable.Sort
 import qualified Data.Vector.Unboxed as UV
 import           System.Random
 -- import           Data.Double.Approximate

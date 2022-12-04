@@ -6,7 +6,7 @@ module ConvexHull.GrahamFastest( convexHull
 
 import           Control.DeepSeq
 import           Control.Lens ((^.))
-import           Data.Foldable.Sort
+import           HGeometry.Foldable.Sort
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid
