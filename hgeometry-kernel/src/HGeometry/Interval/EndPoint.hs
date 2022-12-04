@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Interval.EndPoint
   ( EndPoint_(..)
-  , HasEndPoint(..)
+  , IsEndPoint(..)
 
   , EndPointType(..)
   , EndPoint(.., OpenE, ClosedE)
@@ -25,12 +25,12 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
-class HasEndPoint endPoint endPoint' where
+class IsEndPoint endPoint endPoint' where
   -- | Lens to access the actual data value of the end point
-  endPoint :: Lens endPoint endPoint' (NumType endPoint) (NumType endPoint')
+  _endPoint :: Lens endPoint endPoint' (NumType endPoint) (NumType endPoint')
 
 -- | An endpoint storing values of some type r
-class HasEndPoint endPoint endPoint => EndPoint_ endPoint where
+class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
   -- | Report the type of the endpoint
   endPointType :: endPoint -> EndPointType
   -- | constructs a "default" enpoint
@@ -50,8 +50,8 @@ type instance VectorFamily 2 (EndPoint et r) = WrapVector 2 r (EndPoint et r)
 
 
 
-instance HasEndPoint (EndPoint et r) (EndPoint et r') where
-  endPoint = lens (\(EndPoint x) -> x) (\_ x -> EndPoint x)
+instance IsEndPoint (EndPoint et r) (EndPoint et r') where
+  _endPoint = lens (\(EndPoint x) -> x) (\_ x -> EndPoint x)
 
 instance EndPoint_ (EndPoint Closed r) where
   endPointType _ = Closed
@@ -74,8 +74,8 @@ data AnEndPoint r = AnEndPoint !EndPointType !r
 
 type instance NumType (AnEndPoint r) = r
 
-instance HasEndPoint (AnEndPoint r) (AnEndPoint r') where
-  endPoint = lens (\(AnEndPoint _ p) -> p) (\(AnEndPoint t _) p -> AnEndPoint t p)
+instance IsEndPoint (AnEndPoint r) (AnEndPoint r') where
+  _endPoint = lens (\(AnEndPoint _ p) -> p) (\(AnEndPoint t _) p -> AnEndPoint t p)
 
 instance EndPoint_ (AnEndPoint r) where
   endPointType (AnEndPoint t _) = t

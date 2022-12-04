@@ -36,16 +36,24 @@ instance Foldable endPoint => Foldable (Interval endPoint) where
 instance Traversable endPoint => Traversable (Interval endPoint) where
   traverse f (Interval s t) = Interval <$> traverse f s <*> traverse f t
 
-instance HasStart (Interval endPoint r) (endPoint r) where
-  start = lens (\(Interval s _) -> s) (\(Interval _ t) s -> Interval s t)
+instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+         ) => HasStart (Interval endPoint r) r where
+  start = startPoint._endPoint
+instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+         ) => HasEnd (Interval endPoint r) r where
+  end = endPoint._endPoint
 
-instance HasEnd (Interval endPoint r) (endPoint r) where
-  end   = lens (\(Interval _ t) -> t) (\(Interval s _) t -> Interval s t)
+instance HasStartPoint (Interval endPoint r) (endPoint r) where
+  startPoint = lens (\(Interval s _) -> s) (\(Interval _ t) s -> Interval s t)
+
+instance HasEndPoint (Interval endPoint r) (endPoint r) where
+  endPoint = lens (\(Interval _ t) -> t) (\(Interval s _) t -> Interval s t)
+
+type instance EndPointOf (Interval endPoint r) = endPoint r
 
 instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
-         ) => Interval_ (Interval endPoint r) (endPoint r) where
+         ) => Interval_ (Interval endPoint r) r where
   mkInterval = Interval
-
 
 instance ClosedInterval_ (ClosedInterval r) r
 

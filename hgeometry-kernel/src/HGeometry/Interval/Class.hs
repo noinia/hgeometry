@@ -13,11 +13,16 @@ module HGeometry.Interval.Class
   ( Interval_(..), pattern Interval_
   , ClosedInterval_(..)
   , OpenInterval_(..)
-  , IntervalFor
 
   , HasStart(..)
   , HasEnd(..)
   , startAndEnd
+
+  , EndPointOf
+  , HasStartPoint(..)
+  , HasEndPoint(..)
+  , startAndEndPoint
+
 
   , inInterval
 
@@ -53,33 +58,48 @@ startAndEnd i = (i^.start,i^.end)
 
 --------------------------------------------------------------------------------
 
--- type family IntervalOf (et :: EndPointType) r
+-- | Things that have a start point
+class HasStartPoint seg p | seg -> p where
+  -- | Lens to access the start point
+  startPoint :: Lens' seg p
 
--- | Types that output intervals should use this type
-type family IntervalFor g
+-- | Things that have an end point
+class HasEndPoint seg p | seg -> p where
+  -- | Lens to access the ending point
+  endPoint :: Lens' seg p
+
+-- | Get both the start and end of something that has a start and end.
+startAndEndPoint   :: (HasStartPoint seg p, HasEndPoint seg p) => seg -> (p,p)
+startAndEndPoint i = (i^.startPoint, i^.endPoint)
+
+-- | type family to declare the type of endpoint for an interval, the
+-- idea is to define this as one of the endpoinst form the Endpoints module
+type family EndPointOf interval
+
+--------------------------------------------------------------------------------
 
 -- | A class for types representing Intervals
 type Interval_ :: Type -> Type -> Constraint
-class ( HasStart interval endPoint
-      , HasEnd   interval endPoint
-      , EndPoint_ endPoint
-      , NumType interval ~ NumType endPoint
-      ) => Interval_ interval endPoint | interval -> endPoint where
+class ( HasStart interval r, HasStartPoint interval (EndPointOf interval)
+      , HasEnd   interval r, HasEndPoint   interval (EndPointOf interval)
+      , NumType interval ~ r
+      ) => Interval_ interval r | interval -> r where
 
   -- | Construct an interval given its start and end point.
-  mkInterval :: endPoint -> endPoint -> interval
-
+  mkInterval :: EndPointOf interval -> EndPointOf interval -> interval
 
 type ClosedInterval_ :: Type -> Type -> Constraint
-class Interval_ interval (EndPoint Closed r) =>
-      ClosedInterval_ interval r | interval -> r where
+class (Interval_ interval r
+      , EndPointOf interval ~ EndPoint Closed r
+      ) => ClosedInterval_ interval r where
   -- | Construct an interval given its start and end point.
   mkClosedInterval     :: r -> r -> interval
   mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
   {-# MINIMAL #-}
 
-class Interval_ interval (EndPoint Open r) =>
-      OpenInterval_ interval r | interval -> r where
+class ( Interval_ interval r
+      , EndPointOf interval ~ EndPoint Open r
+      ) => OpenInterval_ interval r | interval -> r where
   -- | Construct an interval given its start and end point.
   mkOpenInterval     :: r -> r -> interval
   mkOpenInterval s e = mkInterval (OpenE s) (OpenE e)
@@ -88,9 +108,9 @@ class Interval_ interval (EndPoint Open r) =>
 --------------------------------------------------------------------------------
 
 -- | Pattern to match on intervals or construct them.
-pattern Interval_     :: Interval_ interval endPoint
-                      => endPoint -> endPoint -> interval
-pattern Interval_ s t <- (startAndEnd -> (s,t))
+pattern Interval_     :: Interval_ interval r
+                      => EndPointOf interval -> EndPointOf interval -> interval
+pattern Interval_ s t <- (startAndEndPoint -> (s,t))
   where
     Interval_ s t = mkInterval s t
 {-# COMPLETE Interval_ #-}
@@ -123,11 +143,9 @@ shiftLeft       :: ( Num r
 shiftLeft delta = fmap (subtract delta)
 
 -- | Flips the start and endpoint of the interval.
-flipInterval :: Interval_ interval endPoint => interval -> interval
-flipInterval = uncurry mkInterval . swap . startAndEnd
+flipInterval :: Interval_ interval r => interval -> interval
+flipInterval = uncurry mkInterval . swap . startAndEndPoint
 
 -- | Get the duration, or length of an interval.
-duration   :: forall interval endPoint. ( Interval_ interval endPoint
-                                        , Num (NumType interval)
-              ) => interval -> NumType interval
-duration i = i^.end.(endPoint @_ @endPoint) - i^.start.(endPoint @_ @endPoint)
+duration   :: (Interval_ interval r, Num r) => interval -> r
+duration i = i^.end - i^.start
