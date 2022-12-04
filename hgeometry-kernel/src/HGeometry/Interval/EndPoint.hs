@@ -27,7 +27,7 @@ import HGeometry.Vector
 
 class IsEndPoint endPoint endPoint' where
   -- | Lens to access the actual data value of the end point
-  _endPoint :: Lens endPoint endPoint' (NumType endPoint) (NumType endPoint')
+  _endPoint :: Lens endPoint endPoint' (IxValue endPoint) (IxValue endPoint')
 
 -- | An endpoint storing values of some type r
 class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
@@ -39,12 +39,16 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
 -- | Possible endpoint types; open or closed
 data EndPointType = Open | Closed deriving (Show,Eq)
 
+
+
+
 --------------------------------------------------------------------------------
 
 -- | EndPoint with a type safe tag
 newtype EndPoint (et :: EndPointType) r = EndPoint r deriving (Show,Eq,Ord)
 
 type instance NumType   (EndPoint et r) = r
+type instance IxValue   (EndPoint et r) = r
 
 type instance VectorFamily 2 (EndPoint et r) = WrapVector 2 r (EndPoint et r)
 
@@ -73,6 +77,7 @@ data AnEndPoint r = AnEndPoint !EndPointType !r
                   deriving (Show,Eq,Functor,Foldable,Traversable)
 
 type instance NumType (AnEndPoint r) = r
+type instance IxValue (AnEndPoint r) = r
 
 instance IsEndPoint (AnEndPoint r) (AnEndPoint r') where
   _endPoint = lens (\(AnEndPoint _ p) -> p) (\(AnEndPoint t _) p -> AnEndPoint t p)

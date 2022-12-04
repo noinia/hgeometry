@@ -11,6 +11,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Class
   ( Interval_(..), pattern Interval_
+  , IntervalLike_(..)
   , ClosedInterval_(..)
   , OpenInterval_(..)
 
@@ -78,15 +79,24 @@ type family EndPointOf interval
 
 --------------------------------------------------------------------------------
 
--- | A class for types representing Intervals
-type Interval_ :: Type -> Type -> Constraint
-class ( HasStart interval r, HasStartPoint interval (EndPointOf interval)
-      , HasEnd   interval r, HasEndPoint   interval (EndPointOf interval)
-      , NumType interval ~ r
-      ) => Interval_ interval r | interval -> r where
+-- | A class for types representing interval like objects
+type IntervalLike_ :: Type -> Type -> Constraint
+class ( HasStart interval point, HasStartPoint interval (EndPointOf interval)
+      , HasEnd   interval point, HasEndPoint   interval (EndPointOf interval)
+      , EndPoint_ (EndPointOf interval)
+      ) => IntervalLike_ interval point | interval -> point where
 
   -- | Construct an interval given its start and end point.
   mkInterval :: EndPointOf interval -> EndPointOf interval -> interval
+
+--------------------------------------------------------------------------------
+
+-- | A class for types representing Intervals
+type Interval_ :: Type -> Type -> Constraint
+class ( IntervalLike_ interval r
+      , NumType interval ~ r
+      ) => Interval_ interval r | interval -> r where
+
 
 type ClosedInterval_ :: Type -> Type -> Constraint
 class (Interval_ interval r

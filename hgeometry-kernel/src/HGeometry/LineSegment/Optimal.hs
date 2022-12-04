@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -20,10 +19,11 @@ module HGeometry.LineSegment.Optimal
 import Control.Lens
 import HGeometry.Interval.EndPoint
 import HGeometry.Interval.Optimal
+import HGeometry.Interval.Class
 import HGeometry.LineSegment.Class
 import HGeometry.Properties
 import HGeometry.Vector
-
+import HGeometry.Point
 
 --------------------------------------------------------------------------------
 
@@ -54,3 +54,46 @@ pattern OpenLineSegment s t = LineSegment (OpenE s) (OpenE t)
 
 type instance NumType   (LineSegment endPoint point) = NumType point
 type instance Dimension (LineSegment endPoint point) = Dimension point
+
+
+-- | Lens to get the underlying interval
+_LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' point')
+                            (Interval endPoint point)    (Interval    endPoint' point')
+_LineSegmentInterval = iso (\(MkLineSegment i) -> i) MkLineSegment
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         , EndPoint_ (endPoint point)
+         ) => HasStart (LineSegment endPoint point) point where
+  start = _LineSegmentInterval.start
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         ) => HasStartPoint (LineSegment endPoint point) (endPoint point) where
+  startPoint = _LineSegmentInterval.startPoint
+
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         , EndPoint_ (endPoint point)
+         ) => HasEnd (LineSegment endPoint point) point where
+  end = _LineSegmentInterval.end
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         ) => HasEndPoint (LineSegment endPoint point) (endPoint point) where
+  endPoint = _LineSegmentInterval.endPoint
+
+type instance EndPointOf (LineSegment endPoint point) = endPoint point
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         , EndPoint_ (endPoint point)
+         ) => IntervalLike_ (LineSegment endPoint point) point where
+  mkInterval = LineSegment
+
+instance ( IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         , EndPoint_ (endPoint point)
+         , Point_ point (Dimension point) (NumType point)
+         ) => LineSegment_ (LineSegment endPoint point) point where

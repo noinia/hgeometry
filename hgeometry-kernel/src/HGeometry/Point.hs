@@ -58,9 +58,9 @@ import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
-import HGeometry.Vector.Class
-import HGeometry.Vector.Optimal (VectorFamily')
+import HGeometry.Vector
 import HGeometry.Point.Optimal
+
 
 --------------------------------------------------------------------------------
 
@@ -84,7 +84,7 @@ import HGeometry.Point.Optimal
 cmpInDirection       :: forall vector point d r.
                         ( Ord r, Num r, Point_ point d r
                         , vector ~ VectorFor point
-                        , d < d+1, d <= d+1, 0 < d+1, 0 < d
+                        , d < d+1, 0 < d
                         , KnownNat ((d+1)-d), KnownNat d
                         , Vector_ (VectorFamily' d r) d r
                         , Vector_ (VectorFamily' (d+1) r) (d+1) r

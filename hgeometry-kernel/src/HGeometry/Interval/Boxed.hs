@@ -52,8 +52,12 @@ instance HasEndPoint (Interval endPoint r) (endPoint r) where
 type instance EndPointOf (Interval endPoint r) = endPoint r
 
 instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
-         ) => Interval_ (Interval endPoint r) r where
+         ) => IntervalLike_ (Interval endPoint r) r where
   mkInterval = Interval
+
+instance ( EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+         ) => Interval_ (Interval endPoint r) r where
+
 
 instance ClosedInterval_ (ClosedInterval r) r
 

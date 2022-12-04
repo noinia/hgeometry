@@ -16,7 +16,7 @@ import           GHC.TypeLits
 import           HGeometry.Point.Class
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Properties
-import           HGeometry.Vector.Class
+import           HGeometry.Vector
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
@@ -106,6 +106,10 @@ instance Uniform v => Uniform (PointF v) where
 
 instance (UniformRange v) => UniformRange (PointF v) where
   uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
+
+
+-- | use the optimal representation for v.
+type instance VectorFamily d (PointF v) = WrapVector d v (PointF v)
 
 
 newtype instance UMV.MVector s (PointF v) = MV_PointF (UMV.MVector s v)

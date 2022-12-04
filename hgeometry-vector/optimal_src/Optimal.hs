@@ -29,9 +29,6 @@ type instance VectorFamily 4 Double = Double.Unpacked.Vec4
 type instance VectorFamily 4 Float  = Float.Unpacked.Vec4
 
 
--- bleh, apparently I can't define this for arbitrary d here :(
--- I guess that is somewhat to be expected; since we may still want to define
--- the various boxed versions separately
 type instance VectorFamily d (RealNumber n) = Boxed.Vector d (RealNumber n)
 type instance VectorFamily d (Vector d' r)  = Boxed.Vector d (Vector d' r)
 

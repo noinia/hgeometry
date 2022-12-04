@@ -37,8 +37,7 @@ class OnSegment lineSegment where
   onSegment :: (Ord r, Point_ point d r) => point -> lineSegment -> Bool
 
 -- | A class representing line segments
-class ( HasStart lineSegment point
-      , HasEnd   lineSegment point
+class ( IntervalLike_ lineSegment point
       , Point_ point (Dimension lineSegment) (NumType lineSegment)
       ) => LineSegment_ lineSegment point | lineSegment -> point where
   {-# MINIMAL uncheckedLineSegment #-}

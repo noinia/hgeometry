@@ -61,10 +61,10 @@ instance (Eq (endPoint r), OptCVector_ 2 (endPoint r)) => Eq (Interval endPoint 
 instance (Ord (endPoint r), OptCVector_ 2 (endPoint r)) => Ord (Interval endPoint r) where
   (Interval s t) `compare` (Interval s' t') = s `compare` s' <> t `compare` t'
 
-instance ( OptCVector_ 2 (endPoint r), EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+instance ( OptCVector_ 2 (endPoint r), EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
          ) => HasStart (Interval endPoint r) r where
   start = startPoint._endPoint
-instance ( OptCVector_ 2 (endPoint r) , EndPoint_ (endPoint r), NumType (endPoint r) ~ r
+instance ( OptCVector_ 2 (endPoint r) , EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
          ) => HasEnd (Interval endPoint r) r where
   end = endPoint._endPoint
 
@@ -76,9 +76,13 @@ instance OptCVector_ 2 (endPoint r) => HasEndPoint (Interval endPoint r) (endPoi
 
 type instance EndPointOf (Interval endPoint r) = endPoint r
 
-instance ( OptCVector_ 2 (endPoint r), EndPoint_ (endPoint r), NumType (endPoint r) ~ r
-         ) => Interval_ (Interval endPoint r) r where
+instance ( OptCVector_ 2 (endPoint r), EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
+         ) => IntervalLike_ (Interval endPoint r) r where
   mkInterval = Interval
+
+instance ( OptCVector_ 2 (endPoint r), EndPoint_ (endPoint r)
+         , IxValue (endPoint r) ~ r
+         ) => Interval_ (Interval endPoint r) r where
 
 instance OptCVector_ 2 r => ClosedInterval_ (ClosedInterval r) r where
 
