@@ -83,7 +83,7 @@ type family EndPointOf interval
 type IntervalLike_ :: Type -> Type -> Constraint
 class ( HasStart interval point, HasStartPoint interval (EndPointOf interval)
       , HasEnd   interval point, HasEndPoint   interval (EndPointOf interval)
-      , EndPoint_ (EndPointOf interval)
+      , EndPoint_ (EndPointOf interval), IxValue (EndPointOf interval) ~ point
       ) => IntervalLike_ interval point | interval -> point where
 
   -- | Construct an interval given its start and end point.

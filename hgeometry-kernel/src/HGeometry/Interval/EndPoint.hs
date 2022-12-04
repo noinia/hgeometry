@@ -34,7 +34,7 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
   -- | Report the type of the endpoint
   endPointType :: endPoint -> EndPointType
   -- | constructs a "default" enpoint
-  mkEndPoint :: NumType endPoint -> endPoint
+  mkEndPoint :: IxValue endPoint -> endPoint
 
 -- | Possible endpoint types; open or closed
 data EndPointType = Open | Closed deriving (Show,Eq)

@@ -40,12 +40,12 @@ class OnSegment lineSegment where
 class ( IntervalLike_ lineSegment point
       , Point_ point (Dimension lineSegment) (NumType lineSegment)
       ) => LineSegment_ lineSegment point | lineSegment -> point where
-  {-# MINIMAL uncheckedLineSegment #-}
 
   -- | Create a segment
   --
   -- pre: the points are disjoint
-  uncheckedLineSegment :: point -> point -> lineSegment
+  uncheckedLineSegment     :: point -> point -> lineSegment
+  uncheckedLineSegment s t = mkInterval (mkEndPoint s) (mkEndPoint t)
 
   -- | smart constructor that creates a valid segment, i.e. it
   -- validates that the endpoints are disjoint.
