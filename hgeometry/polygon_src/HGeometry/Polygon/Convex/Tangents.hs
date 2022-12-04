@@ -125,6 +125,18 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
                              | isRight' ls l r = go (ne ls) rh
                              | otherwise       = Two (l :+ ls) (r :+ rs)
 
+
+
+-- -- | Given an index i, returns an IndexedTraversal of the cyclic
+-- -- structure, starting from the element with index i.
+-- itraverseRightFrom           :: Int -> IndexedTraversal Int (Cyclic v a) (Cyclic v b) a b
+-- itraverseRightFrom i pafb cv = [0..n]
+--   where
+--     n = length cv
+
+
+
+
 -- | Compute the upper tangent of the two polgyons
 --
 --   pre: - polygons lp and rp have at least 1 vertex
@@ -175,16 +187,16 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --------------------------------------------------------------------------------
 
 
--- | Rotate to the rightmost point (rightmost and topmost in case of ties)
-rightMost :: (Ord r, Point_ point 2 r)
-          => CircularVector (point 2 r) -> CircularVector (point 2 r)
-rightMost = CV.rotateToMaximumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
+-- -- | Rotate to the rightmost point (rightmost and topmost in case of ties)
+-- rightMost :: (Ord r, Point_ point 2 r)
+--           => CircularVector (point 2 r) -> CircularVector (point 2 r)
+-- rightMost = CV.rotateToMaximumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
 
--- | Rotate to the leftmost point (and bottommost in case of ties)
-leftMost :: (Ord r, Point_ point 2 r)
-         => CircularVector (point 2 r) -> CircularVector (point 2 r)
-leftMost = CV.rotateToMinimumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
+-- -- | Rotate to the leftmost point (and bottommost in case of ties)
+-- leftMost :: (Ord r, Point_ point 2 r)
+--          => CircularVector (point 2 r) -> CircularVector (point 2 r)
+-- leftMost = CV.rotateToMinimumBy (comparing $ \p -> (p^.xCoord,p^.yCoord))
 
--- | get the vertices of a polygon as a circularvector
-getVertices   :: HasOuterBoundary polygon => polygon -> CircularVector (Vertex polygon)
-getVertices p = CV.unsafeFromListN (numVertices p) (p^..outerBoundary)
+-- -- | get the vertices of a polygon as a circularvector
+-- getVertices   :: HasOuterBoundary polygon => polygon -> Cyclic (Vertex polygon)
+-- getVertices p = CV.unsafeFromListN (numVertices p) (p^..outerBoundary)

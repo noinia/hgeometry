@@ -30,16 +30,23 @@ import Data.Semigroup.Foldable
 import HGeometry.Point.Class
 import HGeometry.Vector.Class
 import Hiraffe.Graph
+import Data.Function (on)
+import Data.Semigroup (First(..))
 
 --------------------------------------------------------------------------------
 
 -- ^ A class for items that have an outer boundary.
 class HasVertices polygon polygon => HasOuterBoundary polygon where
+  {-# MINIMAL outerBoundaryVertexAt, ccwOuterBoundaryFrom, cwOuterBoundaryFrom #-}
+
   -- | A fold over all vertices of the outer boundary, the
   -- vertices are traversed in CCW order.
   --
   -- running time :: \(O(n)\)
   outerBoundary :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+  default outerBoundary :: Num (VertexIx polygon)
+                        => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+  outerBoundary = ccwOuterBoundaryFrom 0
 
   -- | A particular vertex of the outer polygon
   --
@@ -55,8 +62,19 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
   -- running time :: \(O(n)\)
   outerBoundaryEdges :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
 
+  -- | A CCW-fold over all vertices of the outer boundary, starting
+  -- from the vertex with the given index.
+  --
+  -- running time :: \(O(n)\)
+  ccwOuterBoundaryFrom :: VertexIx polygon -> IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
 
-  {-# MINIMAL outerBoundary, outerBoundaryVertexAt #-}
+  -- | A CW-fold over all vertices of the outer boundary, starting
+  -- from the vertex with the given index.
+  --
+  -- running time :: \(O(n)\)
+  cwOuterBoundaryFrom :: VertexIx polygon -> IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+
+
 
   default outerBoundaryEdges
     :: Enum (VertexIx polygon)
@@ -90,9 +108,16 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
 -- end of te HasOuterBoundary class
 --------------------------------------------------------------------------------
 
--- | Version of ifolding to build an 'IndexedFold1'
+-- TODO: upstream these to lens
 --
 -- taken and modified directly from lens
+
+-- | construct a Fold1 from a function that produces a Foldable1
+folding1         :: Foldable1 f => (s -> f a) -> Fold1 s a
+folding1 sfa agb = phantom . traverse1_ agb . sfa
+{-# INLINE folding1 #-}
+
+-- | Version of ifolding to build an 'IndexedFold1'
 ifolding1       :: (Foldable1 f, Indexable i p, Contravariant g, Apply g)
                 => (s -> f (i, a)) -> Over p g s t a b
 ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
@@ -106,27 +131,50 @@ itoNonEmptyOf l = flip getNonEmptyDList [] . ifoldMapOf l (\i a -> NonEmptyDList
 --------------------------------------------------------------------------------
 -- * HasOuterBoundary Helpers
 
+-- IndexedFold i s a = (Indexable i p, Contravariant f, Applicative f)
+--                   => p a (f a) -> s -> f s
+
+-- conjoined:: (p ~ (->) => q (a -> b) r) -> q (p a b) r -> q (p a b) r
+
+
+
 -- | Yield the minimum  vertex of a polygon according to the given comparison function.
 --
 -- running time \( O(n) \)
-minimumVertexBy     :: (HasOuterBoundary polygon)
+
+-- | Yield the minimum  vertex of a polygon according to the given comparison function.
+--
+-- running time \( O(n) \)
+minimumVertexBy     :: forall polygon. (HasOuterBoundary polygon)
                     => (Vertex polygon -> Vertex polygon -> Ordering)
-                    -> polygon
-                    -> Vertex polygon
-minimumVertexBy cmp = fromMaybe (error "minimumVertexBy: absurd")
-                    . minimumByOf outerBoundary cmp
+                    -> IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+minimumVertexBy cmp = conjoined go igo
+  where
+    go :: Fold1 polygon (Vertex polygon)
+    go = folding1 $ f outerBoundary cmp
+
+    igo :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+    igo = ifolding1 $ f (outerBoundary.withIndex) (cmp `on` snd)
+
+    f boundary cmp' = maybe (error "minimumVertexBy: absurd") First
+                    . minimumByOf boundary cmp'
 
 -- | Yield the maximum vertex of a polygon according to the given comparison function.
 --
 -- running time \( O(n) \)
-maximumVertexBy     :: (HasOuterBoundary polygon)
+maximumVertexBy     :: forall polygon. (HasOuterBoundary polygon)
                     => (Vertex polygon -> Vertex polygon -> Ordering)
-                    -> polygon
-                    -> Vertex polygon
-maximumVertexBy cmp = fromMaybe (error "maximumVertexBy: absurd")
-                    . maximumByOf outerBoundary cmp
+                    -> IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+maximumVertexBy cmp = conjoined go igo
+  where
+    go :: Fold1 polygon (Vertex polygon)
+    go = folding1 $ f outerBoundary cmp
 
+    igo :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+    igo = ifolding1 $ f (outerBoundary.withIndex) (cmp `on` snd)
 
+    f boundary cmp' = maybe (error "maximumVertexBy: absurd") First
+                    . maximumByOf boundary cmp'
 
 -- | Compute the signed area times 2 of a simple polygon. The the
 -- vertices are in clockwise order, the signed area will be negative,
@@ -202,8 +250,8 @@ class ( HasOuterBoundary polygon
   -- running time: \(O(n)\)
   extremes      :: (Num r, Ord r, Point_ point 2 r, VectorFor point ~ vector)
                 => vector -> polygon -> (point, point)
-  extremes u pg = ( minimumVertexBy (cmpExtreme u) pg
-                  , maximumVertexBy (cmpExtreme u) pg
+  extremes u pg = ( first1Of (minimumVertexBy (cmpExtreme u)) pg
+                  , first1Of (maximumVertexBy (cmpExtreme u)) pg
                   )
 
 --------------------------------------------------------------------------------

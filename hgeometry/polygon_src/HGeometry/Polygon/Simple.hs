@@ -139,3 +139,40 @@ _testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------
+
+
+
+
+
+class AsCyclic v where
+  {-# MINIMAL itraverseRightFrom, itraverseLeftFrom #-}
+  -- | Given an index i, returns an "rightwards" (i.e. clockwise)
+  -- IndexedTraversal of the cyclic structure, starting from the
+  -- element with index i.
+  itraverseRightFrom :: Int -> IndexedTraversal Int (Cyclic v a) (Cyclic v b) a b
+
+  -- | Given an index i, returns an "leftwards" (i.e. counter
+  -- clockwise) IndexedTraversal of the cyclic structure, starting
+  -- from the element with index i.
+  itraverseLeftFrom   :: Int -> IndexedTraversal Int (Cyclic v a) (Cyclic v b) a b
+  -- itraverseLeftFrom i =
+
+
+  -- | Given an index i, returns an "rightwards" (i.e. clockwise)
+  -- IndexedFold of the cyclic structure, starting from the
+  -- element with index i.
+  ifoldRightFrom :: Int -> IndexedFold Int (Cyclic v a) a
+  ifoldRightFrom = itraverseRightFrom
+
+  -- | Given an index i, returns an "leftward" (i.e. count clockwise)
+  -- IndexedFold of the cyclic structure, starting from the
+  -- element with index i.
+  ifoldLeftFrom :: Int -> IndexedFold Int (Cyclic v a) a
+  ifoldLeftFrom = itraverseLeftFrom
+
+-- instance AsCyclic NonEmptyVector where
+--   itraverseRightFrom i pafb (Cyclic v) = Cyclic <$> do v' <-
+
+--     [0..n]
+--     where
+--       n = length cv
