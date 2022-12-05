@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Line.PointAndLine
@@ -22,7 +23,7 @@ import           HGeometry.HyperPlane.Class
 -- import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
-import           HGeometry.Properties
+import           HGeometry.Properties(NumType, Dimension)
 import           HGeometry.Vector
 import           HGeometry.Intersection
 
@@ -36,14 +37,15 @@ data Line d r = Line { _anchorPoint :: !(Point  d r)
                      } deriving Generic
 
 -- | Vertical line with a given X-coordinate.
-verticalLine   :: Num r => r -> Line 2 r
+verticalLine   :: (Num r, OptCVector_ 2 r) => r -> Line 2 r
 verticalLine x = Line (Point2 x 0) (Vector2 0 1)
 
 -- | Horizontal line with a given Y-coordinate.
-horizontalLine   :: Num r => r -> Line 2 r
+horizontalLine   :: (Num r, OptCVector_ 2 r) => r -> Line 2 r
 horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 
-instance Line_ (Line d r) d r where
+instance ( OptVector_ d r
+         , Metric_ (VectorFamily' d r)) => Line_ (Line d r) d r where
   fromPointAndVec p v = Line (pointFromPoint p) (vectorFromVector v)
 
 
@@ -124,7 +126,7 @@ isIdenticalTo                         :: (Eq r) => Line d r -> Line d r -> Bool
 
 data instance IntersectionOf (Line 2 r) (Line 2 r) = PointIntersection (Point 2 r)
                                                    | LineIntersection (Line 2 r)
-                                                   deriving (Show,Eq)
+--                                                   deriving (Show,Eq)
 type instance Intersection (Line 2 r) (Line 2 r) = Maybe (IntersectionOf (Line 2 r)  (Line 2 r))
 
 instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Line 2 r where
