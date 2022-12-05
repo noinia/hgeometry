@@ -282,8 +282,7 @@ class HasPoints s t point point' | s -> point
                , Dimension s ~ d, Dimension t ~ d
                ) => Traversal1 s t point point'
 
--- | 'HasPoints' s point' is a shorthand for 'HasPoints s s point
--- point'
+-- | Shorthand for 'HasPoints s s point point'
 type HasPoints' s point = HasPoints s s point point
 
 --------------------------------------------------------------------------------

@@ -10,7 +10,12 @@
 -- for the more geometric types.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Intersection where
+module HGeometry.Intersection
+  ( Intersection
+  , IntersectionOf
+  , HasIntersectionWith(..)
+  , IsIntersectableWith(..)
+  ) where
 
 import Data.Kind (Type)
 import Data.Maybe (isJust)
@@ -24,6 +29,7 @@ type family Intersection g h :: Type
 -- intersection.
 data family IntersectionOf g h
 
+-- | Class for types for which we can test if they intersect.
 class HasIntersectionWith g h where
   -- | g `intersects` h  <=> The intersection of g and h is non-empty.
   intersects :: g -> h -> Bool
@@ -34,4 +40,5 @@ class HasIntersectionWith g h where
 
 -- | Class relationship between intersectable geometric objects.
 class HasIntersectionWith g h => IsIntersectableWith g h where
+  -- | Computes te intersection of two geometric objects.
   intersect :: g -> h -> Intersection g h

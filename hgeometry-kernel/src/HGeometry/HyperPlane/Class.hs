@@ -1,6 +1,16 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HyperPlane.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Classes for representing hyperplanes in d-dimensional space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
   , NonVerticalHyperPlane_(..)

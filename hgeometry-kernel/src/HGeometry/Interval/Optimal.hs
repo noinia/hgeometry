@@ -24,10 +24,11 @@ import HGeometry.Vector
 -- | Data type representing intervals
 newtype Interval endPoint r = MkInterval (Vector 2 (endPoint r))
 
+-- | Closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval r = Interval (EndPoint Closed) r
 
+-- | Open intervals, i.e. intervals that exclude their endpoints
 type OpenInterval r   = Interval (EndPoint Open) r
-
 
 -- | Construct an interval
 pattern Interval     :: OptCVector_ 2 (endPoint r)

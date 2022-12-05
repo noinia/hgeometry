@@ -26,6 +26,7 @@ import Data.Semigroup.Foldable.Class
 
 --------------------------------------------------------------------------------
 
+-- | Types that have an '_endPoint' field lens.
 class IsEndPoint endPoint endPoint' where
   -- | Lens to access the actual data value of the end point
   _endPoint :: Lens endPoint endPoint' (IxValue endPoint) (IxValue endPoint')

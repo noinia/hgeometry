@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Ball.CenterAndRadius
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Balls in d-dimensional space, represented by their center and squared radius.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Ball.CenterAndRadius
   ( Ball(Ball,Disk)
   , Disk

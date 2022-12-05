@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Triangle.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class of types representing Triangles
+--
+--------------------------------------------------------------------------------
 module HGeometry.Triangle.Class
   ( Triangle_(..)
   ) where

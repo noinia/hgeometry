@@ -13,7 +13,11 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Point
-  ( Point, pattern Point1, pattern Point2, pattern Point3, pattern Point4
+  ( Point
+  , {- | construct a 1-dimensional point -} pattern Point1
+  , {- | construct a 2-dimensional point -} pattern Point2
+  , {- | construct a 3-dimensional point -} pattern Point3
+  , {- | construct a 4-dimensional point -} pattern Point4
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , PointF(Point, toVec)
   , origin, vector
@@ -27,12 +31,12 @@ module HGeometry.Point
   , Affine_(..)
   , CCW(CCW, CW, CoLinear), ccw, isCoLinear
 
- , ccwCmpAround
- , cwCmpAround
- , ccwCmpAroundWith
- , cwCmpAroundWith
- , sortAround
- , insertIntoCyclicOrder
+  , ccwCmpAround
+  , cwCmpAround
+  , ccwCmpAroundWith
+  , cwCmpAroundWith
+  , sortAround
+  , insertIntoCyclicOrder
 --
 --  , StrictCCW(SCCW, SCW)
 --  , strictCcw

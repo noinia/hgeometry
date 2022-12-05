@@ -33,10 +33,12 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- | Types that have a 'minPoint' field lens
 class HasMinPoint box point | box -> point where
   -- | Lens to access the lexicographically smallest point
   minPoint :: Lens' box point
 
+-- | Types that have a 'maxPoint' field lens
 class HasMaxPoint box point | box -> point where
   -- | Lens to access the lexicographically largest point
   maxPoint :: Lens' box point

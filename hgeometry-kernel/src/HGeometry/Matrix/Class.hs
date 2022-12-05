@@ -15,7 +15,7 @@ module HGeometry.Matrix.Class
   , Invertible(..)
   ) where
 
-import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
+import           Control.Lens hiding (cons,snoc,uncons,unsnoc,elements)
 import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)

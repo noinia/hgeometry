@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HyperPlane.NonVertical
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Non-vertical hyperplanes in d-dimensional space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.HyperPlane.NonVertical
   ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
   ) where
@@ -37,6 +47,7 @@ instance ( MkHyperPlaneConstraints d r
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
 
+-- | Constructs a Plane in R^3 for the equation z = ax + by + c
 pattern Plane       :: ConstructableVector_ (VectorFamily 3 r) 3 r
                     => r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)

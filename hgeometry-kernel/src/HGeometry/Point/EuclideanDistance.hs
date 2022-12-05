@@ -29,6 +29,7 @@ cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 
 --------------------------------------------------------------------------------
 
+-- | Types for which we can compute the squared Euclidean distance.
 class HasSquaredEuclideanDistance g where
   {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}
   -- | Given a point q and a geometry g, the squared Euclidean distance between q and g.

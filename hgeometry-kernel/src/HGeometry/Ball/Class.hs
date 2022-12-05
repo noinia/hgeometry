@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Ball.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class of types that can act as balls in \(d\)-dimensional space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Ball.Class
   ( Ball_(..), pattern Ball_
   , HasCenter(..)
@@ -19,12 +29,12 @@ import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
-
+-- | Types that have a 'center' field lens
 class HasCenter geom point | geom -> point where
   -- | Lens to access the center point of a geometry
   center :: Lens' geom point
 
-
+-- | Balls in d-dimensional space
 class ( HasCenter ball point
       , Point_ point (Dimension ball) (NumType ball)
       ) => Ball_ ball point | ball -> point where
@@ -44,7 +54,7 @@ class ( HasCenter ball point
   radius :: Radical.Radical (NumType ball) => Lens' ball (NumType ball)
   radius = lens (Radical.sqrt . view squaredRadius) (\b r -> set squaredRadius (r*r) b)
 
-
+-- | Constructs a Ball from its center and squared radius.
 pattern Ball_     :: Ball_ ball point => point -> NumType ball -> ball
 pattern Ball_ c r <- ((view center &&& view squaredRadius) -> (c,r))
   where
@@ -70,8 +80,10 @@ fromCenterAndPoint c p = fromCenterAndSquaredRadius c (squaredEuclideanDist c p)
 
 --------------------------------------------------------------------------------
 
+-- | Disks are two dimensional balls
 class (Ball_ disk point, Dimension disk ~ 2) => Disk_ disk point where
 
 
+-- | Constructs a Disk by its center and squared radius.
 pattern Disk_     :: Disk_ ball point => point -> NumType ball -> ball
 pattern Disk_ c r = Ball_ c r

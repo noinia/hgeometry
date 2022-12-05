@@ -1,7 +1,16 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Box.Optimal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Axis alligned boxes in d-dimensional space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Box.Optimal
   ( Box(Box)
-
   ) where
 
 import Control.Lens
