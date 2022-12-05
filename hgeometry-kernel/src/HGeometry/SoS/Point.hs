@@ -15,11 +15,12 @@ module HGeometry.SoS.Point
   ) where
 
 import Control.Lens hiding (Index)
-import Data.Indexed
-import Data.Ratio.Generalized
-import Data.RealNumber.Symbolic
+import HGeometry.Indexed
+import HGeometry.Number.Ratio.Generalized
+import HGeometry.Number.Real.Symbolic
+import HGeometry.Point.Boxed (Point)
 import HGeometry.Point.Class
-import HGeometry.Point.Boxed(Point)
+import HGeometry.Vector.Boxed
 -- import Geometry.Vector
 -- import Test.QuickCheck (Arbitrary(..))
 
@@ -41,7 +42,7 @@ fromSymbolic = fmap roundToConstant
 
 -- | Constructs an point whose numeric type uses SoSRational, so that
 -- we can use SoS.
-toSoSRational :: ( Point_ point d r
+toSoSRational :: ( Point_ point d r -- , TraversableWithIndex Int (VectorImpl (Choose d))
                  , HasIndex point, Eq r, Num r)
               => point -> Point d (SoSRational SoSI r)
 toSoSRational = over coordinates (\x -> sosRational x 1) . toSymbolic

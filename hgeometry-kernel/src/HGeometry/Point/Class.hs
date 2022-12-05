@@ -34,7 +34,8 @@ import           HGeometry.Vector.Class
 class ( NumType point ~ r
       , NumType point' ~ s
       , Vector_ (VectorFor point) (Dimension point) r
-      ) => HasVector point point' r s where
+      ) => HasVector point point' r s | point  -> r
+                                      , point' -> s where
 
   -- | Lens to access the vector corresponding to this point.
   --
