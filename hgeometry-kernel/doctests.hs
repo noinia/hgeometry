@@ -1,68 +1,34 @@
-import Test.DocTest
+{-# OPTIONS_GHC -F -pgmF doctest-driver-gen
+                -optF src
 
-main :: IO ()
-main = doctest $ ["-isrc" ] ++ ghcExts ++ files
+                -optF -XTypeFamilies
+                -optF -XGADTs
+                -optF -XKindSignatures
+                -optF -XDataKinds
+                -optF -XTypeOperators
+                -optF -XConstraintKinds
+                -optF -XPolyKinds
+                -optF -XRankNTypes
+                -optF -XTypeApplications
+                -optF -XScopedTypeVariables
+                -optF -XPatternSynonyms
+                -optF -XViewPatterns
+                -optF -XTupleSections
+                -optF -XMultiParamTypeClasses
+                -optF -XLambdaCase
+                -optF -XTupleSections
+                -optF -XFunctionalDependencies
+                -optF -XStandaloneDeriving
+                -optF -XGeneralizedNewtypeDeriving
+                -optF -XDeriveFunctor
+                -optF -XDeriveFoldable
+                -optF -XDeriveTraversable
+                -optF -XDeriveGeneric
+                -optF -XFlexibleInstances
+                -optF -XFlexibleContexts
+                -optF -XDerivingStrategies
+                -optF -XDerivingVia
 
-ghcExts :: [String]
-ghcExts = map ("-X" ++)
-          [ "TypeFamilies"
-          , "GADTs"
-          , "KindSignatures"
-          , "DataKinds"
-          , "TypeOperators"
-          , "ConstraintKinds"
-          , "PolyKinds"
-          , "RankNTypes"
-          , "TypeApplications"
-          , "ScopedTypeVariables"
-
-          , "PatternSynonyms"
-          , "ViewPatterns"
-          , "TupleSections"
-          , "MultiParamTypeClasses"
-          , "LambdaCase"
-          , "TupleSections"
-          , "FunctionalDependencies"
-
-          , "StandaloneDeriving"
-          , "GeneralizedNewtypeDeriving"
-          , "DeriveFunctor"
-          , "DeriveFoldable"
-          , "DeriveTraversable"
-          , "DeriveGeneric"
-          , "FlexibleInstances"
-          , "FlexibleContexts"
-          , "DerivingStrategies"
-          , "DerivingVia"
-          ]
-
-files :: [String]
-files = map toFile modules
-
-toFile :: String -> String
-toFile = (\s -> "src/" <> s <> ".hs") . replace '.' '/'
-
-replace     :: Eq a => a -> a -> [a] -> [a]
-replace a b = go
-  where
-    go []                 = []
-    go (c:cs) | c == a    = b:go cs
-              | otherwise = c:go cs
-
-modules :: [String]
-modules =
-  [ -- "Data.PlaneGraph.IO"
-    "HGeometry.Point"
-  , "HGeometry.Transformation"
-  , "HGeometry.Line"
-  -- , "HGeometry.Line.Internal"
-  -- , "HGeometry.Interval"
-  -- , "HGeometry.LineSegment"
-  -- , "HGeometry.PolyLine"
-  -- , "HGeometry.Polygon"
-  -- , "HGeometry.Ball"
-  -- , "HGeometry.Box"
-  , "HGeometry.HyperPlane"
-  , "HGeometry.SoS.Orientation"
-  -- , "Algorithms.Geometry.InPolygon"
-  ]
+                -optF -package=hgeometry-vector
+                -optF -package=hgeometry-kernel
+#-}

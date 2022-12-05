@@ -3,7 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Matrix
+-- Module      :  HGeometry.Matrix.Flat
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -11,12 +11,12 @@
 -- type-indexed matrices.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Matrix(
-    Matrix(Matrix)
-  , Matrix_(..)
+module HGeometry.Matrix.Flat(
+  --   Matrix(Matrix)
+  -- , Matrix_(..)
 
-  , Invertible(..)
-  , HasDeterminant(..)
+  -- , Invertible(..)
+  -- , HasDeterminant(..)
   ) where
 
 import           Control.Lens
@@ -30,6 +30,8 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import           Linear.Matrix (M22, M33, M44, (!*!), (!*))
 import qualified Linear.Matrix as Lin
+
+{-
 
 --------------------------------------------------------------------------------
 -- * Matrices
@@ -84,7 +86,7 @@ instance ( KnownNat n, KnownNat m
 
   rows = undefined
 
-  colummns = undefined
+  -- colummns = undefined
 
 
 -- -- deriving instance (Show r, Arity n, Arity m) => Show (Matrix n m r)
@@ -111,12 +113,12 @@ instance ( KnownNat n, KnownNat m
 --   inverse' :: Matrix n n r -> Matrix n n r
 
 -- instance Fractional r => Invertible 2 r where
---   -- >>> inverse' $ Matrix $ Vector2 (Vector2 1 2) (Vector2 3 4.0)
+--   -- >>>> inverse' $ Matrix $ Vector2 (Vector2 1 2) (Vector2 3 4.0)
 --   -- Matrix Vector2 [Vector2 [-2.0,1.0],Vector2 [1.5,-0.5]]
 --   inverse' = withM22 Lin.inv22
 
 -- instance Fractional r => Invertible 3 r where
---   -- >>> inverse' $ Matrix $ Vector3 (Vector3 1 2 4) (Vector3 4 2 2) (Vector3 1 1 1.0)
+--   -- >>>> inverse' $ Matrix $ Vector3 (Vector3 1 2 4) (Vector3 4 2 2) (Vector3 1 1 1.0)
 --   -- Matrix Vector3 [Vector3 [0.0,0.5,-1.0],Vector3 [-0.5,-0.75,3.5],Vector3 [0.5,0.25,-1.5]]
 --   inverse' = withM33 Lin.inv33
 
@@ -147,3 +149,5 @@ instance ( KnownNat n, KnownNat m
 
 -- withM44 :: (M44 a -> M44 b) -> Matrix 4 4 a -> Matrix 4 4 b
 -- withM44 f = coerce . f . coerce
+
+-}

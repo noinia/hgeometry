@@ -140,6 +140,8 @@ library
     HGeometry.LineSegment.Class
     HGeometry.LineSegment.Optimal
 
+    HGeometry.Intersection
+
 
 --
 --    HGeometry.Transformation
@@ -199,13 +201,13 @@ benchmark hgeometry-kernel-benchmarks
 
 test-suite doctests-kernel
   type:          exitcode-stdio-1.0
-  ghc-options:   -threaded
   main-is:       doctests.hs
   build-depends: base
                , doctest             >= 0.8
-               , doctest-discover
                , QuickCheck
                , quickcheck-instances
+
+  build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 test-suite hspec-kernel
   import: setup

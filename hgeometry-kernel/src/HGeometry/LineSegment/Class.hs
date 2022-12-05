@@ -28,6 +28,10 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import HGeometry.LineSegment
+-- >>> import HGeometry.Point
+
 -- not sure why I made this a separate class again...
 
 class OnSegment lineSegment where

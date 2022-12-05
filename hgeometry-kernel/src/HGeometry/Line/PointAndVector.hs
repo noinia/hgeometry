@@ -17,13 +17,14 @@ import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           GHC.Generics (Generic)
 import           HGeometry.Line.Class
-import           HGeometry.Point.Class
+import           HGeometry.Point
 import           HGeometry.HyperPlane.Class
 -- import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties
 import           HGeometry.Vector
+import           HGeometry.Intersection
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -67,12 +68,12 @@ instance (Show r) => Show (Line d r) where
 -- instance (Read r, Arity d)   => Read (Line d r) where
 
 
-instance (NFData r, Arity d) => NFData        (Line d r)
-deriving instance Arity d             => Functor       (Line d)
-deriving instance Arity d             => F.Foldable    (Line d)
-deriving instance Arity d             => T.Traversable (Line d)
+-- instance (NFData r, Arity d) => NFData        (Line d r)
+-- deriving instance Arity d             => Functor       (Line d)
+-- deriving instance Arity d             => F.Foldable    (Line d)
+-- deriving instance Arity d             => T.Traversable (Line d)
 
-deriving instance (Arity d, Eq r)     => Eq (Line d r)
+-- deriving instance (Arity d, Eq r)     => Eq (Line d r)
 
 
 
@@ -100,7 +101,7 @@ type instance NumType   (Line d r) = r
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
-isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r -> Bool
+isIdenticalTo                         :: (Eq r) => Line d r -> Line d r -> Bool
 (Line p u) `isIdenticalTo` (Line q v) = (p,u) == (q,v)
 
 
@@ -120,6 +121,7 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 -- p `onLine2` (Line q v) = ccw (pointFromPoint p) q (q .+^ v) == CoLinear
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
+
 data instance IntersectionOf (Line 2 r) (Line 2 r) = PointIntersection (Point 2 r)
                                                    | LineIntersection (Line 2 r)
                                                    deriving (Show,Eq)
@@ -178,7 +180,7 @@ toLinearFunction l@(Line _ ~(Vector2 vx vy)) = case l `intersect` verticalLine @
   Just (LineIntersection _)             -> Nothing -- l is a vertical line (through x=0)
 
 
-instance (Fractional r, Arity d) => HasSquaredEuclideanDistance (Line d r) where
+instance (Fractional r) => HasSquaredEuclideanDistance (Line d r) where
   pointClosestTo (pointFromPoint -> p) (Line a m) = pointFromPoint $ a .+^ (t0 *^ m)
     where
       -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
