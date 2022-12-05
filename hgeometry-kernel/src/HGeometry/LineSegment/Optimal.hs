@@ -32,7 +32,10 @@ import HGeometry.Vector
 -- | Data type representing intervals
 newtype LineSegment endPoint point = MkLineSegment (Interval endPoint point)
 
+-- | Default implementation of Closed LineSegments
 type ClosedLineSegment point = LineSegment (EndPoint Closed) point
+
+-- | Default implementation of Open LineSegments
 type OpenLineSegment point   = LineSegment (EndPoint Open) point
 
 -- | Construct a line Segment
@@ -40,7 +43,6 @@ pattern LineSegment     :: OptCVector_ 2 (endPoint point)
                         => endPoint point -> endPoint point -> LineSegment endPoint point
 pattern LineSegment p q = MkLineSegment (Interval p q)
 {-# COMPLETE LineSegment #-}
-
 
 -- | Construct a closed interval
 pattern ClosedLineSegment     :: OptCVector_ 2 point

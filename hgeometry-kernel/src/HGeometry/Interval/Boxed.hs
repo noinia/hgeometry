@@ -20,13 +20,16 @@ import HGeometry.Interval.Class
 import HGeometry.Properties
 
 --------------------------------------------------------------------------------
--- | Data type representing intervals
+-- | Data type representing intervals (using a boxed implementation)
 data Interval endPoint r = Interval !(endPoint r) !(endPoint r)
   deriving (Show,Eq,Ord)
 
 type instance NumType (Interval endPoint r) = r
 
+-- | Cosed intervals (using a boxed representation)
 type ClosedInterval r = Interval (EndPoint Closed) r
+
+-- | Open intervals (using a boxed representation)
 type OpenInterval r   = Interval (EndPoint Open) r
 
 instance Functor endPoint => Functor (Interval endPoint) where

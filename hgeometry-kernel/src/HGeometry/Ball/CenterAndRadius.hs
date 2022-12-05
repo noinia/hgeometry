@@ -42,7 +42,9 @@ instance Point_ point (Dimension point) (NumType point) => Ball_ (Ball point) po
 
 instance Point_ point 2 (NumType point) => Disk_ (Ball point) point where
 
+-- | Balls in 2D are also known as Disks
 type Disk = Ball
 
+-- | Construct a disk
 pattern Disk     :: point -> NumType point -> Disk point
 pattern Disk c r = Ball c r

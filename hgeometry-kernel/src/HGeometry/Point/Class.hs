@@ -2,6 +2,16 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Point.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class of types that can act as \(d\)-dimensional points.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Point.Class
   ( HasVector(..)
   , Affine_(..)
@@ -31,6 +41,7 @@ import           HGeometry.Vector.Class
 -- >>> import HGeometry.Vector
 -- >>> let myPoint = Point3 1 2 3 :: Point 3 Int
 
+-- | Types that have a 'vector' field lens
 class ( NumType point ~ r
       , NumType point' ~ s
       , Vector_ (VectorFor point) (Dimension point) r
@@ -63,6 +74,7 @@ class ( Vector_ (VectorFor point) (Dimension point) (NumType point)
   p .-^ v = p .+^ negated v
   {-# MINIMAL (.-.), (.+^) #-}
 
+-- | A class representing points in d-dimensional space.
 class ( Dimension point ~ d
       , NumType point   ~ r
       , HasVector point point r r
@@ -270,6 +282,8 @@ class HasPoints s t point point' | s -> point
                , Dimension s ~ d, Dimension t ~ d
                ) => Traversal1 s t point point'
 
+-- | 'HasPoints' s point' is a shorthand for 'HasPoints s s point
+-- point'
 type HasPoints' s point = HasPoints s s point point
 
 --------------------------------------------------------------------------------

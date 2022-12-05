@@ -60,7 +60,7 @@ type instance IxValue   (EndPoint et r) = r
 type instance VectorFamily 2 (EndPoint et r) = WrapVector 2 r (EndPoint et r)
 
 
-
+-- | Class for types that have '_endPoint' field.
 instance IsEndPoint (EndPoint et r) (EndPoint et r') where
   _endPoint = lens (\(EndPoint x) -> x) (\_ x -> EndPoint x)
 

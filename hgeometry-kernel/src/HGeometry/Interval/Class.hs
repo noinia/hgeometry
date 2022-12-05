@@ -98,6 +98,7 @@ class ( IntervalLike_ interval r
       ) => Interval_ interval r | interval -> r where
 
 
+-- | A class representing closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval_ :: Type -> Type -> Constraint
 class (Interval_ interval r
       , EndPointOf interval ~ EndPoint Closed r
@@ -107,6 +108,8 @@ class (Interval_ interval r
   mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
   {-# MINIMAL #-}
 
+
+-- | A class representing open intervals, i.e. intervals that exclude their endpoints
 class ( Interval_ interval r
       , EndPointOf interval ~ EndPoint Open r
       ) => OpenInterval_ interval r | interval -> r where

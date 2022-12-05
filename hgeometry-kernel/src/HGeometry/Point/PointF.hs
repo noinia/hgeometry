@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Point.PointF
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implements a point by wrapping some Vector type
+--
+--------------------------------------------------------------------------------
 module HGeometry.Point.PointF
   ( PointF(..)
   ) where

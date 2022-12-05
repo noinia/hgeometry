@@ -25,7 +25,7 @@ module HGeometry.Point
   , projectPoint
 
   , Affine_(..)
- , CCW(CCW, CW, CoLinear), ccw, isCoLinear
+  , CCW(CCW, CW, CoLinear), ccw, isCoLinear
 
  , ccwCmpAround
  , cwCmpAround

@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Matrix.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class of types representing matrices
+--
+--------------------------------------------------------------------------------
 module HGeometry.Matrix.Class
   ( Matrix_(..)
   , HasElements(..)
@@ -18,6 +28,7 @@ import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
+-- | Types that have an 'elements' field lens.
 class HasElements matrix matrix' where
   -- | IndexedTraversal over the elements of the matrix, each index is
   -- a (row,column) index pair.

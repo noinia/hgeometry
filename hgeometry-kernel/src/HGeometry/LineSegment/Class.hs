@@ -34,6 +34,7 @@ import HGeometry.Vector
 
 -- not sure why I made this a separate class again...
 
+-- | Class that expresses that we can test if the segment contains a point
 class OnSegment lineSegment where
   -- | Test if a point lies on a line segment.
   --

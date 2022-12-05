@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Line.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class of types that can act as lines in d-dimensional space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Line.Class
   ( Line_(..)
   -- , fromPointAndVec
@@ -9,7 +19,7 @@ import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 
-
+-- | Types that can act as lines in d-dimensional space.
 class Line_ line d r where
   -- | Constructs a line through a point and a vector
   fromPointAndVec ::  ( Point_ point d r
