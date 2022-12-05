@@ -35,4 +35,4 @@ newtype PolyLineF f point = MkPolylLine (f point)
   deriving newtype (NFData)
 
 -- | By default we store simple poylline as non-empty vectors.
-type PolyLine = SimplePolygonF NonEmptyVector
+type PolyLine = PolyLineF NonEmptyVector
