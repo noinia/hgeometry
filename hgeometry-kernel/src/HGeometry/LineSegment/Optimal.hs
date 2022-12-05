@@ -117,3 +117,22 @@ instance ( OptCVector_ 2 (endPoint point)
          , Traversable1 endPoint
          , Point_ point  (Dimension point) (NumType point)
          ) => IsBoxable (LineSegment endPoint point)
+
+
+instance ( Show (endPoint point)
+         , OptCVector_ 2 (endPoint point)
+         ) => Show (LineSegment endPoint point) where
+  showsPrec k (LineSegment s t) = showParen (k > app_prec) $
+                                    showString "LineSegment "
+                                    . showsPrec (k+1) s
+                                    . showChar ' '
+                                    . showsPrec (k+1) t
+    where
+      app_prec = 10
+
+
+testseg :: ClosedLineSegment (Point 2 Double)
+testseg = ClosedLineSegment origin (Point2 10.0 10.0)
+
+test :: Point 2 Double
+test = interpolate 0.5 testseg
