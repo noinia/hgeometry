@@ -29,6 +29,5 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
-                -optF -package=hgeometry-vector
-                -optF -package=hgeometry-kernel
+
 #-}

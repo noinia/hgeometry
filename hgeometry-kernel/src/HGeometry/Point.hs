@@ -75,15 +75,15 @@ import HGeometry.Point.Optimal
 -- | Compare the points with respect to the direction given by the
 -- vector, i.e. by taking planes whose normal is the given vector.
 --
--- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 0)
+-- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 (0 :: Int))
 -- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 0)
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (0 :: Int))
 -- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 10)
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (10 :: Int))
 -- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 10)
+-- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 (10 :: Int))
 -- GT
--- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 10)
+-- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 (10 :: Int))
 -- EQ
 cmpInDirection       :: forall vector point d r.
                         ( Ord r, Num r, Point_ point d r

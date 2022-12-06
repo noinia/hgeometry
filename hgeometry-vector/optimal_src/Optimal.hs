@@ -28,18 +28,19 @@ import           Optimal.Wrap
 -- type instance VectorFamily 2 Int = V2.V2 Int
 
 type instance VectorFamily 2 Int    = Int.Unpacked.Vec2
-type instance VectorFamily 2 Double = Double.Unpacked.Vec2
-type instance VectorFamily 2 Float  = Float.Unpacked.Vec2
-
 type instance VectorFamily 3 Int    = Int.Unpacked.Vec3
-type instance VectorFamily 3 Double = Double.Unpacked.Vec3
-type instance VectorFamily 3 Float  = Float.Unpacked.Vec3
-
 type instance VectorFamily 4 Int    = Int.Unpacked.Vec4
+
+type instance VectorFamily 2 Double = Double.Unpacked.Vec2
+type instance VectorFamily 3 Double = Double.Unpacked.Vec3
 type instance VectorFamily 4 Double = Double.Unpacked.Vec4
+
+type instance VectorFamily 2 Float  = Float.Unpacked.Vec2
+type instance VectorFamily 3 Float  = Float.Unpacked.Vec3
 type instance VectorFamily 4 Float  = Float.Unpacked.Vec4
 
-
+type instance VectorFamily d Integer        = Boxed.Vector d Integer
+type instance VectorFamily d Rational       = Boxed.Vector d Rational
 type instance VectorFamily d (RealNumber n) = Boxed.Vector d (RealNumber n)
 type instance VectorFamily d (Vector d' r)  = Boxed.Vector d (Vector d' r)
 

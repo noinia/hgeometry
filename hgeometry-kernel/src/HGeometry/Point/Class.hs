@@ -229,7 +229,7 @@ projectPoint = fromVector @point' @i @r @(VectorFor point') . prefix . view vect
 --
 -- >>> myPoint ^. xCoord
 -- 1
--- >>> Point2 1 2 & xCoord .~ 10
+-- >>> Point2 1 (2 :: Int) & xCoord .~ 10
 -- Point2 10 2
 xCoord :: (1 <= d, Point_ point d r) => Lens' point r
 xCoord = coord @1
@@ -237,7 +237,7 @@ xCoord = coord @1
 
 -- | Shorthand to access the second coordinate
 --
--- >>> Point2 1 2 ^. yCoord
+-- >>> Point2 1 (2 :: Int) ^. yCoord
 -- 2
 -- >>> myPoint & yCoord %~ (+1)
 -- Point3 1 3 3
