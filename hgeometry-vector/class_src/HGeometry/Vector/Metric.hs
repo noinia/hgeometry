@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Metric
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- typeclass that expresses operations on vectors in a Metric space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Metric
   ( Metric_(..)
   ) where

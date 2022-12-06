@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Helpers
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper functions to easily implement operations on data types that
+-- can act as vectors.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Helper where
 
 import           Control.Lens
@@ -22,7 +33,7 @@ showsPrecVec k v = showParen (k > app_prec) $
       constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
 
-
+-- | Implementation for read on vectors.
 readPrecVec :: forall vector d r. (Vector_ vector d r, KnownNat d, Read r)
             => ReadPrec vector
 readPrecVec = readData $

@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.List
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of d-dimensional vectors using basic Lists
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.List
   ( ListVector(..)
   ) where

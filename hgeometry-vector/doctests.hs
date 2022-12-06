@@ -29,4 +29,7 @@
                 -optF -XFlexibleContexts
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
+
+                -optF -package=hgeometry-vector
+
 #-}

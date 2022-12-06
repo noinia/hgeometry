@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked.V2
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of 2 dimensional vectors for unpackable types.
+--
+--------------------------------------------------------------------------------
 module V2
   ( Vec2(..)
   ) where

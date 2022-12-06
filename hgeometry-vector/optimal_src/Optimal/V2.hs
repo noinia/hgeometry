@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.V2
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Optimal implementation using data families of 2 dimensional vectors.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Optimal.V2
   ( V2(Vector2)
   , HasV2(..)

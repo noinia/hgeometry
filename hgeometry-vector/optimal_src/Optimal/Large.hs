@@ -1,4 +1,14 @@
- module HGeometry.Vector.Optimal.Large
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.Large
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Optimal implementation of d dimensional vectors, for d > 4
+--
+--------------------------------------------------------------------------------
+module HGeometry.Vector.Optimal.Large
    ( LargeVector(..)
    , FallBack(..)
    ) where

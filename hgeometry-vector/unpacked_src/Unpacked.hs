@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of d-dimensional vectors for unpackable types.
+--
+--------------------------------------------------------------------------------
 module Unpacked
   ( Vec2(..)
   , Vec3(..)

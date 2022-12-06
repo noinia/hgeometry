@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.V3
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Optimal implementation using data families of 3 dimensional vectors.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Optimal.V3
   ( V3(Vector3)
   , HasV3(..)

@@ -2,6 +2,16 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Class defining d-dimensional vectors
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Class
   ( Vector_(..), pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , component
@@ -46,6 +56,8 @@ import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
+-- | Type family that expresses that we can construct a d-dimensional
+-- vector from an arity d function.
 type ConstructVector :: Type -> Nat -> Type
 type family ConstructVector vector d where
   ConstructVector vector 0 = vector
@@ -79,13 +91,14 @@ class ( Dimension vector ~ d
 
   {-# MINIMAL vectorFromList #-}
 
+-- | Vectors that we can construct using an arity d function
 class Vector_ vector d r => ConstructableVector_ vector d r where
   -- | Construct a vector from a d-arity function.
   --
   mkVector :: ConstructVector vector d
 
 
-  -- | Convert an arbitrary vector into another vector
+-- | Convert an arbitrary vector into another vector
 vectorFromVector :: forall vector vector' d r. (Vector_ vector d r, Vector_ vector' d r)
                  => vector -> vector'
 vectorFromVector = uncheckedVectorFromList . toListOf components
@@ -165,7 +178,7 @@ pattern Vector4_ x y z w <- (    view (component @0) &&& view (component @1)
 -- >>> myVec2 & component @1 %~ (*5)
 -- Vector2 10 100
 component :: forall i vector d r. (Vector_ vector d r, i < d, KnownNat i)
-        => IndexedLens' Int vector r
+          => IndexedLens' Int vector r
 component = componentProxy (Proxy @i)
 {-# INLINE component #-}
 
@@ -197,11 +210,17 @@ suffix = uncheckedVectorFromList . List.genericDrop (natVal $ Proxy @(d-i)) . to
 
 
 -- | Add an element to the front of the vector
+--
+-- >>> cons 5 myVec2 :: Vector 3 Int
+-- Vector3 5 10 20
 cons     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
          => r -> vector -> vector'
 cons x v = uncheckedVectorFromList $ x : (v^..components)
 
 -- | Add an element to the back of the vector.
+--
+-- >>> snoc myVec2 5 :: Vector 3 Int
+-- Vector3 10 20 5
 snoc     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
          => vector -> r -> vector'
 snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
@@ -209,6 +228,9 @@ snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
 --------------------------------------------------------------------------------
 
 -- | Extract the first element from the vector
+--
+-- >>> uncons myVec3 :: (Int, Vector 2 Int)
+-- (1,Vector2 2 3)
 uncons   :: forall vector vector' d r.
             ( Vector_ vector (d+1) r, Vector_ vector' d r
             , 0 < d+1 -- this one is silly
@@ -217,37 +239,15 @@ uncons   :: forall vector vector' d r.
 uncons v = ( v^.component @0, suffix v)
 
 -- | Extract the last element from the vector
+--
+-- >>> unsnoc myVec3 :: (Vector 2 Int, Int)
+-- (Vector2 1 2, 3)
 unsnoc   :: forall vector vector' d r.
             (Vector_ vector (d+1) r, Vector_ vector' d r
             , d < d+1 -- these are silly
             , KnownNat d
             ) => vector -> (vector',r)
 unsnoc v = ( prefix v, v^.component @d )
-
---------------------------------------------------------------------------------
-
-
--- class Vector vec where
---   -- | construct from list
---   fromList :: [r] -> vec r
---   -- | access ith component
---   component :: Int -> vec r -> r
-
---   pattern V2 :: r -> r -> V2 r
---   -- default implementation:
---   pattern (V2 x y) <- (elment 1 &&& component 2 -> (x,y))
---     where
---       V2 x y = fromList [x,y]
-
--- data MyV2 r = MyV2 r r
-
--- instance Vector MyV2 where
---   fromList = undefined
---   component = undefined
---   -- for whatever reason I may want some specialized implementation here.
---   pattern V2 x y = MyV2 x y
-
-
 
 --------------------------------------------------------------------------------
 -- * Helper functions specific to two and three dimensional vectors

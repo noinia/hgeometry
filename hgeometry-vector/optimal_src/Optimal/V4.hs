@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.V4
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Optimal implementation using data families of 4 dimensional vectors.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Optimal.V4
   ( V4(Vector4)
   , HasV4(..)

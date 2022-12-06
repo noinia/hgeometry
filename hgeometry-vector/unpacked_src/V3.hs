@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked.V3
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of 3 dimensional vectors for unpackable types.
+--
+--------------------------------------------------------------------------------
 module V3
   ( Vec3(..)
   ) where

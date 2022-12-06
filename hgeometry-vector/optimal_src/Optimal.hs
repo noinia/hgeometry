@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- An implementation of d-dimensional vectors that tries to pick an
+-- optimzied representation.
+--
+--------------------------------------------------------------------------------
 module Optimal
   ( module Optimal.Internal
   -- * Helper with which we can easily implement Optimal vectors for newtypes

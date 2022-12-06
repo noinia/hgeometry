@@ -1,4 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked.Large
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of d dimensional vectors for unpackable types, for d
+-- > 4. This uses an Unboxed VEctor from the Vector package.
+--
+--------------------------------------------------------------------------------
 module VLarge
   ( VecLarge(..)
   ) where

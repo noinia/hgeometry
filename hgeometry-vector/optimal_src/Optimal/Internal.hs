@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Internal module implementing optimal vectors.
+--
+--------------------------------------------------------------------------------
 module Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily, VectorFamily'

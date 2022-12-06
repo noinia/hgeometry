@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.V1
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Optimal implementation of 1 dimensional vectors (as a newtype).
+--
+--------------------------------------------------------------------------------
 module Optimal.V1
   ( V1(Vector1)
   ) where

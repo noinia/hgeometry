@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked.V4
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of 4 dimensional vectors for unpackable types.
+--
+--------------------------------------------------------------------------------
 module V4
   ( Vec4(..)
   ) where

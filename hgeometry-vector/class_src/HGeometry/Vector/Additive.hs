@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Additive
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- typeclass that expresses that we can essentially add vectors
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Additive
   ( Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , HasComponents(..)
@@ -8,6 +18,7 @@ import qualified Data.Foldable as F
 
 --------------------------------------------------------------------------------
 
+-- | Types that have a 'components' indexed traversal
 class HasComponents vector vector' where
   -- | An Indexed Traversal over the components of a vector
   components :: IndexedTraversal Int vector vector' (IxValue vector) (IxValue vector')

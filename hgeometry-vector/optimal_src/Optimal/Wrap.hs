@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Optimal.Wrap
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Module that implements an optimal vector by wrapping some other vector.
+--
+--------------------------------------------------------------------------------
 module Optimal.Wrap
   ( WrapVector(..)
   ) where

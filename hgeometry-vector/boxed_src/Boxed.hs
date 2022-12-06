@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Boxed
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- An implementation d-dimensional vectors that works for any boxed type
+--
+--------------------------------------------------------------------------------
 module Boxed
   ( Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
   ) where
