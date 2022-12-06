@@ -99,7 +99,7 @@ pattern Vector4         :: forall r. OptCVector_ 4 r
                         => r -> r -> r -> r -> Vector 4 r
 pattern Vector4 x y z w <- MkVector (Vector4_ x y z w)
   where
-    Vector4 x y z w = MkVector $ mkVector @(VectorFamily 4 r) x y w z
+    Vector4 x y z w = MkVector $ mkVector @(VectorFamily 4 r) x y z w
 
 -- --------------------------------------------------------------------------------
 
