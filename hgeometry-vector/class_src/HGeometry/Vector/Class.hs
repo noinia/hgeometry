@@ -99,6 +99,8 @@ class Vector_ vector d r => ConstructableVector_ vector d r where
 
 
 -- | Convert an arbitrary vector into another vector
+--
+--
 vectorFromVector :: forall vector vector' d r. (Vector_ vector d r, Vector_ vector' d r)
                  => vector -> vector'
 vectorFromVector = uncheckedVectorFromList . toListOf components
@@ -111,12 +113,16 @@ vectorFromVector = uncheckedVectorFromList . toListOf components
 
 -- | Zip two vectors together using the given function.
 --
+-- >>> vzipWith (+) myVec3 (Vector3 10 20 30)
+-- Vector3 11 22 33
 vZipWith         :: forall vector vector' vector'' d a b c.
                    (Vector_ vector d a, Vector_ vector' d b, Vector_ vector'' d c)
                 => (a -> b -> c) -> vector -> vector' -> vector''
 vZipWith f va vb = uncheckedVectorFromList $ List.zipWith f (va^..components) (vb^..components)
 
 -- | Constructs a vector using the given function
+--
+--
 generate   :: forall vector d r. (Vector_ vector d r, KnownNat d) => (Int -> r) -> vector
 generate f = runIdentity $ generateA (Identity . f)
 
@@ -127,9 +133,6 @@ generateA :: forall vector d r f. (Vector_ vector d r
                                   ) => (Int -> f r) -> f vector
 generateA f = let d = fromIntegral $ natVal $ Proxy @d
               in uncheckedVectorFromList <$> traverse f [0..(d-1)]
-
-
-                  -- [ f i | i <- [0..(d-1)]]
 
 --------------------------------------------------------------------------------
 

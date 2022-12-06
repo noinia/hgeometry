@@ -213,18 +213,17 @@ library
                , hgeometry-vector:boxed
 
 --------------------------------------------------------------------------------
+library quickcheckinstances-vector
+  import: setup
+  visibility: public
 
--- library quickcheckinstances-vector
---   import: setup
---   visibility: public
---
---   hs-source-dirs: qc_src
---   exposed-modules:
---     HGeometry.Vector.Instances
---
---   build-depends: hgeometry-vector
---                , QuickCheck              >= 2.5
---                , quickcheck-instances    >= 0.3
+  hs-source-dirs: qc_src
+  exposed-modules:
+    HGeometry.Vector.Instances
+
+  build-depends: hgeometry-vector
+               , QuickCheck              >= 2.5
+               , quickcheck-instances    >= 0.3
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
@@ -262,15 +261,20 @@ test-suite doctests-vector
 test-suite hspec-vector
   import: setup
   type:                 exitcode-stdio-1.0
-  default-language:     Haskell2010
   hs-source-dirs:       test
   main-is:              Main.hs
 
+  other-modules:
+    VectorSpec
+    Test.Util
+
   build-depends: hgeometry-vector
-               -- , hgeometry-vector:quickcheckinstances-vector
+               , hgeometry-vector:quickcheckinstances-vector
                , hspec                   >= 2.9
-               , QuickCheck
+               , QuickCheck              >= 2.10
                , quickcheck-instances
+               , directory               >= 1.3
+               , filepath                >= 1.4
 
   ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
