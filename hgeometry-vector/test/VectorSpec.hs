@@ -1,13 +1,14 @@
 module VectorSpec (spec) where
 
+import           Control.Lens ((^..),(%~),(&))
 -- import Data.Double.Approximate (SafeDouble)
-import Data.Proxy
-import HGeometry.Vector
-import Test.Hspec
-import Test.QuickCheck
-import Test.QuickCheck.Instances ()
-import HGeometry.Vector.Instances ()
-import Test.Util
+import           HGeometry.Vector
+import           Test.Hspec
+import           Test.Hspec.QuickCheck
+import           Test.QuickCheck.Instances ()
+import           HGeometry.Vector.Instances ()
+-- import           Test.Util
+import qualified HGeometry.Vector.Boxed as Boxed
 
 --------------------------------------------------------------------------------
 
@@ -23,12 +24,76 @@ spec = do
     -- it "1e10 (pass)" $
     --   isScalarMultipleOf (Vector2 1 10) (Vector2 1e10 (1e10*10::SafeDouble)) `shouldBe` True
 
-  -- -- this ia a bit annoying since we don't have a Arbitrary1 instance anymore.
-  -- specify "Read/Show properties for Vector1" $
-  --   property $ qcReadShow1 @(Vector 1) Proxy
-  -- specify "Read/Show properties for Vector2" $
-  --   property $ qcReadShow1 @(Vector 2) Proxy
-  -- specify "Read/Show properties for Vector3" $
-  --   property $ qcReadShow1 @(Vector 3) Proxy
-  -- specify "Read/Show properties for Vector4" $
-  --   property $ qcReadShow1 @(Vector 4) Proxy
+  ordTests
+  showReadTests
+  fromListTests
+
+showReadTests :: Spec
+showReadTests = describe "show/read tests for" $ do
+  describe "Vector1" $ do
+    prop "Double"       $ \(v :: Vector 1 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: Vector 1 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: Vector 1 Rational)       -> (read . show) v == v
+    prop "Vector 2 Int" $ \(v :: Vector 1 (Vector 2 Int)) -> (read . show) v == v
+
+  describe "Vector2" $ do
+    prop "Double"       $ \(v :: Vector 2 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: Vector 2 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: Vector 2 Rational)       -> (read . show) v == v
+    prop "Vector 2 Int" $ \(v :: Vector 2 (Vector 2 Int)) -> (read . show) v == v
+
+  describe "Vector3" $ do
+    prop "Double"       $ \(v :: Vector 3 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: Vector 3 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: Vector 3 Rational)       -> (read . show) v == v
+    prop "Vector 2 Int" $ \(v :: Vector 3 (Vector 2 Int)) -> (read . show) v == v
+
+  describe "Vector4" $ do
+    prop "Double"       $ \(v :: Vector 4 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: Vector 4 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: Vector 4 Rational)       -> (read . show) v == v
+    prop "Vector 2 Int" $ \(v :: Vector 4 (Vector 2 Int)) -> (read . show) v == v
+
+  describe "Vector6" $ do
+    prop "Double"       $ \(v :: Vector 6 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: Vector 6 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: Vector 6 Rational)       -> (read . show) v == v
+    prop "Vector 2 Int" $ \(v :: Vector 6 (Vector 2 Int)) -> (read . show) v == v
+
+
+ordTests :: Spec
+ordTests = describe "Ord tests for" $ do
+  describe "Vector2" $ do
+    prop "Int"       $ \u (v :: Vector 2 Int) ->
+      (vectorFromVector u `compare` vectorFromVector @_ @(Boxed.Vector 2 Int) v) ==
+      (u `compare` v)
+  describe "Vector3" $ do
+    prop "Int"       $ \u (v :: Vector 3 Int) ->
+      (vectorFromVector u `compare` vectorFromVector @_ @(Boxed.Vector 3 Int) v) ==
+      (u `compare` v)
+  describe "Vector4" $ do
+    prop "Int"       $ \u (v :: Vector 4 Int) ->
+      (vectorFromVector u `compare` vectorFromVector @_ @(Boxed.Vector 4 Int) v) ==
+      (u `compare` v)
+  describe "Vector7" $ do
+    prop "Int"       $ \u (v :: Vector 7 Int) ->
+      (vectorFromVector u `compare` vectorFromVector @_ @(Boxed.Vector 7 Int) v) ==
+      (u `compare` v)
+
+
+fromListTests :: Spec
+fromListTests = describe "fromList tests for" $ do
+  describe "Vector2 " $ do
+    prop "Int" $ \(v :: Vector 2 Int) -> let v' = vectorFromVector @_ @(Boxed.Vector 2 Int) v in
+                 v^..components == v'^..components
+    -- prop "Show Int" $ \(v :: Vector 2 Int) -> let v'= v&components.traverse %~ show in
+    --              (show <$> v^..components) == v'^..components
+  describe "Vector3 " $ do
+    prop "Int" $ \(v :: Vector 3 Int) -> let v' = vectorFromVector @_ @(Boxed.Vector 3 Int) v in
+                 v^..components == v'^..components
+  describe "Vector4 " $ do
+    prop "Int" $ \(v :: Vector 4 Int) -> let v' = vectorFromVector @_ @(Boxed.Vector 4 Int) v in
+                 v^..components == v'^..components
+  describe "Vector5 " $ do
+    prop "Int" $ \(v :: Vector 5 Int) -> let v' = vectorFromVector @_ @(Boxed.Vector 5 Int) v in
+                 v^..components == v'^..components

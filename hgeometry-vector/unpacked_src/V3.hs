@@ -84,13 +84,13 @@ instance Ixed Vec3 where
                             _ -> pure v
   {-# INLINE ix #-}
 
-instance Vector_ v 3 (NumType v) => HasComponents Vec3 v where
+instance Vector_ v 3 (IxValue v) => HasComponents Vec3 v where
   {-# SPECIALIZE instance HasComponents Vec3 Vec3 #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
-      traverse'                 :: Applicative f => (R -> f (NumType v)) -> Vec3 -> f v
+      traverse'                 :: Applicative f => (R -> f (IxValue v)) -> Vec3 -> f v
       traverse' f (Vec3 x y z)  = Vector3_ <$> f x <*> f y <*> f z
-      itraverse'               :: Applicative f => (Int -> R -> f (NumType v)) -> Vec3 -> f v
+      itraverse'               :: Applicative f => (Int -> R -> f (IxValue v)) -> Vec3 -> f v
       itraverse' f (Vec3 x y z) = Vector3_ <$> f 0 x <*> f 1 y <*> f 2 z
   {-# INLINE components #-}
 

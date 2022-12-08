@@ -79,14 +79,14 @@ instance Ixed (VecLarge d) where
   ix i = _VecLargeVector.ix i
 
 
--- instance Vector_ v d (NumType v) => HasComponents (VecLarge d) v where
+-- instance Vector_ v d (IxValue v) => HasComponents (VecLarge d) v where
 --   {-# SPECIALIZE instance HasComponents (VecLarge d) (VecLarge d) #-}
 --   components = conjoined traverse' (itraverse' . indexed)
 --     where
---       traverse'                   :: Applicative f => (R -> f (NumType v)) -> VecLarge d -> f v
+--       traverse'                   :: Applicative f => (R -> f (IxValue v)) -> VecLarge d -> f v
 --       traverse' f (VecLarge v)  = VecLarge <$> traverse'' f v
 --       itraverse'                 :: Applicative f
---                                  => (Int -> R -> f (NumType v)) -> VecLarge d -> f v
+--                                  => (Int -> R -> f (IxValue v)) -> VecLarge d -> f v
 --       itraverse' f (VecLarge v) = VecLarge <$> itraverse'' f v
 --   {-# INLINE components #-}
 
