@@ -79,6 +79,13 @@ type instance Intersection (ClosedLineSegment point) (Ball point) =
 
 
 
+-- instance ( Point_ point d r
+--          , Ord r, Num r
+--          , OptVector_ d r, Metric_ (VectorFamily' d r)
+--          ) => (LineSegment endPoint point') `HasIntersectionWith` (Ball point) where
+--   intersects s (Ball c r) = squaredEuclideanDist q (pointFromPoint c) <= r
+
+
 
 --------------------------------------------------------------------------------
 

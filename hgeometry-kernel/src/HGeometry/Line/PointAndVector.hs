@@ -17,15 +17,16 @@ import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           GHC.Generics (Generic)
+import           HGeometry.HyperPlane.Class
 import           HGeometry.Line.Class
 import           HGeometry.Point
-import           HGeometry.HyperPlane.Class
 -- import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
-import           HGeometry.Properties(NumType, Dimension)
+import           HGeometry.Properties (NumType, Dimension)
 import           HGeometry.Vector
 import           HGeometry.Intersection
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -49,7 +50,8 @@ instance ( OptVector_ d r
   fromPointAndVec p v = Line (pointFromPoint p) (vectorFromVector v)
 
 
-instance HyperPlane_ (Line 2 r) 2 r where
+instance ( OptCVector_ 2 r, OptCVector_ 3 r
+         ) => HyperPlane_ (Line 2 r) 2 r where
   -- hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
 
   hyperPlaneEquation (Line p v) = Vector3 a b c
@@ -58,12 +60,30 @@ instance HyperPlane_ (Line 2 r) 2 r where
       b = undefined
       c = undefined
 
+{- HLINT ignore toLinearFunction -}
+-- | get values a,b s.t. the input line is described by y = ax + b.
+-- returns Nothing if the line is vertical
+toLinearFunction                             :: forall r.
+                                                ( Fractional r, Ord r
+                                                , OptCVector_ 2 r, OptCVector_ 3 r
+                                                , Metric_ (VectorFamily 2 r)
+                                                , Eq (VectorFamily 2 r)
+                                                )
+                                             => Line 2 r -> Maybe (r,r)
+toLinearFunction l@(Line _ ~(Vector2 vx vy)) = case l `intersect` verticalLine @r 0 of
+  Nothing                               -> Nothing -- l is vertical
+  Just (Line_x_Line_Point (Point2 _ b)) -> Just (vy / vx,b)
+  Just (Line_x_Line_Line _)             -> Nothing -- l is a vertical line (through x=0)
+
+
 -- instance Line_ Line d r where
 --   mkLine (fromGenericPoint -> p) = Line p
 --   anchorPoint = lens _anchorPoint (\line pt -> line{_anchorPoint=pt})
 --   direction = lens _direction (\line dir -> line{_direction=dir})
 
-instance (Show r) => Show (Line d r) where
+instance ( Show r, KnownNat d
+         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         ) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
 
 -- -- TODO:
@@ -85,9 +105,11 @@ instance (Show r) => Show (Line d r) where
 
 -- | Test if a point lies on the line
 onLine :: ( Point_ point d r
-          , Line_ line d r
-          ) => point -> line -> Bool
-onLine = undefined
+          , Fractional r, Eq r
+          , OptVector_ d r, Metric_ (VectorFamily' d r), Eq (VectorFamily' d r)
+          ) => point -> Line d r -> Bool
+onLine q (Line p v) = let q' = pointFromPoint q
+                      in p == q' || (q' .-. p) `isScalarMultipleOf` v
 
 
 -- instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
@@ -103,7 +125,8 @@ type instance NumType   (Line d r) = r
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
-isIdenticalTo                         :: (Eq r) => Line d r -> Line d r -> Bool
+isIdenticalTo                         :: (Eq (VectorFamily' d r)
+                                         ) => Line d r -> Line d r -> Bool
 (Line p u) `isIdenticalTo` (Line q v) = (p,u) == (q,v)
 
 
@@ -124,22 +147,30 @@ isIdenticalTo                         :: (Eq r) => Line d r -> Line d r -> Bool
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
 
-data instance IntersectionOf (Line 2 r) (Line 2 r) = PointIntersection (Point 2 r)
-                                                   | LineIntersection (Line 2 r)
+data instance IntersectionOf (Line 2 r) (Line 2 r) = Line_x_Line_Point (Point 2 r)
+                                                   | Line_x_Line_Line (Line 2 r)
 --                                                   deriving (Show,Eq)
 type instance Intersection (Line 2 r) (Line 2 r) = Maybe (IntersectionOf (Line 2 r)  (Line 2 r))
 
-instance (Ord r, Num r) => Line 2 r `HasIntersectionWith` Line 2 r where
+instance ( Ord r
+         , Fractional r, Eq (VectorFamily 2 r)
+         , OptCVector_ 2 r, OptCVector_ 3 r
+         , Metric_ (VectorFamily 2 r)
+         ) => Line 2 r `HasIntersectionWith` Line 2 r where
   l1 `intersects` l2@(Line q _) =
     not (l1 `isParallelTo` l2) || q `onLine` l1
 
 
 
-instance (Ord r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
+instance ( Ord r
+         , Fractional r
+         , OptCVector_ 2 r, OptCVector_ 3 r
+         , Metric_ (VectorFamily 2 r), Eq (VectorFamily 2 r)
+         ) => Line 2 r `IsIntersectableWith` Line 2 r where
   l@(Line p ~(Vector2 ux uy)) `intersect` (Line q ~v@(Vector2 vx vy))
-      | areParallel = if q `onLine` l then Just $ LineIntersection l
-                                       else Nothing
-      | otherwise   = Just $ PointIntersection r
+      | areParallel = if q `onLine` l then Just $ Line_x_Line_Line l
+                                      else Nothing
+      | otherwise   = Just $ Line_x_Line_Point r
     where
       r = q .+^ (alpha *^ v)
 
@@ -156,7 +187,8 @@ instance (Ord r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
 --------------------------------------------------------------------------------
 -- * Supporting Lines
 
--- | Types for which we can compute a supporting line, i.e. a line that contains the thing of type t.
+-- | Types for which we can compute a supporting line, i.e. a line
+-- that contains the thing of type t.
 class HasSupportingLine t where
   supportingLine :: t -> Line (Dimension t) (NumType t)
 
@@ -167,22 +199,16 @@ instance HasSupportingLine (Line d r) where
 -- * Convenience functions on Two dimensional lines
 
 -- | Create a line from the linear function ax + b
-fromLinearFunction     :: Num r => r -> r -> Line 2 r
+fromLinearFunction     :: (Num r, OptCVector_ 2 r) => r -> r -> Line 2 r
 fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 
 
-{- HLINT ignore toLinearFunction -}
--- | get values a,b s.t. the input line is described by y = ax + b.
--- returns Nothing if the line is vertical
-toLinearFunction                             :: forall r. (Fractional r, Ord r)
-                                             => Line 2 r -> Maybe (r,r)
-toLinearFunction l@(Line _ ~(Vector2 vx vy)) = case l `intersect` verticalLine @r 0 of
-  Nothing                               -> Nothing -- l is vertical
-  Just (PointIntersection (Point2 _ b)) -> Just (vy / vx,b)
-  Just (LineIntersection _)             -> Nothing -- l is a vertical line (through x=0)
 
 
-instance (Fractional r) => HasSquaredEuclideanDistance (Line d r) where
+instance (Fractional r
+         , OptVector_ d r, OptVector_ (d+1) r
+         , Metric_ (VectorFamily' d r)
+         ) => HasSquaredEuclideanDistance (Line d r) where
   pointClosestTo (pointFromPoint -> p) (Line a m) = pointFromPoint $ a .+^ (t0 *^ m)
     where
       -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
@@ -200,7 +226,9 @@ class OnSideUpDownTest t where
   onSideUpDown :: (d ~ Dimension t, r ~ NumType t, Ord r, Num r, Point_ point d r)
                => point -> t -> SideTestUpDown
 
-instance OnSideUpDownTest (Line 2 r) where
+instance ( OptCVector_ 2 r
+         , Metric_ (VectorFamily 2 r)
+         ) => OnSideUpDownTest (Line 2 r) where
   -- | Given a point q and a line l, compute to which side of l q lies. For
   -- vertical lines the left side of the line is interpeted as below.
   --
@@ -237,6 +265,7 @@ data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)
 -- OnLine
 onSide                :: ( Ord r, Num r
                          , Point_ point 2 r
+                         , OptCVector_ 2 r, Metric_ (VectorFamily 2 r)
                          ) => point -> Line 2 r -> SideTest
 q `onSide` (Line p v) = let r    =  p .+^ v
                             -- f z         = (z^.xCoord, -z^.yCoord)
@@ -248,15 +277,22 @@ q `onSide` (Line p v) = let r    =  p .+^ v
                           CoLinear -> OnLine
 
 -- | Test if the query point q lies (strictly) above line l
-liesAbove       :: (Ord r, Num r, Point_ point 2 r) => point -> Line 2 r -> Bool
+liesAbove       :: ( Ord r, Num r
+                   , Point_ point 2 r
+                   , OptCVector_ 2 r, Metric_ (VectorFamily 2 r)
+                   ) => point -> Line 2 r -> Bool
 q `liesAbove` l = q `onSideUpDown` l == Above
 
 -- | Test if the query point q lies (strictly) above line l
-liesBelow      :: (Ord r, Num r, Point_ point 2 r) => point -> Line 2 r -> Bool
+liesBelow      :: (Ord r, Num r, Point_ point 2 r
+                  , OptCVector_ 2 r, Metric_ (VectorFamily 2 r)
+                  ) => point -> Line 2 r -> Bool
 q `liesBelow` l = q `onSideUpDown` l == Below
 
 -- | Get the bisector between two points
-bisector     :: (Fractional r, Point_ point 2 r) => point -> point -> Line 2 r
+bisector     :: (Fractional r, Point_ point 2 r
+                , OptCVector_ 2 r, Metric_ (VectorFamily 2 r)
+                ) => point -> point -> Line 2 r
 bisector p q = let v = q .-. p
                    h = pointFromPoint $ p .+^ (v ^/ 2)
                in perpendicularTo (Line h $ vectorFromVector v)
@@ -267,11 +303,12 @@ bisector p q = let v = q .-. p
 --
 -- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
 -- Line (Point2 3 4) (Vector2 (-2) (-1))
-perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
+perpendicularTo                           :: (Num r, OptCVector_ 2 r) => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 
 -- | Test if a vector is perpendicular to the line.
-isPerpendicularTo :: (Num r, Eq r) => Vector 2 r -> Line 2 r -> Bool
+isPerpendicularTo :: (Num r, Eq r, OptVector_ 2 r, Metric_ (VectorFamily 2 r)
+                     ) => Vector 2 r -> Line 2 r -> Bool
 v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 
 
@@ -284,7 +321,8 @@ v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 -- GT
 -- >>> (Line origin (Vector2 5 1)) `cmpSlope` (Line origin (Vector2 0 1))
 -- LT
-cmpSlope :: forall r. (Num r, Ord r) => Line 2 r -> Line 2 r -> Ordering
+cmpSlope :: forall r. (Num r, Ord r, OptCVector_ 2 r, Metric_ (VectorFamily 2 r)
+                      ) => Line 2 r -> Line 2 r -> Ordering
 (Line _ u) `cmpSlope` (Line _ v) = case ccw (origin :: Point 2 r) (f u) (f v) of
                                      CCW      -> LT
                                      CW       -> GT

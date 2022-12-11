@@ -17,7 +17,7 @@ import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.Properties
 import HGeometry.Vector
-import GHC.TypeLits
+-- import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -33,7 +33,6 @@ type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
 instance ( MkHyperPlaneConstraints d r
          , Fractional r
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
-  type EquationFor (NonVerticalHyperPlane d r) = Vector (d+1) r
 
   -- | pre: the last component is not zero
   hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-x)

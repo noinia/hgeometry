@@ -22,23 +22,22 @@ import Data.Type.Ord
 import GHC.TypeNats
 import HGeometry.Point.Class
 import HGeometry.Properties
-import HGeometry.Vector (sameDirection)
-import HGeometry.Vector.Class
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
 -- | A class to represent hyperplanes in d-dimensional space.
 class ( NumType hyperPlane ~ r
       , Dimension hyperPlane ~ d
-      , NumType (EquationFor hyperPlane) ~ r
-      , Vector_ (VectorFor hyperPlane) d r
-      , Vector_ (EquationFor hyperPlane) (d+1) r
+      , OptVector_ d     r
+      , OptVector_ (d+1) r
+      -- , NumType (EquationFor hyperPlane) ~ r
       ) => HyperPlane_ hyperPlane d r | hyperPlane -> d
                                       , hyperPlane -> r where
-  type EquationFor hyperPlane
+--  {-# MINIMAL hyperPlaneTrough #-}
 
-  -- | Given the equation, construct the hyperplane form it.
-  hyperPlaneFromEquation :: EquationFor hyperPlane -> hyperPlane
+  -- | Given the coefficients of the equation, construct the hyperplane form it.
+  hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
 
   -- -- | Constructs the hyperplane through d points
   -- hyperPlaneTrough :: Num r => Point_ point d r => Vector d point -> hyperPlane
@@ -49,32 +48,32 @@ class ( NumType hyperPlane ~ r
   --
   -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\)
   hyperPlaneEquation :: ( Num r
-                        ) => hyperPlane -> EquationFor hyperPlane
+                        ) => hyperPlane -> Vector (d+1) r
   default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
                                 , Num r
                                 )
-                             => hyperPlane -> EquationFor hyperPlane
+                             => hyperPlane -> Vector (d+1) r
   hyperPlaneEquation h = snoc a (-1)
     where
       a = hyperPlaneCoefficients h
 
   -- | Construct a Hyperplane from a point and a normal.
   fromPointAndNormal     :: ( Point_ point d r
-                            , vector ~ VectorFor point
+                            , VectorFor point ~ Vector d r
                             , Num r
                             )
-                         => point -> vector -> hyperPlane
+                         => point -> Vector d r -> hyperPlane
   fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
     where
       a0 = negate $ (q^.vector) `dot` n
 
 
   -- | Get the normal vector of the hyperlane.
-  normalVector :: Num r => hyperPlane -> VectorFor hyperPlane
+  normalVector :: Num r => hyperPlane -> Vector d r
   default normalVector :: ( KnownNat d
                           , Num r
                           )
-                       => HyperPlane_ hyperPlane d r => hyperPlane -> VectorFor hyperPlane
+                       => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
   normalVector = suffix . hyperPlaneEquation
 
   -- | Test if a point lies on a hyperplane.
@@ -97,19 +96,21 @@ class ( NumType hyperPlane ~ r
     where
       (a,a0) = unsnoc $ hyperPlaneEquation h
 
---  {-# MINIMAL hyperPlaneTrough #-}
 
 --------------------------------------------------------------------------------
 
 
 -- | Non-vertical hyperplanes.
 class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
+  {-# MINIMAL  #-}
 
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   evalAt     :: ( Num r
-                , Metric_ (VectorFor hyperPlane)
                 , 1 <= d
-                ) => Point_ point (d-1) r => point -> hyperPlane -> r
+                , Metric_ (VectorFamily' d r)
+                , Point_ point (d-1) r
+                , OptVector_ ((d-1)+1) r
+                ) => point -> hyperPlane -> r
   evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
 
   -- | The coefficients \( \langle a_0,..,a_{d-1} \rangle \) such that
@@ -118,15 +119,14 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   --  \( a_0 + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
-  hyperPlaneCoefficients :: hyperPlane -> VectorFor hyperPlane
+  hyperPlaneCoefficients :: hyperPlane -> Vector d r
   default hyperPlaneCoefficients :: ( Fractional r, KnownNat d
                                     , d < d+1
-                                    ) => hyperPlane -> VectorFor hyperPlane
+                                    ) => hyperPlane -> Vector d r
   hyperPlaneCoefficients h = a ^/ (-x)
     where
       (a,x) = unsnoc $ hyperPlaneEquation h
 
-  {-# MINIMAL  #-}
 
 --------------------------------------------------------------------------------
 -- * Functions on Hyperplanes

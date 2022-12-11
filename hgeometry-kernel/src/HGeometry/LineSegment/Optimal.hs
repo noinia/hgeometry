@@ -131,8 +131,16 @@ instance ( Show (endPoint point)
       app_prec = 10
 
 
+
+
+
 testseg :: ClosedLineSegment (Point 2 Double)
-testseg = ClosedLineSegment origin (Point2 10.0 10.0)
+testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
 
 test :: Point 2 Double
 test = interpolate 0.5 testseg
+
+
+
+-- instance HasSquaredEuclideanDistance (ClosedLineSegment point) where
+--   pointClosestToWithDistance q (ClosedLineSegment s t) =

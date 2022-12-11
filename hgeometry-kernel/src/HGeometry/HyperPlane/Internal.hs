@@ -33,13 +33,12 @@ type instance VectorFor (HyperPlane d r) = Vector d r
 -- these are satisfied by default, it is just that the typechecker does not realize that.
 type MkHyperPlaneConstraints d r =
   ( d < d+1, KnownNat d
-  , Vector_ (Vector (d+1) r) (d+1) r
-  , Vector_ (Vector d r)     d r
+  , OptVector_ (d+1) r
+  , OptVector_ d     r
   )
 
 instance ( MkHyperPlaneConstraints d r
          ) => HyperPlane_ (HyperPlane d r) d r where
-  type EquationFor (HyperPlane d r) = Vector (d+1) r
   hyperPlaneEquation (HyperPlane v) = v
   hyperPlaneFromEquation = HyperPlane
 
