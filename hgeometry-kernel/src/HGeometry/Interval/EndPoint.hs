@@ -24,6 +24,7 @@ import HGeometry.Properties
 import HGeometry.Vector
 import Data.Semigroup.Foldable.Class
 
+import HGeometry.Point
 --------------------------------------------------------------------------------
 
 -- | Types that have an '_endPoint' field lens.
@@ -39,10 +40,14 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
   mkEndPoint :: IxValue endPoint -> endPoint
 
 -- | Possible endpoint types; open or closed
-data EndPointType = Open | Closed deriving (Show,Eq)
+data EndPointType = Open | Closed deriving (Show,Eq,Enum,Bounded)
 
 
+testV :: Vector 2 (Point 2 Double)
+testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 1.0)
 
+testV1 :: Vector 2 (EndPoint Closed (Point 2 Double))
+testV1 = Vector2 (mkEndPoint$ Point2 5.0 6.0) (mkEndPoint$ Point2 10.0 1.0)
 
 --------------------------------------------------------------------------------
 
@@ -73,9 +78,11 @@ instance EndPoint_ (EndPoint Open r) where
   endPointType _ = Open
   mkEndPoint = EndPoint
 
+-- | Constructs a closed endpoint
 pattern ClosedE   :: r -> EndPoint Closed r
 pattern ClosedE x = EndPoint x
 
+-- | Constructs an Open endpoint
 pattern OpenE   :: r -> EndPoint Open r
 pattern OpenE x = EndPoint x
 
