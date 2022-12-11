@@ -12,7 +12,7 @@
 module Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily, VectorFamily'
-  , OptVector_, OptCVector_
+  , OptVector_, OptCVector_, OptMetric_
   ) where
 
 import           Control.Applicative
@@ -73,6 +73,9 @@ type OptVector_ d r = Vector_ (VectorFamily' d r) d r
 -- | Shorthand for the constraint that our optimal vector is a constructable vector
 type OptCVector_ d r = ConstructableVector_ (VectorFamily d r) d r
 
+-- | Shorthand for having a Optimal vector as a Metric
+type OptMetric_ d r = Metric_ (VectorFamily' d r)
+
 ---------------------------------------------------------------------------------
 -- * Constructors for Small vectors
 
@@ -103,7 +106,8 @@ pattern Vector4         :: forall r. OptCVector_ 4 r
 pattern Vector4 x y z w <- MkVector (Vector4_ x y z w)
   where
     Vector4 x y z w = MkVector $ mkVector @(VectorFamily 4 r) x y z w
-{-# COMPLETE Vector4 #-}
+{-# COMPLETE Vector4
+ #-}
 
 -- --------------------------------------------------------------------------------
 
@@ -150,7 +154,7 @@ instance ( ConstructableVector_ (VectorFamily' d r) d r
 deriving newtype instance ( Additive_ (VectorFamily' d r)
                           , IxValue (VectorFamily' d r) ~ r
                           ) => Additive_ (Vector d r)
-deriving newtype instance ( Metric_ (VectorFamily' d r)
+deriving newtype instance ( OptMetric_ d r
                           , IxValue (VectorFamily' d r) ~ r
                           ) => Metric_   (Vector d r)
 

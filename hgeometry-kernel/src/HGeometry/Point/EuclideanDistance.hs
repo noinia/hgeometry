@@ -1,13 +1,15 @@
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Point.EuclideanDistance
   ( cmpByDistanceTo
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
   ) where
 
-
+import           Control.Lens
 import           Data.Ord (comparing)
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point.Class
+import           HGeometry.Point.Optimal
 import           HGeometry.Properties
 import           HGeometry.Vector
 
@@ -33,34 +35,40 @@ cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 class HasSquaredEuclideanDistance g where
   {-# MINIMAL pointClosestToWithDistance | pointClosestTo #-}
   -- | Given a point q and a geometry g, the squared Euclidean distance between q and g.
-  squaredEuclideanDistTo   :: ( Num (NumType g)
-                              , Point_ point (Dimension  g) (NumType g))
+  squaredEuclideanDistTo   :: ( r ~ NumType g, d ~ Dimension g, Num r
+                              , Point_ point d r
+                              , OptVector_ d r
+                              , OptMetric_ d r
+                              )
                            => point -> g -> NumType g
-  squaredEuclideanDistTo q = snd . pointClosestToWithDistance' q
-    where
-      pointClosestToWithDistance' :: Point_ point' (Dimension g) (NumType g)
-                                  => point' -> g -> (point', NumType g)
-      pointClosestToWithDistance' = pointClosestToWithDistance
-
+  squaredEuclideanDistTo q = snd . pointClosestToWithDistance q
 
   -- | Given q and g, computes the point p in g closest to q according
   -- to the Squared Euclidean distance.
-  pointClosestTo   :: ( Num (NumType g)
-                      , Point_ point    (Dimension g) (NumType g)
-                      , Point_ outPoint (Dimension g) (NumType g)
+  pointClosestTo   :: ( r ~ NumType g, d ~ Dimension g, Num r
+                      , Point_ point d r, OptVector_ d r
+                      , OptMetric_ d r
                       )
-                   => point -> g -> outPoint
+                   => point -> g -> Point (Dimension g) (NumType g)
   pointClosestTo q = fst . pointClosestToWithDistance q
 
   -- | Given q and g, computes the point p in g closest to q according
   -- to the Squared Euclidean distance. Returns both the point and the
   -- distance realized by this point.
-  pointClosestToWithDistance     :: ( Num (NumType g)
-                                    , Point_ point    (Dimension g) (NumType g)
-                                    , Point_ outPoint (Dimension g) (NumType g)
+  pointClosestToWithDistance     :: ( r ~ NumType g, d ~ Dimension g, Num r
+                                    , Point_ point d r
+                                    , OptVector_ d r
+                                    , OptMetric_ d r
                                     )
                                  => point -> g
-                                 -> (outPoint, NumType g)
+                                 -> (Point d r, r)
   pointClosestToWithDistance q g = let q' = pointFromPoint q
                                        p  = pointClosestTo q' g
                                    in (p, squaredEuclideanDist p q')
+
+instance ( Num (IxValue v)
+         , Metric_ v
+         , Vector_ v (Dimension v) (IxValue v)
+         , IxValue v ~ NumType v
+         ) => HasSquaredEuclideanDistance (PointF v) where
+  pointClosestTo _ = pointFromPoint

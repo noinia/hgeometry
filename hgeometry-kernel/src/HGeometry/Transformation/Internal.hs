@@ -98,7 +98,7 @@ type DefaultTransformByConstraints g d r =
   , KnownNat d
   , d < d+1
   , Fractional r
-  , Metric_ (VectorFamily' d r)
+  , OptMetric_ d r
   )
 
 -- | A class representing types that can be transformed using a transformation

@@ -22,7 +22,7 @@ class IsBoxable g where
 -- defaultBBox  :: forall g d r. ( d ~ Dimension g, r ~ NumType g
 --                                    -- , HasPoints g g point (Point d r)
 --                 , OptVector_ d r
---                 , Metric_ (VectorFamily' d r)
+--                 , OptMetric_ d r
 --                 , Ord (VectorFamily' d r)
 --                 -- , Point_ point d r
 --                 )
@@ -39,6 +39,6 @@ instance ( Box_ (Box point) point
          , OptVector_ d r
          , OptCVector_ 2 point
          , OptCVector_ 2 (Point d r)
-         , Metric_ (VectorFamily' d r)
+         , OptMetric_ d r
          ) => IsBoxable (Box point) where
   boundingBox (Box p q) = Box (pointFromPoint p) (pointFromPoint q)

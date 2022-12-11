@@ -24,7 +24,6 @@ import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Point.Class
-import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           System.Random (Random (..))
@@ -103,13 +102,6 @@ instance ( Vector_ v d r
 
 instance HasPoints (PointF v) (PointF v') (PointF v) (PointF v') where
   allPoints = id
-
-instance ( Num (IxValue v)
-         , Metric_ v
-         , Vector_ v (Dimension v) (IxValue v)
-         , IxValue v ~ NumType v
-         ) => HasSquaredEuclideanDistance (PointF v) where
-  pointClosestTo _ = pointFromPoint
 
 instance Uniform v => Uniform (PointF v) where
   uniformM gen = Point <$> uniformM gen

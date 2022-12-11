@@ -66,7 +66,7 @@ fitToBoxTransform     :: forall g r rectangle point.
                          , OptCVector_ 2 (ClosedInterval r)
                          , OptVector_ 3 r
                          , Additive_ (VectorFamily 3 r)
-                         , Metric_ (VectorFamily 2 r)
+                         , OptMetric_ 2 r
                          , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
                          ) => rectangle -> g -> Transformation 2 r
 fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1

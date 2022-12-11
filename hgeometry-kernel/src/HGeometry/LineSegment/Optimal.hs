@@ -143,34 +143,42 @@ testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
 test :: Point 2 Double
 test = interpolate 0.5 testseg
 
-instance ( Point_ point (Dimension point) (NumType point)
-         , OptVector_ (Dimension point) (NumType point)
-         , Metric_ (VectorFamily' (Dimension point) (NumType point))
+instance ( d ~ Dimension point, r ~ NumType point
+         , Point_ point d r
+         , OptVector_ d r
+         , OptMetric_ d r
          , EndPoint_ (endPoint point)
          , IxValue (endPoint point) ~ point
          , OptCVector_ 2 (endPoint point)
-         , Num (NumType point)
+         , Num r
          ) => HasSupportingLine (LineSegment endPoint point) where
   supportingLine seg = let s = seg^.start.to pointFromPoint
                            t = seg^.end.to pointFromPoint
                        in Line s (t .-. s)
 
-
-
-
-{-
-instance ( Fractional (NumType point), Ord (NumType point)
+instance ( d ~ Dimension point, r ~ NumType point
+         , Fractional r, Ord r
          , HasSquaredEuclideanDistance point
+         , Point_ point d r
+         , OptCVector_ 2 point
          , OptCVector_ 2 (EndPoint Closed point)
-         , Metric_ (VectorFamily' (Dimension point) (NumType point))
+         , OptMetric_ d r
          ) => HasSquaredEuclideanDistance (ClosedLineSegment point) where
   pointClosestToWithDistance q seg@(ClosedLineSegment a b)
       | m `intersects` seg = z
       | otherwise          = minOn snd (pointClosestToWithDistance q a)
                                        (pointClosestToWithDistance q b)
     where
+      z       :: (Point d r, r)
       z@(m,_) = pointClosestToWithDistance q (supportingLine seg)
 
       minOn       :: Ord b => (a -> b) -> a -> a -> a
       minOn f x y = if f x <= f y then x else y
--}
+
+-- type Intersection (Point d r) (ClosedLineSegment point)
+
+instance OnSegment (LineSegment endPoint point) =>
+         (Point d r) `HasIntersectionWith` (LineSegment endPoint point) where
+  intersects = onSegment
+
+-- instance OnSegment (LineSegment endPoint point)

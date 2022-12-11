@@ -22,7 +22,7 @@ randomPoints       :: forall point r. ( UniformRange point
                       , Point_ point 2 r
                       , Num r
                       , OptCVector_ 2 r
-                      , Metric_ (VectorFamily 2 r)
+                      , OptMetric_ 2 r
                       )
                    => StdGen -- ^ generator to use
                    -> r -- ^ max coordinate value

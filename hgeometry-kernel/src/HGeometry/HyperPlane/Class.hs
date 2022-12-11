@@ -107,7 +107,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   evalAt     :: ( Num r
                 , 1 <= d
-                , Metric_ (VectorFamily' d r)
+                , OptMetric_ d r
                 , Point_ point (d-1) r
                 , OptVector_ ((d-1)+1) r
                 ) => point -> hyperPlane -> r

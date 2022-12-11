@@ -56,13 +56,13 @@ type instance Intersection (Point d r) (Ball point) = Maybe (Point d r)
 
 instance ( Point_ point d r
          , Ord r, Num r
-         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         , OptVector_ d r, OptMetric_ d r
          ) => (Point d r) `HasIntersectionWith` (Ball point) where
   intersects q (Ball c r) = squaredEuclideanDist q (pointFromPoint c) <= r
 
 instance ( Point_ point d r
          , Ord r, Num r
-         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         , OptVector_ d r, OptMetric_ d r
          ) => (Point d r) `IsIntersectableWith` (Ball point) where
   intersect q b | q `intersects` b = Just q
                 | otherwise        = Nothing
@@ -81,7 +81,7 @@ type instance Intersection (ClosedLineSegment point) (Ball point) =
 
 -- instance ( Point_ point d r
 --          , Ord r, Num r
---          , OptVector_ d r, Metric_ (VectorFamily' d r)
+--          , OptVector_ d r, OptMetric_ d r
 --          ) => (LineSegment endPoint point') `HasIntersectionWith` (Ball point) where
 --   intersects s (Ball c r) = squaredEuclideanDist q (pointFromPoint c) <= r
 
@@ -137,13 +137,13 @@ type instance Intersection (Point d r) (Sphere point) = Maybe (Point d r)
 
 instance ( Point_ point d r
          , Eq r, Num r
-         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         , OptVector_ d r, OptMetric_ d r
          ) => (Point d r) `HasIntersectionWith` (Sphere point) where
   intersects q (Sphere c r) = squaredEuclideanDist q (pointFromPoint c) == r
 
 instance ( Point_ point d r
          , Eq r, Num r
-         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         , OptVector_ d r, OptMetric_ d r
          ) => (Point d r) `IsIntersectableWith` (Sphere point) where
   intersect q b | q `intersects` b = Just q
                 | otherwise        = Nothing
