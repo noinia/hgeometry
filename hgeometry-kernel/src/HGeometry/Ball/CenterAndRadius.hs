@@ -12,17 +12,24 @@
 module HGeometry.Ball.CenterAndRadius
   ( Ball(Ball,Disk)
   , Disk
+
+
+  , Sphere(Sphere,Circle,MkSphere)
+  , Circle
   ) where
 
 import           Control.Lens
 import           Data.Ord (comparing)
 import           GHC.TypeLits
+import           HGeometry.Ball.Class
+import           HGeometry.Boundary
+import           HGeometry.Intersection
 import           HGeometry.Interval.Class
+import           HGeometry.LineSegment
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point
-import           HGeometry.Properties
+import           HGeometry.Properties (NumType, Dimension)
 import           HGeometry.Vector
-import           HGeometry.Ball.Class
 
 
 --------------------------------------------------------------------------------
@@ -43,6 +50,33 @@ instance Point_ point (Dimension point) (NumType point) => Ball_ (Ball point) po
   squaredRadius = lens (\(Ball _ r) -> r) (\(Ball c _) r -> Ball c r)
   fromCenterAndSquaredRadius = Ball
 
+--------------------------------------------------------------------------------
+
+type instance Intersection (Point d r) (Ball point) = Maybe (Point d r)
+
+instance ( Point_ point d r
+         , Ord r, Num r
+         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         ) => (Point d r) `HasIntersectionWith` (Ball point) where
+  intersects q (Ball c r) = squaredEuclideanDist q (pointFromPoint c) <= r
+
+instance ( Point_ point d r
+         , Ord r, Num r
+         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         ) => (Point d r) `IsIntersectableWith` (Ball point) where
+  intersect q b | q `intersects` b = Just q
+                | otherwise        = Nothing
+
+-- type instance Intersection (Line point) (Ball point) =
+--   Maybe (IntersectionOf (LineSegment point) (Ball point))
+
+data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
+    Line_x_Ball_Point   point
+  | Line_x_Ball_Segment (ClosedLineSegment point)
+
+type instance Intersection (ClosedLineSegment point) (Ball point) =
+  Maybe (IntersectionOf (ClosedLineSegment point) (Ball point))
+
 
 
 
@@ -58,3 +92,51 @@ type Disk = Ball
 -- | Construct a disk
 pattern Disk     :: point -> NumType point -> Disk point
 pattern Disk c r = Ball c r
+
+
+--------------------------------------------------------------------------------
+
+-- | A sphere, i.e. the boudary of a Ball.
+newtype Sphere point = MkSphere (Ball point)
+
+-- | Construct a Sphere
+pattern Sphere     :: point -> NumType point -> Sphere point
+pattern Sphere c r = MkSphere (Ball c r)
+{-# COMPLETE Sphere #-}
+
+-- | A circle, i.e. the boundary of a Disk
+type Circle = Sphere
+
+-- | Construct a Circle
+pattern Circle     :: point -> NumType point -> Circle point
+pattern Circle c r = Sphere c r
+{-# COMPLETE Circle #-}
+
+
+deriving stock instance (Show point, Show (NumType point)) => Show (Sphere point)
+deriving stock instance (Eq point, Eq (NumType point)) => Eq (Sphere point)
+
+type instance NumType   (Sphere point) = NumType point
+type instance Dimension (Sphere point) = Dimension point
+
+instance HasCenter (Sphere point) point where
+  center = lens (\(Sphere c _) -> c) (\(Sphere _ r) c -> Sphere c r)
+
+
+
+--------------------------------------------------------------------------------
+
+type instance Intersection (Point d r) (Sphere point) = Maybe (Point d r)
+
+instance ( Point_ point d r
+         , Eq r, Num r
+         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         ) => (Point d r) `HasIntersectionWith` (Sphere point) where
+  intersects q (Sphere c r) = squaredEuclideanDist q (pointFromPoint c) == r
+
+instance ( Point_ point d r
+         , Eq r, Num r
+         , OptVector_ d r, Metric_ (VectorFamily' d r)
+         ) => (Point d r) `IsIntersectableWith` (Sphere point) where
+  intersect q b | q `intersects` b = Just q
+                | otherwise        = Nothing

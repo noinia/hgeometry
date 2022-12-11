@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Ball
-  ( Ball(..)
+  ( module HGeometry.Ball.CenterAndRadius
   , module HGeometry.Ball.Class
   ) where
 

@@ -25,8 +25,8 @@ import Data.Maybe (isJust)
 -- | The result of interesecting two geometries,
 type family Intersection g h :: Type
 
--- | The type family specifying the list of possible result types of an
--- intersection.
+-- | The data family specifying to help implement the 'Intersection'
+-- type family.
 data family IntersectionOf g h
 
 -- | Class for types for which we can test if they intersect.
