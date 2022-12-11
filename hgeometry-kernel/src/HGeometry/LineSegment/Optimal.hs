@@ -18,10 +18,12 @@ module HGeometry.LineSegment.Optimal
 
 import Control.Lens
 import Data.Functor.Apply
+import Data.Kind (Type)
 import HGeometry.Box.Boxable
 import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint
 import HGeometry.Interval.Optimal
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties
@@ -30,6 +32,7 @@ import HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- | Data type representing intervals
+type LineSegment :: (Type -> Type) -> Type -> Type
 newtype LineSegment endPoint point = MkLineSegment (Interval endPoint point)
 
 -- | Default implementation of Closed LineSegments
@@ -140,7 +143,34 @@ testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
 test :: Point 2 Double
 test = interpolate 0.5 testseg
 
+instance ( Point_ point (Dimension point) (NumType point)
+         , OptVector_ (Dimension point) (NumType point)
+         , Metric_ (VectorFamily' (Dimension point) (NumType point))
+         , EndPoint_ (endPoint point)
+         , IxValue (endPoint point) ~ point
+         , OptCVector_ 2 (endPoint point)
+         , Num (NumType point)
+         ) => HasSupportingLine (LineSegment endPoint point) where
+  supportingLine seg = let s = seg^.start.to pointFromPoint
+                           t = seg^.end.to pointFromPoint
+                       in Line s (t .-. s)
 
 
--- instance HasSquaredEuclideanDistance (ClosedLineSegment point) where
---   pointClosestToWithDistance q (ClosedLineSegment s t) =
+
+
+{-
+instance ( Fractional (NumType point), Ord (NumType point)
+         , HasSquaredEuclideanDistance point
+         , OptCVector_ 2 (EndPoint Closed point)
+         , Metric_ (VectorFamily' (Dimension point) (NumType point))
+         ) => HasSquaredEuclideanDistance (ClosedLineSegment point) where
+  pointClosestToWithDistance q seg@(ClosedLineSegment a b)
+      | m `intersects` seg = z
+      | otherwise          = minOn snd (pointClosestToWithDistance q a)
+                                       (pointClosestToWithDistance q b)
+    where
+      z@(m,_) = pointClosestToWithDistance q (supportingLine seg)
+
+      minOn       :: Ord b => (a -> b) -> a -> a -> a
+      minOn f x y = if f x <= f y then x else y
+-}

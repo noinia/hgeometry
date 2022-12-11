@@ -15,9 +15,11 @@ module HGeometry.Interval.Optimal
   ) where
 
 import Control.Lens
-import HGeometry.Interval.EndPoint
+import HGeometry.Intersection
 import HGeometry.Interval.Class
-import HGeometry.Properties
+import HGeometry.Interval.EndPoint
+import HGeometry.Point
+import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -102,6 +104,8 @@ test = ClosedInterval 5 10
 {-
 
 
+
+
 -- type instance IntersectionOf r (Interval endPoint r) = [NoIntersection, r]
 -- GHC does not understand the r here cannot be 'Interval endPoint r' itself :(
 
@@ -133,3 +137,55 @@ test = ClosedInterval 5 10
 
 
 --------------------------------------------------------------------------------
+
+type instance Intersection (Point 1 r) (Interval endPoint r) = Maybe r
+
+instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `HasIntersectionWith` (ClosedInterval r) where
+  (Point1 q) `intersects` int = int^.start <= q && q <= int^.end
+instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `HasIntersectionWith` (OpenInterval r) where
+  (Point1 q) `intersects` int = int^.start < q && q < int^.end
+
+instance (Ord r, OptCVector_ 2 (AnEndPoint r))
+         => (Point 1 r) `HasIntersectionWith` (Interval AnEndPoint r) where
+  (Point1 q) `intersects` int = compare' (int^.startPoint.to endPointType) (int^.start) q
+                             && compare' (int^.endPoint.to endPointType)   q            (int^.end)
+    where
+      compare' = \case
+        Open   -> (<)
+        Closed -> (<=)
+
+-- | intersect implementation
+intersectImpl  :: HasIntersectionWith (Point 1 r) i => Point 1 r -> i -> Maybe r
+q@(Point1 q') `intersectImpl` int | q `intersects` int = Just q'
+                                  | otherwise          = Nothing
+
+instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `IsIntersectableWith` (ClosedInterval r) where
+  intersect = intersectImpl
+instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `IsIntersectableWith` (OpenInterval r) where
+  intersect = intersectImpl
+instance (Ord r, OptCVector_ 2 (AnEndPoint r))
+         => (Point 1 r) `IsIntersectableWith` (Interval AnEndPoint r) where
+  intersect = intersectImpl
+
+
+type instance Intersection (ClosedInterval r) (ClosedInterval r) =
+  Maybe (IntersectionOf (ClosedInterval r) (ClosedInterval r))
+
+data instance IntersectionOf (ClosedInterval r) (ClosedInterval r) =
+    ClosedInterval_x_ClosedInterval_Point     !r
+  | ClosedInterval_x_ClosedInterval_Contained !(ClosedInterval r)
+  | ClosedInterval_x_ClosedInterval_Partial   !(ClosedInterval r)
+
+
+-- instance (ClosedInterval r) `HasIntersectionWith` (ClosedInterval r) where
+--   intA `intersects` intB =
+
+
+-- instance (ClosedInterval r) `IsIntersectableWith` (ClosedInterval r) where
+--   intA `intersect` intB = case intA^.start `compare` intB^.start of
+--     LT -> case intB^.start `compare` intA^.end of
+--             LT -> _
+--             EQ -> _
+--             GT -> _
+--     EQ -> _
+--     GT -> _

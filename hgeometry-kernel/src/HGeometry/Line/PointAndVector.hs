@@ -50,15 +50,13 @@ instance ( OptVector_ d r
   fromPointAndVec p v = Line (pointFromPoint p) (vectorFromVector v)
 
 
-instance ( OptCVector_ 2 r, OptCVector_ 3 r
+instance ( OptCVector_ 2 r, OptCVector_ 3 r, Eq r
          ) => HyperPlane_ (Line 2 r) 2 r where
   -- hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
 
-  hyperPlaneEquation (Line p v) = Vector3 a b c
+  hyperPlaneEquation (Line (Point2 px py) (Vector2 vx vy)) = Vector3 a0 vx vy
     where
-      a = undefined
-      b = undefined
-      c = undefined
+      a0 = if vx == 0 then -px else -vx*px - vy*py
 
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
@@ -103,7 +101,14 @@ instance ( Show r, KnownNat d
 --  l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
 
 
--- | Test if a point lies on the line
+-- | Test if point q lies on line l
+--
+-- >>> origin `onLine` lineThrough origin (Point2 1 0)
+-- True
+-- >>> Point2 10 10 `onLine` lineThrough origin (Point2 2 2)
+-- True
+-- >>> Point2 10 5 `onLine` lineThrough origin (Point2 2 2)
+-- False
 onLine :: ( Point_ point d r
           , Fractional r, Eq r
           , OptVector_ d r, Metric_ (VectorFamily' d r), Eq (VectorFamily' d r)

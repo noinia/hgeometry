@@ -87,6 +87,8 @@ class ( HasStart interval point, HasStartPoint interval (EndPointOf interval)
       ) => IntervalLike_ interval point | interval -> point where
 
   -- | Construct an interval given its start and end point.
+  --
+  -- pre: start < end
   mkInterval :: EndPointOf interval -> EndPointOf interval -> interval
 
 --------------------------------------------------------------------------------

@@ -79,6 +79,7 @@ type OptCVector_ d r = ConstructableVector_ (VectorFamily d r) d r
 -- | Construct a 1 dimensional vector
 pattern Vector1   :: r -> Vector 1 r
 pattern Vector1 x = MkVector (V1.Vector1 x)
+{-# COMPLETE Vector1 #-}
 
 -- | Construct a 2 dimensional vector
 pattern Vector2     :: forall r. OptCVector_ 2 r
@@ -86,6 +87,7 @@ pattern Vector2     :: forall r. OptCVector_ 2 r
 pattern Vector2 x y <- MkVector (Vector2_ x y)
   where
     Vector2 x y = MkVector $ mkVector @(VectorFamily 2 r) x y
+{-# COMPLETE Vector2 #-}
 
 -- | Construct a 3 dimensional vector
 pattern Vector3       :: forall r. OptCVector_ 3 r
@@ -93,6 +95,7 @@ pattern Vector3       :: forall r. OptCVector_ 3 r
 pattern Vector3 x y z <- MkVector (Vector3_ x y z)
   where
     Vector3 x y z = MkVector $ mkVector @(VectorFamily 3 r) x y z
+{-# COMPLETE Vector3 #-}
 
 -- | Construct a 4 dimensional vector
 pattern Vector4         :: forall r. OptCVector_ 4 r
@@ -100,6 +103,7 @@ pattern Vector4         :: forall r. OptCVector_ 4 r
 pattern Vector4 x y z w <- MkVector (Vector4_ x y z w)
   where
     Vector4 x y z w = MkVector $ mkVector @(VectorFamily 4 r) x y z w
+{-# COMPLETE Vector4 #-}
 
 -- --------------------------------------------------------------------------------
 
