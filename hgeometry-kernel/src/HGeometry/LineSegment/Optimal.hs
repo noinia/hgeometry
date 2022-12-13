@@ -19,6 +19,7 @@ module HGeometry.LineSegment.Optimal
 import Control.Lens
 import Data.Functor.Apply
 import Data.Kind (Type)
+import GHC.TypeLits
 import HGeometry.Box.Boxable
 import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint
@@ -163,6 +164,7 @@ instance ( d ~ Dimension point, r ~ NumType point
          , OptCVector_ 2 point
          , OptCVector_ 2 (EndPoint Closed point)
          , OptMetric_ d r
+         , OptVector_ (d+1) r
          ) => HasSquaredEuclideanDistance (ClosedLineSegment point) where
   pointClosestToWithDistance q seg@(ClosedLineSegment a b)
       | m `intersects` seg = z
@@ -177,8 +179,41 @@ instance ( d ~ Dimension point, r ~ NumType point
 
 -- type Intersection (Point d r) (ClosedLineSegment point)
 
-instance OnSegment (LineSegment endPoint point) =>
-         (Point d r) `HasIntersectionWith` (LineSegment endPoint point) where
+instance ( OnSegment (LineSegment endPoint point)
+         , Point_ point d r
+         , Fractional r, Ord r
+         , OptVector_ d r, OptMetric_ d r
+         ) => (Point d r) `HasIntersectionWith` (LineSegment endPoint point) where
   intersects = onSegment
 
--- instance OnSegment (LineSegment endPoint point)
+instance ( OptCVector_ 2 point
+         , Point_ point d r
+         , Fractional r
+         ) => OnSegment (ClosedLineSegment point) where
+  onSegment (pointFromPoint -> q) seg =
+    case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+      Nothing     -> False
+      Just lambda -> 0 <= lambda && lambda <= 1
+
+instance ( OptCVector_ 2 point
+         , Point_ point d r
+         , Fractional r
+         ) => OnSegment (OpenLineSegment point) where
+  onSegment (pointFromPoint -> q) seg =
+    case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+      Nothing     -> False
+      Just lambda -> 0 < lambda && lambda < 1
+
+instance ( OptCVector_ 2 (AnEndPoint point)
+         , Point_ point d r
+         , Fractional r
+         ) => OnSegment (LineSegment AnEndPoint point) where
+  onSegment (pointFromPoint -> q) seg =
+      case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+        Nothing     -> False
+        Just lambda -> compare' (seg^.startPoint.to endPointType) 0      lambda
+                    && compare' (seg^.endPoint.to endPointType)   lambda 1
+    where
+      compare' = \case
+        Open   -> (<)
+        Closed -> (<=)

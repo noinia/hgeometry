@@ -39,7 +39,9 @@ class OnSegment lineSegment where
   -- | Test if a point lies on a line segment.
   --
   -- As a user, you should typically just use 'intersects' instead.
-  onSegment :: (Ord r, Point_ point d r) => point -> lineSegment -> Bool
+  onSegment :: ( Ord r, Point_ point d r
+               , r ~ NumType lineSegment, d ~ Dimension lineSegment
+               ) => point -> lineSegment -> Bool
 
 -- | A class representing line segments
 class ( IntervalLike_ lineSegment point
