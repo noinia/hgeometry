@@ -46,3 +46,7 @@ instance ( Affine_ point
          , OptCVector_ 2 point
          ) => Box_ (Box point) point where
   extent (Box p q) = vZipWith ClosedInterval (p^.vector) (q^.vector)
+
+
+
+--------------------------------------------------------------------------------

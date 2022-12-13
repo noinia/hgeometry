@@ -29,6 +29,7 @@ import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
+import Text.Read
 
 --------------------------------------------------------------------------------
 
@@ -128,12 +129,23 @@ instance ( Show (endPoint point)
          ) => Show (LineSegment endPoint point) where
   showsPrec k (LineSegment s t) = showParen (k > app_prec) $
                                     showString "LineSegment "
-                                    . showsPrec (k+1) s
+                                    . showsPrec (app_prec+1) s
                                     . showChar ' '
-                                    . showsPrec (k+1) t
-    where
-      app_prec = 10
+                                    . showsPrec (app_prec+1) t
+app_prec :: Int
+app_prec = 10
 
+instance (Read (endPoint point), OptCVector_ 2 (endPoint point))
+         => Read (LineSegment endPoint point) where
+  readPrec = parens $ (prec app_prec $ do
+                          Ident "LineSegment" <- lexP
+                          p <- step readPrec
+                          q <- step readPrec
+                          return (LineSegment p q))
+
+
+type instance VectorFamily d (LineSegment endPoint point) =
+  WrapVector d (Interval endPoint point) (LineSegment endPoint point)
 
 
 

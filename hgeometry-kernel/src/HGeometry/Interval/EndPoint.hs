@@ -20,11 +20,12 @@ module HGeometry.Interval.EndPoint
   ) where
 
 import Control.Lens
+import Data.Semigroup.Foldable.Class
+import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
-import Data.Semigroup.Foldable.Class
+import Text.Read
 
-import HGeometry.Point
 --------------------------------------------------------------------------------
 
 -- | Types that have an '_endPoint' field lens.
@@ -53,7 +54,35 @@ testV1 = Vector2 (mkEndPoint$ Point2 5.0 6.0) (mkEndPoint$ Point2 10.0 1.0)
 
 -- | EndPoint with a type safe tag
 newtype EndPoint (et :: EndPointType) r = EndPoint r
-  deriving stock (Show,Eq,Ord,Functor,Foldable,Traversable)
+  deriving stock (Eq,Ord,Functor,Foldable,Traversable)
+
+instance Show r => Show (EndPoint Closed r) where
+  showsPrec = showsPrecImpl "ClosedE"
+instance Show r => Show (EndPoint Open r) where
+  showsPrec = showsPrecImpl "OpenE"
+
+-- | Implementation for Show
+showsPrecImpl                        :: Show r => String -> Int -> EndPoint et r -> ShowS
+showsPrecImpl ctrName k (EndPoint x) = showParen (k > app_prec) $
+                                           showString ctrName
+                                         . showChar ' '
+                                         . showsPrec (app_prec+1) x
+
+-- | application precedence
+app_prec :: Int
+app_prec = 10
+
+instance Read r => Read (EndPoint Closed r) where
+  readPrec = parens $ (prec app_prec $ do
+                          Ident "ClosedE" <- lexP
+                          p <- step readPrec
+                          return (ClosedE p))
+
+instance Read r => Read (EndPoint Open r) where
+  readPrec = parens $ (prec app_prec $ do
+                          Ident "OpenE" <- lexP
+                          p <- step readPrec
+                          return (OpenE p))
 
 instance Foldable1 (EndPoint et)
 instance Traversable1 (EndPoint et) where
