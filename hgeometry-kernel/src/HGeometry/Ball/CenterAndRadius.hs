@@ -19,10 +19,8 @@ module HGeometry.Ball.CenterAndRadius
   ) where
 
 import           Control.Lens
-import           Data.Ord (comparing)
 import           GHC.TypeLits
 import           HGeometry.Ball.Class
-import           HGeometry.Boundary
 import           HGeometry.Intersection
 import           HGeometry.Interval.Class
 import           HGeometry.LineSegment
@@ -74,16 +72,25 @@ data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
     Line_x_Ball_Point   point
   | Line_x_Ball_Segment (ClosedLineSegment point)
 
+deriving instance (Show point, Show (ClosedLineSegment point))
+               => Show (IntersectionOf (ClosedLineSegment point) (Ball point))
+deriving instance (Eq point, Eq (ClosedLineSegment point))
+               => Eq (IntersectionOf (ClosedLineSegment point) (Ball point))
+
+
 type instance Intersection (ClosedLineSegment point) (Ball point) =
   Maybe (IntersectionOf (ClosedLineSegment point) (Ball point))
 
 
-
--- instance ( Point_ point d r
---          , Ord r, Num r
---          , OptVector_ d r, OptMetric_ d r
---          ) => (LineSegment endPoint point') `HasIntersectionWith` (Ball point) where
---   intersects s (Ball c r) = squaredEuclideanDist q (pointFromPoint c) <= r
+instance ( Point_ point d r, Point_ point' d r
+         , Ord r, Fractional r
+         , OptVector_ d r, OptMetric_ d r
+         , HasSquaredEuclideanDistance point'
+         , OptCVector_ 2 point'
+         , OptCVector_ 2 (EndPoint Closed point')
+         , OptVector_ (d+1) r
+         ) => (ClosedLineSegment point') `HasIntersectionWith` (Ball point) where
+  intersects s (Ball c r) = squaredEuclideanDistTo c s <= r
 
 
 
@@ -147,3 +154,13 @@ instance ( Point_ point d r
          ) => (Point d r) `IsIntersectableWith` (Sphere point) where
   intersect q b | q `intersects` b = Just q
                 | otherwise        = Nothing
+
+instance ( Point_ point d r, Point_ point' d r
+         , Ord r, Fractional r
+         , OptVector_ d r, OptMetric_ d r
+         , HasSquaredEuclideanDistance point'
+         , OptCVector_ 2 point'
+         , OptCVector_ 2 (EndPoint Closed point')
+         , OptVector_ (d+1) r
+         ) => (ClosedLineSegment point') `HasIntersectionWith` (Sphere point) where
+  intersects s (Sphere c r) = squaredEuclideanDistTo c s <= r

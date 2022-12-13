@@ -30,8 +30,9 @@ spec = do
         (mySeg `intersects` unitCircle @R) `shouldBe` True
 
 
-unitCircle :: (Num r, OptCVector_ 2 r) => Circle (Point 2 r)
+unitCircle :: (Num r, OptCVector_ 2 r, OptMetric_ 2 r) => Circle (Point 2 r)
 unitCircle = Circle origin 1
 
-segment     :: (Floating r, OptCVector_ 2 r) => r -> r -> ClosedLineSegment (Point 2 r)
+segment     :: (Floating r, OptCVector_ 2 r, OptMetric_ 2 r)
+            => r -> r -> ClosedLineSegment (Point 2 r)
 segment r x = ClosedLineSegment origin (Point2 (r*cos x) (r*sin x))

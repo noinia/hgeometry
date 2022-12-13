@@ -15,7 +15,7 @@ module HGeometry.Interval.EndPoint
   , IsEndPoint(..)
 
   , EndPointType(..)
-  , EndPoint(.., OpenE, ClosedE)
+  , EndPoint(EndPoint, OpenE, ClosedE)
   , AnEndPoint(..)
   ) where
 

@@ -13,6 +13,7 @@ module HGeometry.LineSegment.Optimal
   ( LineSegment(LineSegment, ClosedLineSegment, OpenLineSegment)
   , ClosedLineSegment
   , OpenLineSegment
+  , EndPoint(EndPoint,OpenE,ClosedE)
   ) where
 
 
@@ -22,7 +23,6 @@ import Data.Kind (Type)
 import GHC.TypeLits
 import HGeometry.Box.Boxable
 import HGeometry.Interval.Class
-import HGeometry.Interval.EndPoint
 import HGeometry.Interval.Optimal
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
@@ -157,8 +157,7 @@ instance ( d ~ Dimension point, r ~ NumType point
                            t = seg^.end.to pointFromPoint
                        in Line s (t .-. s)
 
-instance ( d ~ Dimension point, r ~ NumType point
-         , Fractional r, Ord r
+instance ( Fractional r, Ord r
          , HasSquaredEuclideanDistance point
          , Point_ point d r
          , OptCVector_ 2 point
