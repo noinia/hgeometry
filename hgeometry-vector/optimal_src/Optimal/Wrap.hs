@@ -35,7 +35,8 @@ type instance Dimension (WrapVector d orig wrapped) = d
 type instance IxValue   (WrapVector d orig wrapped) = wrapped
 type instance Index     (WrapVector d orig wrapped) = Int
 
-
+deriving newtype instance Read (Vector d orig)   => Read (WrapVector d orig wrapped)
+deriving newtype instance Show (Vector d orig)   => Show (WrapVector d orig wrapped)
 deriving newtype instance Eq (Vector d orig)     => Eq (WrapVector d orig wrapped)
 deriving newtype instance Ord (Vector d orig)    => Ord (WrapVector d orig wrapped)
 deriving newtype instance NFData (Vector d orig) => NFData (WrapVector d orig wrapped)
