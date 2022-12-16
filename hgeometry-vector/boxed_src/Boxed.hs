@@ -130,19 +130,31 @@ instance Ixed (VectorImpl One r      ) where
 
 
 instance Ixed (VectorImpl Two r      ) where
-  ix i f v = ix i f (coerce v)
+  ix i f (V_2 v) = V_2 <$> case i of
+                             0 -> L2._x f v
+                             1 -> L2._y f v
+                             _ -> pure v
   {-# INLINE ix #-}
 
 instance Ixed (VectorImpl Three r    ) where
-  ix i f v = ix i f (coerce v)
+  ix i f (V_3 v) = V_3 <$> case i of
+                             0 -> L3._x f v
+                             1 -> L3._y f v
+                             2 -> L3._z f v
+                             _ -> pure v
   {-# INLINE ix #-}
 
 instance Ixed (VectorImpl Four r     ) where
-  ix i f v = ix i f (coerce v)
+  ix i f (V_4 v) = V_4 <$> case i of
+                             0 -> L4._x f v
+                             1 -> L4._y f v
+                             2 -> L4._z f v
+                             3 -> L4._w f v
+                             _ -> pure v
   {-# INLINE ix #-}
 
 instance Ixed (VectorImpl (Large d) r) where
-  ix i f v = ix i f (coerce v)
+  ix i f (V_Large v) = V_Large <$> ix i f v
   {-# INLINE ix #-}
 
 instance FunctorWithIndex Int (VectorImpl Zero)
