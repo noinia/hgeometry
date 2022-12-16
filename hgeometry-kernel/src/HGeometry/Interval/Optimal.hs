@@ -9,12 +9,22 @@
 --
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC
+    -ddump-simpl
+    -dsuppress-idinfo
+    -dsuppress-coercions
+    -dsuppress-type-applications
+    -dsuppress-uniques
+    -dsuppress-module-prefixes
+    -ddump-to-file
+#-}
 module HGeometry.Interval.Optimal
   ( Interval(Interval, ClosedInterval, OpenInterval)
   , ClosedInterval, OpenInterval
   ) where
 
 import Control.Lens
+import Data.Kind (Type)
 import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint
@@ -25,7 +35,7 @@ import Text.Read
 
 --------------------------------------------------------------------------------
 -- | Data type representing intervals
-newtype Interval endPoint r = MkInterval (Vector 2 (endPoint r))
+newtype Interval (endPoint :: Type -> Type) (r :: Type) = MkInterval (Vector 2 (endPoint r))
 
 -- | Closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval r = Interval (EndPoint Closed) r
@@ -55,14 +65,25 @@ type instance NumType   (Interval endPoint r) = r
 type instance Dimension (Interval endPoint r) = 1
 
 
-instance ( Show (endPoint r)
-         , OptCVector_ 2 (endPoint r)
-         ) => Show (Interval endPoint r) where
-  showsPrec k (Interval s t) = showParen (k > app_prec) $
-                                 showString "Interval "
-                               . showsPrec (app_prec+1) s
-                               . showChar ' '
-                               . showsPrec (app_prec+1) t
+deriving instance (Show (Vector 2 (endPoint r))) => Show (Interval endPoint r)
+
+-- instance ( Show (endPoint r)
+--          , OptCVector_ 2 (endPoint r)
+--          ) => Show (Interval endPoint r) where
+--   showsPrec k (Interval s t) = showParen (k > app_prec) $
+--                                  showString "Interval "
+--                                . showsPrec (app_prec+1) s
+--                                . showChar ' '
+--                                . showsPrec (app_prec+1) t
+
+-- instance ( Show r, OptCVector_ 2 r
+--          ) => Show (ClosedInterval r) where
+--   showsPrec k (ClosedInterval s t) = showParen (k > app_prec) $
+--                                        showString "ClosedInterval "
+--                                      . showsPrec (app_prec+1) s
+--                                      . showChar ' '
+--                                      . showsPrec (app_prec+1) t
+
 
 -- | application precedence
 app_prec :: Int

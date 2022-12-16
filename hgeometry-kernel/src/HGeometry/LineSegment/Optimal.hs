@@ -124,14 +124,16 @@ instance ( OptCVector_ 2 (endPoint point)
          ) => IsBoxable (LineSegment endPoint point)
 
 
-instance ( Show (endPoint point)
-         , OptCVector_ 2 (endPoint point)
-         ) => Show (LineSegment endPoint point) where
-  showsPrec k (LineSegment s t) = showParen (k > app_prec) $
-                                    showString "LineSegment "
-                                    . showsPrec (app_prec+1) s
-                                    . showChar ' '
-                                    . showsPrec (app_prec+1) t
+deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)
+
+-- instance ( Show (endPoint point)
+--          , OptCVector_ 2 (endPoint point)
+--          ) => Show (LineSegment endPoint point) where
+--   showsPrec k (LineSegment s t) = showParen (k > app_prec) $
+--                                     showString "LineSegment "
+--                                     . showsPrec (app_prec+1) s
+--                                     . showChar ' '
+--                                     . showsPrec (app_prec+1) t
 app_prec :: Int
 app_prec = 10
 
@@ -148,10 +150,11 @@ type instance VectorFamily d (LineSegment endPoint point) =
   WrapVector d (Interval endPoint point) (LineSegment endPoint point)
 
 
-
-
 testseg :: ClosedLineSegment (Point 2 Double)
 testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+testI :: ClosedInterval (Point 2 Double)
+testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
 
 test :: Point 2 Double
 test = interpolate 0.5 testseg

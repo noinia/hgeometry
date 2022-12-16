@@ -1,4 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC
+    -ddump-simpl
+    -dsuppress-idinfo
+    -dsuppress-coercions
+    -dsuppress-type-applications
+    -dsuppress-uniques
+    -dsuppress-module-prefixes
+    -ddump-to-file
+#-}
 module HGeometry.LineSegmentSpec where
 
 import Control.Lens
@@ -13,6 +22,7 @@ import HGeometry.Line
 import HGeometry.LineSegment
 -- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
+import HGeometry.Interval
 import HGeometry.Vector
 import Test.Hspec
 import Test.QuickCheck
@@ -22,13 +32,47 @@ import Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
+testI :: ClosedInterval (Point 2 Double)
+testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+-- | this already fails after printing:
+-- Interval (ClosedE (Vector2
+testI' :: ClosedInterval (Vector 2 Double)
+testI' = ClosedInterval (Vector2 5.0 6.0) (Vector2 10.0 10.0)
+
+-- | fails after Interval (ClosedE
+testI'' :: ClosedInterval Integer
+testI'' = ClosedInterval 5 6
+
+testStart = testI''^.startPoint
+
+testPM                :: ClosedInterval Integer -> String
+testPM (Interval s _) = "foo" <> show s
+
+-- this is ok
+test3 :: Vector 2 Integer
+test3 = Vector2 5 6
+
+test4 :: Vector 2 (EndPoint Closed Integer)
+test4 = Vector2 (ClosedE 5) (ClosedE 6)
+
+
+testV :: Vector 2 (Point 2 Double)
+testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+pt :: Point 2 Double
+pt = (Point2 5.0 6.0)
 
 spec :: Spec
 spec =
-  describe "show segment" $
-    (show (ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)))
-    `shouldBe`
-    "ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)"
+  describe "line segment tests" $ do
+    it "point" $ show pt `shouldBe` "Point2 5.0 6.0"
+    it "interval" $
+      (show testI) `shouldBe` "Interval (ClosedE (Point2 5.0 6.0)) (ClosedE (Point2 10.0 10.0))"
+    it "show segment" $
+      (show $ ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 (10.0 :: Double)))
+      `shouldBe`
+      "ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)"
 
 --   describe "onSegment" $ do
 --     let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R) -> Bool

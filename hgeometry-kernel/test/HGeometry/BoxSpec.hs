@@ -14,13 +14,13 @@ import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
-arbitraryPointInBoundingBox   :: Box (Point 2 Rational) -> Gen (Point 2 Rational)
-arbitraryPointInBoundingBox b = do
-  ZeroToOne rX <- arbitrary
-  ZeroToOne rY <- arbitrary
-  let minPt        = b^.minPoint
-      offsetVector = Vector2 (width b * rX) (height b * rY)
-  pure $ minPt .+^ offsetVector
+-- arbitraryPointInBoundingBox   :: Box (Point 2 Rational) -> Gen (Point 2 Rational)
+-- arbitraryPointInBoundingBox b = do
+--   ZeroToOne rX <- arbitrary
+--   ZeroToOne rY <- arbitrary
+--   let minPt        = b^.minPoint
+--       offsetVector = Vector2 (width b * rX) (height b * rY)
+--   pure $ minPt .+^ offsetVector
 
 spec :: Spec
 spec = pure ()
