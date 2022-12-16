@@ -64,17 +64,14 @@ pattern OpenInterval s t = Interval (OpenE s) (OpenE t)
 type instance NumType   (Interval endPoint r) = r
 type instance Dimension (Interval endPoint r) = 1
 
-
-deriving instance (Show (Vector 2 (endPoint r))) => Show (Interval endPoint r)
-
--- instance ( Show (endPoint r)
---          , OptCVector_ 2 (endPoint r)
---          ) => Show (Interval endPoint r) where
---   showsPrec k (Interval s t) = showParen (k > app_prec) $
---                                  showString "Interval "
---                                . showsPrec (app_prec+1) s
---                                . showChar ' '
---                                . showsPrec (app_prec+1) t
+instance ( Show (endPoint r)
+         , OptCVector_ 2 (endPoint r)
+         ) => Show (Interval endPoint r) where
+  showsPrec k (Interval s t) = showParen (k > app_prec) $
+                                 showString "Interval "
+                               . showsPrec (app_prec+1) s
+                               . showChar ' '
+                               . showsPrec (app_prec+1) t
 
 -- instance ( Show r, OptCVector_ 2 r
 --          ) => Show (ClosedInterval r) where

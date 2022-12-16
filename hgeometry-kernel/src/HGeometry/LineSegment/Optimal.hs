@@ -124,16 +124,17 @@ instance ( OptCVector_ 2 (endPoint point)
          ) => IsBoxable (LineSegment endPoint point)
 
 
-deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)
+-- deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)
 
--- instance ( Show (endPoint point)
---          , OptCVector_ 2 (endPoint point)
---          ) => Show (LineSegment endPoint point) where
---   showsPrec k (LineSegment s t) = showParen (k > app_prec) $
---                                     showString "LineSegment "
---                                     . showsPrec (app_prec+1) s
---                                     . showChar ' '
---                                     . showsPrec (app_prec+1) t
+instance ( Show (endPoint point)
+         , OptCVector_ 2 (endPoint point)
+         ) => Show (LineSegment endPoint point) where
+  showsPrec k (LineSegment s t) = showParen (k > app_prec) $
+                                    showString "LineSegment "
+                                    . showsPrec (app_prec+1) s
+                                    . showChar ' '
+                                    . showsPrec (app_prec+1) t
+
 app_prec :: Int
 app_prec = 10
 

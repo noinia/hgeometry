@@ -29,39 +29,10 @@ import Test.QuickCheck
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
+-- main :: IO ()
+-- main = print $ testStartInt
 
 type R = RealNumber 5
-
-testI :: ClosedInterval (Point 2 Double)
-testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
-
--- | this already fails after printing:
--- Interval (ClosedE (Vector2
-testI' :: ClosedInterval (Vector 2 Double)
-testI' = ClosedInterval (Vector2 5.0 6.0) (Vector2 10.0 10.0)
-
--- | fails after Interval (ClosedE
-testI'' :: ClosedInterval Integer
-testI'' = ClosedInterval 5 6
-
-testStart = testI''^.startPoint
-
-testPM                :: ClosedInterval Integer -> String
-testPM (Interval s _) = "foo" <> show s
-
--- this is ok
-test3 :: Vector 2 Integer
-test3 = Vector2 5 6
-
-test4 :: Vector 2 (EndPoint Closed Integer)
-test4 = Vector2 (ClosedE 5) (ClosedE 6)
-
-
-testV :: Vector 2 (Point 2 Double)
-testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 10.0)
-
-pt :: Point 2 Double
-pt = (Point2 5.0 6.0)
 
 spec :: Spec
 spec =
@@ -74,12 +45,12 @@ spec =
       `shouldBe`
       "ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)"
 
---   describe "onSegment" $ do
---     let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R) -> Bool
---         intersects3 = intersects
---         intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R) -> Bool
---         intersects2 = intersects
---     testI
+  describe "onSegment" $ do
+    let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R) -> Bool
+        intersects3 = intersects
+        intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R) -> Bool
+        intersects2 = intersects
+    testI
 
 --     -- it "handles zero length segments correctly" $ do
 --     --   let zeroSegment = ClosedLineSegment (Point2 0 0 :+ ()) (Point2 0 0 :+ ())
@@ -130,8 +101,8 @@ spec =
 -- -- test = withRank (Vector2 0 1) test1 test4
 
 
--- testI = describe "some manual intersection tests" $ do
---           it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
---           it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
---           it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
---           it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
+testI = describe "some manual intersection tests" $ do
+          it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
+          it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
