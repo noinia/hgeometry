@@ -29,6 +29,7 @@ import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
+import HGeometry.Transformation
 import Text.Read
 
 --------------------------------------------------------------------------------
@@ -267,6 +268,8 @@ instance ( OptCVector_ 2 (AnEndPoint point)
         Closed -> (<=)
 
 
+instance IsTransformable (LineSegment endPoint point)
+
 
 testseg :: ClosedLineSegment (Point 2 Double)
 testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
@@ -279,3 +282,12 @@ test = interpolate 0.5 testseg
 
 
 testOn = test `intersects` testseg
+
+
+
+  -- traverse1' f xs =
+  --     -- Get the length of the vector in /O(1)/ time
+  --     let !n = G.length xs
+  --     -- Use fromListN to be more efficient in construction of resulting vector
+  --     -- Also behaves better with compact regions, preventing runtime exceptions
+  --     in  Data.Vector.fromListN n Applicative.<$> Traversable.traverse f (toList xs)

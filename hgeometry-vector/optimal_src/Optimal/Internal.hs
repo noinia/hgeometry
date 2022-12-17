@@ -12,7 +12,7 @@
 module Optimal.Internal
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
   , VectorFamily, VectorFamily'
-  , OptVector_, OptCVector_, OptMetric_
+  , OptVector_, OptCVector_, OptAdditive_, OptMetric_
   ) where
 
 import           Control.Applicative
@@ -72,6 +72,9 @@ type OptVector_ d r = Vector_ (VectorFamily' d r) d r
 
 -- | Shorthand for the constraint that our optimal vector is a constructable vector
 type OptCVector_ d r = ConstructableVector_ (VectorFamily' d r) d r
+
+-- | The optimized family should be Additive
+type OptAdditive_ d r = Additive_ (VectorFamily' d r)
 
 -- | Shorthand for having a Optimal vector as a Metric
 type OptMetric_ d r = Metric_ (VectorFamily' d r)

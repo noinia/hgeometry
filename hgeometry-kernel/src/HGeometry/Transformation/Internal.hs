@@ -86,7 +86,7 @@ type TransformationConstraints g =
   , OptMatrix_ (Dimension g+1) (NumType g)
   , HasComponents (VectorFamily' (Dimension g+1) (NumType g))
                   (VectorFamily' (Dimension g+1) (Vector (Dimension g+1) (NumType g)))
-  , Additive_ (VectorFamily' (Dimension g+1) (NumType g))
+  , OptAdditive_ (Dimension g+1) (NumType g)
   )
 
 -- | Bunch of constraints we need for the default implementation of transformBy
@@ -141,7 +141,7 @@ translation   :: forall d r vector. ( Num r
                  , OptMatrix_ (d+1) r
                  , HasComponents (VectorFamily' (d+1) r)
                                  (VectorFamily' (d+1) (Vector (d+1) r))
-                 , Additive_ (VectorFamily' (d+1) r)
+                 , OptAdditive_ (d+1) r
                  )
               => vector -> Transformation d r
 translation v = Transformation . Matrix
@@ -157,7 +157,7 @@ scaling   :: forall d r vector. ( Num r
              , OptMatrix_ (d+1) r
              , HasComponents (VectorFamily' (d+1) r)
                              (VectorFamily' (d+1) (Vector (d+1) r))
-             , Additive_ (VectorFamily' (d+1) r)
+             , OptAdditive_ (d+1) r
              )
           => vector -> Transformation d r
 scaling v = Transformation . Matrix
