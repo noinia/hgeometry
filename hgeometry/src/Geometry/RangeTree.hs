@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Geometry.RangeTree

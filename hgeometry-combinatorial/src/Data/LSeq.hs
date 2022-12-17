@@ -265,8 +265,8 @@ instance (n ~ 1 + n0) => Semigroup (ViewL n a) where
   (<>) = combineL
 
 -- | implementation of <> for viewL
-combineL                       :: forall n a. ViewL (1+n) a -> ViewL (1+n) a -> ViewL (1+n) a
-combineL s@(x :< xs) (y :< ys) = x :< promise @n (LSeq (toSeq xs <> (y S.<| toSeq ys)))
+combineL                     :: forall n a. ViewL (1+n) a -> ViewL (1+n) a -> ViewL (1+n) a
+combineL (x :< xs) (y :< ys) = x :< promise @n (LSeq (toSeq xs <> (y S.<| toSeq ys)))
 
 
 deriving instance Show a => Show (ViewL n a)
