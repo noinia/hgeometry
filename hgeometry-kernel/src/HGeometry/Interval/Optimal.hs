@@ -9,15 +9,6 @@
 --
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC
-    -ddump-simpl
-    -dsuppress-idinfo
-    -dsuppress-coercions
-    -dsuppress-type-applications
-    -dsuppress-uniques
-    -dsuppress-module-prefixes
-    -ddump-to-file
-#-}
 module HGeometry.Interval.Optimal
   ( Interval(Interval, ClosedInterval, OpenInterval)
   , ClosedInterval, OpenInterval

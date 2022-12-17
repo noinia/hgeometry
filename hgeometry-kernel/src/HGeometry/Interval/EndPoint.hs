@@ -19,12 +19,13 @@ module HGeometry.Interval.EndPoint
   , AnEndPoint(..)
   ) where
 
-import Control.Lens
-import Data.Semigroup.Foldable.Class
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Vector
-import Text.Read
+import           Control.Lens
+import           Data.Semigroup.Foldable.Class
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Vector
+import qualified HGeometry.Vector.Boxed as Boxed
+import           Text.Read
 
 --------------------------------------------------------------------------------
 
@@ -117,11 +118,13 @@ pattern OpenE x = EndPoint x
 
 
 -- | Data type modelling an endpoint that can both be open and closed.
-data AnEndPoint r = AnEndPoint !EndPointType !r
+data AnEndPoint r = AnEndPoint {-# UNPACK #-} !EndPointType !r
                   deriving (Show,Eq,Functor,Foldable,Traversable)
 
 type instance NumType (AnEndPoint r) = r
 type instance IxValue (AnEndPoint r) = r
+
+type instance VectorFamily d (AnEndPoint r) = Boxed.Vector d (AnEndPoint r)
 
 instance Foldable1 AnEndPoint
 instance Traversable1 AnEndPoint where

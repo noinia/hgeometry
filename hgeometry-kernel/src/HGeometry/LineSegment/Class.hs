@@ -11,11 +11,14 @@
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Class
   ( LineSegment_(..), pattern LineSegment_
+  , ClosedLineSegment_(..)
+  , OpenLineSegment_(..)
 
   , interpolate
   , OnSegment(..)
 
   , HasStart(..), HasEnd(..)
+  , HasStartPoint(..), HasEndPoint(..)
   ) where
 
 import Control.Lens
@@ -60,6 +63,16 @@ class ( IntervalLike_ lineSegment point
   mkLineSegment s t
     | s^.vector /= t^.vector = Just $ uncheckedLineSegment s t
     | otherwise              = Nothing
+
+-- | A class representing Closed Linesegments
+class ( LineSegment_ lineSegment point
+      , EndPointOf lineSegment ~ EndPoint Closed point
+      ) => ClosedLineSegment_ lineSegment point where
+
+-- | A Class representing Open ended linesegments
+class ( LineSegment_ lineSegment point
+      , EndPointOf lineSegment ~ EndPoint Open point
+      ) => OpenLineSegment_ lineSegment point where
 
 
 -- | Constructs a line segment from the start and end point

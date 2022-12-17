@@ -1,13 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# OPTIONS_GHC
-    -ddump-simpl
-    -dsuppress-idinfo
-    -dsuppress-coercions
-    -dsuppress-type-applications
-    -dsuppress-uniques
-    -dsuppress-module-prefixes
-    -ddump-to-file
-#-}
 module HGeometry.LineSegmentSpec where
 
 import Control.Lens
@@ -34,37 +25,44 @@ import Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
+pt :: Point 2 Double
+pt = Point2 5 6
+
+testInt :: ClosedInterval (Point 2 Double)
+testInt = ClosedInterval pt (Point2 10 10)
+
 spec :: Spec
 spec =
   describe "line segment tests" $ do
     it "point" $ show pt `shouldBe` "Point2 5.0 6.0"
     it "interval" $
-      (show testI) `shouldBe` "Interval (ClosedE (Point2 5.0 6.0)) (ClosedE (Point2 10.0 10.0))"
+      (show testInt) `shouldBe` "Interval (ClosedE (Point2 5.0 6.0)) (ClosedE (Point2 10.0 10.0))"
     it "show segment" $
       (show $ ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 (10.0 :: Double)))
       `shouldBe`
       "ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)"
 
-  describe "onSegment" $ do
-    let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R) -> Bool
-        intersects3 = intersects
-        intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R) -> Bool
-        intersects2 = intersects
-    testI
+    describe "onSegment" $ do
+      let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R) -> Bool
+          intersects3 = intersects
+          intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R) -> Bool
+          intersects2 = intersects
+
+      testI
 
 --     -- it "handles zero length segments correctly" $ do
 --     --   let zeroSegment = ClosedLineSegment (Point2 0 0 :+ ()) (Point2 0 0 :+ ())
 --     --   (Point2 0 0 `intersects2` zeroSegment) `shouldBe` True
 --     --   (Point2 1 0 `intersects2` zeroSegment) `shouldBe` False
 
---     it "2d on segment tests" $ do
---       let seg1 = ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ())
---           seg2 = ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ())
---       (Point2 1    0 `intersects2` seg1) `shouldBe`  True
---       (Point2 1    1 `intersects2` seg1) `shouldBe` False
---       (Point2 5    0 `intersects2` seg1) `shouldBe` False
---       (Point2 (-1) 0 `intersects2` seg1) `shouldBe` False
---       (Point2 1    1 `intersects2` seg2) `shouldBe`  True
+    -- it "2d on segment tests" $ do
+    --   let seg1 = ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ())
+    --       seg2 = ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ())
+    --   (Point2 1    0 `intersects2` seg1) `shouldBe`  True
+    --   (Point2 1    1 `intersects2` seg1) `shouldBe` False
+    --   (Point2 5    0 `intersects2` seg1) `shouldBe` False
+    --   (Point2 (-1) 0 `intersects2` seg1) `shouldBe` False
+    --   (Point2 1    1 `intersects2` seg2) `shouldBe`  True
 
 --     it "3d on segment tests" $ do
 --       let seg = ClosedLineSegment (origin :+ ()) (Point3 3 3 3 :+ ())
@@ -86,17 +84,17 @@ spec =
 --       (s `intersect` horizontalLine (0 :: R)) `shouldBe` coRec s
 
 
--- test1 :: ClosedLineSegment (Point 2 Int)
--- test1 = ClosedLineSegment (Point2 0 10) (Point2 0 20)
+test1 :: ClosedLineSegment (Point 2 Int)
+test1 = ClosedLineSegment (Point2 0 10) (Point2 0 20)
 
--- test2 :: OpenLineSegment (Point 2 Int)
--- test2 = OpenLineSegment (Point2 0 5) (Point2 0 20)
+test2 :: OpenLineSegment (Point 2 Int)
+test2 = OpenLineSegment (Point2 0 5) (Point2 0 20)
 
--- test3 :: ClosedLineSegment (Point 2 Int)
--- test3 = ClosedLineSegment (Point2 0 21) (Point2 0 5)
+test3 :: ClosedLineSegment (Point 2 Int)
+test3 = ClosedLineSegment (Point2 0 21) (Point2 0 5)
 
--- test4 :: LineSegment AnEndPoint (Point 2 Int)
--- test4 = LineSegment (AnEndPoint Open $ Point2 0 10) (AnEndPoint Closed $ Point2 0 9)
+test4 :: LineSegment AnEndPoint (Point 2 Int)
+test4 = LineSegment (AnEndPoint Open $ Point2 0 10) (AnEndPoint Closed $ Point2 0 9)
 
 -- -- test = withRank (Vector2 0 1) test1 test4
 
