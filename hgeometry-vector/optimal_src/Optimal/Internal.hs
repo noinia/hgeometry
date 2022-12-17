@@ -71,7 +71,7 @@ type family VectorFamily d r
 type OptVector_ d r = Vector_ (VectorFamily' d r) d r
 
 -- | Shorthand for the constraint that our optimal vector is a constructable vector
-type OptCVector_ d r = ConstructableVector_ (VectorFamily d r) d r
+type OptCVector_ d r = ConstructableVector_ (VectorFamily' d r) d r
 
 -- | Shorthand for having a Optimal vector as a Metric
 type OptMetric_ d r = Metric_ (VectorFamily' d r)
@@ -109,7 +109,7 @@ pattern Vector4 x y z w <- MkVector (Vector4_ x y z w)
 {-# COMPLETE Vector4
  #-}
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 deriving newtype instance Eq (VectorFamily' d r)      => Eq (Vector d r)
 deriving newtype instance Ord (VectorFamily' d r)     => Ord (Vector d r)

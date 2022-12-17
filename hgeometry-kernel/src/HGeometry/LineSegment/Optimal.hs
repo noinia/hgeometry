@@ -126,41 +126,74 @@ instance ( OptCVector_ 2 (endPoint point)
   allPoints f (LineSegment s t) = liftF2 LineSegment (traverse1 f s) (traverse1 f t)
 
 
+-- foo     :: ( Eq r
+--          , Additive_ (VectorFamily' d r)
+--          , IxValue (VectorFamily' d r) ~ r
+--          , HasComponents (VectorFamily' d Bool) Bool
+--          ) => Vector d r -> Vector d r -> Bool
+
+
+
+
 instance ( OptCVector_ 2 (endPoint point)
          , Traversable1 endPoint
-         , Point_ point  (Dimension point) (NumType point)
+         , Point_ point d r
+         , OptVector_ d r, OptMetric_ d r
+         , d ~ Dimension point, r ~  NumType point
+         , Ord r
+         , Ord (VectorFamily' d r) -- dummy; this basically follows from Ord r
          ) => IsBoxable (LineSegment endPoint point)
 
 
 -- deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)
 
-instance ( Show (endPoint point)
+instance {-# OVERLAPPABLE #-}
+         ( Show (endPoint point)
          , OptCVector_ 2 (endPoint point)
          ) => Show (LineSegment endPoint point) where
-  showsPrec k (LineSegment s t) = showParen (k > app_prec) $
+  showsPrec k (LineSegment s t) = showParen (k > appPrec) $
                                     showString "LineSegment "
-                                    . showsPrec (app_prec+1) s
+                                    . showsPrec (appPrec+1) s
                                     . showChar ' '
-                                    . showsPrec (app_prec+1) t
+                                    . showsPrec (appPrec+1) t
 
-app_prec :: Int
-app_prec = 10
+instance {-# OVERLAPPING #-}
+         ( Show point
+         , OptCVector_ 2 point
+         ) => Show (ClosedLineSegment point) where
+  showsPrec k (ClosedLineSegment s t) = showParen (k > appPrec) $
+                                    showString "ClosedLineSegment "
+                                    . showsPrec (appPrec+1) s
+                                    . showChar ' '
+                                    . showsPrec (appPrec+1) t
+
+appPrec :: Int
+appPrec = 10
 
 instance (Read (endPoint point), OptCVector_ 2 (endPoint point))
          => Read (LineSegment endPoint point) where
-  readPrec = parens $ (prec app_prec $ do
+  readPrec = parens (prec appPrec $ do
                           Ident "LineSegment" <- lexP
                           p <- step readPrec
                           q <- step readPrec
                           return (LineSegment p q))
+
+instance {-# OVERLAPPING #-}
+         (Read point, OptCVector_ 2 point)
+         => Read (ClosedLineSegment point) where
+  readPrec = parens (prec appPrec $ do
+                          Ident "ClosedLineSegment" <- lexP
+                          p <- step readPrec
+                          q <- step readPrec
+                          return (ClosedLineSegment p q))
 
 
 type instance VectorFamily d (LineSegment endPoint point) =
   WrapVector d (Interval endPoint point) (LineSegment endPoint point)
 
 
--- testseg :: ClosedLineSegment (Point 2 Double)
--- testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
+testseg :: ClosedLineSegment (Point 2 Double)
+testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
 
 -- testI :: ClosedInterval (Point 2 Double)
 -- testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
@@ -206,7 +239,7 @@ instance ( OnSegment (LineSegment endPoint point)
          , Point_ point d r
          , Fractional r, Ord r
          , OptVector_ d r, OptMetric_ d r
-         ) => (Point d r) `HasIntersectionWith` (LineSegment endPoint point) where
+         ) => Point d r `HasIntersectionWith` LineSegment endPoint point where
   intersects = onSegment
 
 instance ( OptCVector_ 2 point

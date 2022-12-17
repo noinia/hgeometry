@@ -126,7 +126,7 @@ ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
 -- | indexed version of 'toNonEmptyOf'
 itoNonEmptyOf   :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)
 itoNonEmptyOf l = flip getNonEmptyDList [] . ifoldMapOf l (\i a -> NonEmptyDList $ ((i,a) :|))
-
+{-# INLINE itoNonEmptyOf #-}
 
 --------------------------------------------------------------------------------
 -- * HasOuterBoundary Helpers
