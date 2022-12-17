@@ -16,6 +16,7 @@ module Optimal
   ) where
 
 import qualified Boxed
+import           Data.Ext
 import           Data.Functor.Identity (Identity(..))
 import           Data.RealNumber.Rational
 import qualified Double.Unpacked
@@ -87,5 +88,6 @@ type instance VectorFamily d (a,b,c,e)      = Boxed.Vector d (a,b,c,e)
 type instance VectorFamily d (a,b,c,e,f)    = Boxed.Vector d (a,b,c,e,f)
 type instance VectorFamily d (a,b,c,e,f,g)  = Boxed.Vector d (a,b,c,e,f,g)
 
+type instance VectorFamily d (c :+ e)       = Boxed.Vector d (c :+ e)
 
 type instance VectorFamily d (Identity a) = WrapVector d a (Identity a)

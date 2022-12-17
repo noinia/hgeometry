@@ -33,10 +33,10 @@ module HGeometry.Interval.Class
   , module HGeometry.Interval.EndPoint
   ) where
 
-
 import Control.Lens
-import Data.Tuple (swap)
+import Data.Ext
 import Data.Kind (Type,Constraint)
+import Data.Tuple (swap)
 import HGeometry.Boundary
 import HGeometry.Interval.EndPoint
 import HGeometry.Properties
@@ -164,3 +164,36 @@ flipInterval = uncurry mkInterval . swap . startAndEndPoint
 -- | Get the duration, or length of an interval.
 duration   :: (Interval_ interval r, Num r) => interval -> r
 duration i = i^.end - i^.start
+
+
+--------------------------------------------------------------------------------
+
+instance HasStart seg p => HasStart (seg :+ extra) p where
+  start = core.start
+instance HasEnd seg p => HasEnd (seg :+ extra) p where
+  end = core.end
+instance HasStartPoint seg p => HasStartPoint (seg :+ extra) p where
+  startPoint = core.startPoint
+instance HasEndPoint seg p => HasEndPoint (seg :+ extra) p where
+  endPoint = core.endPoint
+
+type instance EndPointOf (interval :+ extra) = EndPointOf interval
+
+instance ( IntervalLike_ interval point
+         , Monoid extra
+         ) => IntervalLike_ (interval :+ extra) point where
+  mkInterval s t = mkInterval s t :+ mempty
+
+instance ( Interval_ interval r
+         , Monoid extra
+         ) => Interval_ (interval :+ extra) r
+
+instance ( ClosedInterval_ interval r
+         , Monoid extra
+         ) => ClosedInterval_ (interval :+ extra) r where
+  mkClosedInterval s t = mkClosedInterval s t :+ mempty
+
+instance ( OpenInterval_ interval r
+         , Monoid extra
+         ) => OpenInterval_ (interval :+ extra) r where
+  mkOpenInterval s t = mkOpenInterval s t :+ mempty

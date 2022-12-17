@@ -22,6 +22,7 @@ module HGeometry.LineSegment.Class
   ) where
 
 import Control.Lens
+import Data.Ext
 import Data.Ord (comparing)
 import HGeometry.Interval.Class
 import HGeometry.Point.Class
@@ -50,6 +51,7 @@ class OnSegment lineSegment where
 class ( IntervalLike_ lineSegment point
       , Point_ point (Dimension lineSegment) (NumType lineSegment)
       ) => LineSegment_ lineSegment point | lineSegment -> point where
+  {-# MINIMAL uncheckedLineSegment #-}
 
   -- | Create a segment
   --
@@ -149,3 +151,19 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
     alpha = (x - px) / (qx - px)
 
 --------------------------------------------------------------------------------
+
+instance ( LineSegment_ segment point
+         , Monoid extra
+         ) => LineSegment_ (segment :+ extra) point where
+  uncheckedLineSegment p q = uncheckedLineSegment p q :+ mempty
+
+instance ( ClosedLineSegment_ segment point
+         , Monoid extra
+         ) => ClosedLineSegment_ (segment :+ extra) point where
+
+instance ( OpenLineSegment_ segment point
+         , Monoid extra
+         ) => OpenLineSegment_ (segment :+ extra) point where
+
+instance OnSegment lineSegment =>  OnSegment (lineSegment :+ extra) where
+  onSegment q (s :+ _) = q `onSegment` s

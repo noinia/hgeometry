@@ -192,14 +192,6 @@ type instance VectorFamily d (LineSegment endPoint point) =
   WrapVector d (Interval endPoint point) (LineSegment endPoint point)
 
 
-testseg :: ClosedLineSegment (Point 2 Double)
-testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
-
--- testI :: ClosedInterval (Point 2 Double)
--- testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
-
--- test :: Point 2 Double
--- test = interpolate 0.5 testseg
 
 instance ( d ~ Dimension point, r ~ NumType point
          , Point_ point d r
@@ -273,3 +265,17 @@ instance ( OptCVector_ 2 (AnEndPoint point)
       compare' = \case
         Open   -> (<)
         Closed -> (<=)
+
+
+
+testseg :: ClosedLineSegment (Point 2 Double)
+testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+-- testI :: ClosedInterval (Point 2 Double)
+-- testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+test :: Point 2 Double
+test = interpolate 0.5 testseg
+
+
+testOn = test `intersects` testseg
