@@ -11,6 +11,7 @@ module HGeometry.Transformation
   , (|.|), identity, inverseOf
 
   , IsTransformable(..)
+  , TransformationConstraints, DefaultTransformByConstraints
   , OptMatrix_
   , ConstructableMatrix_
 

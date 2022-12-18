@@ -20,6 +20,7 @@ module HGeometry.LineSegment.Optimal
 import Control.Lens
 import Data.Functor.Apply
 import Data.Kind (Type)
+import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.Box.Boxable
 import HGeometry.Interval.Class
@@ -28,8 +29,8 @@ import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties
-import HGeometry.Vector
 import HGeometry.Transformation
+import HGeometry.Vector
 import Text.Read
 
 --------------------------------------------------------------------------------
@@ -268,7 +269,10 @@ instance ( OptCVector_ 2 (AnEndPoint point)
         Closed -> (<=)
 
 
-instance IsTransformable (LineSegment endPoint point)
+instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r
+         , Point_ point d r
+         , d > 0
+         ) => IsTransformable (LineSegment endPoint point)
 
 
 testseg :: ClosedLineSegment (Point 2 Double)

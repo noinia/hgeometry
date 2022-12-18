@@ -1,9 +1,8 @@
-{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
--- {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
--- {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
---------------------------------------------------------------------------------
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+-- --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Transformation.Internal
 -- Copyright   :  (C) Frank Staals
@@ -81,12 +80,12 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 -- * Transformable geometry objects
 
 type TransformationConstraints g =
-  ( Dimension g < Dimension g + 1
-  , KnownNat (Dimension g)
+  ( KnownNat (Dimension g)
   , OptMatrix_ (Dimension g+1) (NumType g)
   , HasComponents (VectorFamily' (Dimension g+1) (NumType g))
                   (VectorFamily' (Dimension g+1) (Vector (Dimension g+1) (NumType g)))
   , OptAdditive_ (Dimension g+1) (NumType g)
+ , Dimension g < Dimension g + 1 -- TODO: get rid of this constraint somehow
   )
 
 -- | Bunch of constraints we need for the default implementation of transformBy
@@ -96,9 +95,9 @@ type DefaultTransformByConstraints g d r =
   , OptVector_ d r
   , OptMatrix_ (d+1) r
   , KnownNat d
-  , d < d+1
   , Fractional r
   , OptMetric_ d r
+  , d < d+1 -- TODO: get rid of this constraint somehow
   )
 
 -- | A class representing types that can be transformed using a transformation
@@ -112,7 +111,8 @@ class IsTransformable g where
   -- We need the metric constraint since Point_ requires Affine_, and Affine_ requires Metric
 
 instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
-         , d < d+1, KnownNat d
+         , d < d+1
+         , KnownNat d
          ) => IsTransformable (Point d r) where
   transformBy t = Point . transformBy t . toVec
 
