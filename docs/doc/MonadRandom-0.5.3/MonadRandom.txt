@@ -705,37 +705,98 @@ withRandT :: (g -> g) -> RandT g m a -> RandT g m a
 --   computation.
 evalRandTIO :: MonadIO m => RandT StdGen m a -> m a
 
--- | A variant of <a>random</a> that uses the global pseudo-random number
---   generator.
+-- | A variant of <a>randomM</a> that uses the global pseudo-random number
+--   generator <a>globalStdGen</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import Data.Int
+--   
+--   &gt;&gt;&gt; randomIO :: IO Int32
+--   -1580093805
+--   </pre>
+--   
+--   This function is equivalent to <tt><a>getStdRandom</a>
+--   <a>random</a></tt> and is included in this interface for historical
+--   reasons and backwards compatibility. It is recommended to use
+--   <a>uniformM</a> instead, possibly with the <a>globalStdGen</a> if
+--   relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; uniformM globalStdGen :: IO Int32
+--   -1649127057
+--   </pre>
 randomIO :: (Random a, MonadIO m) => m a
 
--- | A variant of <a>randomR</a> that uses the global pseudo-random number
---   generator.
+-- | A variant of <a>randomRM</a> that uses the global pseudo-random number
+--   generator <a>globalStdGen</a>
+--   
+--   <pre>
+--   &gt;&gt;&gt; randomRIO (2020, 2100) :: IO Int
+--   2040
+--   </pre>
+--   
+--   Similar to <a>randomIO</a>, this function is equivalent to
+--   <tt><a>getStdRandom</a> <a>randomR</a></tt> and is included in this
+--   interface for historical reasons and backwards compatibility. It is
+--   recommended to use <a>uniformRM</a> instead, possibly with the
+--   <a>globalStdGen</a> if relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; uniformRM (2020, 2100) globalStdGen :: IO Int
+--   2079
+--   </pre>
 randomRIO :: (Random a, MonadIO m) => (a, a) -> m a
 
 -- | Uses the supplied function to get a value from the current global
 --   random generator, and updates the global generator with the new
 --   generator returned by the function. For example, <tt>rollDice</tt>
---   gets a pseudo-random integer between 1 and 6:
+--   produces a pseudo-random integer between 1 and 6:
 --   
 --   <pre>
---   rollDice :: IO Int
---   rollDice = getStdRandom (randomR (1,6))
+--   &gt;&gt;&gt; rollDice = getStdRandom (randomR (1, 6))
+--   
+--   &gt;&gt;&gt; replicateM 10 (rollDice :: IO Int)
+--   [5,6,6,1,1,6,4,2,4,1]
+--   </pre>
+--   
+--   This is an outdated function and it is recommended to switch to its
+--   equivalent <a>applyAtomicGen</a> instead, possibly with the
+--   <a>globalStdGen</a> if relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; rollDice = applyAtomicGen (uniformR (1, 6)) globalStdGen
+--   
+--   &gt;&gt;&gt; replicateM 10 (rollDice :: IO Int)
+--   [4,6,1,1,4,4,3,2,1,2]
 --   </pre>
 getStdRandom :: MonadIO m => (StdGen -> (a, StdGen)) -> m a
 
--- | Applies <a>split</a> to the current global pseudo-random generator,
---   updates it with one of the results, and returns the other.
+-- | Applies <a>split</a> to the current global pseudo-random generator
+--   <a>globalStdGen</a>, updates it with one of the results, and returns
+--   the other.
 newStdGen :: MonadIO m => m StdGen
 
--- | Gets the global pseudo-random number generator.
+-- | Gets the global pseudo-random number generator. Extracts the contents
+--   of <a>globalStdGen</a>
 getStdGen :: MonadIO m => m StdGen
 
--- | Sets the global pseudo-random number generator.
+-- | Sets the global pseudo-random number generator. Overwrites the
+--   contents of <a>globalStdGen</a>
 setStdGen :: MonadIO m => StdGen -> m ()
 
+-- | Initialize <a>StdGen</a> using system entropy (i.e.
+--   <tt>/dev/urandom</tt>) when it is available, while falling back on
+--   using system time as the seed.
+initStdGen :: MonadIO m => m StdGen
+
 -- | Generates a <a>ByteString</a> of the specified size using a pure
---   pseudo-random number generator. See <tt>uniformByteString</tt> for the
+--   pseudo-random number generator. See <a>uniformByteStringM</a> for the
 --   monadic version.
 --   
 --   <h4><b>Examples</b></h4>
@@ -752,8 +813,11 @@ setStdGen :: MonadIO m => StdGen -> m ()
 --   </pre>
 genByteString :: RandomGen g => Int -> g -> (ByteString, g)
 
--- | The class of types for which uniformly distributed values can be
---   generated.
+-- | The class of types for which random values can be generated. Most
+--   instances of <a>Random</a> will produce values that are uniformly
+--   distributed on the full range, but for those types without a
+--   well-defined "full range" some sensible default subrange will be
+--   selected.
 --   
 --   <a>Random</a> exists primarily for backwards compatibility with
 --   version 1.1 of this library. In new code, use the better specified
@@ -763,10 +827,34 @@ class Random a
 -- | Takes a range <i>(lo,hi)</i> and a pseudo-random number generator
 --   <i>g</i>, and returns a pseudo-random value uniformly distributed over
 --   the closed interval <i>[lo,hi]</i>, together with a new generator. It
---   is unspecified what happens if <i>lo&gt;hi</i>. For continuous types
---   there is no requirement that the values <i>lo</i> and <i>hi</i> are
---   ever produced, but they may be, depending on the implementation and
---   the interval.
+--   is unspecified what happens if <i>lo&gt;hi</i>, but usually the values
+--   will simply get swapped.
+--   
+--   <pre>
+--   &gt;&gt;&gt; let gen = mkStdGen 2021
+--   
+--   &gt;&gt;&gt; fst $ randomR ('a', 'z') gen
+--   't'
+--   
+--   &gt;&gt;&gt; fst $ randomR ('z', 'a') gen
+--   't'
+--   </pre>
+--   
+--   For continuous types there is no requirement that the values <i>lo</i>
+--   and <i>hi</i> are ever produced, but they may be, depending on the
+--   implementation and the interval.
+--   
+--   There is no requirement to follow the <tt>Ord</tt> instance and the
+--   concept of range can be defined on per type basis. For example product
+--   types will treat their values independently:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fst $ randomR (('a', 5.0), ('z', 10.0)) $ mkStdGen 2021
+--   ('t',6.240232662366563)
+--   </pre>
+--   
+--   In case when a lawful range is desired <a>uniformR</a> should be used
+--   instead.
 randomR :: (Random a, RandomGen g) => (a, a) -> g -> (a, g)
 
 -- | The same as <a>randomR</a>, but using a default range determined by
@@ -775,8 +863,8 @@ randomR :: (Random a, RandomGen g) => (a, a) -> g -> (a, g)
 --   <ul>
 --   <li>For bounded types (instances of <a>Bounded</a>, such as
 --   <a>Char</a>), the range is normally the whole type.</li>
---   <li>For fractional types, the range is normally the semi-closed
---   interval <tt>[0,1)</tt>.</li>
+--   <li>For floating point types, the range is normally the closed
+--   interval <tt>[0,1]</tt>.</li>
 --   <li>For <a>Integer</a>, the range is (arbitrarily) the range of
 --   <a>Int</a>.</li>
 --   </ul>
@@ -867,6 +955,23 @@ class Uniform a
 -- | The class of types for which a uniformly distributed value can be
 --   drawn from a range.
 class UniformRange a
+
+-- | A type class for data with a finite number of inhabitants. This type
+--   class is used in default implementations of <a>Uniform</a>.
+--   
+--   Users are not supposed to write instances of <a>Finite</a> manually.
+--   There is a default implementation in terms of <a>Generic</a> instead.
+--   
+--   <pre>
+--   &gt;&gt;&gt; :set -XDeriveGeneric -XDeriveAnyClass
+--   
+--   &gt;&gt;&gt; import GHC.Generics (Generic)
+--   
+--   &gt;&gt;&gt; data MyBool = MyTrue | MyFalse deriving (Generic, Finite)
+--   
+--   &gt;&gt;&gt; data Action = Code MyBool | Eat (Maybe Bool) | Sleep deriving (Generic, Finite)
+--   </pre>
+class Finite a
 
 
 -- | This module is provided for backwards compatibility, and simply
@@ -992,37 +1097,98 @@ withRandT :: (g -> g) -> RandT g m a -> RandT g m a
 --   computation.
 evalRandTIO :: MonadIO m => RandT StdGen m a -> m a
 
--- | A variant of <a>random</a> that uses the global pseudo-random number
---   generator.
+-- | A variant of <a>randomM</a> that uses the global pseudo-random number
+--   generator <a>globalStdGen</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import Data.Int
+--   
+--   &gt;&gt;&gt; randomIO :: IO Int32
+--   -1580093805
+--   </pre>
+--   
+--   This function is equivalent to <tt><a>getStdRandom</a>
+--   <a>random</a></tt> and is included in this interface for historical
+--   reasons and backwards compatibility. It is recommended to use
+--   <a>uniformM</a> instead, possibly with the <a>globalStdGen</a> if
+--   relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; uniformM globalStdGen :: IO Int32
+--   -1649127057
+--   </pre>
 randomIO :: (Random a, MonadIO m) => m a
 
--- | A variant of <a>randomR</a> that uses the global pseudo-random number
---   generator.
+-- | A variant of <a>randomRM</a> that uses the global pseudo-random number
+--   generator <a>globalStdGen</a>
+--   
+--   <pre>
+--   &gt;&gt;&gt; randomRIO (2020, 2100) :: IO Int
+--   2040
+--   </pre>
+--   
+--   Similar to <a>randomIO</a>, this function is equivalent to
+--   <tt><a>getStdRandom</a> <a>randomR</a></tt> and is included in this
+--   interface for historical reasons and backwards compatibility. It is
+--   recommended to use <a>uniformRM</a> instead, possibly with the
+--   <a>globalStdGen</a> if relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; uniformRM (2020, 2100) globalStdGen :: IO Int
+--   2079
+--   </pre>
 randomRIO :: (Random a, MonadIO m) => (a, a) -> m a
 
 -- | Uses the supplied function to get a value from the current global
 --   random generator, and updates the global generator with the new
 --   generator returned by the function. For example, <tt>rollDice</tt>
---   gets a pseudo-random integer between 1 and 6:
+--   produces a pseudo-random integer between 1 and 6:
 --   
 --   <pre>
---   rollDice :: IO Int
---   rollDice = getStdRandom (randomR (1,6))
+--   &gt;&gt;&gt; rollDice = getStdRandom (randomR (1, 6))
+--   
+--   &gt;&gt;&gt; replicateM 10 (rollDice :: IO Int)
+--   [5,6,6,1,1,6,4,2,4,1]
+--   </pre>
+--   
+--   This is an outdated function and it is recommended to switch to its
+--   equivalent <a>applyAtomicGen</a> instead, possibly with the
+--   <a>globalStdGen</a> if relying on the global state is acceptable.
+--   
+--   <pre>
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; rollDice = applyAtomicGen (uniformR (1, 6)) globalStdGen
+--   
+--   &gt;&gt;&gt; replicateM 10 (rollDice :: IO Int)
+--   [4,6,1,1,4,4,3,2,1,2]
 --   </pre>
 getStdRandom :: MonadIO m => (StdGen -> (a, StdGen)) -> m a
 
--- | Applies <a>split</a> to the current global pseudo-random generator,
---   updates it with one of the results, and returns the other.
+-- | Applies <a>split</a> to the current global pseudo-random generator
+--   <a>globalStdGen</a>, updates it with one of the results, and returns
+--   the other.
 newStdGen :: MonadIO m => m StdGen
 
--- | Gets the global pseudo-random number generator.
+-- | Gets the global pseudo-random number generator. Extracts the contents
+--   of <a>globalStdGen</a>
 getStdGen :: MonadIO m => m StdGen
 
--- | Sets the global pseudo-random number generator.
+-- | Sets the global pseudo-random number generator. Overwrites the
+--   contents of <a>globalStdGen</a>
 setStdGen :: MonadIO m => StdGen -> m ()
 
+-- | Initialize <a>StdGen</a> using system entropy (i.e.
+--   <tt>/dev/urandom</tt>) when it is available, while falling back on
+--   using system time as the seed.
+initStdGen :: MonadIO m => m StdGen
+
 -- | Generates a <a>ByteString</a> of the specified size using a pure
---   pseudo-random number generator. See <tt>uniformByteString</tt> for the
+--   pseudo-random number generator. See <a>uniformByteStringM</a> for the
 --   monadic version.
 --   
 --   <h4><b>Examples</b></h4>
@@ -1039,8 +1205,11 @@ setStdGen :: MonadIO m => StdGen -> m ()
 --   </pre>
 genByteString :: RandomGen g => Int -> g -> (ByteString, g)
 
--- | The class of types for which uniformly distributed values can be
---   generated.
+-- | The class of types for which random values can be generated. Most
+--   instances of <a>Random</a> will produce values that are uniformly
+--   distributed on the full range, but for those types without a
+--   well-defined "full range" some sensible default subrange will be
+--   selected.
 --   
 --   <a>Random</a> exists primarily for backwards compatibility with
 --   version 1.1 of this library. In new code, use the better specified
@@ -1050,10 +1219,34 @@ class Random a
 -- | Takes a range <i>(lo,hi)</i> and a pseudo-random number generator
 --   <i>g</i>, and returns a pseudo-random value uniformly distributed over
 --   the closed interval <i>[lo,hi]</i>, together with a new generator. It
---   is unspecified what happens if <i>lo&gt;hi</i>. For continuous types
---   there is no requirement that the values <i>lo</i> and <i>hi</i> are
---   ever produced, but they may be, depending on the implementation and
---   the interval.
+--   is unspecified what happens if <i>lo&gt;hi</i>, but usually the values
+--   will simply get swapped.
+--   
+--   <pre>
+--   &gt;&gt;&gt; let gen = mkStdGen 2021
+--   
+--   &gt;&gt;&gt; fst $ randomR ('a', 'z') gen
+--   't'
+--   
+--   &gt;&gt;&gt; fst $ randomR ('z', 'a') gen
+--   't'
+--   </pre>
+--   
+--   For continuous types there is no requirement that the values <i>lo</i>
+--   and <i>hi</i> are ever produced, but they may be, depending on the
+--   implementation and the interval.
+--   
+--   There is no requirement to follow the <tt>Ord</tt> instance and the
+--   concept of range can be defined on per type basis. For example product
+--   types will treat their values independently:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fst $ randomR (('a', 5.0), ('z', 10.0)) $ mkStdGen 2021
+--   ('t',6.240232662366563)
+--   </pre>
+--   
+--   In case when a lawful range is desired <a>uniformR</a> should be used
+--   instead.
 randomR :: (Random a, RandomGen g) => (a, a) -> g -> (a, g)
 
 -- | The same as <a>randomR</a>, but using a default range determined by
@@ -1062,8 +1255,8 @@ randomR :: (Random a, RandomGen g) => (a, a) -> g -> (a, g)
 --   <ul>
 --   <li>For bounded types (instances of <a>Bounded</a>, such as
 --   <a>Char</a>), the range is normally the whole type.</li>
---   <li>For fractional types, the range is normally the semi-closed
---   interval <tt>[0,1)</tt>.</li>
+--   <li>For floating point types, the range is normally the closed
+--   interval <tt>[0,1]</tt>.</li>
 --   <li>For <a>Integer</a>, the range is (arbitrarily) the range of
 --   <a>Int</a>.</li>
 --   </ul>
@@ -1154,3 +1347,20 @@ class Uniform a
 -- | The class of types for which a uniformly distributed value can be
 --   drawn from a range.
 class UniformRange a
+
+-- | A type class for data with a finite number of inhabitants. This type
+--   class is used in default implementations of <a>Uniform</a>.
+--   
+--   Users are not supposed to write instances of <a>Finite</a> manually.
+--   There is a default implementation in terms of <a>Generic</a> instead.
+--   
+--   <pre>
+--   &gt;&gt;&gt; :set -XDeriveGeneric -XDeriveAnyClass
+--   
+--   &gt;&gt;&gt; import GHC.Generics (Generic)
+--   
+--   &gt;&gt;&gt; data MyBool = MyTrue | MyFalse deriving (Generic, Finite)
+--   
+--   &gt;&gt;&gt; data Action = Code MyBool | Eat (Maybe Bool) | Sleep deriving (Generic, Finite)
+--   </pre>
+class Finite a

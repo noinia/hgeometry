@@ -24,15 +24,11 @@
 </span><span id="line-24"></span><span class="hs-keyword">type</span><span> </span><span id="WidthIndex"><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-var">WidthIndex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-25"></span><span>
 </span><span id="line-26"></span><span class="hs-comment">-- | A Cell corresponding to a node in the QuadTree</span><span>
-</span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="Cell"><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span id="local-6989586621680035914"><span class="annot"><a href="#local-6989586621680035914"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Cell"><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_cellWidthIndex"><span class="annot"><span class="annottext">Cell r -&gt; WidthIndex
+</span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="Cell"><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span id="local-6989586621680130007"><span class="annot"><a href="#local-6989586621680130007"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Cell"><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_cellWidthIndex"><span class="annot"><span class="annottext">forall r. Cell r -&gt; WidthIndex
 </span><a href="Geometry.QuadTree.Cell.html#_cellWidthIndex"><span class="hs-identifier hs-var hs-var">_cellWidthIndex</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span>
-</span><span id="line-28"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="_lowerLeft"><span class="annot"><span class="annottext">Cell r -&gt; Point 2 r
-</span><a href="Geometry.QuadTree.Cell.html#_lowerLeft"><span class="hs-identifier hs-var hs-var">_lowerLeft</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span>                </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035914"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680035772"><span id="local-6989586621680035774"><span id="local-6989586621680035776"><span class="annot"><span class="annottext">WidthIndex -&gt; Cell r -&gt; ShowS
-[Cell r] -&gt; ShowS
-Cell r -&gt; String
-(WidthIndex -&gt; Cell r -&gt; ShowS)
--&gt; (Cell r -&gt; String) -&gt; ([Cell r] -&gt; ShowS) -&gt; Show (Cell r)
+</span><span id="line-28"></span><span>                   </span><span class="hs-special">,</span><span> </span><span id="_lowerLeft"><span class="annot"><span class="annottext">forall r. Cell r -&gt; Point 2 r
+</span><a href="Geometry.QuadTree.Cell.html#_lowerLeft"><span class="hs-identifier hs-var hs-var">_lowerLeft</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span>                </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680130007"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                   </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680129698"><span id="local-6989586621680129700"><span id="local-6989586621680129709"><span class="annot"><span class="annottext">WidthIndex -&gt; Cell r -&gt; ShowS
 forall r. Show r =&gt; WidthIndex -&gt; Cell r -&gt; ShowS
 forall r. Show r =&gt; [Cell r] -&gt; ShowS
 forall r. Show r =&gt; Cell r -&gt; String
@@ -45,55 +41,28 @@ show :: Cell r -&gt; String
 $cshow :: forall r. Show r =&gt; Cell r -&gt; String
 showsPrec :: WidthIndex -&gt; Cell r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; WidthIndex -&gt; Cell r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680035767"><span id="local-6989586621680035769"><span class="annot"><span class="annottext">Cell r -&gt; Cell r -&gt; Bool
-(Cell r -&gt; Cell r -&gt; Bool)
--&gt; (Cell r -&gt; Cell r -&gt; Bool) -&gt; Eq (Cell r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680129669"><span id="local-6989586621680129676"><span class="annot"><span class="annottext">Cell r -&gt; Cell r -&gt; Bool
 forall r. Eq r =&gt; Cell r -&gt; Cell r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Cell r -&gt; Cell r -&gt; Bool
 $c/= :: forall r. Eq r =&gt; Cell r -&gt; Cell r -&gt; Bool
 == :: Cell r -&gt; Cell r -&gt; Bool
 $c== :: forall r. Eq r =&gt; Cell r -&gt; Cell r -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680035762"><span id="local-6989586621680035764"><span class="annot"><span class="annottext">a -&gt; Cell b -&gt; Cell a
-(a -&gt; b) -&gt; Cell a -&gt; Cell b
-(forall a b. (a -&gt; b) -&gt; Cell a -&gt; Cell b)
--&gt; (forall a b. a -&gt; Cell b -&gt; Cell a) -&gt; Functor Cell
-forall a b. a -&gt; Cell b -&gt; Cell a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680129648"><span id="local-6989586621680129653"><span class="annot"><span class="annottext">forall a b. a -&gt; Cell b -&gt; Cell a
 forall a b. (a -&gt; b) -&gt; Cell a -&gt; Cell b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-&lt;$ :: a -&gt; Cell b -&gt; Cell a
+&lt;$ :: forall a b. a -&gt; Cell b -&gt; Cell a
 $c&lt;$ :: forall a b. a -&gt; Cell b -&gt; Cell a
-fmap :: (a -&gt; b) -&gt; Cell a -&gt; Cell b
+fmap :: forall a b. (a -&gt; b) -&gt; Cell a -&gt; Cell b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Cell a -&gt; Cell b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680035727"><span id="local-6989586621680035729"><span id="local-6989586621680035731"><span id="local-6989586621680035733"><span id="local-6989586621680035735"><span id="local-6989586621680035737"><span id="local-6989586621680035739"><span id="local-6989586621680035741"><span id="local-6989586621680035743"><span id="local-6989586621680035745"><span id="local-6989586621680035747"><span id="local-6989586621680035749"><span id="local-6989586621680035751"><span id="local-6989586621680035753"><span id="local-6989586621680035755"><span id="local-6989586621680035757"><span id="local-6989586621680035759"><span class="annot"><span class="annottext">Cell a -&gt; Bool
-(a -&gt; m) -&gt; Cell a -&gt; m
-(a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
-(forall m. Monoid m =&gt; Cell m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a)
--&gt; (forall a. Cell a -&gt; [a])
--&gt; (forall a. Cell a -&gt; Bool)
--&gt; (forall a. Cell a -&gt; WidthIndex)
--&gt; (forall a. Eq a =&gt; a -&gt; Cell a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; Cell a -&gt; a)
--&gt; (forall a. Ord a =&gt; Cell a -&gt; a)
--&gt; (forall a. Num a =&gt; Cell a -&gt; a)
--&gt; (forall a. Num a =&gt; Cell a -&gt; a)
--&gt; Foldable Cell
-forall a. Eq a =&gt; a -&gt; Cell a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680129575"><span id="local-6989586621680129577"><span id="local-6989586621680129579"><span id="local-6989586621680129581"><span id="local-6989586621680129583"><span id="local-6989586621680129585"><span id="local-6989586621680129589"><span id="local-6989586621680129591"><span id="local-6989586621680129593"><span id="local-6989586621680129595"><span id="local-6989586621680129597"><span id="local-6989586621680129599"><span id="local-6989586621680129601"><span id="local-6989586621680129605"><span id="local-6989586621680129607"><span id="local-6989586621680129614"><span id="local-6989586621680129616"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; Cell a -&gt; Bool
 forall a. Num a =&gt; Cell a -&gt; a
 forall a. Ord a =&gt; Cell a -&gt; a
 forall m. Monoid m =&gt; Cell m -&gt; m
 forall a. Cell a -&gt; Bool
-forall a. Cell a -&gt; WidthIndex
+forall r. Cell r -&gt; WidthIndex
 forall a. Cell a -&gt; [a]
 forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
 forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m
@@ -118,56 +87,42 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-product :: Cell a -&gt; a
+product :: forall a. Num a =&gt; Cell a -&gt; a
 $cproduct :: forall a. Num a =&gt; Cell a -&gt; a
-sum :: Cell a -&gt; a
+sum :: forall a. Num a =&gt; Cell a -&gt; a
 $csum :: forall a. Num a =&gt; Cell a -&gt; a
-minimum :: Cell a -&gt; a
+minimum :: forall a. Ord a =&gt; Cell a -&gt; a
 $cminimum :: forall a. Ord a =&gt; Cell a -&gt; a
-maximum :: Cell a -&gt; a
+maximum :: forall a. Ord a =&gt; Cell a -&gt; a
 $cmaximum :: forall a. Ord a =&gt; Cell a -&gt; a
-elem :: a -&gt; Cell a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Cell a -&gt; Bool
 $celem :: forall a. Eq a =&gt; a -&gt; Cell a -&gt; Bool
-length :: Cell a -&gt; WidthIndex
-$clength :: forall a. Cell a -&gt; WidthIndex
-null :: Cell a -&gt; Bool
+length :: forall r. Cell r -&gt; WidthIndex
+$clength :: forall r. Cell r -&gt; WidthIndex
+null :: forall a. Cell a -&gt; Bool
 $cnull :: forall a. Cell a -&gt; Bool
-toList :: Cell a -&gt; [a]
+toList :: forall a. Cell a -&gt; [a]
 $ctoList :: forall a. Cell a -&gt; [a]
-foldl1 :: (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
 $cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
-foldr1 :: (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
 $cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cell a -&gt; a
-foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
 $cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
-foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
 $cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cell a -&gt; b
-foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
 $cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
-foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
 $cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cell a -&gt; b
-foldMap' :: (a -&gt; m) -&gt; Cell a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m
 $cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m
-foldMap :: (a -&gt; m) -&gt; Cell a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cell a -&gt; m
-fold :: Cell m -&gt; m
+fold :: forall m. Monoid m =&gt; Cell m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Cell m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680035716"><span id="local-6989586621680035718"><span id="local-6989586621680035720"><span id="local-6989586621680035722"><span class="annot"><span class="annottext">Functor Cell
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680129516"><span id="local-6989586621680129518"><span id="local-6989586621680129520"><span id="local-6989586621680129529"><span class="annot"><span class="annottext">Functor Cell
 Foldable Cell
-Functor Cell
--&gt; Foldable Cell
--&gt; (forall (f :: * -&gt; *) a b.
-    Applicative f =&gt;
-    (a -&gt; f b) -&gt; Cell a -&gt; f (Cell b))
--&gt; (forall (f :: * -&gt; *) a.
-    Applicative f =&gt;
-    Cell (f a) -&gt; f (Cell a))
--&gt; (forall (m :: * -&gt; *) a b.
-    Monad m =&gt;
-    (a -&gt; m b) -&gt; Cell a -&gt; m (Cell b))
--&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Cell (m a) -&gt; m (Cell a))
--&gt; Traversable Cell
-(a -&gt; f b) -&gt; Cell a -&gt; f (Cell b)
 forall (t :: * -&gt; *).
 Functor t
 -&gt; Foldable t
@@ -188,418 +143,309 @@ Monad m =&gt;
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Cell a -&gt; f (Cell b)
-sequence :: Cell (m a) -&gt; m (Cell a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Cell (m a) -&gt; m (Cell a)
 $csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Cell (m a) -&gt; m (Cell a)
-mapM :: (a -&gt; m b) -&gt; Cell a -&gt; m (Cell b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Cell a -&gt; m (Cell b)
 $cmapM :: forall (m :: * -&gt; *) a b.
 Monad m =&gt;
 (a -&gt; m b) -&gt; Cell a -&gt; m (Cell b)
-sequenceA :: Cell (f a) -&gt; f (Cell a)
+sequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Cell (f a) -&gt; f (Cell a)
 $csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Cell (f a) -&gt; f (Cell a)
-traverse :: (a -&gt; f b) -&gt; Cell a -&gt; f (Cell b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Cell a -&gt; f (Cell b)
 $ctraverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Cell a -&gt; f (Cell b)
-$cp2Traversable :: Foldable Cell
-$cp1Traversable :: Functor Cell
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span id="lowerLeft"><span id="cellWidthIndex"><span id="local-6989586621680035714"><span id="local-6989586621680035914"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Cell</span></span></span></span></span><span>
+</span><span id="line-30"></span><span id="lowerLeft"><span id="cellWidthIndex"><span id="local-6989586621680129938"><span id="local-6989586621680130007"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Cell</span></span></span></span></span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- | Computes a cell that contains the given rectangle</span><span>
-</span><span id="line-33"></span><span id="local-6989586621680035710"><span id="local-6989586621680035711"><span class="annot"><a href="Geometry.QuadTree.Cell.html#fitsRectangle"><span class="hs-identifier hs-type">fitsRectangle</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621680035711"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035711"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035710"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035711"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035711"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
-</span><span id="line-34"></span><span id="fitsRectangle"><span class="annot"><span class="annottext">fitsRectangle :: Rectangle p r -&gt; Cell r
-</span><a href="Geometry.QuadTree.Cell.html#fitsRectangle"><span class="hs-identifier hs-var hs-var">fitsRectangle</span></a></span></span><span> </span><span id="local-6989586621680035708"><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680035708"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; Point 2 r -&gt; Cell r
-forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
+</span><span id="line-33"></span><span id="local-6989586621680129929"><span id="local-6989586621680129930"><span class="annot"><a href="Geometry.QuadTree.Cell.html#fitsRectangle"><span class="hs-identifier hs-type">fitsRectangle</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621680129930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129929"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129930"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129930"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-34"></span><span id="fitsRectangle"><span class="annot"><span class="annottext">fitsRectangle :: forall r p. (RealFrac r, Ord r) =&gt; Rectangle p r -&gt; Cell r
+</span><a href="Geometry.QuadTree.Cell.html#fitsRectangle"><span class="hs-identifier hs-var hs-var">fitsRectangle</span></a></span></span><span> </span><span id="local-6989586621680129436"><span class="annot"><span class="annottext">Rectangle p r
+</span><a href="#local-6989586621680129436"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
 </span><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035707"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680035708"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">Rectangle p r
--&gt; Getting (Point 2 r) (Rectangle p r) (Point 2 r) -&gt; Point 2 r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
--&gt; Rectangle p r -&gt; Const (Point 2 r) (Rectangle p r)
-forall (d :: Nat) p r. Lens' (Box d p r) (Point d r :+ p)
-</span><a href="Geometry.Box.Internal.html#minPoint"><span class="hs-identifier hs-var">minPoint</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
- -&gt; Rectangle p r -&gt; Const (Point 2 r) (Rectangle p r))
--&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
-    -&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
--&gt; Getting (Point 2 r) (Rectangle p r) (Point 2 r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
--&gt; (Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p)
-forall core extra core'.
+</span><a href="#local-6989586621680129435"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rectangle p r
+</span><a href="#local-6989586621680129436"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall (d :: Nat) p r. Lens' (Box d p r) (Point d r :+ p)
+</span><a href="Geometry.Box.Internal.html#minPoint"><span class="hs-identifier hs-var">minPoint</span></a></span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">forall core extra core'.
 Lens (core :+ extra) (core' :+ extra) core core'
-</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
-forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
-</span><span class="hs-operator hs-var">.-^</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
-forall r. r -&gt; r -&gt; Vector 2 r
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.-^</span></span><span> </span><span class="annot"><span class="annottext">forall r. r -&gt; r -&gt; Vector 2 r
 </span><a href="Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-36"></span><span>    </span><span id="local-6989586621680035707"><span class="annot"><span class="annottext">w :: WidthIndex
-</span><a href="#local-6989586621680035707"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; WidthIndex
-</span><a href="#local-6989586621680035701"><span class="hs-identifier hs-var">lg'</span></a></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; WidthIndex)
--&gt; (Rectangle p r -&gt; Integer) -&gt; Rectangle p r -&gt; WidthIndex
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Integer
-forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
-</span><span class="hs-identifier hs-var">ceiling</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Integer) -&gt; (Rectangle p r -&gt; r) -&gt; Rectangle p r -&gt; Integer
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621680129435"><span class="annot"><span class="annottext">w :: WidthIndex
+</span><a href="#local-6989586621680129435"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; WidthIndex
+</span><a href="#local-6989586621680129429"><span class="hs-identifier hs-var">lg'</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">ceiling</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
-forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-operator hs-var">+</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(r -&gt; r) -&gt; (Rectangle p r -&gt; r) -&gt; Rectangle p r -&gt; r
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; r
-forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
-</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; r)
--&gt; (Rectangle p r -&gt; Vector 2 r) -&gt; Rectangle p r -&gt; r
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rectangle p r -&gt; Vector 2 r
-forall (d :: Nat) r p. (Arity d, Num r) =&gt; Box d p r -&gt; Vector d r
-</span><a href="Geometry.Box.Internal.html#size"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">(Rectangle p r -&gt; WidthIndex) -&gt; Rectangle p r -&gt; WidthIndex
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (d :: Nat) r p. (Arity d, Num r) =&gt; Box d p r -&gt; Vector d r
+</span><a href="Geometry.Box.Internal.html#size"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
-</span><a href="#local-6989586621680035708"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621680129436"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span>    </span><span class="hs-comment">-- &quot;approximate log&quot; that over approximates by a factor of at most two.</span><span>
-</span><span id="line-39"></span><span>    </span><span class="annot"><a href="#local-6989586621680035701"><span class="hs-identifier hs-type">lg'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span>
-</span><span id="line-40"></span><span>    </span><span id="local-6989586621680035701"><span class="annot"><span class="annottext">lg' :: Integer -&gt; WidthIndex
-</span><a href="#local-6989586621680035701"><span class="hs-identifier hs-var hs-var">lg'</span></a></span></span><span> </span><span id="local-6989586621680035696"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621680035696"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex
-</span><a href="#local-6989586621680035695"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
+</span><span id="line-39"></span><span>    </span><span class="annot"><a href="#local-6989586621680129429"><span class="hs-identifier hs-type">lg'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621680129429"><span class="annot"><span class="annottext">lg' :: Integer -&gt; WidthIndex
+</span><a href="#local-6989586621680129429"><span class="hs-identifier hs-var hs-var">lg'</span></a></span></span><span> </span><span id="local-6989586621680129424"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621680129424"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex
+</span><a href="#local-6989586621680129423"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-41"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>        </span><span id="local-6989586621680035695"><span class="annot"><span class="annottext">go :: WidthIndex -&gt; WidthIndex
-</span><a href="#local-6989586621680035695"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621680035694"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035694"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Integer
-forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
-</span><span class="hs-identifier hs-var">floor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; Double
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><span id="line-42"></span><span>        </span><span id="local-6989586621680129423"><span class="annot"><span class="annottext">go :: WidthIndex -&gt; WidthIndex
+</span><a href="#local-6989586621680129423"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621680129422"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129422"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">floor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035694"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621680129422"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621680035696"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex
-</span><a href="#local-6989586621680035695"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035694"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex -&gt; WidthIndex
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621680129424"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex
+</span><a href="#local-6989586621680129423"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129422"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">WidthIndex
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- note that the floor does not really do anything</span><span>
 </span><span id="line-43"></span><span>                                             </span><span class="hs-comment">-- since i is integral and &gt;= 1.</span><span>
 </span><span id="line-44"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035694"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621680129422"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035689"><span class="annot"><a href="#local-6989586621680035689"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035687"><span class="annot"><a href="#local-6989586621680035687"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680035687"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621680129417"><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129417"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span id="local-6989586621680129415"><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129415"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680129415"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span id="local-6989586621680035686"><span class="annot"><a href="#local-6989586621680035686"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035686"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035686"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span id="local-6989586621680129414"><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129414"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129414"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129414"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span id="local-6989586621680035685"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035685"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035685"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035685"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`HasIntersectionWith`</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035685"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>  </span><span id="local-6989586621680035682"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035682"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680035681"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; Cell r -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></span></span><span> </span><span id="local-6989586621680035679"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035679"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035682"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Box 2 () r -&gt; Bool
-forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
-</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Box 2 () r
-forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680129885"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129885"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129885"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129885"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`HasIntersectionWith`</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129885"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621680129391"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129391"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680129390"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; Cell r -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></span></span><span> </span><span id="local-6989586621680129388"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129388"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129391"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
 </span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var">toBox</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035679"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="#local-6989586621680129388"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span id="local-6989586621680035677"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035677"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035677"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035677"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035677"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-55"></span><span>  </span><span id="local-6989586621680035672"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Point 2 r)
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680129874"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129874"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129874"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129874"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129874"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621680129369"><span class="annot"><span class="annottext">nonEmptyIntersection :: forall (proxy :: * -&gt; *).
+proxy (Point 2 r)
 -&gt; proxy (Cell r) -&gt; Intersection (Point 2 r) (Cell r) -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Point 2 r)
--&gt; proxy (Cell r) -&gt; Intersection (Point 2 r) (Cell r) -&gt; Bool
-forall g h (proxy :: * -&gt; *).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall g h (proxy :: * -&gt; *).
 (NoIntersection &#8712; IntersectionOf g h,
  RecApplicative (IntersectionOf g h)) =&gt;
 proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
 </span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
-</span><span id="line-56"></span><span>  </span><span id="local-6989586621680035669"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035669"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680035668"><span class="annot"><span class="annottext">intersect :: Point 2 r -&gt; Cell r -&gt; Intersection (Point 2 r) (Cell r)
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></span></span><span> </span><span id="local-6989586621680035666"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035666"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035669"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Box 2 () r -&gt; Intersection (Point 2 r) (Box 2 () r)
-forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
-</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Box 2 () r
-forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621680129349"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129349"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680129348"><span class="annot"><span class="annottext">intersect :: Point 2 r -&gt; Cell r -&gt; Intersection (Point 2 r) (Cell r)
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></span></span><span> </span><span id="local-6989586621680129346"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129346"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129349"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
 </span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var">toBox</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035666"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="#local-6989586621680129346"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span id="local-6989586621680035880"><span class="annot"><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-type">pow</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035880"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680035880"><span class="hs-identifier hs-type">r</span></a></span></span><span>
-</span><span id="line-59"></span><span id="pow"><span class="annot"><span class="annottext">pow :: WidthIndex -&gt; r
-</span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var hs-var">pow</span></a></span></span><span> </span><span id="local-6989586621680035665"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035665"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035665"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex -&gt; Ordering
-forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span id="line-58"></span><span id="local-6989586621680129891"><span class="annot"><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-type">pow</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129891"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680129891"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-59"></span><span id="pow"><span class="annot"><span class="annottext">pow :: forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var hs-var">pow</span></a></span></span><span> </span><span id="local-6989586621680129327"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129327"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129327"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">WidthIndex
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-60"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r
-</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; WidthIndex -&gt; r
-forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">WidthIndex
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex -&gt; WidthIndex
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035665"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680129327"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-62"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r
-</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; WidthIndex -&gt; r
-forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035665"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621680129327"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span id="local-6989586621680035660"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellWidth"><span class="hs-identifier hs-type">cellWidth</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035660"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035660"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680035660"><span class="hs-identifier hs-type">r</span></a></span></span><span>
-</span><span id="line-65"></span><span id="cellWidth"><span class="annot"><span class="annottext">cellWidth :: Cell r -&gt; r
-</span><a href="Geometry.QuadTree.Cell.html#cellWidth"><span class="hs-identifier hs-var hs-var">cellWidth</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035658"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035658"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; r
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><span id="line-64"></span><span id="local-6989586621680129848"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellWidth"><span class="hs-identifier hs-type">cellWidth</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129848"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129848"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680129848"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-65"></span><span id="cellWidth"><span class="annot"><span class="annottext">cellWidth :: forall r. Fractional r =&gt; Cell r -&gt; r
+</span><a href="Geometry.QuadTree.Cell.html#cellWidth"><span class="hs-identifier hs-var hs-var">cellWidth</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680129319"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129319"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035658"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><a href="#local-6989586621680129319"><span class="hs-identifier hs-var">w</span></a></span><span>
 </span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span id="local-6989586621680035874"><span class="annot"><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-type">toBox</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035874"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035874"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Box"><span class="hs-identifier hs-type">Box</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680035874"><span class="hs-identifier hs-type">r</span></a></span></span><span>
-</span><span id="line-68"></span><span id="toBox"><span class="annot"><span class="annottext">toBox :: Cell r -&gt; Box 2 () r
-</span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var hs-var">toBox</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035657"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035657"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680035656"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035656"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Box 2 () r
-forall (d :: Nat) r p.
+</span><span id="line-67"></span><span id="local-6989586621680129881"><span class="annot"><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-type">toBox</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129881"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129881"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Internal.html#Box"><span class="hs-identifier hs-type">Box</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680129881"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-68"></span><span id="toBox"><span class="annot"><span class="annottext">toBox :: forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var hs-var">toBox</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680129298"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129298"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680129297"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129297"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (d :: Nat) r p.
 (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Box d p r
-</span><a href="Geometry.Box.Internal.html#box"><span class="hs-identifier hs-var">box</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
-forall a. a -&gt; a :+ ()
+</span><a href="Geometry.Box.Internal.html#box"><span class="hs-identifier hs-var">box</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. a -&gt; a :+ ()
 </span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035656"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
-forall a. a -&gt; a :+ ()
-</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r :+ ()) -&gt; Point 2 r -&gt; Point 2 r :+ ()
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="#local-6989586621680129297"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035656"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
-forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
-</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
-forall r. r -&gt; r -&gt; Vector 2 r
-</span><a href="Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; r
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><a href="#local-6989586621680129297"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035657"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; r
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><a href="#local-6989586621680129298"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035657"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680129298"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span id="local-6989586621680035651"><span id="local-6989586621680035652"><span class="annot"><a href="Geometry.QuadTree.Cell.html#inCell"><span class="hs-identifier hs-type">inCell</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035652"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035652"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035652"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680035651"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035652"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
-</span><span id="line-71"></span><span id="inCell"><span class="annot"><span class="annottext">inCell :: (Point 2 r :+ p) -&gt; Cell r -&gt; Bool
-</span><a href="Geometry.QuadTree.Cell.html#inCell"><span class="hs-identifier hs-var hs-var">inCell</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680035649"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035649"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><span class="annottext">p
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680035647"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035647"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035649"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Box 2 () r -&gt; Bool
-forall (d :: Nat) r p.
+</span><span id="line-70"></span><span id="local-6989586621680129840"><span id="local-6989586621680129841"><span class="annot"><a href="Geometry.QuadTree.Cell.html#inCell"><span class="hs-identifier hs-type">inCell</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129841"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129841"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129841"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680129840"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129841"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-71"></span><span id="inCell"><span class="annot"><span class="annottext">inCell :: forall r p.
+(Fractional r, Ord r) =&gt;
+(Point 2 r :+ p) -&gt; Cell r -&gt; Bool
+</span><a href="Geometry.QuadTree.Cell.html#inCell"><span class="hs-identifier hs-var hs-var">inCell</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680129274"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129274"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680129272"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129272"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129274"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall (d :: Nat) r p.
 (Arity d, Ord r) =&gt;
 Point d r -&gt; Box d p r -&gt; Bool
-</span><a href="Geometry.Box.Internal.html#inBox"><span class="hs-operator hs-var">`inBox`</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Box 2 () r
-forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><a href="Geometry.Box.Internal.html#inBox"><span class="hs-operator hs-var">`inBox`</span></a></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
 </span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var">toBox</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035647"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621680129272"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span id="local-6989586621680035645"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellCorners"><span class="hs-identifier hs-type">cellCorners</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035645"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035645"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035645"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-74"></span><span id="cellCorners"><span class="annot"><span class="annottext">cellCorners :: Cell r -&gt; Quadrants (Point 2 r)
-</span><a href="Geometry.QuadTree.Cell.html#cellCorners"><span class="hs-identifier hs-var hs-var">cellCorners</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; Point 2 r)
--&gt; Corners (Point 2 r :+ ()) -&gt; Quadrants (Point 2 r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ ())
--&gt; Getting (Point 2 r) (Point 2 r :+ ()) (Point 2 r) -&gt; Point 2 r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ ()) (Point 2 r)
-forall core extra core'.
+</span><span id="line-73"></span><span id="local-6989586621680129834"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellCorners"><span class="hs-identifier hs-type">cellCorners</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129834"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129834"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129834"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-74"></span><span id="cellCorners"><span class="annot"><span class="annottext">cellCorners :: forall r. Fractional r =&gt; Cell r -&gt; Quadrants (Point 2 r)
+</span><a href="Geometry.QuadTree.Cell.html#cellCorners"><span class="hs-identifier hs-var hs-var">cellCorners</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall core extra core'.
 Lens (core :+ extra) (core' :+ extra) core core'
-</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Corners (Point 2 r :+ ()) -&gt; Quadrants (Point 2 r))
--&gt; (Cell r -&gt; Corners (Point 2 r :+ ()))
--&gt; Cell r
--&gt; Quadrants (Point 2 r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rectangle () r -&gt; Corners (Point 2 r :+ ())
-forall r p. Num r =&gt; Rectangle p r -&gt; Corners (Point 2 r :+ p)
-</span><a href="Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span> </span><span class="annot"><span class="annottext">(Rectangle () r -&gt; Corners (Point 2 r :+ ()))
--&gt; (Cell r -&gt; Rectangle () r)
--&gt; Cell r
--&gt; Corners (Point 2 r :+ ())
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Rectangle () r
-forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall r p. Num r =&gt; Rectangle p r -&gt; Corners (Point 2 r :+ p)
+</span><a href="Geometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
 </span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var">toBox</span></a></span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span class="hs-comment">-- | Sides are open</span><span>
-</span><span id="line-77"></span><span id="local-6989586621680035790"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-type">cellSides</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035790"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035790"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680035790"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-78"></span><span id="cellSides"><span class="annot"><span class="annottext">cellSides :: Cell r -&gt; Sides (LineSegment 2 () r)
-</span><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-var hs-var">cellSides</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r -&gt; LineSegment 2 () r)
--&gt; Sides (LineSegment 2 () r) -&gt; Sides (LineSegment 2 () r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span id="local-6989586621680035640"><span class="annot"><span class="annottext">Point 2 r :+ ()
-</span><a href="#local-6989586621680035640"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680035639"><span class="annot"><span class="annottext">Point 2 r :+ ()
-</span><a href="#local-6989586621680035639"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; LineSegment 2 () r
-forall (d :: Nat) r p.
+</span><span id="line-77"></span><span id="local-6989586621680129828"><span class="annot"><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-type">cellSides</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129828"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129828"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680129828"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-78"></span><span id="cellSides"><span class="annot"><span class="annottext">cellSides :: forall r. Fractional r =&gt; Cell r -&gt; Sides (LineSegment 2 () r)
+</span><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-var hs-var">cellSides</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span id="local-6989586621680129253"><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621680129253"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680129252"><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621680129252"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (d :: Nat) r p.
 (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
 </span><a href="Geometry.LineSegment.Internal.html#OpenLineSegment"><span class="hs-identifier hs-var">OpenLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
-</span><a href="#local-6989586621680035640"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
-</span><a href="#local-6989586621680035639"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Sides (LineSegment 2 () r) -&gt; Sides (LineSegment 2 () r))
--&gt; (Cell r -&gt; Sides (LineSegment 2 () r))
--&gt; Cell r
--&gt; Sides (LineSegment 2 () r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rectangle () r -&gt; Sides (LineSegment 2 () r)
-forall r p. Num r =&gt; Rectangle p r -&gt; Sides (LineSegment 2 p r)
-</span><a href="Geometry.Box.Sides.html#sides"><span class="hs-identifier hs-var">sides</span></a></span><span> </span><span class="annot"><span class="annottext">(Rectangle () r -&gt; Sides (LineSegment 2 () r))
--&gt; (Cell r -&gt; Rectangle () r)
--&gt; Cell r
--&gt; Sides (LineSegment 2 () r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Rectangle () r
-forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
+</span><a href="#local-6989586621680129253"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621680129252"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall r p. Num r =&gt; Rectangle p r -&gt; Sides (LineSegment 2 p r)
+</span><a href="Geometry.Box.Sides.html#sides"><span class="hs-identifier hs-var">sides</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Box 2 () r
 </span><a href="Geometry.QuadTree.Cell.html#toBox"><span class="hs-identifier hs-var">toBox</span></a></span><span>
 </span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span id="local-6989586621680035636"><span class="annot"><a href="Geometry.QuadTree.Cell.html#splitCell"><span class="hs-identifier hs-type">splitCell</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680035636"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035636"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035636"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035636"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-81"></span><span id="splitCell"><span class="annot"><span class="annottext">splitCell :: Cell r -&gt; Quadrants (Cell r)
-</span><a href="Geometry.QuadTree.Cell.html#splitCell"><span class="hs-identifier hs-var hs-var">splitCell</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035634"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035634"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680035633"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035633"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Cell r -&gt; Cell r -&gt; Cell r -&gt; Quadrants (Cell r)
-forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
-</span><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-var">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; Point 2 r -&gt; Cell r
-forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
+</span><span id="line-80"></span><span id="local-6989586621680129819"><span class="annot"><a href="Geometry.QuadTree.Cell.html#splitCell"><span class="hs-identifier hs-type">splitCell</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680129819"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129819"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129819"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129819"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-81"></span><span id="splitCell"><span class="annot"><span class="annottext">splitCell :: forall r. (Num r, Fractional r) =&gt; Cell r -&gt; Quadrants (Cell r)
+</span><a href="Geometry.QuadTree.Cell.html#splitCell"><span class="hs-identifier hs-var hs-var">splitCell</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680129225"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129225"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680129224"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129224"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; a -&gt; a -&gt; a -&gt; Corners a
+</span><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-var">Quadrants</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
 </span><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Cell r) -&gt; Point 2 r -&gt; Cell r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
-</span><a href="#local-6989586621680035630"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129221"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035629"><span class="hs-identifier hs-var">rr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-82"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; Point 2 r -&gt; Cell r
-forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
+</span><a href="#local-6989586621680129220"><span class="hs-identifier hs-var">rr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
 </span><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Cell r) -&gt; Point 2 r -&gt; Cell r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
-</span><a href="#local-6989586621680035630"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035629"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035629"><span class="hs-identifier hs-var">rr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-83"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; Point 2 r -&gt; Cell r
-forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
+</span><a href="#local-6989586621680129221"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129220"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129220"><span class="hs-identifier hs-var">rr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
 </span><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Cell r) -&gt; Point 2 r -&gt; Cell r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
-</span><a href="#local-6989586621680035630"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035629"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129221"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129220"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex -&gt; Point 2 r -&gt; Cell r
-forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
+</span><span id="line-84"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall r. WidthIndex -&gt; Point 2 r -&gt; Cell r
 </span><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035633"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129224"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-85"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-86"></span><span>    </span><span id="local-6989586621680035631"><span class="annot"><span class="annottext">r :: WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035634"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex -&gt; WidthIndex
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621680129222"><span class="annot"><span class="annottext">r :: WidthIndex
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129225"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">WidthIndex
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-87"></span><span>    </span><span id="local-6989586621680035629"><span class="annot"><span class="annottext">rr :: r
-</span><a href="#local-6989586621680035629"><span class="hs-identifier hs-var hs-var">rr</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; r
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621680129220"><span class="annot"><span class="annottext">rr :: r
+</span><a href="#local-6989586621680129220"><span class="hs-identifier hs-var hs-var">rr</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035631"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-88"></span><span>    </span><span id="local-6989586621680035630"><span class="annot"><span class="annottext">f :: r -&gt; r -&gt; Point 2 r
-</span><a href="#local-6989586621680035630"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680035628"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035628"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680035627"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035627"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035633"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
-forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
-</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
-forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="#local-6989586621680129222"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621680129221"><span class="annot"><span class="annottext">f :: r -&gt; r -&gt; Point 2 r
+</span><a href="#local-6989586621680129221"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680129219"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129219"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680129218"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129218"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129224"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">forall r. r -&gt; r -&gt; Vector 2 r
 </span><a href="Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035628"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035627"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621680129219"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129218"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-89"></span><span>
 </span><span id="line-90"></span><span>
-</span><span id="line-91"></span><span id="local-6989586621680035808"><span class="annot"><a href="Geometry.QuadTree.Cell.html#midPoint"><span class="hs-identifier hs-type">midPoint</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035808"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035808"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035808"><span class="hs-identifier hs-type">r</span></a></span></span><span>
-</span><span id="line-92"></span><span id="midPoint"><span class="annot"><span class="annottext">midPoint :: Cell r -&gt; Point 2 r
-</span><a href="Geometry.QuadTree.Cell.html#midPoint"><span class="hs-identifier hs-var hs-var">midPoint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680035625"><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035625"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680035624"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035624"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680035623"><span class="annot"><span class="annottext">rr :: r
-</span><a href="#local-6989586621680035623"><span class="hs-identifier hs-var hs-var">rr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; r
-forall r. Fractional r =&gt; WidthIndex -&gt; r
+</span><span id="line-91"></span><span id="local-6989586621680129816"><span class="annot"><a href="Geometry.QuadTree.Cell.html#midPoint"><span class="hs-identifier hs-type">midPoint</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129816"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129816"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129816"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-92"></span><span id="midPoint"><span class="annot"><span class="annottext">midPoint :: forall r. Fractional r =&gt; Cell r -&gt; Point 2 r
+</span><a href="Geometry.QuadTree.Cell.html#midPoint"><span class="hs-identifier hs-var hs-var">midPoint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span id="local-6989586621680129195"><span class="annot"><span class="annottext">WidthIndex
+</span><a href="#local-6989586621680129195"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680129194"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129194"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680129193"><span class="annot"><span class="annottext">rr :: r
+</span><a href="#local-6989586621680129193"><span class="hs-identifier hs-var hs-var">rr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; WidthIndex -&gt; r
 </span><a href="Geometry.QuadTree.Cell.html#pow"><span class="hs-identifier hs-var">pow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WidthIndex
-</span><a href="#local-6989586621680035625"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">WidthIndex -&gt; WidthIndex -&gt; WidthIndex
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621680129195"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">WidthIndex
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035624"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
-forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
-</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
-forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="#local-6989586621680129194"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">forall r. r -&gt; r -&gt; Vector 2 r
 </span><a href="Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035623"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621680035623"><span class="hs-identifier hs-var">rr</span></a></span><span>
+</span><a href="#local-6989586621680129193"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621680129193"><span class="hs-identifier hs-var">rr</span></a></span><span>
 </span><span id="line-93"></span><span>
 </span><span id="line-94"></span><span>
 </span><span id="line-95"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-96"></span><span>
 </span><span id="line-97"></span><span class="hs-comment">-- | Partitions the points into quadrants. See 'quadrantOf' for the</span><span>
 </span><span id="line-98"></span><span class="hs-comment">-- precise rules.</span><span>
-</span><span id="line-99"></span><span id="local-6989586621680035621"><span id="local-6989586621680035622"><span class="annot"><a href="Geometry.QuadTree.Cell.html#partitionPoints"><span class="hs-identifier hs-type">partitionPoints</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035622"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035622"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-100"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035622"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035622"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680035621"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035622"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680035621"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
-</span><span id="line-101"></span><span id="partitionPoints"><span class="annot"><span class="annottext">partitionPoints :: Cell r -&gt; [Point 2 r :+ p] -&gt; Quadrants [Point 2 r :+ p]
-</span><a href="Geometry.QuadTree.Cell.html#partitionPoints"><span class="hs-identifier hs-var hs-var">partitionPoints</span></a></span></span><span> </span><span id="local-6989586621680035619"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035619"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Quadrants [Point 2 r :+ p])
--&gt; [Point 2 r :+ p] -&gt; Quadrants [Point 2 r :+ p]
-forall (t :: * -&gt; *) m a.
+</span><span id="line-99"></span><span id="local-6989586621680129813"><span id="local-6989586621680129814"><span class="annot"><a href="Geometry.QuadTree.Cell.html#partitionPoints"><span class="hs-identifier hs-type">partitionPoints</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129814"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129814"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129814"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129814"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680129813"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129814"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621680129813"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-101"></span><span id="partitionPoints"><span class="annot"><span class="annottext">partitionPoints :: forall r p.
+(Fractional r, Ord r) =&gt;
+Cell r -&gt; [Point 2 r :+ p] -&gt; Quadrants [Point 2 r :+ p]
+</span><a href="Geometry.QuadTree.Cell.html#partitionPoints"><span class="hs-identifier hs-var hs-var">partitionPoints</span></a></span></span><span> </span><span id="local-6989586621680129175"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129175"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
-</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680035617"><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680035617"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680035616"><span class="annot"><span class="annottext">q :: InterCardinalDirection
-</span><a href="#local-6989586621680035616"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Cell r -&gt; InterCardinalDirection
-forall r.
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680129173"><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680129173"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680129172"><span class="annot"><span class="annottext">q :: InterCardinalDirection
+</span><a href="#local-6989586621680129172"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r.
 (Fractional r, Ord r) =&gt;
 Point 2 r -&gt; Cell r -&gt; InterCardinalDirection
 </span><a href="Geometry.QuadTree.Cell.html#quadrantOf"><span class="hs-identifier hs-var">quadrantOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680035617"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
--&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
-forall core extra core'.
+</span><a href="#local-6989586621680129173"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall core extra core'.
 Lens (core :+ extra) (core' :+ extra) core core'
 </span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035619"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Quadrants [Point 2 r :+ p]
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span class="annot"><span class="annottext">Quadrants [Point 2 r :+ p]
--&gt; (Quadrants [Point 2 r :+ p] -&gt; Quadrants [Point 2 r :+ p])
--&gt; Quadrants [Point 2 r :+ p]
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">Index (Quadrants [Point 2 r :+ p])
--&gt; Traversal'
-     (Quadrants [Point 2 r :+ p]) (IxValue (Quadrants [Point 2 r :+ p]))
-forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><span class="hs-identifier hs-var">ix</span></span><span> </span><span class="annot"><span class="annottext">Index (Quadrants [Point 2 r :+ p])
-InterCardinalDirection
-</span><a href="#local-6989586621680035616"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">(([Point 2 r :+ p] -&gt; Identity [Point 2 r :+ p])
- -&gt; Quadrants [Point 2 r :+ p]
- -&gt; Identity (Quadrants [Point 2 r :+ p]))
--&gt; ([Point 2 r :+ p] -&gt; [Point 2 r :+ p])
--&gt; Quadrants [Point 2 r :+ p]
--&gt; Quadrants [Point 2 r :+ p]
-forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="#local-6989586621680129175"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="annot"><span class="annottext">forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><span class="hs-identifier hs-var">ix</span></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="#local-6989586621680129172"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621680035617"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
-forall a. a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621680129173"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-102"></span><span>
 </span><span id="line-103"></span><span class="hs-comment">-- | Computes the quadrant of the cell corresponding to the current</span><span>
@@ -629,46 +475,37 @@ forall a. a -&gt; [a] -&gt; [a]
 </span><span id="line-127"></span><span class="hs-comment">-- NorthEast</span><span>
 </span><span id="line-128"></span><span class="hs-comment">-- &gt;&gt;&gt; quadrantOf (Point2 4 40) (Cell 4 origin)</span><span>
 </span><span id="line-129"></span><span class="hs-comment">-- NorthWest</span><span>
-</span><span id="line-130"></span><span class="annot"><a href="Geometry.QuadTree.Cell.html#quadrantOf"><span class="hs-identifier hs-type">quadrantOf</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680035825"><span class="annot"><a href="#local-6989586621680035825"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-131"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680035825"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035825"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span>
-</span><span id="line-132"></span><span id="quadrantOf"><span class="annot"><span class="annottext">quadrantOf :: Point 2 r -&gt; Cell r -&gt; InterCardinalDirection
-</span><a href="Geometry.QuadTree.Cell.html#quadrantOf"><span class="hs-identifier hs-var hs-var">quadrantOf</span></a></span></span><span> </span><span id="local-6989586621680035614"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035614"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680035613"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035613"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680035612"><span class="annot"><span class="annottext">m :: Point 2 r
-</span><a href="#local-6989586621680035612"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Point 2 r
-forall r. Fractional r =&gt; Cell r -&gt; Point 2 r
+</span><span id="line-130"></span><span class="annot"><a href="Geometry.QuadTree.Cell.html#quadrantOf"><span class="hs-identifier hs-type">quadrantOf</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680129804"><span class="annot"><a href="#local-6989586621680129804"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129804"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129804"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680129804"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129804"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Directions.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span>
+</span><span id="line-132"></span><span id="quadrantOf"><span class="annot"><span class="annottext">quadrantOf :: forall r.
+(Fractional r, Ord r) =&gt;
+Point 2 r -&gt; Cell r -&gt; InterCardinalDirection
+</span><a href="Geometry.QuadTree.Cell.html#quadrantOf"><span class="hs-identifier hs-var hs-var">quadrantOf</span></a></span></span><span> </span><span id="local-6989586621680129131"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680129131"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621680129130"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129130"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680129129"><span class="annot"><span class="annottext">m :: Point 2 r
+</span><a href="#local-6989586621680129129"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Point 2 r
 </span><a href="Geometry.QuadTree.Cell.html#midPoint"><span class="hs-identifier hs-var">midPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035613"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621680129130"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-133"></span><span>                 </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035614"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
-forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+</span><a href="#local-6989586621680129131"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (1 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
-</span><a href="Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035612"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
-forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+</span><a href="#local-6989586621680129129"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (1 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035614"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
-forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+</span><a href="#local-6989586621680129131"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (2 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
-</span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621680035612"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
-forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+</span><a href="#local-6989586621680129129"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
 (2 &lt;= d, Arity d, AsAPoint point) =&gt;
 Lens' (point d r) r
 </span><a href="Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
@@ -695,60 +532,45 @@ Lens' (point d r) r
 </span><span id="line-142"></span><span class="hs-comment">-- `c` is.</span><span>
 </span><span id="line-143"></span><span class="hs-comment">--</span><span>
 </span><span id="line-144"></span><span class="hs-comment">-- pre: c and me are non-overlapping</span><span>
-</span><span id="line-145"></span><span id="local-6989586621680035603"><span id="local-6989586621680035604"><span class="annot"><a href="Geometry.QuadTree.Cell.html#relationTo"><span class="hs-identifier hs-type">relationTo</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680035604"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680035604"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-146"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680035603"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035604"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035604"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680035603"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680035604"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-147"></span><span id="local-6989586621680035601"><span class="annot"><span class="annottext">p :+ Cell r
-</span><a href="#local-6989586621680035601"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="relationTo"><span class="annot"><span class="annottext">relationTo :: (p :+ Cell r) -&gt; Cell r -&gt; Sides (Maybe (p :+ Cell r))
-</span><a href="Geometry.QuadTree.Cell.html#relationTo"><span class="hs-operator hs-var hs-var">`relationTo`</span></a></span></span><span> </span><span id="local-6989586621680035600"><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035600"><span class="hs-identifier hs-var">me</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Maybe (p :+ Cell r)
-</span><a href="#local-6989586621680035599"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Maybe (p :+ Cell r))
--&gt; Sides (LineSegment 2 () r)
--&gt; Sides (LineSegment 2 () r -&gt; Maybe (p :+ Cell r))
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
--&gt; LineSegment 2 () r
--&gt; LineSegment 2 () r
--&gt; LineSegment 2 () r
--&gt; Sides (LineSegment 2 () r)
-forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><span id="line-145"></span><span id="local-6989586621680129780"><span id="local-6989586621680129781"><span class="annot"><a href="Geometry.QuadTree.Cell.html#relationTo"><span class="hs-identifier hs-type">relationTo</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680129781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680129781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680129780"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129781"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680129780"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680129781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-147"></span><span id="local-6989586621680129109"><span class="annot"><span class="annottext">p :+ Cell r
+</span><a href="#local-6989586621680129109"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="relationTo"><span class="annot"><span class="annottext">relationTo :: forall r p.
+(Fractional r, Ord r) =&gt;
+(p :+ Cell r) -&gt; Cell r -&gt; Sides (Maybe (p :+ Cell r))
+</span><a href="Geometry.QuadTree.Cell.html#relationTo"><span class="hs-operator hs-var hs-var">`relationTo`</span></a></span></span><span> </span><span id="local-6989586621680129108"><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621680129108"><span class="hs-identifier hs-var">me</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Maybe (p :+ Cell r)
+</span><a href="#local-6989586621680129107"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
 </span><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035596"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035595"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035594"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035593"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Sides (LineSegment 2 () r -&gt; Maybe (p :+ Cell r))
--&gt; Sides (LineSegment 2 () r) -&gt; Sides (Maybe (p :+ Cell r))
-forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Sides (LineSegment 2 () r)
-forall r. Fractional r =&gt; Cell r -&gt; Sides (LineSegment 2 () r)
+</span><a href="#local-6989586621680129104"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129103"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129102"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129101"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Sides (LineSegment 2 () r)
 </span><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-var">cellSides</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
-</span><a href="#local-6989586621680035600"><span class="hs-identifier hs-var">me</span></a></span><span>
+</span><a href="#local-6989586621680129108"><span class="hs-identifier hs-var">me</span></a></span><span>
 </span><span id="line-148"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-149"></span><span>    </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621680035594"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035594"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680035593"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035593"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680035596"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035596"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680035595"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035595"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cell r -&gt; Sides (LineSegment 2 () r)
-forall r. Fractional r =&gt; Cell r -&gt; Sides (LineSegment 2 () r)
+</span><span id="line-149"></span><span>    </span><span class="annot"><a href="Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621680129102"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129102"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680129101"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129101"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621680129104"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129104"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680129103"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129103"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. Fractional r =&gt; Cell r -&gt; Sides (LineSegment 2 () r)
 </span><a href="Geometry.QuadTree.Cell.html#cellSides"><span class="hs-identifier hs-var">cellSides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p :+ Cell r
-</span><a href="#local-6989586621680035601"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">(p :+ Cell r) -&gt; Getting (Cell r) (p :+ Cell r) (Cell r) -&gt; Cell r
-forall s a. s -&gt; Getting a s a -&gt; a
-</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Cell r) (p :+ Cell r) (Cell r)
-forall core extra extra'.
+</span><a href="#local-6989586621680129109"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">forall core extra extra'.
 Lens (core :+ extra) (core :+ extra') extra extra'
 </span><span class="hs-identifier hs-var">extra</span></span><span class="hs-special">)</span><span>
-</span><span id="line-150"></span><span>    </span><span id="local-6989586621680035599"><span class="annot"><span class="annottext">f :: LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Maybe (p :+ Cell r)
-</span><a href="#local-6989586621680035599"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680035591"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035591"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680035590"><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035590"><span class="hs-identifier hs-var">e'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035591"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Bool
-forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621680129107"><span class="annot"><span class="annottext">f :: LineSegment 2 () r -&gt; LineSegment 2 () r -&gt; Maybe (p :+ Cell r)
+</span><a href="#local-6989586621680129107"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680129099"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129099"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621680129098"><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129098"><span class="hs-identifier hs-var">e'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+</span><a href="#local-6989586621680129099"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 </span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
-</span><a href="#local-6989586621680035590"><span class="hs-identifier hs-var">e'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(p :+ Cell r) -&gt; Maybe (p :+ Cell r)
-forall a. a -&gt; Maybe a
+</span><a href="#local-6989586621680129098"><span class="hs-identifier hs-var">e'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">p :+ Cell r
-</span><a href="#local-6989586621680035601"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621680129109"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-151"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (p :+ Cell r)
-forall a. Maybe a
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-152"></span></pre></body></html>

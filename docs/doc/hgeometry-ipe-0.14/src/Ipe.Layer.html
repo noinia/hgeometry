@@ -21,13 +21,9 @@
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="hs-comment">-- | Defines an Layer in Ipe.</span><span>
 </span><span id="line-23"></span><span class="hs-keyword">newtype</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_layerName"><span class="annot"><span class="annottext">LayerName -&gt; Text
-</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679412805"><span id="local-6989586621679412807"><span id="local-6989586621679412809"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
+</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679368561"><span id="local-6989586621679368563"><span id="local-6989586621679368569"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
 [LayerName] -&gt; ShowS
 LayerName -&gt; String
-(Int -&gt; LayerName -&gt; ShowS)
--&gt; (LayerName -&gt; String)
--&gt; ([LayerName] -&gt; ShowS)
--&gt; Show LayerName
 forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
 showList :: [LayerName] -&gt; ShowS
@@ -36,15 +32,10 @@ show :: LayerName -&gt; String
 $cshow :: LayerName -&gt; String
 showsPrec :: Int -&gt; LayerName -&gt; ShowS
 $cshowsPrec :: Int -&gt; LayerName -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412796"><span id="local-6989586621679412798"><span id="local-6989586621679412800"><span id="local-6989586621679412802"><span class="annot"><span class="annottext">ReadPrec [LayerName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679368543"><span id="local-6989586621679368553"><span id="local-6989586621679368556"><span id="local-6989586621679368558"><span class="annot"><span class="annottext">ReadPrec [LayerName]
 ReadPrec LayerName
 Int -&gt; ReadS LayerName
 ReadS [LayerName]
-(Int -&gt; ReadS LayerName)
--&gt; ReadS [LayerName]
--&gt; ReadPrec LayerName
--&gt; ReadPrec [LayerName]
--&gt; Read LayerName
 forall a.
 (Int -&gt; ReadS a)
 -&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
@@ -56,24 +47,13 @@ readList :: ReadS [LayerName]
 $creadList :: ReadS [LayerName]
 readsPrec :: Int -&gt; ReadS LayerName
 $creadsPrec :: Int -&gt; ReadS LayerName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412791"><span id="local-6989586621679412793"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
-(LayerName -&gt; LayerName -&gt; Bool)
--&gt; (LayerName -&gt; LayerName -&gt; Bool) -&gt; Eq LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679368534"><span id="local-6989586621679368539"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: LayerName -&gt; LayerName -&gt; Bool
 $c/= :: LayerName -&gt; LayerName -&gt; Bool
 == :: LayerName -&gt; LayerName -&gt; Bool
 $c== :: LayerName -&gt; LayerName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412775"><span id="local-6989586621679412777"><span id="local-6989586621679412779"><span id="local-6989586621679412781"><span id="local-6989586621679412783"><span id="local-6989586621679412785"><span id="local-6989586621679412787"><span class="annot"><span class="annottext">Eq LayerName
-Eq LayerName
--&gt; (LayerName -&gt; LayerName -&gt; Ordering)
--&gt; (LayerName -&gt; LayerName -&gt; Bool)
--&gt; (LayerName -&gt; LayerName -&gt; Bool)
--&gt; (LayerName -&gt; LayerName -&gt; Bool)
--&gt; (LayerName -&gt; LayerName -&gt; Bool)
--&gt; (LayerName -&gt; LayerName -&gt; LayerName)
--&gt; (LayerName -&gt; LayerName -&gt; LayerName)
--&gt; Ord LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679368501"><span id="local-6989586621679368505"><span id="local-6989586621679368509"><span id="local-6989586621679368513"><span id="local-6989586621679368517"><span id="local-6989586621679368521"><span id="local-6989586621679368526"><span class="annot"><span class="annottext">Eq LayerName
 LayerName -&gt; LayerName -&gt; Bool
 LayerName -&gt; LayerName -&gt; Ordering
 LayerName -&gt; LayerName -&gt; LayerName
@@ -101,9 +81,7 @@ $c&lt;= :: LayerName -&gt; LayerName -&gt; Bool
 $c&lt; :: LayerName -&gt; LayerName -&gt; Bool
 compare :: LayerName -&gt; LayerName -&gt; Ordering
 $ccompare :: LayerName -&gt; LayerName -&gt; Ordering
-$cp1Ord :: Eq LayerName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412772"><span class="annot"><span class="annottext">String -&gt; LayerName
-(String -&gt; LayerName) -&gt; IsString LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679368495"><span class="annot"><span class="annottext">String -&gt; LayerName
 forall a. (String -&gt; a) -&gt; IsString a
 fromString :: String -&gt; LayerName
 $cfromString :: String -&gt; LayerName

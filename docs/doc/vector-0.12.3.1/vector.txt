@@ -5487,11 +5487,17 @@ getPtr :: ForeignPtr a -> Ptr a
 setPtr :: ForeignPtr a -> Ptr a -> ForeignPtr a
 updPtr :: (Ptr a -> Ptr a) -> ForeignPtr a -> ForeignPtr a
 
--- | A compatibility wrapper for <a>unsafeWithForeignPtr</a> provided by
---   GHC 9.0.1 and later.
+-- | This is similar to <a>withForeignPtr</a> but comes with an important
+--   caveat: the user must guarantee that the continuation does not diverge
+--   (e.g. loop or throw an exception). In exchange for this loss of
+--   generality, this function offers the ability of GHC to optimise more
+--   aggressively.
 --   
---   Only to be used when the continuation is known not to unconditionally
---   diverge lest unsoundness can result.
+--   Specifically, applications of the form: <tt> unsafeWithForeignPtr fptr
+--   (<a>forever</a> something) </tt>
+--   
+--   See GHC issue #17760 for more information about the unsoundness
+--   behavior that this function can result in.
 unsafeWithForeignPtr :: ForeignPtr a -> (Ptr a -> IO b) -> IO b
 
 

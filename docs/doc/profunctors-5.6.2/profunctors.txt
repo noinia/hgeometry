@@ -1196,7 +1196,7 @@ module Data.Profunctor.Rep
 --   a <a>Functor</a> <tt>f</tt> such that <tt>p d c</tt> is isomorphic to
 --   <tt>d -&gt; f c</tt>.
 class (Sieve p (Rep p), Strong p) => Representable p where {
-    type family Rep p :: * -> *;
+    type Rep p :: * -> *;
 }
 
 -- | Laws:
@@ -1228,7 +1228,7 @@ secondRep :: Representable p => p a b -> p (c, a) (c, b)
 --   exists a <a>Functor</a> <tt>f</tt> such that <tt>p d c</tt> is
 --   isomorphic to <tt>f d -&gt; c</tt>.
 class (Cosieve p (Corep p), Costrong p) => Corepresentable p where {
-    type family Corep p :: * -> *;
+    type Corep p :: * -> *;
 }
 
 -- | Laws:

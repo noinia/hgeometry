@@ -15,7 +15,7 @@ module Data.List.Class
 
 -- | A class for list types. Every list has an underlying monad.
 class (MonadPlus l, Monad (ItemM l)) => List l where {
-    type family ItemM l :: * -> *;
+    type ItemM l :: * -> *;
 }
 runList :: List l => l a -> ItemM l (ListItem l a)
 

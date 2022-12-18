@@ -465,7 +465,7 @@ instance Data.Reflection.Reifies n GHC.Types.Int => Data.Reflection.Reifies (Dat
 instance Data.Reflection.Reifies n GHC.Types.Int => Data.Reflection.Reifies (Data.Reflection.SD n) GHC.Types.Int
 instance Data.Reflection.Reifies n GHC.Types.Int => Data.Reflection.Reifies (Data.Reflection.D n) GHC.Types.Int
 instance Data.Reflection.Reifies Data.Reflection.Z GHC.Types.Int
-instance GHC.TypeNats.KnownNat n => Data.Reflection.Reifies n GHC.Integer.Type.Integer
+instance GHC.TypeNats.KnownNat n => Data.Reflection.Reifies n GHC.Num.Integer.Integer
 instance GHC.TypeLits.KnownSymbol n => Data.Reflection.Reifies n GHC.Base.String
 instance GHC.Num.Num a => GHC.Num.Num (Language.Haskell.TH.Syntax.Q a)
 instance GHC.Real.Fractional a => GHC.Real.Fractional (Language.Haskell.TH.Syntax.Q a)

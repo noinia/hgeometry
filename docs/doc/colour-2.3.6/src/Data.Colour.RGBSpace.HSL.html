@@ -33,210 +33,173 @@ THE SOFTWARE.
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- |Returns the HSL (hue-saturation-lightness) coordinates of an 'RGB' triple.</span><span>
 </span><span id="line-35"></span><span class="hs-comment">-- See 'hue', 'saturation', and 'lightness'.</span><span>
-</span><span id="line-36"></span><span id="local-6989586621679046346"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#hslView"><span class="hs-identifier hs-type">hslView</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679046346"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-37"></span><span id="hslView"><span class="annot"><span class="annottext">hslView :: RGB a -&gt; (a, a, a)
-</span><a href="Data.Colour.RGBSpace.HSL.html#hslView"><span class="hs-identifier hs-var hs-var">hslView</span></a></span></span><span> </span><span id="local-6989586621679046345"><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046345"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046344"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046343"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046342"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span id="local-6989586621679043362"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#hslView"><span class="hs-identifier hs-type">hslView</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679043362"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-37"></span><span id="hslView"><span class="annot"><span class="annottext">hslView :: forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a)
+</span><a href="Data.Colour.RGBSpace.HSL.html#hslView"><span class="hs-identifier hs-var hs-var">hslView</span></a></span></span><span> </span><span id="local-6989586621679043336"><span class="annot"><span class="annottext">RGB a
+</span><a href="#local-6989586621679043336"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043335"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043334"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043333"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679046344"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046344"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046343"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046343"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046342"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046342"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span id="line-39"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679043335"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043335"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679043334"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043334"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679043333"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043333"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RGB a -&gt; (a, a, a, a, a)
-forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
 </span><a href="Data.Colour.RGB.html#hslsv"><span class="hs-identifier hs-var">hslsv</span></a></span><span> </span><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046345"><span class="hs-identifier hs-var">rgb</span></a></span><span>
+</span><a href="#local-6989586621679043336"><span class="hs-identifier hs-var">rgb</span></a></span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- |Returns the saturation coordinate (range [0, 1]) of an 'RGB' triple for the HSL</span><span>
 </span><span id="line-42"></span><span class="hs-comment">-- (hue-saturation-lightness) system.</span><span>
 </span><span id="line-43"></span><span class="hs-comment">-- Note: This is different from 'Data.Colour.RGBSpace.HSV.saturation' for</span><span>
 </span><span id="line-44"></span><span class="hs-comment">-- the &quot;Data.Colour.RGBSpace.HSV&quot;</span><span>
-</span><span id="line-45"></span><span id="local-6989586621679046340"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#saturation"><span class="hs-identifier hs-type">saturation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046340"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679046340"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046340"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679046340"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-46"></span><span id="saturation"><span class="annot"><span class="annottext">saturation :: RGB a -&gt; a
-</span><a href="Data.Colour.RGBSpace.HSL.html#saturation"><span class="hs-identifier hs-var hs-var">saturation</span></a></span></span><span> </span><span id="local-6989586621679046339"><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046339"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046338"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679043358"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#saturation"><span class="hs-identifier hs-type">saturation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679043358"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679043358"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043358"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043358"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-46"></span><span id="saturation"><span class="annot"><span class="annottext">saturation :: forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; a
+</span><a href="Data.Colour.RGBSpace.HSL.html#saturation"><span class="hs-identifier hs-var hs-var">saturation</span></a></span></span><span> </span><span id="local-6989586621679043327"><span class="annot"><span class="annottext">RGB a
+</span><a href="#local-6989586621679043327"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043326"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-47"></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679046338"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046338"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679043326"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043326"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RGB a -&gt; (a, a, a, a, a)
-forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
 </span><a href="Data.Colour.RGB.html#hslsv"><span class="hs-identifier hs-var">hslsv</span></a></span><span> </span><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046339"><span class="hs-identifier hs-var">rgb</span></a></span><span>
+</span><a href="#local-6989586621679043327"><span class="hs-identifier hs-var">rgb</span></a></span><span>
 </span><span id="line-49"></span><span>
 </span><span id="line-50"></span><span class="hs-comment">-- |Returns the lightness coordinate (range [0, 1]) of an 'RGB' triple for the HSL</span><span>
 </span><span id="line-51"></span><span class="hs-comment">-- (hue-saturation-lightness) system.</span><span>
-</span><span id="line-52"></span><span id="local-6989586621679046337"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#lightness"><span class="hs-identifier hs-type">lightness</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046337"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679046337"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046337"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679046337"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-53"></span><span id="lightness"><span class="annot"><span class="annottext">lightness :: RGB a -&gt; a
-</span><a href="Data.Colour.RGBSpace.HSL.html#lightness"><span class="hs-identifier hs-var hs-var">lightness</span></a></span></span><span> </span><span id="local-6989586621679046336"><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046336"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046335"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679043323"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#lightness"><span class="hs-identifier hs-type">lightness</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679043323"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679043323"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043323"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043323"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-53"></span><span id="lightness"><span class="annot"><span class="annottext">lightness :: forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; a
+</span><a href="Data.Colour.RGBSpace.HSL.html#lightness"><span class="hs-identifier hs-var hs-var">lightness</span></a></span></span><span> </span><span id="local-6989586621679043320"><span class="annot"><span class="annottext">RGB a
+</span><a href="#local-6989586621679043320"><span class="hs-identifier hs-var">rgb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043319"><span class="hs-identifier hs-var">l</span></a></span><span>
 </span><span id="line-54"></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-55"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679046335"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046335"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679043319"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043319"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RGB a -&gt; (a, a, a, a, a)
-forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. (Fractional a, Ord a) =&gt; RGB a -&gt; (a, a, a, a, a)
 </span><a href="Data.Colour.RGB.html#hslsv"><span class="hs-identifier hs-var">hslsv</span></a></span><span> </span><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046336"><span class="hs-identifier hs-var">rgb</span></a></span><span>
+</span><a href="#local-6989586621679043320"><span class="hs-identifier hs-var">rgb</span></a></span><span>
 </span><span id="line-56"></span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- |Convert HSL (hue-saturation-lightness) coordinates to an 'RGB' value.</span><span>
 </span><span id="line-58"></span><span class="hs-comment">-- Hue is expected to be measured in degrees [0,360], while saturation and</span><span>
 </span><span id="line-59"></span><span class="hs-comment">-- lightness are expected to be in the closed range [0,1].</span><span>
-</span><span id="line-60"></span><span id="local-6989586621679046334"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#hsl"><span class="hs-identifier hs-type">hsl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046334"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-61"></span><span id="hsl"><span class="annot"><span class="annottext">hsl :: a -&gt; a -&gt; a -&gt; RGB a
-</span><a href="Data.Colour.RGBSpace.HSL.html#hsl"><span class="hs-identifier hs-var hs-var">hsl</span></a></span></span><span> </span><span id="local-6989586621679046333"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046333"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679046332"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046332"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679046331"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; RGB a -&gt; RGB a
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span id="line-60"></span><span id="local-6989586621679043355"><span class="annot"><a href="Data.Colour.RGBSpace.HSL.html#hsl"><span class="hs-identifier hs-type">hsl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043355"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-61"></span><span id="hsl"><span class="annot"><span class="annottext">hsl :: forall a. (RealFrac a, Ord a) =&gt; a -&gt; a -&gt; a -&gt; RGB a
+</span><a href="Data.Colour.RGBSpace.HSL.html#hsl"><span class="hs-identifier hs-var hs-var">hsl</span></a></span></span><span> </span><span id="local-6989586621679043306"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043306"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679043305"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043305"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679043304"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679046330"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="annot"><span class="annottext">RGB a
-</span><a href="#local-6989586621679046329"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679043303"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="annot"><span class="annottext">RGB a
+</span><a href="#local-6989586621679043302"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-62"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-63"></span><span>  </span><span id="local-6989586621679046328"><span class="annot"><span class="annottext">hk :: a
-</span><a href="#local-6989586621679046328"><span class="hs-identifier hs-var hs-var">hk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046333"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679043299"><span class="annot"><span class="annottext">hk :: a
+</span><a href="#local-6989586621679043299"><span class="hs-identifier hs-var hs-var">hk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043306"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">360</span></span><span>
-</span><span id="line-64"></span><span>  </span><span id="local-6989586621679046326"><span class="annot"><span class="annottext">tr :: a
-</span><a href="#local-6989586621679046326"><span class="hs-identifier hs-var hs-var">tr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-forall p. RealFrac p =&gt; p -&gt; p
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679043292"><span class="annot"><span class="annottext">tr :: a
+</span><a href="#local-6989586621679043292"><span class="hs-identifier hs-var hs-var">tr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {a}. RealFrac a =&gt; a -&gt; a
 </span><a href="Data.Colour.RGB.html#mod1"><span class="hs-identifier hs-var">mod1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046328"><span class="hs-identifier hs-var">hk</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043299"><span class="hs-identifier hs-var">hk</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">3</span></span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621679046323"><span class="annot"><span class="annottext">tg :: a
-</span><a href="#local-6989586621679046323"><span class="hs-identifier hs-var hs-var">tg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-forall p. RealFrac p =&gt; p -&gt; p
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679043288"><span class="annot"><span class="annottext">tg :: a
+</span><a href="#local-6989586621679043288"><span class="hs-identifier hs-var hs-var">tg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {a}. RealFrac a =&gt; a -&gt; a
 </span><a href="Data.Colour.RGB.html#mod1"><span class="hs-identifier hs-var">mod1</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046328"><span class="hs-identifier hs-var">hk</span></a></span><span>
-</span><span id="line-66"></span><span>  </span><span id="local-6989586621679046322"><span class="annot"><span class="annottext">tb :: a
-</span><a href="#local-6989586621679046322"><span class="hs-identifier hs-var hs-var">tb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-forall p. RealFrac p =&gt; p -&gt; p
+</span><a href="#local-6989586621679043299"><span class="hs-identifier hs-var">hk</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679043282"><span class="annot"><span class="annottext">tb :: a
+</span><a href="#local-6989586621679043282"><span class="hs-identifier hs-var hs-var">tb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {a}. RealFrac a =&gt; a -&gt; a
 </span><a href="Data.Colour.RGB.html#mod1"><span class="hs-identifier hs-var">mod1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046328"><span class="hs-identifier hs-var">hk</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043299"><span class="hs-identifier hs-var">hk</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">3</span></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>  </span><span id="local-6989586621679046329"><span class="annot"><span class="annottext">t :: RGB a
-</span><a href="#local-6989586621679046329"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; RGB a
-forall a. a -&gt; a -&gt; a -&gt; RGB a
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679043302"><span class="annot"><span class="annottext">t :: RGB a
+</span><a href="#local-6989586621679043302"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; a -&gt; a -&gt; RGB a
 </span><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-var">RGB</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046326"><span class="hs-identifier hs-var">tr</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046323"><span class="hs-identifier hs-var">tg</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046322"><span class="hs-identifier hs-var">tb</span></a></span><span>
-</span><span id="line-68"></span><span>  </span><span id="local-6989586621679046320"><span class="annot"><span class="annottext">q :: a
-</span><a href="#local-6989586621679046320"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679043292"><span class="hs-identifier hs-var">tr</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043288"><span class="hs-identifier hs-var">tg</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043282"><span class="hs-identifier hs-var">tb</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679043272"><span class="annot"><span class="annottext">q :: a
+</span><a href="#local-6989586621679043272"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0.5</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046332"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679043305"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046332"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043305"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046332"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-70"></span><span>  </span><span id="local-6989586621679046317"><span class="annot"><span class="annottext">p :: a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043305"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679043266"><span class="annot"><span class="annottext">p :: a
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046331"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043304"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046320"><span class="hs-identifier hs-var">q</span></a></span><span>
-</span><span id="line-71"></span><span>  </span><span id="local-6989586621679046330"><span class="annot"><span class="annottext">component :: a -&gt; a
-</span><a href="#local-6989586621679046330"><span class="hs-identifier hs-var hs-var">component</span></a></span></span><span> </span><span id="local-6989586621679046316"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679043272"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679043303"><span class="annot"><span class="annottext">component :: a -&gt; a
+</span><a href="#local-6989586621679043303"><span class="hs-identifier hs-var hs-var">component</span></a></span></span><span> </span><span id="local-6989586621679043239"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">6</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046320"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043272"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">6</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">6</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046320"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><a href="#local-6989586621679043272"><span class="hs-identifier hs-var">q</span></a></span><span>
 </span><span id="line-73"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046320"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043272"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">6</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">6</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
-</span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046316"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679043239"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-74"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046317"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679043266"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-75"></span></pre></body></html>

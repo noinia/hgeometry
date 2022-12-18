@@ -1,0 +1,783 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Language/Haskell/TH/Desugar/Expand.hs
+
+(c) Richard Eisenberg 2013
+rae@cs.brynmawr.edu
+-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE CPP, NoMonomorphismRestriction, ScopedTypeVariables #-}</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Module      :  Language.Haskell.TH.Desugar.Expand</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Copyright   :  (C) 2014 Richard Eisenberg</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Expands type synonyms and type families in desugared types.</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- See also the package th-expand-syns for doing this to</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- non-desugared types.</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--</span><span>
+</span><span id="line-22"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Language.Haskell.TH.Desugar.Expand</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Expand synonyms soundly</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand"><span class="hs-identifier">expand</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expandType"><span class="hs-identifier">expandType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Expand synonyms potentially unsoundly</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expandUnsoundly"><span class="hs-identifier">expandUnsoundly</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &lt; 709
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control.Applicative</span><span class="hs-cpp">
+#endif
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">cxt</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Quasi</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Generics</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Traversable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.AST</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Core</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Util</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Sweeten.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Sweeten</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Reify</span></a></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Subst</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- | Expands all type synonyms in a desugared type. Also expands open type family</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- applications. (In GHCs before 7.10, this part does not work if there are any</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- variables.) Attempts to</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- expand closed type family applications, but aborts the moment it spots anything</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- strange, like a nested type family application or type variable.</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679514276"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expandType"><span class="hs-identifier hs-type">expandType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514276"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514276"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span></span><span>
+</span><span id="line-56"></span><span id="expandType"><span class="annot"><span class="annottext">expandType :: forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expandType"><span class="hs-identifier hs-var hs-var">expandType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#NoIgnore"><span class="hs-identifier hs-var">NoIgnore</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-type">expand_type</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679514272"><span class="annot"><a href="#local-6989586621679514272"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514272"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html#IgnoreKinds"><span class="hs-identifier hs-type">IgnoreKinds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514272"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>
+</span><span id="line-59"></span><span id="expand_type"><span class="annot"><span class="annottext">expand_type :: forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var hs-var">expand_type</span></a></span></span><span> </span><span id="local-6989586621679514123"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DTypeArg"><span class="hs-identifier hs-type">DTypeArg</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514272"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679514122"><span class="annot"><span class="annottext">go :: [DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-type">DForallT</span></a></span><span> </span><span id="local-6989586621679514120"><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679514120"><span class="hs-identifier hs-var">tele</span></a></span></span><span> </span><span id="local-6989586621679514119"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514119"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-63"></span><span>      </span><span class="annot"><span class="annottext">DForallTelescope -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-var">DForallT</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *).
+DsMonad q =&gt;
+IgnoreKinds -&gt; DForallTelescope -&gt; q DForallTelescope
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tele"><span class="hs-identifier hs-var">expand_tele</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679514120"><span class="hs-identifier hs-var">tele</span></a></span><span>
+</span><span id="line-64"></span><span>               </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514119"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-type">DForallT</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-66"></span><span>      </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) a. MonadFail q =&gt; String -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Util.html#impossible"><span class="hs-identifier hs-var">impossible</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;A forall type is applied to another type.&quot;</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConstrainedT"><span class="hs-identifier hs-type">DConstrainedT</span></a></span><span> </span><span id="local-6989586621679514114"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679514114"><span class="hs-identifier hs-var">cxt</span></a></span></span><span> </span><span id="local-6989586621679514113"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514113"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-68"></span><span>      </span><span class="annot"><span class="annottext">DCxt -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DConstrainedT"><span class="hs-identifier hs-var">DConstrainedT</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679514114"><span class="hs-identifier hs-var">cxt</span></a></span><span>
+</span><span id="line-69"></span><span>                    </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514113"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConstrainedT"><span class="hs-identifier hs-type">DConstrainedT</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>      </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) a. MonadFail q =&gt; String -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Util.html#impossible"><span class="hs-identifier hs-var">impossible</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;A constrained type is applied to another type.&quot;</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514111"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514111"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppT"><span class="hs-identifier hs-type">DAppT</span></a></span><span> </span><span id="local-6989586621679514109"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514109"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621679514108"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514108"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-73"></span><span>      </span><span id="local-6989586621679514107"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514107"><span class="hs-identifier hs-var">t2'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514108"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-74"></span><span>      </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#DTANormal"><span class="hs-identifier hs-var">DTANormal</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514107"><span class="hs-identifier hs-var">t2'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514111"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514109"><span class="hs-identifier hs-var">t1</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514105"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514105"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppKindT"><span class="hs-identifier hs-type">DAppKindT</span></a></span><span> </span><span id="local-6989586621679514103"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514103"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679514102"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514102"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-76"></span><span>      </span><span id="local-6989586621679514101"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514101"><span class="hs-identifier hs-var">k'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514102"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-77"></span><span>      </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#DTyArg"><span class="hs-identifier hs-var">DTyArg</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514101"><span class="hs-identifier hs-var">k'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514105"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514103"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514099"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514099"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigT"><span class="hs-identifier hs-type">DSigT</span></a></span><span> </span><span id="local-6989586621679514097"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514097"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621679514096"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514096"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-79"></span><span>      </span><span id="local-6989586621679514095"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514095"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514097"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-80"></span><span>      </span><span id="local-6989586621679514094"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514094"><span class="hs-identifier hs-var">ki'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; q DType
+</span><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514096"><span class="hs-identifier hs-var">ki</span></a></span><span>
+</span><span id="line-81"></span><span>      </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DSigT"><span class="hs-identifier hs-var">DSigT</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514095"><span class="hs-identifier hs-var">ty'</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514094"><span class="hs-identifier hs-var">ki'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514099"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514092"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514092"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConT"><span class="hs-identifier hs-type">DConT</span></a></span><span> </span><span id="local-6989586621679514090"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514090"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *).
+DsMonad q =&gt;
+IgnoreKinds -&gt; Name -&gt; [DTypeArg] -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_con"><span class="hs-identifier hs-var">expand_con</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514123"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514090"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514092"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514088"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514088"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679514087"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679514087"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarT"><span class="hs-identifier hs-type">DVarT</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514087"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514088"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514085"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514085"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679514084"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679514084"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DArrowT"><span class="hs-identifier hs-var">DArrowT</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514084"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514085"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514082"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514082"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679514081"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679514081"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLitT"><span class="hs-identifier hs-type">DLitT</span></a></span><span> </span><span class="annot"><span class="annottext">TyLit
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514081"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514082"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span class="annot"><a href="#local-6989586621679514122"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679514079"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514079"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679514078"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679514078"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildCardT"><span class="hs-identifier hs-var">DWildCardT</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514078"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514079"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><a href="#local-6989586621679514093"><span class="hs-identifier hs-type">finish</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DTypeArg"><span class="hs-identifier hs-type">DTypeArg</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514272"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679514093"><span class="annot"><span class="annottext">finish :: DType -&gt; [DTypeArg] -&gt; q DType
+</span><a href="#local-6989586621679514093"><span class="hs-identifier hs-var hs-var">finish</span></a></span></span><span> </span><span id="local-6989586621679514076"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514076"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621679514075"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514075"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514076"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679514075"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- | Expands all type synonyms in the kinds of a @forall@ telescope.</span><span>
+</span><span id="line-92"></span><span id="local-6989586621679514259"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tele"><span class="hs-identifier hs-type">expand_tele</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514259"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html#IgnoreKinds"><span class="hs-identifier hs-type">IgnoreKinds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallTelescope"><span class="hs-identifier hs-type">DForallTelescope</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514259"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallTelescope"><span class="hs-identifier hs-type">DForallTelescope</span></a></span></span><span>
+</span><span id="line-93"></span><span id="expand_tele"><span class="annot"><span class="annottext">expand_tele :: forall (q :: * -&gt; *).
+DsMonad q =&gt;
+IgnoreKinds -&gt; DForallTelescope -&gt; q DForallTelescope
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tele"><span class="hs-identifier hs-var hs-var">expand_tele</span></a></span></span><span> </span><span id="local-6989586621679514060"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514060"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallVis"><span class="hs-identifier hs-type">DForallVis</span></a></span><span>   </span><span id="local-6989586621679514058"><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679514058"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit] -&gt; DForallTelescope
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DForallVis"><span class="hs-identifier hs-var">DForallVis</span></a></span><span>   </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) flag.
+DsMonad q =&gt;
+IgnoreKinds -&gt; DTyVarBndr flag -&gt; q (DTyVarBndr flag)
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tvb"><span class="hs-identifier hs-var">expand_tvb</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514060"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679514058"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-94"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tele"><span class="hs-identifier hs-var">expand_tele</span></a></span><span> </span><span id="local-6989586621679514056"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514056"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallInvis"><span class="hs-identifier hs-type">DForallInvis</span></a></span><span> </span><span id="local-6989586621679514054"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679514054"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec] -&gt; DForallTelescope
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DForallInvis"><span class="hs-identifier hs-var">DForallInvis</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) flag.
+DsMonad q =&gt;
+IgnoreKinds -&gt; DTyVarBndr flag -&gt; q (DTyVarBndr flag)
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tvb"><span class="hs-identifier hs-var">expand_tvb</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514056"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679514054"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- | Expands all type synonyms in a type variable binder's kind.</span><span>
+</span><span id="line-97"></span><span id="local-6989586621679514240"><span id="local-6989586621679514241"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tvb"><span class="hs-identifier hs-type">expand_tvb</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514241"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html#IgnoreKinds"><span class="hs-identifier hs-type">IgnoreKinds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514240"><span class="hs-identifier hs-type">flag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514241"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514240"><span class="hs-identifier hs-type">flag</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-98"></span><span id="expand_tvb"><span class="annot"><span class="annottext">expand_tvb :: forall (q :: * -&gt; *) flag.
+DsMonad q =&gt;
+IgnoreKinds -&gt; DTyVarBndr flag -&gt; q (DTyVarBndr flag)
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tvb"><span class="hs-identifier hs-var hs-var">expand_tvb</span></a></span></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><span class="hs-identifier">_</span></span><span>   </span><span id="local-6989586621679514045"><span class="annot"><span class="annottext">tvb :: DTyVarBndr flag
+</span><a href="#local-6989586621679514045"><span class="hs-identifier hs-var">tvb</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPlainTV"><span class="hs-identifier hs-type">DPlainTV</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndr flag
+</span><a href="#local-6989586621679514045"><span class="hs-identifier hs-var">tvb</span></a></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_tvb"><span class="hs-identifier hs-var">expand_tvb</span></a></span><span> </span><span id="local-6989586621679514043"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514043"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DKindedTV"><span class="hs-identifier hs-type">DKindedTV</span></a></span><span> </span><span id="local-6989586621679514041"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514041"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679514040"><span class="annot"><span class="annottext">flag
+</span><a href="#local-6989586621679514040"><span class="hs-identifier hs-var">flag</span></a></span></span><span> </span><span id="local-6989586621679514039"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514039"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall flag. Name -&gt; flag -&gt; DType -&gt; DTyVarBndr flag
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DKindedTV"><span class="hs-identifier hs-var">DKindedTV</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514041"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">flag
+</span><a href="#local-6989586621679514040"><span class="hs-identifier hs-var">flag</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679514043"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514039"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | Expand a constructor with given arguments</span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_con"><span class="hs-identifier hs-type">expand_con</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679514249"><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-103"></span><span>              </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span>
+</span><span id="line-104"></span><span>           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html#IgnoreKinds"><span class="hs-identifier hs-type">IgnoreKinds</span></a></span><span>
+</span><span id="line-105"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>       </span><span class="hs-comment">-- ^ Tycon name</span><span>
+</span><span id="line-106"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DTypeArg"><span class="hs-identifier hs-type">DTypeArg</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ Arguments</span><span>
+</span><span id="line-107"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>    </span><span class="hs-comment">-- ^ Expanded type</span><span>
+</span><span id="line-108"></span><span id="expand_con"><span class="annot"><span class="annottext">expand_con :: forall (q :: * -&gt; *).
+DsMonad q =&gt;
+IgnoreKinds -&gt; Name -&gt; [DTypeArg] -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_con"><span class="hs-identifier hs-var hs-var">expand_con</span></a></span></span><span> </span><span id="local-6989586621679513972"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span id="local-6989586621679513971"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513971"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679513970"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513970"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-109"></span><span>  </span><span id="local-6989586621679513969"><span class="annot"><span class="annottext">Info
+</span><a href="#local-6989586621679513969"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q Info
+</span><a href="Language.Haskell.TH.Desugar.Reify.html#reifyWithLocals"><span class="hs-identifier hs-var">reifyWithLocals</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513971"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Info
+</span><a href="#local-6989586621679513969"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">TyConI</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TySynD</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[TyVarBndr ()]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier hs-var">StarT</span></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>         </span><span class="hs-comment">-- See Note [Don't expand synonyms for *]</span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DConT"><span class="hs-identifier hs-var">DConT</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Language.Haskell.TH.Desugar.Util.html#typeKindName"><span class="hs-identifier hs-var">typeKindName</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513970"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="annot"><span class="annottext">Info
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Info -&gt; q DType
+</span><a href="#local-6989586621679513963"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Info
+</span><a href="#local-6989586621679513969"><span class="hs-identifier hs-var">info</span></a></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-comment">-- Only the normal (i.e., non-visibly applied) arguments. These are</span><span>
+</span><span id="line-117"></span><span>    </span><span class="hs-comment">-- important since we need to align these with the arguments of the type</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">-- synonym/family, and visible kind arguments can mess with this.</span><span>
+</span><span id="line-119"></span><span>    </span><span class="annot"><a href="#local-6989586621679513962"><span class="hs-identifier hs-type">normal_args</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679513962"><span class="annot"><span class="annottext">normal_args :: DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var hs-var">normal_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><a href="Language.Haskell.TH.Desugar.Core.html#filterDTANormals"><span class="hs-identifier hs-var">filterDTANormals</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513970"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>    </span><span class="annot"><a href="#local-6989586621679513963"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Info</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621679513963"><span class="annot"><span class="annottext">go :: Info -&gt; q DType
+</span><a href="#local-6989586621679513963"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679513960"><span class="annot"><span class="annottext">Info
+</span><a href="#local-6989586621679513960"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-124"></span><span>      </span><span id="local-6989586621679513959"><span class="annot"><span class="annottext">DInfo
+</span><a href="#local-6989586621679513959"><span class="hs-identifier hs-var">dinfo</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Info -&gt; q DInfo
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsInfo"><span class="hs-identifier hs-var">dsInfo</span></a></span><span> </span><span class="annot"><span class="annottext">Info
+</span><a href="#local-6989586621679513960"><span class="hs-identifier hs-var">info</span></a></span><span>
+</span><span id="line-125"></span><span>      </span><span id="local-6989586621679513957"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679513957"><span class="hs-identifier hs-var">args_ok</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m Bool) -&gt; [a] -&gt; m Bool
+</span><a href="#local-6989586621679513956"><span class="hs-identifier hs-var">allM</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513955"><span class="hs-identifier hs-var">no_tyvars_tyfams</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span>
+</span><span id="line-126"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DInfo
+</span><a href="#local-6989586621679513959"><span class="hs-identifier hs-var">dinfo</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-127"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynD"><span class="hs-identifier hs-type">DTySynD</span></a></span><span> </span><span id="local-6989586621679513952"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513952"><span class="hs-identifier hs-var">_n</span></a></span></span><span> </span><span id="local-6989586621679513951"><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513951"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621679513950"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513950"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-128"></span><span>          </span><span class="hs-glyph">|</span><span>  </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513951"><span class="hs-identifier hs-var">tvbs</span></a></span><span>   </span><span class="hs-comment">-- this should always be true!</span><span>
+</span><span id="line-129"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-130"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679513948"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513948"><span class="hs-identifier hs-var">syn_args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679513947"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513947"><span class="hs-identifier hs-var">rest_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. [a] -&gt; [b] -&gt; ([b], [b])
+</span><a href="Language.Haskell.TH.Desugar.Util.html#splitAtList"><span class="hs-identifier hs-var">splitAtList</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513951"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span>
+</span><span id="line-131"></span><span>            </span><span id="local-6989586621679513945"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513945"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; DSubst -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#substTy"><span class="hs-identifier hs-var">substTy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.fromList</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">forall flag. DTyVarBndr flag -&gt; Name
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dtvbName"><span class="hs-identifier hs-var">dtvbName</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513951"><span class="hs-identifier hs-var">tvbs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513948"><span class="hs-identifier hs-var">syn_args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513950"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-132"></span><span>            </span><span id="local-6989586621679513941"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513941"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513945"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-133"></span><span>            </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513941"><span class="hs-identifier hs-var">ty'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#DTANormal"><span class="hs-identifier hs-var">DTANormal</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513947"><span class="hs-identifier hs-var">rest_args</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DOpenTypeFamilyD"><span class="hs-identifier hs-type">DOpenTypeFamilyD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTypeFamilyHead"><span class="hs-identifier hs-type">DTypeFamilyHead</span></a></span><span> </span><span id="local-6989586621679513938"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513938"><span class="hs-identifier hs-var">_n</span></a></span></span><span> </span><span id="local-6989586621679513937"><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513937"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621679513936"><span class="annot"><span class="annottext">DFamilyResultSig
+</span><a href="#local-6989586621679513936"><span class="hs-identifier hs-var">_frs</span></a></span></span><span> </span><span id="local-6989586621679513935"><span class="annot"><span class="annottext">Maybe InjectivityAnn
+</span><a href="#local-6989586621679513935"><span class="hs-identifier hs-var">_ann</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-136"></span><span>          </span><span class="hs-glyph">|</span><span>  </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513937"><span class="hs-identifier hs-var">tvbs</span></a></span><span>   </span><span class="hs-comment">-- this should always be true!</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &lt; 709
+</span><span>          </span><span class="hs-special">,</span><span>  </span><span class="hs-identifier">args_ok</span><span class="hs-cpp">
+#endif
+</span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-141"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679513934"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513934"><span class="hs-identifier hs-var">syn_args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679513933"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513933"><span class="hs-identifier hs-var">rest_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. [a] -&gt; [b] -&gt; ([b], [b])
+</span><a href="Language.Haskell.TH.Desugar.Util.html#splitAtList"><span class="hs-identifier hs-var">splitAtList</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513937"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span>
+</span><span id="line-142"></span><span>            </span><span class="hs-comment">-- We need to get the correct instance. If we fail to reify anything</span><span>
+</span><span id="line-143"></span><span>            </span><span class="hs-comment">-- (e.g., if a type family is quasiquoted), then fall back by</span><span>
+</span><span id="line-144"></span><span>            </span><span class="hs-comment">-- pretending that there are no instances in scope.</span><span>
+</span><span id="line-145"></span><span>            </span><span id="local-6989586621679513932"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679513932"><span class="hs-identifier hs-var">insts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Quasi m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">qRecover</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-146"></span><span>                     </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). Quasi m =&gt; Name -&gt; [Type] -&gt; m [Dec]
+</span><span class="hs-identifier hs-var">qReifyInstances</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513971"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; Type
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#typeToTH"><span class="hs-identifier hs-var">typeToTH</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513934"><span class="hs-identifier hs-var">syn_args</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>            </span><span id="local-6989586621679513928"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679513928"><span class="hs-identifier hs-var">dinsts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; [Dec] -&gt; q [DDec]
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsDecs"><span class="hs-identifier hs-var">dsDecs</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679513932"><span class="hs-identifier hs-var">insts</span></a></span><span>
+</span><span id="line-148"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679513928"><span class="hs-identifier hs-var">dinsts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-149"></span><span>              </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynInstD"><span class="hs-identifier hs-type">DTySynInstD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynEqn"><span class="hs-identifier hs-type">DTySynEqn</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe [DTyVarBndrUnit]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679513924"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513924"><span class="hs-identifier hs-var">lhs</span></a></span></span><span> </span><span id="local-6989586621679513923"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513923"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-150"></span><span>                </span><span class="hs-glyph">|</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679513922"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513922"><span class="hs-identifier hs-var">lhs_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DType, [DTypeArg])
+</span><a href="Language.Haskell.TH.Desugar.Core.html#unfoldDType"><span class="hs-identifier hs-var">unfoldDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513924"><span class="hs-identifier hs-var">lhs</span></a></span><span>
+</span><span id="line-151"></span><span>                </span><span class="hs-special">,</span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679513920"><span class="annot"><span class="annottext">lhs_normal_args :: DCxt
+</span><a href="#local-6989586621679513920"><span class="hs-identifier hs-var hs-var">lhs_normal_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><a href="Language.Haskell.TH.Desugar.Core.html#filterDTANormals"><span class="hs-identifier hs-var">filterDTANormals</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513922"><span class="hs-identifier hs-var">lhs_args</span></a></span><span>
+</span><span id="line-152"></span><span>                </span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679513919"><span class="annot"><span class="annottext">DSubst
+</span><a href="#local-6989586621679513919"><span class="hs-identifier hs-var">subst</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-153"></span><span>                     </span><span class="annot"><span class="annottext">[Maybe DSubst] -&gt; Maybe DSubst
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#unionMaybeSubsts"><span class="hs-identifier hs-var">unionMaybeSubsts</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IgnoreKinds -&gt; DType -&gt; DType -&gt; Maybe DSubst
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#matchTy"><span class="hs-identifier hs-var">matchTy</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513920"><span class="hs-identifier hs-var">lhs_normal_args</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513934"><span class="hs-identifier hs-var">syn_args</span></a></span><span>
+</span><span id="line-154"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679513915"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513915"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; DSubst -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#substTy"><span class="hs-identifier hs-var">substTy</span></a></span><span> </span><span class="annot"><span class="annottext">DSubst
+</span><a href="#local-6989586621679513919"><span class="hs-identifier hs-var">subst</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513923"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-155"></span><span>                      </span><span id="local-6989586621679513914"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513914"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513915"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-156"></span><span>                      </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513914"><span class="hs-identifier hs-var">ty'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#DTANormal"><span class="hs-identifier hs-var">DTANormal</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513933"><span class="hs-identifier hs-var">rest_args</span></a></span><span>
+</span><span id="line-157"></span><span>              </span><span class="annot"><span class="annottext">[DDec]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">q DType
+</span><a href="#local-6989586621679513913"><span class="hs-identifier hs-var">give_up</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClosedTypeFamilyD"><span class="hs-identifier hs-type">DClosedTypeFamilyD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTypeFamilyHead"><span class="hs-identifier hs-type">DTypeFamilyHead</span></a></span><span> </span><span id="local-6989586621679513911"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513911"><span class="hs-identifier hs-var">_n</span></a></span></span><span> </span><span id="local-6989586621679513910"><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513910"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621679513909"><span class="annot"><span class="annottext">DFamilyResultSig
+</span><a href="#local-6989586621679513909"><span class="hs-identifier hs-var">_frs</span></a></span></span><span> </span><span id="local-6989586621679513908"><span class="annot"><span class="annottext">Maybe InjectivityAnn
+</span><a href="#local-6989586621679513908"><span class="hs-identifier hs-var">_ann</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679513907"><span class="annot"><span class="annottext">[DTySynEqn]
+</span><a href="#local-6989586621679513907"><span class="hs-identifier hs-var">eqns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-161"></span><span>          </span><span class="hs-glyph">|</span><span>  </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513910"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-162"></span><span>          </span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679513957"><span class="hs-identifier hs-var">args_ok</span></a></span><span>
+</span><span id="line-163"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-164"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679513906"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513906"><span class="hs-identifier hs-var">syn_args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679513905"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513905"><span class="hs-identifier hs-var">rest_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. [a] -&gt; [b] -&gt; ([b], [b])
+</span><a href="Language.Haskell.TH.Desugar.Util.html#splitAtList"><span class="hs-identifier hs-var">splitAtList</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513910"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513962"><span class="hs-identifier hs-var">normal_args</span></a></span><span>
+</span><span id="line-165"></span><span>            </span><span id="local-6989586621679513904"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513904"><span class="hs-identifier hs-var">rhss</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m (Maybe b)) -&gt; [a] -&gt; m [b]
+</span><a href="Language.Haskell.TH.Desugar.Util.html#mapMaybeM"><span class="hs-identifier hs-var">mapMaybeM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DCxt -&gt; DTySynEqn -&gt; q (Maybe DType)
+</span><a href="#local-6989586621679513902"><span class="hs-identifier hs-var">check_eqn</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513906"><span class="hs-identifier hs-var">syn_args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTySynEqn]
+</span><a href="#local-6989586621679513907"><span class="hs-identifier hs-var">eqns</span></a></span><span>
+</span><span id="line-166"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513904"><span class="hs-identifier hs-var">rhss</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-167"></span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679513901"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513901"><span class="hs-identifier hs-var">rhs</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-168"></span><span>                </span><span id="local-6989586621679513900"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513900"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513901"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-169"></span><span>                </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513900"><span class="hs-identifier hs-var">rhs'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#DTANormal"><span class="hs-identifier hs-var">DTANormal</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513905"><span class="hs-identifier hs-var">rest_args</span></a></span><span>
+</span><span id="line-170"></span><span>              </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">q DType
+</span><a href="#local-6989586621679513913"><span class="hs-identifier hs-var">give_up</span></a></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span>          </span><span class="hs-keyword">where</span><span>
+</span><span id="line-173"></span><span>             </span><span class="hs-comment">-- returns the substed rhs</span><span>
+</span><span id="line-174"></span><span>            </span><span class="annot"><a href="#local-6989586621679513902"><span class="hs-identifier hs-type">check_eqn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynEqn"><span class="hs-identifier hs-type">DTySynEqn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span>            </span><span id="local-6989586621679513902"><span class="annot"><span class="annottext">check_eqn :: DCxt -&gt; DTySynEqn -&gt; q (Maybe DType)
+</span><a href="#local-6989586621679513902"><span class="hs-identifier hs-var hs-var">check_eqn</span></a></span></span><span> </span><span id="local-6989586621679513899"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513899"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynEqn"><span class="hs-identifier hs-type">DTySynEqn</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe [DTyVarBndrUnit]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679513898"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513898"><span class="hs-identifier hs-var">lhs</span></a></span></span><span> </span><span id="local-6989586621679513897"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513897"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-176"></span><span>              </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679513896"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513896"><span class="hs-identifier hs-var">lhs_args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DType, [DTypeArg])
+</span><a href="Language.Haskell.TH.Desugar.Core.html#unfoldDType"><span class="hs-identifier hs-var">unfoldDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513898"><span class="hs-identifier hs-var">lhs</span></a></span><span>
+</span><span id="line-177"></span><span>                  </span><span id="local-6989586621679513895"><span class="annot"><span class="annottext">normal_lhs_args :: DCxt
+</span><a href="#local-6989586621679513895"><span class="hs-identifier hs-var hs-var">normal_lhs_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DCxt
+</span><a href="Language.Haskell.TH.Desugar.Core.html#filterDTANormals"><span class="hs-identifier hs-var">filterDTANormals</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513896"><span class="hs-identifier hs-var">lhs_args</span></a></span><span>
+</span><span id="line-178"></span><span>                  </span><span id="local-6989586621679513894"><span class="annot"><span class="annottext">m_subst :: Maybe DSubst
+</span><a href="#local-6989586621679513894"><span class="hs-identifier hs-var hs-var">m_subst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Maybe DSubst] -&gt; Maybe DSubst
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#unionMaybeSubsts"><span class="hs-identifier hs-var">unionMaybeSubsts</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IgnoreKinds -&gt; DType -&gt; DType -&gt; Maybe DSubst
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#matchTy"><span class="hs-identifier hs-var">matchTy</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513972"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513895"><span class="hs-identifier hs-var">normal_lhs_args</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513899"><span class="hs-identifier hs-var">arg_tys</span></a></span><span>
+</span><span id="line-179"></span><span>              </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">T.mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; DSubst -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#substTy"><span class="hs-identifier hs-var">substTy</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513897"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe DSubst
+</span><a href="#local-6989586621679513894"><span class="hs-identifier hs-var">m_subst</span></a></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span>        </span><span class="annot"><span class="annottext">DInfo
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">q DType
+</span><a href="#local-6989586621679513913"><span class="hs-identifier hs-var">give_up</span></a></span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-comment">-- Used when we can't proceed with type family instance expansion any more,</span><span>
+</span><span id="line-184"></span><span>    </span><span class="hs-comment">-- and must conservatively return the orignal type family applied to its</span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-comment">-- arguments.</span><span>
+</span><span id="line-186"></span><span>    </span><span class="annot"><a href="#local-6989586621679513913"><span class="hs-identifier hs-type">give_up</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span>
+</span><span id="line-187"></span><span>    </span><span id="local-6989586621679513913"><span class="annot"><span class="annottext">give_up :: q DType
+</span><a href="#local-6989586621679513913"><span class="hs-identifier hs-var hs-var">give_up</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier hs-var">applyDType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DConT"><span class="hs-identifier hs-var">DConT</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513971"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679513970"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span>    </span><span class="annot"><a href="#local-6989586621679513955"><span class="hs-identifier hs-type">no_tyvars_tyfams</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-190"></span><span>    </span><span id="local-6989586621679513955"><span class="annot"><span class="annottext">no_tyvars_tyfams :: DType -&gt; q Bool
+</span><a href="#local-6989586621679513955"><span class="hs-identifier hs-var hs-var">no_tyvars_tyfams</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span>
+</span><span id="line-191"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-192"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-type">go_ty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-193"></span><span>        </span><span class="hs-comment">-- Interesting cases</span><span>
+</span><span id="line-194"></span><span>        </span><span id="local-6989586621679513892"><span class="annot"><span class="annottext">go_ty :: DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var hs-var">go_ty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarT"><span class="hs-identifier hs-type">DVarT</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-195"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConT"><span class="hs-identifier hs-type">DConT</span></a></span><span> </span><span id="local-6989586621679513891"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513891"><span class="hs-identifier hs-var">con_name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-196"></span><span>          </span><span id="local-6989586621679513890"><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621679513890"><span class="hs-identifier hs-var">m_info</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe DInfo)
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsReify"><span class="hs-identifier hs-var">dsReify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679513891"><span class="hs-identifier hs-var">con_name</span></a></span><span>
+</span><span id="line-197"></span><span>          </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621679513890"><span class="hs-identifier hs-var">m_info</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-198"></span><span>            </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>   </span><span class="hs-comment">-- we don't know anything. False is safe.</span><span>
+</span><span id="line-199"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DOpenTypeFamilyD"><span class="hs-identifier hs-type">DOpenTypeFamilyD</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-200"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDataFamilyD"><span class="hs-identifier hs-type">DDataFamilyD</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-201"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyConI"><span class="hs-identifier hs-type">DTyConI</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClosedTypeFamilyD"><span class="hs-identifier hs-type">DClosedTypeFamilyD</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe [DDec]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-202"></span><span>            </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><span class="hs-identifier">_</span></span><span>                                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span>        </span><span class="hs-comment">-- Recursive cases</span><span>
+</span><span id="line-205"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-type">DForallT</span></a></span><span> </span><span id="local-6989586621679513887"><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679513887"><span class="hs-identifier hs-var">tele</span></a></span></span><span> </span><span id="local-6989586621679513886"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513886"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(&amp;&amp;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DForallTelescope -&gt; q Bool
+</span><a href="#local-6989586621679513883"><span class="hs-identifier hs-var">go_tele</span></a></span><span> </span><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679513887"><span class="hs-identifier hs-var">tele</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513886"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-206"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConstrainedT"><span class="hs-identifier hs-type">DConstrainedT</span></a></span><span> </span><span id="local-6989586621679513882"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513882"><span class="hs-identifier hs-var">ctxt</span></a></span></span><span> </span><span id="local-6989586621679513881"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513881"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(&amp;&amp;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m Bool) -&gt; [a] -&gt; m Bool
+</span><a href="#local-6989586621679513956"><span class="hs-identifier hs-var">allM</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679513882"><span class="hs-identifier hs-var">ctxt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513881"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppT"><span class="hs-identifier hs-type">DAppT</span></a></span><span> </span><span id="local-6989586621679513880"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513880"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621679513879"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513879"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(&amp;&amp;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513880"><span class="hs-identifier hs-var">t1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513879"><span class="hs-identifier hs-var">t2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-208"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DAppKindT"><span class="hs-identifier hs-type">DAppKindT</span></a></span><span> </span><span id="local-6989586621679513878"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513878"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679513877"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513877"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(&amp;&amp;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513878"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513877"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-209"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigT"><span class="hs-identifier hs-type">DSigT</span></a></span><span> </span><span id="local-6989586621679513876"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513876"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679513875"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513875"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">(&amp;&amp;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513876"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513875"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>
+</span><span id="line-211"></span><span>        </span><span class="hs-comment">-- Default to True</span><span>
+</span><span id="line-212"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLitT"><span class="hs-identifier hs-type">DLitT</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-213"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DArrowT"><span class="hs-identifier hs-var">DArrowT</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-214"></span><span>        </span><span class="annot"><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildCardT"><span class="hs-identifier hs-var">DWildCardT</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-215"></span><span>
+</span><span id="line-216"></span><span>        </span><span class="hs-comment">-- These cases are uninteresting</span><span>
+</span><span id="line-217"></span><span>        </span><span class="annot"><a href="#local-6989586621679513883"><span class="hs-identifier hs-type">go_tele</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallTelescope"><span class="hs-identifier hs-type">DForallTelescope</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-218"></span><span>        </span><span id="local-6989586621679513883"><span class="annot"><span class="annottext">go_tele :: DForallTelescope -&gt; q Bool
+</span><a href="#local-6989586621679513883"><span class="hs-identifier hs-var hs-var">go_tele</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallVis"><span class="hs-identifier hs-type">DForallVis</span></a></span><span>   </span><span id="local-6989586621679513874"><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513874"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m Bool) -&gt; [a] -&gt; m Bool
+</span><a href="#local-6989586621679513956"><span class="hs-identifier hs-var">allM</span></a></span><span> </span><span class="annot"><span class="annottext">forall flag. DTyVarBndr flag -&gt; q Bool
+</span><a href="#local-6989586621679513873"><span class="hs-identifier hs-var">go_tvb</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrUnit]
+</span><a href="#local-6989586621679513874"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-219"></span><span>        </span><span class="annot"><a href="#local-6989586621679513883"><span class="hs-identifier hs-var">go_tele</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallInvis"><span class="hs-identifier hs-type">DForallInvis</span></a></span><span> </span><span id="local-6989586621679513872"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679513872"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m Bool) -&gt; [a] -&gt; m Bool
+</span><a href="#local-6989586621679513956"><span class="hs-identifier hs-var">allM</span></a></span><span> </span><span class="annot"><span class="annottext">forall flag. DTyVarBndr flag -&gt; q Bool
+</span><a href="#local-6989586621679513873"><span class="hs-identifier hs-var">go_tvb</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679513872"><span class="hs-identifier hs-var">tvbs</span></a></span><span>
+</span><span id="line-220"></span><span>
+</span><span id="line-221"></span><span>        </span><span id="local-6989586621679514188"><span class="annot"><a href="#local-6989586621679513873"><span class="hs-identifier hs-type">go_tvb</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514188"><span class="hs-identifier hs-type">flag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514249"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-222"></span><span>        </span><span id="local-6989586621679513873"><span class="annot"><span class="annottext">go_tvb :: forall flag. DTyVarBndr flag -&gt; q Bool
+</span><a href="#local-6989586621679513873"><span class="hs-identifier hs-var hs-var">go_tvb</span></a></span></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPlainTV"><span class="hs-identifier hs-type">DPlainTV</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-223"></span><span>        </span><span class="annot"><a href="#local-6989586621679513873"><span class="hs-identifier hs-var">go_tvb</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DKindedTV"><span class="hs-identifier hs-type">DKindedTV</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">flag
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679513870"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513870"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; q Bool
+</span><a href="#local-6989586621679513892"><span class="hs-identifier hs-var">go_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679513870"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-224"></span><span>
+</span><span id="line-225"></span><span>    </span><span id="local-6989586621679514225"><span id="local-6989586621679514226"><span class="annot"><a href="#local-6989586621679513956"><span class="hs-identifier hs-type">allM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679514226"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679514225"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514226"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679514225"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514226"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-226"></span><span>    </span><span id="local-6989586621679513956"><span class="annot"><span class="annottext">allM :: forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m Bool) -&gt; [a] -&gt; m Bool
+</span><a href="#local-6989586621679513956"><span class="hs-identifier hs-var hs-var">allM</span></a></span></span><span> </span><span id="local-6989586621679513865"><span class="annot"><span class="annottext">a -&gt; m Bool
+</span><a href="#local-6989586621679513865"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) b a.
+(Foldable t, Monad m) =&gt;
+(b -&gt; a -&gt; m b) -&gt; b -&gt; t a -&gt; m b
+</span><span class="hs-identifier hs-var">foldM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679513863"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679513863"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679513862"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679513862"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679513863"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 r. Monad m =&gt; (a1 -&gt; r) -&gt; m a1 -&gt; m r
+</span><span class="hs-operator hs-var">`liftM`</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m Bool
+</span><a href="#local-6989586621679513865"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679513862"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-227"></span><span>
+</span><span id="line-228"></span><span class="hs-comment">{-
+Note [Don't expand synonyms for *]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We deliberately avoid expanding type synonyms for * such as Type and &#9733;.
+Why? If you reify any such type synonym using Template Haskell, this is
+what you'll get:
+
+  TyConI (TySynD &lt;type synonym name&gt; [] StarT)
+
+If you blindly charge ahead and recursively inspect the right-hand side of
+this type synonym, you'll desugar StarT into (DConT ''Type), reify ''Type,
+and get back another type synonym with StarT as its right-hand side. Then
+you'll recursively inspect StarT and find yourself knee-deep in an infinite
+loop.
+
+To prevent these sorts of shenanigans, we simply stop whenever we see a type
+synonym with StarT as its right-hand side and return Type.
+-}</span><span>
+</span><span id="line-246"></span><span>
+</span><span id="line-247"></span><span class="hs-comment">-- | Expand all type synonyms and type families in the desugared abstract</span><span>
+</span><span id="line-248"></span><span class="hs-comment">-- syntax tree provided, where type family simplification is on a &quot;best effort&quot;</span><span>
+</span><span id="line-249"></span><span class="hs-comment">-- basis. Normally, the first parameter should have a type like</span><span>
+</span><span id="line-250"></span><span class="hs-comment">-- 'DExp' or 'DLetDec'.</span><span>
+</span><span id="line-251"></span><span id="local-6989586621679514176"><span id="local-6989586621679514177"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand"><span class="hs-identifier hs-type">expand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514177"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data</span></span><span> </span><span class="annot"><a href="#local-6989586621679514176"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514176"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514177"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514176"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-252"></span><span id="expand"><span class="annot"><span class="annottext">expand :: forall (q :: * -&gt; *) a. (DsMonad q, Data a) =&gt; a -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand"><span class="hs-identifier hs-var hs-var">expand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) a.
+(DsMonad q, Data a) =&gt;
+IgnoreKinds -&gt; a -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_"><span class="hs-identifier hs-var">expand_</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#NoIgnore"><span class="hs-identifier hs-var">NoIgnore</span></a></span><span>
+</span><span id="line-253"></span><span>
+</span><span id="line-254"></span><span class="hs-comment">-- | Expand all type synonyms and type families in the desugared abstract</span><span>
+</span><span id="line-255"></span><span class="hs-comment">-- syntax tree provided, where type family simplification is on a &quot;better</span><span>
+</span><span id="line-256"></span><span class="hs-comment">-- than best effort&quot; basis. This means that it will try so hard that it will</span><span>
+</span><span id="line-257"></span><span class="hs-comment">-- sometimes do the wrong thing. Specifically, any kind parameters to type</span><span>
+</span><span id="line-258"></span><span class="hs-comment">-- families are ignored. So, if we have</span><span>
+</span><span id="line-259"></span><span class="hs-comment">--</span><span>
+</span><span id="line-260"></span><span class="hs-comment">-- &gt; type family F (x :: k) where</span><span>
+</span><span id="line-261"></span><span class="hs-comment">-- &gt;   F (a :: *) = Int</span><span>
+</span><span id="line-262"></span><span class="hs-comment">--</span><span>
+</span><span id="line-263"></span><span class="hs-comment">-- 'expandUnsoundly' will expand @F 'True@ to @Int@, ignoring that the</span><span>
+</span><span id="line-264"></span><span class="hs-comment">-- expansion should only work for type of kind @*@.</span><span>
+</span><span id="line-265"></span><span class="hs-comment">--</span><span>
+</span><span id="line-266"></span><span class="hs-comment">-- This function is useful because plain old 'expand' will simply fail</span><span>
+</span><span id="line-267"></span><span class="hs-comment">-- to expand type families that make use of kinds. Sometimes, the kinds</span><span>
+</span><span id="line-268"></span><span class="hs-comment">-- are benign and we want to expand anyway. Use this function in that case.</span><span>
+</span><span id="line-269"></span><span id="local-6989586621679513854"><span id="local-6989586621679513855"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expandUnsoundly"><span class="hs-identifier hs-type">expandUnsoundly</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679513855"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data</span></span><span> </span><span class="annot"><a href="#local-6989586621679513854"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679513854"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679513855"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679513854"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-270"></span><span id="expandUnsoundly"><span class="annot"><span class="annottext">expandUnsoundly :: forall (q :: * -&gt; *) a. (DsMonad q, Data a) =&gt; a -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expandUnsoundly"><span class="hs-identifier hs-var hs-var">expandUnsoundly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) a.
+(DsMonad q, Data a) =&gt;
+IgnoreKinds -&gt; a -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_"><span class="hs-identifier hs-var">expand_</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="Language.Haskell.TH.Desugar.Subst.html#YesIgnore"><span class="hs-identifier hs-var">YesIgnore</span></a></span><span>
+</span><span id="line-271"></span><span>
+</span><span id="line-272"></span><span class="hs-comment">-- | Generalization of 'expand' that either can or won't ignore kind annotations.sx</span><span>
+</span><span id="line-273"></span><span id="local-6989586621679514172"><span id="local-6989586621679514173"><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand_"><span class="hs-identifier hs-type">expand_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514173"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data</span></span><span> </span><span class="annot"><a href="#local-6989586621679514172"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html#IgnoreKinds"><span class="hs-identifier hs-type">IgnoreKinds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514172"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514173"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514172"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-274"></span><span id="expand_"><span class="annot"><span class="annottext">expand_ :: forall (q :: * -&gt; *) a.
+(DsMonad q, Data a) =&gt;
+IgnoreKinds -&gt; a -&gt; q a
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_"><span class="hs-identifier hs-var hs-var">expand_</span></a></span></span><span> </span><span id="local-6989586621679513842"><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513842"><span class="hs-identifier hs-var">ign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). Monad m =&gt; GenericM m -&gt; GenericM m
+</span><span class="hs-identifier hs-var">everywhereM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a b.
+(Monad m, Typeable a, Typeable b) =&gt;
+(b -&gt; m b) -&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">mkM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; IgnoreKinds -&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expand_type"><span class="hs-identifier hs-var">expand_type</span></a></span><span> </span><span class="annot"><span class="annottext">IgnoreKinds
+</span><a href="#local-6989586621679513842"><span class="hs-identifier hs-var">ign</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-275"></span></pre></body></html>

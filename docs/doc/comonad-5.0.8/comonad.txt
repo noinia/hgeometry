@@ -189,30 +189,76 @@ Cokleisli :: (w a -> b) -> Cokleisli w a b
 --   condition holds.
 class Functor (f :: Type -> Type)
 
--- | Using <tt>ApplicativeDo</tt>: '<tt><a>fmap</a> f as</tt>' can be
---   understood as the <tt>do</tt> expression
+-- | <a>fmap</a> is used to apply a function of type <tt>(a -&gt; b)</tt>
+--   to a value of type <tt>f a</tt>, where f is a functor, to produce a
+--   value of type <tt>f b</tt>. Note that for any type constructor with
+--   more than one parameter (e.g., <tt>Either</tt>), only the last type
+--   parameter can be modified with <a>fmap</a> (e.g., <tt>b</tt> in
+--   `Either a b`).
+--   
+--   Some type constructors with two parameters or more have a
+--   <tt><a>Bifunctor</a></tt> instance that allows both the last and the
+--   penultimate parameters to be mapped over.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   Convert from a <tt><a>Maybe</a> Int</tt> to a <tt>Maybe String</tt>
+--   using <a>show</a>:
 --   
 --   <pre>
---   do a &lt;- as
---      pure (f a)
+--   &gt;&gt;&gt; fmap show Nothing
+--   Nothing
+--   
+--   &gt;&gt;&gt; fmap show (Just 3)
+--   Just "3"
 --   </pre>
 --   
---   with an inferred <tt>Functor</tt> constraint.
+--   Convert from an <tt><a>Either</a> Int Int</tt> to an <tt>Either Int
+--   String</tt> using <a>show</a>:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fmap show (Left 17)
+--   Left 17
+--   
+--   &gt;&gt;&gt; fmap show (Right 17)
+--   Right "17"
+--   </pre>
+--   
+--   Double each element of a list:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fmap (*2) [1,2,3]
+--   [2,4,6]
+--   </pre>
+--   
+--   Apply <a>even</a> to the second element of a pair:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fmap even (2,2)
+--   (2,True)
+--   </pre>
+--   
+--   It may seem surprising that the function is only applied to the last
+--   element of the tuple compared to the list example above which applies
+--   it to every element in the list. To understand, remember that tuples
+--   are type constructors with multiple type parameters: a tuple of 3
+--   elements <tt>(a,b,c)</tt> can also be written <tt>(,,) a b c</tt> and
+--   its <tt>Functor</tt> instance is defined for <tt>Functor ((,,) a
+--   b)</tt> (i.e., only the third parameter is free to be mapped over with
+--   <tt>fmap</tt>).
+--   
+--   It explains why <tt>fmap</tt> can be used with tuples containing
+--   values of different types as in the following example:
+--   
+--   <pre>
+--   &gt;&gt;&gt; fmap even ("hello", 1.0, 4)
+--   ("hello",1.0,True)
+--   </pre>
 fmap :: Functor f => (a -> b) -> f a -> f b
 
 -- | Replace all locations in the input with the same value. The default
 --   definition is <tt><a>fmap</a> . <a>const</a></tt>, but this may be
 --   overridden with a more efficient version.
---   
---   Using <tt>ApplicativeDo</tt>: '<tt>a <a>&lt;$</a> bs</tt>' can be
---   understood as the <tt>do</tt> expression
---   
---   <pre>
---   do bs
---      pure a
---   </pre>
---   
---   with an inferred <tt>Functor</tt> constraint.
 (<$) :: Functor f => a -> f b -> f a
 infixl 4 <$
 
@@ -270,16 +316,6 @@ infixl 4 <$
 infixl 4 <$>
 
 -- | Flipped version of <a>&lt;$</a>.
---   
---   Using <tt>ApplicativeDo</tt>: '<tt>as <a>$&gt;</a> b</tt>' can be
---   understood as the <tt>do</tt> expression
---   
---   <pre>
---   do as
---      pure b
---   </pre>
---   
---   with an inferred <tt>Functor</tt> constraint.
 --   
 --   <h4><b>Examples</b></h4>
 --   

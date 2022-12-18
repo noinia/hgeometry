@@ -881,10 +881,26 @@ zip3 :: CircularVector a -> CircularVector b -> CircularVector c -> CircularVect
 
 -- | <a>unzip</a> transforms a list of pairs into a list of first
 --   components and a list of second components.
+--   
+--   <pre>
+--   &gt;&gt;&gt; unzip []
+--   ([],[])
+--   
+--   &gt;&gt;&gt; unzip [(1, 'a'), (2, 'b')]
+--   ([1,2],"ab")
+--   </pre>
 unzip :: [(a, b)] -> ([a], [b])
 
 -- | The <a>unzip3</a> function takes a list of triples and returns three
 --   lists, analogous to <a>unzip</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; unzip3 []
+--   ([],[],[])
+--   
+--   &gt;&gt;&gt; unzip3 [(1, 'a', True), (2, 'b', False)]
+--   ([1,2],"ab",[True,False])
+--   </pre>
 unzip3 :: [(a, b, c)] -> ([a], [b], [c])
 
 -- | <i>O(n)</i> Drop repeated adjacent elements.
@@ -1205,14 +1221,44 @@ modify :: (forall s. MVector s a -> ST s ()) -> CircularVector a -> CircularVect
 -- | Evaluate each monadic action in the structure from left to right, and
 --   collect the results. For a version that ignores the results see
 --   <a>sequence_</a>.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   Basic usage:
+--   
+--   The first two examples are instances where the input and and output of
+--   <a>sequence</a> are isomorphic.
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ Right [1,2,3,4]
+--   [Right 1,Right 2,Right 3,Right 4]
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ [Right 1,Right 2,Right 3,Right 4]
+--   Right [1,2,3,4]
+--   </pre>
+--   
+--   The following examples demonstrate short circuit behavior for
+--   <a>sequence</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ Left [1,2,3,4]
+--   Left [1,2,3,4]
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ [Left 0, Right 1,Right 2,Right 3,Right 4]
+--   Left 0
+--   </pre>
 sequence :: (Traversable t, Monad m) => t (m a) -> m (t a)
 
 -- | Evaluate each monadic action in the structure from left to right, and
 --   ignore the results. For a version that doesn't ignore the results see
 --   <a>sequence</a>.
 --   
---   As of base 4.8.0.0, <a>sequence_</a> is just <a>sequenceA_</a>,
---   specialized to <a>Monad</a>.
+--   <a>sequence_</a> is just like <a>sequenceA_</a>, but specialised to
+--   monadic actions.
 sequence_ :: (Foldable t, Monad m) => t (m a) -> m ()
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Vector.Circular.CircularVector a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Vector.Circular.CircularVector a)
@@ -2126,10 +2172,26 @@ zip3 :: (Vector v a, Vector v b, Vector v c, Vector v (a, b, c)) => CircularVect
 
 -- | <a>unzip</a> transforms a list of pairs into a list of first
 --   components and a list of second components.
+--   
+--   <pre>
+--   &gt;&gt;&gt; unzip []
+--   ([],[])
+--   
+--   &gt;&gt;&gt; unzip [(1, 'a'), (2, 'b')]
+--   ([1,2],"ab")
+--   </pre>
 unzip :: [(a, b)] -> ([a], [b])
 
 -- | The <a>unzip3</a> function takes a list of triples and returns three
 --   lists, analogous to <a>unzip</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; unzip3 []
+--   ([],[],[])
+--   
+--   &gt;&gt;&gt; unzip3 [(1, 'a', True), (2, 'b', False)]
+--   ([1,2],"ab",[True,False])
+--   </pre>
 unzip3 :: [(a, b, c)] -> ([a], [b], [c])
 
 -- | <i>O(n)</i> Drop repeated adjacent elements.
@@ -2423,14 +2485,44 @@ modify :: Vector v a => (forall s. Mutable v s a -> ST s ()) -> CircularVector v
 -- | Evaluate each monadic action in the structure from left to right, and
 --   collect the results. For a version that ignores the results see
 --   <a>sequence_</a>.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   Basic usage:
+--   
+--   The first two examples are instances where the input and and output of
+--   <a>sequence</a> are isomorphic.
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ Right [1,2,3,4]
+--   [Right 1,Right 2,Right 3,Right 4]
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ [Right 1,Right 2,Right 3,Right 4]
+--   Right [1,2,3,4]
+--   </pre>
+--   
+--   The following examples demonstrate short circuit behavior for
+--   <a>sequence</a>.
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ Left [1,2,3,4]
+--   Left [1,2,3,4]
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sequence $ [Left 0, Right 1,Right 2,Right 3,Right 4]
+--   Left 0
+--   </pre>
 sequence :: (Traversable t, Monad m) => t (m a) -> m (t a)
 
 -- | Evaluate each monadic action in the structure from left to right, and
 --   ignore the results. For a version that doesn't ignore the results see
 --   <a>sequence</a>.
 --   
---   As of base 4.8.0.0, <a>sequence_</a> is just <a>sequenceA_</a>,
---   specialized to <a>Monad</a>.
+--   <a>sequence_</a> is just like <a>sequenceA_</a>, but specialised to
+--   monadic actions.
 sequence_ :: (Foldable t, Monad m) => t (m a) -> m ()
 instance Control.DeepSeq.NFData (v a) => Control.DeepSeq.NFData (Data.Vector.Circular.Generic.CircularVector v a)
 instance GHC.Show.Show (v a) => GHC.Show.Show (Data.Vector.Circular.Generic.CircularVector v a)

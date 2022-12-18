@@ -42,11 +42,10 @@
 </span><span id="line-42"></span><span class="hs-comment">-- implementations (GHC with the @-threaded@ option, and GPH, for</span><span>
 </span><span id="line-43"></span><span class="hs-comment">-- now).  On other implementations, @par a b = b@.</span><span>
 </span><span id="line-44"></span><span class="hs-comment">--</span><span>
-</span><span id="line-45"></span><span id="local-6989586621679041247"><span id="local-6989586621679041248"><span class="annot"><a href="Control.Parallel.html#par"><span class="hs-identifier hs-type">par</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679041248"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679041247"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679041247"><span class="hs-identifier hs-type">b</span></a></span></span></span><span class="hs-cpp">
+</span><span id="line-45"></span><span id="local-6989586621679040762"><span id="local-6989586621679040763"><span class="annot"><a href="Control.Parallel.html#par"><span class="hs-identifier hs-type">par</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679040763"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679040762"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679040762"><span class="hs-identifier hs-type">b</span></a></span></span></span><span class="hs-cpp">
 #ifdef __GLASGOW_HASKELL__
-</span><span id="par"><span class="annot"><span class="annottext">par :: a -&gt; b -&gt; b
-</span><a href="Control.Parallel.html#par"><span class="hs-identifier hs-var hs-var">par</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; b
-forall a b. a -&gt; b -&gt; b
+</span><span id="par"><span class="annot"><span class="annottext">par :: forall a b. a -&gt; b -&gt; b
+</span><a href="Control.Parallel.html#par"><span class="hs-identifier hs-var hs-var">par</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. a -&gt; b -&gt; b
 </span><span class="hs-identifier hs-var">GHC.Conc.par</span></span><span class="hs-cpp">
 #else
 </span><span class="hs-comment">-- For now, Hugs does not support par properly.</span><span>
@@ -67,11 +66,10 @@ forall a b. a -&gt; b -&gt; b
 </span><span id="line-64"></span><span class="hs-comment">-- which restricts the transformations that the compiler can do, and</span><span>
 </span><span id="line-65"></span><span class="hs-comment">-- ensures that the user can retain control of the evaluation order.</span><span>
 </span><span id="line-66"></span><span class="hs-comment">--</span><span>
-</span><span id="line-67"></span><span id="local-6989586621679041245"><span id="local-6989586621679041246"><span class="annot"><a href="Control.Parallel.html#pseq"><span class="hs-identifier hs-type">pseq</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679041246"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679041245"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679041245"><span class="hs-identifier hs-type">b</span></a></span></span></span><span class="hs-cpp">
+</span><span id="line-67"></span><span id="local-6989586621679040756"><span id="local-6989586621679040757"><span class="annot"><a href="Control.Parallel.html#pseq"><span class="hs-identifier hs-type">pseq</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679040757"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679040756"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679040756"><span class="hs-identifier hs-type">b</span></a></span></span></span><span class="hs-cpp">
 #ifdef __GLASGOW_HASKELL__
-</span><span id="pseq"><span class="annot"><span class="annottext">pseq :: a -&gt; b -&gt; b
-</span><a href="Control.Parallel.html#pseq"><span class="hs-identifier hs-var hs-var">pseq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; b
-forall a b. a -&gt; b -&gt; b
+</span><span id="pseq"><span class="annot"><span class="annottext">pseq :: forall a b. a -&gt; b -&gt; b
+</span><a href="Control.Parallel.html#pseq"><span class="hs-identifier hs-var hs-var">pseq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. a -&gt; b -&gt; b
 </span><span class="hs-identifier hs-var">GHC.Conc.pseq</span></span><span class="hs-cpp">
 #else
 </span><span class="hs-identifier">pseq</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">seq</span><span class="hs-cpp">

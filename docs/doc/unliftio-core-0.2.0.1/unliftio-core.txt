@@ -117,7 +117,44 @@ wrappedWithRunInIO :: MonadUnliftIO n => (n b -> m b) -> (forall a. m a -> n a) 
 --   </ul>
 class Monad m => MonadIO (m :: Type -> Type)
 
--- | Lift a computation from the <a>IO</a> monad.
+-- | Lift a computation from the <a>IO</a> monad. This allows us to run IO
+--   computations in any monadic stack, so long as it supports these kinds
+--   of operations (i.e. <a>IO</a> is the base monad for the stack).
+--   
+--   <h3><b>Example</b></h3>
+--   
+--   <pre>
+--   import Control.Monad.Trans.State -- from the "transformers" library
+--   
+--   printState :: Show s =&gt; StateT s IO ()
+--   printState = do
+--     state &lt;- get
+--     liftIO $ print state
+--   </pre>
+--   
+--   Had we omitted <tt><a>liftIO</a></tt>, we would have ended up with
+--   this error:
+--   
+--   <pre>
+--   • Couldn't match type ‘IO’ with ‘StateT s IO’
+--    Expected type: StateT s IO ()
+--      Actual type: IO ()
+--   </pre>
+--   
+--   The important part here is the mismatch between <tt>StateT s IO
+--   ()</tt> and <tt><a>IO</a> ()</tt>.
+--   
+--   Luckily, we know of a function that takes an <tt><a>IO</a> a</tt> and
+--   returns an <tt>(m a)</tt>: <tt><a>liftIO</a></tt>, enabling us to run
+--   the program and see the expected results:
+--   
+--   <pre>
+--   &gt; evalStateT printState "hello"
+--   "hello"
+--   
+--   &gt; evalStateT printState 3
+--   3
+--   </pre>
 liftIO :: MonadIO m => IO a -> m a
 instance Control.Monad.IO.Unlift.MonadUnliftIO GHC.Types.IO
 instance Control.Monad.IO.Unlift.MonadUnliftIO m => Control.Monad.IO.Unlift.MonadUnliftIO (Control.Monad.Trans.Reader.ReaderT r m)

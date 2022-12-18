@@ -468,7 +468,6 @@ instance Data.MonoTraversable.MonoPointed Data.Text.Internal.Text
 instance Data.MonoTraversable.MonoPointed Data.Text.Internal.Lazy.Text
 instance Data.MonoTraversable.MonoPointed [a]
 instance Data.MonoTraversable.MonoPointed (GHC.Maybe.Maybe a)
-instance Data.MonoTraversable.MonoPointed (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoPointed (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoPointed (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoPointed (Data.Vector.Vector a)
@@ -521,7 +520,6 @@ instance Data.MonoTraversable.MonoTraversable (Data.Sequence.Internal.Seq a)
 instance Data.MonoTraversable.MonoTraversable (Data.Sequence.Internal.ViewL a)
 instance Data.MonoTraversable.MonoTraversable (Data.Sequence.Internal.ViewR a)
 instance Data.MonoTraversable.MonoTraversable (Data.IntMap.Internal.IntMap a)
-instance Data.MonoTraversable.MonoTraversable (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoTraversable (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoTraversable (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoTraversable (Data.Map.Internal.Map k v)
@@ -561,7 +559,6 @@ instance Data.MonoTraversable.MonoFoldable (Data.Sequence.Internal.Seq a)
 instance Data.MonoTraversable.MonoFoldable (Data.Sequence.Internal.ViewL a)
 instance Data.MonoTraversable.MonoFoldable (Data.Sequence.Internal.ViewR a)
 instance Data.MonoTraversable.MonoFoldable (Data.IntMap.Internal.IntMap a)
-instance Data.MonoTraversable.MonoFoldable (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoFoldable (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoFoldable (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoFoldable (Data.Map.Internal.Map k v)
@@ -604,7 +601,6 @@ instance Data.MonoTraversable.MonoFunctor (Data.Sequence.Internal.Seq a)
 instance Data.MonoTraversable.MonoFunctor (Data.Sequence.Internal.ViewL a)
 instance Data.MonoTraversable.MonoFunctor (Data.Sequence.Internal.ViewR a)
 instance Data.MonoTraversable.MonoFunctor (Data.IntMap.Internal.IntMap a)
-instance Data.MonoTraversable.MonoFunctor (Data.Semigroup.Option a)
 instance Data.MonoTraversable.MonoFunctor (GHC.Base.NonEmpty a)
 instance Data.MonoTraversable.MonoFunctor (Data.Functor.Identity.Identity a)
 instance Data.MonoTraversable.MonoFunctor (r -> a)
@@ -650,7 +646,7 @@ module Data.Containers
 class (Monoid set, Semigroup set, MonoFoldable set, Eq (ContainerKey set), GrowingAppend set) => SetContainer set where {
     
     -- | The type of the key
-    type family ContainerKey set;
+    type ContainerKey set;
 }
 
 -- | Check if there is a value with the supplied key in the container.
@@ -691,7 +687,7 @@ intersectionWithMap :: PolyMap map => (value1 -> value2 -> value3) -> map value1
 
 -- | A <tt>Map</tt> type polymorphic in both its key and value.
 class BiPolyMap map where {
-    type family BPMKeyConstraint map key :: Constraint;
+    type BPMKeyConstraint map key :: Constraint;
 }
 mapKeysWith :: (BiPolyMap map, BPMKeyConstraint map k1, BPMKeyConstraint map k2) => (v -> v -> v) -> (k1 -> k2) -> map k1 v -> map k2 v
 
@@ -700,7 +696,7 @@ class (MonoTraversable map, SetContainer map) => IsMap map where {
     
     -- | In some cases, <a>MapValue</a> and <a>Element</a> will be different,
     --   e.g., the <a>IsMap</a> instance of associated lists.
-    type family MapValue map;
+    type MapValue map;
 }
 
 -- | Look up a value in a map with a specified key.
@@ -853,7 +849,7 @@ ounzip :: MonoZip mono => [(Element mono, Element mono)] -> (mono, mono)
 class SetContainer set => HasKeysSet set where {
     
     -- | Type of the key set.
-    type family KeySet set;
+    type KeySet set;
 }
 
 -- | Convert a map into a set of its keys.
@@ -1016,7 +1012,7 @@ module Data.Sequences
 class (Integral (Index seq), GrowingAppend seq) => SemiSequence seq where {
     
     -- | The type of the index of a sequence.
-    type family Index seq;
+    type Index seq;
 }
 
 -- | <a>intersperse</a> takes an element and intersperses that element

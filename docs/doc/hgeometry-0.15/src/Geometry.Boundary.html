@@ -14,14 +14,8 @@
 </span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="hs-comment">-- | The boundary of a geometric object.</span><span>
-</span><span id="line-17"></span><span class="hs-keyword">newtype</span><span> </span><span id="Boundary"><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span></span><span> </span><span id="local-6989586621680029704"><span class="annot"><a href="#local-6989586621680029704"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Boundary"><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621680029704"><span class="hs-identifier hs-type">g</span></a></span><span>
-</span><span id="line-18"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680029695"><span id="local-6989586621680029697"><span id="local-6989586621680029699"><span class="annot"><span class="annottext">Int -&gt; Boundary g -&gt; ShowS
-[Boundary g] -&gt; ShowS
-Boundary g -&gt; String
-(Int -&gt; Boundary g -&gt; ShowS)
--&gt; (Boundary g -&gt; String)
--&gt; ([Boundary g] -&gt; ShowS)
--&gt; Show (Boundary g)
+</span><span id="line-17"></span><span class="hs-keyword">newtype</span><span> </span><span id="Boundary"><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span></span><span> </span><span id="local-6989586621680119082"><span class="annot"><a href="#local-6989586621680119082"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Boundary"><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621680119082"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-18"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680118951"><span id="local-6989586621680118953"><span id="local-6989586621680118958"><span class="annot"><span class="annottext">Int -&gt; Boundary g -&gt; ShowS
 forall g. Show g =&gt; Int -&gt; Boundary g -&gt; ShowS
 forall g. Show g =&gt; [Boundary g] -&gt; ShowS
 forall g. Show g =&gt; Boundary g -&gt; String
@@ -33,26 +27,14 @@ show :: Boundary g -&gt; String
 $cshow :: forall g. Show g =&gt; Boundary g -&gt; String
 showsPrec :: Int -&gt; Boundary g -&gt; ShowS
 $cshowsPrec :: forall g. Show g =&gt; Int -&gt; Boundary g -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029690"><span id="local-6989586621680029692"><span class="annot"><span class="annottext">Boundary g -&gt; Boundary g -&gt; Bool
-(Boundary g -&gt; Boundary g -&gt; Bool)
--&gt; (Boundary g -&gt; Boundary g -&gt; Bool) -&gt; Eq (Boundary g)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118943"><span id="local-6989586621680118947"><span class="annot"><span class="annottext">Boundary g -&gt; Boundary g -&gt; Bool
 forall g. Eq g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Boundary g -&gt; Boundary g -&gt; Bool
 $c/= :: forall g. Eq g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
 == :: Boundary g -&gt; Boundary g -&gt; Bool
 $c== :: forall g. Eq g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029674"><span id="local-6989586621680029676"><span id="local-6989586621680029678"><span id="local-6989586621680029680"><span id="local-6989586621680029682"><span id="local-6989586621680029684"><span id="local-6989586621680029686"><span class="annot"><span class="annottext">Eq (Boundary g)
-Eq (Boundary g)
--&gt; (Boundary g -&gt; Boundary g -&gt; Ordering)
--&gt; (Boundary g -&gt; Boundary g -&gt; Bool)
--&gt; (Boundary g -&gt; Boundary g -&gt; Bool)
--&gt; (Boundary g -&gt; Boundary g -&gt; Bool)
--&gt; (Boundary g -&gt; Boundary g -&gt; Bool)
--&gt; (Boundary g -&gt; Boundary g -&gt; Boundary g)
--&gt; (Boundary g -&gt; Boundary g -&gt; Boundary g)
--&gt; Ord (Boundary g)
-Boundary g -&gt; Boundary g -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118909"><span id="local-6989586621680118913"><span id="local-6989586621680118917"><span id="local-6989586621680118921"><span id="local-6989586621680118925"><span id="local-6989586621680118929"><span id="local-6989586621680118933"><span class="annot"><span class="annottext">Boundary g -&gt; Boundary g -&gt; Bool
 Boundary g -&gt; Boundary g -&gt; Ordering
 Boundary g -&gt; Boundary g -&gt; Boundary g
 forall a.
@@ -65,7 +47,7 @@ Eq a
 -&gt; (a -&gt; a -&gt; a)
 -&gt; (a -&gt; a -&gt; a)
 -&gt; Ord a
-forall g. Ord g =&gt; Eq (Boundary g)
+forall {g}. Ord g =&gt; Eq (Boundary g)
 forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
 forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Ordering
 forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Boundary g
@@ -83,16 +65,9 @@ $c&lt;= :: forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
 $c&lt; :: forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Bool
 compare :: Boundary g -&gt; Boundary g -&gt; Ordering
 $ccompare :: forall g. Ord g =&gt; Boundary g -&gt; Boundary g -&gt; Ordering
-$cp1Ord :: forall g. Ord g =&gt; Eq (Boundary g)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029665"><span id="local-6989586621680029667"><span id="local-6989586621680029669"><span id="local-6989586621680029671"><span class="annot"><span class="annottext">ReadPrec [Boundary g]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118890"><span id="local-6989586621680118897"><span id="local-6989586621680118900"><span id="local-6989586621680118902"><span class="annot"><span class="annottext">ReadPrec [Boundary g]
 ReadPrec (Boundary g)
-Int -&gt; ReadS (Boundary g)
 ReadS [Boundary g]
-(Int -&gt; ReadS (Boundary g))
--&gt; ReadS [Boundary g]
--&gt; ReadPrec (Boundary g)
--&gt; ReadPrec [Boundary g]
--&gt; Read (Boundary g)
 forall g. Read g =&gt; ReadPrec [Boundary g]
 forall g. Read g =&gt; ReadPrec (Boundary g)
 forall g. Read g =&gt; Int -&gt; ReadS (Boundary g)
@@ -108,11 +83,8 @@ readList :: ReadS [Boundary g]
 $creadList :: forall g. Read g =&gt; ReadS [Boundary g]
 readsPrec :: Int -&gt; ReadS (Boundary g)
 $creadsPrec :: forall g. Read g =&gt; Int -&gt; ReadS (Boundary g)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029662"><span class="annot"><span class="annottext">Transformation (Dimension (Boundary g)) (NumType (Boundary g))
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118885"><span class="annot"><span class="annottext">Transformation (Dimension (Boundary g)) (NumType (Boundary g))
 -&gt; Boundary g -&gt; Boundary g
-(Transformation (Dimension (Boundary g)) (NumType (Boundary g))
- -&gt; Boundary g -&gt; Boundary g)
--&gt; IsTransformable (Boundary g)
 forall g.
 IsTransformable g =&gt;
 Transformation (Dimension (Boundary g)) (NumType (Boundary g))
@@ -127,41 +99,16 @@ IsTransformable g =&gt;
 Transformation (Dimension (Boundary g)) (NumType (Boundary g))
 -&gt; Boundary g -&gt; Boundary g
 </span><a href="Geometry.Transformation.Internal.html#C%3AIsTransformable"><span class="hs-identifier hs-var hs-var hs-var hs-var">IsTransformable</span></a></span></span><span>
-</span><span id="line-19"></span><span>                            </span><span class="hs-special">,</span><span id="local-6989586621680029657"><span id="local-6989586621680029659"><span class="annot"><span class="annottext">a -&gt; Boundary b -&gt; Boundary a
-(a -&gt; b) -&gt; Boundary a -&gt; Boundary b
-(forall a b. (a -&gt; b) -&gt; Boundary a -&gt; Boundary b)
--&gt; (forall a b. a -&gt; Boundary b -&gt; Boundary a) -&gt; Functor Boundary
-forall a b. a -&gt; Boundary b -&gt; Boundary a
+</span><span id="line-19"></span><span>                            </span><span class="hs-special">,</span><span id="local-6989586621680118876"><span id="local-6989586621680118878"><span class="annot"><span class="annottext">forall a b. a -&gt; Boundary b -&gt; Boundary a
 forall a b. (a -&gt; b) -&gt; Boundary a -&gt; Boundary b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-&lt;$ :: a -&gt; Boundary b -&gt; Boundary a
+&lt;$ :: forall a b. a -&gt; Boundary b -&gt; Boundary a
 $c&lt;$ :: forall a b. a -&gt; Boundary b -&gt; Boundary a
-fmap :: (a -&gt; b) -&gt; Boundary a -&gt; Boundary b
+fmap :: forall a b. (a -&gt; b) -&gt; Boundary a -&gt; Boundary b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Boundary a -&gt; Boundary b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029622"><span id="local-6989586621680029624"><span id="local-6989586621680029626"><span id="local-6989586621680029628"><span id="local-6989586621680029630"><span id="local-6989586621680029632"><span id="local-6989586621680029634"><span id="local-6989586621680029636"><span id="local-6989586621680029638"><span id="local-6989586621680029640"><span id="local-6989586621680029642"><span id="local-6989586621680029644"><span id="local-6989586621680029646"><span id="local-6989586621680029648"><span id="local-6989586621680029650"><span id="local-6989586621680029652"><span id="local-6989586621680029654"><span class="annot"><span class="annottext">Boundary a -&gt; Bool
-(a -&gt; m) -&gt; Boundary a -&gt; m
-(a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
-(forall m. Monoid m =&gt; Boundary m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a)
--&gt; (forall a. Boundary a -&gt; [a])
--&gt; (forall a. Boundary a -&gt; Bool)
--&gt; (forall a. Boundary a -&gt; Int)
--&gt; (forall a. Eq a =&gt; a -&gt; Boundary a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; Boundary a -&gt; a)
--&gt; (forall a. Ord a =&gt; Boundary a -&gt; a)
--&gt; (forall a. Num a =&gt; Boundary a -&gt; a)
--&gt; (forall a. Num a =&gt; Boundary a -&gt; a)
--&gt; Foldable Boundary
-forall a. Eq a =&gt; a -&gt; Boundary a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118839"><span id="local-6989586621680118841"><span id="local-6989586621680118843"><span id="local-6989586621680118845"><span id="local-6989586621680118847"><span id="local-6989586621680118849"><span id="local-6989586621680118851"><span id="local-6989586621680118853"><span id="local-6989586621680118855"><span id="local-6989586621680118857"><span id="local-6989586621680118859"><span id="local-6989586621680118861"><span id="local-6989586621680118863"><span id="local-6989586621680118865"><span id="local-6989586621680118867"><span id="local-6989586621680118870"><span id="local-6989586621680118872"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; Boundary a -&gt; Bool
 forall a. Num a =&gt; Boundary a -&gt; a
 forall a. Ord a =&gt; Boundary a -&gt; a
 forall m. Monoid m =&gt; Boundary m -&gt; m
@@ -191,58 +138,42 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-product :: Boundary a -&gt; a
+product :: forall a. Num a =&gt; Boundary a -&gt; a
 $cproduct :: forall a. Num a =&gt; Boundary a -&gt; a
-sum :: Boundary a -&gt; a
+sum :: forall a. Num a =&gt; Boundary a -&gt; a
 $csum :: forall a. Num a =&gt; Boundary a -&gt; a
-minimum :: Boundary a -&gt; a
+minimum :: forall a. Ord a =&gt; Boundary a -&gt; a
 $cminimum :: forall a. Ord a =&gt; Boundary a -&gt; a
-maximum :: Boundary a -&gt; a
+maximum :: forall a. Ord a =&gt; Boundary a -&gt; a
 $cmaximum :: forall a. Ord a =&gt; Boundary a -&gt; a
-elem :: a -&gt; Boundary a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Boundary a -&gt; Bool
 $celem :: forall a. Eq a =&gt; a -&gt; Boundary a -&gt; Bool
-length :: Boundary a -&gt; Int
+length :: forall a. Boundary a -&gt; Int
 $clength :: forall a. Boundary a -&gt; Int
-null :: Boundary a -&gt; Bool
+null :: forall a. Boundary a -&gt; Bool
 $cnull :: forall a. Boundary a -&gt; Bool
-toList :: Boundary a -&gt; [a]
+toList :: forall a. Boundary a -&gt; [a]
 $ctoList :: forall a. Boundary a -&gt; [a]
-foldl1 :: (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
 $cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
-foldr1 :: (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
 $cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Boundary a -&gt; a
-foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
 $cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
-foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
 $cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
-foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
 $cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
-foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
 $cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Boundary a -&gt; b
-foldMap' :: (a -&gt; m) -&gt; Boundary a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m
 $cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m
-foldMap :: (a -&gt; m) -&gt; Boundary a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Boundary a -&gt; m
-fold :: Boundary m -&gt; m
+fold :: forall m. Monoid m =&gt; Boundary m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Boundary m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029611"><span id="local-6989586621680029613"><span id="local-6989586621680029615"><span id="local-6989586621680029617"><span class="annot"><span class="annottext">Functor Boundary
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118823"><span id="local-6989586621680118825"><span id="local-6989586621680118827"><span id="local-6989586621680118832"><span class="annot"><span class="annottext">Functor Boundary
 Foldable Boundary
-Functor Boundary
--&gt; Foldable Boundary
--&gt; (forall (f :: * -&gt; *) a b.
-    Applicative f =&gt;
-    (a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b))
--&gt; (forall (f :: * -&gt; *) a.
-    Applicative f =&gt;
-    Boundary (f a) -&gt; f (Boundary a))
--&gt; (forall (m :: * -&gt; *) a b.
-    Monad m =&gt;
-    (a -&gt; m b) -&gt; Boundary a -&gt; m (Boundary b))
--&gt; (forall (m :: * -&gt; *) a.
-    Monad m =&gt;
-    Boundary (m a) -&gt; m (Boundary a))
--&gt; Traversable Boundary
-(a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b)
 forall (t :: * -&gt; *).
 Functor t
 -&gt; Foldable t
@@ -265,49 +196,46 @@ Monad m =&gt;
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b)
-sequence :: Boundary (m a) -&gt; m (Boundary a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Boundary (m a) -&gt; m (Boundary a)
 $csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Boundary (m a) -&gt; m (Boundary a)
-mapM :: (a -&gt; m b) -&gt; Boundary a -&gt; m (Boundary b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Boundary a -&gt; m (Boundary b)
 $cmapM :: forall (m :: * -&gt; *) a b.
 Monad m =&gt;
 (a -&gt; m b) -&gt; Boundary a -&gt; m (Boundary b)
-sequenceA :: Boundary (f a) -&gt; f (Boundary a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Boundary (f a) -&gt; f (Boundary a)
 $csequenceA :: forall (f :: * -&gt; *) a.
 Applicative f =&gt;
 Boundary (f a) -&gt; f (Boundary a)
-traverse :: (a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b)
 $ctraverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Boundary a -&gt; f (Boundary b)
-$cp2Traversable :: Foldable Boundary
-$cp1Traversable :: Functor Boundary
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-20"></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span id="local-6989586621680029609"><span class="annot"><a href="#local-6989586621680029609"><span class="hs-identifier hs-type hs-type">g</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680029609"><span class="hs-identifier hs-type">g</span></a></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span id="local-6989586621680029608"><span class="annot"><a href="#local-6989586621680029608"><span class="hs-identifier hs-type hs-type">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680029608"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span> </span><span id="local-6989586621680118820"><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680118820"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680118820"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621680118819"><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680118819"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680118819"><span class="hs-identifier hs-type">g</span></a></span><span>
 </span><span id="line-23"></span><span>
 </span><span id="line-24"></span><span class="hs-comment">-- | Iso for converting between things with a boundary and without its boundary</span><span>
-</span><span id="line-25"></span><span id="local-6989586621680029606"><span id="local-6989586621680029607"><span class="annot"><a href="Geometry.Boundary.html#_Boundary"><span class="hs-identifier hs-type">_Boundary</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Iso</span></span><span> </span><span class="annot"><a href="#local-6989586621680029607"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680029606"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680029607"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680029606"><span class="hs-identifier hs-type">h</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-26"></span><span id="_Boundary"><span class="annot"><span class="annottext">_Boundary :: p (Boundary g) (f (Boundary h)) -&gt; p g (f h)
-</span><a href="Geometry.Boundary.html#_Boundary"><span class="hs-identifier hs-var hs-var">_Boundary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(g -&gt; Boundary g)
--&gt; (Boundary h -&gt; h) -&gt; Iso g h (Boundary g) (Boundary h)
-forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
-</span><span class="hs-identifier hs-var">iso</span></span><span> </span><span class="annot"><span class="annottext">g -&gt; Boundary g
-forall g. g -&gt; Boundary g
-</span><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span id="local-6989586621680029604"><span class="annot"><span class="annottext">h
-</span><a href="#local-6989586621680029604"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">h
-</span><a href="#local-6989586621680029604"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span id="local-6989586621680119024"><span id="local-6989586621680119025"><span class="annot"><a href="Geometry.Boundary.html#_Boundary"><span class="hs-identifier hs-type">_Boundary</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Iso</span></span><span> </span><span class="annot"><a href="#local-6989586621680119025"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680119024"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680119025"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680119024"><span class="hs-identifier hs-type">h</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-26"></span><span id="_Boundary"><span class="annot"><span class="annottext">_Boundary :: forall g h. Iso g h (Boundary g) (Boundary h)
+</span><a href="Geometry.Boundary.html#_Boundary"><span class="hs-identifier hs-var hs-var">_Boundary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
+</span><span class="hs-identifier hs-var">iso</span></span><span> </span><span class="annot"><span class="annottext">forall g. g -&gt; Boundary g
+</span><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span id="local-6989586621680118813"><span class="annot"><span class="annottext">h
+</span><a href="#local-6989586621680118813"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">h
+</span><a href="#local-6989586621680118813"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-27"></span><span>
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span class="hs-comment">-- | Result of a query that asks if something is Inside a g, *on* the boundary</span><span>
 </span><span id="line-30"></span><span class="hs-comment">-- of the g, or outside.</span><span>
-</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="PointLocationResult"><span class="annot"><a href="Geometry.Boundary.html#PointLocationResult"><span class="hs-identifier hs-var">PointLocationResult</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Inside"><span class="annot"><a href="Geometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="OnBoundary"><span class="annot"><a href="Geometry.Boundary.html#OnBoundary"><span class="hs-identifier hs-var">OnBoundary</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Outside"><span class="annot"><a href="Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680029595"><span id="local-6989586621680029597"><span id="local-6989586621680029599"><span class="annot"><span class="annottext">Int -&gt; PointLocationResult -&gt; ShowS
+</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="PointLocationResult"><span class="annot"><a href="Geometry.Boundary.html#PointLocationResult"><span class="hs-identifier hs-var">PointLocationResult</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Inside"><span class="annot"><a href="Geometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="OnBoundary"><span class="annot"><a href="Geometry.Boundary.html#OnBoundary"><span class="hs-identifier hs-var">OnBoundary</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Outside"><span class="annot"><a href="Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680118804"><span id="local-6989586621680118806"><span id="local-6989586621680118808"><span class="annot"><span class="annottext">Int -&gt; PointLocationResult -&gt; ShowS
 [PointLocationResult] -&gt; ShowS
 PointLocationResult -&gt; String
-(Int -&gt; PointLocationResult -&gt; ShowS)
--&gt; (PointLocationResult -&gt; String)
--&gt; ([PointLocationResult] -&gt; ShowS)
--&gt; Show PointLocationResult
 forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
 showList :: [PointLocationResult] -&gt; ShowS
@@ -316,15 +244,10 @@ show :: PointLocationResult -&gt; String
 $cshow :: PointLocationResult -&gt; String
 showsPrec :: Int -&gt; PointLocationResult -&gt; ShowS
 $cshowsPrec :: Int -&gt; PointLocationResult -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029587"><span id="local-6989586621680029589"><span id="local-6989586621680029591"><span id="local-6989586621680029593"><span class="annot"><span class="annottext">ReadPrec [PointLocationResult]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118792"><span id="local-6989586621680118797"><span id="local-6989586621680118800"><span id="local-6989586621680118802"><span class="annot"><span class="annottext">ReadPrec [PointLocationResult]
 ReadPrec PointLocationResult
 Int -&gt; ReadS PointLocationResult
 ReadS [PointLocationResult]
-(Int -&gt; ReadS PointLocationResult)
--&gt; ReadS [PointLocationResult]
--&gt; ReadPrec PointLocationResult
--&gt; ReadPrec [PointLocationResult]
--&gt; Read PointLocationResult
 forall a.
 (Int -&gt; ReadS a)
 -&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
@@ -336,10 +259,7 @@ readList :: ReadS [PointLocationResult]
 $creadList :: ReadS [PointLocationResult]
 readsPrec :: Int -&gt; ReadS PointLocationResult
 $creadsPrec :: Int -&gt; ReadS PointLocationResult
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680029583"><span id="local-6989586621680029585"><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
-(PointLocationResult -&gt; PointLocationResult -&gt; Bool)
--&gt; (PointLocationResult -&gt; PointLocationResult -&gt; Bool)
--&gt; Eq PointLocationResult
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621680118787"><span id="local-6989586621680118789"><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: PointLocationResult -&gt; PointLocationResult -&gt; Bool
 $c/= :: PointLocationResult -&gt; PointLocationResult -&gt; Bool

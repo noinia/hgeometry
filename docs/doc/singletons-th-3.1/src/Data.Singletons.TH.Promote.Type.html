@@ -1,0 +1,386 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Data/Singletons/TH/Promote/Type.hs
+
+(c) Richard Eisenberg 2013
+rae@cs.brynmawr.edu
+
+This file implements promotion of types into kinds.
+-}</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.TH.Promote.Type</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType"><span class="hs-identifier">promoteType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier">promoteType_NC</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType_options"><span class="hs-identifier">promoteType_options</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier">PromoteTypeOptions</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#defaultPromoteTypeOptions"><span class="hs-identifier">defaultPromoteTypeOptions</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteTypeArg_NC"><span class="hs-identifier">promoteTypeArg_NC</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteUnraveled"><span class="hs-identifier">promoteUnraveled</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">when</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">pprint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Names.html"><span class="hs-identifier">Data.Singletons.TH.Names</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html"><span class="hs-identifier">Data.Singletons.TH.Options</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Util.html"><span class="hs-identifier">Data.Singletons.TH.Util</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Promote a 'DType' to the kind level and invoke 'checkVanillaDType'.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- See @Note [Vanilla-type validity checking during promotion]@.</span><span>
+</span><span id="line-26"></span><span id="local-6989586621679302343"><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType"><span class="hs-identifier hs-type">promoteType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302343"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302343"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span></span><span>
+</span><span id="line-27"></span><span id="promoteType"><span class="annot"><span class="annottext">promoteType :: forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType"><span class="hs-identifier hs-var hs-var">promoteType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *).
+OptionsMonad m =&gt;
+PromoteTypeOptions -&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_options"><span class="hs-identifier hs-var">promoteType_options</span></a></span><span> </span><span class="annot"><span class="annottext">PromoteTypeOptions
+</span><a href="Data.Singletons.TH.Promote.Type.html#defaultPromoteTypeOptions"><span class="hs-identifier hs-var">defaultPromoteTypeOptions</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ptoCheckVanilla :: Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoCheckVanilla"><span class="hs-identifier hs-var">ptoCheckVanilla</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | Promote a 'DType' to the kind level. This is suffixed with \&quot;_NC\&quot; because</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- we do not invoke 'checkVanillaDType' here.</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- See @Note [Vanilla-type validity checking during promotion]@.</span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-type">promoteType_NC</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679302278"><span class="annot"><a href="#local-6989586621679302278"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302278"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302278"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span>
+</span><span id="line-33"></span><span id="promoteType_NC"><span class="annot"><span class="annottext">promoteType_NC :: forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var hs-var">promoteType_NC</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *).
+OptionsMonad m =&gt;
+PromoteTypeOptions -&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_options"><span class="hs-identifier hs-var">promoteType_options</span></a></span><span> </span><span class="annot"><span class="annottext">PromoteTypeOptions
+</span><a href="Data.Singletons.TH.Promote.Type.html#defaultPromoteTypeOptions"><span class="hs-identifier hs-var">defaultPromoteTypeOptions</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- | Options for controlling how types are promoted at a fine granularity.</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">data</span><span> </span><span id="PromoteTypeOptions"><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier hs-var">PromoteTypeOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PromoteTypeOptions"><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier hs-var">PromoteTypeOptions</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="ptoCheckVanilla"><span class="annot"><span class="annottext">PromoteTypeOptions -&gt; Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoCheckVanilla"><span class="hs-identifier hs-var hs-var">ptoCheckVanilla</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-comment">-- ^ If 'True', invoke 'checkVanillaDType' on the argument type being</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-comment">--   promoted. See @Note [Vanilla-type validity checking during promotion]@.</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="ptoAllowWildcards"><span class="annot"><span class="annottext">PromoteTypeOptions -&gt; Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoAllowWildcards"><span class="hs-identifier hs-var hs-var">ptoAllowWildcards</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-comment">-- ^ If 'True', allow promoting wildcard types. Otherwise, throw an error.</span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-comment">--   In most places, GHC disallows kind-level wildcard types, so rather</span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-comment">--   than promoting such wildcards and getting an error message from GHC</span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-comment">--   /post facto/, we can catch such wildcards early and give a more</span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-comment">--   descriptive error message instead.</span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679302263"><span id="local-6989586621679302265"><span id="local-6989586621679302272"><span class="annot"><span class="annottext">Int -&gt; PromoteTypeOptions -&gt; ShowS
+[PromoteTypeOptions] -&gt; ShowS
+PromoteTypeOptions -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [PromoteTypeOptions] -&gt; ShowS
+$cshowList :: [PromoteTypeOptions] -&gt; ShowS
+show :: PromoteTypeOptions -&gt; String
+$cshow :: PromoteTypeOptions -&gt; String
+showsPrec :: Int -&gt; PromoteTypeOptions -&gt; ShowS
+$cshowsPrec :: Int -&gt; PromoteTypeOptions -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | The default 'PromoteTypeOptions':</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- * 'checkVanillaDType' is not invoked.</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- * Throw an error when attempting to promote a wildcard type.</span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#defaultPromoteTypeOptions"><span class="hs-identifier hs-type">defaultPromoteTypeOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier hs-type">PromoteTypeOptions</span></a></span><span>
+</span><span id="line-54"></span><span id="defaultPromoteTypeOptions"><span class="annot"><span class="annottext">defaultPromoteTypeOptions :: PromoteTypeOptions
+</span><a href="Data.Singletons.TH.Promote.Type.html#defaultPromoteTypeOptions"><span class="hs-identifier hs-var hs-var">defaultPromoteTypeOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier hs-type">PromoteTypeOptions</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ptoCheckVanilla :: Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoCheckVanilla"><span class="hs-identifier hs-var">ptoCheckVanilla</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ptoAllowWildcards :: Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoAllowWildcards"><span class="hs-identifier hs-var">ptoAllowWildcards</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Promote a 'DType' to the kind level. This is the workhorse for</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- 'promoteType' and 'promoteType_NC'.</span><span>
+</span><span id="line-61"></span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteType_options"><span class="hs-identifier hs-type">promoteType_options</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679302339"><span class="annot"><a href="#local-6989586621679302339"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302339"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#PromoteTypeOptions"><span class="hs-identifier hs-type">PromoteTypeOptions</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302339"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span>
+</span><span id="line-62"></span><span id="promoteType_options"><span class="annot"><span class="annottext">promoteType_options :: forall (m :: * -&gt; *).
+OptionsMonad m =&gt;
+PromoteTypeOptions -&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_options"><span class="hs-identifier hs-var hs-var">promoteType_options</span></a></span></span><span> </span><span id="local-6989586621679302231"><span class="annot"><span class="annottext">PromoteTypeOptions
+</span><a href="#local-6989586621679302231"><span class="hs-identifier hs-var">pto</span></a></span></span><span> </span><span id="local-6989586621679302230"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302230"><span class="hs-identifier hs-var">typ</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-comment">-- See Note [Vanilla-type validity checking during promotion]</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
+</span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PromoteTypeOptions -&gt; Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoCheckVanilla"><span class="hs-identifier hs-var">ptoCheckVanilla</span></a></span><span> </span><span class="annot"><span class="annottext">PromoteTypeOptions
+</span><a href="#local-6989586621679302231"><span class="hs-identifier hs-var">pto</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). MonadFail m =&gt; DType -&gt; m ()
+</span><a href="Data.Singletons.TH.Util.html#checkVanillaDType"><span class="hs-identifier hs-var">checkVanillaDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302230"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302230"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTypeArg</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302339"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span>
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621679302228"><span class="annot"><span class="annottext">go :: [DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DForallT</span></span><span> </span><span id="local-6989586621679302226"><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679302226"><span class="hs-identifier hs-var">tele</span></a></span></span><span> </span><span id="local-6989586621679302225"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302225"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-70"></span><span>      </span><span id="local-6989586621679302224"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302224"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302225"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-71"></span><span>      </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DForallTelescope -&gt; DType -&gt; DType
+</span><span class="hs-identifier hs-var">DForallT</span></span><span> </span><span class="annot"><span class="annottext">DForallTelescope
+</span><a href="#local-6989586621679302226"><span class="hs-identifier hs-var">tele</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302224"><span class="hs-identifier hs-var">ty'</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302223"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302223"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span id="local-6989586621679302222"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302222"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">DForallT</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. [DTypeArg] -&gt; DType -&gt; m a
+</span><a href="#local-6989586621679302221"><span class="hs-identifier hs-var">illegal</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302223"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302222"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-comment">-- We don't need to worry about constraints: they are used to express</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- static guarantees at runtime. But, because we don't need to do</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">-- anything special to keep static guarantees at compile time, we don't</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-comment">-- need to promote them.</span><span>
+</span><span id="line-77"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConstrainedT</span></span><span> </span><span id="local-6989586621679302219"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679302219"><span class="hs-identifier hs-var">_cxt</span></a></span></span><span> </span><span id="local-6989586621679302218"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302218"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302218"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302217"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302217"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span id="local-6989586621679302216"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302216"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">DConstrainedT</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. [DTypeArg] -&gt; DType -&gt; m a
+</span><a href="#local-6989586621679302221"><span class="hs-identifier hs-var">illegal</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302217"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302216"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302215"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302215"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppT</span></span><span> </span><span id="local-6989586621679302213"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302213"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621679302212"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302212"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-80"></span><span>      </span><span id="local-6989586621679302211"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302211"><span class="hs-identifier hs-var">k2</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302212"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-81"></span><span>      </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><span class="hs-identifier hs-var">DTANormal</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302211"><span class="hs-identifier hs-var">k2</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302215"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302213"><span class="hs-identifier hs-var">t1</span></a></span><span>
+</span><span id="line-82"></span><span>       </span><span class="hs-comment">-- NB: This next case means that promoting something like</span><span>
+</span><span id="line-83"></span><span>       </span><span class="hs-comment">--   (((-&gt;) a) :: Type -&gt; Type) b</span><span>
+</span><span id="line-84"></span><span>       </span><span class="hs-comment">-- will fail because the pattern below won't recognize the</span><span>
+</span><span id="line-85"></span><span>       </span><span class="hs-comment">-- arrow to turn it into a TyFun. But I'm not terribly</span><span>
+</span><span id="line-86"></span><span>       </span><span class="hs-comment">-- bothered by this, and it would be annoying to fix. Wait</span><span>
+</span><span id="line-87"></span><span>       </span><span class="hs-comment">-- for someone to report.</span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302209"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302209"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppKindT</span></span><span> </span><span id="local-6989586621679302207"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302207"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621679302206"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302206"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-89"></span><span>      </span><span id="local-6989586621679302205"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302205"><span class="hs-identifier hs-var">ki'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302206"><span class="hs-identifier hs-var">ki</span></a></span><span>
+</span><span id="line-90"></span><span>      </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><span class="hs-identifier hs-var">DTyArg</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302205"><span class="hs-identifier hs-var">ki'</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302209"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302207"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-91"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302203"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302203"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621679302201"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302201"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621679302200"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302200"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-92"></span><span>      </span><span id="local-6989586621679302199"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302199"><span class="hs-identifier hs-var">ty'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; m DType
+</span><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302201"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-93"></span><span>      </span><span class="hs-comment">-- No need to promote 'ki' - it is already a kind.</span><span>
+</span><span id="line-94"></span><span>      </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><span class="hs-identifier hs-var">applyDType</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-identifier hs-var">DSigT</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302199"><span class="hs-identifier hs-var">ty'</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302200"><span class="hs-identifier hs-var">ki</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302203"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302197"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302197"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span id="local-6989586621679302195"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302195"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><span class="hs-identifier hs-var">applyDType</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DVarT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302195"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302197"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302194"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302194"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621679302192"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302192"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-97"></span><span>      </span><span id="local-6989586621679302191"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679302191"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-98"></span><span>      </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><span class="hs-identifier hs-var">applyDType</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#promotedDataTypeOrConName"><span class="hs-identifier hs-var">promotedDataTypeOrConName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679302191"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679302192"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302194"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-99"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTANormal</span></span><span> </span><span id="local-6989586621679302188"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302188"><span class="hs-identifier hs-var">k1</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DTANormal</span></span><span> </span><span id="local-6989586621679302187"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302187"><span class="hs-identifier hs-var">k2</span></a></span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier hs-var">DArrowT</span></span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.TH.Names.html#tyFunArrowName"><span class="hs-identifier hs-var">tyFunArrowName</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302188"><span class="hs-identifier hs-var">k1</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302187"><span class="hs-identifier hs-var">k2</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302184"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302184"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span id="local-6989586621679302183"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302183"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier hs-var">DArrowT</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. [DTypeArg] -&gt; DType -&gt; m a
+</span><a href="#local-6989586621679302221"><span class="hs-identifier hs-var">illegal</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302184"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302183"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>       </span><span id="local-6989586621679302182"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302182"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">DLitT</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302182"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-103"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302180"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302180"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span id="local-6989586621679302179"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302179"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">DLitT</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. [DTypeArg] -&gt; DType -&gt; m a
+</span><a href="#local-6989586621679302221"><span class="hs-identifier hs-var">illegal</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302180"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302179"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="annot"><a href="#local-6989586621679302228"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679302178"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302178"><span class="hs-identifier hs-var">args</span></a></span></span><span>     </span><span id="local-6989586621679302177"><span class="annot"><span class="annottext">ty :: DType
+</span><a href="#local-6989586621679302177"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">DWildCardT</span></span><span class="hs-special">{</span><span class="hs-special">}</span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">PromoteTypeOptions -&gt; Bool
+</span><a href="Data.Singletons.TH.Promote.Type.html#ptoAllowWildcards"><span class="hs-identifier hs-var">ptoAllowWildcards</span></a></span><span> </span><span class="annot"><span class="annottext">PromoteTypeOptions
+</span><a href="#local-6989586621679302231"><span class="hs-identifier hs-var">pto</span></a></span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><span class="hs-identifier hs-var">applyDType</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302177"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302178"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-107"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-108"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
+</span><span class="hs-identifier hs-var">unlines</span></span><span>
+</span><span id="line-109"></span><span>          </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;`singletons-th` does not support wildcard types&quot;</span></span><span>
+</span><span id="line-110"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\tunless they appear in visible type patterns of data constructors&quot;</span></span><span>
+</span><span id="line-111"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\tIn the type: &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">forall a. Ppr a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">pprint</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall th ds. Desugar th ds =&gt; ds -&gt; th
+</span><span class="hs-identifier hs-var">sweeten</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302230"><span class="hs-identifier hs-var">typ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679302317"><span class="annot"><a href="#local-6989586621679302221"><span class="hs-identifier hs-type">illegal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTypeArg</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302339"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302317"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679302221"><span class="annot"><span class="annottext">illegal :: forall a. [DTypeArg] -&gt; DType -&gt; m a
+</span><a href="#local-6989586621679302221"><span class="hs-identifier hs-var hs-var">illegal</span></a></span></span><span> </span><span id="local-6989586621679302166"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302166"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679302165"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302165"><span class="hs-identifier hs-var">hd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
+</span><span class="hs-identifier hs-var">unlines</span></span><span>
+</span><span id="line-116"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Illegal Haskell construct encountered:&quot;</span></span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\theaded by: &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302165"><span class="hs-identifier hs-var">hd</span></a></span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\tapplied to: &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679302166"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-119"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- | Promote a DTypeArg to the kind level. This is suffixed with &quot;_NC&quot; because</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- we do not invoke checkVanillaDType here.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- See @Note [Vanilla-type validity checking during promotion]@.</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679302306"><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteTypeArg_NC"><span class="hs-identifier hs-type">promoteTypeArg_NC</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302306"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DTypeArg</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302306"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DTypeArg</span></span></span><span>
+</span><span id="line-125"></span><span id="promoteTypeArg_NC"><span class="annot"><span class="annottext">promoteTypeArg_NC :: forall (m :: * -&gt; *). OptionsMonad m =&gt; DTypeArg -&gt; m DTypeArg
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteTypeArg_NC"><span class="hs-identifier hs-var hs-var">promoteTypeArg_NC</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTANormal</span></span><span> </span><span id="local-6989586621679302153"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302153"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><span class="hs-identifier hs-var">DTANormal</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var">promoteType_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302153"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteTypeArg_NC"><span class="hs-identifier hs-var">promoteTypeArg_NC</span></a></span><span> </span><span id="local-6989586621679302151"><span class="annot"><span class="annottext">ta :: DTypeArg
+</span><a href="#local-6989586621679302151"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DTyArg</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">DTypeArg
+</span><a href="#local-6989586621679302151"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="hs-comment">-- Kinds are already promoted</span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- | Promote a DType to the kind level, splitting it into its type variable</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- binders, argument types, and result type in the process.</span><span>
+</span><span id="line-130"></span><span id="local-6989586621679302301"><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html#promoteUnraveled"><span class="hs-identifier hs-type">promoteUnraveled</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679302301"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-131"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679302301"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTyVarBndrSpec</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-132"></span><span id="promoteUnraveled"><span class="annot"><span class="annottext">promoteUnraveled :: forall (m :: * -&gt; *).
+OptionsMonad m =&gt;
+DType -&gt; m ([DTyVarBndrSpec], DCxt, DType)
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteUnraveled"><span class="hs-identifier hs-var hs-var">promoteUnraveled</span></a></span></span><span> </span><span id="local-6989586621679302136"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302136"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679302135"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679302135"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302134"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679302134"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679302133"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302133"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *).
+MonadFail m =&gt;
+DType -&gt; m ([DTyVarBndrSpec], DCxt, DCxt, DType)
+</span><a href="Data.Singletons.TH.Util.html#unravelVanillaDType"><span class="hs-identifier hs-var">unravelVanillaDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302136"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679302131"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679302131"><span class="hs-identifier hs-var">arg_kis</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var">promoteType_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679302134"><span class="hs-identifier hs-var">arg_tys</span></a></span><span>
+</span><span id="line-135"></span><span>  </span><span id="local-6989586621679302129"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302129"><span class="hs-identifier hs-var">res_ki</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var">promoteType_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302133"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679302135"><span class="hs-identifier hs-var">tvbs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679302131"><span class="hs-identifier hs-var">arg_kis</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679302129"><span class="hs-identifier hs-var">res_ki</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">{-
+Note [Vanilla-type validity checking during promotion]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We only support promoting (and singling) vanilla types, where a vanilla
+function type is a type that:
+
+1. Only uses a @forall@ at the top level, if used at all. That is to say, it
+   does not contain any nested or higher-rank @forall@s.
+
+2. Only uses a context (e.g., @c =&gt; ...@) at the top level, if used at all,
+   and only after the top-level @forall@ if one is present. That is to say,
+   it does not contain any nested or higher-rank contexts.
+
+3. Contains no visible dependent quantification.
+
+The checkVanillaDType function checks if a type is vanilla. Note that it is
+crucial to call checkVanillaDType on the /entire/ type. For instance, it would
+be incorrect to call unravelVanillaDType and then check each argument type
+individually, since that loses information about which @forall@s/constraints
+are higher-rank.
+
+We make an effort to avoiding calling checkVanillaDType on the same type twice,
+since checkVanillaDType must traverse the entire type. (It would not be
+incorrect to do so, just wasteful.) For this certain, certain functions are
+suffixed with &quot;_NC&quot; (short for &quot;no checking&quot;) to indicate that they do not
+invoke checkVanillaDType. These functions are used on types that have already
+been validity-checked.
+-}</span><span>
+</span><span id="line-166"></span></pre></body></html>

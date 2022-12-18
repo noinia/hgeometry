@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679505533"><span id="local-6989586621679505534"></span></span><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveFoldable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Module      :  Language.Haskell.TH.Desugar.OSet</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Copyright   :  (C) 2016-2018 Daniel Wagner, 2019 Ryan Scott</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- An 'OSet' behaves much like a 'S.Set', with all the same asymptotics, but</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- also remembers the order that values were inserted.</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- This module offers a simplified version of the &quot;Data.Set.Ordered&quot; API</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- that assumes left-biased indices everywhere.</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--</span><span>
+</span><span id="line-22"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier">OSet</span></a></span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Trivial sets</span></span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier">empty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#singleton"><span class="hs-identifier">singleton</span></a></span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Insertion</span></span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#insertPre"><span class="hs-identifier">insertPre</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#insertPost"><span class="hs-identifier">insertPost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#union"><span class="hs-identifier">union</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Query</span></span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#null"><span class="hs-identifier">null</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#size"><span class="hs-identifier">size</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#member"><span class="hs-identifier">member</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#notMember"><span class="hs-identifier">notMember</span></a></span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Deletion</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#delete"><span class="hs-identifier">delete</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#filter"><span class="hs-identifier">filter</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#%5C%5C"><span class="hs-operator">(\\)</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#intersection"><span class="hs-identifier">intersection</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Indexing</span></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Index</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#lookupIndex"><span class="hs-identifier">lookupIndex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#lookupAt"><span class="hs-identifier">lookupAt</span></a></span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><span class="hs-comment">-- * List conversions</span></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#fromList"><span class="hs-identifier">fromList</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#toAscList"><span class="hs-identifier">toAscList</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><span class="hs-comment">-- * 'Set' conversion</span></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#toSet"><span class="hs-identifier">toSet</span></a></span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Set</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set.Ordered</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bias</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Index</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set.Ordered</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OS</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OMap.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.OMap</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">filter</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">null</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4,8,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Foldable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Foldable</span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Monoid</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Semigroup</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Semigroup</span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | An ordered set whose 'insertPre', 'insertPost', 'intersection', and 'union'</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- operations are biased towards leftmost indices when when breaking ties</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- between keys.</span><span>
+</span><span id="line-61"></span><span class="hs-keyword">newtype</span><span> </span><span id="OSet"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-var">OSet</span></a></span></span><span> </span><span id="local-6989586621679505714"><span class="annot"><a href="#local-6989586621679505714"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OSet"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-var">OSet</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bias</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">L</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505714"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679505470"><span id="local-6989586621679505472"><span id="local-6989586621679505474"><span id="local-6989586621679505476"><span id="local-6989586621679505478"><span id="local-6989586621679505480"><span id="local-6989586621679505482"><span id="local-6989586621679505484"><span id="local-6989586621679505486"><span id="local-6989586621679505492"><span id="local-6989586621679505494"><span id="local-6989586621679505496"><span id="local-6989586621679505501"><span id="local-6989586621679505507"><span class="annot"><span class="annottext">OSet a -&gt; DataType
+OSet a -&gt; Constr
+forall {a}. (Data a, Ord a) =&gt; Typeable (OSet a)
+forall a. (Data a, Ord a) =&gt; OSet a -&gt; DataType
+forall a. (Data a, Ord a) =&gt; OSet a -&gt; Constr
+forall a.
+(Data a, Ord a) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; OSet a -&gt; OSet a
+forall a u.
+(Data a, Ord a) =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; u
+forall a u.
+(Data a, Ord a) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; [u]
+forall a r r'.
+(Data a, Ord a) =&gt;
+(r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+forall a r r'.
+(Data a, Ord a) =&gt;
+(r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+forall a (m :: * -&gt; *).
+(Data a, Ord a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+forall a (m :: * -&gt; *).
+(Data a, Ord a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+forall a (c :: * -&gt; *).
+(Data a, Ord a) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OSet a)
+forall a (c :: * -&gt; *).
+(Data a, Ord a) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OSet a -&gt; c (OSet a)
+forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Ord a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OSet a))
+forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Ord a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OSet a))
+forall a.
+Typeable a
+-&gt; (forall (c :: * -&gt; *).
+    (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+    -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OSet a)
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OSet a -&gt; c (OSet a)
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OSet a))
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+$cgmapMo :: forall a (m :: * -&gt; *).
+(Data a, Ord a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+$cgmapMp :: forall a (m :: * -&gt; *).
+(Data a, Ord a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+$cgmapM :: forall a (m :: * -&gt; *).
+(Data a, Ord a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; OSet a -&gt; m (OSet a)
+gmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; u
+$cgmapQi :: forall a u.
+(Data a, Ord a) =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; u
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; [u]
+$cgmapQ :: forall a u.
+(Data a, Ord a) =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; OSet a -&gt; [u]
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+$cgmapQr :: forall a r r'.
+(Data a, Ord a) =&gt;
+(r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+$cgmapQl :: forall a r r'.
+(Data a, Ord a) =&gt;
+(r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; OSet a -&gt; r
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; OSet a -&gt; OSet a
+$cgmapT :: forall a.
+(Data a, Ord a) =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; OSet a -&gt; OSet a
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OSet a))
+$cdataCast2 :: forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Ord a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c (OSet a))
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OSet a))
+$cdataCast1 :: forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Ord a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (OSet a))
+dataTypeOf :: OSet a -&gt; DataType
+$cdataTypeOf :: forall a. (Data a, Ord a) =&gt; OSet a -&gt; DataType
+toConstr :: OSet a -&gt; Constr
+$ctoConstr :: forall a. (Data a, Ord a) =&gt; OSet a -&gt; Constr
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OSet a)
+$cgunfold :: forall a (c :: * -&gt; *).
+(Data a, Ord a) =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (OSet a)
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OSet a -&gt; c (OSet a)
+$cgfoldl :: forall a (c :: * -&gt; *).
+(Data a, Ord a) =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; OSet a -&gt; c (OSet a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505423"><span id="local-6989586621679505425"><span id="local-6989586621679505427"><span id="local-6989586621679505429"><span id="local-6989586621679505431"><span id="local-6989586621679505433"><span id="local-6989586621679505437"><span id="local-6989586621679505439"><span id="local-6989586621679505441"><span id="local-6989586621679505443"><span id="local-6989586621679505445"><span id="local-6989586621679505447"><span id="local-6989586621679505449"><span id="local-6989586621679505453"><span id="local-6989586621679505455"><span id="local-6989586621679505464"><span id="local-6989586621679505466"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; OSet a -&gt; Bool
+forall a. Num a =&gt; OSet a -&gt; a
+forall a. Ord a =&gt; OSet a -&gt; a
+forall m. Monoid m =&gt; OSet m -&gt; m
+forall a. OSet a -&gt; Bool
+forall a. OSet a -&gt; Int
+forall a. OSet a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; OSet a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OSet a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: forall a. Num a =&gt; OSet a -&gt; a
+$cproduct :: forall a. Num a =&gt; OSet a -&gt; a
+sum :: forall a. Num a =&gt; OSet a -&gt; a
+$csum :: forall a. Num a =&gt; OSet a -&gt; a
+minimum :: forall a. Ord a =&gt; OSet a -&gt; a
+$cminimum :: forall a. Ord a =&gt; OSet a -&gt; a
+maximum :: forall a. Ord a =&gt; OSet a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; OSet a -&gt; a
+elem :: forall a. Eq a =&gt; a -&gt; OSet a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; OSet a -&gt; Bool
+length :: forall a. OSet a -&gt; Int
+$clength :: forall a. OSet a -&gt; Int
+null :: forall a. OSet a -&gt; Bool
+$cnull :: forall a. OSet a -&gt; Bool
+toList :: forall a. OSet a -&gt; [a]
+$ctoList :: forall a. OSet a -&gt; [a]
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; OSet a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; OSet a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; OSet a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; OSet a -&gt; a
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OSet a -&gt; b
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OSet a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OSet a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OSet a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OSet a -&gt; m
+fold :: forall m. Monoid m =&gt; OSet m -&gt; m
+$cfold :: forall m. Monoid m =&gt; OSet m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505413"><span id="local-6989586621679505419"><span class="annot"><span class="annottext">OSet a -&gt; OSet a -&gt; Bool
+forall a. Eq a =&gt; OSet a -&gt; OSet a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: OSet a -&gt; OSet a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; OSet a -&gt; OSet a -&gt; Bool
+== :: OSet a -&gt; OSet a -&gt; Bool
+$c== :: forall a. Eq a =&gt; OSet a -&gt; OSet a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505393"><span id="local-6989586621679505397"><span id="local-6989586621679505402"><span class="annot"><span class="annottext">OSet a
+[OSet a] -&gt; OSet a
+OSet a -&gt; OSet a -&gt; OSet a
+forall {a}. Ord a =&gt; Semigroup (OSet a)
+forall a. Ord a =&gt; OSet a
+forall a. Ord a =&gt; [OSet a] -&gt; OSet a
+forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+forall a.
+Semigroup a -&gt; a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+mconcat :: [OSet a] -&gt; OSet a
+$cmconcat :: forall a. Ord a =&gt; [OSet a] -&gt; OSet a
+mappend :: OSet a -&gt; OSet a -&gt; OSet a
+$cmappend :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+mempty :: OSet a
+$cmempty :: forall a. Ord a =&gt; OSet a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monoid</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505352"><span id="local-6989586621679505357"><span id="local-6989586621679505362"><span id="local-6989586621679505367"><span id="local-6989586621679505372"><span id="local-6989586621679505377"><span id="local-6989586621679505383"><span class="annot"><span class="annottext">OSet a -&gt; OSet a -&gt; Bool
+OSet a -&gt; OSet a -&gt; Ordering
+OSet a -&gt; OSet a -&gt; OSet a
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall {a}. Ord a =&gt; Eq (OSet a)
+forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Bool
+forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Ordering
+forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+min :: OSet a -&gt; OSet a -&gt; OSet a
+$cmin :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+max :: OSet a -&gt; OSet a -&gt; OSet a
+$cmax :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+&gt;= :: OSet a -&gt; OSet a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Bool
+&gt; :: OSet a -&gt; OSet a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Bool
+&lt;= :: OSet a -&gt; OSet a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Bool
+&lt; :: OSet a -&gt; OSet a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Bool
+compare :: OSet a -&gt; OSet a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; Ordering
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505329"><span id="local-6989586621679505338"><span id="local-6989586621679505341"><span id="local-6989586621679505343"><span class="annot"><span class="annottext">ReadPrec [OSet a]
+ReadPrec (OSet a)
+ReadS [OSet a]
+forall a. (Ord a, Read a) =&gt; ReadPrec [OSet a]
+forall a. (Ord a, Read a) =&gt; ReadPrec (OSet a)
+forall a. (Ord a, Read a) =&gt; Int -&gt; ReadS (OSet a)
+forall a. (Ord a, Read a) =&gt; ReadS [OSet a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [OSet a]
+$creadListPrec :: forall a. (Ord a, Read a) =&gt; ReadPrec [OSet a]
+readPrec :: ReadPrec (OSet a)
+$creadPrec :: forall a. (Ord a, Read a) =&gt; ReadPrec (OSet a)
+readList :: ReadS [OSet a]
+$creadList :: forall a. (Ord a, Read a) =&gt; ReadS [OSet a]
+readsPrec :: Int -&gt; ReadS (OSet a)
+$creadsPrec :: forall a. (Ord a, Read a) =&gt; Int -&gt; ReadS (OSet a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679505315"><span id="local-6989586621679505317"><span id="local-6989586621679505324"><span class="annot"><span class="annottext">Int -&gt; OSet a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; OSet a -&gt; ShowS
+forall a. Show a =&gt; [OSet a] -&gt; ShowS
+forall a. Show a =&gt; OSet a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [OSet a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [OSet a] -&gt; ShowS
+show :: OSet a -&gt; String
+$cshow :: forall a. Show a =&gt; OSet a -&gt; String
+showsPrec :: Int -&gt; OSet a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; OSet a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679505307"><span id="local-6989586621679505309"><span id="local-6989586621679505312"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505312"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505312"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679505304"><span class="annot"><span class="annottext">&lt;&gt; :: OSet a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#union"><span class="hs-identifier hs-var">union</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-type">empty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505665"><span class="annot"><a href="#local-6989586621679505665"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505665"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-68"></span><span id="empty"><span class="annot"><span class="annottext">empty :: forall a. OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#empty"><span class="hs-identifier hs-var hs-var">empty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a
+</span><span class="hs-identifier hs-var">OS.empty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505665"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679505659"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#singleton"><span class="hs-identifier hs-type">singleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679505659"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505659"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-71"></span><span id="singleton"><span class="annot"><span class="annottext">singleton :: forall a. a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#singleton"><span class="hs-identifier hs-var hs-var">singleton</span></a></span></span><span> </span><span id="local-6989586621679505300"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505300"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. a -&gt; OSet a
+</span><span class="hs-identifier hs-var">OS.singleton</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505300"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- | The element's index will be lower than the indices of the elements in the</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- 'OSet'.</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679505656"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#insertPre"><span class="hs-identifier hs-type">insertPre</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505656"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679505656"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505656"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505656"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-76"></span><span id="insertPre"><span class="annot"><span class="annottext">insertPre :: forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#insertPre"><span class="hs-identifier hs-var hs-var">insertPre</span></a></span></span><span> </span><span id="local-6989586621679505295"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505295"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505295"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var">OS.|&lt;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | The element's index will be higher than the indices of the elements in the</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- 'OSet'.</span><span>
+</span><span id="line-80"></span><span id="local-6989586621679505653"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#insertPost"><span class="hs-identifier hs-type">insertPost</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505653"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505653"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679505653"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505653"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-81"></span><span id="insertPost"><span class="annot"><span class="annottext">insertPost :: forall a. Ord a =&gt; OSet a -&gt; a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#insertPost"><span class="hs-identifier hs-var hs-var">insertPost</span></a></span></span><span> </span><span id="local-6989586621679505289"><span class="annot"><span class="annottext">OSet a
+</span><a href="#local-6989586621679505289"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679505288"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505288"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="annot"><span class="annottext">OSet a
+</span><a href="#local-6989586621679505289"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; OSet a -&gt; a -&gt; OSet a
+</span><span class="hs-operator hs-var">OS.|&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505288"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#union"><span class="hs-identifier hs-type">union</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505286"><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-84"></span><span id="union"><span class="annot"><span class="annottext">union :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#union"><span class="hs-identifier hs-var hs-var">union</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var">(OS.|&lt;&gt;)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505286"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#null"><span class="hs-identifier hs-type">null</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505281"><span class="annot"><a href="#local-6989586621679505281"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505281"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-87"></span><span id="null"><span class="annot"><span class="annottext">null :: forall a. OSet a -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#null"><span class="hs-identifier hs-var hs-var">null</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a -&gt; Bool
+</span><span class="hs-identifier hs-var">OS.null</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505281"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#size"><span class="hs-identifier hs-type">size</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505278"><span class="annot"><a href="#local-6989586621679505278"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-90"></span><span id="size"><span class="annot"><span class="annottext">size :: forall a. OSet a -&gt; Int
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#size"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a -&gt; Int
+</span><span class="hs-identifier hs-var">OS.size</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span id="local-6989586621679505644"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#member"><span class="hs-identifier hs-type">member</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#notMember"><span class="hs-identifier hs-type">notMember</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505644"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679505644"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505644"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-93"></span><span id="member"><span class="annot"><span class="annottext">member :: forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#member"><span class="hs-identifier hs-var hs-var">member</span></a></span></span><span>    </span><span id="local-6989586621679505272"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505272"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><span class="hs-identifier hs-var">OS.member</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505272"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span id="notMember"><span class="annot"><span class="annottext">notMember :: forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#notMember"><span class="hs-identifier hs-var hs-var">notMember</span></a></span></span><span> </span><span id="local-6989586621679505267"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505267"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; OSet a -&gt; Bool
+</span><span class="hs-identifier hs-var">OS.notMember</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505267"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span id="local-6989586621679505265"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#delete"><span class="hs-identifier hs-type">delete</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505265"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679505265"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505265"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505265"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-97"></span><span id="delete"><span class="annot"><span class="annottext">delete :: forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#delete"><span class="hs-identifier hs-var hs-var">delete</span></a></span></span><span> </span><span id="local-6989586621679505261"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505261"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-identifier hs-var">OS.delete</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505261"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span id="local-6989586621679505639"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#filter"><span class="hs-identifier hs-type">filter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505639"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679505639"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505639"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505639"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-100"></span><span id="filter"><span class="annot"><span class="annottext">filter :: forall a. Ord a =&gt; (a -&gt; Bool) -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#filter"><span class="hs-identifier hs-var hs-var">filter</span></a></span></span><span> </span><span id="local-6989586621679505256"><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679505256"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; (a -&gt; Bool) -&gt; OSet a -&gt; OSet a
+</span><span class="hs-identifier hs-var">OS.filter</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679505256"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#%5C%5C"><span class="hs-operator hs-type">(\\)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505254"><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-103"></span><span id="%5C%5C"><span class="annot"><span class="annottext">\\ :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#%5C%5C"><span class="hs-operator hs-var hs-var">(\\)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var">(OS.\\)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505254"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#intersection"><span class="hs-identifier hs-type">intersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505249"><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-106"></span><span id="intersection"><span class="annot"><span class="annottext">intersection :: forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#intersection"><span class="hs-identifier hs-var hs-var">intersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; OSet a -&gt; OSet a -&gt; OSet a
+</span><span class="hs-operator hs-var">(OS.|/\)</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505249"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679505634"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#lookupIndex"><span class="hs-identifier hs-type">lookupIndex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505634"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679505634"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505634"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Index</span></span></span><span>
+</span><span id="line-109"></span><span id="lookupIndex"><span class="annot"><span class="annottext">lookupIndex :: forall a. Ord a =&gt; a -&gt; OSet a -&gt; Maybe Int
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#lookupIndex"><span class="hs-identifier hs-var hs-var">lookupIndex</span></a></span></span><span> </span><span id="local-6989586621679505241"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505241"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; OSet a -&gt; Maybe Int
+</span><span class="hs-identifier hs-var">OS.findIndex</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679505241"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#lookupAt"><span class="hs-identifier hs-type">lookupAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505631"><span class="annot"><a href="#local-6989586621679505631"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Index</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505631"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679505631"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-112"></span><span id="lookupAt"><span class="annot"><span class="annottext">lookupAt :: forall a. Int -&gt; OSet a -&gt; Maybe a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#lookupAt"><span class="hs-identifier hs-var hs-var">lookupAt</span></a></span></span><span> </span><span id="local-6989586621679505237"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679505237"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679505236"><span class="annot"><span class="annottext">OSet a
+</span><a href="#local-6989586621679505236"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a -&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">OS.elemAt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="annot"><span class="annottext">OSet a
+</span><a href="#local-6989586621679505236"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679505237"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679505631"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span id="local-6989586621679505628"><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#fromList"><span class="hs-identifier hs-type">fromList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679505628"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679505628"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505628"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-115"></span><span id="fromList"><span class="annot"><span class="annottext">fromList :: forall a. Ord a =&gt; [a] -&gt; OSet a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#fromList"><span class="hs-identifier hs-var hs-var">fromList</span></a></span></span><span> </span><span id="local-6989586621679505231"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679505231"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Ord a =&gt; [a] -&gt; OSet a
+</span><span class="hs-identifier hs-var">OS.fromList</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679505231"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#toAscList"><span class="hs-identifier hs-type">toAscList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505229"><span class="annot"><a href="#local-6989586621679505229"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505229"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679505229"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-118"></span><span id="toAscList"><span class="annot"><span class="annottext">toAscList :: forall a. OSet a -&gt; [a]
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#toAscList"><span class="hs-identifier hs-var hs-var">toAscList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a -&gt; [a]
+</span><span class="hs-identifier hs-var">OS.toAscList</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505229"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679505229"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#toSet"><span class="hs-identifier hs-type">toSet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679505623"><span class="annot"><a href="#local-6989586621679505623"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.OSet.html#OSet"><span class="hs-identifier hs-type">OSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679505623"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679505623"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-121"></span><span id="toSet"><span class="annot"><span class="annottext">toSet :: forall a. OSet a -&gt; Set a
+</span><a href="Language.Haskell.TH.Desugar.OSet.html#toSet"><span class="hs-identifier hs-var hs-var">toSet</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">coerce :: forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-type">coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. OSet a -&gt; Set a
+</span><span class="hs-identifier hs-var">OS.toSet</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OS.OSet</span></span><span> </span><span class="annot"><a href="#local-6989586621679505623"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679505623"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span></pre></body></html>

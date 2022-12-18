@@ -540,7 +540,7 @@ instance (Test.QuickCheck.Arbitrary.CoArbitrary a, Test.QuickCheck.Arbitrary.CoA
 instance (Test.QuickCheck.Arbitrary.CoArbitrary a, Test.QuickCheck.Arbitrary.CoArbitrary b, Test.QuickCheck.Arbitrary.CoArbitrary c) => Test.QuickCheck.Arbitrary.CoArbitrary (a, b, c)
 instance (Test.QuickCheck.Arbitrary.CoArbitrary a, Test.QuickCheck.Arbitrary.CoArbitrary b, Test.QuickCheck.Arbitrary.CoArbitrary c, Test.QuickCheck.Arbitrary.CoArbitrary d) => Test.QuickCheck.Arbitrary.CoArbitrary (a, b, c, d)
 instance (Test.QuickCheck.Arbitrary.CoArbitrary a, Test.QuickCheck.Arbitrary.CoArbitrary b, Test.QuickCheck.Arbitrary.CoArbitrary c, Test.QuickCheck.Arbitrary.CoArbitrary d, Test.QuickCheck.Arbitrary.CoArbitrary e) => Test.QuickCheck.Arbitrary.CoArbitrary (a, b, c, d, e)
-instance Test.QuickCheck.Arbitrary.CoArbitrary GHC.Integer.Type.Integer
+instance Test.QuickCheck.Arbitrary.CoArbitrary GHC.Num.Integer.Integer
 instance Test.QuickCheck.Arbitrary.CoArbitrary GHC.Types.Int
 instance Test.QuickCheck.Arbitrary.CoArbitrary GHC.Int.Int8
 instance Test.QuickCheck.Arbitrary.CoArbitrary GHC.Int.Int16
@@ -635,7 +635,7 @@ instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbit
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbitrary b, Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary d, Test.QuickCheck.Arbitrary.Arbitrary e, Test.QuickCheck.Arbitrary.Arbitrary f, Test.QuickCheck.Arbitrary.Arbitrary g, Test.QuickCheck.Arbitrary.Arbitrary h) => Test.QuickCheck.Arbitrary.Arbitrary (a, b, c, d, e, f, g, h)
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbitrary b, Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary d, Test.QuickCheck.Arbitrary.Arbitrary e, Test.QuickCheck.Arbitrary.Arbitrary f, Test.QuickCheck.Arbitrary.Arbitrary g, Test.QuickCheck.Arbitrary.Arbitrary h, Test.QuickCheck.Arbitrary.Arbitrary i) => Test.QuickCheck.Arbitrary.Arbitrary (a, b, c, d, e, f, g, h, i)
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbitrary b, Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary d, Test.QuickCheck.Arbitrary.Arbitrary e, Test.QuickCheck.Arbitrary.Arbitrary f, Test.QuickCheck.Arbitrary.Arbitrary g, Test.QuickCheck.Arbitrary.Arbitrary h, Test.QuickCheck.Arbitrary.Arbitrary i, Test.QuickCheck.Arbitrary.Arbitrary j) => Test.QuickCheck.Arbitrary.Arbitrary (a, b, c, d, e, f, g, h, i, j)
-instance Test.QuickCheck.Arbitrary.Arbitrary GHC.Integer.Type.Integer
+instance Test.QuickCheck.Arbitrary.Arbitrary GHC.Num.Integer.Integer
 instance Test.QuickCheck.Arbitrary.Arbitrary GHC.Types.Int
 instance Test.QuickCheck.Arbitrary.Arbitrary GHC.Int.Int8
 instance Test.QuickCheck.Arbitrary.Arbitrary GHC.Int.Int16
@@ -1199,7 +1199,7 @@ instance (Test.QuickCheck.Function.Function a, Test.QuickCheck.Function.Function
 instance Test.QuickCheck.Function.Function a => Test.QuickCheck.Function.Function [a]
 instance Test.QuickCheck.Function.Function a => Test.QuickCheck.Function.Function (GHC.Maybe.Maybe a)
 instance Test.QuickCheck.Function.Function GHC.Types.Bool
-instance Test.QuickCheck.Function.Function GHC.Integer.Type.Integer
+instance Test.QuickCheck.Function.Function GHC.Num.Integer.Integer
 instance Test.QuickCheck.Function.Function GHC.Types.Int
 instance Test.QuickCheck.Function.Function GHC.Types.Word
 instance Test.QuickCheck.Function.Function GHC.Types.Char

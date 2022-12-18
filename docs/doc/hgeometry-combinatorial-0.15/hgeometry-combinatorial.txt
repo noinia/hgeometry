@@ -52,10 +52,10 @@ binarySearchUntil :: (Fractional r, Ord r) => r -> (r -> Bool) -> r -> r -> r
 class BinarySearch v where {
     
     -- | The type of the elements of the container
-    type family Elem v :: Type;
+    type Elem v :: Type;
     
     -- | The type of indices used in the container.
-    type family Index v :: Type;
+    type Index v :: Type;
 }
 
 -- | Given a monotonic predicate p and a data structure v, find the element
@@ -610,8 +610,8 @@ pattern AsA :: t :~ c => c -> t
 
 -- | Types that can be decomposed into an Ext
 class AsExt t where {
-    type family CoreOf t;
-    type family ExtraOf t;
+    type CoreOf t;
+    type ExtraOf t;
 }
 
 -- | Convert between this type and an Ext
@@ -1145,18 +1145,18 @@ instance GHC.Read.Read a => GHC.Read.Read (Data.LSeq.LSeq n a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.LSeq.LSeq n a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.LSeq.ViewL n a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.LSeq.ViewR n a)
-instance GHC.Base.Semigroup (Data.LSeq.ViewR n a)
+instance (n GHC.Types.~ (1 GHC.TypeNats.+ n0)) => GHC.Base.Semigroup (Data.LSeq.ViewR n a)
 instance GHC.Base.Functor (Data.LSeq.ViewR n)
 instance Data.Foldable.Foldable (Data.LSeq.ViewR n)
 instance Data.Traversable.Traversable (Data.LSeq.ViewR n)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.LSeq.ViewR n a)
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.LSeq.ViewR n a)
-instance GHC.Base.Semigroup (Data.LSeq.ViewL n a)
+instance (n GHC.Types.~ (1 GHC.TypeNats.+ n0)) => GHC.Base.Semigroup (Data.LSeq.ViewL n a)
 instance GHC.Base.Functor (Data.LSeq.ViewL n)
 instance Data.Foldable.Foldable (Data.LSeq.ViewL n)
 instance Data.Traversable.Traversable (Data.LSeq.ViewL n)
-instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Foldable.Class.Foldable1 (Data.LSeq.ViewL n)
-instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Traversable.Class.Traversable1 (Data.LSeq.ViewL n)
+instance (1 Data.Type.Ord.<= n) => Data.Semigroup.Foldable.Class.Foldable1 (Data.LSeq.ViewL n)
+instance (1 Data.Type.Ord.<= n) => Data.Semigroup.Traversable.Class.Traversable1 (Data.LSeq.ViewL n)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.LSeq.ViewL n a)
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.LSeq.ViewL n a)
 instance GHC.Base.Semigroup (Data.LSeq.LSeq n a)
@@ -1165,8 +1165,8 @@ instance (GHC.TypeNats.KnownNat n, Test.QuickCheck.Arbitrary.Arbitrary a) => Tes
 instance Data.Aeson.Types.ToJSON.ToJSON a => Data.Aeson.Types.ToJSON.ToJSON (Data.LSeq.LSeq n a)
 instance Data.Aeson.Types.FromJSON.FromJSON a => Data.Aeson.Types.FromJSON.FromJSON (Data.LSeq.LSeq n a)
 instance Control.Lens.At.Ixed (Data.LSeq.LSeq n a)
-instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Foldable.Class.Foldable1 (Data.LSeq.LSeq n)
-instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Traversable.Class.Traversable1 (Data.LSeq.LSeq n)
+instance (1 Data.Type.Ord.<= n) => Data.Semigroup.Foldable.Class.Foldable1 (Data.LSeq.LSeq n)
+instance (1 Data.Type.Ord.<= n) => Data.Semigroup.Traversable.Class.Traversable1 (Data.LSeq.LSeq n)
 
 
 module Data.List.Alternating
@@ -1620,7 +1620,7 @@ module Data.Permutation
 -- | Cyclic representation of a permutation.
 data Permutation a
 Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
-orbits :: forall a_avNq a_avX0. Lens (Permutation a_avNq) (Permutation a_avX0) (Vector (Orbit a_avNq)) (Vector (Orbit a_avX0))
+orbits :: forall a_awiY a_awq0. Lens (Permutation a_awiY) (Permutation a_awq0) (Vector (Orbit a_awiY)) (Vector (Orbit a_awq0))
 
 -- | This allows you to filter an <a>IndexedFold</a>, <a>IndexedGetter</a>,
 --   <a>IndexedTraversal</a> or <a>IndexedLens</a> based on a predicate on
@@ -2354,7 +2354,7 @@ prevIncidentEdgeFrom :: Dart s -> PlanarGraph s w v e f -> Dart s
 
 -- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where {
-    type family DataOf g i;
+    type DataOf g i;
 }
 
 -- | get the data associated with the value i.
@@ -3694,9 +3694,9 @@ instance GHC.Base.Functor v => GHC.Base.Functor (HGeometry.Cyclic.Cyclic v)
 instance Data.Semigroup.Foldable.Class.Foldable1 v => Data.Semigroup.Foldable.Class.Foldable1 (HGeometry.Cyclic.Cyclic v)
 instance Data.Semigroup.Traversable.Class.Traversable1 v => Data.Semigroup.Traversable.Class.Traversable1 (HGeometry.Cyclic.Cyclic v)
 instance Data.Traversable.Traversable v => Data.Traversable.Traversable (HGeometry.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.FunctorWithIndex i v => Control.Lens.Indexed.FunctorWithIndex i (HGeometry.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.FoldableWithIndex i v => Control.Lens.Indexed.FoldableWithIndex i (HGeometry.Cyclic.Cyclic v)
-instance Control.Lens.Indexed.TraversableWithIndex i v => Control.Lens.Indexed.TraversableWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance WithIndex.FunctorWithIndex i v => WithIndex.FunctorWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance WithIndex.FoldableWithIndex i v => WithIndex.FoldableWithIndex i (HGeometry.Cyclic.Cyclic v)
+instance WithIndex.TraversableWithIndex i v => WithIndex.TraversableWithIndex i (HGeometry.Cyclic.Cyclic v)
 instance HGeometry.Foldable.Util.HasFromFoldable v => HGeometry.Foldable.Util.HasFromFoldable (HGeometry.Cyclic.Cyclic v)
 instance HGeometry.Foldable.Util.HasFromFoldable1 v => HGeometry.Foldable.Util.HasFromFoldable1 (HGeometry.Cyclic.Cyclic v)
 instance (Control.Lens.At.Index (v a) GHC.Types.~ GHC.Types.Int, Data.Foldable.Foldable v, Control.Lens.At.Ixed (v a)) => Control.Lens.At.Ixed (HGeometry.Cyclic.Cyclic v a)
@@ -3792,8 +3792,8 @@ module HGeometry.Number.Real.Rational
 --   of decimals behind the period) with which we display the numbers when
 --   printing them (using Show).
 --   
---   If the number cannot be displayed exactly a '~' is printed after the
---   number.
+--   If the number cannot be displayed exactly a <tt>~</tt> is printed
+--   after the number.
 newtype RealNumber (p :: Nat)
 RealNumber :: Rational -> RealNumber (p :: Nat)
 
@@ -3816,8 +3816,11 @@ toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
 -- | Cast a fixed-precision number to a <a>RealNumber</a>.
 fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 
--- | (Kind) This is the kind of type-level natural numbers.
-data Nat
+-- | A type synonym for <a>Natural</a>.
+--   
+--   Prevously, this was an opaque data type, but it was changed to a type
+--   synonym.
+type Nat = Natural
 instance Control.DeepSeq.NFData (HGeometry.Number.Real.Rational.RealNumber p)
 instance Data.Aeson.Types.FromJSON.FromJSON (HGeometry.Number.Real.Rational.RealNumber p)
 instance Data.Aeson.Types.ToJSON.ToJSON (HGeometry.Number.Real.Rational.RealNumber p)
@@ -4052,9 +4055,9 @@ module HGeometry.Vector.NonEmpty.Util
 instance Control.Lens.At.Ixed (Data.Vector.NonEmpty.Internal.NonEmptyVector a)
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Data.Semigroup.Traversable.Class.Traversable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.FunctorWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.FoldableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
-instance Control.Lens.Indexed.TraversableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance WithIndex.FunctorWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance WithIndex.FoldableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance WithIndex.TraversableWithIndex GHC.Types.Int Data.Vector.NonEmpty.Internal.NonEmptyVector
 
 
 -- | Implements Fishyer-Yates shuffle.

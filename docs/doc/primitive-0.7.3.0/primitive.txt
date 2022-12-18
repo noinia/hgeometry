@@ -16,7 +16,7 @@ module Control.Monad.Primitive
 class Monad m => PrimMonad m where {
     
     -- | State token type.
-    type family PrimState m;
+    type PrimState m;
 }
 
 -- | Execute a primitive operation.
@@ -301,11 +301,15 @@ sizeofMutableArray :: MutableArray s a -> Int
 -- | The empty <a>Array</a>.
 emptyArray :: Array a
 
--- | The <a>fromListN</a> function takes the input list's length as a hint.
---   Its behaviour should be equivalent to <a>fromList</a>. The hint can be
---   used to construct the structure <tt>l</tt> more efficiently compared
---   to <a>fromList</a>. If the given hint does not equal to the input
---   list's length the behaviour of <a>fromListN</a> is not specified.
+-- | The <a>fromListN</a> function takes the input list's length and
+--   potentially uses it to construct the structure <tt>l</tt> more
+--   efficiently compared to <a>fromList</a>. If the given number does not
+--   equal to the input list's length the behaviour of <a>fromListN</a> is
+--   not specified.
+--   
+--   <pre>
+--   fromListN (length xs) xs == fromList xs
+--   </pre>
 fromListN :: IsList l => Int -> [Item l] -> l
 
 -- | The <a>fromList</a> function constructs the structure <tt>l</tt> from
@@ -991,8 +995,60 @@ ByteArray :: ByteArray# -> ByteArray
 -- | Mutable byte arrays associated with a primitive state token.
 data MutableByteArray s
 MutableByteArray :: MutableByteArray# s -> MutableByteArray s
-data ByteArray# :: TYPE 'UnliftedRep
-data MutableByteArray# a :: TYPE 'UnliftedRep
+
+-- | A boxed, unlifted datatype representing a region of raw memory in the
+--   garbage-collected heap, which is not scanned for pointers during
+--   garbage collection.
+--   
+--   It is created by freezing a 'MutableByteArray#' with
+--   'unsafeFreezeByteArray#'. Freezing is essentially a no-op, as
+--   MutableByteArray# and ByteArray# share the same heap structure under
+--   the hood.
+--   
+--   The immutable and mutable variants are commonly used for scenarios
+--   requiring high-performance data structures, like Text, Primitive
+--   Vector, Unboxed Array, and ShortByteString.
+--   
+--   Another application of fundamental importance is 'Integer', which is
+--   backed by 'ByteArray#'.
+--   
+--   The representation on the heap of a Byte Array is:
+--   
+--   <pre>
+--   +------------+-----------------+-----------------------+
+--   |            |                 |                       |
+--   |   HEADER   | SIZE (in bytes) |       PAYLOAD         |
+--   |            |                 |                       |
+--   +------------+-----------------+-----------------------+
+--   </pre>
+--   
+--   To obtain a pointer to actual payload (e.g., for FFI purposes) use
+--   'byteArrayContents#' or 'mutableByteArrayContents#'.
+--   
+--   Alternatively, enabling the UnliftedFFITypes extension allows to
+--   mention 'ByteArray#' and 'MutableByteArray#' in FFI type signatures
+--   directly.
+data ByteArray# :: UnliftedType
+
+-- | A mutable ByteAray#. It can be created in three ways:
+--   
+--   <ul>
+--   <li>'newByteArray#': Create an unpinned array.</li>
+--   <li>'newPinnedByteArray#': This will create a pinned array,</li>
+--   <li>'newAlignedPinnedByteArray#': This will create a pinned array,
+--   with a custom alignment.</li>
+--   </ul>
+--   
+--   Unpinned arrays can be moved around during garbage collection, so you
+--   must not store or pass pointers to these values if there is a chance
+--   for the garbage collector to kick in. That said, even unpinned arrays
+--   can be passed to unsafe FFI calls, because no garbage collection
+--   happens during these unsafe calls (see <a>Guaranteed Call Safety</a>
+--   in the GHC Manual). For safe FFI calls, byte arrays must be not only
+--   pinned, but also kept alive by means of the keepAlive# function for
+--   the duration of a call (that's because garbage collection cannot move
+--   a pinned array, but is free to scrap it altogether).
+data MutableByteArray# a :: UnliftedType
 
 -- | Create a new mutable byte array of the specified size in bytes.
 --   

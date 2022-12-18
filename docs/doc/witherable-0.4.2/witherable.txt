@@ -237,7 +237,6 @@ instance (WithIndex.FunctorWithIndex i f, Witherable.FilterableWithIndex j g) =>
 instance (Witherable.FilterableWithIndex i f, Witherable.FilterableWithIndex j g) => Witherable.FilterableWithIndex (Data.Either.Either i j) (Data.Functor.Product.Product f g)
 instance (Witherable.FilterableWithIndex i f, Witherable.FilterableWithIndex j g) => Witherable.FilterableWithIndex (Data.Either.Either i j) (Data.Functor.Sum.Sum f g)
 instance Witherable.Witherable GHC.Maybe.Maybe
-instance Witherable.Witherable Data.Semigroup.Option
 instance GHC.Base.Monoid e => Witherable.Witherable (Data.Either.Either e)
 instance Witherable.Witherable []
 instance Witherable.Witherable Control.Applicative.ZipList
@@ -264,7 +263,6 @@ instance (Witherable.Witherable f, Witherable.Witherable g) => Witherable.Wither
 instance (Witherable.Witherable f, Witherable.Witherable g) => Witherable.Witherable (f GHC.Generics.:+: g)
 instance (Data.Traversable.Traversable f, Witherable.Witherable g) => Witherable.Witherable (f GHC.Generics.:.: g)
 instance Witherable.Filterable GHC.Maybe.Maybe
-instance Witherable.Filterable Data.Semigroup.Option
 instance GHC.Base.Monoid e => Witherable.Filterable (Data.Either.Either e)
 instance Witherable.Filterable []
 instance Witherable.Filterable Control.Applicative.ZipList

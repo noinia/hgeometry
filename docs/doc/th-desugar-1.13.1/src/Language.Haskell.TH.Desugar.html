@@ -1,0 +1,822 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Language/Haskell/TH/Desugar.hs
+
+(c) Richard Eisenberg 2013
+rae@cs.brynmawr.edu
+-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE CPP, MultiParamTypeClasses, FunctionalDependencies,
+             TypeSynonymInstances, FlexibleInstances, LambdaCase,
+             ScopedTypeVariables #-}</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Module      :  Language.Haskell.TH.Desugar</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Copyright   :  (C) 2014 Richard Eisenberg</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- License     :  BSD-style (see LICENSE)</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Maintainer  :  Ryan Scott</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- Desugars full Template Haskell syntax into a smaller core syntax for further</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- processing.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Language.Haskell.TH.Desugar</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Desugared data types</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DExp"><span class="hs-identifier">DExp</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier">DLetDec</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPat"><span class="hs-identifier">DPat</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier">DType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForallTelescope"><span class="hs-identifier">DForallTelescope</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DKind"><span class="hs-identifier">DKind</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DCxt"><span class="hs-identifier">DCxt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPred"><span class="hs-identifier">DPred</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier">DTyVarBndr</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndrSpec"><span class="hs-identifier">DTyVarBndrSpec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndrUnit"><span class="hs-identifier">DTyVarBndrUnit</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Specificity</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DMatch"><span class="hs-identifier">DMatch</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClause"><span class="hs-identifier">DClause</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDec"><span class="hs-identifier">DDec</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDerivClause"><span class="hs-identifier">DDerivClause</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDerivStrategy"><span class="hs-identifier">DDerivStrategy</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPatSynDir"><span class="hs-identifier">DPatSynDir</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPatSynType"><span class="hs-identifier">DPatSynType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><span class="hs-identifier">Overlap</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">PatSynArgs</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#NewOrData"><span class="hs-identifier">NewOrData</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTypeFamilyHead"><span class="hs-identifier">DTypeFamilyHead</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DFamilyResultSig"><span class="hs-identifier">DFamilyResultSig</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">InjectivityAnn</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DCon"><span class="hs-identifier">DCon</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConFields"><span class="hs-identifier">DConFields</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDeclaredInfix"><span class="hs-identifier">DDeclaredInfix</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DBangType"><span class="hs-identifier">DBangType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarBangType"><span class="hs-identifier">DVarBangType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier">Bang</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">SourceUnpackedness</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">SourceStrictness</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DForeign"><span class="hs-identifier">DForeign</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPragma"><span class="hs-identifier">DPragma</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DRuleBndr"><span class="hs-identifier">DRuleBndr</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTySynEqn"><span class="hs-identifier">DTySynEqn</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DInfo"><span class="hs-identifier">DInfo</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DInstanceDec"><span class="hs-identifier">DInstanceDec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><span class="hs-identifier">Role</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">AnnTarget</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-comment">-- * The 'Desugar' class</span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier">Desugar</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Main desugaring functions</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsExp"><span class="hs-identifier">dsExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDecs"><span class="hs-identifier">dsDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsType"><span class="hs-identifier">dsType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsInfo"><span class="hs-identifier">dsInfo</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPatOverExp"><span class="hs-identifier">dsPatOverExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPatsOverExp"><span class="hs-identifier">dsPatsOverExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPatX"><span class="hs-identifier">dsPatX</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsLetDecs"><span class="hs-identifier">dsLetDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsTvb"><span class="hs-identifier">dsTvb</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsTvbSpec"><span class="hs-identifier">dsTvbSpec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsTvbUnit"><span class="hs-identifier">dsTvbUnit</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsCxt"><span class="hs-identifier">dsCxt</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsCon"><span class="hs-identifier">dsCon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsForeign"><span class="hs-identifier">dsForeign</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPragma"><span class="hs-identifier">dsPragma</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsRuleBndr"><span class="hs-identifier">dsRuleBndr</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Secondary desugaring functions</span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#PatM"><span class="hs-identifier">PatM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPred"><span class="hs-identifier">dsPred</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPat"><span class="hs-identifier">dsPat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDec"><span class="hs-identifier">dsDec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDataDec"><span class="hs-identifier">dsDataDec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDataInstDec"><span class="hs-identifier">dsDataInstDec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DerivingClause"><span class="hs-identifier">DerivingClause</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDerivClause"><span class="hs-identifier">dsDerivClause</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsLetDec"><span class="hs-identifier">dsLetDec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsMatches"><span class="hs-identifier">dsMatches</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsBody"><span class="hs-identifier">dsBody</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsGuards"><span class="hs-identifier">dsGuards</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsDoStmts"><span class="hs-identifier">dsDoStmts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsComp"><span class="hs-identifier">dsComp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsClauses"><span class="hs-identifier">dsClauses</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsBangType"><span class="hs-identifier">dsBangType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsVarBangType"><span class="hs-identifier">dsVarBangType</span></a></span><span class="hs-special">,</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &gt; 710
+</span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsTypeFamilyHead"><span class="hs-identifier">dsTypeFamilyHead</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsFamilyResultSig"><span class="hs-identifier">dsFamilyResultSig</span></a></span><span class="hs-special">,</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">#if __GLASGOW_HASKELL__ &gt;= 801
+</span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsPatSynDir"><span class="hs-identifier">dsPatSynDir</span></a></span><span class="hs-special">,</span><span class="hs-cpp">
+#endif
+</span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsTypeArg"><span class="hs-identifier">dsTypeArg</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Converting desugared AST back to TH AST</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Sweeten.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Sweeten</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Expanding type synonyms</span></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expand"><span class="hs-identifier">expand</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html#expandType"><span class="hs-identifier">expandType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Reification</span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyWithWarning"><span class="hs-identifier">reifyWithWarning</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Local reification</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-comment">-- $localReification</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#withLocalDeclarations"><span class="hs-identifier">withLocalDeclarations</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsReify"><span class="hs-identifier">dsReify</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dsReifyType"><span class="hs-identifier">dsReifyType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyWithLocals_maybe"><span class="hs-identifier">reifyWithLocals_maybe</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyWithLocals"><span class="hs-identifier">reifyWithLocals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyFixityWithLocals"><span class="hs-identifier">reifyFixityWithLocals</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-75"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyTypeWithLocals_maybe"><span class="hs-identifier">reifyTypeWithLocals_maybe</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyTypeWithLocals"><span class="hs-identifier">reifyTypeWithLocals</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-76"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#lookupValueNameWithLocals"><span class="hs-identifier">lookupValueNameWithLocals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#lookupTypeNameWithLocals"><span class="hs-identifier">lookupTypeNameWithLocals</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#mkDataNameWithLocals"><span class="hs-identifier">mkDataNameWithLocals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#mkTypeNameWithLocals"><span class="hs-identifier">mkTypeNameWithLocals</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#reifyNameSpace"><span class="hs-identifier">reifyNameSpace</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier">DsMonad</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsM"><span class="hs-identifier">DsM</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Nested pattern flattening</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Match.html#scExp"><span class="hs-identifier">scExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Match.html#scLetDec"><span class="hs-identifier">scLetDec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Capture-avoiding substitution and utilities</span></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Subst</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Free variable calculation</span></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.FV</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Utility functions</span></span><span>
+</span><span id="line-91"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#applyDExp"><span class="hs-identifier">applyDExp</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dPatToDExp"><span class="hs-identifier">dPatToDExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#removeWilds"><span class="hs-identifier">removeWilds</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-93"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#getDataD"><span class="hs-identifier">getDataD</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#dataConNameToDataName"><span class="hs-identifier">dataConNameToDataName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#dataConNameToCon"><span class="hs-identifier">dataConNameToCon</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-94"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#nameOccursIn"><span class="hs-identifier">nameOccursIn</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#allNamesIn"><span class="hs-identifier">allNamesIn</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#flattenDValD"><span class="hs-identifier">flattenDValD</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#getRecordSelectors"><span class="hs-identifier">getRecordSelectors</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-95"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#mkTypeName"><span class="hs-identifier">mkTypeName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#mkDataName"><span class="hs-identifier">mkDataName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#newUniqueName"><span class="hs-identifier">newUniqueName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#mkTupleDExp"><span class="hs-identifier">mkTupleDExp</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#mkTupleDPat"><span class="hs-identifier">mkTupleDPat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#maybeDLetE"><span class="hs-identifier">maybeDLetE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#maybeDCaseE"><span class="hs-identifier">maybeDCaseE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#mkDLamEFromDPats"><span class="hs-identifier">mkDLamEFromDPats</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#tupleDegree_maybe"><span class="hs-identifier">tupleDegree_maybe</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#tupleNameDegree_maybe"><span class="hs-identifier">tupleNameDegree_maybe</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unboxedSumDegree_maybe"><span class="hs-identifier">unboxedSumDegree_maybe</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unboxedSumNameDegree_maybe"><span class="hs-identifier">unboxedSumNameDegree_maybe</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unboxedTupleDegree_maybe"><span class="hs-identifier">unboxedTupleDegree_maybe</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unboxedTupleNameDegree_maybe"><span class="hs-identifier">unboxedTupleNameDegree_maybe</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-100"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#strictToBang"><span class="hs-identifier">strictToBang</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#isTypeKindName"><span class="hs-identifier">isTypeKindName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#typeKindName"><span class="hs-identifier">typeKindName</span></a></span><span class="hs-special">,</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &gt;= 800
+</span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#bindIP"><span class="hs-identifier">bindIP</span></a></span><span class="hs-special">,</span><span class="hs-cpp">
+#endif
+</span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#mkExtraDKindBinders"><span class="hs-identifier">mkExtraDKindBinders</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#dTyVarBndrToDType"><span class="hs-identifier">dTyVarBndrToDType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#changeDTVFlags"><span class="hs-identifier">changeDTVFlags</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#toposortTyVarsOf"><span class="hs-identifier">toposortTyVarsOf</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** 'FunArgs' and 'VisFunArg'</span></span><span>
+</span><span id="line-107"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#FunArgs"><span class="hs-identifier">FunArgs</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#ForallTelescope"><span class="hs-identifier">ForallTelescope</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#VisFunArg"><span class="hs-identifier">VisFunArg</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-108"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#filterVisFunArgs"><span class="hs-identifier">filterVisFunArgs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#ravelType"><span class="hs-identifier">ravelType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unravelType"><span class="hs-identifier">unravelType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** 'DFunArgs' and 'DVisFunArg'</span></span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DFunArgs"><span class="hs-identifier">DFunArgs</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DVisFunArg"><span class="hs-identifier">DVisFunArg</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#filterDVisFunArgs"><span class="hs-identifier">filterDVisFunArgs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#ravelDType"><span class="hs-identifier">ravelDType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#unravelDType"><span class="hs-identifier">unravelDType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** 'TypeArg'</span></span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#TypeArg"><span class="hs-identifier">TypeArg</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#applyType"><span class="hs-identifier">applyType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#filterTANormals"><span class="hs-identifier">filterTANormals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#unfoldType"><span class="hs-identifier">unfoldType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** 'DTypeArg'</span></span><span>
+</span><span id="line-118"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DTypeArg"><span class="hs-identifier">DTypeArg</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#applyDType"><span class="hs-identifier">applyDType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#filterDTANormals"><span class="hs-identifier">filterDTANormals</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#unfoldDType"><span class="hs-identifier">unfoldDType</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Extracting bound names</span></span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#extractBoundNamesStmt"><span class="hs-identifier">extractBoundNamesStmt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#extractBoundNamesDec"><span class="hs-identifier">extractBoundNamesDec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#extractBoundNamesPat"><span class="hs-identifier">extractBoundNamesPat</span></a></span><span>
+</span><span id="line-122"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Datatype.TyVarBndr</span></span><span>
+</span><span id="line-125"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.AST</span></a></span><span>
+</span><span id="line-126"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Core</span></a></span><span>
+</span><span id="line-127"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Expand.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Expand</span></a></span><span>
+</span><span id="line-128"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.FV.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.FV</span></a></span><span>
+</span><span id="line-129"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Match.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Match</span></a></span><span>
+</span><span id="line-130"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Reify</span></a></span><span>
+</span><span id="line-131"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Subst.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Subst</span></a></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Sweeten.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Sweeten</span></a></span><span>
+</span><span id="line-133"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html"><span class="hs-identifier">Language.Haskell.TH.Desugar.Util</span></a></span><span>
+</span><span id="line-134"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-137"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-138"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Function</span></span><span>
+</span><span id="line-139"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-140"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span>
+</span><span id="line-141"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">exp</span></span><span> </span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if __GLASGOW_HASKELL__ &lt; 710
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control.Applicative</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- | This class relates a TH type with its th-desugar type and allows</span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- conversions back and forth. The functional dependency goes only one</span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- way because we define the following instances on old versions of GHC:</span><span>
+</span><span id="line-150"></span><span class="hs-comment">--</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- instance 'Desugar' 'TyVarBndrSpec' 'DTyVarBndrSpec'</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- instance 'Desugar' 'TyVarBndrUnit' 'DTyVarBndrUnit'</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- Prior to GHC 9.0, 'TyVarBndrSpec' and 'TyVarBndrUnit' are simply type</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- synonyms for 'TyVarBndr', so making the functional dependencies</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- bidirectional would cause these instances to be rejected.</span><span>
+</span><span id="line-159"></span><span class="hs-keyword">class</span><span> </span><span id="Desugar"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-var">Desugar</span></a></span></span><span> </span><span id="local-6989586621679514905"><span class="annot"><a href="#local-6989586621679514905"><span class="hs-identifier hs-type">th</span></a></span></span><span> </span><span id="local-6989586621679514904"><span class="annot"><a href="#local-6989586621679514904"><span class="hs-identifier hs-type">ds</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="#local-6989586621679514904"><span class="hs-identifier hs-type">ds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514905"><span class="hs-identifier hs-type">th</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="desugar"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#desugar"><span class="hs-identifier hs-type">desugar</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679514907"><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514907"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514905"><span class="hs-identifier hs-type">th</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514907"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514904"><span class="hs-identifier hs-type">ds</span></a></span></span><span>
+</span><span id="line-161"></span><span>  </span><span id="sweeten"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#sweeten"><span class="hs-identifier hs-type">sweeten</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679514904"><span class="hs-identifier hs-type">ds</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514905"><span class="hs-identifier hs-type">th</span></a></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exp</span></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DExp"><span class="hs-identifier hs-type">DExp</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-164"></span><span>  </span><span id="local-6989586621679514661"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *). DsMonad q =&gt; Exp -&gt; q DExp
+</span><a href="#local-6989586621679514661"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Exp -&gt; q DExp
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsExp"><span class="hs-identifier hs-var">dsExp</span></a></span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621679514660"><span class="annot"><span class="annottext">sweeten :: DExp -&gt; Exp
+</span><a href="#local-6989586621679514660"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DExp -&gt; Exp
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#expToTH"><span class="hs-identifier hs-var">expToTH</span></a></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DType"><span class="hs-identifier hs-type">DType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-168"></span><span>  </span><span id="local-6989586621679514653"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *). DsMonad q =&gt; Type -&gt; q DType
+</span><a href="#local-6989586621679514653"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Type -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsType"><span class="hs-identifier hs-var">dsType</span></a></span><span>
+</span><span id="line-169"></span><span>  </span><span id="local-6989586621679514652"><span class="annot"><span class="annottext">sweeten :: DType -&gt; Type
+</span><a href="#local-6989586621679514652"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; Type
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#typeToTH"><span class="hs-identifier hs-var">typeToTH</span></a></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Cxt</span></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DCxt"><span class="hs-identifier hs-type">DCxt</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-172"></span><span>  </span><span id="local-6989586621679514645"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *). DsMonad q =&gt; Cxt -&gt; q DCxt
+</span><a href="#local-6989586621679514645"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Cxt -&gt; q DCxt
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsCxt"><span class="hs-identifier hs-var">dsCxt</span></a></span><span>
+</span><span id="line-173"></span><span>  </span><span id="local-6989586621679514644"><span class="annot"><span class="annottext">sweeten :: DCxt -&gt; Cxt
+</span><a href="#local-6989586621679514644"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt -&gt; Cxt
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#cxtToTH"><span class="hs-identifier hs-var">cxtToTH</span></a></span><span class="hs-cpp">
+
+#if __GLASGOW_HASKELL__ &gt;= 900
+</span><span class="hs-comment">-- | This instance is only @flag@-polymorphic on GHC 9.0 or later, since</span><span>
+</span><span id="line-177"></span><span class="hs-comment">-- previous versions of GHC do not equip 'TyVarBndr' with a @flag@ type</span><span>
+</span><span id="line-178"></span><span class="hs-comment">-- parameter. As a result, we define two separate instances for 'DTyVarBndr'</span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- on older GHCs:</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-182"></span><span class="hs-comment">-- instance 'Desugar' 'TyVarBndrSpec' 'DTyVarBndrSpec'</span><span>
+</span><span id="line-183"></span><span class="hs-comment">-- instance 'Desugar' 'TyVarBndrUnit' 'DTyVarBndrUnit'</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-185"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679514893"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TyVarBndr</span></span><span> </span><span class="annot"><a href="#local-6989586621679514893"><span class="hs-identifier hs-type">flag</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndr"><span class="hs-identifier hs-type">DTyVarBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514893"><span class="hs-identifier hs-type">flag</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-186"></span><span>  </span><span id="local-6989586621679514637"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *).
+DsMonad q =&gt;
+TyVarBndr flag -&gt; q (DTyVarBndr flag)
+</span><a href="#local-6989586621679514637"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) flag.
+DsMonad q =&gt;
+TyVarBndr_ flag -&gt; q (DTyVarBndr flag)
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsTvb"><span class="hs-identifier hs-var">dsTvb</span></a></span><span>
+</span><span id="line-187"></span><span>  </span><span id="local-6989586621679514636"><span class="annot"><span class="annottext">sweeten :: DTyVarBndr flag -&gt; TyVarBndr flag
+</span><a href="#local-6989586621679514636"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall flag. DTyVarBndr flag -&gt; TyVarBndr flag
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#tvbToTH"><span class="hs-identifier hs-var">tvbToTH</span></a></span><span class="hs-cpp">
+#else
+</span><span class="hs-comment">-- | This instance monomorphizes the @flag@ parameter of 'DTyVarBndr' since</span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- pre-9.0 versions of GHC do not equip 'TyVarBndr' with a @flag@ type</span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- parameter. There is also a corresponding instance for</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- 'TyVarBndrUnit'/'DTyVarBndrUnit'.</span><span>
+</span><span id="line-193"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier">Desugar</span><span> </span><span class="hs-identifier">TyVarBndrSpec</span><span> </span><span class="hs-identifier">DTyVarBndrSpec</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-identifier">desugar</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">dsTvbSpec</span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-identifier">sweeten</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">tvbToTH</span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="hs-comment">-- | This instance monomorphizes the @flag@ parameter of 'DTyVarBndr' since</span><span>
+</span><span id="line-198"></span><span class="hs-comment">-- pre-9.0 versions of GHC do not equip 'TyVarBndr' with a @flag@ type</span><span>
+</span><span id="line-199"></span><span class="hs-comment">-- parameter. There is also a corresponding instance for</span><span>
+</span><span id="line-200"></span><span class="hs-comment">-- 'TyVarBndrSpec'/'DTyVarBndrSpec'.</span><span>
+</span><span id="line-201"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier">Desugar</span><span> </span><span class="hs-identifier">TyVarBndrUnit</span><span> </span><span class="hs-identifier">DTyVarBndrUnit</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-202"></span><span>  </span><span class="hs-identifier">desugar</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">dsTvbUnit</span><span>
+</span><span id="line-203"></span><span>  </span><span class="hs-identifier">sweeten</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">tvbToTH</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-206"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DDec"><span class="hs-identifier hs-type">DDec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-207"></span><span>  </span><span id="local-6989586621679514629"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *). DsMonad q =&gt; [Dec] -&gt; q [DDec]
+</span><a href="#local-6989586621679514629"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; [Dec] -&gt; q [DDec]
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsDecs"><span class="hs-identifier hs-var">dsDecs</span></a></span><span>
+</span><span id="line-208"></span><span>  </span><span id="local-6989586621679514628"><span class="annot"><span class="annottext">sweeten :: [DDec] -&gt; [Dec]
+</span><a href="#local-6989586621679514628"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DDec] -&gt; [Dec]
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#decsToTH"><span class="hs-identifier hs-var">decsToTH</span></a></span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#Desugar"><span class="hs-identifier hs-type">Desugar</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Util.html#TypeArg"><span class="hs-identifier hs-type">TypeArg</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DTypeArg"><span class="hs-identifier hs-type">DTypeArg</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-211"></span><span>  </span><span id="local-6989586621679514621"><span class="annot"><span class="annottext">desugar :: forall (q :: * -&gt; *). DsMonad q =&gt; TypeArg -&gt; q DTypeArg
+</span><a href="#local-6989586621679514621"><span class="hs-identifier hs-var hs-var hs-var hs-var">desugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; TypeArg -&gt; q DTypeArg
+</span><a href="Language.Haskell.TH.Desugar.Core.html#dsTypeArg"><span class="hs-identifier hs-var">dsTypeArg</span></a></span><span>
+</span><span id="line-212"></span><span>  </span><span id="local-6989586621679514620"><span class="annot"><span class="annottext">sweeten :: DTypeArg -&gt; TypeArg
+</span><a href="#local-6989586621679514620"><span class="hs-identifier hs-var hs-var hs-var hs-var">sweeten</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DTypeArg -&gt; TypeArg
+</span><a href="Language.Haskell.TH.Desugar.Sweeten.html#typeArgToTH"><span class="hs-identifier hs-var">typeArgToTH</span></a></span><span>
+</span><span id="line-213"></span><span>
+</span><span id="line-214"></span><span class="hs-comment">-- | If the declaration passed in is a 'DValD', creates new, equivalent</span><span>
+</span><span id="line-215"></span><span class="hs-comment">-- declarations such that the 'DPat' in all 'DValD's is just a plain</span><span>
+</span><span id="line-216"></span><span class="hs-comment">-- 'DVarPa'. Other declarations are passed through unchanged.</span><span>
+</span><span id="line-217"></span><span class="hs-comment">-- Note that the declarations that come out of this function are rather</span><span>
+</span><span id="line-218"></span><span class="hs-comment">-- less efficient than those that come in: they have many more pattern</span><span>
+</span><span id="line-219"></span><span class="hs-comment">-- matches.</span><span>
+</span><span id="line-220"></span><span id="local-6989586621679514883"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#flattenDValD"><span class="hs-identifier hs-type">flattenDValD</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621679514883"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514883"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-221"></span><span id="flattenDValD"><span class="annot"><span class="annottext">flattenDValD :: forall (q :: * -&gt; *). Quasi q =&gt; DLetDec -&gt; q [DLetDec]
+</span><a href="Language.Haskell.TH.Desugar.html#flattenDValD"><span class="hs-identifier hs-var hs-var">flattenDValD</span></a></span></span><span> </span><span id="local-6989586621679514603"><span class="annot"><span class="annottext">dec :: DLetDec
+</span><a href="#local-6989586621679514603"><span class="hs-identifier hs-var">dec</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DValD"><span class="hs-identifier hs-type">DValD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-type">DVarP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514603"><span class="hs-identifier hs-var">dec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-222"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#flattenDValD"><span class="hs-identifier hs-var">flattenDValD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DValD"><span class="hs-identifier hs-type">DValD</span></a></span><span> </span><span id="local-6989586621679514600"><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514600"><span class="hs-identifier hs-var">pat</span></a></span></span><span> </span><span id="local-6989586621679514599"><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679514599"><span class="hs-identifier hs-var">exp</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-223"></span><span>  </span><span id="local-6989586621679514598"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514598"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><a href="Language.Haskell.TH.Desugar.Util.html#newUniqueName"><span class="hs-identifier hs-var">newUniqueName</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="hs-comment">-- must use newUniqueName here because we might be top-level</span><span>
+</span><span id="line-224"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679514597"><span class="annot"><span class="annottext">top_val_d :: DLetDec
+</span><a href="#local-6989586621679514597"><span class="hs-identifier hs-var hs-var">top_val_d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DExp -&gt; DLetDec
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DValD"><span class="hs-identifier hs-var">DValD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-var">DVarP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514598"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679514599"><span class="hs-identifier hs-var">exp</span></a></span><span>
+</span><span id="line-225"></span><span>      </span><span id="local-6989586621679514594"><span class="annot"><span class="annottext">bound_names :: [Name]
+</span><a href="#local-6989586621679514594"><span class="hs-identifier hs-var hs-var">bound_names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DPat -&gt; OSet Name
+</span><a href="Language.Haskell.TH.Desugar.FV.html#extractBoundNamesDPat"><span class="hs-identifier hs-var">extractBoundNamesDPat</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514600"><span class="hs-identifier hs-var">pat</span></a></span><span>
+</span><span id="line-226"></span><span>  </span><span id="local-6989586621679514591"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514591"><span class="hs-identifier hs-var">other_val_ds</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall {m :: * -&gt; *}. Quasi m =&gt; Name -&gt; Name -&gt; m DLetDec
+</span><a href="#local-6989586621679514589"><span class="hs-identifier hs-var">mk_val_d</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514598"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679514594"><span class="hs-identifier hs-var">bound_names</span></a></span><span>
+</span><span id="line-227"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514597"><span class="hs-identifier hs-var">top_val_d</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514591"><span class="hs-identifier hs-var">other_val_ds</span></a></span><span>
+</span><span id="line-228"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-229"></span><span>    </span><span id="local-6989586621679514589"><span class="annot"><span class="annottext">mk_val_d :: Name -&gt; Name -&gt; m DLetDec
+</span><a href="#local-6989586621679514589"><span class="hs-identifier hs-var hs-var">mk_val_d</span></a></span></span><span> </span><span id="local-6989586621679514582"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514582"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679514581"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514581"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-230"></span><span>      </span><span id="local-6989586621679514580"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514580"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><a href="Language.Haskell.TH.Desugar.Util.html#newUniqueName"><span class="hs-identifier hs-var">newUniqueName</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;y&quot;</span></span><span>
+</span><span id="line-231"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679514579"><span class="annot"><span class="annottext">pat' :: DPat
+</span><a href="#local-6989586621679514579"><span class="hs-identifier hs-var hs-var">pat'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var">wildify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514581"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514580"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514600"><span class="hs-identifier hs-var">pat</span></a></span><span>
+</span><span id="line-232"></span><span>          </span><span id="local-6989586621679514577"><span class="annot"><span class="annottext">match :: DMatch
+</span><a href="#local-6989586621679514577"><span class="hs-identifier hs-var hs-var">match</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DExp -&gt; DMatch
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DMatch"><span class="hs-identifier hs-var">DMatch</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514579"><span class="hs-identifier hs-var">pat'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarE"><span class="hs-identifier hs-var">DVarE</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514580"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-233"></span><span>          </span><span id="local-6989586621679514574"><span class="annot"><span class="annottext">cas :: DExp
+</span><a href="#local-6989586621679514574"><span class="hs-identifier hs-var hs-var">cas</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DExp -&gt; [DMatch] -&gt; DExp
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DCaseE"><span class="hs-identifier hs-var">DCaseE</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarE"><span class="hs-identifier hs-var">DVarE</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514582"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DMatch
+</span><a href="#local-6989586621679514577"><span class="hs-identifier hs-var">match</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-234"></span><span>      </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DExp -&gt; DLetDec
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DValD"><span class="hs-identifier hs-var">DValD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-var">DVarP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514581"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679514574"><span class="hs-identifier hs-var">cas</span></a></span><span>
+</span><span id="line-235"></span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621679514578"><span class="annot"><span class="annottext">wildify :: Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var hs-var">wildify</span></a></span></span><span> </span><span id="local-6989586621679514570"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679514569"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679514568"><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514568"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-237"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514568"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-238"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLitP"><span class="hs-identifier hs-type">DLitP</span></a></span><span> </span><span id="local-6989586621679514566"><span class="annot"><span class="annottext">Lit
+</span><a href="#local-6989586621679514566"><span class="hs-identifier hs-var">lit</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Lit -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DLitP"><span class="hs-identifier hs-var">DLitP</span></a></span><span> </span><span class="annot"><span class="annottext">Lit
+</span><a href="#local-6989586621679514566"><span class="hs-identifier hs-var">lit</span></a></span><span>
+</span><span id="line-239"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-type">DVarP</span></a></span><span> </span><span id="local-6989586621679514565"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514565"><span class="hs-identifier hs-var">n</span></a></span></span><span>
+</span><span id="line-240"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514565"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-var">DVarP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-241"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-var">DWildP</span></a></span><span>
+</span><span id="line-242"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DConP"><span class="hs-identifier hs-type">DConP</span></a></span><span> </span><span id="local-6989586621679514562"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514562"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621679514561"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679514561"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span id="local-6989586621679514560"><span class="annot"><span class="annottext">[DPat]
+</span><a href="#local-6989586621679514560"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DCxt -&gt; [DPat] -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DConP"><span class="hs-identifier hs-var">DConP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514562"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679514561"><span class="hs-identifier hs-var">ts</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var">wildify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DPat]
+</span><a href="#local-6989586621679514560"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-243"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTildeP"><span class="hs-identifier hs-type">DTildeP</span></a></span><span> </span><span id="local-6989586621679514558"><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514558"><span class="hs-identifier hs-var">pa</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DTildeP"><span class="hs-identifier hs-var">DTildeP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var">wildify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514558"><span class="hs-identifier hs-var">pa</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-244"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DBangP"><span class="hs-identifier hs-type">DBangP</span></a></span><span> </span><span id="local-6989586621679514556"><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514556"><span class="hs-identifier hs-var">pa</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DBangP"><span class="hs-identifier hs-var">DBangP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var">wildify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514556"><span class="hs-identifier hs-var">pa</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-245"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigP"><span class="hs-identifier hs-type">DSigP</span></a></span><span> </span><span id="local-6989586621679514554"><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514554"><span class="hs-identifier hs-var">pa</span></a></span></span><span> </span><span id="local-6989586621679514553"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514553"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DPat -&gt; DType -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DSigP"><span class="hs-identifier hs-var">DSigP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; DPat -&gt; DPat
+</span><a href="#local-6989586621679514578"><span class="hs-identifier hs-var">wildify</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514570"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514569"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="#local-6989586621679514554"><span class="hs-identifier hs-var">pa</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514553"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-246"></span><span>        </span><span class="annot"><span class="annottext">DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-var">DWildP</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-var">DWildP</span></a></span><span>
+</span><span id="line-247"></span><span>
+</span><span id="line-248"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#flattenDValD"><span class="hs-identifier hs-var">flattenDValD</span></a></span><span> </span><span id="local-6989586621679514552"><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514552"><span class="hs-identifier hs-var">other_dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514552"><span class="hs-identifier hs-var">other_dec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-249"></span><span>
+</span><span id="line-250"></span><span class="hs-comment">-- | Produces 'DLetDec's representing the record selector functions from</span><span>
+</span><span id="line-251"></span><span class="hs-comment">-- the provided 'DCon's.</span><span>
+</span><span id="line-252"></span><span class="hs-comment">--</span><span>
+</span><span id="line-253"></span><span class="hs-comment">-- Note that if the same record selector appears in multiple constructors,</span><span>
+</span><span id="line-254"></span><span class="hs-comment">-- 'getRecordSelectors' will return only one binding for that selector.</span><span>
+</span><span id="line-255"></span><span class="hs-comment">-- For example, if you had:</span><span>
+</span><span id="line-256"></span><span class="hs-comment">--</span><span>
+</span><span id="line-257"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-258"></span><span class="hs-comment">-- data X = X1 {y :: Symbol} | X2 {y :: Symbol}</span><span>
+</span><span id="line-259"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-260"></span><span class="hs-comment">--</span><span>
+</span><span id="line-261"></span><span class="hs-comment">-- Then calling 'getRecordSelectors' on @[X1, X2]@ will return:</span><span>
+</span><span id="line-262"></span><span class="hs-comment">--</span><span>
+</span><span id="line-263"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-264"></span><span class="hs-comment">-- [ DSigD y (DAppT (DAppT DArrowT (DConT X)) (DConT Symbol))</span><span>
+</span><span id="line-265"></span><span class="hs-comment">-- , DFunD y [ DClause [DConP X1 [DVarP field]] (DVarE field)</span><span>
+</span><span id="line-266"></span><span class="hs-comment">--           , DClause [DConP X2 [DVarP field]] (DVarE field) ] ]</span><span>
+</span><span id="line-267"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-268"></span><span class="hs-comment">--</span><span>
+</span><span id="line-269"></span><span class="hs-comment">-- instead of returning one binding for @X1@ and another binding for @X2@.</span><span>
+</span><span id="line-270"></span><span class="hs-comment">--</span><span>
+</span><span id="line-271"></span><span class="hs-comment">-- 'getRecordSelectors' does not attempt to filter out \&quot;naughty\&quot; record</span><span>
+</span><span id="line-272"></span><span class="hs-comment">-- selectors&#8212;that is, records whose field types mention existentially</span><span>
+</span><span id="line-273"></span><span class="hs-comment">-- quantified type variables that do not appear in the constructor's return</span><span>
+</span><span id="line-274"></span><span class="hs-comment">-- type. Here is an example of a naughty record selector:</span><span>
+</span><span id="line-275"></span><span class="hs-comment">--</span><span>
+</span><span id="line-276"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-277"></span><span class="hs-comment">-- data Some :: (Type -&gt; Type) -&gt; Type where</span><span>
+</span><span id="line-278"></span><span class="hs-comment">--   MkSome :: { getSome :: f a } -&gt; Some f</span><span>
+</span><span id="line-279"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-280"></span><span class="hs-comment">--</span><span>
+</span><span id="line-281"></span><span class="hs-comment">-- GHC itself will not allow the use of @getSome@ as a top-level function due</span><span>
+</span><span id="line-282"></span><span class="hs-comment">-- to its type @f a@ mentioning the existential variable @a@, but</span><span>
+</span><span id="line-283"></span><span class="hs-comment">-- 'getRecordSelectors' will return it nonetheless. Ultimately, this design</span><span>
+</span><span id="line-284"></span><span class="hs-comment">-- choice is a practical one, as detecting which type variables are existential</span><span>
+</span><span id="line-285"></span><span class="hs-comment">-- in Template Haskell is difficult in the general case.</span><span>
+</span><span id="line-286"></span><span id="local-6989586621679514855"><span class="annot"><a href="Language.Haskell.TH.Desugar.html#getRecordSelectors"><span class="hs-identifier hs-type">getRecordSelectors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514855"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DCon"><span class="hs-identifier hs-type">DCon</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514855"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-287"></span><span id="getRecordSelectors"><span class="annot"><span class="annottext">getRecordSelectors :: forall (q :: * -&gt; *). DsMonad q =&gt; [DCon] -&gt; q [DLetDec]
+</span><a href="Language.Haskell.TH.Desugar.html#getRecordSelectors"><span class="hs-identifier hs-var hs-var">getRecordSelectors</span></a></span></span><span> </span><span id="local-6989586621679514520"><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621679514520"><span class="hs-identifier hs-var">cons</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514519"><span class="hs-identifier hs-var">merge_let_decs</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">`fmap`</span></span><span> </span><span class="annot"><span class="annottext">forall (monad :: * -&gt; *) monoid (t :: * -&gt; *) a.
+(Monad monad, Monoid monoid, Traversable t) =&gt;
+(a -&gt; monad monoid) -&gt; t a -&gt; monad monoid
+</span><a href="Language.Haskell.TH.Desugar.Util.html#concatMapM"><span class="hs-identifier hs-var">concatMapM</span></a></span><span> </span><span class="annot"><span class="annottext">forall {m :: * -&gt; *}. Quasi m =&gt; DCon -&gt; m [DLetDec]
+</span><a href="#local-6989586621679514517"><span class="hs-identifier hs-var">get_record_sels</span></a></span><span> </span><span class="annot"><span class="annottext">[DCon]
+</span><a href="#local-6989586621679514520"><span class="hs-identifier hs-var">cons</span></a></span><span>
+</span><span id="line-288"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-289"></span><span>    </span><span id="local-6989586621679514517"><span class="annot"><span class="annottext">get_record_sels :: DCon -&gt; m [DLetDec]
+</span><a href="#local-6989586621679514517"><span class="hs-identifier hs-var hs-var">get_record_sels</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DCon"><span class="hs-identifier hs-type">DCon</span></a></span><span> </span><span id="local-6989586621679514510"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679514510"><span class="hs-identifier hs-var">con_tvbs</span></a></span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679514509"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514509"><span class="hs-identifier hs-var">con_name</span></a></span></span><span> </span><span id="local-6989586621679514508"><span class="annot"><span class="annottext">DConFields
+</span><a href="#local-6989586621679514508"><span class="hs-identifier hs-var">con_fields</span></a></span></span><span> </span><span id="local-6989586621679514507"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514507"><span class="hs-identifier hs-var">con_ret_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-290"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DConFields
+</span><a href="#local-6989586621679514508"><span class="hs-identifier hs-var">con_fields</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-291"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DRecC"><span class="hs-identifier hs-type">DRecC</span></a></span><span> </span><span id="local-6989586621679514505"><span class="annot"><span class="annottext">[DVarBangType]
+</span><a href="#local-6989586621679514505"><span class="hs-identifier hs-var">fields</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall {m :: * -&gt; *} {b}.
+Quasi m =&gt;
+[(Name, b, DType)] -&gt; m [DLetDec]
+</span><a href="#local-6989586621679514504"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[DVarBangType]
+</span><a href="#local-6989586621679514505"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-292"></span><span>        </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DNormalC"><span class="hs-identifier hs-type">DNormalC</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-293"></span><span>        </span><span class="hs-keyword">where</span><span>
+</span><span id="line-294"></span><span>          </span><span id="local-6989586621679514504"><span class="annot"><span class="annottext">go :: [(Name, b, DType)] -&gt; m [DLetDec]
+</span><a href="#local-6989586621679514504"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679514490"><span class="annot"><span class="annottext">[(Name, b, DType)]
+</span><a href="#local-6989586621679514490"><span class="hs-identifier hs-var">fields</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-295"></span><span>            </span><span id="local-6989586621679514489"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514489"><span class="hs-identifier hs-var">varName</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">qNewName</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;field&quot;</span></span><span>
+</span><span id="line-296"></span><span>            </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">concat</span></span><span>
+</span><span id="line-297"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DType -&gt; DLetDec
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DSigD"><span class="hs-identifier hs-var">DSigD</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514485"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DForallTelescope -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DForallT"><span class="hs-identifier hs-var">DForallT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DTyVarBndrSpec] -&gt; DForallTelescope
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DForallInvis"><span class="hs-identifier hs-var">DForallInvis</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679514510"><span class="hs-identifier hs-var">con_tvbs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-298"></span><span>                             </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DArrowT"><span class="hs-identifier hs-var">DArrowT</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DAppT"><span class="hs-operator hs-var">`DAppT`</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514507"><span class="hs-identifier hs-var">con_ret_ty</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DAppT"><span class="hs-operator hs-var">`DAppT`</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514480"><span class="hs-identifier hs-var">field_ty</span></a></span><span>
+</span><span id="line-299"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DClause] -&gt; DLetDec
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DFunD"><span class="hs-identifier hs-var">DFunD</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514485"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[DPat] -&gt; DExp -&gt; DClause
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DClause"><span class="hs-identifier hs-var">DClause</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name -&gt; DCxt -&gt; [DPat] -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DConP"><span class="hs-identifier hs-var">DConP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514509"><span class="hs-identifier hs-var">con_name</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-300"></span><span>                                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Name -&gt; [DPat]
+</span><a href="#local-6989586621679514477"><span class="hs-identifier hs-var">mk_field_pats</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514476"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[(Name, b, DType)]
+</span><a href="#local-6989586621679514490"><span class="hs-identifier hs-var">fields</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514489"><span class="hs-identifier hs-var">varName</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-301"></span><span>                                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarE"><span class="hs-identifier hs-var">DVarE</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514489"><span class="hs-identifier hs-var">varName</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-302"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679514485"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514485"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514474"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679514474"><span class="hs-identifier hs-var">_strict</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514480"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514480"><span class="hs-identifier hs-var">field_ty</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514476"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514476"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[(Name, b, DType)]
+</span><a href="#local-6989586621679514490"><span class="hs-identifier hs-var">fields</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
+</span><span id="line-303"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-304"></span><span>
+</span><span id="line-305"></span><span>    </span><span class="annot"><a href="#local-6989586621679514477"><span class="hs-identifier hs-type">mk_field_pats</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DPat"><span class="hs-identifier hs-type">DPat</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-306"></span><span>    </span><span id="local-6989586621679514477"><span class="annot"><span class="annottext">mk_field_pats :: Int -&gt; Int -&gt; Name -&gt; [DPat]
+</span><a href="#local-6989586621679514477"><span class="hs-identifier hs-var hs-var">mk_field_pats</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span id="local-6989586621679514473"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514473"><span class="hs-identifier hs-var">total</span></a></span></span><span> </span><span id="local-6989586621679514472"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514472"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DVarP"><span class="hs-identifier hs-var">DVarP</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514472"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Int -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514473"><span class="hs-identifier hs-var">total</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-var">DWildP</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-307"></span><span>    </span><span class="annot"><a href="#local-6989586621679514477"><span class="hs-identifier hs-var">mk_field_pats</span></a></span><span> </span><span id="local-6989586621679514470"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514470"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679514469"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514469"><span class="hs-identifier hs-var">total</span></a></span></span><span> </span><span id="local-6989586621679514468"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514468"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DPat
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DWildP"><span class="hs-identifier hs-var">DWildP</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Name -&gt; [DPat]
+</span><a href="#local-6989586621679514477"><span class="hs-identifier hs-var">mk_field_pats</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514470"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679514469"><span class="hs-identifier hs-var">total</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514468"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-308"></span><span>
+</span><span id="line-309"></span><span>    </span><span class="annot"><a href="#local-6989586621679514519"><span class="hs-identifier hs-type">merge_let_decs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-310"></span><span>    </span><span id="local-6989586621679514519"><span class="annot"><span class="annottext">merge_let_decs :: [DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514519"><span class="hs-identifier hs-var hs-var">merge_let_decs</span></a></span></span><span> </span><span id="local-6989586621679514467"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514467"><span class="hs-identifier hs-var">decs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-311"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514466"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514466"><span class="hs-identifier hs-var">name_clause_map</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514465"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514465"><span class="hs-identifier hs-var">decs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">forall k a. Map k a
+</span><span class="hs-identifier hs-var">M.empty</span></span><span> </span><span class="annot"><span class="annottext">forall a. Set a
+</span><span class="hs-identifier hs-var">S.empty</span></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514467"><span class="hs-identifier hs-var">decs</span></a></span><span>
+</span><span id="line-312"></span><span>       </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause] -&gt; [DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514461"><span class="hs-identifier hs-var">augment_clauses</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514466"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514465"><span class="hs-identifier hs-var">decs'</span></a></span><span>
+</span><span id="line-313"></span><span>        </span><span class="hs-comment">-- First, for each record selector-related declarations, do the following:</span><span>
+</span><span id="line-314"></span><span>        </span><span class="hs-comment">--</span><span>
+</span><span id="line-315"></span><span>        </span><span class="hs-comment">-- 1. If it's a DFunD...</span><span>
+</span><span id="line-316"></span><span>        </span><span class="hs-comment">--   a. If we haven't encountered it before, add a mapping from its Name</span><span>
+</span><span id="line-317"></span><span>        </span><span class="hs-comment">--      to its associated DClauses, and continue.</span><span>
+</span><span id="line-318"></span><span>        </span><span class="hs-comment">--   b. If we have encountered it before, augment the existing Name's</span><span>
+</span><span id="line-319"></span><span>        </span><span class="hs-comment">--      mapping with the new clauses. Then remove the DFunD from the list</span><span>
+</span><span id="line-320"></span><span>        </span><span class="hs-comment">--      and continue.</span><span>
+</span><span id="line-321"></span><span>        </span><span class="hs-comment">-- 2. If it's a DSigD...</span><span>
+</span><span id="line-322"></span><span>        </span><span class="hs-comment">--   a. If we haven't encountered it before, remember its Name and continue.</span><span>
+</span><span id="line-323"></span><span>        </span><span class="hs-comment">--   b. If we have encountered it before, remove the DSigD from the list</span><span>
+</span><span id="line-324"></span><span>        </span><span class="hs-comment">--      and continue.</span><span>
+</span><span id="line-325"></span><span>        </span><span class="hs-comment">-- 3. Otherwise, continue.</span><span>
+</span><span id="line-326"></span><span>        </span><span class="hs-comment">--</span><span>
+</span><span id="line-327"></span><span>        </span><span class="hs-comment">-- After this, scan over the resulting list once more with the mapping</span><span>
+</span><span id="line-328"></span><span>        </span><span class="hs-comment">-- that we accumulated. For every DFunD, replace its DClauses with the</span><span>
+</span><span id="line-329"></span><span>        </span><span class="hs-comment">-- ones corresponding to its Name in the mapping.</span><span>
+</span><span id="line-330"></span><span>        </span><span class="hs-comment">--</span><span>
+</span><span id="line-331"></span><span>        </span><span class="hs-comment">-- Note that this algorithm combines all of the DClauses for each unique</span><span>
+</span><span id="line-332"></span><span>        </span><span class="hs-comment">-- Name, while preserving the order in which the DFunDs were originally</span><span>
+</span><span id="line-333"></span><span>        </span><span class="hs-comment">-- found. Moreover, it removes duplicate DSigD entries. Using Maps and</span><span>
+</span><span id="line-334"></span><span>        </span><span class="hs-comment">-- Sets avoid quadratic blowup for data types with many record selectors.</span><span>
+</span><span id="line-335"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-336"></span><span>        </span><span class="annot"><a href="#local-6989586621679514464"><span class="hs-identifier hs-type">gather_decs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClause"><span class="hs-identifier hs-type">DClause</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Set</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-337"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClause"><span class="hs-identifier hs-type">DClause</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-338"></span><span>        </span><span id="local-6989586621679514464"><span class="annot"><span class="annottext">gather_decs :: Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var hs-var">gather_decs</span></a></span></span><span> </span><span id="local-6989586621679514460"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514460"><span class="hs-identifier hs-var">name_clause_map</span></a></span></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514460"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-339"></span><span>        </span><span class="annot"><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span id="local-6989586621679514459"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span></span><span> </span><span id="local-6989586621679514458"><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514457"><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679514456"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-340"></span><span>          </span><span class="hs-comment">-- 1.</span><span>
+</span><span id="line-341"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DFunD"><span class="hs-identifier hs-type">DFunD</span></a></span><span> </span><span id="local-6989586621679514455"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514455"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679514454"><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514454"><span class="hs-identifier hs-var">clauses</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-342"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679514452"><span class="annot"><span class="annottext">name_clause_map' :: Map Name [DClause]
+</span><a href="#local-6989586621679514452"><span class="hs-identifier hs-var hs-var">name_clause_map'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.insertWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679514450"><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514450"><span class="hs-identifier hs-var">new</span></a></span></span><span> </span><span id="local-6989586621679514449"><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514449"><span class="hs-identifier hs-var">old</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514449"><span class="hs-identifier hs-var">old</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514450"><span class="hs-identifier hs-var">new</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-343"></span><span>                                                </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514455"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514454"><span class="hs-identifier hs-var">clauses</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span>
+</span><span id="line-344"></span><span>             </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514455"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; k -&gt; Map k a -&gt; Bool
+</span><span class="hs-operator hs-var">`M.member`</span></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span>
+</span><span id="line-345"></span><span>                </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514452"><span class="hs-identifier hs-var">name_clause_map'</span></a></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-346"></span><span>                </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514447"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514447"><span class="hs-identifier hs-var">map'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514446"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514446"><span class="hs-identifier hs-var">decs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514452"><span class="hs-identifier hs-var">name_clause_map'</span></a></span><span>
+</span><span id="line-347"></span><span>                                           </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-348"></span><span>                      </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514447"><span class="hs-identifier hs-var">map'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514446"><span class="hs-identifier hs-var">decs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-349"></span><span>
+</span><span id="line-350"></span><span>          </span><span class="hs-comment">-- 2.</span><span>
+</span><span id="line-351"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DSigD"><span class="hs-identifier hs-type">DSigD</span></a></span><span> </span><span id="local-6989586621679514445"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514445"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-352"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514445"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; Set a -&gt; Bool
+</span><span class="hs-operator hs-var">`S.member`</span></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span>
+</span><span id="line-353"></span><span>            </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-354"></span><span>            </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514442"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514442"><span class="hs-identifier hs-var">map'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514441"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514441"><span class="hs-identifier hs-var">decs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span>
+</span><span id="line-355"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514445"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; Set a -&gt; Set a
+</span><span class="hs-operator hs-var">`S.insert`</span></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-356"></span><span>                  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514442"><span class="hs-identifier hs-var">map'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514441"><span class="hs-identifier hs-var">decs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-357"></span><span>
+</span><span id="line-358"></span><span>          </span><span class="hs-comment">-- 3.</span><span>
+</span><span id="line-359"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-360"></span><span>              </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514439"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514439"><span class="hs-identifier hs-var">map'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679514438"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514438"><span class="hs-identifier hs-var">decs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+-&gt; Set Name -&gt; [DLetDec] -&gt; (Map Name [DClause], [DLetDec])
+</span><a href="#local-6989586621679514464"><span class="hs-identifier hs-var">gather_decs</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514459"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span> </span><span class="annot"><span class="annottext">Set Name
+</span><a href="#local-6989586621679514458"><span class="hs-identifier hs-var">type_sig_names</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514456"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-361"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514439"><span class="hs-identifier hs-var">map'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514457"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514438"><span class="hs-identifier hs-var">decs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-362"></span><span>
+</span><span id="line-363"></span><span>        </span><span class="annot"><a href="#local-6989586621679514461"><span class="hs-identifier hs-type">augment_clauses</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DClause"><span class="hs-identifier hs-type">DClause</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DLetDec"><span class="hs-identifier hs-type">DLetDec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-364"></span><span>        </span><span id="local-6989586621679514461"><span class="annot"><span class="annottext">augment_clauses :: Map Name [DClause] -&gt; [DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514461"><span class="hs-identifier hs-var hs-var">augment_clauses</span></a></span></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-365"></span><span>        </span><span class="annot"><a href="#local-6989586621679514461"><span class="hs-identifier hs-var">augment_clauses</span></a></span><span> </span><span id="local-6989586621679514437"><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514437"><span class="hs-identifier hs-var">name_clause_map</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514436"><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514436"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679514435"><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514435"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-366"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DFunD"><span class="hs-identifier hs-type">DFunD</span></a></span><span> </span><span id="local-6989586621679514434"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514434"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514436"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679514433"><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514433"><span class="hs-identifier hs-var">merged_clauses</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514434"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; k -&gt; Map k a -&gt; Maybe a
+</span><span class="hs-operator hs-var">`M.lookup`</span></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514437"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span>
+</span><span id="line-367"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [DClause] -&gt; DLetDec
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DFunD"><span class="hs-identifier hs-var">DFunD</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679514434"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[DClause]
+</span><a href="#local-6989586621679514433"><span class="hs-identifier hs-var">merged_clauses</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">Map Name [DClause] -&gt; [DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514461"><span class="hs-identifier hs-var">augment_clauses</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514437"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514435"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-368"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DLetDec
+</span><a href="#local-6989586621679514436"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">Map Name [DClause] -&gt; [DLetDec] -&gt; [DLetDec]
+</span><a href="#local-6989586621679514461"><span class="hs-identifier hs-var">augment_clauses</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name [DClause]
+</span><a href="#local-6989586621679514437"><span class="hs-identifier hs-var">name_clause_map</span></a></span><span> </span><span class="annot"><span class="annottext">[DLetDec]
+</span><a href="#local-6989586621679514435"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-369"></span><span>
+</span><span id="line-370"></span><span class="hs-comment">-- | Create new kind variable binder names corresponding to the return kind of</span><span>
+</span><span id="line-371"></span><span class="hs-comment">-- a data type. This is useful when you have a data type like:</span><span>
+</span><span id="line-372"></span><span class="hs-comment">--</span><span>
+</span><span id="line-373"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-374"></span><span class="hs-comment">-- data Foo :: forall k. k -&gt; Type -&gt; Type where ...</span><span>
+</span><span id="line-375"></span><span class="hs-comment">-- @</span><span>
+</span><span id="line-376"></span><span class="hs-comment">--</span><span>
+</span><span id="line-377"></span><span class="hs-comment">-- But you want to be able to refer to the type @Foo a b@.</span><span>
+</span><span id="line-378"></span><span class="hs-comment">-- 'mkExtraDKindBinders' will take the kind @forall k. k -&gt; Type -&gt; Type@,</span><span>
+</span><span id="line-379"></span><span class="hs-comment">-- discover that is has two visible argument kinds, and return as a result</span><span>
+</span><span id="line-380"></span><span class="hs-comment">-- two new kind variable binders @[a :: k, b :: Type]@, where @a@ and @b@</span><span>
+</span><span id="line-381"></span><span class="hs-comment">-- are fresh type variable names.</span><span>
+</span><span id="line-382"></span><span class="hs-comment">--</span><span>
+</span><span id="line-383"></span><span class="hs-comment">-- This expands kind synonyms if necessary.</span><span>
+</span><span id="line-384"></span><span class="annot"><a href="Language.Haskell.TH.Desugar.html#mkExtraDKindBinders"><span class="hs-identifier hs-type">mkExtraDKindBinders</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679514812"><span class="annot"><a href="#local-6989586621679514812"><span class="hs-identifier hs-type">q</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Reify.html#DsMonad"><span class="hs-identifier hs-type">DsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679514812"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DKind"><span class="hs-identifier hs-type">DKind</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514812"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndrUnit"><span class="hs-identifier hs-type">DTyVarBndrUnit</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-385"></span><span id="mkExtraDKindBinders"><span class="annot"><span class="annottext">mkExtraDKindBinders :: forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; q [DTyVarBndrUnit]
+</span><a href="Language.Haskell.TH.Desugar.html#mkExtraDKindBinders"><span class="hs-identifier hs-var hs-var">mkExtraDKindBinders</span></a></span></span><span> </span><span id="local-6989586621679514414"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514414"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-386"></span><span>  </span><span id="local-6989586621679514413"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514413"><span class="hs-identifier hs-var">k'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; DType -&gt; q DType
+</span><a href="Language.Haskell.TH.Desugar.Expand.html#expandType"><span class="hs-identifier hs-var">expandType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514414"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-387"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679514412"><span class="annot"><span class="annottext">DFunArgs
+</span><a href="#local-6989586621679514412"><span class="hs-identifier hs-var">fun_args</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; (DFunArgs, DType)
+</span><a href="Language.Haskell.TH.Desugar.Core.html#unravelDType"><span class="hs-identifier hs-var">unravelDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514413"><span class="hs-identifier hs-var">k'</span></a></span><span>
+</span><span id="line-388"></span><span>      </span><span id="local-6989586621679514411"><span class="annot"><span class="annottext">vis_fun_args :: [DVisFunArg]
+</span><a href="#local-6989586621679514411"><span class="hs-identifier hs-var hs-var">vis_fun_args</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DFunArgs -&gt; [DVisFunArg]
+</span><a href="Language.Haskell.TH.Desugar.Core.html#filterDVisFunArgs"><span class="hs-identifier hs-var">filterDVisFunArgs</span></a></span><span> </span><span class="annot"><span class="annottext">DFunArgs
+</span><a href="#local-6989586621679514412"><span class="hs-identifier hs-var">fun_args</span></a></span><span>
+</span><span id="line-389"></span><span>  </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">DVisFunArg -&gt; q DTyVarBndrUnit
+</span><a href="#local-6989586621679514410"><span class="hs-identifier hs-var">mk_tvb</span></a></span><span> </span><span class="annot"><span class="annottext">[DVisFunArg]
+</span><a href="#local-6989586621679514411"><span class="hs-identifier hs-var">vis_fun_args</span></a></span><span>
+</span><span id="line-390"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-391"></span><span>    </span><span class="annot"><a href="#local-6989586621679514410"><span class="hs-identifier hs-type">mk_tvb</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DVisFunArg"><span class="hs-identifier hs-type">DVisFunArg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679514812"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.TH.Desugar.AST.html#DTyVarBndrUnit"><span class="hs-identifier hs-type">DTyVarBndrUnit</span></a></span><span>
+</span><span id="line-392"></span><span>    </span><span id="local-6989586621679514410"><span class="annot"><span class="annottext">mk_tvb :: DVisFunArg -&gt; q DTyVarBndrUnit
+</span><a href="#local-6989586621679514410"><span class="hs-identifier hs-var hs-var">mk_tvb</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DVisFADep"><span class="hs-identifier hs-type">DVisFADep</span></a></span><span> </span><span id="local-6989586621679514408"><span class="annot"><span class="annottext">DTyVarBndrUnit
+</span><a href="#local-6989586621679514408"><span class="hs-identifier hs-var">tvb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">DTyVarBndrUnit
+</span><a href="#local-6989586621679514408"><span class="hs-identifier hs-var">tvb</span></a></span><span>
+</span><span id="line-393"></span><span>    </span><span class="annot"><a href="#local-6989586621679514410"><span class="hs-identifier hs-var">mk_tvb</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.TH.Desugar.Core.html#DVisFAAnon"><span class="hs-identifier hs-type">DVisFAAnon</span></a></span><span> </span><span id="local-6989586621679514406"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514406"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall flag. Name -&gt; flag -&gt; DType -&gt; DTyVarBndr flag
+</span><a href="Language.Haskell.TH.Desugar.AST.html#DKindedTV"><span class="hs-identifier hs-var">DKindedTV</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">qNewName</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;a&quot;</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679514406"><span class="hs-identifier hs-var">ki</span></a></span><span>
+</span><span id="line-394"></span><span>
+</span><span id="line-395"></span><span class="hs-comment">{- $localReification
+
+@template-haskell@ reification functions like 'reify' and 'qReify', as well as
+@th-desugar@'s 'reifyWithWarning', only look through declarations that either
+(1) have already been typechecked in the current module, or (2) are in scope
+because of imports. We refer to this as /global/ reification. Sometimes,
+however, you may wish to reify declarations that have been quoted but not
+yet been typechecked, such as in the following example:
+
+@
+example :: IO ()
+example = putStrLn
+  $(do decs &lt;- [d| data Foo = MkFoo |]
+       info &lt;- 'reify' (mkName \&quot;Foo\&quot;)
+       stringE $ pprint info)
+@
+
+Because @Foo@ only exists in a TH quote, it is not available globally. As a
+result, the call to @'reify' (mkName \&quot;Foo\&quot;)@ will fail.
+
+To make this sort of example possible, @th-desugar@ extends global reification
+with /local/ reification. A function that performs local reification (such
+as 'dsReify', 'reifyWithLocals', or similar functions that have a 'DsMonad'
+context) looks through both typechecked (or imported) declarations /and/ quoted
+declarations that are currently in scope. One can add quoted declarations in
+the current scope by using the 'withLocalDeclarations' function. Here is an
+example of how to repair the example above using 'withLocalDeclarations':
+
+@
+example2 :: IO ()
+example2 = putStrLn
+  $(do decs &lt;- [d| data Foo = MkFoo |]
+       info &lt;- 'withLocalDeclarations' decs $
+                 'reifyWithLocals' (mkName \&quot;Foo\&quot;)
+       stringE $ pprint info)
+@
+
+Note that 'withLocalDeclarations' should only be used to add quoted
+declarations with names that are not duplicates of existing global or local
+declarations. Adding duplicate declarations through 'withLocalDeclarations'
+is undefined behavior and should be avoided. This is unlikely to happen if
+you are only using 'withLocalDeclarations' in conjunction with TH quotes,
+however. For instance, this is /not/ an example of duplicate declarations:
+
+@
+data T = MkT1
+
+$(do decs &lt;- [d| data T = MkT2 |]
+     info &lt;- 'withLocalDeclarations' decs ...
+     ...)
+@
+
+The quoted @data T = MkT2@ does not conflict with the top-level @data T = Mk1@
+since declaring a data type within TH quotes gives it a fresh, unique name that
+distinguishes it from any other data types already in scope.
+-}</span><span>
+</span><span id="line-451"></span></pre></body></html>

@@ -130,159 +130,128 @@ THE SOFTWARE.
 </span><span id="line-130"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Colour.SRGB.Linear.html"><span class="hs-identifier">Data.Colour.SRGB.Linear</span></a></span><span>
 </span><span id="line-131"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Colour.CIE.Chromaticity.html"><span class="hs-identifier">Data.Colour.CIE.Chromaticity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier">app_prec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier">infix_prec</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-132"></span><span>
-</span><span id="line-133"></span><span id="local-6989586621679046876"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046871"><span id="local-6989586621679046873"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046876"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679046876"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#Colour"><span class="hs-identifier hs-type">Colour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046876"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-134"></span><span>  </span><span id="local-6989586621679046869"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Colour a -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679046867"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046867"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679046866"><span class="annot"><span class="annottext">Colour a
-</span><a href="#local-6989586621679046866"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span id="line-133"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679044242"><span id="local-6989586621679044244"><span id="local-6989586621679044318"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679044318"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679044318"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#Colour"><span class="hs-identifier hs-type">Colour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679044318"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679044238"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Colour a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679044236"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679044236"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679044235"><span class="annot"><span class="annottext">Colour a
+</span><a href="#local-6989586621679044235"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
 </span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046867"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679044236"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621679046863"><span class="hs-identifier hs-var">showStr</span></a></span><span>
+</span><a href="#local-6989586621679044232"><span class="hs-identifier hs-var">showStr</span></a></span><span>
 </span><span id="line-135"></span><span>   </span><span class="hs-keyword">where</span><span>
-</span><span id="line-136"></span><span>    </span><span id="local-6989586621679046863"><span class="annot"><span class="annottext">showStr :: ShowS
-</span><a href="#local-6989586621679046863"><span class="hs-identifier hs-var hs-var">showStr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679044232"><span class="annot"><span class="annottext">showStr :: ShowS
+</span><a href="#local-6989586621679044232"><span class="hs-identifier hs-var hs-var">showStr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><a href="Data.Colour.html#linearConstructorQualifiedName"><span class="hs-identifier hs-var">linearConstructorQualifiedName</span></a></span><span>
-</span><span id="line-137"></span><span>            </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span id="line-137"></span><span>            </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046858"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-138"></span><span>            </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679044217"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>            </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046857"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-139"></span><span>            </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679044216"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>            </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046856"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-140"></span><span>    </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">Data.Colour.SRGB.Linear.RGB</span></a></span><span> </span><span id="local-6989586621679046858"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046858"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679046857"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046857"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679046856"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046856"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Colour a -&gt; RGB a
-forall a. Fractional a =&gt; Colour a -&gt; RGB a
+</span><a href="#local-6989586621679044215"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>    </span><span class="annot"><a href="Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">Data.Colour.SRGB.Linear.RGB</span></a></span><span> </span><span id="local-6989586621679044217"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044217"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679044216"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044216"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679044215"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044215"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; Colour a -&gt; RGB a
 </span><a href="Data.Colour.SRGB.Linear.html#toRGB"><span class="hs-identifier hs-var">Data.Colour.SRGB.Linear.toRGB</span></a></span><span> </span><span class="annot"><span class="annottext">Colour a
-</span><a href="#local-6989586621679046866"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="#local-6989586621679044235"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-141"></span><span>
-</span><span id="line-142"></span><span id="local-6989586621679046853"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046846"><span id="local-6989586621679046848"><span id="local-6989586621679046850"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046853"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679046853"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#Colour"><span class="hs-identifier hs-type">Colour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046853"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-143"></span><span>  </span><span id="local-6989586621679046844"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (Colour a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span id="local-6989586621679046842"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046842"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679046841"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046841"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ReadS (Colour a) -&gt; ReadS (Colour a)
-forall a. Bool -&gt; ReadS a -&gt; ReadS a
+</span><span id="line-142"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679044205"><span id="local-6989586621679044207"><span id="local-6989586621679044209"><span id="local-6989586621679044307"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679044307"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679044307"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#Colour"><span class="hs-identifier hs-type">Colour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679044307"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-143"></span><span>  </span><span id="local-6989586621679044186"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (Colour a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span id="local-6989586621679044184"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679044184"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679044183"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044183"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Bool -&gt; ReadS a -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046842"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679044184"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-144"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679046839"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046839"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; Colour a
-forall a. Fractional a =&gt; a -&gt; a -&gt; a -&gt; Colour a
+</span><span id="line-144"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679044181"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044181"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; a -&gt; a -&gt; a -&gt; Colour a
 </span><a href="Data.Colour.SRGB.Linear.html#rgb"><span class="hs-identifier hs-var">Data.Colour.SRGB.Linear.rgb</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046837"><span class="hs-identifier hs-var">r0</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046836"><span class="hs-identifier hs-var">g0</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046835"><span class="hs-identifier hs-var">b0</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046834"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-145"></span><span>                         </span><span class="hs-glyph">|</span><span class="hs-special">(</span><span id="local-6989586621679046833"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046833"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046832"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046832"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
-</span><a href="#local-6989586621679046831"><span class="hs-identifier hs-var">mylex</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046839"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><a href="#local-6989586621679044179"><span class="hs-identifier hs-var">r0</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044178"><span class="hs-identifier hs-var">g0</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044177"><span class="hs-identifier hs-var">b0</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044176"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>                         </span><span class="hs-glyph">|</span><span class="hs-special">(</span><span id="local-6989586621679044175"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044175"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044174"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044174"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
+</span><a href="#local-6989586621679044173"><span class="hs-identifier hs-var">mylex</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044181"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-146"></span><span>                         </span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046833"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
-forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><a href="#local-6989586621679044175"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><a href="Data.Colour.html#linearConstructorName"><span class="hs-identifier hs-var">linearConstructorName</span></a></span><span>
 </span><span id="line-147"></span><span>                                      </span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
 </span><a href="Data.Colour.html#linearConstructorQualifiedName"><span class="hs-identifier hs-var">linearConstructorQualifiedName</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-148"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679046837"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046837"><span class="hs-identifier hs-var">r0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046828"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046828"><span class="hs-identifier hs-var">s0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS a
-forall a. Read a =&gt; Int -&gt; ReadS a
+</span><span id="line-148"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679044179"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044179"><span class="hs-identifier hs-var">r0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044170"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044170"><span class="hs-identifier hs-var">s0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046832"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-149"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679046836"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046836"><span class="hs-identifier hs-var">g0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046827"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046827"><span class="hs-identifier hs-var">s1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS a
-forall a. Read a =&gt; Int -&gt; ReadS a
+</span><a href="#local-6989586621679044174"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-149"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679044178"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044178"><span class="hs-identifier hs-var">g0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044169"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044169"><span class="hs-identifier hs-var">s1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046828"><span class="hs-identifier hs-var">s0</span></a></span><span>
-</span><span id="line-150"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679046835"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046835"><span class="hs-identifier hs-var">b0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046834"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046834"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS a
-forall a. Read a =&gt; Int -&gt; ReadS a
+</span><a href="#local-6989586621679044170"><span class="hs-identifier hs-var">s0</span></a></span><span>
+</span><span id="line-150"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679044177"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044177"><span class="hs-identifier hs-var">b0</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044176"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044176"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#app_prec"><span class="hs-identifier hs-var">app_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046827"><span class="hs-identifier hs-var">s1</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046841"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><a href="#local-6989586621679044169"><span class="hs-identifier hs-var">s1</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044183"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-151"></span><span>   </span><span class="hs-keyword">where</span><span>
-</span><span id="line-152"></span><span>    </span><span id="local-6989586621679046831"><span class="annot"><span class="annottext">mylex :: String -&gt; [(String, String)]
-</span><a href="#local-6989586621679046831"><span class="hs-identifier hs-var hs-var">mylex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String, String) -&gt; [(String, String)]
-forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span id="line-152"></span><span>    </span><span id="local-6989586621679044173"><span class="annot"><span class="annottext">mylex :: String -&gt; [(String, String)]
+</span><a href="#local-6989586621679044173"><span class="hs-identifier hs-var hs-var">mylex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span>
-</span><span id="line-153"></span><span>          </span><span class="annot"><span class="annottext">((String, String) -&gt; [(String, String)])
--&gt; (String -&gt; (String, String)) -&gt; String -&gt; [(String, String)]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
-forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
-</span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679046825"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679046825"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span id="line-153"></span><span>          </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679044163"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679044163"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isAlphaNum</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679046825"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679044163"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679046825"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; Bool
-forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><a href="#local-6989586621679044163"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;._'&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-154"></span><span>          </span><span class="annot"><span class="annottext">(String -&gt; (String, String)) -&gt; ShowS -&gt; String -&gt; (String, String)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; ShowS
-forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span id="line-154"></span><span>          </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">dropWhile</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><span class="hs-identifier hs-var">isSpace</span></span></span><span>
+</span><span class="hs-identifier hs-var">isSpace</span></span><span>
 </span><span id="line-155"></span><span>
 </span><span id="line-156"></span><span id="linearConstructorQualifiedName"><span class="annot"><span class="annottext">linearConstructorQualifiedName :: String
 </span><a href="Data.Colour.html#linearConstructorQualifiedName"><span class="hs-identifier hs-var hs-var">linearConstructorQualifiedName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
@@ -291,13 +260,12 @@ forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><a href="Data.Colour.html#linearConstructorName"><span class="hs-identifier hs-var hs-var">linearConstructorName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;rgb&quot;</span></span><span>
 </span><span id="line-158"></span><span>
-</span><span id="line-159"></span><span id="local-6989586621679046822"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046817"><span id="local-6989586621679046819"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679046822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679046822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#AlphaColour"><span class="hs-identifier hs-type">AlphaColour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-160"></span><span>  </span><span id="local-6989586621679046816"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; AlphaColour a -&gt; ShowS
-</span><a href="#local-6989586621679046816"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679046815"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046815"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679046814"><span class="annot"><span class="annottext">AlphaColour a
-</span><a href="#local-6989586621679046814"><span class="hs-identifier hs-var">ac</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046813"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span id="line-159"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679044156"><span id="local-6989586621679044158"><span id="local-6989586621679044297"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679044297"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679044297"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679044297"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#AlphaColour"><span class="hs-identifier hs-type">AlphaColour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679044297"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621679044152"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; AlphaColour a -&gt; ShowS
+</span><a href="#local-6989586621679044152"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679044151"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679044151"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679044150"><span class="annot"><span class="annottext">AlphaColour a
+</span><a href="#local-6989586621679044150"><span class="hs-identifier hs-var">ac</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044149"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -305,110 +273,91 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-161"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
 </span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046815"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679044151"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621679046812"><span class="hs-identifier hs-var">showStr</span></a></span><span>
+</span><a href="#local-6989586621679044148"><span class="hs-identifier hs-var">showStr</span></a></span><span>
 </span><span id="line-162"></span><span>   </span><span class="hs-keyword">where</span><span>
-</span><span id="line-163"></span><span>    </span><span id="local-6989586621679046812"><span class="annot"><span class="annottext">showStr :: ShowS
-</span><a href="#local-6989586621679046812"><span class="hs-identifier hs-var hs-var">showStr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Colour a -&gt; ShowS
-forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span id="line-163"></span><span>    </span><span id="local-6989586621679044148"><span class="annot"><span class="annottext">showStr :: ShowS
+</span><a href="#local-6989586621679044148"><span class="hs-identifier hs-var hs-var">showStr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Colour a
-</span><a href="#local-6989586621679046811"><span class="hs-identifier hs-var">c</span></a></span><span>
-</span><span id="line-164"></span><span>            </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679044139"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-164"></span><span>            </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; `withOpacity` &quot;</span></span><span>
-</span><span id="line-165"></span><span>            </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span id="line-165"></span><span>            </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046813"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-166"></span><span>    </span><span id="local-6989586621679046813"><span class="annot"><span class="annottext">a :: a
-</span><a href="#local-6989586621679046813"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AlphaColour a -&gt; a
-forall a. AlphaColour a -&gt; a
+</span><a href="#local-6989586621679044149"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-166"></span><span>    </span><span id="local-6989586621679044149"><span class="annot"><span class="annottext">a :: a
+</span><a href="#local-6989586621679044149"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. AlphaColour a -&gt; a
 </span><a href="Data.Colour.Internal.html#alphaChannel"><span class="hs-identifier hs-var">alphaChannel</span></a></span><span> </span><span class="annot"><span class="annottext">AlphaColour a
-</span><a href="#local-6989586621679046814"><span class="hs-identifier hs-var">ac</span></a></span><span>
-</span><span id="line-167"></span><span>    </span><span id="local-6989586621679046811"><span class="annot"><span class="annottext">c :: Colour a
-</span><a href="#local-6989586621679046811"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AlphaColour a -&gt; Colour a
-forall a. Fractional a =&gt; AlphaColour a -&gt; Colour a
+</span><a href="#local-6989586621679044150"><span class="hs-identifier hs-var">ac</span></a></span><span>
+</span><span id="line-167"></span><span>    </span><span id="local-6989586621679044139"><span class="annot"><span class="annottext">c :: Colour a
+</span><a href="#local-6989586621679044139"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. Fractional a =&gt; AlphaColour a -&gt; Colour a
 </span><a href="Data.Colour.Internal.html#colourChannel"><span class="hs-identifier hs-var">colourChannel</span></a></span><span> </span><span class="annot"><span class="annottext">AlphaColour a
-</span><a href="#local-6989586621679046814"><span class="hs-identifier hs-var">ac</span></a></span></span><span>
+</span><a href="#local-6989586621679044150"><span class="hs-identifier hs-var">ac</span></a></span><span>
 </span><span id="line-168"></span><span>
-</span><span id="line-169"></span><span id="local-6989586621679046809"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046802"><span id="local-6989586621679046804"><span id="local-6989586621679046806"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679046809"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679046809"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#AlphaColour"><span class="hs-identifier hs-type">AlphaColour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679046809"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-170"></span><span>  </span><span id="local-6989586621679046801"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (AlphaColour a)
-</span><a href="#local-6989586621679046801"><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span id="local-6989586621679046800"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046800"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679046799"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046799"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">AlphaColour a
-forall a. Num a =&gt; AlphaColour a
+</span><span id="line-169"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679044130"><span id="local-6989586621679044132"><span id="local-6989586621679044134"><span id="local-6989586621679044292"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679044292"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679044292"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Colour.Internal.html#AlphaColour"><span class="hs-identifier hs-type">AlphaColour</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679044292"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-170"></span><span>  </span><span id="local-6989586621679044120"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (AlphaColour a)
+</span><a href="#local-6989586621679044120"><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span id="local-6989586621679044119"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679044119"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679044118"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044118"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Num a =&gt; AlphaColour a
 </span><a href="Data.Colour.Internal.html#transparent"><span class="hs-identifier hs-var">transparent</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046798"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-glyph">|</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;transparent&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679046798"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046798"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
+</span><a href="#local-6989586621679044117"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-glyph">|</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;transparent&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679044117"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044117"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
 </span><span class="hs-identifier hs-var">lex</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046799"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-171"></span><span>               </span><span class="annot"><span class="annottext">[(AlphaColour a, String)]
--&gt; [(AlphaColour a, String)] -&gt; [(AlphaColour a, String)]
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ReadS (AlphaColour a) -&gt; ReadS (AlphaColour a)
-forall a. Bool -&gt; ReadS a -&gt; ReadS a
+</span><a href="#local-6989586621679044118"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-171"></span><span>               </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">forall a. Bool -&gt; ReadS a -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679046800"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
-forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679044119"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-172"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679046796"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046796"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Colour a
-</span><a href="#local-6989586621679046795"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Colour a -&gt; a -&gt; AlphaColour a
-forall a. Num a =&gt; Colour a -&gt; a -&gt; AlphaColour a
+</span><span id="line-172"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679044115"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044115"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Colour a
+</span><a href="#local-6989586621679044114"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; Colour a -&gt; a -&gt; AlphaColour a
 </span><a href="Data.Colour.Internal.html#withOpacity"><span class="hs-operator hs-var">`withOpacity`</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046794"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046793"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-173"></span><span>                         </span><span class="hs-glyph">|</span><span class="hs-special">(</span><span id="local-6989586621679046795"><span class="annot"><span class="annottext">Colour a
-</span><a href="#local-6989586621679046795"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046792"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046792"><span class="hs-identifier hs-var">r0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS (Colour a)
-forall a. Read a =&gt; Int -&gt; ReadS a
+</span><a href="#local-6989586621679044113"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044112"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-173"></span><span>                         </span><span class="hs-glyph">|</span><span class="hs-special">(</span><span id="local-6989586621679044114"><span class="annot"><span class="annottext">Colour a
+</span><a href="#local-6989586621679044114"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044111"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044111"><span class="hs-identifier hs-var">r0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046796"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><a href="#local-6989586621679044115"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-174"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;`&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679046791"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046791"><span class="hs-identifier hs-var">r1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
+</span><span class="hs-string">&quot;`&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679044110"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044110"><span class="hs-identifier hs-var">r1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
 </span><span class="hs-identifier hs-var">lex</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046792"><span class="hs-identifier hs-var">r0</span></a></span><span>
+</span><a href="#local-6989586621679044111"><span class="hs-identifier hs-var">r0</span></a></span><span>
 </span><span id="line-175"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;withOpacity&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679046790"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046790"><span class="hs-identifier hs-var">r2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
+</span><span class="hs-string">&quot;withOpacity&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679044109"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044109"><span class="hs-identifier hs-var">r2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
 </span><span class="hs-identifier hs-var">lex</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046791"><span class="hs-identifier hs-var">r1</span></a></span><span>
+</span><a href="#local-6989586621679044110"><span class="hs-identifier hs-var">r1</span></a></span><span>
 </span><span id="line-176"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;`&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679046789"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046789"><span class="hs-identifier hs-var">r3</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
+</span><span class="hs-string">&quot;`&quot;</span></span><span class="hs-special">,</span><span id="local-6989586621679044108"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044108"><span class="hs-identifier hs-var">r3</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; [(String, String)]
 </span><span class="hs-identifier hs-var">lex</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046790"><span class="hs-identifier hs-var">r2</span></a></span><span>
-</span><span id="line-177"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679046794"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679046794"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679046793"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046793"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS a
-forall a. Read a =&gt; Int -&gt; ReadS a
+</span><a href="#local-6989586621679044109"><span class="hs-identifier hs-var">r2</span></a></span><span>
+</span><span id="line-177"></span><span>                         </span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679044113"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679044113"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679044112"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044112"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><a href="Data.Colour.CIE.Chromaticity.html#infix_prec"><span class="hs-identifier hs-var">infix_prec</span></a></span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046789"><span class="hs-identifier hs-var">r3</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679046799"><span class="hs-identifier hs-var">r</span></a></span></span><span>
+</span><a href="#local-6989586621679044108"><span class="hs-identifier hs-var">r3</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679044118"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-178"></span></pre></body></html>

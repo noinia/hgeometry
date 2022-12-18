@@ -16,36 +16,8 @@
 
 -- | Low level stuff for integer logarithms.
 module GHC.Integer.Logarithms.Compat
-
--- | Calculate the integer logarithm for an arbitrary base.
---   
---   The base must be greater than <tt>1</tt>, the second argument, the
---   number whose logarithm is sought, shall be positive, otherwise the
---   result is meaningless.
---   
---   The following property holds
---   
---   <pre>
---   base ^ <a>integerLogBase#</a> base m &lt;= m &lt; base ^(<a>integerLogBase#</a> base m + 1)
---   </pre>
---   
---   for <tt>base &gt; 1</tt> and <tt>m &gt; 0</tt>.
---   
---   Note: Internally uses <a>integerLog2#</a> for base 2
 integerLogBase# :: Integer -> Integer -> Int#
-
--- | Calculate the integer base 2 logarithm of an <a>Integer</a>. The
---   calculation is more efficient than for the general case, on platforms
---   with 32- or 64-bit words much more efficient.
---   
---   The argument must be strictly positive, that condition is <i>not</i>
---   checked.
 integerLog2# :: Integer -> Int#
-
--- | Compute base-2 log of <a>Word#</a>
---   
---   This is internally implemented as count-leading-zeros machine
---   instruction.
 wordLog2# :: Word# -> Int#
 
 

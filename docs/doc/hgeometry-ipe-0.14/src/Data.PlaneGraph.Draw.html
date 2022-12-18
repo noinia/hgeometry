@@ -23,12 +23,14 @@
 </span><span id="line-23"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-comment">-- | Draws only the values for which we have a Just attribute</span><span>
-</span><span id="line-26"></span><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-type">drawPlaneGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679421568"><span class="annot"><a href="#local-6989586621679421568"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679421569"><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-27"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679421568"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span>                           </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-31"></span><span id="drawPlaneGraph"><span class="annot"><span class="annottext">drawPlaneGraph :: IpeOut
+</span><span id="line-26"></span><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-type">drawPlaneGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679385636"><span class="annot"><a href="#local-6989586621679385636"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679385637"><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679385636"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>                           </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-31"></span><span id="drawPlaneGraph"><span class="annot"><span class="annottext">drawPlaneGraph :: forall {k} (s :: k) r.
+(Num r, Ord r) =&gt;
+IpeOut
   (PlaneGraph
      s
      (Maybe (IpeAttributes IpeSymbol r))
@@ -37,325 +39,105 @@
      r)
   Group
   r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-var hs-var">drawPlaneGraph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut'
-  Maybe
-  (VertexId' s,
-   VertexData
-     r
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size])))
-  IpeSymbol
-  r
--&gt; IpeOut'
-     Maybe
-     (Dart s,
-      LineSegment
-        2
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        r
-      :+ Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     Path
-     r
--&gt; IpeOut'
-     Maybe
-     (FaceId' s,
-      SimplePolygon
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        r
-      :+ Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     Path
-     r
--&gt; IpeOut'
-     Maybe
-     (FaceId' s,
-      MultiPolygon
-        (Maybe
-           (Maybe
-              (Attributes'
-                 r
-                 '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                    'Size])))
-        r
-      :+ Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     Path
-     r
--&gt; IpeOut
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        r)
-     Group
-     r
-forall k (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k) v
-       e f.
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-var hs-var">drawPlaneGraph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k)
+       v e f.
 (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) =&gt;
 IpeOut' Maybe (VertexId' s, VertexData r v) vi r
 -&gt; IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
 -&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
 -&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
 -&gt; IpeOut (PlaneGraph s v e f r) Group r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var">drawPlaneGraphWith</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut'
-  Maybe
-  (VertexId' s,
-   VertexData
-     r
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size])))
-  IpeSymbol
-  r
-(VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var">drawPlaneGraphWith</span></a></span><span> </span><span class="annot"><span class="annottext">(VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
 -&gt; Maybe (IpeObject' IpeSymbol r)
-</span><a href="#local-6989586621679421449"><span class="hs-identifier hs-var">fv</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut'
-  Maybe
-  (Dart s,
-   LineSegment
-     2
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     r
-   :+ Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-  Path
-  r
-forall (f :: * -&gt; *) g a.
+</span><a href="#local-6989586621679385400"><span class="hs-identifier hs-var">fv</span></a></span><span> </span><span class="annot"><span class="annottext">forall {f :: * -&gt; *} {g} {a}.
 (Functor f, HasDefaultIpeOut g) =&gt;
 (a,
  g :+ f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))))
 -&gt; f (DefaultIpeOut g (NumType g)
       :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421448"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut'
-  Maybe
-  (FaceId' s,
-   SimplePolygon
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     r
-   :+ Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-  Path
-  r
-forall (f :: * -&gt; *) g a.
+</span><a href="#local-6989586621679385399"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">forall {f :: * -&gt; *} {g} {a}.
 (Functor f, HasDefaultIpeOut g) =&gt;
 (a,
  g :+ f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))))
 -&gt; f (DefaultIpeOut g (NumType g)
       :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421447"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut'
-  Maybe
-  (FaceId' s,
-   MultiPolygon
-     (Maybe
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size])))
-     r
-   :+ Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-  Path
-  r
-forall (f :: * -&gt; *) g a.
+</span><a href="#local-6989586621679385398"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">forall {f :: * -&gt; *} {g} {a}.
 (Functor f, HasDefaultIpeOut g) =&gt;
 (a,
  g :+ f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))))
 -&gt; f (DefaultIpeOut g (NumType g)
       :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421447"><span class="hs-identifier hs-var">ff</span></a></span><span>
+</span><a href="#local-6989586621679385398"><span class="hs-identifier hs-var">ff</span></a></span><span>
 </span><span id="line-32"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-33"></span><span>    </span><span class="annot"><a href="#local-6989586621679421449"><span class="hs-identifier hs-type">fv</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421568"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421569"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>    </span><span id="local-6989586621679421449"><span class="annot"><span class="annottext">fv :: (VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
+</span><span id="line-33"></span><span>    </span><span class="annot"><a href="#local-6989586621679385400"><span class="hs-identifier hs-type">fv</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385636"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385637"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679385400"><span class="annot"><span class="annottext">fv :: (VertexId' s, VertexData r (Maybe (IpeAttributes IpeSymbol r)))
 -&gt; Maybe (IpeObject' IpeSymbol r)
-</span><a href="#local-6989586621679421449"><span class="hs-identifier hs-var hs-var">fv</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexId' s
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span id="local-6989586621679421445"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679421445"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679421444"><span class="annot"><span class="annottext">Maybe (IpeAttributes IpeSymbol r)
-</span><a href="#local-6989586621679421444"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679421443"><span class="annot"><span class="annottext">Attributes'
+</span><a href="#local-6989586621679385400"><span class="hs-identifier hs-var hs-var">fv</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexId' s
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span id="local-6989586621679385396"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679385396"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679385395"><span class="annot"><span class="annottext">Maybe (IpeAttributes IpeSymbol r)
+</span><a href="#local-6989586621679385395"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679385394"><span class="annot"><span class="annottext">Attributes'
   r
   '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
      'Size]
-</span><a href="#local-6989586621679421443"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut
-  (Point 2 r) (DefaultIpeOut (Point 2 r)) (NumType (Point 2 r))
-forall g.
+</span><a href="#local-6989586621679385394"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall g.
 HasDefaultIpeOut g =&gt;
 IpeOut g (DefaultIpeOut g) (NumType g)
 </span><a href="Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679421445"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' IpeSymbol r
--&gt; IpeAttributes IpeSymbol r -&gt; IpeObject' IpeSymbol r
-forall (i :: * -&gt; *) r.
+</span><a href="#local-6989586621679385396"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r.
 IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
-</span><a href="Ipe.IpeOut.html#%21"><span class="hs-glyph hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+</span><a href="Ipe.IpeOut.html#%21"><span class="hs-operator hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
   r
   '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
      'Size]
-IpeAttributes IpeSymbol r
-</span><a href="#local-6989586621679421443"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Attributes'
-   r
-   '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-      'Size]
- -&gt; IpeSymbol r
-    :+ Attributes'
-         r
-         '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-            'Size])
--&gt; Maybe
-     (Attributes'
-        r
-        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-           'Size])
--&gt; Maybe
-     (IpeSymbol r
-      :+ Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size])
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe
-  (Attributes'
-     r
-     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-        'Size])
-Maybe (IpeAttributes IpeSymbol r)
-</span><a href="#local-6989586621679421444"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draws a point</span><span>
-</span><span id="line-36"></span><span>    </span><span id="local-6989586621679421448"><span class="annot"><span class="annottext">fe :: (a,
+</span><a href="#local-6989586621679385394"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (IpeAttributes IpeSymbol r)
+</span><a href="#local-6989586621679385395"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draws a point</span><span>
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621679385399"><span class="annot"><span class="annottext">fe :: (a,
  g :+ f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))))
 -&gt; f (DefaultIpeOut g (NumType g)
       :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421448"><span class="hs-identifier hs-var hs-var">fe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679421439"><span class="annot"><span class="annottext">g
-</span><a href="#local-6989586621679421439"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679421437"><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421437"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679421436"><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-</span><a href="#local-6989586621679421436"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut g (DefaultIpeOut g) (NumType g)
-forall g.
+</span><a href="#local-6989586621679385399"><span class="hs-identifier hs-var hs-var">fe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679385386"><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621679385386"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679385384"><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
+</span><a href="#local-6989586621679385384"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679385383"><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
+</span><a href="#local-6989586621679385383"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall g.
 HasDefaultIpeOut g =&gt;
 IpeOut g (DefaultIpeOut g) (NumType g)
 </span><a href="Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">g
-</span><a href="#local-6989586621679421439"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(DefaultIpeOut g (NumType g)
- :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
--&gt; DefaultIpeOut g (NumType g)
-   :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-forall (i :: * -&gt; *) r.
+</span><a href="#local-6989586621679385386"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r.
 IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
-</span><a href="Ipe.IpeOut.html#%21"><span class="hs-glyph hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-</span><a href="#local-6989586621679421436"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
- -&gt; DefaultIpeOut g (NumType g)
-    :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; f (DefaultIpeOut g (NumType g)
-      :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="Ipe.IpeOut.html#%21"><span class="hs-operator hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
+</span><a href="#local-6989586621679385383"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421437"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draw segment</span><span>
-</span><span id="line-37"></span><span>    </span><span id="local-6989586621679421447"><span class="annot"><span class="annottext">ff :: (a,
+</span><a href="#local-6989586621679385384"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draw segment</span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679385398"><span class="annot"><span class="annottext">ff :: (a,
  g :+ f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))))
 -&gt; f (DefaultIpeOut g (NumType g)
       :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421447"><span class="hs-identifier hs-var hs-var">ff</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679421435"><span class="annot"><span class="annottext">g
-</span><a href="#local-6989586621679421435"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679421434"><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421434"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679421433"><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-</span><a href="#local-6989586621679421433"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut g (DefaultIpeOut g) (NumType g)
-forall g.
+</span><a href="#local-6989586621679385398"><span class="hs-identifier hs-var hs-var">ff</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679385378"><span class="annot"><span class="annottext">g
+</span><a href="#local-6989586621679385378"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679385377"><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
+</span><a href="#local-6989586621679385377"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679385376"><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
+</span><a href="#local-6989586621679385376"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall g.
 HasDefaultIpeOut g =&gt;
 IpeOut g (DefaultIpeOut g) (NumType g)
 </span><a href="Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">g
-</span><a href="#local-6989586621679421435"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(DefaultIpeOut g (NumType g)
- :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
--&gt; DefaultIpeOut g (NumType g)
-   :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-forall (i :: * -&gt; *) r.
+</span><a href="#local-6989586621679385378"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r.
 IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
-</span><a href="Ipe.IpeOut.html#%21"><span class="hs-glyph hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
-</span><a href="#local-6989586621679421433"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
- -&gt; DefaultIpeOut g (NumType g)
-    :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
--&gt; f (DefaultIpeOut g (NumType g)
-      :+ Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="Ipe.IpeOut.html#%21"><span class="hs-operator hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes' (NumType g) (AttributesOf (DefaultIpeOut g))
+</span><a href="#local-6989586621679385376"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (Attributes' (NumType g) (AttributesOf (DefaultIpeOut g)))
-</span><a href="#local-6989586621679421434"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draw a face</span><span>
+</span><a href="#local-6989586621679385377"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-comment">-- draw a face</span><span>
 </span><span id="line-38"></span><span>
 </span><span id="line-39"></span><span class="hs-comment">-- | Draw everything using the defaults</span><span>
-</span><span id="line-40"></span><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph%27"><span class="hs-identifier hs-type">drawPlaneGraph'</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679421431"><span class="annot"><a href="#local-6989586621679421431"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679421430"><span class="annot"><a href="#local-6989586621679421430"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679421429"><span class="annot"><a href="#local-6989586621679421429"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679421428"><span class="annot"><a href="#local-6989586621679421428"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679421427"><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-41"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679421431"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421430"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421429"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421428"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-42"></span><span id="drawPlaneGraph%27"><span class="annot"><span class="annottext">drawPlaneGraph' :: IpeOut (PlaneGraph s v e f r) Group r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph%27"><span class="hs-identifier hs-var hs-var">drawPlaneGraph'</span></a></span></span><span> </span><span id="local-6989586621679421426"><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421426"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut
-  (PlaneGraph
-     s
-     (Maybe (IpeAttributes IpeSymbol r))
-     (Maybe (IpeAttributes Path r))
-     (Maybe (IpeAttributes Path r))
-     r)
-  Group
-  r
-forall k (s :: k) r.
+</span><span id="line-40"></span><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph%27"><span class="hs-identifier hs-type">drawPlaneGraph'</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679385569"><span class="annot"><a href="#local-6989586621679385569"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679385568"><span class="annot"><a href="#local-6989586621679385568"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679385567"><span class="annot"><a href="#local-6989586621679385567"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679385566"><span class="annot"><a href="#local-6989586621679385566"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679385570"><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679385569"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385568"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385567"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385566"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-42"></span><span id="drawPlaneGraph%27"><span class="annot"><span class="annottext">drawPlaneGraph' :: forall {k} (s :: k) v e f r.
+(Ord r, Num r) =&gt;
+IpeOut (PlaneGraph s v e f r) Group r
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph%27"><span class="hs-identifier hs-var hs-var">drawPlaneGraph'</span></a></span></span><span> </span><span id="local-6989586621679385323"><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679385323"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) r.
 (Num r, Ord r) =&gt;
 IpeOut
   (PlaneGraph
@@ -368,876 +150,75 @@ IpeOut
   r
 </span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraph"><span class="hs-identifier hs-var">drawPlaneGraph</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421426"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">PlaneGraph s v e f r
--&gt; (PlaneGraph s v e f r
-    -&gt; PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         e
-         f
-         r)
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     e
-     f
-     r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector v
- -&gt; Identity
-      (Vector
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))))
--&gt; PlaneGraph s v e f r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        e
-        f
-        r)
-forall k (s :: k) v e f r v'.
+</span><a href="#local-6989586621679385323"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r v'.
 Lens
   (PlaneGraph s v e f r)
   (PlaneGraph s v' e f r)
   (Vector v)
   (Vector v')
-</span><span class="hs-identifier hs-var">vertexData</span></span><span class="annot"><span class="annottext">((Vector v
-  -&gt; Identity
-       (Vector
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                   'Size]))))
- -&gt; PlaneGraph s v e f r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         e
-         f
-         r))
--&gt; ((v
-     -&gt; Identity
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                   'Size])))
-    -&gt; Vector v
-    -&gt; Identity
-         (Vector
-            (Maybe
-               (Attributes'
-                  r
-                  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                     'Size]))))
--&gt; (v
-    -&gt; Identity
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size])))
--&gt; PlaneGraph s v e f r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        e
-        f
-        r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(v
- -&gt; Identity
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size])))
--&gt; Vector v
--&gt; Identity
-     (Vector
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size])))
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><span class="hs-identifier hs-var">vertexData</span></span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
-</span><span class="hs-identifier hs-var">traverse</span></span><span>   </span><span class="annot"><span class="annottext">((v
-  -&gt; Identity
-       (Maybe
-          (Attributes'
-             r
-             '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                'Size])))
- -&gt; PlaneGraph s v e f r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         e
-         f
-         r))
--&gt; Attributes'
-     r
-     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-        'Size]
--&gt; PlaneGraph s v e f r
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     e
-     f
-     r
-forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeAttributes IpeSymbol r
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span>     </span><span class="annot"><span class="annottext">PlaneGraph
-  s
-  (Maybe
-     (Attributes'
-        r
-        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-           'Size]))
-  e
-  f
-  r
--&gt; (PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      e
-      f
-      r
-    -&gt; PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         f
-         r)
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     f
-     r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector (Dart s, e)
- -&gt; Identity
-      (Vector
-         (Dart s,
-          Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     e
-     f
-     r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        f
-        r)
-forall k (s :: k) v e f r e'.
+</span><span class="hs-identifier hs-var">traverse</span></span><span>   </span><span class="annot"><span class="annottext">forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier hs-type">IpeSymbol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>     </span><span class="annot"><span class="annottext">forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r e'.
 Lens
   (PlaneGraph s v e f r)
   (PlaneGraph s v e' f r)
   (Vector (Dart s, e))
   (Vector (Dart s, e'))
-</span><span class="hs-identifier hs-var">dartData</span></span><span class="annot"><span class="annottext">((Vector (Dart s, e)
-  -&gt; Identity
-       (Vector
-          (Dart s,
-           Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                   'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                   'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
- -&gt; PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      e
-      f
-      r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         f
-         r))
--&gt; ((e
-     -&gt; Identity
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                   'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                   'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-    -&gt; Vector (Dart s, e)
-    -&gt; Identity
-         (Vector
-            (Dart s,
-             Maybe
-               (Attributes'
-                  r
-                  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
--&gt; (e
-    -&gt; Identity
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     e
-     f
-     r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        f
-        r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((Dart s, e)
- -&gt; Identity
-      (Dart s,
-       Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; Vector (Dart s, e)
--&gt; Identity
-     (Vector
-        (Dart s,
-         Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><span class="hs-identifier hs-var">dartData</span></span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
-</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">(((Dart s, e)
-  -&gt; Identity
-       (Dart s,
-        Maybe
-          (Attributes'
-             r
-             '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
- -&gt; Vector (Dart s, e)
- -&gt; Identity
-      (Vector
-         (Dart s,
-          Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
--&gt; ((e
-     -&gt; Identity
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                   'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                   'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-    -&gt; (Dart s, e)
-    -&gt; Identity
-         (Dart s,
-          Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; (e
-    -&gt; Identity
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; Vector (Dart s, e)
--&gt; Identity
-     (Vector
-        (Dart s,
-         Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(e
- -&gt; Identity
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; (Dart s, e)
--&gt; Identity
-     (Dart s,
-      Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-forall s t a b. Field2 s t a b =&gt; Lens s t a b
-</span><span class="hs-identifier hs-var">_2</span></span><span>  </span><span class="annot"><span class="annottext">((e
-  -&gt; Identity
-       (Maybe
-          (Attributes'
-             r
-             '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
- -&gt; PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      e
-      f
-      r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         f
-         r))
--&gt; Attributes'
-     r
-     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     e
-     f
-     r
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     f
-     r
-forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeAttributes Path r
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>      </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>     </span><span class="annot"><span class="annottext">PlaneGraph
-  s
-  (Maybe
-     (Attributes'
-        r
-        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-           'Size]))
-  (Maybe
-     (Attributes'
-        r
-        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-  f
-  r
--&gt; (PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-      f
-      r
-    -&gt; PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         r)
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector f
- -&gt; Identity
-      (Vector
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     f
-     r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        r)
-forall k (s :: k) v e f r f'.
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span>  </span><span class="annot"><span class="annottext">forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>      </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>     </span><span class="annot"><span class="annottext">forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r f'.
 Lens
   (PlaneGraph s v e f r)
   (PlaneGraph s v e f' r)
   (Vector f)
   (Vector f')
-</span><span class="hs-identifier hs-var">faceData</span></span><span class="annot"><span class="annottext">((Vector f
-  -&gt; Identity
-       (Vector
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                   'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                   'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
- -&gt; PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-      f
-      r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         r))
--&gt; ((f
-     -&gt; Identity
-          (Maybe
-             (Attributes'
-                r
-                '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                   'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                   'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-    -&gt; Vector f
-    -&gt; Identity
-         (Vector
-            (Maybe
-               (Attributes'
-                  r
-                  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))))
--&gt; (f
-    -&gt; Identity
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     f
-     r
--&gt; Identity
-     (PlaneGraph
-        s
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                 'Size]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-        r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(f
- -&gt; Identity
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
--&gt; Vector f
--&gt; Identity
-     (Vector
-        (Maybe
-           (Attributes'
-              r
-              '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                 'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                 'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><span class="hs-identifier hs-var">faceData</span></span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
-</span><span class="hs-identifier hs-var">traverse</span></span><span>     </span><span class="annot"><span class="annottext">((f
-  -&gt; Identity
-       (Maybe
-          (Attributes'
-             r
-             '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])))
- -&gt; PlaneGraph
-      s
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-               'Size]))
-      (Maybe
-         (Attributes'
-            r
-            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-      f
-      r
- -&gt; Identity
-      (PlaneGraph
-         s
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-                  'Size]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         (Maybe
-            (Attributes'
-               r
-               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-         r))
--&gt; Attributes'
-     r
-     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     f
-     r
--&gt; PlaneGraph
-     s
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Pen,
-              'Size]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     (Maybe
-        (Attributes'
-           r
-           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
-              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
-              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
-     r
-forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeAttributes Path r
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>      </span><span class="annot"><a href="#local-6989586621679421427"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var">traverse</span></span><span>     </span><span class="annot"><span class="annottext">forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">?~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>      </span><span class="annot"><a href="#local-6989586621679385570"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- | Function to draw a graph by giving functions that specify how to</span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- render vertices, edges, and faces.</span><span>
-</span><span id="line-50"></span><span id="local-6989586621679421595"><span id="local-6989586621679421596"><span id="local-6989586621679421597"><span id="local-6989586621679421598"><span id="local-6989586621679421599"><span id="local-6989586621679421600"><span id="local-6989586621679421601"><span id="local-6989586621679421603"><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-type">drawPlaneGraphWith</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421603"><span class="hs-identifier hs-type">vi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421601"><span class="hs-identifier hs-type">ei</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421600"><span class="hs-identifier hs-type">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span>                                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421598"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421597"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>          </span><span class="annot"><a href="#local-6989586621679421603"><span class="hs-identifier hs-type">vi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-52"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679421598"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679421597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421596"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679421601"><span class="hs-identifier hs-type">ei</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-53"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421598"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679421597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421595"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679421600"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-54"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421598"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679421597"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421595"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>   </span><span class="annot"><a href="#local-6989586621679421600"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-55"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679421598"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421596"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421595"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421599"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-56"></span><span id="drawPlaneGraphWith"><span class="annot"><span class="annottext">drawPlaneGraphWith :: IpeOut' Maybe (VertexId' s, VertexData r v) vi r
+</span><span id="line-50"></span><span id="local-6989586621679385590"><span id="local-6989586621679385593"><span id="local-6989586621679385597"><span id="local-6989586621679385599"><span id="local-6989586621679385600"><span id="local-6989586621679385601"><span id="local-6989586621679385602"><span id="local-6989586621679385603"><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-type">drawPlaneGraphWith</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385603"><span class="hs-identifier hs-type">vi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385602"><span class="hs-identifier hs-type">ei</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385601"><span class="hs-identifier hs-type">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>                                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385599"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385597"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>          </span><span class="annot"><a href="#local-6989586621679385603"><span class="hs-identifier hs-type">vi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679385599"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679385597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385593"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679385602"><span class="hs-identifier hs-type">ei</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-53"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385599"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679385597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385590"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679385601"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-54"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385599"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679385597"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385590"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>   </span><span class="annot"><a href="#local-6989586621679385601"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679385599"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385597"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385593"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385590"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385600"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-56"></span><span id="drawPlaneGraphWith"><span class="annot"><span class="annottext">drawPlaneGraphWith :: forall {k} (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k)
+       v e f.
+(ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) =&gt;
+IpeOut' Maybe (VertexId' s, VertexData r v) vi r
 -&gt; IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
 -&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
 -&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
 -&gt; IpeOut (PlaneGraph s v e f r) Group r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var hs-var">drawPlaneGraphWith</span></a></span></span><span> </span><span id="local-6989586621679421417"><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
-</span><a href="#local-6989586621679421417"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span id="local-6989586621679421416"><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
-</span><a href="#local-6989586621679421416"><span class="hs-identifier hs-var">fe</span></a></span></span><span> </span><span id="local-6989586621679421415"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
-</span><a href="#local-6989586621679421415"><span class="hs-identifier hs-var">fif</span></a></span></span><span> </span><span id="local-6989586621679421414"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
-</span><a href="#local-6989586621679421414"><span class="hs-identifier hs-var">fof</span></a></span></span><span> </span><span id="local-6989586621679421413"><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421413"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FaceId' s
--&gt; IpeOut' Maybe (VertexId' s, VertexData r v) vi r
--&gt; IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
--&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
--&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
--&gt; IpeOut (PlaneGraph s v e f r) Group r
-forall k (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k) v
-       e f.
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith"><span class="hs-identifier hs-var hs-var">drawPlaneGraphWith</span></a></span></span><span> </span><span id="local-6989586621679385302"><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
+</span><a href="#local-6989586621679385302"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span id="local-6989586621679385301"><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
+</span><a href="#local-6989586621679385301"><span class="hs-identifier hs-var">fe</span></a></span></span><span> </span><span id="local-6989586621679385300"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
+</span><a href="#local-6989586621679385300"><span class="hs-identifier hs-var">fif</span></a></span></span><span> </span><span id="local-6989586621679385299"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
+</span><a href="#local-6989586621679385299"><span class="hs-identifier hs-var">fof</span></a></span></span><span> </span><span id="local-6989586621679385298"><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679385298"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k)
+       v e f.
 (ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) =&gt;
 FaceId' s
 -&gt; IpeOut' Maybe (VertexId' s, VertexData r v) vi r
@@ -1245,215 +226,109 @@ FaceId' s
 -&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
 -&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
 -&gt; IpeOut (PlaneGraph s v e f r) Group r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-var">drawPlaneGraphWith'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; FaceId' s
-forall k r (s :: k) v e f.
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-var">drawPlaneGraphWith'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall {k} r (s :: k) v e f.
 (Ord r, Num r) =&gt;
 PlaneGraph s v e f r -&gt; FaceId' s
 </span><span class="hs-identifier hs-var">outerFaceId</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421413"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
-</span><a href="#local-6989586621679421417"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
-</span><a href="#local-6989586621679421416"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
-</span><a href="#local-6989586621679421415"><span class="hs-identifier hs-var">fif</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
-</span><a href="#local-6989586621679421414"><span class="hs-identifier hs-var">fof</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421413"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679385298"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
+</span><a href="#local-6989586621679385302"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
+</span><a href="#local-6989586621679385301"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
+</span><a href="#local-6989586621679385300"><span class="hs-identifier hs-var">fif</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
+</span><a href="#local-6989586621679385299"><span class="hs-identifier hs-var">fof</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679385298"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-57"></span><span>
 </span><span id="line-58"></span><span class="hs-comment">-- | Function to draw a graph by giving the outer faceId and the</span><span>
 </span><span id="line-59"></span><span class="hs-comment">-- functions that specify how to render vertices, edges, and faces.</span><span>
-</span><span id="line-60"></span><span id="local-6989586621679421506"><span id="local-6989586621679421507"><span id="local-6989586621679421508"><span id="local-6989586621679421509"><span id="local-6989586621679421510"><span id="local-6989586621679421511"><span id="local-6989586621679421512"><span id="local-6989586621679421513"><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-type">drawPlaneGraphWith'</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421513"><span class="hs-identifier hs-type">vi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421512"><span class="hs-identifier hs-type">ei</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421511"><span class="hs-identifier hs-type">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-61"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-comment">-- ^ outerface Id</span><span>
-</span><span id="line-62"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421508"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>          </span><span class="annot"><a href="#local-6989586621679421513"><span class="hs-identifier hs-type">vi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-63"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679421508"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421507"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679421512"><span class="hs-identifier hs-type">ei</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-64"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679421508"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421506"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679421511"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-65"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679421508"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679421506"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>   </span><span class="annot"><a href="#local-6989586621679421511"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-66"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679421509"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421508"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421507"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421506"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421510"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-67"></span><span id="drawPlaneGraphWith%27"><span class="annot"><span class="annottext">drawPlaneGraphWith' :: FaceId' s
+</span><span id="line-60"></span><span id="local-6989586621679385475"><span id="local-6989586621679385476"><span id="local-6989586621679385477"><span id="local-6989586621679385478"><span id="local-6989586621679385479"><span id="local-6989586621679385480"><span id="local-6989586621679385481"><span id="local-6989586621679385482"><span class="annot"><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-type">drawPlaneGraphWith'</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385482"><span class="hs-identifier hs-type">vi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385481"><span class="hs-identifier hs-type">ei</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier hs-type">ToObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385480"><span class="hs-identifier hs-type">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-comment">-- ^ outerface Id</span><span>
+</span><span id="line-62"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">VertexId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VertexData</span></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385477"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>          </span><span class="annot"><a href="#local-6989586621679385482"><span class="hs-identifier hs-type">vi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-63"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>      </span><span class="annot"><span class="hs-identifier hs-type">LineSegment</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679385477"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385476"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679385481"><span class="hs-identifier hs-type">ei</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-64"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="annot"><a href="#local-6989586621679385477"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385475"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><a href="#local-6989586621679385480"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-65"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut%27"><span class="hs-identifier hs-type">IpeOut'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-identifier hs-type">MultiPolygon</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679385477"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679385475"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>   </span><span class="annot"><a href="#local-6989586621679385480"><span class="hs-identifier hs-type">fi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-66"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlaneGraph</span></span><span> </span><span class="annot"><a href="#local-6989586621679385478"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385477"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385476"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385475"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385479"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-67"></span><span id="drawPlaneGraphWith%27"><span class="annot"><span class="annottext">drawPlaneGraphWith' :: forall {k} (vi :: * -&gt; *) (ei :: * -&gt; *) (fi :: * -&gt; *) r (s :: k)
+       v e f.
+(ToObject vi, ToObject ei, ToObject fi, Num r, Ord r) =&gt;
+FaceId' s
 -&gt; IpeOut' Maybe (VertexId' s, VertexData r v) vi r
 -&gt; IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
 -&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
 -&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
 -&gt; IpeOut (PlaneGraph s v e f r) Group r
-</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-var hs-var">drawPlaneGraphWith'</span></a></span></span><span> </span><span id="local-6989586621679421410"><span class="annot"><span class="annottext">FaceId' s
-</span><a href="#local-6989586621679421410"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679421409"><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
-</span><a href="#local-6989586621679421409"><span class="hs-identifier hs-var">fv</span></a></span></span><span> </span><span id="local-6989586621679421408"><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
-</span><a href="#local-6989586621679421408"><span class="hs-identifier hs-var">fe</span></a></span></span><span> </span><span id="local-6989586621679421407"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
-</span><a href="#local-6989586621679421407"><span class="hs-identifier hs-var">fif</span></a></span></span><span> </span><span id="local-6989586621679421406"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
-</span><a href="#local-6989586621679421406"><span class="hs-identifier hs-var">fof</span></a></span></span><span> </span><span id="local-6989586621679421405"><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421405"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
--&gt; Group r
-   :+ Attributes
-        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
-forall (f :: * -&gt; *) r.
+</span><a href="Data.PlaneGraph.Draw.html#drawPlaneGraphWith%27"><span class="hs-identifier hs-var hs-var">drawPlaneGraphWith'</span></a></span></span><span> </span><span id="local-6989586621679385273"><span class="annot"><span class="annottext">FaceId' s
+</span><a href="#local-6989586621679385273"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679385272"><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
+</span><a href="#local-6989586621679385272"><span class="hs-identifier hs-var">fv</span></a></span></span><span> </span><span id="local-6989586621679385271"><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
+</span><a href="#local-6989586621679385271"><span class="hs-identifier hs-var">fe</span></a></span></span><span> </span><span id="local-6989586621679385270"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
+</span><a href="#local-6989586621679385270"><span class="hs-identifier hs-var">fif</span></a></span></span><span> </span><span id="local-6989586621679385269"><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
+</span><a href="#local-6989586621679385269"><span class="hs-identifier hs-var">fof</span></a></span></span><span> </span><span id="local-6989586621679385268"><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679385268"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) r.
 Foldable f =&gt;
 IpeOut (f (IpeObject r)) Group r
-</span><a href="Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">([IpeObject r]
- -&gt; Group r
-    :+ Attributes
-         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
--&gt; ([[IpeObject r]] -&gt; [IpeObject r])
--&gt; [[IpeObject r]]
--&gt; Group r
-   :+ Attributes
-        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[[IpeObject r]] -&gt; [IpeObject r]
-forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
-</span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="annot"><span class="annottext">([[IpeObject r]]
- -&gt; Group r
-    :+ Attributes
-         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
--&gt; [[IpeObject r]]
--&gt; Group r
-   :+ Attributes
-        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[IpeObject r]
-</span><a href="#local-6989586621679421402"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
-</span><a href="#local-6989586621679421401"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
-</span><a href="#local-6989586621679421400"><span class="hs-identifier hs-var">ifs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
-</span><a href="#local-6989586621679421399"><span class="hs-identifier hs-var">of'</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679385265"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+</span><a href="#local-6989586621679385264"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+</span><a href="#local-6989586621679385263"><span class="hs-identifier hs-var">ifs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[IpeObject r]
+</span><a href="#local-6989586621679385262"><span class="hs-identifier hs-var">of'</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-68"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-69"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679421398"><span class="annot"><span class="annottext">(FaceId' s, MultiPolygon (Maybe v) r :+ f)
-</span><a href="#local-6989586621679421398"><span class="hs-identifier hs-var">outerF</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679421397"><span class="annot"><span class="annottext">Vector (FaceId' s, SimplePolygon v r :+ f)
-</span><a href="#local-6989586621679421397"><span class="hs-identifier hs-var">innerFs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FaceId' s
--&gt; PlaneGraph s v e f r
--&gt; ((FaceId' s, MultiPolygon (Maybe v) r :+ f),
-    Vector (FaceId' s, SimplePolygon v r :+ f))
-forall k r (s :: k) v e f.
+</span><span id="line-69"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679385261"><span class="annot"><span class="annottext">(FaceId' s, MultiPolygon (Maybe v) r :+ f)
+</span><a href="#local-6989586621679385261"><span class="hs-identifier hs-var">outerF</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679385260"><span class="annot"><span class="annottext">Vector (FaceId' s, SimplePolygon v r :+ f)
+</span><a href="#local-6989586621679385260"><span class="hs-identifier hs-var">innerFs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} r (s :: k) v e f.
 (Num r, Ord r) =&gt;
 FaceId' s
 -&gt; PlaneGraph s v e f r
 -&gt; ((FaceId' s, MultiPolygon (Maybe v) r :+ f),
     Vector (FaceId' s, SimplePolygon v r :+ f))
 </span><span class="hs-identifier hs-var">facePolygons</span></span><span> </span><span class="annot"><span class="annottext">FaceId' s
-</span><a href="#local-6989586621679421410"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421405"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679421402"><span class="annot"><span class="annottext">vs :: [IpeObject r]
-</span><a href="#local-6989586621679421402"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((VertexId' s, VertexData r v) -&gt; Maybe (IpeObject r))
--&gt; [(VertexId' s, VertexData r v)] -&gt; [IpeObject r]
-forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((vi r :+ Attributes' r (AttributesOf vi)) -&gt; IpeObject r)
--&gt; Maybe (vi r :+ Attributes' r (AttributesOf vi))
--&gt; Maybe (IpeObject r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(vi r :+ Attributes' r (AttributesOf vi)) -&gt; IpeObject r
-forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
-</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (vi r :+ Attributes' r (AttributesOf vi))
- -&gt; Maybe (IpeObject r))
--&gt; IpeOut' Maybe (VertexId' s, VertexData r v) vi r
--&gt; (VertexId' s, VertexData r v)
--&gt; Maybe (IpeObject r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679385273"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
+</span><a href="#local-6989586621679385268"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679385265"><span class="annot"><span class="annottext">vs :: [IpeObject r]
+</span><a href="#local-6989586621679385265"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (VertexId' s, VertexData r v) vi r
-</span><a href="#local-6989586621679421409"><span class="hs-identifier hs-var">fv</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">([(VertexId' s, VertexData r v)] -&gt; [IpeObject r])
--&gt; (PlaneGraph s v e f r -&gt; [(VertexId' s, VertexData r v)])
--&gt; PlaneGraph s v e f r
--&gt; [IpeObject r]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (VertexId' s, VertexData r v)
--&gt; [(VertexId' s, VertexData r v)]
-forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
-</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (VertexId' s, VertexData r v)
- -&gt; [(VertexId' s, VertexData r v)])
--&gt; (PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v))
--&gt; PlaneGraph s v e f r
--&gt; [(VertexId' s, VertexData r v)]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
-forall k (s :: k) v e f r.
+</span><a href="#local-6989586621679385272"><span class="hs-identifier hs-var">fv</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r.
 PlaneGraph s v e f r -&gt; Vector (VertexId' s, VertexData r v)
-</span><span class="hs-identifier hs-var">vertices</span></span><span>        </span><span class="annot"><span class="annottext">(PlaneGraph s v e f r -&gt; [IpeObject r])
--&gt; PlaneGraph s v e f r -&gt; [IpeObject r]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">vertices</span></span><span>        </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421405"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-71"></span><span>    </span><span id="local-6989586621679421401"><span class="annot"><span class="annottext">es :: [IpeObject r]
-</span><a href="#local-6989586621679421401"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Dart s, LineSegment 2 v r :+ e) -&gt; Maybe (IpeObject r))
--&gt; [(Dart s, LineSegment 2 v r :+ e)] -&gt; [IpeObject r]
-forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((ei r :+ Attributes' r (AttributesOf ei)) -&gt; IpeObject r)
--&gt; Maybe (ei r :+ Attributes' r (AttributesOf ei))
--&gt; Maybe (IpeObject r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(ei r :+ Attributes' r (AttributesOf ei)) -&gt; IpeObject r
-forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
-</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (ei r :+ Attributes' r (AttributesOf ei))
- -&gt; Maybe (IpeObject r))
--&gt; IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
--&gt; (Dart s, LineSegment 2 v r :+ e)
--&gt; Maybe (IpeObject r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679385268"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679385264"><span class="annot"><span class="annottext">es :: [IpeObject r]
+</span><a href="#local-6989586621679385264"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (Dart s, LineSegment 2 v r :+ e) ei r
-</span><a href="#local-6989586621679421408"><span class="hs-identifier hs-var">fe</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">([(Dart s, LineSegment 2 v r :+ e)] -&gt; [IpeObject r])
--&gt; (PlaneGraph s v e f r -&gt; [(Dart s, LineSegment 2 v r :+ e)])
--&gt; PlaneGraph s v e f r
--&gt; [IpeObject r]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Dart s, LineSegment 2 v r :+ e)
--&gt; [(Dart s, LineSegment 2 v r :+ e)]
-forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
-</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Dart s, LineSegment 2 v r :+ e)
- -&gt; [(Dart s, LineSegment 2 v r :+ e)])
--&gt; (PlaneGraph s v e f r
-    -&gt; Vector (Dart s, LineSegment 2 v r :+ e))
--&gt; PlaneGraph s v e f r
--&gt; [(Dart s, LineSegment 2 v r :+ e)]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r -&gt; Vector (Dart s, LineSegment 2 v r :+ e)
-forall k (s :: k) v e f r.
+</span><a href="#local-6989586621679385271"><span class="hs-identifier hs-var">fe</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r.
 PlaneGraph s v e f r -&gt; Vector (Dart s, LineSegment 2 v r :+ e)
-</span><span class="hs-identifier hs-var">edgeSegments</span></span><span>    </span><span class="annot"><span class="annottext">(PlaneGraph s v e f r -&gt; [IpeObject r])
--&gt; PlaneGraph s v e f r -&gt; [IpeObject r]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">edgeSegments</span></span><span>    </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s v e f r
-</span><a href="#local-6989586621679421405"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-72"></span><span>    </span><span id="local-6989586621679421400"><span class="annot"><span class="annottext">ifs :: [IpeObject r]
-</span><a href="#local-6989586621679421400"><span class="hs-identifier hs-var hs-var">ifs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((FaceId' s, SimplePolygon v r :+ f) -&gt; Maybe (IpeObject r))
--&gt; [(FaceId' s, SimplePolygon v r :+ f)] -&gt; [IpeObject r]
-forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((fi r :+ Attributes' r (AttributesOf fi)) -&gt; IpeObject r)
--&gt; Maybe (fi r :+ Attributes' r (AttributesOf fi))
--&gt; Maybe (IpeObject r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(fi r :+ Attributes' r (AttributesOf fi)) -&gt; IpeObject r
-forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
-</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (fi r :+ Attributes' r (AttributesOf fi))
- -&gt; Maybe (IpeObject r))
--&gt; IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
--&gt; (FaceId' s, SimplePolygon v r :+ f)
--&gt; Maybe (IpeObject r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679385268"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679385263"><span class="annot"><span class="annottext">ifs :: [IpeObject r]
+</span><a href="#local-6989586621679385263"><span class="hs-identifier hs-var hs-var">ifs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, SimplePolygon v r :+ f) fi r
-</span><a href="#local-6989586621679421407"><span class="hs-identifier hs-var">fif</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(FaceId' s, SimplePolygon v r :+ f)] -&gt; [IpeObject r])
--&gt; (Vector (FaceId' s, SimplePolygon v r :+ f)
-    -&gt; [(FaceId' s, SimplePolygon v r :+ f)])
--&gt; Vector (FaceId' s, SimplePolygon v r :+ f)
--&gt; [IpeObject r]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (FaceId' s, SimplePolygon v r :+ f)
--&gt; [(FaceId' s, SimplePolygon v r :+ f)]
-forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
-</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (FaceId' s, SimplePolygon v r :+ f) -&gt; [IpeObject r])
--&gt; Vector (FaceId' s, SimplePolygon v r :+ f) -&gt; [IpeObject r]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="#local-6989586621679385270"><span class="hs-identifier hs-var">fif</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector (FaceId' s, SimplePolygon v r :+ f)
-</span><a href="#local-6989586621679421397"><span class="hs-identifier hs-var">innerFs</span></a></span><span>
-</span><span id="line-73"></span><span>    </span><span id="local-6989586621679421399"><span class="annot"><span class="annottext">of' :: [IpeObject r]
-</span><a href="#local-6989586621679421399"><span class="hs-identifier hs-var hs-var">of'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((FaceId' s, MultiPolygon (Maybe v) r :+ f) -&gt; Maybe (IpeObject r))
--&gt; [(FaceId' s, MultiPolygon (Maybe v) r :+ f)] -&gt; [IpeObject r]
-forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((fi r :+ Attributes' r (AttributesOf fi)) -&gt; IpeObject r)
--&gt; Maybe (fi r :+ Attributes' r (AttributesOf fi))
--&gt; Maybe (IpeObject r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(fi r :+ Attributes' r (AttributesOf fi)) -&gt; IpeObject r
-forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
-</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (fi r :+ Attributes' r (AttributesOf fi))
- -&gt; Maybe (IpeObject r))
--&gt; IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
--&gt; (FaceId' s, MultiPolygon (Maybe v) r :+ f)
--&gt; Maybe (IpeObject r)
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="#local-6989586621679385260"><span class="hs-identifier hs-var">innerFs</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679385262"><span class="annot"><span class="annottext">of' :: [IpeObject r]
+</span><a href="#local-6989586621679385262"><span class="hs-identifier hs-var hs-var">of'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IpeOut' Maybe (FaceId' s, MultiPolygon (Maybe v) r :+ f) fi r
-</span><a href="#local-6989586621679421406"><span class="hs-identifier hs-var">fof</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(FaceId' s, MultiPolygon (Maybe v) r :+ f)
-</span><a href="#local-6989586621679421398"><span class="hs-identifier hs-var">outerF</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679385269"><span class="hs-identifier hs-var">fof</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(FaceId' s, MultiPolygon (Maybe v) r :+ f)
+</span><a href="#local-6989586621679385261"><span class="hs-identifier hs-var">outerF</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-74"></span></pre></body></html>

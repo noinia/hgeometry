@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_LVEn4chGeUtCdHgLVtnCfZ"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
 </span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- Module      :  Ipe.Value</span><span>
@@ -17,14 +17,8 @@
 </span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-18"></span><span>
 </span><span id="line-19"></span><span class="hs-comment">-- | Many types either consist of a symbolc value, or a value of type v</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="IpeValue"><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-var">IpeValue</span></a></span></span><span> </span><span id="local-6989586621679414046"><span class="annot"><a href="#local-6989586621679414046"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Named"><span class="annot"><a href="Ipe.Value.html#Named"><span class="hs-identifier hs-var">Named</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Valued"><span class="annot"><a href="Ipe.Value.html#Valued"><span class="hs-identifier hs-var">Valued</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679414046"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679414034"><span id="local-6989586621679414036"><span id="local-6989586621679414038"><span class="annot"><span class="annottext">Int -&gt; IpeValue v -&gt; ShowS
-[IpeValue v] -&gt; ShowS
-IpeValue v -&gt; String
-(Int -&gt; IpeValue v -&gt; ShowS)
--&gt; (IpeValue v -&gt; String)
--&gt; ([IpeValue v] -&gt; ShowS)
--&gt; Show (IpeValue v)
+</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="IpeValue"><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-var">IpeValue</span></a></span></span><span> </span><span id="local-6989586621679371139"><span class="annot"><a href="#local-6989586621679371139"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Named"><span class="annot"><a href="Ipe.Value.html#Named"><span class="hs-identifier hs-var">Named</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Valued"><span class="annot"><a href="Ipe.Value.html#Valued"><span class="hs-identifier hs-var">Valued</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679371139"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371020"><span id="local-6989586621679371022"><span id="local-6989586621679371030"><span class="annot"><span class="annottext">Int -&gt; IpeValue v -&gt; ShowS
 forall v. Show v =&gt; Int -&gt; IpeValue v -&gt; ShowS
 forall v. Show v =&gt; [IpeValue v] -&gt; ShowS
 forall v. Show v =&gt; IpeValue v -&gt; String
@@ -36,15 +30,9 @@ show :: IpeValue v -&gt; String
 $cshow :: forall v. Show v =&gt; IpeValue v -&gt; String
 showsPrec :: Int -&gt; IpeValue v -&gt; ShowS
 $cshowsPrec :: forall v. Show v =&gt; Int -&gt; IpeValue v -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679414025"><span id="local-6989586621679414027"><span id="local-6989586621679414029"><span id="local-6989586621679414031"><span class="annot"><span class="annottext">ReadPrec [IpeValue v]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371000"><span id="local-6989586621679371012"><span id="local-6989586621679371015"><span id="local-6989586621679371017"><span class="annot"><span class="annottext">ReadPrec [IpeValue v]
 ReadPrec (IpeValue v)
-Int -&gt; ReadS (IpeValue v)
 ReadS [IpeValue v]
-(Int -&gt; ReadS (IpeValue v))
--&gt; ReadS [IpeValue v]
--&gt; ReadPrec (IpeValue v)
--&gt; ReadPrec [IpeValue v]
--&gt; Read (IpeValue v)
 forall v. Read v =&gt; ReadPrec [IpeValue v]
 forall v. Read v =&gt; ReadPrec (IpeValue v)
 forall v. Read v =&gt; Int -&gt; ReadS (IpeValue v)
@@ -60,28 +48,15 @@ readList :: ReadS [IpeValue v]
 $creadList :: forall v. Read v =&gt; ReadS [IpeValue v]
 readsPrec :: Int -&gt; ReadS (IpeValue v)
 $creadsPrec :: forall v. Read v =&gt; Int -&gt; ReadS (IpeValue v)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679414020"><span id="local-6989586621679414022"><span class="annot"><span class="annottext">IpeValue v -&gt; IpeValue v -&gt; Bool
-(IpeValue v -&gt; IpeValue v -&gt; Bool)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Bool) -&gt; Eq (IpeValue v)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679370991"><span id="local-6989586621679370996"><span class="annot"><span class="annottext">IpeValue v -&gt; IpeValue v -&gt; Bool
 forall v. Eq v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: IpeValue v -&gt; IpeValue v -&gt; Bool
 $c/= :: forall v. Eq v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
 == :: IpeValue v -&gt; IpeValue v -&gt; Bool
 $c== :: forall v. Eq v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679414004"><span id="local-6989586621679414006"><span id="local-6989586621679414008"><span id="local-6989586621679414010"><span id="local-6989586621679414012"><span id="local-6989586621679414014"><span id="local-6989586621679414016"><span class="annot"><span class="annottext">Eq (IpeValue v)
-Eq (IpeValue v)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Ordering)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Bool)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Bool)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Bool)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; Bool)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; IpeValue v)
--&gt; (IpeValue v -&gt; IpeValue v -&gt; IpeValue v)
--&gt; Ord (IpeValue v)
-IpeValue v -&gt; IpeValue v -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679370966"><span id="local-6989586621679370968"><span id="local-6989586621679370971"><span id="local-6989586621679370974"><span id="local-6989586621679370977"><span id="local-6989586621679370981"><span id="local-6989586621679370986"><span class="annot"><span class="annottext">IpeValue v -&gt; IpeValue v -&gt; Bool
 IpeValue v -&gt; IpeValue v -&gt; Ordering
-IpeValue v -&gt; IpeValue v -&gt; IpeValue v
 forall a.
 Eq a
 -&gt; (a -&gt; a -&gt; Ordering)
@@ -92,7 +67,7 @@ Eq a
 -&gt; (a -&gt; a -&gt; a)
 -&gt; (a -&gt; a -&gt; a)
 -&gt; Ord a
-forall v. Ord v =&gt; Eq (IpeValue v)
+forall {v}. Ord v =&gt; Eq (IpeValue v)
 forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
 forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; Ordering
 forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; IpeValue v
@@ -110,42 +85,16 @@ $c&lt;= :: forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
 $c&lt; :: forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; Bool
 compare :: IpeValue v -&gt; IpeValue v -&gt; Ordering
 $ccompare :: forall v. Ord v =&gt; IpeValue v -&gt; IpeValue v -&gt; Ordering
-$cp1Ord :: forall v. Ord v =&gt; Eq (IpeValue v)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413999"><span id="local-6989586621679414001"><span class="annot"><span class="annottext">a -&gt; IpeValue b -&gt; IpeValue a
-(a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
-(forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b)
--&gt; (forall a b. a -&gt; IpeValue b -&gt; IpeValue a) -&gt; Functor IpeValue
-forall a b. a -&gt; IpeValue b -&gt; IpeValue a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679370961"><span id="local-6989586621679370963"><span class="annot"><span class="annottext">forall a b. a -&gt; IpeValue b -&gt; IpeValue a
 forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-&lt;$ :: a -&gt; IpeValue b -&gt; IpeValue a
+&lt;$ :: forall a b. a -&gt; IpeValue b -&gt; IpeValue a
 $c&lt;$ :: forall a b. a -&gt; IpeValue b -&gt; IpeValue a
-fmap :: (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
+fmap :: forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
 $cfmap :: forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413964"><span id="local-6989586621679413966"><span id="local-6989586621679413968"><span id="local-6989586621679413970"><span id="local-6989586621679413972"><span id="local-6989586621679413974"><span id="local-6989586621679413976"><span id="local-6989586621679413978"><span id="local-6989586621679413980"><span id="local-6989586621679413982"><span id="local-6989586621679413984"><span id="local-6989586621679413986"><span id="local-6989586621679413988"><span id="local-6989586621679413990"><span id="local-6989586621679413992"><span id="local-6989586621679413994"><span id="local-6989586621679413996"><span class="annot"><span class="annottext">IpeValue a -&gt; Bool
-(a -&gt; m) -&gt; IpeValue a -&gt; m
-(a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
-(forall m. Monoid m =&gt; IpeValue m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a)
--&gt; (forall a. IpeValue a -&gt; [a])
--&gt; (forall a. IpeValue a -&gt; Bool)
--&gt; (forall a. IpeValue a -&gt; Int)
--&gt; (forall a. Eq a =&gt; a -&gt; IpeValue a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; IpeValue a -&gt; a)
--&gt; (forall a. Ord a =&gt; IpeValue a -&gt; a)
--&gt; (forall a. Num a =&gt; IpeValue a -&gt; a)
--&gt; (forall a. Num a =&gt; IpeValue a -&gt; a)
--&gt; Foldable IpeValue
-forall a. Eq a =&gt; a -&gt; IpeValue a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679370923"><span id="local-6989586621679370925"><span id="local-6989586621679370927"><span id="local-6989586621679370929"><span id="local-6989586621679370931"><span id="local-6989586621679370933"><span id="local-6989586621679370935"><span id="local-6989586621679370937"><span id="local-6989586621679370939"><span id="local-6989586621679370941"><span id="local-6989586621679370943"><span id="local-6989586621679370945"><span id="local-6989586621679370947"><span id="local-6989586621679370949"><span id="local-6989586621679370951"><span id="local-6989586621679370955"><span id="local-6989586621679370957"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; IpeValue a -&gt; Bool
 forall a. Num a =&gt; IpeValue a -&gt; a
 forall a. Ord a =&gt; IpeValue a -&gt; a
 forall m. Monoid m =&gt; IpeValue m -&gt; m
@@ -175,58 +124,42 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-product :: IpeValue a -&gt; a
+product :: forall a. Num a =&gt; IpeValue a -&gt; a
 $cproduct :: forall a. Num a =&gt; IpeValue a -&gt; a
-sum :: IpeValue a -&gt; a
+sum :: forall a. Num a =&gt; IpeValue a -&gt; a
 $csum :: forall a. Num a =&gt; IpeValue a -&gt; a
-minimum :: IpeValue a -&gt; a
+minimum :: forall a. Ord a =&gt; IpeValue a -&gt; a
 $cminimum :: forall a. Ord a =&gt; IpeValue a -&gt; a
-maximum :: IpeValue a -&gt; a
+maximum :: forall a. Ord a =&gt; IpeValue a -&gt; a
 $cmaximum :: forall a. Ord a =&gt; IpeValue a -&gt; a
-elem :: a -&gt; IpeValue a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; IpeValue a -&gt; Bool
 $celem :: forall a. Eq a =&gt; a -&gt; IpeValue a -&gt; Bool
-length :: IpeValue a -&gt; Int
+length :: forall a. IpeValue a -&gt; Int
 $clength :: forall a. IpeValue a -&gt; Int
-null :: IpeValue a -&gt; Bool
+null :: forall a. IpeValue a -&gt; Bool
 $cnull :: forall a. IpeValue a -&gt; Bool
-toList :: IpeValue a -&gt; [a]
+toList :: forall a. IpeValue a -&gt; [a]
 $ctoList :: forall a. IpeValue a -&gt; [a]
-foldl1 :: (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
 $cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
-foldr1 :: (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
 $cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; IpeValue a -&gt; a
-foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
 $cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
-foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
 $cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
-foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
 $cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
-foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
 $cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; IpeValue a -&gt; b
-foldMap' :: (a -&gt; m) -&gt; IpeValue a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m
 $cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m
-foldMap :: (a -&gt; m) -&gt; IpeValue a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeValue a -&gt; m
-fold :: IpeValue m -&gt; m
+fold :: forall m. Monoid m =&gt; IpeValue m -&gt; m
 $cfold :: forall m. Monoid m =&gt; IpeValue m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413953"><span id="local-6989586621679413955"><span id="local-6989586621679413957"><span id="local-6989586621679413959"><span class="annot"><span class="annottext">Functor IpeValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679370906"><span id="local-6989586621679370908"><span id="local-6989586621679370910"><span id="local-6989586621679370916"><span class="annot"><span class="annottext">Functor IpeValue
 Foldable IpeValue
-Functor IpeValue
--&gt; Foldable IpeValue
--&gt; (forall (f :: * -&gt; *) a b.
-    Applicative f =&gt;
-    (a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b))
--&gt; (forall (f :: * -&gt; *) a.
-    Applicative f =&gt;
-    IpeValue (f a) -&gt; f (IpeValue a))
--&gt; (forall (m :: * -&gt; *) a b.
-    Monad m =&gt;
-    (a -&gt; m b) -&gt; IpeValue a -&gt; m (IpeValue b))
--&gt; (forall (m :: * -&gt; *) a.
-    Monad m =&gt;
-    IpeValue (m a) -&gt; m (IpeValue a))
--&gt; Traversable IpeValue
-(a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
 forall (t :: * -&gt; *).
 Functor t
 -&gt; Foldable t
@@ -249,31 +182,32 @@ Monad m =&gt;
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
-sequence :: IpeValue (m a) -&gt; m (IpeValue a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; IpeValue (m a) -&gt; m (IpeValue a)
 $csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; IpeValue (m a) -&gt; m (IpeValue a)
-mapM :: (a -&gt; m b) -&gt; IpeValue a -&gt; m (IpeValue b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; IpeValue a -&gt; m (IpeValue b)
 $cmapM :: forall (m :: * -&gt; *) a b.
 Monad m =&gt;
 (a -&gt; m b) -&gt; IpeValue a -&gt; m (IpeValue b)
-sequenceA :: IpeValue (f a) -&gt; f (IpeValue a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+IpeValue (f a) -&gt; f (IpeValue a)
 $csequenceA :: forall (f :: * -&gt; *) a.
 Applicative f =&gt;
 IpeValue (f a) -&gt; f (IpeValue a)
-traverse :: (a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
 $ctraverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
-$cp2Traversable :: Foldable IpeValue
-$cp1Traversable :: Functor IpeValue
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span id="local-6989586621679413951"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-type">IpeValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679413951"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-24"></span><span>  </span><span id="local-6989586621679413948"><span class="annot"><span class="annottext">fromString :: String -&gt; IpeValue v
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeValue v
-forall v. Text -&gt; IpeValue v
-</span><a href="Ipe.Value.html#Named"><span class="hs-identifier hs-var">Named</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; IpeValue v) -&gt; (String -&gt; Text) -&gt; String -&gt; IpeValue v
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
-forall a. IsString a =&gt; String -&gt; a
-</span><span class="hs-identifier hs-var">fromString</span></span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371092"><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-type">IpeValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371092"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679370898"><span class="annot"><span class="annottext">fromString :: String -&gt; IpeValue v
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall v. Text -&gt; IpeValue v
+</span><a href="Ipe.Value.html#Named"><span class="hs-identifier hs-var">Named</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall a. IsString a =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">fromString</span></span><span>
 </span><span id="line-25"></span></pre></body></html>

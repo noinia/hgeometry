@@ -51,22 +51,16 @@
 </span><span id="line-51"></span><span class="hs-comment">-- | Paths</span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span class="hs-comment">-- | Paths consist of Path Segments. PathSegments come in the following forms:</span><span>
-</span><span id="line-54"></span><span class="hs-keyword">data</span><span> </span><span id="PathSegment"><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-var">PathSegment</span></a></span></span><span> </span><span id="local-6989586621679413517"><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PolyLineSegment"><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-55"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="PolygonPath"><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="CubicBezierSegment"><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">BezierSpline</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-57"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="QuadraticBezierSegment"><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">BezierSpline</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-58"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="EllipseSegment"><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span></span><span>         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ellipse</span></span><span> </span><span class="annot"><a href="#local-6989586621679413517"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">data</span><span> </span><span id="PathSegment"><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-var">PathSegment</span></a></span></span><span> </span><span id="local-6989586621679370302"><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PolyLineSegment"><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="PolygonPath"><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="CubicBezierSegment"><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">BezierSpline</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="QuadraticBezierSegment"><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">BezierSpline</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="EllipseSegment"><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span></span><span>         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ellipse</span></span><span> </span><span class="annot"><a href="#local-6989586621679370302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span><span>                     </span><span class="hs-comment">-- TODO</span><span>
 </span><span id="line-60"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="ArcSegment"><span class="annot"><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span></span><span>
 </span><span id="line-61"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="SplineSegment"><span class="annot"><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span></span><span>          </span><span class="hs-comment">-- (Spline 2 r)</span><span>
 </span><span id="line-62"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="ClosedSplineSegment"><span class="annot"><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span></span><span>    </span><span class="hs-comment">-- (ClosedSpline 2 r)</span><span>
-</span><span id="line-63"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679413345"><span id="local-6989586621679413347"><span id="local-6989586621679413349"><span class="annot"><span class="annottext">Int -&gt; PathSegment r -&gt; ShowS
-[PathSegment r] -&gt; ShowS
-PathSegment r -&gt; String
-(Int -&gt; PathSegment r -&gt; ShowS)
--&gt; (PathSegment r -&gt; String)
--&gt; ([PathSegment r] -&gt; ShowS)
--&gt; Show (PathSegment r)
+</span><span id="line-63"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679369902"><span id="local-6989586621679369904"><span id="local-6989586621679369923"><span class="annot"><span class="annottext">Int -&gt; PathSegment r -&gt; ShowS
 forall r. Show r =&gt; Int -&gt; PathSegment r -&gt; ShowS
 forall r. Show r =&gt; [PathSegment r] -&gt; ShowS
 forall r. Show r =&gt; PathSegment r -&gt; String
@@ -78,9 +72,7 @@ show :: PathSegment r -&gt; String
 $cshow :: forall r. Show r =&gt; PathSegment r -&gt; String
 showsPrec :: Int -&gt; PathSegment r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; Int -&gt; PathSegment r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413340"><span id="local-6989586621679413342"><span class="annot"><span class="annottext">PathSegment r -&gt; PathSegment r -&gt; Bool
-(PathSegment r -&gt; PathSegment r -&gt; Bool)
--&gt; (PathSegment r -&gt; PathSegment r -&gt; Bool) -&gt; Eq (PathSegment r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369866"><span id="local-6989586621679369879"><span class="annot"><span class="annottext">PathSegment r -&gt; PathSegment r -&gt; Bool
 forall r. Eq r =&gt; PathSegment r -&gt; PathSegment r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: PathSegment r -&gt; PathSegment r -&gt; Bool
@@ -88,233 +80,160 @@ $c/= :: forall r. Eq r =&gt; PathSegment r -&gt; PathSegment r -&gt; Bool
 == :: PathSegment r -&gt; PathSegment r -&gt; Bool
 $c== :: forall r. Eq r =&gt; PathSegment r -&gt; PathSegment r -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span id="_ClosedSplineSegment"><span id="_SplineSegment"><span id="_ArcSegment"><span id="_EllipseSegment"><span id="_QuadraticBezierSegment"><span id="_CubicBezierSegment"><span id="_PolygonPath"><span id="_PolyLineSegment"><span id="local-6989586621679413517"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PathSegment</span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-64"></span><span id="_ClosedSplineSegment"><span id="_SplineSegment"><span id="_ArcSegment"><span id="_EllipseSegment"><span id="_QuadraticBezierSegment"><span id="_CubicBezierSegment"><span id="_PolygonPath"><span id="_PolyLineSegment"><span id="local-6989586621679370302"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PathSegment</span></span></span></span></span></span></span></span></span></span><span>
 </span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span id="local-6989586621679413338"><span class="annot"><a href="#local-6989586621679413338"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679413338"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span id="local-6989586621679413337"><span class="annot"><a href="#local-6989586621679413337"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679369799"><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369799"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679369799"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679369798"><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369798"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679413334"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>  </span><span id="local-6989586621679413332"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; PathSegment a -&gt; PathSegment b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; PathSegment a -&gt; PathSegment b
-forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679369795"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679369792"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; PathSegment a -&gt; PathSegment b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
 </span><span class="hs-identifier hs-var">fmapDefault</span></span><span>
-</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679413298"><span id="local-6989586621679413300"><span id="local-6989586621679413302"><span id="local-6989586621679413304"><span id="local-6989586621679413306"><span id="local-6989586621679413308"><span id="local-6989586621679413310"><span id="local-6989586621679413312"><span id="local-6989586621679413314"><span id="local-6989586621679413316"><span id="local-6989586621679413318"><span id="local-6989586621679413320"><span id="local-6989586621679413322"><span id="local-6989586621679413324"><span id="local-6989586621679413326"><span id="local-6989586621679413329"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-72"></span><span>  </span><span id="local-6989586621679413296"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; PathSegment a -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; PathSegment a -&gt; m
-forall (t :: * -&gt; *) m a.
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679369758"><span id="local-6989586621679369760"><span id="local-6989586621679369762"><span id="local-6989586621679369764"><span id="local-6989586621679369766"><span id="local-6989586621679369768"><span id="local-6989586621679369770"><span id="local-6989586621679369772"><span id="local-6989586621679369774"><span id="local-6989586621679369776"><span id="local-6989586621679369778"><span id="local-6989586621679369780"><span id="local-6989586621679369782"><span id="local-6989586621679369784"><span id="local-6989586621679369786"><span id="local-6989586621679369789"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679369753"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PathSegment a -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) m a.
 (Traversable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMapDefault</span></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679413285"><span id="local-6989586621679413287"><span id="local-6989586621679413289"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>  </span><span id="local-6989586621679413283"><span class="annot"><span class="annottext">traverse :: (a -&gt; f b) -&gt; PathSegment a -&gt; f (PathSegment b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621679413281"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-75"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-type">PolyLineSegment</span></a></span><span> </span><span id="local-6989586621679413280"><span class="annot"><span class="annottext">PolyLine 2 () a
-</span><a href="#local-6989586621679413280"><span class="hs-identifier hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () b -&gt; PathSegment b
-forall r. PolyLine 2 () r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(PolyLine 2 () b -&gt; PathSegment b)
--&gt; f (PolyLine 2 () b) -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(() -&gt; f ())
--&gt; (a -&gt; f b) -&gt; PolyLine 2 () a -&gt; f (PolyLine 2 () b)
-forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679369740"><span id="local-6989586621679369742"><span id="local-6989586621679369744"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679369697"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; PathSegment a -&gt; f (PathSegment b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></span></span><span> </span><span id="local-6989586621679369695"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-type">PolyLineSegment</span></a></span><span> </span><span id="local-6989586621679369694"><span class="annot"><span class="annottext">PolyLine 2 () a
+</span><a href="#local-6989586621679369694"><span class="hs-identifier hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. PolyLine 2 () r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
 (Bitraversable t, Applicative f) =&gt;
 (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; t a b -&gt; f (t c d)
-</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">() -&gt; f ()
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () a
-</span><a href="#local-6989586621679413280"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-76"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-type">PolygonPath</span></a></span><span> </span><span id="local-6989586621679413277"><span class="annot"><span class="annottext">SimplePolygon () a
-</span><a href="#local-6989586621679413277"><span class="hs-identifier hs-var">p</span></a></span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SimplePolygon () b -&gt; PathSegment b
-forall r. SimplePolygon () r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () b -&gt; PathSegment b)
--&gt; f (SimplePolygon () b) -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(() -&gt; f ())
--&gt; (a -&gt; f b) -&gt; SimplePolygon () a -&gt; f (SimplePolygon () b)
-forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () a
+</span><a href="#local-6989586621679369694"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-type">PolygonPath</span></a></span><span> </span><span id="local-6989586621679369691"><span class="annot"><span class="annottext">SimplePolygon () a
+</span><a href="#local-6989586621679369691"><span class="hs-identifier hs-var">p</span></a></span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. SimplePolygon () r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
 (Bitraversable t, Applicative f) =&gt;
 (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; t a b -&gt; f (t c d)
-</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">() -&gt; f ()
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () a
-</span><a href="#local-6989586621679413277"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-77"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-type">CubicBezierSegment</span></a></span><span> </span><span id="local-6989586621679413276"><span class="annot"><span class="annottext">BezierSpline 3 2 a
-</span><a href="#local-6989586621679413276"><span class="hs-identifier hs-var">b</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 b -&gt; PathSegment b
-forall r. BezierSpline 3 2 r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(BezierSpline 3 2 b -&gt; PathSegment b)
--&gt; f (BezierSpline 3 2 b) -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; BezierSpline 3 2 a -&gt; f (BezierSpline 3 2 b)
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () a
+</span><a href="#local-6989586621679369691"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-77"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-type">CubicBezierSegment</span></a></span><span> </span><span id="local-6989586621679369690"><span class="annot"><span class="annottext">BezierSpline 3 2 a
+</span><a href="#local-6989586621679369690"><span class="hs-identifier hs-var">b</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. BezierSpline 3 2 r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 a
-</span><a href="#local-6989586621679413276"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-78"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-type">QuadraticBezierSegment</span></a></span><span> </span><span id="local-6989586621679413275"><span class="annot"><span class="annottext">BezierSpline 2 2 a
-</span><a href="#local-6989586621679413275"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 b -&gt; PathSegment b
-forall r. BezierSpline 2 2 r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(BezierSpline 2 2 b -&gt; PathSegment b)
--&gt; f (BezierSpline 2 2 b) -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; BezierSpline 2 2 a -&gt; f (BezierSpline 2 2 b)
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 a
+</span><a href="#local-6989586621679369690"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-type">QuadraticBezierSegment</span></a></span><span> </span><span id="local-6989586621679369689"><span class="annot"><span class="annottext">BezierSpline 2 2 a
+</span><a href="#local-6989586621679369689"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. BezierSpline 2 2 r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 a
-</span><a href="#local-6989586621679413275"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-79"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-type">EllipseSegment</span></a></span><span> </span><span id="local-6989586621679413274"><span class="annot"><span class="annottext">Ellipse a
-</span><a href="#local-6989586621679413274"><span class="hs-identifier hs-var">e</span></a></span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ellipse b -&gt; PathSegment b
-forall r. Ellipse r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(Ellipse b -&gt; PathSegment b) -&gt; f (Ellipse b) -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Ellipse a -&gt; f (Ellipse b)
-forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 a
+</span><a href="#local-6989586621679369689"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-type">EllipseSegment</span></a></span><span> </span><span id="local-6989586621679369688"><span class="annot"><span class="annottext">Ellipse a
+</span><a href="#local-6989586621679369688"><span class="hs-identifier hs-var">e</span></a></span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. Ellipse r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679413281"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Ellipse a
-</span><a href="#local-6989586621679413274"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><a href="#local-6989586621679369695"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Ellipse a
+</span><a href="#local-6989586621679369688"><span class="hs-identifier hs-var">e</span></a></span><span>
 </span><span id="line-80"></span><span>    </span><span class="annot"><span class="annottext">PathSegment a
-</span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment b -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">PathSegment b
-forall r. PathSegment r
+</span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
 </span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>
 </span><span id="line-81"></span><span>    </span><span class="annot"><span class="annottext">PathSegment a
-</span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment b -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">PathSegment b
-forall r. PathSegment r
+</span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
 </span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>
 </span><span id="line-82"></span><span>    </span><span class="annot"><span class="annottext">PathSegment a
-</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment b -&gt; f (PathSegment b)
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">PathSegment b
-forall r. PathSegment r
+</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
 </span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span id="local-6989586621679413273"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679413273"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsTransformable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679413273"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-85"></span><span>  </span><span id="local-6989586621679413270"><span class="annot"><span class="annottext">transformBy :: Transformation
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679370184"><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679370184"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsTransformable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370184"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679369645"><span class="annot"><span class="annottext">transformBy :: Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
 -&gt; PathSegment r -&gt; PathSegment r
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">transformBy</span></span></span><span> </span><span id="local-6989586621679413268"><span class="annot"><span class="annottext">Transformation
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">transformBy</span></span></span><span> </span><span id="local-6989586621679369643"><span class="annot"><span class="annottext">Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-86"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-type">PolyLineSegment</span></a></span><span> </span><span id="local-6989586621679413267"><span class="annot"><span class="annottext">PolyLine 2 () r
-</span><a href="#local-6989586621679413267"><span class="hs-identifier hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r -&gt; PathSegment r
-forall r. PolyLine 2 () r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(PolyLine 2 () r -&gt; PathSegment r)
--&gt; PolyLine 2 () r -&gt; PathSegment r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (PolyLine 2 () r)) (NumType (PolyLine 2 () r))
--&gt; PolyLine 2 () r -&gt; PolyLine 2 () r
-forall g.
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-86"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-type">PolyLineSegment</span></a></span><span> </span><span id="local-6989586621679369642"><span class="annot"><span class="annottext">PolyLine 2 () r
+</span><a href="#local-6989586621679369642"><span class="hs-identifier hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. PolyLine 2 () r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
 </span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (PolyLine 2 () r)) (NumType (PolyLine 2 () r))
-Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r
-</span><a href="#local-6989586621679413267"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-87"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-type">PolygonPath</span></a></span><span> </span><span id="local-6989586621679413266"><span class="annot"><span class="annottext">SimplePolygon () r
-</span><a href="#local-6989586621679413266"><span class="hs-identifier hs-var">p</span></a></span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; PathSegment r
-forall r. SimplePolygon () r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () r -&gt; PathSegment r)
--&gt; SimplePolygon () r -&gt; PathSegment r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (SimplePolygon () r)) (NumType (SimplePolygon () r))
--&gt; SimplePolygon () r -&gt; SimplePolygon () r
-forall g.
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine 2 () r
+</span><a href="#local-6989586621679369642"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-type">PolygonPath</span></a></span><span> </span><span id="local-6989586621679369641"><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679369641"><span class="hs-identifier hs-var">p</span></a></span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. SimplePolygon () r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#PolygonPath"><span class="hs-identifier hs-var">PolygonPath</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
 </span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (SimplePolygon () r)) (NumType (SimplePolygon () r))
-Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
-</span><a href="#local-6989586621679413266"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-88"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-type">CubicBezierSegment</span></a></span><span> </span><span id="local-6989586621679413265"><span class="annot"><span class="annottext">BezierSpline 3 2 r
-</span><a href="#local-6989586621679413265"><span class="hs-identifier hs-var">b</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 r -&gt; PathSegment r
-forall r. BezierSpline 3 2 r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(BezierSpline 3 2 r -&gt; PathSegment r)
--&gt; BezierSpline 3 2 r -&gt; PathSegment r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (BezierSpline 3 2 r)) (NumType (BezierSpline 3 2 r))
--&gt; BezierSpline 3 2 r -&gt; BezierSpline 3 2 r
-forall g.
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon () r
+</span><a href="#local-6989586621679369641"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-type">CubicBezierSegment</span></a></span><span> </span><span id="local-6989586621679369640"><span class="annot"><span class="annottext">BezierSpline 3 2 r
+</span><a href="#local-6989586621679369640"><span class="hs-identifier hs-var">b</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. BezierSpline 3 2 r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#CubicBezierSegment"><span class="hs-identifier hs-var">CubicBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
 </span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (BezierSpline 3 2 r)) (NumType (BezierSpline 3 2 r))
-Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 r
-</span><a href="#local-6989586621679413265"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-89"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-type">QuadraticBezierSegment</span></a></span><span> </span><span id="local-6989586621679413264"><span class="annot"><span class="annottext">BezierSpline 2 2 r
-</span><a href="#local-6989586621679413264"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 r -&gt; PathSegment r
-forall r. BezierSpline 2 2 r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(BezierSpline 2 2 r -&gt; PathSegment r)
--&gt; BezierSpline 2 2 r -&gt; PathSegment r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (BezierSpline 2 2 r)) (NumType (BezierSpline 2 2 r))
--&gt; BezierSpline 2 2 r -&gt; BezierSpline 2 2 r
-forall g.
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 3 2 r
+</span><a href="#local-6989586621679369640"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-type">QuadraticBezierSegment</span></a></span><span> </span><span id="local-6989586621679369639"><span class="annot"><span class="annottext">BezierSpline 2 2 r
+</span><a href="#local-6989586621679369639"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. BezierSpline 2 2 r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#QuadraticBezierSegment"><span class="hs-identifier hs-var">QuadraticBezierSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
 </span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (BezierSpline 2 2 r)) (NumType (BezierSpline 2 2 r))
-Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 r
-</span><a href="#local-6989586621679413264"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-90"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-type">EllipseSegment</span></a></span><span> </span><span id="local-6989586621679413263"><span class="annot"><span class="annottext">Ellipse r
-</span><a href="#local-6989586621679413263"><span class="hs-identifier hs-var">e</span></a></span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ellipse r -&gt; PathSegment r
-forall r. Ellipse r -&gt; PathSegment r
-</span><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span><span> </span><span class="annot"><span class="annottext">(Ellipse r -&gt; PathSegment r) -&gt; Ellipse r -&gt; PathSegment r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Transformation (Dimension (Ellipse r)) (NumType (Ellipse r))
--&gt; Ellipse r -&gt; Ellipse r
-forall g.
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">BezierSpline 2 2 r
+</span><a href="#local-6989586621679369639"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-90"></span><span>    </span><span class="annot"><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-type">EllipseSegment</span></a></span><span> </span><span id="local-6989586621679369638"><span class="annot"><span class="annottext">Ellipse r
+</span><a href="#local-6989586621679369638"><span class="hs-identifier hs-var">e</span></a></span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. Ellipse r -&gt; PathSegment r
+</span><a href="Ipe.Path.html#EllipseSegment"><span class="hs-identifier hs-var">EllipseSegment</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
-</span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation (Dimension (Ellipse r)) (NumType (Ellipse r))
-Transformation
+</span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
   (Dimension (PathSegment r)) (NumType (PathSegment r))
-</span><a href="#local-6989586621679413268"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Ellipse r
-</span><a href="#local-6989586621679413263"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><a href="#local-6989586621679369643"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Ellipse r
+</span><a href="#local-6989586621679369638"><span class="hs-identifier hs-var">e</span></a></span><span>
 </span><span id="line-91"></span><span>    </span><span class="hs-comment">-- TODO:</span><span>
 </span><span id="line-92"></span><span>    </span><span class="annot"><span class="annottext">PathSegment r
-</span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment r
-forall r. PathSegment r
+</span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
 </span><a href="Ipe.Path.html#ArcSegment"><span class="hs-identifier hs-var">ArcSegment</span></a></span><span>
 </span><span id="line-93"></span><span>    </span><span class="annot"><span class="annottext">PathSegment r
-</span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment r
-forall r. PathSegment r
+</span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
 </span><a href="Ipe.Path.html#SplineSegment"><span class="hs-identifier hs-var">SplineSegment</span></a></span><span>
 </span><span id="line-94"></span><span>    </span><span class="annot"><span class="annottext">PathSegment r
-</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PathSegment r
-forall r. PathSegment r
-</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span></span><span>
+</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall r. PathSegment r
+</span><a href="Ipe.Path.html#ClosedSplineSegment"><span class="hs-identifier hs-var">ClosedSplineSegment</span></a></span><span>
 </span><span id="line-95"></span><span>
 </span><span id="line-96"></span><span>
 </span><span id="line-97"></span><span class="hs-comment">-- | A path is a non-empty sequence of PathSegments.</span><span>
-</span><span id="line-98"></span><span class="hs-keyword">newtype</span><span> </span><span id="Path"><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span></span><span> </span><span id="local-6989586621679413448"><span class="annot"><a href="#local-6989586621679413448"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Path"><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_pathSegments"><span class="annot"><span class="annottext">Path r -&gt; LSeq 1 (PathSegment r)
-</span><a href="Ipe.Path.html#_pathSegments"><span class="hs-identifier hs-var hs-var">_pathSegments</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679413448"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-99"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679413256"><span id="local-6989586621679413258"><span id="local-6989586621679413260"><span class="annot"><span class="annottext">Int -&gt; Path r -&gt; ShowS
-[Path r] -&gt; ShowS
-Path r -&gt; String
-(Int -&gt; Path r -&gt; ShowS)
--&gt; (Path r -&gt; String) -&gt; ([Path r] -&gt; ShowS) -&gt; Show (Path r)
+</span><span id="line-98"></span><span class="hs-keyword">newtype</span><span> </span><span id="Path"><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span></span><span> </span><span id="local-6989586621679370169"><span class="annot"><a href="#local-6989586621679370169"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Path"><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_pathSegments"><span class="annot"><span class="annottext">forall r. Path r -&gt; LSeq 1 (PathSegment r)
+</span><a href="Ipe.Path.html#_pathSegments"><span class="hs-identifier hs-var hs-var">_pathSegments</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier hs-type">PathSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370169"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-99"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679369627"><span id="local-6989586621679369629"><span id="local-6989586621679369635"><span class="annot"><span class="annottext">Int -&gt; Path r -&gt; ShowS
 forall r. Show r =&gt; Int -&gt; Path r -&gt; ShowS
 forall r. Show r =&gt; [Path r] -&gt; ShowS
 forall r. Show r =&gt; Path r -&gt; String
@@ -326,50 +245,23 @@ show :: Path r -&gt; String
 $cshow :: forall r. Show r =&gt; Path r -&gt; String
 showsPrec :: Int -&gt; Path r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; Int -&gt; Path r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413252"><span id="local-6989586621679413254"><span class="annot"><span class="annottext">Path r -&gt; Path r -&gt; Bool
-(Path r -&gt; Path r -&gt; Bool)
--&gt; (Path r -&gt; Path r -&gt; Bool) -&gt; Eq (Path r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369618"><span id="local-6989586621679369624"><span class="annot"><span class="annottext">Path r -&gt; Path r -&gt; Bool
 forall r. Eq r =&gt; Path r -&gt; Path r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Path r -&gt; Path r -&gt; Bool
 $c/= :: forall r. Eq r =&gt; Path r -&gt; Path r -&gt; Bool
 == :: Path r -&gt; Path r -&gt; Bool
 $c== :: forall r. Eq r =&gt; Path r -&gt; Path r -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413248"><span id="local-6989586621679413250"><span class="annot"><span class="annottext">a -&gt; Path b -&gt; Path a
-(a -&gt; b) -&gt; Path a -&gt; Path b
-(forall a b. (a -&gt; b) -&gt; Path a -&gt; Path b)
--&gt; (forall a b. a -&gt; Path b -&gt; Path a) -&gt; Functor Path
-forall a b. a -&gt; Path b -&gt; Path a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369607"><span id="local-6989586621679369612"><span class="annot"><span class="annottext">forall a b. a -&gt; Path b -&gt; Path a
 forall a b. (a -&gt; b) -&gt; Path a -&gt; Path b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-&lt;$ :: a -&gt; Path b -&gt; Path a
+&lt;$ :: forall a b. a -&gt; Path b -&gt; Path a
 $c&lt;$ :: forall a b. a -&gt; Path b -&gt; Path a
-fmap :: (a -&gt; b) -&gt; Path a -&gt; Path b
+fmap :: forall a b. (a -&gt; b) -&gt; Path a -&gt; Path b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Path a -&gt; Path b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413214"><span id="local-6989586621679413216"><span id="local-6989586621679413218"><span id="local-6989586621679413220"><span id="local-6989586621679413222"><span id="local-6989586621679413224"><span id="local-6989586621679413226"><span id="local-6989586621679413228"><span id="local-6989586621679413230"><span id="local-6989586621679413232"><span id="local-6989586621679413234"><span id="local-6989586621679413236"><span id="local-6989586621679413238"><span id="local-6989586621679413240"><span id="local-6989586621679413242"><span id="local-6989586621679413244"><span id="local-6989586621679413246"><span class="annot"><span class="annottext">Path a -&gt; Bool
-(a -&gt; m) -&gt; Path a -&gt; m
-(a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
-(forall m. Monoid m =&gt; Path m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a)
--&gt; (forall a. Path a -&gt; [a])
--&gt; (forall a. Path a -&gt; Bool)
--&gt; (forall a. Path a -&gt; Int)
--&gt; (forall a. Eq a =&gt; a -&gt; Path a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; Path a -&gt; a)
--&gt; (forall a. Ord a =&gt; Path a -&gt; a)
--&gt; (forall a. Num a =&gt; Path a -&gt; a)
--&gt; (forall a. Num a =&gt; Path a -&gt; a)
--&gt; Foldable Path
-forall a. Eq a =&gt; a -&gt; Path a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369560"><span id="local-6989586621679369562"><span id="local-6989586621679369564"><span id="local-6989586621679369566"><span id="local-6989586621679369568"><span id="local-6989586621679369570"><span id="local-6989586621679369574"><span id="local-6989586621679369576"><span id="local-6989586621679369578"><span id="local-6989586621679369580"><span id="local-6989586621679369582"><span id="local-6989586621679369584"><span id="local-6989586621679369586"><span id="local-6989586621679369590"><span id="local-6989586621679369592"><span id="local-6989586621679369600"><span id="local-6989586621679369602"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; Path a -&gt; Bool
 forall a. Num a =&gt; Path a -&gt; a
 forall a. Ord a =&gt; Path a -&gt; a
 forall m. Monoid m =&gt; Path m -&gt; m
@@ -399,56 +291,42 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-product :: Path a -&gt; a
+product :: forall a. Num a =&gt; Path a -&gt; a
 $cproduct :: forall a. Num a =&gt; Path a -&gt; a
-sum :: Path a -&gt; a
+sum :: forall a. Num a =&gt; Path a -&gt; a
 $csum :: forall a. Num a =&gt; Path a -&gt; a
-minimum :: Path a -&gt; a
+minimum :: forall a. Ord a =&gt; Path a -&gt; a
 $cminimum :: forall a. Ord a =&gt; Path a -&gt; a
-maximum :: Path a -&gt; a
+maximum :: forall a. Ord a =&gt; Path a -&gt; a
 $cmaximum :: forall a. Ord a =&gt; Path a -&gt; a
-elem :: a -&gt; Path a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Path a -&gt; Bool
 $celem :: forall a. Eq a =&gt; a -&gt; Path a -&gt; Bool
-length :: Path a -&gt; Int
+length :: forall a. Path a -&gt; Int
 $clength :: forall a. Path a -&gt; Int
-null :: Path a -&gt; Bool
+null :: forall a. Path a -&gt; Bool
 $cnull :: forall a. Path a -&gt; Bool
-toList :: Path a -&gt; [a]
+toList :: forall a. Path a -&gt; [a]
 $ctoList :: forall a. Path a -&gt; [a]
-foldl1 :: (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
 $cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
-foldr1 :: (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
 $cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Path a -&gt; a
-foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
 $cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
-foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
 $cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Path a -&gt; b
-foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
 $cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
-foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
 $cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Path a -&gt; b
-foldMap' :: (a -&gt; m) -&gt; Path a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m
 $cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m
-foldMap :: (a -&gt; m) -&gt; Path a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Path a -&gt; m
-fold :: Path m -&gt; m
+fold :: forall m. Monoid m =&gt; Path m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Path m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413204"><span id="local-6989586621679413206"><span id="local-6989586621679413208"><span id="local-6989586621679413210"><span class="annot"><span class="annottext">Functor Path
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369540"><span id="local-6989586621679369542"><span id="local-6989586621679369544"><span id="local-6989586621679369554"><span class="annot"><span class="annottext">Functor Path
 Foldable Path
-Functor Path
--&gt; Foldable Path
--&gt; (forall (f :: * -&gt; *) a b.
-    Applicative f =&gt;
-    (a -&gt; f b) -&gt; Path a -&gt; f (Path b))
--&gt; (forall (f :: * -&gt; *) a.
-    Applicative f =&gt;
-    Path (f a) -&gt; f (Path a))
--&gt; (forall (m :: * -&gt; *) a b.
-    Monad m =&gt;
-    (a -&gt; m b) -&gt; Path a -&gt; m (Path b))
--&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Path (m a) -&gt; m (Path a))
--&gt; Traversable Path
-(a -&gt; f b) -&gt; Path a -&gt; f (Path b)
 forall (t :: * -&gt; *).
 Functor t
 -&gt; Foldable t
@@ -469,81 +347,65 @@ Monad m =&gt;
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Path a -&gt; f (Path b)
-sequence :: Path (m a) -&gt; m (Path a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Path (m a) -&gt; m (Path a)
 $csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Path (m a) -&gt; m (Path a)
-mapM :: (a -&gt; m b) -&gt; Path a -&gt; m (Path b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Path a -&gt; m (Path b)
 $cmapM :: forall (m :: * -&gt; *) a b.
 Monad m =&gt;
 (a -&gt; m b) -&gt; Path a -&gt; m (Path b)
-sequenceA :: Path (f a) -&gt; f (Path a)
+sequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Path (f a) -&gt; f (Path a)
 $csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Path (f a) -&gt; f (Path a)
-traverse :: (a -&gt; f b) -&gt; Path a -&gt; f (Path b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Path a -&gt; f (Path b)
 $ctraverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Path a -&gt; f (Path b)
-$cp2Traversable :: Foldable Path
-$cp1Traversable :: Functor Path
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-100"></span><span id="local-6989586621679413203"><span id="pathSegments"><span id="local-6989586621679413448"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Path</span></span></span></span><span>
+</span><span id="line-100"></span><span id="pathSegments"><span id="local-6989586621679370156"><span id="local-6989586621679370169"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Path</span></span></span></span><span>
 </span><span id="line-101"></span><span>
-</span><span id="line-102"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span id="local-6989586621679413202"><span class="annot"><a href="#local-6989586621679413202"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679413202"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-103"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span id="local-6989586621679413201"><span class="annot"><a href="#local-6989586621679413201"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-102"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679369533"><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369533"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679369533"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679369532"><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369532"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
 </span><span id="line-104"></span><span>
-</span><span id="line-105"></span><span id="local-6989586621679413200"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679413200"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsTransformable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679413200"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-106"></span><span>  </span><span id="local-6989586621679413198"><span class="annot"><span class="annottext">transformBy :: Transformation (Dimension (Path r)) (NumType (Path r))
+</span><span id="line-105"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679370145"><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679370145"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsTransformable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370145"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679369526"><span class="annot"><span class="annottext">transformBy :: Transformation (Dimension (Path r)) (NumType (Path r))
 -&gt; Path r -&gt; Path r
-</span><a href="#local-6989586621679413198"><span class="hs-identifier hs-var hs-var hs-var hs-var">transformBy</span></a></span></span><span> </span><span id="local-6989586621679413197"><span class="annot"><span class="annottext">Transformation (Dimension (Path r)) (NumType (Path r))
-</span><a href="#local-6989586621679413197"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span id="local-6989586621679413196"><span class="annot"><span class="annottext">LSeq 1 (PathSegment r)
-</span><a href="#local-6989586621679413196"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r) -&gt; Path r
-forall r. LSeq 1 (PathSegment r) -&gt; Path r
-</span><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 1 (PathSegment r) -&gt; Path r)
--&gt; LSeq 1 (PathSegment r) -&gt; Path r
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(PathSegment r -&gt; PathSegment r)
--&gt; LSeq 1 (PathSegment r) -&gt; LSeq 1 (PathSegment r)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Transformation
-  (Dimension (PathSegment r)) (NumType (PathSegment r))
--&gt; PathSegment r -&gt; PathSegment r
-forall g.
+</span><a href="#local-6989586621679369526"><span class="hs-identifier hs-var hs-var hs-var hs-var">transformBy</span></a></span></span><span> </span><span id="local-6989586621679369525"><span class="annot"><span class="annottext">Transformation (Dimension (Path r)) (NumType (Path r))
+</span><a href="#local-6989586621679369525"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span id="local-6989586621679369524"><span class="annot"><span class="annottext">LSeq 1 (PathSegment r)
+</span><a href="#local-6989586621679369524"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r. LSeq 1 (PathSegment r) -&gt; Path r
+</span><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall g.
 IsTransformable g =&gt;
 Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
-</span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation
-  (Dimension (PathSegment r)) (NumType (PathSegment r))
-Transformation (Dimension (Path r)) (NumType (Path r))
-</span><a href="#local-6989586621679413197"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r)
-</span><a href="#local-6989586621679413196"><span class="hs-identifier hs-var">s</span></a></span></span><span>
+</span><span class="hs-identifier hs-var">transformBy</span></span><span> </span><span class="annot"><span class="annottext">Transformation (Dimension (Path r)) (NumType (Path r))
+</span><a href="#local-6989586621679369525"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LSeq 1 (PathSegment r)
+</span><a href="#local-6989586621679369524"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-107"></span><span>
 </span><span id="line-108"></span><span>
 </span><span id="line-109"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-110"></span><span>
 </span><span id="line-111"></span><span class="hs-comment">-- | type that represents a path in ipe.</span><span>
-</span><span id="line-112"></span><span class="hs-keyword">data</span><span> </span><span id="Operation"><span class="annot"><a href="Ipe.Path.html#Operation"><span class="hs-identifier hs-var">Operation</span></a></span></span><span> </span><span id="local-6989586621679413195"><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MoveTo"><span class="annot"><a href="Ipe.Path.html#MoveTo"><span class="hs-identifier hs-var">MoveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-113"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="LineTo"><span class="annot"><a href="Ipe.Path.html#LineTo"><span class="hs-identifier hs-var">LineTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-114"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="Ellipse"><span class="annot"><a href="Ipe.Path.html#Ellipse"><span class="hs-identifier hs-var">Ellipse</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-115"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="ArcTo"><span class="annot"><a href="Ipe.Path.html#ArcTo"><span class="hs-identifier hs-var">ArcTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-116"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="Spline"><span class="annot"><a href="Ipe.Path.html#Spline"><span class="hs-identifier hs-var">Spline</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-117"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="ClosedSpline"><span class="annot"><a href="Ipe.Path.html#ClosedSpline"><span class="hs-identifier hs-var">ClosedSpline</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-112"></span><span class="hs-keyword">data</span><span> </span><span id="Operation"><span class="annot"><a href="Ipe.Path.html#Operation"><span class="hs-identifier hs-var">Operation</span></a></span></span><span> </span><span id="local-6989586621679370136"><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MoveTo"><span class="annot"><a href="Ipe.Path.html#MoveTo"><span class="hs-identifier hs-var">MoveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="LineTo"><span class="annot"><a href="Ipe.Path.html#LineTo"><span class="hs-identifier hs-var">LineTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="Ellipse"><span class="annot"><a href="Ipe.Path.html#Ellipse"><span class="hs-identifier hs-var">Ellipse</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="ArcTo"><span class="annot"><a href="Ipe.Path.html#ArcTo"><span class="hs-identifier hs-var">ArcTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="Spline"><span class="annot"><a href="Ipe.Path.html#Spline"><span class="hs-identifier hs-var">Spline</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-117"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="ClosedSpline"><span class="annot"><a href="Ipe.Path.html#ClosedSpline"><span class="hs-identifier hs-var">ClosedSpline</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-118"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="ClosePath"><span class="annot"><a href="Ipe.Path.html#ClosePath"><span class="hs-identifier hs-var">ClosePath</span></a></span></span><span>
 </span><span id="line-119"></span><span>                 </span><span class="hs-comment">-- these should be deprecated</span><span>
-</span><span id="line-120"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="CurveTo"><span class="annot"><a href="Ipe.Path.html#CurveTo"><span class="hs-identifier hs-var">CurveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-121"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="QCurveTo"><span class="annot"><a href="Ipe.Path.html#QCurveTo"><span class="hs-identifier hs-var">QCurveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679413195"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-122"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679413182"><span id="local-6989586621679413184"><span class="annot"><span class="annottext">Operation r -&gt; Operation r -&gt; Bool
-(Operation r -&gt; Operation r -&gt; Bool)
--&gt; (Operation r -&gt; Operation r -&gt; Bool) -&gt; Eq (Operation r)
+</span><span id="line-120"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="CurveTo"><span class="annot"><a href="Ipe.Path.html#CurveTo"><span class="hs-identifier hs-var">CurveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="QCurveTo"><span class="annot"><a href="Ipe.Path.html#QCurveTo"><span class="hs-identifier hs-var">QCurveTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679370136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679369493"><span id="local-6989586621679369513"><span class="annot"><span class="annottext">Operation r -&gt; Operation r -&gt; Bool
 forall r. Eq r =&gt; Operation r -&gt; Operation r -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 /= :: Operation r -&gt; Operation r -&gt; Bool
 $c/= :: forall r. Eq r =&gt; Operation r -&gt; Operation r -&gt; Bool
 == :: Operation r -&gt; Operation r -&gt; Bool
 $c== :: forall r. Eq r =&gt; Operation r -&gt; Operation r -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679413176"><span id="local-6989586621679413178"><span id="local-6989586621679413180"><span class="annot"><span class="annottext">Int -&gt; Operation r -&gt; ShowS
-[Operation r] -&gt; ShowS
-Operation r -&gt; String
-(Int -&gt; Operation r -&gt; ShowS)
--&gt; (Operation r -&gt; String)
--&gt; ([Operation r] -&gt; ShowS)
--&gt; Show (Operation r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369439"><span id="local-6989586621679369441"><span id="local-6989586621679369469"><span class="annot"><span class="annottext">Int -&gt; Operation r -&gt; ShowS
 forall r. Show r =&gt; Int -&gt; Operation r -&gt; ShowS
 forall r. Show r =&gt; [Operation r] -&gt; ShowS
 forall r. Show r =&gt; Operation r -&gt; String
@@ -555,42 +417,16 @@ show :: Operation r -&gt; String
 $cshow :: forall r. Show r =&gt; Operation r -&gt; String
 showsPrec :: Int -&gt; Operation r -&gt; ShowS
 $cshowsPrec :: forall r. Show r =&gt; Int -&gt; Operation r -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413172"><span id="local-6989586621679413174"><span class="annot"><span class="annottext">a -&gt; Operation b -&gt; Operation a
-(a -&gt; b) -&gt; Operation a -&gt; Operation b
-(forall a b. (a -&gt; b) -&gt; Operation a -&gt; Operation b)
--&gt; (forall a b. a -&gt; Operation b -&gt; Operation a)
--&gt; Functor Operation
-forall a b. a -&gt; Operation b -&gt; Operation a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369393"><span id="local-6989586621679369415"><span class="annot"><span class="annottext">forall a b. a -&gt; Operation b -&gt; Operation a
 forall a b. (a -&gt; b) -&gt; Operation a -&gt; Operation b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-&lt;$ :: a -&gt; Operation b -&gt; Operation a
+&lt;$ :: forall a b. a -&gt; Operation b -&gt; Operation a
 $c&lt;$ :: forall a b. a -&gt; Operation b -&gt; Operation a
-fmap :: (a -&gt; b) -&gt; Operation a -&gt; Operation b
+fmap :: forall a b. (a -&gt; b) -&gt; Operation a -&gt; Operation b
 $cfmap :: forall a b. (a -&gt; b) -&gt; Operation a -&gt; Operation b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413138"><span id="local-6989586621679413140"><span id="local-6989586621679413142"><span id="local-6989586621679413144"><span id="local-6989586621679413146"><span id="local-6989586621679413148"><span id="local-6989586621679413150"><span id="local-6989586621679413152"><span id="local-6989586621679413154"><span id="local-6989586621679413156"><span id="local-6989586621679413158"><span id="local-6989586621679413160"><span id="local-6989586621679413162"><span id="local-6989586621679413164"><span id="local-6989586621679413166"><span id="local-6989586621679413168"><span id="local-6989586621679413170"><span class="annot"><span class="annottext">Operation a -&gt; Bool
-(a -&gt; m) -&gt; Operation a -&gt; m
-(a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
-(forall m. Monoid m =&gt; Operation m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a)
--&gt; (forall a. Operation a -&gt; [a])
--&gt; (forall a. Operation a -&gt; Bool)
--&gt; (forall a. Operation a -&gt; Int)
--&gt; (forall a. Eq a =&gt; a -&gt; Operation a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; Operation a -&gt; a)
--&gt; (forall a. Ord a =&gt; Operation a -&gt; a)
--&gt; (forall a. Num a =&gt; Operation a -&gt; a)
--&gt; (forall a. Num a =&gt; Operation a -&gt; a)
--&gt; Foldable Operation
-forall a. Eq a =&gt; a -&gt; Operation a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369223"><span id="local-6989586621679369225"><span id="local-6989586621679369227"><span id="local-6989586621679369229"><span id="local-6989586621679369231"><span id="local-6989586621679369233"><span id="local-6989586621679369252"><span id="local-6989586621679369254"><span id="local-6989586621679369256"><span id="local-6989586621679369258"><span id="local-6989586621679369260"><span id="local-6989586621679369262"><span id="local-6989586621679369264"><span id="local-6989586621679369283"><span id="local-6989586621679369285"><span id="local-6989586621679369327"><span id="local-6989586621679369329"><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; Operation a -&gt; Bool
 forall a. Num a =&gt; Operation a -&gt; a
 forall a. Ord a =&gt; Operation a -&gt; a
 forall m. Monoid m =&gt; Operation m -&gt; m
@@ -620,58 +456,42 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-product :: Operation a -&gt; a
+product :: forall a. Num a =&gt; Operation a -&gt; a
 $cproduct :: forall a. Num a =&gt; Operation a -&gt; a
-sum :: Operation a -&gt; a
+sum :: forall a. Num a =&gt; Operation a -&gt; a
 $csum :: forall a. Num a =&gt; Operation a -&gt; a
-minimum :: Operation a -&gt; a
+minimum :: forall a. Ord a =&gt; Operation a -&gt; a
 $cminimum :: forall a. Ord a =&gt; Operation a -&gt; a
-maximum :: Operation a -&gt; a
+maximum :: forall a. Ord a =&gt; Operation a -&gt; a
 $cmaximum :: forall a. Ord a =&gt; Operation a -&gt; a
-elem :: a -&gt; Operation a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Operation a -&gt; Bool
 $celem :: forall a. Eq a =&gt; a -&gt; Operation a -&gt; Bool
-length :: Operation a -&gt; Int
+length :: forall a. Operation a -&gt; Int
 $clength :: forall a. Operation a -&gt; Int
-null :: Operation a -&gt; Bool
+null :: forall a. Operation a -&gt; Bool
 $cnull :: forall a. Operation a -&gt; Bool
-toList :: Operation a -&gt; [a]
+toList :: forall a. Operation a -&gt; [a]
 $ctoList :: forall a. Operation a -&gt; [a]
-foldl1 :: (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
 $cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
-foldr1 :: (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
 $cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Operation a -&gt; a
-foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
 $cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
-foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
 $cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Operation a -&gt; b
-foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
 $cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
-foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
 $cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Operation a -&gt; b
-foldMap' :: (a -&gt; m) -&gt; Operation a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m
 $cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m
-foldMap :: (a -&gt; m) -&gt; Operation a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m
 $cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Operation a -&gt; m
-fold :: Operation m -&gt; m
+fold :: forall m. Monoid m =&gt; Operation m -&gt; m
 $cfold :: forall m. Monoid m =&gt; Operation m -&gt; m
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679413128"><span id="local-6989586621679413130"><span id="local-6989586621679413132"><span id="local-6989586621679413134"><span class="annot"><span class="annottext">Functor Operation
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679369099"><span id="local-6989586621679369101"><span id="local-6989586621679369103"><span id="local-6989586621679369151"><span class="annot"><span class="annottext">Functor Operation
 Foldable Operation
-Functor Operation
--&gt; Foldable Operation
--&gt; (forall (f :: * -&gt; *) a b.
-    Applicative f =&gt;
-    (a -&gt; f b) -&gt; Operation a -&gt; f (Operation b))
--&gt; (forall (f :: * -&gt; *) a.
-    Applicative f =&gt;
-    Operation (f a) -&gt; f (Operation a))
--&gt; (forall (m :: * -&gt; *) a b.
-    Monad m =&gt;
-    (a -&gt; m b) -&gt; Operation a -&gt; m (Operation b))
--&gt; (forall (m :: * -&gt; *) a.
-    Monad m =&gt;
-    Operation (m a) -&gt; m (Operation a))
--&gt; Traversable Operation
-(a -&gt; f b) -&gt; Operation a -&gt; f (Operation b)
 forall (t :: * -&gt; *).
 Functor t
 -&gt; Foldable t
@@ -696,25 +516,31 @@ Monad m =&gt;
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Operation a -&gt; f (Operation b)
-sequence :: Operation (m a) -&gt; m (Operation a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+Operation (m a) -&gt; m (Operation a)
 $csequence :: forall (m :: * -&gt; *) a.
 Monad m =&gt;
 Operation (m a) -&gt; m (Operation a)
-mapM :: (a -&gt; m b) -&gt; Operation a -&gt; m (Operation b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Operation a -&gt; m (Operation b)
 $cmapM :: forall (m :: * -&gt; *) a b.
 Monad m =&gt;
 (a -&gt; m b) -&gt; Operation a -&gt; m (Operation b)
-sequenceA :: Operation (f a) -&gt; f (Operation a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Operation (f a) -&gt; f (Operation a)
 $csequenceA :: forall (f :: * -&gt; *) a.
 Applicative f =&gt;
 Operation (f a) -&gt; f (Operation a)
-traverse :: (a -&gt; f b) -&gt; Operation a -&gt; f (Operation b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Operation a -&gt; f (Operation b)
 $ctraverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Operation a -&gt; f (Operation b)
-$cp2Traversable :: Foldable Operation
-$cp1Traversable :: Functor Operation
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-123"></span><span id="local-6989586621679413195"><span id="_ClosePath"><span id="_ClosedSpline"><span id="_Spline"><span id="_ArcTo"><span id="_Ellipse"><span id="_QCurveTo"><span id="_CurveTo"><span id="_LineTo"><span id="_MoveTo"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Operation</span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-123"></span><span id="_ClosePath"><span id="_ClosedSpline"><span id="_Spline"><span id="_ArcTo"><span id="_Ellipse"><span id="_QCurveTo"><span id="_CurveTo"><span id="_LineTo"><span id="_MoveTo"><span id="local-6989586621679370136"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Operation</span></span></span></span></span></span></span></span></span></span></span><span>
 </span><span id="line-124"></span><span>
 </span><span id="line-125"></span></pre></body></html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">VectorBuilder.Core.Builder</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic.Mutable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Update.html"><span class="hs-identifier">VectorBuilder.Core.Update</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="VectorBuilder.Prelude.html"><span class="hs-identifier">VectorBuilder.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">concat</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">empty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- An abstraction over the size of a vector for the process of its construction.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- It postpones the actual construction of a vector until the execution of the builder.</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">data</span><span> </span><span id="Builder"><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span></span><span> </span><span id="local-6989586621679050485"><span class="annot"><a href="#local-6989586621679050485"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Builder"><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Update.html#Update"><span class="hs-identifier hs-type">A.Update</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050485"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Gets the size of a Builder.</span><span>
+</span><span id="line-17"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#size"><span class="hs-pragma hs-type">size</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679050489"><span class="annot"><a href="VectorBuilder.Core.Builder.html#size"><span class="hs-identifier hs-type">size</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050489"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-19"></span><span id="size"><span class="annot"><span class="annottext">size :: forall element. Builder element -&gt; Int
+</span><a href="VectorBuilder.Core.Builder.html#size"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050415"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050415"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="annottext">Update element
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050415"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- * Initialisation</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- Empty builder.</span><span>
+</span><span id="line-25"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#empty"><span class="hs-pragma hs-type">empty</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-26"></span><span id="local-6989586621679050486"><span class="annot"><a href="VectorBuilder.Core.Builder.html#empty"><span class="hs-identifier hs-type">empty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050486"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-27"></span><span id="empty"><span class="annot"><span class="annottext">empty :: forall element. Builder element
+</span><a href="VectorBuilder.Core.Builder.html#empty"><span class="hs-identifier hs-var hs-var">empty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">forall element. Update element
+</span><a href="VectorBuilder.Core.Update.html#empty"><span class="hs-identifier hs-var">A.empty</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- Builder of a single element.</span><span>
+</span><span id="line-32"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-pragma hs-type">singleton</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679050483"><span class="annot"><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-type">singleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679050483"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050483"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-34"></span><span id="singleton"><span class="annot"><span class="annottext">singleton :: forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var hs-var">singleton</span></a></span></span><span> </span><span id="local-6989586621679050411"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050411"><span class="hs-identifier hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element. element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#write"><span class="hs-identifier hs-var">A.write</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050411"><span class="hs-identifier hs-var">element</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- Builder from an immutable vector of elements.</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Supports all kinds of vectors: boxed, unboxed, primitive, storable.</span><span>
+</span><span id="line-41"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#vector"><span class="hs-pragma hs-type">vector</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-42"></span><span id="local-6989586621679050479"><span id="local-6989586621679050480"><span class="annot"><a href="VectorBuilder.Core.Builder.html#vector"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679050480"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050479"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679050480"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050479"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050479"><span class="hs-identifier hs-type">element</span></a></span></span></span><span>
+</span><span id="line-43"></span><span id="vector"><span class="annot"><span class="annottext">vector :: forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+vector element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#vector"><span class="hs-identifier hs-var hs-var">vector</span></a></span></span><span> </span><span id="local-6989586621679050405"><span class="annot"><span class="annottext">vector element
+</span><a href="#local-6989586621679050405"><span class="hs-identifier hs-var">vector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int
+</span><span class="hs-identifier hs-var">B.length</span></span><span> </span><span class="annot"><span class="annottext">vector element
+</span><a href="#local-6989586621679050405"><span class="hs-identifier hs-var">vector</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+vector element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#writeMany"><span class="hs-identifier hs-var">A.writeMany</span></a></span><span> </span><span class="annot"><span class="annottext">vector element
+</span><a href="#local-6989586621679050405"><span class="hs-identifier hs-var">vector</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#foldable"><span class="hs-pragma hs-type">foldable</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-47"></span><span id="local-6989586621679050470"><span id="local-6989586621679050471"><span class="annot"><a href="VectorBuilder.Core.Builder.html#foldable"><span class="hs-identifier hs-type">foldable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679050471"><span class="hs-identifier hs-type">foldable</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679050471"><span class="hs-identifier hs-type">foldable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050470"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050470"><span class="hs-identifier hs-type">element</span></a></span></span></span><span>
+</span><span id="line-48"></span><span id="foldable"><span class="annot"><span class="annottext">foldable :: forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#foldable"><span class="hs-identifier hs-var hs-var">foldable</span></a></span></span><span> </span><span id="local-6989586621679050398"><span class="annot"><span class="annottext">foldable element
+</span><a href="#local-6989586621679050398"><span class="hs-identifier hs-var">foldable</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">foldable element
+</span><a href="#local-6989586621679050398"><span class="hs-identifier hs-var">foldable</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#writeFoldable"><span class="hs-identifier hs-var">A.writeFoldable</span></a></span><span> </span><span class="annot"><span class="annottext">foldable element
+</span><a href="#local-6989586621679050398"><span class="hs-identifier hs-var">foldable</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- * Updates</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#snoc"><span class="hs-pragma hs-type">snoc</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679050463"><span class="annot"><a href="VectorBuilder.Core.Builder.html#snoc"><span class="hs-identifier hs-type">snoc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679050463"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050463"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050463"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-55"></span><span id="snoc"><span class="annot"><span class="annottext">snoc :: forall element. element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#snoc"><span class="hs-identifier hs-var hs-var">snoc</span></a></span></span><span> </span><span id="local-6989586621679050392"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050392"><span class="hs-identifier hs-var">element</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050391"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050391"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span id="local-6989586621679050390"><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050390"><span class="hs-identifier hs-var">update</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050391"><span class="hs-identifier hs-var">size</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element.
+Int -&gt; Update element -&gt; Update element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#prepend"><span class="hs-identifier hs-var">A.prepend</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050391"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050390"><span class="hs-identifier hs-var">update</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element. element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#write"><span class="hs-identifier hs-var">A.write</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050392"><span class="hs-identifier hs-var">element</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#cons"><span class="hs-pragma hs-type">cons</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-59"></span><span id="local-6989586621679050386"><span class="annot"><a href="VectorBuilder.Core.Builder.html#cons"><span class="hs-identifier hs-type">cons</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679050386"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050386"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050386"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-60"></span><span id="cons"><span class="annot"><span class="annottext">cons :: forall element. element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#cons"><span class="hs-identifier hs-var hs-var">cons</span></a></span></span><span> </span><span id="local-6989586621679050384"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050384"><span class="hs-identifier hs-var">element</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050383"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050383"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span id="local-6989586621679050382"><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050382"><span class="hs-identifier hs-var">update</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050383"><span class="hs-identifier hs-var">size</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element.
+Int -&gt; Update element -&gt; Update element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#prepend"><span class="hs-identifier hs-var">A.prepend</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element. element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#write"><span class="hs-identifier hs-var">A.write</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679050384"><span class="hs-identifier hs-var">element</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050382"><span class="hs-identifier hs-var">update</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#prepend"><span class="hs-pragma hs-type">prepend</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-64"></span><span id="local-6989586621679050458"><span class="annot"><a href="VectorBuilder.Core.Builder.html#prepend"><span class="hs-identifier hs-type">prepend</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050458"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050458"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050458"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-65"></span><span id="prepend"><span class="annot"><span class="annottext">prepend :: forall element.
+Builder element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#prepend"><span class="hs-identifier hs-var hs-var">prepend</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050378"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050378"><span class="hs-identifier hs-var">leftSize</span></a></span></span><span> </span><span id="local-6989586621679050377"><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050377"><span class="hs-identifier hs-var">leftUpdate</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050376"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050376"><span class="hs-identifier hs-var">rightSize</span></a></span></span><span> </span><span id="local-6989586621679050375"><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050375"><span class="hs-identifier hs-var">rightUpdate</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050378"><span class="hs-identifier hs-var">leftSize</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050376"><span class="hs-identifier hs-var">rightSize</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall element.
+Int -&gt; Update element -&gt; Update element -&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#prepend"><span class="hs-identifier hs-var">A.prepend</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050378"><span class="hs-identifier hs-var">leftSize</span></a></span><span> </span><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050377"><span class="hs-identifier hs-var">leftUpdate</span></a></span><span> </span><span class="annot"><span class="annottext">Update element
+</span><a href="#local-6989586621679050375"><span class="hs-identifier hs-var">rightUpdate</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#append"><span class="hs-pragma hs-type">append</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-69"></span><span id="local-6989586621679050372"><span class="annot"><a href="VectorBuilder.Core.Builder.html#append"><span class="hs-identifier hs-type">append</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050372"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050372"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050372"><span class="hs-identifier hs-type">element</span></a></span></span><span>
+</span><span id="line-70"></span><span id="append"><span class="annot"><span class="annottext">append :: forall element.
+Builder element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#append"><span class="hs-identifier hs-var hs-var">append</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="annottext">forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">forall element.
+Builder element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#prepend"><span class="hs-identifier hs-var">prepend</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#concat"><span class="hs-pragma hs-type">concat</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-74"></span><span id="local-6989586621679050451"><span id="local-6989586621679050452"><span class="annot"><a href="VectorBuilder.Core.Builder.html#concat"><span class="hs-identifier hs-type">concat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679050452"><span class="hs-identifier hs-type">foldable</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679050452"><span class="hs-identifier hs-type">foldable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050451"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050451"><span class="hs-identifier hs-type">element</span></a></span></span></span><span>
+</span><span id="line-75"></span><span id="concat"><span class="annot"><span class="annottext">concat :: forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable (Builder element) -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#concat"><span class="hs-identifier hs-var hs-var">concat</span></a></span></span><span> </span><span id="local-6989586621679050366"><span class="annot"><span class="annottext">foldable (Builder element)
+</span><a href="#local-6989586621679050366"><span class="hs-identifier hs-var">builders</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-76"></span><span>  </span><span class="annot"><span class="annottext">forall element. Int -&gt; Update element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-var">Builder</span></a></span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679050364"><span class="annot"><span class="annottext">step :: Int -&gt; Builder element -&gt; Int
+</span><a href="#local-6989586621679050364"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span id="local-6989586621679050363"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050363"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050362"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050362"><span class="hs-identifier hs-var">builderSize</span></a></span></span><span> </span><span class="annot"><span class="annottext">Update element
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050363"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050362"><span class="hs-identifier hs-var">builderSize</span></a></span><span>
+</span><span id="line-78"></span><span>       </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="annot"><span class="annottext">forall {element}. Int -&gt; Builder element -&gt; Int
+</span><a href="#local-6989586621679050364"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">foldable (Builder element)
+</span><a href="#local-6989586621679050366"><span class="hs-identifier hs-var">builders</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">forall element.
+(forall s (vector :: * -&gt; * -&gt; *).
+ MVector vector element =&gt;
+ vector s element -&gt; Int -&gt; ST s ())
+-&gt; Update element
+</span><a href="VectorBuilder.Core.Update.html#Update"><span class="hs-identifier hs-var">A.Update</span></a></span><span>
+</span><span id="line-81"></span><span>        </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679050351"><span class="annot"><span class="annottext">vector s element
+</span><a href="#local-6989586621679050351"><span class="hs-identifier hs-var">mVector</span></a></span></span><span> </span><span id="local-6989586621679050350"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050350"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-82"></span><span>            </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) b a.
+(Foldable t, Monad m) =&gt;
+(b -&gt; a -&gt; m b) -&gt; b -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">foldM_</span></span><span>
+</span><span id="line-83"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679050348"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050348"><span class="hs-identifier hs-var">index</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span id="local-6989586621679050347"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050347"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Update.html#Update"><span class="hs-identifier hs-type">A.Update</span></a></span><span> </span><span id="local-6989586621679050346"><span class="annot"><span class="annottext">forall s (vector :: * -&gt; * -&gt; *).
+MVector vector element =&gt;
+vector s element -&gt; Int -&gt; ST s ()
+</span><a href="#local-6989586621679050346"><span class="hs-identifier hs-var">st</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-84"></span><span>                  </span><span class="annot"><span class="annottext">forall s (vector :: * -&gt; * -&gt; *).
+MVector vector element =&gt;
+vector s element -&gt; Int -&gt; ST s ()
+</span><a href="#local-6989586621679050346"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="annot"><span class="annottext">vector s element
+</span><a href="#local-6989586621679050351"><span class="hs-identifier hs-var">mVector</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050348"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
+</span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050348"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050347"><span class="hs-identifier hs-var">size</span></a></span><span>
+</span><span id="line-85"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>              </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679050350"><span class="hs-identifier hs-var">offset</span></a></span><span>
+</span><span id="line-87"></span><span>              </span><span class="annot"><span class="annottext">foldable (Builder element)
+</span><a href="#local-6989586621679050366"><span class="hs-identifier hs-var">builders</span></a></span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- * Instances</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- Provides support for /O(1)/ concatenation.</span><span>
+</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679050341"><span id="local-6989586621679050427"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050427"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">&lt;&gt;</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-97"></span><span>  </span><span id="local-6989586621679050339"><span class="annot"><span class="annottext">&lt;&gt; :: Builder element -&gt; Builder element -&gt; Builder element
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-98"></span><span>    </span><span class="annot"><span class="annottext">forall element.
+Builder element -&gt; Builder element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#prepend"><span class="hs-identifier hs-var">prepend</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621679050336"><span class="annot"><span class="annottext">sconcat :: NonEmpty (Builder element) -&gt; Builder element
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">sconcat</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-100"></span><span>    </span><span class="annot"><span class="annottext">forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable (Builder element) -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#concat"><span class="hs-identifier hs-var">concat</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- Provides support for /O(1)/ concatenation.</span><span>
+</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679050424"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679050424"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">mempty</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679050327"><span class="annot"><span class="annottext">mempty :: Builder element
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-107"></span><span>    </span><span class="annot"><span class="annottext">forall element. Builder element
+</span><a href="VectorBuilder.Core.Builder.html#empty"><span class="hs-identifier hs-var">empty</span></a></span><span>
+</span><span id="line-108"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">mappend</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-109"></span><span>  </span><span id="local-6989586621679050325"><span class="annot"><span class="annottext">mappend :: Builder element -&gt; Builder element -&gt; Builder element
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-110"></span><span>    </span><span class="annot"><span class="annottext">forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">mconcat</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-112"></span><span>  </span><span id="local-6989586621679050322"><span class="annot"><span class="annottext">mconcat :: [Builder element] -&gt; Builder element
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mconcat</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><span class="annottext">forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable (Builder element) -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#concat"><span class="hs-identifier hs-var">concat</span></a></span><span>
+</span><span id="line-114"></span></pre></body></html>

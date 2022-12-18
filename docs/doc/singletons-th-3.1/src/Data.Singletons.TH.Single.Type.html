@@ -1,0 +1,509 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Data/Singletons/TH/Single/Type.hs
+
+(c) Richard Eisenberg 2013
+rae@cs.brynmawr.edu
+
+Singletonizes types.
+-}</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.TH.Single.Type</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar.OSet</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">OSet</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Names.html"><span class="hs-identifier">Data.Singletons.TH.Names</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html"><span class="hs-identifier">Data.Singletons.TH.Options</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Type.html"><span class="hs-identifier">Data.Singletons.TH.Promote.Type</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html"><span class="hs-identifier">Data.Singletons.TH.Single.Monad</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Util.html"><span class="hs-identifier">Data.Singletons.TH.Util</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Function</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">deleteFirstsBy</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singType"><span class="hs-identifier hs-type">singType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OSet</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>      </span><span class="hs-comment">-- the set of bound kind variables in this scope</span><span>
+</span><span id="line-25"></span><span>                           </span><span class="hs-comment">-- see Note [Explicitly binding kind variables]</span><span>
+</span><span id="line-26"></span><span>                           </span><span class="hs-comment">-- in Data.Singletons.TH.Promote.Monad</span><span>
+</span><span id="line-27"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>          </span><span class="hs-comment">-- the promoted version of the thing classified by...</span><span>
+</span><span id="line-28"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>          </span><span class="hs-comment">-- ... this type</span><span>
+</span><span id="line-29"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>    </span><span class="hs-comment">-- the singletonized type</span><span>
+</span><span id="line-30"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>      </span><span class="hs-comment">-- the number of arguments</span><span>
+</span><span id="line-31"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span><span>   </span><span class="hs-comment">-- the names of the tyvars used in the sing'd type</span><span>
+</span><span id="line-32"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>     </span><span class="hs-comment">-- the context of the singletonized type</span><span>
+</span><span id="line-33"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- the kinds of the argument types</span><span>
+</span><span id="line-34"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DKind</span></span><span> </span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- the kind of the result type</span><span>
+</span><span id="line-35"></span><span id="singType"><span class="annot"><span class="annottext">singType :: OSet Name
+-&gt; DType -&gt; DType -&gt; SgM (DType, Int, [Name], DCxt, DCxt, DType)
+</span><a href="Data.Singletons.TH.Single.Type.html#singType"><span class="hs-identifier hs-var hs-var">singType</span></a></span></span><span> </span><span id="local-6989586621679303916"><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679303916"><span class="hs-identifier hs-var">bound_kvs</span></a></span></span><span> </span><span id="local-6989586621679303915"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303915"><span class="hs-identifier hs-var">prom</span></a></span></span><span> </span><span id="local-6989586621679303914"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303914"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679303913"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303913"><span class="hs-identifier hs-var">orig_tvbs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303912"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303912"><span class="hs-identifier hs-var">cxt</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303911"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303911"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303910"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303910"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *).
+MonadFail m =&gt;
+DType -&gt; m ([DTyVarBndrSpec], DCxt, DCxt, DType)
+</span><a href="Data.Singletons.TH.Util.html#unravelVanillaDType"><span class="hs-identifier hs-var">unravelVanillaDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303914"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303907"><span class="annot"><span class="annottext">num_args :: Int
+</span><a href="#local-6989586621679303907"><span class="hs-identifier hs-var hs-var">num_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303911"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679303905"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303905"><span class="hs-identifier hs-var">cxt'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPred_NC"><span class="hs-identifier hs-var">singPred_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303912"><span class="hs-identifier hs-var">cxt</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679303902"><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679303902"><span class="hs-identifier hs-var">arg_names</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Applicative m =&gt; Int -&gt; m a -&gt; m [a]
+</span><span class="hs-identifier hs-var">replicateM</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303907"><span class="hs-identifier hs-var">num_args</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). Quasi m =&gt; String -&gt; m Name
+</span><span class="hs-identifier hs-var">qNewName</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;t&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679303899"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303899"><span class="hs-identifier hs-var">prom_args</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var">promoteType_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303911"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621679303897"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303897"><span class="hs-identifier hs-var">prom_res</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DType -&gt; m DType
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteType_NC"><span class="hs-identifier hs-var">promoteType_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303910"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303896"><span class="annot"><span class="annottext">args' :: DCxt
+</span><a href="#local-6989586621679303896"><span class="hs-identifier hs-var hs-var">args'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679303895"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303895"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="Data.Singletons.TH.Names.html#singFamily"><span class="hs-identifier hs-var">singFamily</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DVarT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303895"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679303902"><span class="hs-identifier hs-var">arg_names</span></a></span><span>
+</span><span id="line-43"></span><span>      </span><span id="local-6989586621679303890"><span class="annot"><span class="annottext">res' :: DType
+</span><a href="#local-6989586621679303890"><span class="hs-identifier hs-var hs-var">res'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="Data.Singletons.TH.Names.html#singFamily"><span class="hs-identifier hs-var">singFamily</span></a></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-operator hs-var">`DAppT`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldl</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><a href="Data.Singletons.TH.Names.html#apply"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303915"><span class="hs-identifier hs-var">prom</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DVarT</span></span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679303902"><span class="hs-identifier hs-var">arg_names</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType -&gt; DType -&gt; DType
+</span><span class="hs-operator hs-var">`DSigT`</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303897"><span class="hs-identifier hs-var">prom_res</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>                </span><span class="hs-comment">-- Make sure to include an explicit `prom_res` kind annotation.</span><span>
+</span><span id="line-45"></span><span>                </span><span class="hs-comment">-- See Note [Preserve the order of type variables during singling],</span><span>
+</span><span id="line-46"></span><span>                </span><span class="hs-comment">-- wrinkle 3.</span><span>
+</span><span id="line-47"></span><span>      </span><span id="local-6989586621679303886"><span class="annot"><span class="annottext">kvbs :: [DTyVarBndrSpec]
+</span><a href="#local-6989586621679303886"><span class="hs-identifier hs-var hs-var">kvbs</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+-&gt; DCxt -&gt; DCxt -&gt; DType -&gt; OSet Name -&gt; [DTyVarBndrSpec]
+</span><a href="Data.Singletons.TH.Single.Type.html#singTypeKVBs"><span class="hs-identifier hs-var">singTypeKVBs</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303913"><span class="hs-identifier hs-var">orig_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303899"><span class="hs-identifier hs-var">prom_args</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303905"><span class="hs-identifier hs-var">cxt'</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303897"><span class="hs-identifier hs-var">prom_res</span></a></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679303916"><span class="hs-identifier hs-var">bound_kvs</span></a></span><span>
+</span><span id="line-48"></span><span>      </span><span id="local-6989586621679303884"><span class="annot"><span class="annottext">all_tvbs :: [DTyVarBndrSpec]
+</span><a href="#local-6989586621679303884"><span class="hs-identifier hs-var hs-var">all_tvbs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303886"><span class="hs-identifier hs-var">kvbs</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall flag. Name -&gt; flag -&gt; DType -&gt; DTyVarBndr flag
+</span><span class="hs-operator hs-var">`DKindedTV`</span></span><span> </span><span class="annot"><span class="annottext">Specificity
+</span><span class="hs-identifier hs-var">SpecifiedSpec</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679303902"><span class="hs-identifier hs-var">arg_names</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303899"><span class="hs-identifier hs-var">prom_args</span></a></span><span>
+</span><span id="line-49"></span><span>      </span><span id="local-6989586621679303880"><span class="annot"><span class="annottext">ty' :: DType
+</span><a href="#local-6989586621679303880"><span class="hs-identifier hs-var hs-var">ty'</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec] -&gt; DCxt -&gt; DCxt -&gt; DType -&gt; DType
+</span><a href="Data.Singletons.TH.Util.html#ravelVanillaDType"><span class="hs-identifier hs-var">ravelVanillaDType</span></a></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303884"><span class="hs-identifier hs-var">all_tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303905"><span class="hs-identifier hs-var">cxt'</span></a></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303896"><span class="hs-identifier hs-var">args'</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303890"><span class="hs-identifier hs-var">res'</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303880"><span class="hs-identifier hs-var">ty'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303907"><span class="hs-identifier hs-var">num_args</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621679303902"><span class="hs-identifier hs-var">arg_names</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303912"><span class="hs-identifier hs-var">cxt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303899"><span class="hs-identifier hs-var">prom_args</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303897"><span class="hs-identifier hs-var">prom_res</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- Compute the kind variable binders to use in the singled version of a type</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- signature. This has two main call sites: singType and D.S.TH.Single.Data.singCtor.</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- This implements the advice documented in</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- Note [Preserve the order of type variables during singling], wrinkle 1.</span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singTypeKVBs"><span class="hs-identifier hs-type">singTypeKVBs</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-58"></span><span>     </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTyVarBndrSpec</span></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ The bound type variables from the original type signature.</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span class="hs-special">]</span><span>          </span><span class="hs-comment">-- ^ The argument types of the signature (promoted).</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>             </span><span class="hs-comment">-- ^ The context of the signature (singled).</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span>            </span><span class="hs-comment">-- ^ The result type of the signature (promoted).</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OSet</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>        </span><span class="hs-comment">-- ^ The type variables previously bound in the current scope.</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTyVarBndrSpec</span></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ The kind variables for the singled type signature.</span><span>
+</span><span id="line-64"></span><span id="singTypeKVBs"><span class="annot"><span class="annottext">singTypeKVBs :: [DTyVarBndrSpec]
+-&gt; DCxt -&gt; DCxt -&gt; DType -&gt; OSet Name -&gt; [DTyVarBndrSpec]
+</span><a href="Data.Singletons.TH.Single.Type.html#singTypeKVBs"><span class="hs-identifier hs-var hs-var">singTypeKVBs</span></a></span></span><span> </span><span id="local-6989586621679303878"><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303878"><span class="hs-identifier hs-var">orig_tvbs</span></a></span></span><span> </span><span id="local-6989586621679303877"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303877"><span class="hs-identifier hs-var">prom_args</span></a></span></span><span> </span><span id="local-6989586621679303876"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303876"><span class="hs-identifier hs-var">sing_ctxt</span></a></span></span><span> </span><span id="local-6989586621679303875"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303875"><span class="hs-identifier hs-var">prom_res</span></a></span></span><span> </span><span id="local-6989586621679303874"><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679303874"><span class="hs-identifier hs-var">bound_tvbs</span></a></span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303878"><span class="hs-identifier hs-var">orig_tvbs</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- There are no explicitly `forall`ed type variable binders, so we must</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- infer them ourselves.</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall newFlag oldFlag.
+newFlag -&gt; [DTyVarBndr oldFlag] -&gt; [DTyVarBndr newFlag]
+</span><span class="hs-identifier hs-var">changeDTVFlags</span></span><span> </span><span class="annot"><span class="annottext">Specificity
+</span><span class="hs-identifier hs-var">SpecifiedSpec</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">forall a. (a -&gt; a -&gt; Bool) -&gt; [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">deleteFirstsBy</span></span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(==)</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">`on`</span></span><span> </span><span class="annot"><span class="annottext">forall flag. DTyVarBndr flag -&gt; Name
+</span><a href="Data.Singletons.TH.Util.html#extractTvbName"><span class="hs-identifier hs-var">extractTvbName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DCxt -&gt; [DTyVarBndr ()]
+</span><span class="hs-identifier hs-var">toposortTyVarsOf</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303877"><span class="hs-identifier hs-var">prom_args</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303876"><span class="hs-identifier hs-var">sing_ctxt</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303875"><span class="hs-identifier hs-var">prom_res</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall flag. Name -&gt; flag -&gt; DTyVarBndr flag
+</span><span class="hs-operator hs-var">`DPlainTV`</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">OSet Name
+</span><a href="#local-6989586621679303874"><span class="hs-identifier hs-var">bound_tvbs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>      </span><span class="hs-comment">-- Make sure to subtract out the bound variables currently in scope,</span><span>
+</span><span id="line-74"></span><span>      </span><span class="hs-comment">-- lest we accidentally shadow them in this type signature.</span><span>
+</span><span id="line-75"></span><span>      </span><span class="hs-comment">-- See Note [Explicitly binding kind variables] in D.S.TH.Promote.Monad.</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">-- There is an explicit `forall`, so this case is easy.</span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTyVarBndrSpec]
+</span><a href="#local-6989586621679303878"><span class="hs-identifier hs-var">orig_tvbs</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- Single a DPred, checking that it is a vanilla type in the process.</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- See [Vanilla-type validity checking during promotion]</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- in Data.Singletons.TH.Promote.Type.</span><span>
+</span><span id="line-83"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPred"><span class="hs-identifier hs-type">singPred</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span>
+</span><span id="line-84"></span><span id="singPred"><span class="annot"><span class="annottext">singPred :: DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPred"><span class="hs-identifier hs-var hs-var">singPred</span></a></span></span><span> </span><span id="local-6989586621679303864"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303864"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-85"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). MonadFail m =&gt; DType -&gt; m ()
+</span><a href="Data.Singletons.TH.Util.html#checkVanillaDType"><span class="hs-identifier hs-var">checkVanillaDType</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303864"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><span class="annottext">DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPred_NC"><span class="hs-identifier hs-var">singPred_NC</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303864"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- Single a DPred. Does not check if the argument is a vanilla type.</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- See [Vanilla-type validity checking during promotion]</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- in Data.Singletons.TH.Promote.Type.</span><span>
+</span><span id="line-91"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPred_NC"><span class="hs-identifier hs-type">singPred_NC</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span>
+</span><span id="line-92"></span><span id="singPred_NC"><span class="annot"><span class="annottext">singPred_NC :: DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPred_NC"><span class="hs-identifier hs-var hs-var">singPred_NC</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- The workhorse for singPred_NC.</span><span>
+</span><span id="line-95"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-type">singPredRec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DTypeArg</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DPred</span></span><span>
+</span><span id="line-96"></span><span id="singPredRec"><span class="annot"><span class="annottext">singPredRec :: [DTypeArg] -&gt; DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var hs-var">singPredRec</span></a></span></span><span> </span><span id="local-6989586621679303861"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303861"><span class="hs-identifier hs-var">_cxt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DForallT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Singling of quantified constraints not yet supported&quot;</span></span><span>
+</span><span id="line-98"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303859"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303859"><span class="hs-identifier hs-var">_cxt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConstrainedT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Singling of quantified constraints not yet supported&quot;</span></span><span>
+</span><span id="line-100"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303857"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303857"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppT</span></span><span> </span><span id="local-6989586621679303856"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303856"><span class="hs-identifier hs-var">pr</span></a></span></span><span> </span><span id="local-6989586621679303855"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303855"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><span class="hs-identifier hs-var">DTANormal</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303855"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303857"><span class="hs-identifier hs-var">ctx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303856"><span class="hs-identifier hs-var">pr</span></a></span><span>
+</span><span id="line-101"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303853"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303853"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DAppKindT</span></span><span> </span><span id="local-6989586621679303851"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303851"><span class="hs-identifier hs-var">pr</span></a></span></span><span> </span><span id="local-6989586621679303850"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303850"><span class="hs-identifier hs-var">ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DTypeArg] -&gt; DType -&gt; SgM DType
+</span><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DType -&gt; DTypeArg
+</span><span class="hs-identifier hs-var">DTyArg</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303850"><span class="hs-identifier hs-var">ki</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303853"><span class="hs-identifier hs-var">ctx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303851"><span class="hs-identifier hs-var">pr</span></a></span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303848"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303848"><span class="hs-identifier hs-var">_ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DSigT</span></span><span> </span><span id="local-6989586621679303847"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303847"><span class="hs-identifier hs-var">_pr</span></a></span></span><span> </span><span id="local-6989586621679303846"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303846"><span class="hs-identifier hs-var">_ki</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-103"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Singling of constraints with explicit kinds not yet supported&quot;</span></span><span>
+</span><span id="line-104"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303845"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303845"><span class="hs-identifier hs-var">_ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarT</span></span><span> </span><span id="local-6989586621679303844"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303844"><span class="hs-identifier hs-var">_n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-105"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Singling of contraint variables not yet supported&quot;</span></span><span>
+</span><span id="line-106"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303843"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303843"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DConT</span></span><span> </span><span id="local-6989586621679303841"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303841"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303841"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="Data.Singletons.TH.Names.html#equalityName"><span class="hs-identifier hs-var">equalityName</span></a></span><span>
+</span><span id="line-108"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Singling of type equality constraints not yet supported&quot;</span></span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679303839"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303839"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-111"></span><span>    </span><span id="local-6989586621679303837"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303837"><span class="hs-identifier hs-var">kis</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; DTypeArg -&gt; m DTypeArg
+</span><a href="Data.Singletons.TH.Promote.Type.html#promoteTypeArg_NC"><span class="hs-identifier hs-var">promoteTypeArg_NC</span></a></span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303843"><span class="hs-identifier hs-var">ctx</span></a></span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303835"><span class="annot"><span class="annottext">sName :: Name
+</span><a href="#local-6989586621679303835"><span class="hs-identifier hs-var hs-var">sName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#singledClassName"><span class="hs-identifier hs-var">singledClassName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303839"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303841"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DType -&gt; [DTypeArg] -&gt; DType
+</span><span class="hs-identifier hs-var">applyDType</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303835"><span class="hs-identifier hs-var">sName</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303837"><span class="hs-identifier hs-var">kis</span></a></span><span>
+</span><span id="line-114"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303832"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303832"><span class="hs-identifier hs-var">_ctx</span></a></span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier hs-var">DWildCardT</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier hs-var">DWildCardT</span></span><span>  </span><span class="hs-comment">-- it just might work</span><span>
+</span><span id="line-115"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303830"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303830"><span class="hs-identifier hs-var">_ctx</span></a></span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier hs-var">DArrowT</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-116"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;(-&gt;) spotted at head of a constraint&quot;</span></span><span>
+</span><span id="line-117"></span><span class="annot"><a href="Data.Singletons.TH.Single.Type.html#singPredRec"><span class="hs-identifier hs-var">singPredRec</span></a></span><span> </span><span id="local-6989586621679303828"><span class="annot"><span class="annottext">[DTypeArg]
+</span><a href="#local-6989586621679303828"><span class="hs-identifier hs-var">_ctx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DLitT</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-118"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Type-level literal spotted at head of a constraint&quot;</span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">{-
+Note [Preserve the order of type variables during singling]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+singletons-th does its best to preseve the order in which users write type
+variables in type signatures for functions and data constructors. They are
+&quot;preserved&quot; in the sense that if one writes `foo @T1 @T2`, one should be
+able to write out `sFoo @T1 @T2` by hand and have the same order of visible
+type applications still work. Accomplishing this is surprisingly nontrivial,
+so this Note documents the various wrinkles one must iron out to get this
+working.
+
+-----
+-- Wrinkle 1: Dealing with the presence (and absence) of `forall`
+-----
+
+If we single a function that has an explicit `forall`, such as this example:
+
+  const2 :: forall b a. a -&gt; b -&gt; a
+  const2 x _ = x
+
+Then our job is easy, as the exact order of type variables has already been
+spelled out in advance. We single this to:
+
+  sConst2 :: forall b a (x :: a) (y :: b). Sing x -&gt; Sing y -&gt; Sing (Const2 x y :: a)
+  sConst2 = ...
+
+What happens if there is no explicit `forall`, as in this example?
+
+  data V a
+
+  absurd :: V a -&gt; b
+  absurd v = case v of {}
+
+This time, the order of type variables vis-&#224;-vis TypeApplications is determined
+by their left-to-right order of appearance in the type signature. It's tempting
+to think that since there is no explicit `forall` in the original type
+signature, we could get away without an explicit `forall` in the singled type
+signature. That is, one could write:
+
+  sAbsurd :: Sing (v :: V a) -&gt; Sing (Absurd :: b)
+
+This would have the right type variable order, but unfortunately, this approach
+does not play well with singletons-th's style of code generation. Consider the code
+that would be generated for the body of sAbsurd:
+
+  sAbsurd :: Sing (v :: V a) -&gt; Sing (Absurd :: b)
+  sAbsurd (sV :: Sing v) = id @(Case v v :: b) (case sV of {})
+
+Note the use of the type `Case v v :: b` in the right-hand side of sAbsurd.
+However, because `b` was not bound by a top-level `forall`, it won't be in
+scope here, resulting in an error!
+
+(Why do we generate the code `id @(Case v v :: b)` in the first place? See
+Note [The id hack; or, how singletons-th learned to stop worrying and avoid kind generalization]
+in D.S.TH.Single.)
+
+The simplest approach is to just always generate singled type signatures with
+explicit `forall`s. In the event that the original type signature lacks an
+explicit `forall`, we infer the correct type variable ordering ourselves and
+synthesize a `forall` with that order. The `singTypeKVBs` function implements
+this logic.
+
+-----
+-- Wrinkle 2: The TH reification swamp
+-----
+
+There is another issue with type signatures that lack explicit `forall`s, one
+which the current design of Template Haskell does not make simple to fix.
+If we single code that is wrapped in TH quotes, such as in the following example:
+
+  {-# LANGUAGE PolyKinds, ... #-}
+  $(singletons [d|
+    data Proxy a = MkProxy
+    |])
+
+Then our job is made much easier when singling MkProxy, since we know that the
+only type variable that must be quantified is `a`, as that is the only one
+specified by the user. This results in the following type signature for
+MkProxy:
+
+  MkProxy :: forall a. Proxy a
+
+However, this is not the only possible way to single MkProxy. One can
+alternatively use $(genSingletons [''Proxy]), which uses TH reification to
+infer the type of MkProxy. There is perilous, however, because this is how
+TH reifies Proxy:
+
+  DataD
+    [] ''Proxy [KindedTV a () (VarT k)] Nothing
+    [NormalC 'MkProxy []]
+    []
+
+We must then construct a type signature for MkProxy using nothing but the type
+variables from the data type header. But notice that `KindedTV a () (VarT k)`
+gives no indication of whether `k` is specified or inferred! As a result, we
+conservatively assume that `k` is specified, resulting the following type
+signature for MkProxy:
+
+  MkProxy :: forall k (a :: k). Proxy a
+
+Contrast this with `MkProxy :: Proxy a`, where `k` is inferred. In other words,
+if you single MkProxy using genSingletons, then `Proxy @True` will typecheck
+but `SMkProxy @True` will /not/ typecheck&#8212;you'd have to use
+`SMkProxy @_ @True` instead. Urk!
+
+At present, Template Haskell does not have a way to distinguish among the
+specificities bound by a data type header. Without this knowledge, it is
+unclear how one could work around this issue. Thankfully, this issue is
+only likely to surface in very limited circumstances, so the damage is somewhat
+minimal.
+
+-----
+-- Wrinkle 3: Where to put explicit kind annotations
+-----
+
+Type variable binders are only part of the story&#8212;we must also determine what
+the body of the type signature will be singled to. As a general rule, if the
+original type signature is of the form:
+
+  f :: forall a_1 ... a_m. (C_1, ..., C_n)
+    =&gt; T_1 -&gt; ... -&gt; T_p -&gt; R
+
+Then the singled type signature will be:
+
+  sF :: forall a_1 ... a_m (x_1 :: PT_1) ... (x_p :: PT_p). (SC_1, ..., SC_n)
+     =&gt; Sing x1 -&gt; ... -&gt; Sing x_p -&gt; SRes (F x1 ... x_p :: PR)
+
+Where:
+
+* x_i is a fresh type variable of kind PT_i.
+* PT_i is the promoted version of the type T_i, and PR is the promoted version
+  of the type R.
+* SC_i is the singled version of the constraint SC_i.
+* SRes is either `Sing` if dealing with a function, or a singled data type if
+  dealing with a data constructor. For instance, SRes is `SBool` in
+  `STrue :: SBool (True :: Bool)`.
+
+One aspect of this worth pointing out is the explicit `:: PR` kind annotation
+in the result type `Sing (F x1 ... x_p :: PR)`. As it turns out, this kind
+annotation is mandatory, as omitting can result in singled type signatures
+with the wrong semantics. For instance, consider the `Nothing` data
+constructor:
+
+  Nothing :: forall a. Maybe a
+
+Consider what would happen if it were singled to this type:
+
+  SNothing :: forall a. SMaybe Nothing
+
+This is not what we want at all, since the `a` has no connection to the
+`Nothing` in the result type. It's as if we had written this:
+
+  SNothing :: forall {t} a. SMaybe (Nothing :: Maybe t)
+
+If we instead generate `forall a. SMaybe (Nothing :: Maybe a)`, then this issue
+is handily avoided.
+
+You might wonder if it would be cleaner to use visible kind applications
+instead:
+
+  SNothing :: forall a. SMaybe (Nothing @a)
+
+This does work for many cases, but there are also some corner cases where this
+approach fails. Recall the `MkProxy` example from Wrinkle 2 above:
+
+  {-# LANGUAGE PolyKinds, ... #-}
+  data Proxy a = MkProxy
+  $(genSingletons [''Proxy])
+
+Due to the design of Template Haskell (discussed in Wrinkle 2), `MkProxy` will
+be reified with the type of `forall k (a :: k). Proxy a`. This means that
+if we used visible kind applications in the result type, we would end up with
+this:
+
+  SMkProxy :: forall k (a :: k). SProxy (MkProxy @k @a)
+
+This will not kind-check because MkProxy only accepts /one/ visible kind argument,
+whereas this supplies it with two. To avoid this issue, we instead use the type
+`forall k (a :: k). SProxy (MkProxy :: Proxy a)`. Granted, this type is /still/
+technically wrong due to the fact that it explicitly quantifies `k`, but at the
+very least it typechecks. If Template Haskell gained the ability to distinguish
+among the specificities of type variables bound by a data type header
+(perhaps by way of a language feature akin to
+https://github.com/ghc-proposals/ghc-proposals/pull/326), then we could revisit
+this design choice.
+
+Finally, note that we need only write `Sing x_1 -&gt; ... -&gt; Sing x_p`, and not
+`Sing (x_1 :: PT_1) -&gt; ... Sing (x_p :: PT_p)`. This is simply because we
+always use explicit `forall`s in singled type signatures, and therefore always
+explicitly bind `(x_1 :: PT_1) ... (x_p :: PT_p)`, which fully determine the
+kinds of `x_1 ... x_p`. It wouldn't be wrong to add extra kind annotations to
+`Sing x_1 -&gt; ... -&gt; Sing x_p`, just redundant.
+-}</span><span>
+</span><span id="line-313"></span></pre></body></html>

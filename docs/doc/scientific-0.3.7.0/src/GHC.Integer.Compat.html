@@ -6,7 +6,7 @@
 </span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Integer</span></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">quotRemInteger</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">quotInteger</span></span><span class="hs-special">)</span><span class="hs-cpp">
 
 #if MIN_VERSION_base(4,15,0)
-</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Integer</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">divInteger</span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Integer</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">divInteger</span></span><span class="hs-special">)</span><span class="hs-cpp">
 #else
 </span><span class="hs-cpp">
 #ifdef MIN_VERSION_integer_simple
@@ -21,7 +21,7 @@
 #else
 </span><span class="hs-cpp">
 #if MIN_VERSION_integer_gmp(0,5,1)
-</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Integer</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">divInteger</span></span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Integer</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">divInteger</span><span class="hs-special">)</span><span class="hs-cpp">
 #else
 </span><span class="hs-identifier">divInteger</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">Integer</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">Integer</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">Integer</span><span>
 </span><span id="line-27"></span><span class="hs-identifier">divInteger</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">div</span><span class="hs-cpp">

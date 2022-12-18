@@ -1,0 +1,575 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- Data/Singletons/TH/Single/Monad.hs
+
+(c) Richard Eisenberg 2014
+rae@cs.brynmawr.edu
+
+This file defines the SgM monad and its operations, for use during singling.
+
+The SgM monad allows reading from a SgEnv environment and is wrapped around a Q.
+-}</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving, ParallelListComp, TemplateHaskellQuotes #-}</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Singletons.TH.Single.Monad</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier">SgM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#bindLets"><span class="hs-identifier">bindLets</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#bindContext"><span class="hs-identifier">bindContext</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#askContext"><span class="hs-identifier">askContext</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#lookupVarE"><span class="hs-identifier">lookupVarE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#lookupConE"><span class="hs-identifier">lookupConE</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>  </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapSingFun"><span class="hs-identifier">wrapSingFun</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapUnSingFun"><span class="hs-identifier">wrapUnSingFun</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#singM"><span class="hs-identifier">singM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#singDecsM"><span class="hs-identifier">singDecsM</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><a href="Data.Singletons.TH.Promote.Monad.html#emitDecs"><span class="hs-identifier">emitDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Monad.html#emitDecsM"><span class="hs-identifier">emitDecsM</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">exp</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Singletons</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html"><span class="hs-identifier">Data.Singletons.TH.Options</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Monad.html"><span class="hs-identifier">Data.Singletons.TH.Promote.Monad</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Monad.html#emitDecs"><span class="hs-identifier">emitDecs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Promote.Monad.html#emitDecsM"><span class="hs-identifier">emitDecsM</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Util.html"><span class="hs-identifier">Data.Singletons.TH.Util</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">lift</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Desugar</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Writer</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- environment during singling</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">data</span><span> </span><span id="SgEnv"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-var">SgEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>  </span><span id="SgEnv"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-var">SgEnv</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="sg_options"><span class="annot"><span class="annottext">SgEnv -&gt; Options
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_options"><span class="hs-identifier hs-var hs-var">sg_options</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#Options"><span class="hs-identifier hs-type">Options</span></a></span><span>
+</span><span id="line-36"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="sg_let_binds"><span class="annot"><span class="annottext">SgEnv -&gt; Map Name DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_let_binds"><span class="hs-identifier hs-var hs-var">sg_let_binds</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>   </span><span class="hs-comment">-- from the *original* name</span><span>
+</span><span id="line-37"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="sg_context"><span class="annot"><span class="annottext">SgEnv -&gt; DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_context"><span class="hs-identifier hs-var hs-var">sg_context</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span> </span><span class="hs-comment">-- See Note [Tracking the current type signature context]</span><span>
+</span><span id="line-38"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="sg_local_decls"><span class="annot"><span class="annottext">SgEnv -&gt; [Dec]
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_local_decls"><span class="hs-identifier hs-var hs-var">sg_local_decls</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span>
+</span><span id="line-39"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#emptySgEnv"><span class="hs-identifier hs-type">emptySgEnv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span><span>
+</span><span id="line-42"></span><span id="emptySgEnv"><span class="annot"><span class="annottext">emptySgEnv :: SgEnv
+</span><a href="Data.Singletons.TH.Single.Monad.html#emptySgEnv"><span class="hs-identifier hs-var hs-var">emptySgEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_options :: Options
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_options"><span class="hs-identifier hs-var">sg_options</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="Data.Singletons.TH.Options.html#defaultOptions"><span class="hs-identifier hs-var">defaultOptions</span></a></span><span>
+</span><span id="line-43"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sg_let_binds :: Map Name DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_let_binds"><span class="hs-identifier hs-var">sg_let_binds</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall k a. Map k a
+</span><span class="hs-identifier hs-var">Map.empty</span></span><span>
+</span><span id="line-44"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sg_context :: DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_context"><span class="hs-identifier hs-var">sg_context</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-45"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sg_local_decls :: [Dec]
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_local_decls"><span class="hs-identifier hs-var">sg_local_decls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span><span>                   </span><span class="hs-special">}</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- the singling monad</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">newtype</span><span> </span><span id="SgM"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-var">SgM</span></a></span></span><span> </span><span id="local-6989586621679303588"><span class="annot"><a href="#local-6989586621679303588"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SgM"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-var">SgM</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WriterT</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679303588"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679303579"><span id="local-6989586621679303585"><span class="annot"><span class="annottext">forall a b. a -&gt; SgM b -&gt; SgM a
+forall a b. (a -&gt; b) -&gt; SgM a -&gt; SgM b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: forall a b. a -&gt; SgM b -&gt; SgM a
+$c&lt;$ :: forall a b. a -&gt; SgM b -&gt; SgM a
+fmap :: forall a b. (a -&gt; b) -&gt; SgM a -&gt; SgM b
+$cfmap :: forall a b. (a -&gt; b) -&gt; SgM a -&gt; SgM b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303545"><span id="local-6989586621679303550"><span id="local-6989586621679303555"><span id="local-6989586621679303560"><span id="local-6989586621679303566"><span class="annot"><span class="annottext">Functor SgM
+forall a. a -&gt; SgM a
+forall a b. SgM a -&gt; SgM b -&gt; SgM a
+forall a b. SgM a -&gt; SgM b -&gt; SgM b
+forall a b. SgM (a -&gt; b) -&gt; SgM a -&gt; SgM b
+forall a b c. (a -&gt; b -&gt; c) -&gt; SgM a -&gt; SgM b -&gt; SgM c
+forall (f :: * -&gt; *).
+Functor f
+-&gt; (forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+&lt;* :: forall a b. SgM a -&gt; SgM b -&gt; SgM a
+$c&lt;* :: forall a b. SgM a -&gt; SgM b -&gt; SgM a
+*&gt; :: forall a b. SgM a -&gt; SgM b -&gt; SgM b
+$c*&gt; :: forall a b. SgM a -&gt; SgM b -&gt; SgM b
+liftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; SgM a -&gt; SgM b -&gt; SgM c
+$cliftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; SgM a -&gt; SgM b -&gt; SgM c
+&lt;*&gt; :: forall a b. SgM (a -&gt; b) -&gt; SgM a -&gt; SgM b
+$c&lt;*&gt; :: forall a b. SgM (a -&gt; b) -&gt; SgM a -&gt; SgM b
+pure :: forall a. a -&gt; SgM a
+$cpure :: forall a. a -&gt; SgM a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303512"><span id="local-6989586621679303517"><span id="local-6989586621679303523"><span class="annot"><span class="annottext">Applicative SgM
+forall a. a -&gt; SgM a
+forall a b. SgM a -&gt; SgM b -&gt; SgM b
+forall a b. SgM a -&gt; (a -&gt; SgM b) -&gt; SgM b
+forall (m :: * -&gt; *).
+Applicative m
+-&gt; (forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+return :: forall a. a -&gt; SgM a
+$creturn :: forall a. a -&gt; SgM a
+&gt;&gt; :: forall a b. SgM a -&gt; SgM b -&gt; SgM b
+$c&gt;&gt; :: forall a b. SgM a -&gt; SgM b -&gt; SgM b
+&gt;&gt;= :: forall a b. SgM a -&gt; (a -&gt; SgM b) -&gt; SgM b
+$c&gt;&gt;= :: forall a b. SgM a -&gt; (a -&gt; SgM b) -&gt; SgM b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span>
+</span><span id="line-51"></span><span>           </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303485"><span id="local-6989586621679303490"><span id="local-6989586621679303496"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303453"><span id="local-6989586621679303458"><span id="local-6989586621679303463"><span id="local-6989586621679303469"><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-52"></span><span>           </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303435"><span class="annot"><span class="annottext">Monad SgM
+forall a. String -&gt; SgM a
+forall (m :: * -&gt; *).
+Monad m -&gt; (forall a. String -&gt; m a) -&gt; MonadFail m
+fail :: forall a. String -&gt; SgM a
+$cfail :: forall a. String -&gt; SgM a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadFail</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303421"><span class="annot"><span class="annottext">Monad SgM
+forall a. IO a -&gt; SgM a
+forall (m :: * -&gt; *).
+Monad m -&gt; (forall a. IO a -&gt; m a) -&gt; MonadIO m
+liftIO :: forall a. IO a -&gt; SgM a
+$cliftIO :: forall a. IO a -&gt; SgM a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadIO</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303267"><span id="local-6989586621679303272"><span id="local-6989586621679303277"><span id="local-6989586621679303282"><span id="local-6989586621679303289"><span id="local-6989586621679303298"><span id="local-6989586621679303305"><span id="local-6989586621679303310"><span id="local-6989586621679303315"><span id="local-6989586621679303320"><span id="local-6989586621679303325"><span id="local-6989586621679303330"><span id="local-6989586621679303335"><span id="local-6989586621679303340"><span id="local-6989586621679303345"><span id="local-6989586621679303350"><span id="local-6989586621679303357"><span id="local-6989586621679303364"><span id="local-6989586621679303369"><span id="local-6989586621679303374"><span id="local-6989586621679303379"><span id="local-6989586621679303384"><span id="local-6989586621679303389"><span id="local-6989586621679303394"><span id="local-6989586621679303399"><span id="local-6989586621679303405"><span class="annot"><span class="annottext">MonadFail SgM
+MonadIO SgM
+SgM [Extension]
+SgM Loc
+Bool -&gt; String -&gt; SgM (Maybe Name)
+Bool -&gt; String -&gt; SgM ()
+String -&gt; SgM String
+String -&gt; SgM Name
+String -&gt; SgM ()
+[Dec] -&gt; SgM ()
+Q () -&gt; SgM ()
+Name -&gt; SgM [Role]
+Name -&gt; SgM [DecidedStrictness]
+Name -&gt; SgM (Maybe Fixity)
+Name -&gt; SgM Type
+Name -&gt; SgM Info
+Name -&gt; [Type] -&gt; SgM [Dec]
+Extension -&gt; SgM Bool
+ForeignSrcLang -&gt; String -&gt; SgM ()
+Module -&gt; SgM ModuleInfo
+DocLoc -&gt; SgM (Maybe String)
+DocLoc -&gt; String -&gt; SgM ()
+forall a. Data a =&gt; AnnLookup -&gt; SgM [a]
+forall a. Typeable a =&gt; SgM (Maybe a)
+forall a. Typeable a =&gt; a -&gt; SgM ()
+forall a. IO a -&gt; SgM a
+forall a. SgM a -&gt; SgM a -&gt; SgM a
+forall (m :: * -&gt; *).
+MonadIO m
+-&gt; MonadFail m
+-&gt; (String -&gt; m Name)
+-&gt; (Bool -&gt; String -&gt; m ())
+-&gt; (forall a. m a -&gt; m a -&gt; m a)
+-&gt; (Bool -&gt; String -&gt; m (Maybe Name))
+-&gt; (Name -&gt; m Info)
+-&gt; (Name -&gt; m (Maybe Fixity))
+-&gt; (Name -&gt; m Type)
+-&gt; (Name -&gt; [Type] -&gt; m [Dec])
+-&gt; (Name -&gt; m [Role])
+-&gt; (forall a. Data a =&gt; AnnLookup -&gt; m [a])
+-&gt; (Module -&gt; m ModuleInfo)
+-&gt; (Name -&gt; m [DecidedStrictness])
+-&gt; m Loc
+-&gt; (forall a. IO a -&gt; m a)
+-&gt; (String -&gt; m ())
+-&gt; (String -&gt; m String)
+-&gt; ([Dec] -&gt; m ())
+-&gt; (ForeignSrcLang -&gt; String -&gt; m ())
+-&gt; (Q () -&gt; m ())
+-&gt; (String -&gt; m ())
+-&gt; (forall a. Typeable a =&gt; m (Maybe a))
+-&gt; (forall a. Typeable a =&gt; a -&gt; m ())
+-&gt; (Extension -&gt; m Bool)
+-&gt; m [Extension]
+-&gt; (DocLoc -&gt; String -&gt; m ())
+-&gt; (DocLoc -&gt; m (Maybe String))
+-&gt; Quasi m
+qGetDoc :: DocLoc -&gt; SgM (Maybe String)
+$cqGetDoc :: DocLoc -&gt; SgM (Maybe String)
+qPutDoc :: DocLoc -&gt; String -&gt; SgM ()
+$cqPutDoc :: DocLoc -&gt; String -&gt; SgM ()
+qExtsEnabled :: SgM [Extension]
+$cqExtsEnabled :: SgM [Extension]
+qIsExtEnabled :: Extension -&gt; SgM Bool
+$cqIsExtEnabled :: Extension -&gt; SgM Bool
+qPutQ :: forall a. Typeable a =&gt; a -&gt; SgM ()
+$cqPutQ :: forall a. Typeable a =&gt; a -&gt; SgM ()
+qGetQ :: forall a. Typeable a =&gt; SgM (Maybe a)
+$cqGetQ :: forall a. Typeable a =&gt; SgM (Maybe a)
+qAddCorePlugin :: String -&gt; SgM ()
+$cqAddCorePlugin :: String -&gt; SgM ()
+qAddModFinalizer :: Q () -&gt; SgM ()
+$cqAddModFinalizer :: Q () -&gt; SgM ()
+qAddForeignFilePath :: ForeignSrcLang -&gt; String -&gt; SgM ()
+$cqAddForeignFilePath :: ForeignSrcLang -&gt; String -&gt; SgM ()
+qAddTopDecls :: [Dec] -&gt; SgM ()
+$cqAddTopDecls :: [Dec] -&gt; SgM ()
+qAddTempFile :: String -&gt; SgM String
+$cqAddTempFile :: String -&gt; SgM String
+qAddDependentFile :: String -&gt; SgM ()
+$cqAddDependentFile :: String -&gt; SgM ()
+qRunIO :: forall a. IO a -&gt; SgM a
+$cqRunIO :: forall a. IO a -&gt; SgM a
+qLocation :: SgM Loc
+$cqLocation :: SgM Loc
+qReifyConStrictness :: Name -&gt; SgM [DecidedStrictness]
+$cqReifyConStrictness :: Name -&gt; SgM [DecidedStrictness]
+qReifyModule :: Module -&gt; SgM ModuleInfo
+$cqReifyModule :: Module -&gt; SgM ModuleInfo
+qReifyAnnotations :: forall a. Data a =&gt; AnnLookup -&gt; SgM [a]
+$cqReifyAnnotations :: forall a. Data a =&gt; AnnLookup -&gt; SgM [a]
+qReifyRoles :: Name -&gt; SgM [Role]
+$cqReifyRoles :: Name -&gt; SgM [Role]
+qReifyInstances :: Name -&gt; [Type] -&gt; SgM [Dec]
+$cqReifyInstances :: Name -&gt; [Type] -&gt; SgM [Dec]
+qReifyType :: Name -&gt; SgM Type
+$cqReifyType :: Name -&gt; SgM Type
+qReifyFixity :: Name -&gt; SgM (Maybe Fixity)
+$cqReifyFixity :: Name -&gt; SgM (Maybe Fixity)
+qReify :: Name -&gt; SgM Info
+$cqReify :: Name -&gt; SgM Info
+qLookupName :: Bool -&gt; String -&gt; SgM (Maybe Name)
+$cqLookupName :: Bool -&gt; String -&gt; SgM (Maybe Name)
+qRecover :: forall a. SgM a -&gt; SgM a -&gt; SgM a
+$cqRecover :: forall a. SgM a -&gt; SgM a -&gt; SgM a
+qReport :: Bool -&gt; String -&gt; SgM ()
+$cqReport :: Bool -&gt; String -&gt; SgM ()
+qNewName :: String -&gt; SgM Name
+$cqNewName :: String -&gt; SgM Name
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Quasi</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DsMonad</span></span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679303201"><span class="annot"><span class="annottext">localDeclarations :: SgM [Dec]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">localDeclarations</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">SgEnv -&gt; [Dec]
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_local_decls"><span class="hs-identifier hs-var">sg_local_decls</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679303193"><span class="annot"><span class="annottext">getOptions :: SgM Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var hs-var hs-var hs-var">getOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">SgEnv -&gt; Options
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_options"><span class="hs-identifier hs-var">sg_options</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679303684"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#bindLets"><span class="hs-identifier hs-type">bindLets</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303684"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303684"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-61"></span><span id="bindLets"><span class="annot"><span class="annottext">bindLets :: forall a. [(Name, DExp)] -&gt; SgM a -&gt; SgM a
+</span><a href="Data.Singletons.TH.Single.Monad.html#bindLets"><span class="hs-identifier hs-var hs-var">bindLets</span></a></span></span><span> </span><span id="local-6989586621679303188"><span class="annot"><span class="annottext">[(Name, DExp)]
+</span><a href="#local-6989586621679303188"><span class="hs-identifier hs-var">lets1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679303186"><span class="annot"><span class="annottext">env :: SgEnv
+</span><a href="#local-6989586621679303186"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_let_binds :: SgEnv -&gt; Map Name DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_let_binds"><span class="hs-identifier hs-var">sg_let_binds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679303185"><span class="annot"><span class="annottext">Map Name DExp
+</span><a href="#local-6989586621679303185"><span class="hs-identifier hs-var">lets2</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-63"></span><span>               </span><span class="annot"><span class="annottext">SgEnv
+</span><a href="#local-6989586621679303186"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_let_binds :: Map Name DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_let_binds"><span class="hs-identifier hs-var">sg_let_binds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.fromList</span></span><span> </span><span class="annot"><span class="annottext">[(Name, DExp)]
+</span><a href="#local-6989586621679303188"><span class="hs-identifier hs-var">lets1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; Map k a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-operator hs-var">`Map.union`</span></span><span> </span><span class="annot"><span class="annottext">Map Name DExp
+</span><a href="#local-6989586621679303185"><span class="hs-identifier hs-var">lets2</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- Add some constraints to the current type signature context.</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- See Note [Tracking the current type signature context]</span><span>
+</span><span id="line-67"></span><span id="local-6989586621679303679"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#bindContext"><span class="hs-identifier hs-type">bindContext</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303679"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303679"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-68"></span><span id="bindContext"><span class="annot"><span class="annottext">bindContext :: forall a. DCxt -&gt; SgM a -&gt; SgM a
+</span><a href="Data.Singletons.TH.Single.Monad.html#bindContext"><span class="hs-identifier hs-var hs-var">bindContext</span></a></span></span><span> </span><span id="local-6989586621679303181"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303181"><span class="hs-identifier hs-var">ctxt1</span></a></span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679303180"><span class="annot"><span class="annottext">env :: SgEnv
+</span><a href="#local-6989586621679303180"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgEnv"><span class="hs-identifier hs-type">SgEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_context :: SgEnv -&gt; DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_context"><span class="hs-identifier hs-var">sg_context</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679303179"><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303179"><span class="hs-identifier hs-var">ctxt2</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-70"></span><span>                 </span><span class="annot"><span class="annottext">SgEnv
+</span><a href="#local-6989586621679303180"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_context :: DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_context"><span class="hs-identifier hs-var">sg_context</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303181"><span class="hs-identifier hs-var">ctxt1</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">DCxt
+</span><a href="#local-6989586621679303179"><span class="hs-identifier hs-var">ctxt2</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- Retrieve the current type signature context.</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- See Note [Tracking the current type signature context]</span><span>
+</span><span id="line-74"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#askContext"><span class="hs-identifier hs-type">askContext</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DCxt</span></span><span>
+</span><span id="line-75"></span><span id="askContext"><span class="annot"><span class="annottext">askContext :: SgM DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#askContext"><span class="hs-identifier hs-var hs-var">askContext</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">SgEnv -&gt; DCxt
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_context"><span class="hs-identifier hs-var">sg_context</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#lookupVarE"><span class="hs-identifier hs-type">lookupVarE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>
+</span><span id="line-78"></span><span id="lookupVarE"><span class="annot"><span class="annottext">lookupVarE :: Name -&gt; SgM DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#lookupVarE"><span class="hs-identifier hs-var hs-var">lookupVarE</span></a></span></span><span> </span><span id="local-6989586621679303178"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303178"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679303177"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303177"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="annottext">(Name -&gt; Name) -&gt; (Name -&gt; DExp) -&gt; Name -&gt; SgM DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#lookup_var_con"><span class="hs-identifier hs-var">lookup_var_con</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#singledValueName"><span class="hs-identifier hs-var">singledValueName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303177"><span class="hs-identifier hs-var">opts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#singledValueName"><span class="hs-identifier hs-var">singledValueName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303177"><span class="hs-identifier hs-var">opts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303178"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#lookupConE"><span class="hs-identifier hs-type">lookupConE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>
+</span><span id="line-84"></span><span id="lookupConE"><span class="annot"><span class="annottext">lookupConE :: Name -&gt; SgM DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#lookupConE"><span class="hs-identifier hs-var hs-var">lookupConE</span></a></span></span><span> </span><span id="local-6989586621679303172"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303172"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679303171"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303171"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><span class="annottext">(Name -&gt; Name) -&gt; (Name -&gt; DExp) -&gt; Name -&gt; SgM DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#lookup_var_con"><span class="hs-identifier hs-var">lookup_var_con</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#singledDataConName"><span class="hs-identifier hs-var">singledDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303171"><span class="hs-identifier hs-var">opts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DConE</span></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#singledDataConName"><span class="hs-identifier hs-var">singledDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303171"><span class="hs-identifier hs-var">opts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303172"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#lookup_var_con"><span class="hs-identifier hs-type">lookup_var_con</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>
+</span><span id="line-90"></span><span id="lookup_var_con"><span class="annot"><span class="annottext">lookup_var_con :: (Name -&gt; Name) -&gt; (Name -&gt; DExp) -&gt; Name -&gt; SgM DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#lookup_var_con"><span class="hs-identifier hs-var hs-var">lookup_var_con</span></a></span></span><span> </span><span id="local-6989586621679303168"><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="#local-6989586621679303168"><span class="hs-identifier hs-var">mk_sing_name</span></a></span></span><span> </span><span id="local-6989586621679303167"><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="#local-6989586621679303167"><span class="hs-identifier hs-var">mk_exp</span></a></span></span><span> </span><span id="local-6989586621679303166"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-91"></span><span>  </span><span id="local-6989586621679303165"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303165"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-92"></span><span>  </span><span id="local-6989586621679303164"><span class="annot"><span class="annottext">Map Name DExp
+</span><a href="#local-6989586621679303164"><span class="hs-identifier hs-var">letExpansions</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">SgEnv -&gt; Map Name DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_let_binds"><span class="hs-identifier hs-var">sg_let_binds</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679303163"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303163"><span class="hs-identifier hs-var">sName</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). Quasi q =&gt; String -&gt; q Name
+</span><span class="hs-identifier hs-var">mkDataName</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; String
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="#local-6989586621679303168"><span class="hs-identifier hs-var">mk_sing_name</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- we want *term* names!</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">forall k a. Ord k =&gt; k -&gt; Map k a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Map.lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Map Name DExp
+</span><a href="#local-6989586621679303164"><span class="hs-identifier hs-var">letExpansions</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>    </span><span class="annot"><span class="annottext">Maybe DExp
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span>      </span><span class="hs-comment">-- try to get it from the global context</span><span>
+</span><span id="line-97"></span><span>      </span><span id="local-6989586621679303159"><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621679303159"><span class="hs-identifier hs-var">m_dinfo</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a1 a2 r.
+Monad m =&gt;
+(a1 -&gt; a2 -&gt; r) -&gt; m a1 -&gt; m a2 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM2</span></span><span> </span><span class="annot"><span class="annottext">forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">(&lt;|&gt;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe DInfo)
+</span><span class="hs-identifier hs-var">dsReify</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303163"><span class="hs-identifier hs-var">sName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (q :: * -&gt; *). DsMonad q =&gt; Name -&gt; q (Maybe DInfo)
+</span><span class="hs-identifier hs-var">dsReify</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>        </span><span class="hs-comment">-- try the unrefined name too -- it's needed to bootstrap Enum</span><span>
+</span><span id="line-99"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><a href="#local-6989586621679303159"><span class="hs-identifier hs-var">m_dinfo</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-100"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DVarI</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679303154"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303154"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-101"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303153"><span class="annot"><span class="annottext">num_args :: Int
+</span><a href="#local-6989586621679303153"><span class="hs-identifier hs-var hs-var">num_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DType -&gt; Int
+</span><a href="Data.Singletons.TH.Util.html#countArgs"><span class="hs-identifier hs-var">countArgs</span></a></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303154"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="hs-keyword">in</span><span>
+</span><span id="line-102"></span><span>          </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; DType -&gt; DExp -&gt; DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#wrapSingFun"><span class="hs-identifier hs-var">wrapSingFun</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303153"><span class="hs-identifier hs-var">num_args</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DType
+</span><span class="hs-identifier hs-var">DConT</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Name -&gt; Name
+</span><a href="Data.Singletons.TH.Options.html#defunctionalizedName0"><span class="hs-identifier hs-var">defunctionalizedName0</span></a></span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303165"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="#local-6989586621679303167"><span class="hs-identifier hs-var">mk_exp</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>        </span><span class="annot"><span class="annottext">Maybe DInfo
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><a href="#local-6989586621679303167"><span class="hs-identifier hs-var">mk_exp</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679303166"><span class="hs-identifier hs-var">name</span></a></span><span>   </span><span class="hs-comment">-- lambda-bound</span><span>
+</span><span id="line-105"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679303149"><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679303149"><span class="hs-identifier hs-var">exp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679303149"><span class="hs-identifier hs-var">exp</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapSingFun"><span class="hs-identifier hs-type">wrapSingFun</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>
+</span><span id="line-108"></span><span id="wrapSingFun"><span class="annot"><span class="annottext">wrapSingFun :: Int -&gt; DType -&gt; DExp -&gt; DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#wrapSingFun"><span class="hs-identifier hs-var hs-var">wrapSingFun</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-109"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapSingFun"><span class="hs-identifier hs-var">wrapSingFun</span></a></span><span> </span><span id="local-6989586621679303147"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303147"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679303146"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303146"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303129"><span class="annot"><span class="annottext">wrap_fun :: DExp
+</span><a href="#local-6989586621679303129"><span class="hs-identifier hs-var hs-var">wrap_fun</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303147"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun1</span><span>
+</span><span id="line-112"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun2</span><span>
+</span><span id="line-113"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun3</span><span>
+</span><span id="line-114"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun4</span><span>
+</span><span id="line-115"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun5</span><span>
+</span><span id="line-116"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">6</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun6</span><span>
+</span><span id="line-117"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">7</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">singFun7</span><span>
+</span><span id="line-118"></span><span>                           </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;No support for functions of arity &gt; 7.&quot;</span></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-keyword">in</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679303129"><span class="hs-identifier hs-var">wrap_fun</span></a></span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DType -&gt; DExp
+</span><span class="hs-operator hs-var">`DAppTypeE`</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303146"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DExp -&gt; DExp
+</span><span class="hs-operator hs-var">`DAppE`</span></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapUnSingFun"><span class="hs-identifier hs-type">wrapUnSingFun</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DExp</span></span><span>
+</span><span id="line-123"></span><span id="wrapUnSingFun"><span class="annot"><span class="annottext">wrapUnSingFun :: Int -&gt; DType -&gt; DExp -&gt; DExp
+</span><a href="Data.Singletons.TH.Single.Monad.html#wrapUnSingFun"><span class="hs-identifier hs-var hs-var">wrapUnSingFun</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-124"></span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#wrapUnSingFun"><span class="hs-identifier hs-var">wrapUnSingFun</span></a></span><span> </span><span id="local-6989586621679303125"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303125"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679303124"><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303124"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-125"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303107"><span class="annot"><span class="annottext">unwrap_fun :: DExp
+</span><a href="#local-6989586621679303107"><span class="hs-identifier hs-var hs-var">unwrap_fun</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; DExp
+</span><span class="hs-identifier hs-var">DVarE</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679303125"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-126"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun1</span><span>
+</span><span id="line-127"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun2</span><span>
+</span><span id="line-128"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun3</span><span>
+</span><span id="line-129"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun4</span><span>
+</span><span id="line-130"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun5</span><span>
+</span><span id="line-131"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">6</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun6</span><span>
+</span><span id="line-132"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">7</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">'</span><span class="hs-identifier">unSingFun7</span><span>
+</span><span id="line-133"></span><span>                             </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;No support for functions of arity &gt; 7.&quot;</span></span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-keyword">in</span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DExp
+</span><a href="#local-6989586621679303107"><span class="hs-identifier hs-var">unwrap_fun</span></a></span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DType -&gt; DExp
+</span><span class="hs-operator hs-var">`DAppTypeE`</span></span><span> </span><span class="annot"><span class="annottext">DType
+</span><a href="#local-6989586621679303124"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">DExp -&gt; DExp -&gt; DExp
+</span><span class="hs-operator hs-var">`DAppE`</span></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span id="local-6989586621679303654"><span id="local-6989586621679303655"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#singM"><span class="hs-identifier hs-type">singM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303655"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303654"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679303655"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679303654"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-138"></span><span id="singM"><span class="annot"><span class="annottext">singM :: forall (q :: * -&gt; *) a.
+OptionsMonad q =&gt;
+[Dec] -&gt; SgM a -&gt; q (a, [DDec])
+</span><a href="Data.Singletons.TH.Single.Monad.html#singM"><span class="hs-identifier hs-var hs-var">singM</span></a></span></span><span> </span><span id="local-6989586621679303092"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303092"><span class="hs-identifier hs-var">locals</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span id="local-6989586621679303091"><span class="annot"><span class="annottext">ReaderT SgEnv (WriterT [DDec] Q) a
+</span><a href="#local-6989586621679303091"><span class="hs-identifier hs-var">rdr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-139"></span><span>  </span><span id="local-6989586621679303090"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303090"><span class="hs-identifier hs-var">opts</span></a></span></span><span>         </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). OptionsMonad m =&gt; m Options
+</span><a href="Data.Singletons.TH.Options.html#getOptions"><span class="hs-identifier hs-var">getOptions</span></a></span><span>
+</span><span id="line-140"></span><span>  </span><span id="local-6989586621679303089"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303089"><span class="hs-identifier hs-var">other_locals</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *). DsMonad m =&gt; m [Dec]
+</span><span class="hs-identifier hs-var">localDeclarations</span></span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679303088"><span class="annot"><span class="annottext">wr :: WriterT [DDec] Q a
+</span><a href="#local-6989586621679303088"><span class="hs-identifier hs-var hs-var">wr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var">runReaderT</span></span><span> </span><span class="annot"><span class="annottext">ReaderT SgEnv (WriterT [DDec] Q) a
+</span><a href="#local-6989586621679303091"><span class="hs-identifier hs-var">rdr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SgEnv
+</span><a href="Data.Singletons.TH.Single.Monad.html#emptySgEnv"><span class="hs-identifier hs-var">emptySgEnv</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sg_options :: Options
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_options"><span class="hs-identifier hs-var">sg_options</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679303090"><span class="hs-identifier hs-var">opts</span></a></span><span>
+</span><span id="line-142"></span><span>                                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sg_local_decls :: [Dec]
+</span><a href="Data.Singletons.TH.Single.Monad.html#sg_local_decls"><span class="hs-identifier hs-var">sg_local_decls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303089"><span class="hs-identifier hs-var">other_locals</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303092"><span class="hs-identifier hs-var">locals</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>      </span><span id="local-6989586621679303086"><span class="annot"><span class="annottext">q :: Q (a, [DDec])
+</span><a href="#local-6989586621679303086"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall w (m :: * -&gt; *) a. WriterT w m a -&gt; m (a, w)
+</span><span class="hs-identifier hs-var">runWriterT</span></span><span> </span><span class="annot"><span class="annottext">WriterT [DDec] Q a
+</span><a href="#local-6989586621679303088"><span class="hs-identifier hs-var">wr</span></a></span><span>
+</span><span id="line-144"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Quasi m =&gt; Q a -&gt; m a
+</span><span class="hs-identifier hs-var">runQ</span></span><span> </span><span class="annot"><span class="annottext">Q (a, [DDec])
+</span><a href="#local-6989586621679303086"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span id="local-6989586621679303643"><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#singDecsM"><span class="hs-identifier hs-type">singDecsM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Options.html#OptionsMonad"><span class="hs-identifier hs-type">OptionsMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679303643"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Singletons.TH.Single.Monad.html#SgM"><span class="hs-identifier hs-type">SgM</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679303643"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DDec</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-147"></span><span id="singDecsM"><span class="annot"><span class="annottext">singDecsM :: forall (q :: * -&gt; *).
+OptionsMonad q =&gt;
+[Dec] -&gt; SgM [DDec] -&gt; q [DDec]
+</span><a href="Data.Singletons.TH.Single.Monad.html#singDecsM"><span class="hs-identifier hs-var hs-var">singDecsM</span></a></span></span><span> </span><span id="local-6989586621679303076"><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303076"><span class="hs-identifier hs-var">locals</span></a></span></span><span> </span><span id="local-6989586621679303075"><span class="annot"><span class="annottext">SgM [DDec]
+</span><a href="#local-6989586621679303075"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679303074"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679303074"><span class="hs-identifier hs-var">decs1</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679303073"><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679303073"><span class="hs-identifier hs-var">decs2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall (q :: * -&gt; *) a.
+OptionsMonad q =&gt;
+[Dec] -&gt; SgM a -&gt; q (a, [DDec])
+</span><a href="Data.Singletons.TH.Single.Monad.html#singM"><span class="hs-identifier hs-var">singM</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621679303076"><span class="hs-identifier hs-var">locals</span></a></span><span> </span><span class="annot"><span class="annottext">SgM [DDec]
+</span><a href="#local-6989586621679303075"><span class="hs-identifier hs-var">thing</span></a></span><span>
+</span><span id="line-149"></span><span>  </span><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679303074"><span class="hs-identifier hs-var">decs1</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[DDec]
+</span><a href="#local-6989586621679303073"><span class="hs-identifier hs-var">decs2</span></a></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-comment">{-
+Note [Tracking the current type signature context]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Much like we track the let-bound names in scope, we also track the current
+context. For instance, in the following program:
+
+  -- (1)
+  f :: forall a. Show a =&gt; a -&gt; String -&gt; Bool
+  f x y = g (show x) y
+    where
+      -- (2)
+      g :: forall b. Eq b =&gt; b -&gt; b -&gt; Bool
+      g = h
+        where
+          -- (3)
+          h :: b -&gt; b -&gt; Bool
+          h = (==)
+
+Here is the context at various points:
+
+(1) ()
+(2) (Show a)
+(3) (Show a, Eq b)
+
+We track this informating during singling instead of during promotion, as the
+promoted versions of things are often type families, which do not have
+contexts.
+
+Why do we bother tracking this at all? Ultimately, because singDefuns (from
+Data.Singletons.TH.Single.Defun) needs to know the current context in order to
+generate a correctly typed SingI instance. For instance, if you called
+singDefuns on the class method bar:
+
+  class Foo a where
+    bar :: Eq a =&gt; a -&gt; Bool
+
+Then if you only grabbed the context of `bar` itself, then you'd end up
+generating the following SingI instance for BarSym0:
+
+  instance SEq a =&gt; SingI (FooSym0 :: a ~&gt; Bool) where ...
+
+Which is incorrect&#8212;there needs to be an (SFoo a) constraint as well! If we
+track the current context when singling Foo, then we will correctly propagate
+this information to singDefuns.
+-}</span><span>
+</span><span id="line-196"></span></pre></body></html>

@@ -16,36 +16,16 @@
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Geometry.PlanarSubdivision.Draw.html"><span class="hs-identifier">Geometry.PlanarSubdivision.Draw</span></a></span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- | Draws an arrangement</span><span>
-</span><span id="line-19"></span><span id="local-6989586621679421268"><span id="local-6989586621679421269"><span id="local-6989586621679421270"><span id="local-6989586621679421271"><span id="local-6989586621679421272"><span id="local-6989586621679421273"><span class="annot"><a href="Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-type">drawArrangement</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679421273"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679421273"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arrangement</span></span><span> </span><span class="annot"><a href="#local-6989586621679421272"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421271"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421270"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421269"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421268"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421273"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679421273"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span><span>
-</span><span id="line-20"></span><span id="drawArrangement"><span class="annot"><span class="annottext">drawArrangement :: IpeOut (Arrangement s l v e f r) Group r
-</span><a href="Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-var hs-var">drawArrangement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s v e f r
--&gt; Group r
-   :+ Attributes
-        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
-forall k (s :: k) v e f r.
+</span><span id="line-19"></span><span id="local-6989586621679385177"><span id="local-6989586621679385178"><span id="local-6989586621679385179"><span id="local-6989586621679385180"><span id="local-6989586621679385181"><span id="local-6989586621679385182"><span class="annot"><a href="Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-type">drawArrangement</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385182"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679385182"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html#IpeOut"><span class="hs-identifier hs-type">IpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arrangement</span></span><span> </span><span class="annot"><a href="#local-6989586621679385181"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385180"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385179"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385178"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385177"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385182"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385182"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span><span>
+</span><span id="line-20"></span><span id="drawArrangement"><span class="annot"><span class="annottext">drawArrangement :: forall {k} r (s :: k) l v e f.
+(Ord r, Num r) =&gt;
+IpeOut (Arrangement s l v e f r) Group r
+</span><a href="Geometry.Arrangement.Draw.html#drawArrangement"><span class="hs-identifier hs-var hs-var">drawArrangement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) v e f r.
 (Num r, Ord r) =&gt;
 IpeOut (PlanarSubdivision s v e f r) Group r
-</span><a href="Geometry.PlanarSubdivision.Draw.html#drawPlanarSubdivision%27"><span class="hs-identifier hs-var">drawPlanarSubdivision'</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision s v e f r
- -&gt; Group r
-    :+ Attributes
-         (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip])
--&gt; (Arrangement s l v e f r -&gt; PlanarSubdivision s v e f r)
--&gt; Arrangement s l v e f r
--&gt; Group r
-   :+ Attributes
-        (AttrMapSym1 r) '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting
-  (PlanarSubdivision s v e f r)
-  (Arrangement s l v e f r)
-  (PlanarSubdivision s v e f r)
--&gt; Arrangement s l v e f r -&gt; PlanarSubdivision s v e f r
-forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
-  (PlanarSubdivision s v e f r)
-  (Arrangement s l v e f r)
-  (PlanarSubdivision s v e f r)
-forall k (s :: k) l v1 e1 f1 r v2 e2 f2.
+</span><a href="Geometry.PlanarSubdivision.Draw.html#drawPlanarSubdivision%27"><span class="hs-identifier hs-var">drawPlanarSubdivision'</span></a></span><span> </span><span class="annot"><span class="annottext">forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">forall k (s :: k) l v1 e1 f1 r v2 e2 f2.
 Lens
   (Arrangement s l v1 e1 f1 r)
   (Arrangement s l v2 e2 f2 r)
