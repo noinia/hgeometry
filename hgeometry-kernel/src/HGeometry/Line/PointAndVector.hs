@@ -17,16 +17,15 @@ import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           GHC.Generics (Generic)
+import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
+import           HGeometry.Intersection
 import           HGeometry.Line.Class
 import           HGeometry.Point
--- import           HGeometry.Point.Internal
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties (NumType, Dimension)
 import           HGeometry.Vector
-import           HGeometry.Intersection
-import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines

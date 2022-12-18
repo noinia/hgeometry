@@ -108,6 +108,7 @@ instance ( IxValue (endPoint point) ~ point
          , EndPoint_ (endPoint point)
          , Point_ point (Dimension point) (NumType point)
          ) => LineSegment_ (LineSegment endPoint point) point where
+  uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
 instance ( OptCVector_ 2 (EndPoint Closed point)
          , Point_ point (Dimension point) (NumType point)

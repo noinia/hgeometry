@@ -28,17 +28,14 @@ module HGeometry.Transformation
   ) where
 
 import           Control.Lens hiding ((<.>))
-import           Data.Ext
--- import           HGeometry.Box.Internal (Rectangle, IsBoxable)
-import           HGeometry.Box.Class
 import           HGeometry.Box.Boxable
-import           HGeometry.Interval
+import           HGeometry.Box.Class
 import qualified HGeometry.Box.Class as Box
-import           HGeometry.Properties
+import           HGeometry.Interval
 import           HGeometry.Point
+import           HGeometry.Properties
 import           HGeometry.Transformation.Internal
 import           HGeometry.Vector
-import           Data.Semigroup
 
 --------------------------------------------------------------------------------
 
