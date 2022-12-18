@@ -1,7 +1,7 @@
 HGeometry
 =========
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/noinia/hgeometry/CI)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/noinia/hgeometry/cabal.yml?branch=master)
 [![Hackage](https://img.shields.io/hackage/v/hgeometry.svg?color=success)](https://hackage.haskell.org/package/hgeometry)
 [![API docs coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fnoinia.github.io%2Fhgeometry%2Fhaddock_badge.json)](https://noinia.github.io/hgeometry/doc/)
 
