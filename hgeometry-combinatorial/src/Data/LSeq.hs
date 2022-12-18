@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE BangPatterns #-}
 --------------------------------------------------------------------------------
 -- |
@@ -47,7 +48,7 @@ import           Control.DeepSeq
 import           Control.Lens ((%~), (&), (<&>), (^?!), bimap)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
 import           Data.Aeson
-import           Data.Coerce(coerce)
+import           Data.Coerce (coerce)
 import qualified Data.Foldable as F
 import           Data.Functor.Apply
 import qualified Data.List.NonEmpty as NonEmpty
@@ -56,6 +57,7 @@ import           Data.Semigroup.Foldable
 import           Data.Semigroup.Traversable
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
+import           Data.Type.Ord
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Prelude hiding (drop,take,head,last,tail,init,zipWith,reverse)
@@ -259,8 +261,13 @@ data ViewL n a where
 
 infixr 5 :<
 
-instance Semigroup (ViewL n a) where
-  (x :< xs) <> (y :< ys) = x :< LSeq (toSeq xs <> (y S.<| toSeq ys))
+instance (n ~ 1 + n0) => Semigroup (ViewL n a) where
+  (<>) = combineL
+
+-- | implementation of <> for viewL
+combineL                     :: forall n a. ViewL (1+n) a -> ViewL (1+n) a -> ViewL (1+n) a
+combineL (x :< xs) (y :< ys) = x :< promise @n (LSeq (toSeq xs <> (y S.<| toSeq ys)))
+
 
 deriving instance Show a => Show (ViewL n a)
 instance Functor (ViewL n) where
@@ -327,8 +334,8 @@ data ViewR n a where
 
 infixl 5 :>
 
-instance Semigroup (ViewR n a) where
-  (xs :> x) <> (ys :> y) = LSeq ((toSeq xs S.|> x) <> toSeq ys) :> y
+instance (n ~ 1+n0) => Semigroup (ViewR n a) where
+  (xs :> x) <> (ys :> y) = promise @n0 (LSeq ((toSeq xs S.|> x) <> toSeq ys)) :> y
 
 deriving instance Show a => Show (ViewR n a)
 instance Functor (ViewR n) where
