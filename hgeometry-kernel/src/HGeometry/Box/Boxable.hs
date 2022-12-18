@@ -14,12 +14,11 @@ import HGeometry.Properties
 import HGeometry.Vector
 --------------------------------------------------------------------------------
 
-
-foo'     :: ( IxValue vector ~ Bool
-            , Additive_ vector
-            , Eq (IxValue vector)
-            ) => vector -> vector -> Bool
-foo' u v = andOf components $ liftU2 (==) u v
+-- foo'     :: ( IxValue vector ~ Bool
+--             , Additive_ vector
+--             , Eq (IxValue vector)
+--             ) => vector -> vector -> Bool
+-- foo' u v = andOf components $ liftU2 (==) u v
 
 -- | Types for which we can compute an axis parallel boundingbox
 class IsBoxable g where

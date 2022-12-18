@@ -14,12 +14,15 @@ module HGeometry.Triangle
   , module HGeometry.Triangle.Class
   ) where
 
-import           Control.Lens
-import qualified Data.Foldable as F
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Triangle.Class
-import           HGeometry.Vector
+import Control.Lens
+import Data.Type.Ord
+import HGeometry.Box.Boxable
+import HGeometry.Point
+import HGeometry.Properties
+import HGeometry.Transformation
+import HGeometry.Triangle.Class
+import HGeometry.Vector
+import Text.Read
 
 --------------------------------------------------------------------------------
 
@@ -29,8 +32,57 @@ newtype Triangle point = MkTriangle (Vector 3 point)
 -- | Construct a triangle from its three points
 pattern Triangle       :: OptCVector_ 3 point => point -> point -> point -> Triangle point
 pattern Triangle a b c = MkTriangle (Vector3 a b c)
+{-# COMPLETE Triangle #-}
+
+deriving instance Eq  (Vector 3 point) => Eq (Triangle point)
+deriving instance Ord (Vector 3 point) => Ord (Triangle point)
+
+type instance Dimension (Triangle point) = Dimension point
+type instance NumType   (Triangle point) = NumType point
+
+-- | Iso between a triangle and a vector of three points
+_TriangleVector :: (OptVector_ 3 point, OptVector_ 3 point')
+                => Iso (Triangle point) (Triangle point') (Vector 3 point) (Vector 3 point')
+_TriangleVector = iso (\(MkTriangle v) -> v) MkTriangle
 
 instance ( OptCVector_ 3 point
          , Point_ point (Dimension point) (NumType point)
          ) => Triangle_ (Triangle point) point where
   mkTriangle = Triangle
+
+instance ( OptVector_ 3 point
+         , OptVector_ 3 point'
+         , HasComponents (VectorFamily 3 point) (VectorFamily 3 point')
+         ) => HasPoints (Triangle point) (Triangle point') point point' where
+  allPoints = _TriangleVector.components1
+
+instance ( DefaultTransformByConstraints (Triangle point) d r
+         , Point_ point d r
+         , d > 0
+         ) => IsTransformable (Triangle point)
+
+
+instance (Show point, OptCVector_ 3 point) => Show (Triangle point) where
+  showsPrec k (Triangle a b c ) = showParen (k > appPrec) $
+                                    showString "Triangle "
+                                    . showsPrec (appPrec+1) a
+                                    . showChar ' '
+                                    . showsPrec (appPrec+1) b
+                                    . showChar ' '
+                                    . showsPrec (appPrec+1) c
+
+appPrec :: Int
+appPrec = 10
+
+instance (Read point, OptCVector_ 3 point) => Read (Triangle point) where
+  readPrec = parens (prec appPrec $ do
+                          Ident "Triangle" <- lexP
+                          b <- step readPrec
+                          a <- step readPrec
+                          c <- step readPrec
+                          return (Triangle a b c))
+
+instance ( OptVector_ 3 point
+         , Point_ point d r
+         , OptVector_ d r, OptMetric_ d r, Ord (VectorFamily' d r)
+         ) => IsBoxable (Triangle point)
