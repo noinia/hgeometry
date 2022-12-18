@@ -16,7 +16,7 @@ module HGeometry.Vector.Class
   ( Vector_(..), pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , component
   , xComponent, yComponent, zComponent, wComponent
-  , HasComponents(..)
+  , HasComponents(..), components1
 
   , ConstructVector, ConstructableVector_(..)
 
@@ -33,8 +33,9 @@ module HGeometry.Vector.Class
   ) where
 
 import           Control.Arrow ((&&&))
-import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
+import           Control.Lens hiding (cons,snoc,uncons,unsnoc, (<.>))
 import           Data.Ext
+import           Data.Functor.Apply
 import           Data.Kind
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
@@ -45,6 +46,8 @@ import           HGeometry.Properties
 import           HGeometry.Vector.Additive
 import           HGeometry.Vector.Metric
 import           Prelude hiding (zipWith)
+
+
 
 --------------------------------------------------------------------------------
 
@@ -301,3 +304,25 @@ wComponent = component @3
 type family VectorFor point
 
 type instance VectorFor (point :+ extra) = VectorFor point
+
+
+--------------------------------------------------------------------------------
+
+-- | A traversal of the components that guarantees there is at least one element.
+components1      :: ( HasComponents vector vector'
+                    , Dimension vector > 0
+                    ) => IndexedTraversal1 Int vector vector' (IxValue vector) (IxValue vector')
+components1 paFb = runUnsafeApplicative . components (liftIndexable paFb)
+{-# INLINE components1 #-}
+
+liftIndexable :: (Indexable Int p, Apply f) => p a (f b) -> p a (UnsafeApplicative f b)
+liftIndexable = rmap UnsafeApplicative
+
+newtype UnsafeApplicative f a = UnsafeApplicative { runUnsafeApplicative :: f a }
+
+instance Functor f => Functor (UnsafeApplicative f) where
+  fmap f (UnsafeApplicative fa) = UnsafeApplicative $ fmap f fa
+
+instance Apply f => Applicative (UnsafeApplicative f) where
+  pure _ = error "unsafeApplicative does not have a pure"
+  (UnsafeApplicative f) <*> (UnsafeApplicative g) = UnsafeApplicative $ f <.> g

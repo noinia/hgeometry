@@ -22,11 +22,11 @@ module HGeometry.Transformation
 
   , skewX, rotation, reflection, reflectionV, reflectionH
 
-  -- , fitToBox
-  -- , fitToBoxTransform
+  , fitToBox
+  , fitToBoxTransform
   ) where
 
-import           Control.Lens
+import           Control.Lens hiding ((<.>))
 import           Data.Ext
 -- import           HGeometry.Box.Internal (Rectangle, IsBoxable)
 import           HGeometry.Box.Class
@@ -41,38 +41,38 @@ import           Data.Semigroup
 
 --------------------------------------------------------------------------------
 
-{-
-
 -- | Given a rectangle r and a geometry g with its boundingbox,
 -- transform the g to fit r.
-fitToBox     :: forall g r rectangle.
-                ( IsTransformable g
+fitToBox     :: forall rectangle g point r.
+                ( NumType g ~ r, Dimension g ~ 2
+                , IsTransformable g
                 , IsBoxable g
-                , NumType g ~ r, Dimension g ~ 2
+                , Rectangle_ rectangle point
+                , Point_ point 2 r
                 , Ord r, Fractional r
-                , Rectangle_ rectangle r
+                , TransformationConstraints g
+                , OptCVector_ 2 r, OptMetric_ 2 r
+                , OptVector_ 3 r
+                , OptCVector_ 2 (ClosedInterval r)
+                , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
                 ) => rectangle -> g -> g
 fitToBox r g = transformBy (fitToBoxTransform r g) g
 
--}
 
 -- | Given a rectangle r and a geometry g with its boundingbox,
 -- compute a transformation can fit g to r.
-fitToBoxTransform     :: forall g r rectangle point.
-                         ( IsTransformable g
+fitToBoxTransform     :: forall rectangle g point r.
+                         ( NumType g ~ r, Dimension g ~ 2
+                         , IsTransformable g
                          , IsBoxable g
-                         , NumType g ~ r, Dimension g ~ 2
-                         , Ord r, Fractional r
                          , Rectangle_ rectangle point
                          , Point_ point 2 r
+                         , Ord r, Fractional r
                          , TransformationConstraints g
-                         , OptCVector_ 2 r
-                         , OptCVector_ 2 (ClosedInterval r)
+                         , OptCVector_ 2 r, OptMetric_ 2 r
                          , OptVector_ 3 r
-                         -- , OptAdditive_ 3 r
-                         , OptMetric_ 2 r
+                         , OptCVector_ 2 (ClosedInterval r)
                          , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
-                         -- , HasComponents (Vector)
                          ) => rectangle -> g -> Transformation 2 r
 fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
   where
@@ -80,8 +80,4 @@ fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
     v1  :: Vector 2 r
     v1  = negated $ b^.minPoint.vector
     v2  = r^.minPoint.vector
-    lam = minimum1Of components' $ liftI2 (/) (Box.size r) (Box.size b)
-
-
-
-      -- (/) <$> Box.size r <*> Box.size b
+    lam = minimum1Of components1 $ liftI2 (/) (Box.size r) (Box.size b)
