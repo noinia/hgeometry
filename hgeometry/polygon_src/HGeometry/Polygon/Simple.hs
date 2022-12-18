@@ -19,25 +19,33 @@ module HGeometry.Polygon.Simple
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
-import           HGeometry.Cyclic
 import qualified Data.Foldable as F
-import           HGeometry.Foldable.Util
+import           Data.Functor.Classes
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           HGeometry.Vector.NonEmpty.Util ()
 import           GHC.Generics
+import           HGeometry.Box
+import           HGeometry.Cyclic
+import           HGeometry.Foldable.Util
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Vector
+import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
+
+
 --------------------------------------------------------------------------------
 
 -- | Simple polygons just store their vertices in CCCW order
 newtype SimplePolygonF f point = MkSimplePolygon (f point)
   deriving (Generic)
-  deriving newtype (NFData)
+  deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
+
 
 -- | By default we store simple polygons as non-empty circular vectors.
 type SimplePolygon = SimplePolygonF (Cyclic NonEmptyVector)
@@ -45,19 +53,28 @@ type SimplePolygon = SimplePolygonF (Cyclic NonEmptyVector)
 type instance Dimension (SimplePolygonF f point) = 2
 type instance NumType   (SimplePolygonF f point) = NumType point
 
-deriving instance Eq (f point) => Eq (SimplePolygonF f point)
+-- TODO: should we use allow cyclic shifts?
+-- deriving instance Eq (f point)  => Eq (SimplePolygonF f point)
+-- deriving instance Ord (f point) => Ord (SimplePolygonF f point)
+
+
 
 -- | Access the container
 _SimplePolygonF :: Iso (SimplePolygonF f point) (SimplePolygonF f' point')
                        (f point)                (f' point' )
 _SimplePolygonF = iso (\(MkSimplePolygon vs) -> vs) MkSimplePolygon
 
+instance Traversable f => Traversable (SimplePolygonF f) where
+  traverse f (MkSimplePolygon vs) = MkSimplePolygon <$> traverse f vs
+instance Traversable1 f => Traversable1 (SimplePolygonF f) where
+  traverse1 f (MkSimplePolygon vs) = MkSimplePolygon <$> traverse1 f vs
+
+
 instance (TraversableWithIndex Int f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
-         )
-      => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
+         ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
   vertices = _SimplePolygonF . itraversed
 
 instance ( Traversable1 f
@@ -67,24 +84,27 @@ instance ( Traversable1 f
          ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
   allPoints = _SimplePolygonF . traversed1
 
--- instance ( TraversableWithIndex Int f
---          , HasPoints (SimplePolygonF f point r) (SimplePolygonF f point r)
---          ) => IsTransformable (SimplePolygonF f point r)
+instance ( Traversable1 f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
+         , Point_ point 2 r
+         ) => IsTransformable (SimplePolygonF f point)
 
--- instance HasVertices (SimplePolygon point r) (SimplePolygon point' r') where
---   type Vertex   (SimplePolygon point r) = point 2 r
---   type VertexIx (SimplePolygon point r) = Int
---   -- vertices = _SimplePolygonF . CV.itraversedRight
-
-
-
+instance ( Traversable1 f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         , Point_ point 2 r
+         , OptVector_ 2 r, OptMetric_ 2 r, Ord (VectorFamily' 2 r)
+         ) => IsBoxable (SimplePolygonF f point)
 
 instance ( TraversableWithIndex Int f
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int
-         )
-      => HasVertices' (SimplePolygonF f point) where
+         ) => HasVertices' (SimplePolygonF f point) where
   type Vertex   (SimplePolygonF f point) = point
   type VertexIx (SimplePolygonF f point) = Int
   vertexAt i = _SimplePolygonF . iix i
@@ -95,8 +115,7 @@ instance ( TraversableWithIndex Int f
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int
-         )
-      => HasOuterBoundary (SimplePolygonF f point) where
+         ) => HasOuterBoundary (SimplePolygonF f point) where
   outerBoundary = _SimplePolygonF . traversed1
   outerBoundaryVertexAt i = singular (vertexAt i)
 
@@ -139,40 +158,3 @@ _testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------
-
-
-
-
-
-class AsCyclic v where
-  {-# MINIMAL itraverseRightFrom, itraverseLeftFrom #-}
-  -- | Given an index i, returns an "rightwards" (i.e. clockwise)
-  -- IndexedTraversal of the cyclic structure, starting from the
-  -- element with index i.
-  itraverseRightFrom :: Int -> IndexedTraversal Int (Cyclic v a) (Cyclic v b) a b
-
-  -- | Given an index i, returns an "leftwards" (i.e. counter
-  -- clockwise) IndexedTraversal of the cyclic structure, starting
-  -- from the element with index i.
-  itraverseLeftFrom   :: Int -> IndexedTraversal Int (Cyclic v a) (Cyclic v b) a b
-  -- itraverseLeftFrom i =
-
-
-  -- -- | Given an index i, returns an "rightwards" (i.e. clockwise)
-  -- -- IndexedFold of the cyclic structure, starting from the
-  -- -- element with index i.
-  -- ifoldRightFrom :: Int -> IndexedFold Int (Cyclic v a) a
-  -- ifoldRightFrom = itraverseRightFrom
-
-  -- -- | Given an index i, returns an "leftward" (i.e. count clockwise)
-  -- -- IndexedFold of the cyclic structure, starting from the
-  -- -- element with index i.
-  -- ifoldLeftFrom :: Int -> IndexedFold Int (Cyclic v a) a
-  -- ifoldLeftFrom = itraverseLeftFrom
-
--- instance AsCyclic NonEmptyVector where
---   itraverseRightFrom i pafb (Cyclic v) = Cyclic <$> do v' <-
-
---     [0..n]
---     where
---       n = length cv
