@@ -2,8 +2,9 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 module HGeometry.Cyclic
-  ( Cyclic(..)
-  , toCircularVector
+  ( Cyclic(..), _CyclicVector, toCircularVector
+
+  , AsCyclic(..)
   ) where
 
 --------------------------------------------------------------------------------
@@ -12,7 +13,6 @@ import           Control.DeepSeq (NFData)
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Semigroup.Foldable
-import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector(..))
 import qualified Data.Vector.Fusion.Bundle as Bundle
 import qualified Data.Vector.Generic as GV
