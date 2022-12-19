@@ -94,13 +94,19 @@ class ( r ~ NumType matrix
       dot' u v = sumOf components $ liftI2 (*) u v
 
   -- | Multiply a matrix and a vector.
-  (!*)  :: ( Vector_ vector n r, Num r
-           , OptVector_ m r
-           ) => matrix -> vector -> vector
-  m !* v = vZipWith f (ListVector @n $ m^..rows) v
+  (!*)  :: forall vector.
+           ( Vector_ vector  m r
+           , Additive_ vector
+           , OptVector_ n r, OptVector_ m r
+           , Num r
+           ) => matrix -> vector -> Vector n r
+  m !* v = vectorFromVector $ rows'&components' %~ dotWithV
     where
-      f        :: Vector m r -> r -> r
-      f row' x = sumOf components $ x *^ row'
+      components' :: Traversal (ListVector n a) (ListVector n b) a b
+      components' = components
+      rows'  = ListVector @n $ m^..rows
+      dotWithV   :: Vector m r -> r
+      dotWithV u = sumOf components $ liftI2 (*) (vectorFromVector @_ @vector u) v
 
   -- | traversal over all rows
   rows :: IndexedTraversal' Int matrix (Vector m r)

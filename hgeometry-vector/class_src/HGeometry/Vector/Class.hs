@@ -319,9 +319,7 @@ liftIndexable :: (Indexable Int p, Apply f) => p a (f b) -> p a (UnsafeApplicati
 liftIndexable = rmap UnsafeApplicative
 
 newtype UnsafeApplicative f a = UnsafeApplicative { runUnsafeApplicative :: f a }
-
-instance Functor f => Functor (UnsafeApplicative f) where
-  fmap f (UnsafeApplicative fa) = UnsafeApplicative $ fmap f fa
+                              deriving newtype (Functor)
 
 instance Apply f => Applicative (UnsafeApplicative f) where
   pure _ = error "unsafeApplicative does not have a pure"

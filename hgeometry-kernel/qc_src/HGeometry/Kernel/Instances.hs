@@ -6,6 +6,7 @@ import HGeometry.Ball
 import HGeometry.Interval
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Triangle
 import HGeometry.Properties
 import HGeometry.Vector
 import HGeometry.Vector.Instances ()
@@ -49,3 +50,13 @@ instance ( Arbitrary point
          ) => Arbitrary (Ball point) where
   arbitrary = Ball <$> arbitrary
                    <*> (arbitrary `suchThat` (> 0))
+
+instance ( Arbitrary point
+         , OptCVector_ 3 point
+         , Eq point
+         ) => Arbitrary (Triangle point) where
+  arbitrary = do a <- arbitrary
+                 b <- arbitrary `suchThat` (/= a)
+                 c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b)
+                 pure $ Triangle a b c
+    -- TODO: probably we don't awant to allow degenerate triangles?

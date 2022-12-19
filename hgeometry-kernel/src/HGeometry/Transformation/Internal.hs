@@ -121,7 +121,7 @@ instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
 instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
          , d < d+1, KnownNat d
          ) => IsTransformable (Vector d r) where
-  transformBy (Transformation m) v = f $ m !* snoc v 1
+  transformBy (Transformation m) v = f $ m !* (snoc v 1 :: Vector (d+1) r)
     where
       f   :: Vector (d+1) r -> Vector d r
       f u = let (u',x) = unsnoc u
@@ -146,6 +146,9 @@ translation   :: forall d r vector. ( Num r
               => vector -> Transformation d r
 translation v = Transformation . Matrix
              $ iover components transRow (snoc v 1 :: Vector (d+1) r)
+
+
+
 
 -- | Create scaling transformation from a vector.
 --

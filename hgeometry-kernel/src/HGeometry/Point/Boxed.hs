@@ -17,22 +17,10 @@ module HGeometry.Point.Boxed
   , PointF(..)
   ) where
 
--- import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.PointF
 import HGeometry.Vector.Boxed
--- import HGeometry.Point.Internal
 
 --------------------------------------------------------------------------------
--- $setup
--- >>> import HGeometry.Vector
--- >>> :{
--- let myVector :: Vector 3 Int
---     myVector = Vector3 1 2 3
---     myPoint = Point myVector
--- :}
 
--- | Optimzied point type
+-- | Optimized point type
 type Point d r = PointF (Vector d r)
-
--- instance (Num r) => HasSquaredEuclideanDistance (Point d r) where
---   pointClosestTo _ = pointFromPoint
