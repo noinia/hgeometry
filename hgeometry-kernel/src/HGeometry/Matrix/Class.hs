@@ -27,6 +27,9 @@ import           HGeometry.Vector.List (ListVector(..))
 import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
+-- $setup
+-- >>> import HGeometry.Point
+-- >>> import HGeometry.Matrix
 
 -- | Types that have an 'elements' field lens.
 class HasElements matrix matrix' where
@@ -44,7 +47,14 @@ class ( r ~ NumType matrix
       ) => Matrix_ matrix n m r | matrix -> n
                                 , matrix -> m
                                 , matrix -> r where
+  {-# MINIMAL generateMatrix, matrixFromRows, rows #-}
+
   -- | Produces the Identity Matrix.
+  --
+  -- >>> mapMOf_ rows print $ identityMatrix @(Matrix 3 3 Int)
+  -- Vector3 1 0 0
+  -- Vector3 0 1 0
+  -- Vector3 0 0 1
   identityMatrix :: Num r => matrix
   identityMatrix = generateMatrix $ \(i,j) -> if i == j then 1 else 0
 
@@ -54,6 +64,11 @@ class ( r ~ NumType matrix
   -- | Given a list of the elements in the matrix, in row by row
   -- order, constructs the matrix.
   -- requires that there are exactly n*m elements.
+  --
+  -- >>> matrixFromList @(Matrix 2 3 Int) [1,2,3,4,5,6]
+  -- Just (Matrix (Vector2 (Vector3 1 2 3) (Vector3 4 5 6)))
+  -- >>> matrixFromList @(Matrix 2 3 Int) [1,2,3,4,5,6,7]
+  -- Nothing
   matrixFromList    :: ( KnownNat n, KnownNat m
                        , OptVector_  m r
                        ) => [r] -> Maybe matrix
@@ -74,11 +89,21 @@ class ( r ~ NumType matrix
   -- | Given a list of the elements in the matrix, in row by row
   -- order, constructs the matrix.
   -- requires that there are exactly n*m elements.
+  --
+  -- >>> matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
+  -- Matrix (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
   matrixFromRows :: ( Vector_ rowVector n (Vector m r)
                     , OptVector_ m r
                     ) => rowVector -> matrix
 
   -- | Matrix multiplication
+  --
+  -- >>> let m1  = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
+  -- >>> let r i = Vector4 i (i*10) (i*100) (i*1000)
+  -- >>> let m2  = matrixFromRows @(Matrix 3 4 Int) (Vector3 (r 1) (r 2) (r 3))
+  -- >>> mapMOf_ rows print $ (m1 !*! m2 :: Matrix 2 4 Int)
+  -- Vector4 14 140 1400 14000
+  -- Vector4 32 320 3200 32000
   (!*!)     :: ( Matrix_ matrix'  m m' r
                , Matrix_ matrix'' n m' r
                , Num r
@@ -92,8 +117,13 @@ class ( r ~ NumType matrix
       column' j = fromMaybe (error "absurd: column j out of range") . column j
 
       dot' u v = sumOf components $ liftI2 (*) u v
+  {-# INLINE (!*!) #-}
 
   -- | Multiply a matrix and a vector.
+  --
+  -- >>> let m = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
+  -- >>> m !* Vector3 2 3 1
+  -- Vector2 11 29
   (!*)  :: forall vector.
            ( Vector_ vector  m r
            , Additive_ vector
@@ -107,6 +137,7 @@ class ( r ~ NumType matrix
       rows'  = ListVector @n $ m^..rows
       dotWithV   :: Vector m r -> r
       dotWithV u = sumOf components $ liftI2 (*) (vectorFromVector @_ @vector u) v
+  {-# INLINE (!*) #-}
 
   -- | traversal over all rows
   rows :: IndexedTraversal' Int matrix (Vector m r)
@@ -120,6 +151,7 @@ class ( r ~ NumType matrix
   --
   row     :: (OptVector_ m r, KnownNat m) => Int -> matrix -> Maybe (Vector m r)
   row i m = generateA $ \j -> m ^? ix (i,j)
+  {-# INLINE row #-}
 
   -- row'   :: (OptVector_ m r, KnownNat m) => Int -> Traversal' matrix (Vector m r)
   -- row' i = traversal go
@@ -130,9 +162,9 @@ class ( r ~ NumType matrix
   -- | Access the j^th column in the matrix.
   column     :: (OptVector_ n r, KnownNat n) => Int -> matrix -> Maybe (Vector n r)
   column j m = generateA $ \i -> m ^? ix (i,j)
+  {-# INLINE column #-}
 
 
-  {-# MINIMAL generateMatrix, matrixFromRows, rows #-}
 
 infixl 7 !*!
 infixl 7 !*

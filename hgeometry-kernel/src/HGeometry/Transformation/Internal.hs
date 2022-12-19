@@ -126,7 +126,7 @@ instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
       f   :: Vector (d+1) r -> Vector d r
       f u = let (u',x) = unsnoc u
             in u' ^/ x
-
+  {-# INLINE transformBy #-}
 
 --------------------------------------------------------------------------------
 -- * Common transformations
