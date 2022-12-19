@@ -39,6 +39,7 @@ import           HGeometry.Vector.Class
 -- $setup
 -- >>> import HGeometry.Point
 -- >>> import HGeometry.Vector
+-- >>> import HGeometry.LineSegment
 -- >>> let myPoint = Point3 1 2 3 :: Point 3 Int
 
 -- | Types that have a 'vector' field lens
@@ -52,8 +53,10 @@ class ( NumType point ~ r
   --
   -- >>> myPoint ^. vector
   -- Vector3 1 2 3
-  -- >>> myPoint & vector .~ Vector3 3 2 1
+  -- >>> ( myPoint & vector .~ Vector3 3 2 1  ) :: Point 3 Int
   -- Point3 3 2 1
+  -- >>> (myPoint & coordinates %~ show ) :: Point 3 String
+  -- Point3 "1" "2" "3"
   vector :: ( Dimension point ~ d, Dimension point' ~ d)
          => Lens point point' (VectorFor point) (VectorFor point')
 
@@ -62,17 +65,23 @@ class ( NumType point ~ r
 class ( Vector_ (VectorFor point) (Dimension point) (NumType point)
       , Metric_ (VectorFor point)
       ) => Affine_ point where
+  {-# MINIMAL (.-.), (.+^) #-}
 
   -- | p .-. q represents the vector from q to p
   (.-.) :: Num (NumType point) => point -> point -> VectorFor point
 
   -- | add a vector to a point
+  --
+  -- >>> myPoint .+^ Vector3 100 200 300
+  -- Point3 101 202 303
   (.+^) :: Num (NumType point) => point -> VectorFor point -> point
 
   -- | subtract a vector from a point
+  --
+  -- >>> myPoint .-^ Vector3 100 200 300
+  -- Point3 (-99) (-198) (-297)
   (.-^) :: Num (NumType point) => point -> VectorFor point -> point
   p .-^ v = p .+^ negated v
-  {-# MINIMAL (.-.), (.+^) #-}
 
 -- | A class representing points in d-dimensional space.
 class ( Dimension point ~ d
@@ -84,14 +93,22 @@ class ( Dimension point ~ d
                             , point -> r where
 
   -- | Construct a point from a vector
+  --
+  -- >>> fromVector (Vector4 1 2 3 4) :: Point 4 Int
+  -- Point4 1 2 3 4
   fromVector :: Vector_ vector d r => vector -> point
 
   -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
   --
-  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
+  -- >>> imapMOf_ coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
+  -- (1,10)
+  -- (2,20)
+  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20) :: IO (Point 2 ())
   -- (1,10)
   -- (2,20)
   -- Point2 () ()
+  -- >>> over coordinates (+1) $ Point2 10 20 :: Point 2 Int
+  -- Point2 11 21
   coordinates :: forall point' s. ( HasVector point point' r s
                                   , HasComponents (VectorFor point) (VectorFor point')
                                   , Point_ point' d s
@@ -216,7 +233,10 @@ pointFromList :: forall point d r. (Point_ point d r) => [r] -> Maybe point
 pointFromList = fmap (fromVector @point @d @r @(VectorFor point)) . vectorFromList
 
 -- | Project a point down into a lower dimension.
-projectPoint :: forall i d r point point'. ( i <= d, KnownNat i
+--
+-- >>> projectPoint @(Point 2 Int) myPoint
+-- Point2 1 2
+projectPoint :: forall point' i d r point. ( i <= d, KnownNat i
                                            , Point_ point  d r
                                            , Point_ point' i r
                 ) => point -> point'
@@ -275,6 +295,12 @@ type family PointFor t
 class HasPoints s t point point' | s -> point
                                  , t -> point' where
   -- | Traversal over all points in the structure
+  --
+  -- >>> let seg = ClosedLineSegment (Point2 10 10) (Point2 20 (30 :: Int))
+  -- >>> seg^..allPoints
+  -- [Point2 10 10,Point2 20 30]
+  -- >>> over allPoints (.+^ Vector2 10 10) seg :: ClosedLineSegment (Point 2 Int)
+  -- ClosedLineSegment (Point2 20 20) (Point2 30 40)
   allPoints :: ( Point_ point  d r
                , Point_ point' d r'
                , NumType s ~ r
