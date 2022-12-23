@@ -61,17 +61,23 @@ instance ( OptVector_ d r
 --   fmap f (LinePV p v) = LinePV (p&coordinates %~ f)
 --                                (v&components %~ f)
 
-
 -- instance Foldable (Line d) where
---   foldMap f (LinePV p v) =
+--   foldMap f (LinePV p v) = foldMapOf coordinates f p <> foldMapOf components f v
 
-instance ( OptCVector_ 2 r, OptCVector_ 3 r, Eq r
+instance ( OptCVector_ 2 r, OptCVector_ 3 r, Eq r, Fractional r
          ) => HyperPlane_ (Line 2 r) 2 r where
   -- hyperPlaneTrough (Vector2 p q) = Line p (q .-. p)
 
   hyperPlaneEquation (LinePV (Point2 px py) (Vector2 vx vy)) = Vector3 a0 vx vy
     where
       a0 = if vx == 0 then -px else -vx*px - vy*py
+
+  -- equation: line equation is: c + ax + by = 0
+  -- pre: not all of a b and c are zero
+  hyperPlaneFromEquation (Vector3 c a b)
+    | b == 0    = LinePV (Point2 (-c/a) 0)      (Vector2 0 1) -- if b=0 we are vertical
+    | otherwise = LinePV (Point2 0      (-c/b)) (Vector2 c (-a))
+
 
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
