@@ -25,6 +25,7 @@ import GHC.TypeLits
 import HGeometry.Box.Boxable
 import HGeometry.Interval.Class
 import HGeometry.Interval.Optimal
+import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
@@ -205,9 +206,8 @@ instance ( d ~ Dimension point, r ~ NumType point
          , OptCVector_ 2 (endPoint point)
          , Num r
          ) => HasSupportingLine (LineSegment endPoint point) where
-  supportingLine seg = let s = seg^.start.to pointFromPoint
-                           t = seg^.end.to pointFromPoint
-                       in Line s (t .-. s)
+  supportingLine seg = lineThrough @(Line d r) @(Point d r)
+                                   (seg^.start.to pointFromPoint) (seg^.end.to pointFromPoint)
 
 instance ( Fractional r, Ord r
          , HasSquaredEuclideanDistance point

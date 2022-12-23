@@ -119,6 +119,8 @@ instance ( TraversableWithIndex Int f
   outerBoundary = _SimplePolygonF . traversed1
   outerBoundaryVertexAt i = singular (vertexAt i)
 
+  -- ccwOuterBoundaryFrom
+
 instance ( Point_ point 2 r
          , TraversableWithIndex Int f
          , Traversable1 f
