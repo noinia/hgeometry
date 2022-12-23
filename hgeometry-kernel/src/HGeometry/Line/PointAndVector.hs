@@ -9,13 +9,26 @@
 -- \(d\)-dimensional lines.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Line.PointAndVector where
+module HGeometry.Line.PointAndVector
+  ( Line(..)
+  , onLine
+  , isIdenticalTo
+  , HasSupportingLine(..)
+  , fromLinearFunction
+  , SideTestUpDown(..), OnSideUpDownTest(..)
+  , liesAbove, liesBelow
+  , SideTest, onSide
+
+  , bisector
+  , perpendicularTo, isPerpendicularTo
+
+  , cmpSlope
+  ) where
 
 import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
-import qualified Data.Traversable as T
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
@@ -48,6 +61,9 @@ instance ( OptVector_ d r
 --   fmap f (LinePV p v) = LinePV (p&coordinates %~ f)
 --                                (v&components %~ f)
 
+
+-- instance Foldable (Line d) where
+--   foldMap f (LinePV p v) =
 
 instance ( OptCVector_ 2 r, OptCVector_ 3 r, Eq r
          ) => HyperPlane_ (Line 2 r) 2 r where
@@ -93,9 +109,8 @@ instance (Read r, OptVector_ d r, OptMetric_ d r, KnownNat d) => Read (Line d r)
                           v <- step readPrec
                           return (LinePV p v))
 
+instance (NFData r, NFData (VectorFamily' d r)) => NFData (Line d r)
 
-
--- instance (NFData r, Arity d) => NFData        (Line d r)
 -- deriving instance Arity d             => Functor       (Line d)
 -- deriving instance Arity d             => F.Foldable    (Line d)
 -- deriving instance Arity d             => T.Traversable (Line d)
@@ -110,11 +125,11 @@ instance (Read r, OptVector_ d r, OptMetric_ d r, KnownNat d) => Read (Line d r)
 
 -- | Test if point q lies on line l
 --
--- >>> origin `onLine` lineThrough origin (Point2 1 0)
+-- >>> origin `onLine` lineThrough @(Line 2 Int) origin (Point2 1 0)
 -- True
--- >>> Point2 10 10 `onLine` lineThrough origin (Point2 2 2)
+-- >>> Point2 10 10 `onLine` lineThrough @(Line 2 Int) origin (Point2 2 2)
 -- True
--- >>> Point2 10 5 `onLine` lineThrough origin (Point2 2 2)
+-- >>> Point2 10 5 `onLine` lineThrough @(Line 2 Int) origin (Point2 2 2)
 -- False
 onLine :: ( Point_ point d r
           , Fractional r, Eq r
@@ -133,7 +148,6 @@ type instance Dimension (Line d r) = d
 type instance NumType   (Line d r) = r
 
 -- ** Functions on lines
-
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.

@@ -71,9 +71,9 @@ instance (Num r, OptMatrix_ (d+1) r) => Monoid (Transformation d r) where
 --
 -- >>> inverseOf $ translation (Vector2 (10.0) (5.0))
 -- Transformation {_transformationMatrix = Matrix (Vector3 (Vector3 1.0 0.0 (-10.0)) (Vector3 0.0 1.0 (-5.0)) (Vector3 0.0 0.0 1.0))}
-inverseOf :: (Fractional r, OptMatrix_ (d+1) r, Invertible (d + 1) r)
+inverseOf :: (Fractional r, OptMatrix_ (d+1) r, Invertible (d + 1))
           => Transformation d r -> Transformation d r
-inverseOf = Transformation . inverse' . _transformationMatrix
+inverseOf = Transformation . inverseMatrix . _transformationMatrix
 
 
 --------------------------------------------------------------------------------

@@ -99,8 +99,8 @@ test = identityMatrix
 
 -- -- instance HasDeterminant 1 where
 -- --   det (Matrix (Vector1 (Vector1 x))) = x
--- -- instance HasDeterminant 2 where
--- --   det = Lin.det22 . coerce
+-- instance HasDeterminant 2 where
+--   det = Lin.det22 . coerce
 -- -- instance HasDeterminant 3 where
 -- --   det = Lin.det33 . coerce
 -- -- instance HasDeterminant 4 where

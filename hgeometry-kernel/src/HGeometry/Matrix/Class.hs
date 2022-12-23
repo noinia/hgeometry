@@ -30,6 +30,7 @@ import           Prelude hiding (zipWith)
 -- $setup
 -- >>> import HGeometry.Point
 -- >>> import HGeometry.Matrix
+-- >>> let printMatrix = mapMOf_ rows print
 
 -- | Types that have an 'elements' field lens.
 class HasElements matrix matrix' where
@@ -51,7 +52,7 @@ class ( r ~ NumType matrix
 
   -- | Produces the Identity Matrix.
   --
-  -- >>> mapMOf_ rows print $ identityMatrix @(Matrix 3 3 Int)
+  -- >>> printMatrix $ identityMatrix @(Matrix 3 3 Int)
   -- Vector3 1 0 0
   -- Vector3 0 1 0
   -- Vector3 0 0 1
@@ -101,7 +102,7 @@ class ( r ~ NumType matrix
   -- >>> let m1  = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
   -- >>> let r i = Vector4 i (i*10) (i*100) (i*1000)
   -- >>> let m2  = matrixFromRows @(Matrix 3 4 Int) (Vector3 (r 1) (r 2) (r 3))
-  -- >>> mapMOf_ rows print $ (m1 !*! m2 :: Matrix 2 4 Int)
+  -- >>> printMatrix $ (m1 !*! m2 :: Matrix 2 4 Int)
   -- Vector4 14 140 1400 14000
   -- Vector4 32 320 3200 32000
   (!*!)     :: ( Matrix_ matrix'  m m' r
@@ -139,6 +140,16 @@ class ( r ~ NumType matrix
       dotWithV u = sumOf components $ liftI2 (*) (vectorFromVector @_ @vector u) v
   {-# INLINE (!*) #-}
 
+  -- | Multiply a scalar and a matrix
+  (*!!)   :: Num r => r -> matrix -> matrix
+  s *!! m = m&elements *~ s
+  {-# INLINE (*!!) #-}
+
+  -- | Multiply a matrix and a scalar
+  (!!*)   :: Num r => matrix -> r -> matrix
+  m !!* s = m&elements *~ s
+  {-# INLINE (!!*) #-}
+
   -- | traversal over all rows
   rows :: IndexedTraversal' Int matrix (Vector m r)
 
@@ -165,16 +176,17 @@ class ( r ~ NumType matrix
   {-# INLINE column #-}
 
 
-
 infixl 7 !*!
 infixl 7 !*
-
+infixl 7 *!!
+infixl 7 !!*
 
 -- class Matrix_ matrix n m r => ConstructableMatrix_ matrix n m r where
 --   fromList
 
 
-
+--------------------------------------------------------------------------------
+-- * Determinants
 
 -- | Dimensions for which we can compute the determinant of a matrix
 class HasDeterminant d where
@@ -182,22 +194,105 @@ class HasDeterminant d where
 
 instance HasDeterminant 1 where
   det m = m^?!ix (0,0)
+  {-# INLINE det #-}
 
+instance HasDeterminant 2 where
+  det m = case m^..elements of
+            [ a, b,
+              c, d] -> a*d - b*c
+            _       -> error "det: 2x2, absurd"
+  {-# INLINE det #-}
 
+instance HasDeterminant 3 where
+  det m = case m^..elements of
+            [ a, b, c,
+              d, e, f,
+              g, h, i] -> a*e*i + b*f*g + c*d*h - c*e*g - b*d*i - a*f*h
+            _          -> error "det: 3x3, absurd"
+  {-# INLINE det #-}
+
+instance HasDeterminant 4 where
+  det m = case m^..elements of
+    [ i00, i01, i02, i03,
+      i10, i11, i12, i13,
+      i20, i21, i22, i23,
+      i30, i31, i32, i33 ] -> let s0 = i00 * i11 - i10 * i01
+                                  s1 = i00 * i12 - i10 * i02
+                                  s2 = i00 * i13 - i10 * i03
+                                  s3 = i01 * i12 - i11 * i02
+                                  s4 = i01 * i13 - i11 * i03
+                                  s5 = i02 * i13 - i12 * i03
+
+                                  c5 = i22 * i33 - i32 * i23
+                                  c4 = i21 * i33 - i31 * i23
+                                  c3 = i21 * i32 - i31 * i22
+                                  c2 = i20 * i33 - i30 * i23
+                                  c1 = i20 * i32 - i30 * i22
+                                  c0 = i20 * i31 - i30 * i21
+                              in s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0
+     -- adapted from the implementation in the Linear package.
+    _ -> error "det: 4x4 absurd"
+  {-# INLINE det #-}
+  -- TODO: verify that GHC unrolls the list
+  -- TODO verify that GHC specializes this for the most relevant types
+
+--------------------------------------------------------------------------------
+-- * Invertible matrices
 
 
 -- | Class of matrices that are invertible.
-class Invertible n r where
-  inverse' :: (Matrix_ matrix n n r) => matrix -> matrix
+class Invertible n where
+  -- | given a square \(n \times n\) matrix A, computes the \(n \times n\) matrix B such that
+  -- A !*! B = identityMatrix
+  inverseMatrix :: ( Fractional r
+                   , Matrix_ matrix n n r
+                   , OptVector_ n r
+                   ) => matrix -> matrix
 
+instance Invertible 1 where
+  inverseMatrix m = m&elements %~ (\x -> (1/x))
+  -- slightly weird way of writing this, since there is only one element, but whatever
+  {-# INLINE inverseMatrix #-}
 
+instance Invertible 2 where
+  -- >>> printMatrix $ inverseMatrix $ matrixFromList @(Matrix 2 2 Double) [1,2, 3,4]
+  -- (Vector2 (-2.0) 1.0)
+  -- (Vector2 1.5 (-0.5))
+  inverseMatrix m = case m^..elements of
+                      [a,b,
+                       c,d] -> let s = 1 / det m
+                               in s *!! (matrixFromRows $ Vector2_ @(ListVector 2 _)
+                                  (Vector2_ d          (negate b))
+                                  (Vector2_ (negate c) a))
+                      _     -> error "inverseMatrix 2x2: absurd"
+  {-# INLINE inverseMatrix #-}
+  -- it is a bit silly we are using the list vectors here.
 
-
-
--- -- | Creates a row with zeroes everywhere, except at position i, where the
--- -- value is the supplied value.
--- mkRow     :: forall vector d r. (Vector_ vector d r, Num r) => Int -> r -> vector
--- mkRow i x = set (unsafeComponent i) x zero
+instance Invertible 3 where
+  -- >>> printMatrix $ inverseMatrix $ matrixFromList @(Matrix 3 3 Double) [1,2,4,     4,2,2,    1,1,1]
+  -- (Vector3 0.0 0.5 (-1.0))
+  -- (Vector3 (-0.5) (-0.75) 3.5)
+  -- (Vector3 0.5 0.25 (-1.5))
+  inverseMatrix m = case m^..elements of
+    [ a, b, c,
+      d, e, f,
+      g, h, i] -> let s  = 1 / det m
+                      aa = e*i - f*h
+                      bb = negate $ d*i-f*g
+                      cc = d*h - e*g
+                      dd = negate $ b*i - c*h
+                      ee = a*i - c*g
+                      ff = negate $ a*h - b*g
+                      gg = b*f - c*e
+                      hh = negate $ a*f - c*d
+                      ii = a*e - b*d
+                  in s *!! (matrixFromRows $ Vector3_ @(ListVector 3 _)
+                                  (Vector3_ aa bb cc)
+                                  (Vector3_ dd ee ff)
+                                  (Vector3_ gg hh ii))
+    _          -> error "inverseMatrix 3x3: absurd"
+  {-# INLINE inverseMatrix #-}
+  -- it is a bit silly we are using the list vectors here.
 
 
 --------------------------------------------------------------------------------

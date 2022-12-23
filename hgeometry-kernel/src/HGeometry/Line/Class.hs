@@ -24,7 +24,7 @@ import HGeometry.Vector
 
 -- $setup
 -- import HGeometry.Point
--- import HGeometry.Line
+-- import HGeometry.Line.PointAndVector
 
 -- | Types that can act as lines in d-dimensional space.
 class Line_ line d r | line -> d

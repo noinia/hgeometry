@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Vector.Optimal.Internal
@@ -50,6 +51,17 @@ type instance NumType  (Vector d r)  = r
 type instance IxValue  (Vector d r)  = r
 type instance Index    (Vector d r)  = Int
 
+instance (forall a b. HasComponents (Vector d a) (Vector d b))
+         => Functor (Vector d) where
+  fmap = over components
+
+instance (forall a b. HasComponents (Vector d a) (Vector d b))
+         => Traversable (Vector d) where
+  traverse = components
+
+instance (forall a b. HasComponents (Vector d a) (Vector d b))
+          => Foldable (Vector d) where
+  foldMap = foldMapOf components
 
 -- | The type family to specialize vector implementations. For 0 and 1
 -- dimensions we already decide how to implement the vector, since
