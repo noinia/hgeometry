@@ -5,7 +5,9 @@ module HGeometry.Box.Boxable
   ) where
 
 import Control.Lens
+import Data.Ext
 import Data.Functor.Contravariant (phantom)
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Semigroup.Foldable
 import HGeometry.Box.Class
 import HGeometry.Box.Optimal
@@ -59,6 +61,9 @@ folding1 sfa agb = phantom . traverse1_ agb . sfa
 
   -- $ \g -> g^..allPoints
 
+--------------------------------------------------------------------------------
+-- Instances
+
 instance ( Box_ (Box point) point
          , Point_ point d r
          , OptVector_ d r
@@ -67,3 +72,27 @@ instance ( Box_ (Box point) point
          , OptMetric_ d r
          ) => IsBoxable (Box point) where
   boundingBox (Box p q) = Box (pointFromPoint p) (pointFromPoint q)
+
+instance IsBoxable g => IsBoxable (g :+ extra) where
+  boundingBox = boundingBox . view core
+
+----------------------------------------
+newtype Union point = Union { unUnion :: Box point }
+
+instance (OptCVector_ 2 point, Point_ point d r, Ord r) => Semigroup (Union point) where
+  (Union (Box p q)) <> (Union (Box p' q')) = Union $ Box (f min p p') (f max q q')
+    where
+      f combine a b = b&vector %~ liftI2 combine (a^.vector)
+
+
+instance (IsBoxable g, OptVector_ d r, OptMetric_ d r
+         , d ~ Dimension g, r ~ NumType g
+         ) => IsBoxable (NonEmpty g) where
+  boundingBox = unUnion . foldMap1 (Union . boundingBox)
+
+
+type instance Dimension (NonEmpty g) = Dimension g
+type instance NumType   (NonEmpty g) = NumType g
+-- TODO: move these to hgeometry-combinatorial
+
+----------------------------------------

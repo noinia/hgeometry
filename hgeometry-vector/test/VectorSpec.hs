@@ -1,6 +1,6 @@
 module VectorSpec (spec) where
 
-import           Control.Lens ((^..),(%~),(&))
+import           Control.Lens
 -- import Data.Double.Approximate (SafeDouble)
 import           HGeometry.Vector
 import           Test.Hspec
@@ -23,6 +23,13 @@ spec = do
     -- SafeDouble should work better.
     -- it "1e10 (pass)" $
     --   isScalarMultipleOf (Vector2 1 10) (Vector2 1e10 (1e10*10::SafeDouble)) `shouldBe` True
+
+    it "vecVec" $
+      let vecVec :: Vector 2 (Vector 2 Int)
+          vecVec = Vector2 (Vector2 5 10) (Vector2 20 40)
+      in (vecVec&components %~ view xComponent)
+         `shouldBe`
+         Vector2 5 20
 
   ordTests
   showReadTests

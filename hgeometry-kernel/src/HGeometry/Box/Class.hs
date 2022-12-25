@@ -24,6 +24,7 @@ module HGeometry.Box.Class
   ) where
 
 import Control.Lens
+import Data.Ext
 import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.Interval
@@ -132,3 +133,16 @@ height :: ( Box_ box point, Point_ point d r
          , Num r
          ) => box -> r
 height = widthIn @1
+
+
+--------------------------------------------------------------------------------
+
+instance HasMinPoint box point => HasMinPoint (box :+ extra) point where
+  minPoint = core.minPoint
+  {-# INLINE minPoint #-}
+instance HasMaxPoint box point => HasMaxPoint (box :+ extra) point where
+  maxPoint = core.maxPoint
+  {-# INLINE maxPoint #-}
+instance Box_ box point => Box_ (box :+ extra) point where
+  extent = extent . view core
+  {-# INLINE extent #-}

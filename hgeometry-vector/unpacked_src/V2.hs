@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module V2
   ( Vec2(..)
+  , componentsImpl
   ) where
 
 import           Control.DeepSeq
@@ -107,14 +108,20 @@ type BoxedVector4 r = Boxed.VectorImpl Boxed.Four r
 
 
 instance {-# OVERLAPPING #-} HasComponents (BoxedVector2 a) Vec2  where
-  components = conjoined traverse' (itraverse' . indexed)
+  components = componentsImpl
+  {-# INLINE components #-}
+
+-- | implementation of components
+componentsImpl :: forall vector r. Vector_ vector 2 r
+               => IndexedTraversal Int vector Vec2 r R
+componentsImpl = conjoined traverse' (itraverse' . indexed)
     where
-      traverse'                  :: Applicative f => (a -> f R) -> BoxedVector2 a -> f Vec2
+      traverse'                  :: Applicative f => (r -> f R) -> vector -> f Vec2
       traverse' f (Vector2_ x y) = Vec2 <$> f x <*> f y
       itraverse'                  :: Applicative f
-                                  => (Int -> a -> f R) -> BoxedVector2 a -> f Vec2
+                                  => (Int -> r -> f R) -> vector -> f Vec2
       itraverse' f (Vector2_ x y) = Vec2 <$> f 0 x <*> f 1 y
-  {-# INLINE components #-}
+{-# INLINE componentsImpl #-}
 
 instance Vector_ Vec2 2 R where
 --  mkVector = Vec2

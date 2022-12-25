@@ -45,39 +45,58 @@ instance Wrapped (WrapVector d orig wrapped)
 instance (t ~ WrapVector d' orig' wrapped') => Rewrapped (WrapVector d orig wrapped) t
 
 
-
-
-
 instance ( Coercible orig wrapped
          , Vector_ (Vector d orig) d orig
          ) => Ixed (WrapVector d orig wrapped) where
   ix i = _Wrapped.ix i.coerced
 
-instance ( Coercible orig wrapped
-         , Vector_ (Vector d orig) d orig
-         ) => HasComponents (WrapVector d orig wrapped) (WrapVector d orig wrapped) where
+instance {-# OVERLAPPING #-} (Coercible orig wrapped, Vector_ (Vector d orig) d orig)
+         => HasComponents (WrapVector d orig wrapped) (WrapVector d orig wrapped) where
   components = _Wrapped.components.coerced
 
 instance ( Coercible orig wrapped
          , OptVector_ d orig
-         ) => HasComponents (Vector d orig) (WrapVector d orig wrapped) where
+         , HasComponents  (Vector d a) (Vector d orig)
+         ) => HasComponents (Vector d a) (WrapVector d orig wrapped) where
 
-  -- paFb :: a ~ orig , b ~ wrapped
+  -- paFb :: b ~ orig
   components paFb v = fmap (coerce @(Vector d orig) @(WrapVector d orig wrapped))
-                    $ components @(Vector d orig) @(Vector d orig) (f paFb) v
+                    $ components @(Vector d a) @(Vector d orig) (f paFb) v
     where
-      f :: (Indexable Int p, Applicative f) => p orig (f wrapped) -> p orig (f orig)
+      f :: (Indexable Int p, Applicative f) => p a (f wrapped) -> p a (f orig)
       f = rmap (fmap coerce)
 
 instance ( Coercible orig wrapped
          , OptVector_ d orig
-         ) => HasComponents (WrapVector d orig wrapped) (Vector d orig) where
+         , HasComponents (Vector d orig) vector
+         ) => HasComponents (WrapVector d orig wrapped) vector where
 
-  -- paFb :: a ~ wrapped , b ~ orig
+  -- paFb :: a ~ wrapped
   components paFb (WrapVector v) = components (f paFb) v
     where
-      f :: (Indexable Int p, Applicative f) => p wrapped (f orig) -> p orig (f orig)
+      f :: (Indexable Int p, Applicative f, b ~ IxValue vector)
+        => p wrapped (f b) -> p orig (f b)
       f = lmap coerce
+
+-- instance ( Coercible orig wrapped
+--          , OptVector_ d orig
+--          , HasComponents (Vector d orig) (Vector d b)
+--          ) => HasComponents (WrapVector d orig wrapped) (VectorFamily' d b) where
+
+--   -- paFb :: a ~ wrapped
+--   components paFb (WrapVector v) = undefined
+
+    -- components (f paFb) v
+    -- where
+    --   f :: (Indexable Int p, Applicative f) => p wrapped (f b) -> p orig (f b)
+    --   f = lmap coerce
+
+
+
+
+
+
+
 
 instance ( Coercible orig wrapped
          , Vector_ (Vector d orig) d orig

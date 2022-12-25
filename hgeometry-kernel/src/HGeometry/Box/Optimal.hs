@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Box.Optimal
   ( Box(Box,Rectangle)
+  , Rectangle
   ) where
 
 import Control.Lens
@@ -25,7 +26,7 @@ import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
 import Text.Read
 
--- import Data.Coerce
+import Data.Coerce
 -- import Data.Functor.Apply
 
 --------------------------------------------------------------------------------
@@ -100,54 +101,4 @@ type instance Intersection (LineEQ r) (Rectangle r) = Maybe (LineBoxIntersection
 myRect :: Rectangle (Point 2 Double)
 myRect = Rectangle origin (Point2 10 20.0)
 
--- test :: Vector 2 Double
--- test = size myRect
-
-
--- instance HasComponents (WrapVector d vec) (Vector 2 r)
-
--- instance ( OptVector_ d (Vector e r)
---          , OptVector_ d r
---          ) => HasComponents (Vector d (Vector e r)) (Vector d r) where
---   components pVFr vv = undefined
-
-
-
-
-  -- paFb wv =
-
-
-
-    -- fmap (coerce @(Vector d orig) @(WrapVector d orig wrapped))
-    --                 $ components @(Vector d orig) @(Vector d orig) (f paFb) v
-    -- where
-    --   f :: (Indexable Int p, Applicative f) => p orig (f wrapped) -> p orig (f orig)
-    --   f = rmap (fmap coerce)
-
-
-
--- (Indexable i p, Apply f) => p a (f b) -> s -> f t
-
---   components = re _Wrapped
---             .
---             . coerced
-
-    -- coerce @(f )
-    --          . ()
--- components' :: forall d orig wrapped.
---             ( OptVector_ d orig, OptVector_ d wrapped
---             , Coercible orig wrapped
---             -- , HasComponents (VectorFamily' d orig) (VectorFamily' d wrapped)
---             ) => IndexedTraversal Int (Vector d orig)  (Vector d wrapped) orig wrapped
-
--- components' = _Wrapping f (components @(Vector d orig) @(Vector d orig))
---   where
---     f :: orig -> wrapped
---     f = undefined
-
-
---   _Unwrapped
---             .
--- ;
-  -- ala WrapVector
-  --                 ()
+test = size myRect
