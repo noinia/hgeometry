@@ -23,16 +23,19 @@ import Data.Kind (Type)
 import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.Box.Boxable
+import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Interval.Optimal
 import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
-import HGeometry.Properties
+import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
+
+-- import HGeometry.Number.Real.Rational
 
 --------------------------------------------------------------------------------
 
@@ -295,4 +298,16 @@ testOn = test `intersects` testseg
   --     let !n = G.length xs
   --     -- Use fromListN to be more efficient in construction of resulting vector
   --     -- Also behaves better with compact regions, preventing runtime exceptions
-  --     in  Data.Vector.fromListN n Applicative.<$> Traversable.traverse f (toList xs)
+  --     in  Data.Vector.fromListN n Applicative.<$> Traversable.traverse f (toList xs<)
+
+
+-- type R = RealNumber 5
+
+-- intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R) -> Bool
+-- intersects2 = intersects
+
+-- testseg1 :: ClosedLineSegment (Point 2 R)
+-- testseg1 = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+-- myPoint :: Point 2 R
+-- myPoint = Point2 11 11
