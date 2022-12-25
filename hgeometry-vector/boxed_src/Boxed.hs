@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module Boxed
   ( Vector, pattern Vector1, pattern Vector2, pattern Vector3, pattern Vector4
+  , VectorImpl, Optimize(..)
   ) where
 
 import           Control.Applicative
@@ -34,7 +35,6 @@ import           System.Random.Stateful (Uniform(..), UniformRange(..))
 
 -- | d-dimensional vectors that pick a specialized implementation for sizes up to 4.
 type Vector d r = VectorImpl (Choose d) r
-
 
 --------------------------------------------------------------------------------
 -- * Convenience "constructors"

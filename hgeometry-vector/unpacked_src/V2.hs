@@ -28,6 +28,7 @@ import           HGeometry.Vector.Class
 import           R
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..) ) -- , Uniform(..))
+import qualified Boxed
 
 --------------------------------------------------------------------------------
 
@@ -86,7 +87,7 @@ instance Ixed Vec2 where
                           _ -> pure v
   {-# INLINE ix #-}
 
-instance Vector_ v 2 (IxValue v) => HasComponents Vec2 v where
+instance {-# OVERLAPPABLE #-} Vector_ v 2 (IxValue v) => HasComponents Vec2 v where
   {-# SPECIALIZE instance HasComponents Vec2 Vec2 #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
@@ -96,6 +97,24 @@ instance Vector_ v 2 (IxValue v) => HasComponents Vec2 v where
       itraverse' f (Vec2 x y) = Vector2_ <$> f 0 x <*> f 1 y
   {-# INLINE components #-}
 
+
+-- | Type synonym for Boxed 2-dimensional vectors
+type BoxedVector2 r = Boxed.VectorImpl Boxed.Two r
+-- | Type synonym for Boxed 3-dimensional vectors
+type BoxedVector3 r = Boxed.VectorImpl Boxed.Three r
+-- | Type synonym for Boxed 4-dimensional vectors
+type BoxedVector4 r = Boxed.VectorImpl Boxed.Four r
+
+
+instance {-# OVERLAPPING #-} HasComponents (BoxedVector2 a) Vec2  where
+  components = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse'                  :: Applicative f => (a -> f R) -> BoxedVector2 a -> f Vec2
+      traverse' f (Vector2_ x y) = Vec2 <$> f x <*> f y
+      itraverse'                  :: Applicative f
+                                  => (Int -> a -> f R) -> BoxedVector2 a -> f Vec2
+      itraverse' f (Vector2_ x y) = Vec2 <$> f 0 x <*> f 1 y
+  {-# INLINE components #-}
 
 instance Vector_ Vec2 2 R where
 --  mkVector = Vec2

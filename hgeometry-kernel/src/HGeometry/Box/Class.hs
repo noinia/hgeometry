@@ -71,9 +71,12 @@ type Rectangle_ rectangle point = (Box_ rectangle point, Dimension rectangle ~ 2
 
 
 
+
 -- | Get the size of the box (in all dimensions). Note that the
 -- resulting vector is 0 indexed whereas one would normally count
 -- dimensions starting at zero.
+--
+--
 size :: forall box d point r.
         ( Box_ box point, Point_ point d r
         , Num r
@@ -85,8 +88,14 @@ size :: forall box d point r.
 size = over components duration . extent
 
 
+-- instance HasComponents (VectorFamily' d (Interval (EndPoint et r) r))
+--                        (VectorFamily' d r) where
+--   components =
 
--- Given a dimension, get the width of the box in that dimension.
+
+
+
+-- | Given a dimension, get the width of the box in that dimension.
 -- Dimensions are 0 indexed.
 widthIn :: forall i box d point r. ( Box_ box point, Point_ point d r
                                    , i < d, KnownNat i

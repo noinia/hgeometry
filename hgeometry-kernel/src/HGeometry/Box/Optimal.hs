@@ -10,16 +10,23 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Box.Optimal
-  ( Box(Box)
+  ( Box(Box,Rectangle)
   ) where
 
 import Control.Lens
-import GHC.Generics
+import GHC.Generics hiding (prec)
 import HGeometry.Box.Class
+import HGeometry.Intersection
 import HGeometry.Interval
+import HGeometry.Line.LineEQ
+-- import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Properties
+import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
+import Text.Read
+
+-- import Data.Coerce
+-- import Data.Functor.Apply
 
 --------------------------------------------------------------------------------
 -- | D-dimensional boxes.
@@ -29,6 +36,17 @@ newtype Box point = MkBox (Vector 2 point) deriving (Generic)
 pattern Box           :: OptCVector_ 2 point => point -> point -> Box point
 pattern Box minP maxP = MkBox (Vector2 minP maxP)
 {-# COMPLETE Box #-}
+
+-- | Defines a rectangle
+type Rectangle = Box
+-- TODO this type is slightly misleading
+
+-- | Construct a Rectangle
+pattern Rectangle           :: (OptCVector_ 2 point, Dimension point ~ 2)
+                            => point -> point -> Box point
+pattern Rectangle minP maxP = Box minP maxP
+{-# COMPLETE Rectangle #-}
+
 
 -- type instance PointFor  (Box point) = point
 type instance Dimension (Box point) = Dimension point
@@ -48,5 +66,88 @@ instance ( Affine_ point
   extent (Box p q) = vZipWith ClosedInterval (p^.vector) (q^.vector)
 
 
+instance ( Show point, OptCVector_ 2 point) => Show (Box point) where
+  showsPrec k (Box p q) = showParen (k > appPrec) $
+                              showString "Box "
+                            . showsPrec (appPrec+1) p
+                            . showChar ' '
+                            . showsPrec (appPrec+1) q
+
+appPrec :: Int
+appPrec = 10
+
+instance (Read point, OptCVector_ 2 point) => Read (Box point) where
+  readPrec = parens (prec appPrec $ do
+                          Ident "Box" <- lexP
+                          p <- step readPrec
+                          q <- step readPrec
+                          return (Box p q))
 
 --------------------------------------------------------------------------------
+{-
+data LineBoxIntersection d r = Line_x_Box_Point (Point d r)
+                             | Line_x_Box_Segment (ClosedLineSegment (Point d r))
+                             deriving (Show,Eq)
+
+type instance Intersection (LineEQ r) (Rectangle r) = Maybe (LineBoxIntersection 2 r)
+
+-- instance HasIntersection (LineEQ r) (Rectangle r) where
+--   (LineEQ a b) `intersects` (Rectangle p q) =
+-}
+
+--------------------------------------------------------------------------------
+
+myRect :: Rectangle (Point 2 Double)
+myRect = Rectangle origin (Point2 10 20.0)
+
+-- test :: Vector 2 Double
+-- test = size myRect
+
+
+-- instance HasComponents (WrapVector d vec) (Vector 2 r)
+
+-- instance ( OptVector_ d (Vector e r)
+--          , OptVector_ d r
+--          ) => HasComponents (Vector d (Vector e r)) (Vector d r) where
+--   components pVFr vv = undefined
+
+
+
+
+  -- paFb wv =
+
+
+
+    -- fmap (coerce @(Vector d orig) @(WrapVector d orig wrapped))
+    --                 $ components @(Vector d orig) @(Vector d orig) (f paFb) v
+    -- where
+    --   f :: (Indexable Int p, Applicative f) => p orig (f wrapped) -> p orig (f orig)
+    --   f = rmap (fmap coerce)
+
+
+
+-- (Indexable i p, Apply f) => p a (f b) -> s -> f t
+
+--   components = re _Wrapped
+--             .
+--             . coerced
+
+    -- coerce @(f )
+    --          . ()
+-- components' :: forall d orig wrapped.
+--             ( OptVector_ d orig, OptVector_ d wrapped
+--             , Coercible orig wrapped
+--             -- , HasComponents (VectorFamily' d orig) (VectorFamily' d wrapped)
+--             ) => IndexedTraversal Int (Vector d orig)  (Vector d wrapped) orig wrapped
+
+-- components' = _Wrapping f (components @(Vector d orig) @(Vector d orig))
+--   where
+--     f :: orig -> wrapped
+--     f = undefined
+
+
+--   _Unwrapped
+--             .
+-- ;
+  -- ala WrapVector
+  --                 ()
