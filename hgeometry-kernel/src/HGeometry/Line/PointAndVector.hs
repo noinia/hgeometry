@@ -34,6 +34,7 @@ import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line.Class
+import           HGeometry.Line.Intersection
 import           HGeometry.Point
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
@@ -178,11 +179,8 @@ isIdenticalTo                             :: (Eq (VectorFamily' d r)
 -- p `onLine2` (Line q v) = ccw (pointFromPoint p) q (q .+^ v) == CoLinear
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
-
-data instance IntersectionOf (Line 2 r) (Line 2 r) = Line_x_Line_Point (Point 2 r)
-                                                   | Line_x_Line_Line (Line 2 r)
---                                                   deriving (Show,Eq)
-type instance Intersection (Line 2 r) (Line 2 r) = Maybe (IntersectionOf (Line 2 r)  (Line 2 r))
+type instance Intersection (Line 2 r) (Line 2 r) =
+  Maybe (LineLineIntersection (Line 2 r))
 
 instance ( Ord r
          , Fractional r, Eq (VectorFamily 2 r)
@@ -191,7 +189,6 @@ instance ( Ord r
          ) => Line 2 r `HasIntersectionWith` Line 2 r where
   l1 `intersects` l2@(LinePV q _) =
     not (l1 `isParallelTo` l2) || q `onLine` l1
-
 
 
 instance ( Ord r

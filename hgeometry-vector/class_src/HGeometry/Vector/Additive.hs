@@ -13,6 +13,7 @@ module HGeometry.Vector.Additive
   , HasComponents(..)
   ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Lens
 import qualified Data.Foldable as F
 
@@ -26,8 +27,15 @@ class HasComponents vector vector' where
 infixl 6 ^+^, ^-^
 infixl 7 ^*, *^, ^/
 
+type instance IxValue (Const c a) = a
+
+instance HasComponents (Const c a) (Const c b) where
+  components _paFb (Const c) = pure (Const c)
+
 -- | Basically a copy of the Linear.Additive class
 class HasComponents vector vector => Additive_ vector where
+  {-# MINIMAL zero, liftU2, liftI2 #-}
+
   -- | zero vector
   zero :: Num (IxValue vector) => vector
 
@@ -54,7 +62,6 @@ class HasComponents vector vector => Additive_ vector where
   -- | Apply a function to the components of two vectors.
   liftI2 :: (IxValue vector -> IxValue vector -> IxValue vector) -> vector -> vector -> vector
 
-  {-# MINIMAL zero, liftU2, liftI2 #-}
 
 -- | unit vector
 unit :: forall vector. (Additive_ vector, Num (IxValue vector)) => vector
@@ -103,3 +110,8 @@ basisFor = \t ->
        iover  components ?? t $ \j _ ->
          if i == j then 1 else 0
 {-# INLINABLE basisFor #-}
+
+instance Monoid c => Additive_ (Const c a) where
+  zero = Const mempty
+  liftU2 _f l _ = l
+  liftI2 _f l _ = l

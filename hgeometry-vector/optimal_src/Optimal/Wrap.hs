@@ -44,6 +44,10 @@ deriving newtype instance NFData (Vector d orig) => NFData (WrapVector d orig wr
 instance Wrapped (WrapVector d orig wrapped)
 instance (t ~ WrapVector d' orig' wrapped') => Rewrapped (WrapVector d orig wrapped) t
 
+
+
+
+
 instance ( Coercible orig wrapped
          , Vector_ (Vector d orig) d orig
          ) => Ixed (WrapVector d orig wrapped) where
@@ -53,6 +57,27 @@ instance ( Coercible orig wrapped
          , Vector_ (Vector d orig) d orig
          ) => HasComponents (WrapVector d orig wrapped) (WrapVector d orig wrapped) where
   components = _Wrapped.components.coerced
+
+instance ( Coercible orig wrapped
+         , OptVector_ d orig
+         ) => HasComponents (Vector d orig) (WrapVector d orig wrapped) where
+
+  -- paFb :: a ~ orig , b ~ wrapped
+  components paFb v = fmap (coerce @(Vector d orig) @(WrapVector d orig wrapped))
+                    $ components @(Vector d orig) @(Vector d orig) (f paFb) v
+    where
+      f :: (Indexable Int p, Applicative f) => p orig (f wrapped) -> p orig (f orig)
+      f = rmap (fmap coerce)
+
+instance ( Coercible orig wrapped
+         , OptVector_ d orig
+         ) => HasComponents (WrapVector d orig wrapped) (Vector d orig) where
+
+  -- paFb :: a ~ wrapped , b ~ orig
+  components paFb (WrapVector v) = components (f paFb) v
+    where
+      f :: (Indexable Int p, Applicative f) => p wrapped (f orig) -> p orig (f orig)
+      f = lmap coerce
 
 instance ( Coercible orig wrapped
          , Vector_ (Vector d orig) d orig

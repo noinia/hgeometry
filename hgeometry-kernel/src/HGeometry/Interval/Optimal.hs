@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Optimal
-  ( Interval(Interval, ClosedInterval, OpenInterval)
+  ( Interval(MkInterval, Interval, ClosedInterval, OpenInterval)
   , ClosedInterval, OpenInterval
   ) where
 

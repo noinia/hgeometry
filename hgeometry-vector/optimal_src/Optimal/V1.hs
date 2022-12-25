@@ -12,6 +12,7 @@ module Optimal.V1
   ( V1(Vector1)
   ) where
 
+import Control.Applicative (liftA2)
 import Control.Lens
 import Data.Coerce
 import GHC.Generics (Generic)
@@ -24,8 +25,9 @@ import System.Random.Stateful (UniformRange(..), Uniform(..))
 
 -- | Wrapper around r's
 newtype V1 r = Vector1 r
-  deriving (Show,Eq,Ord,Generic,Functor,Foldable,Traversable, Random
-           )
+  deriving stock (Show,Eq,Ord,Generic,Functor,Foldable,Traversable)
+  deriving newtype (Random)
+  deriving (Applicative, Monad) via Identity
 
 instance Field1 (V1 r) (V1 s) r s where
   _1 = lens coerce (\_ x -> coerce x)
@@ -58,6 +60,12 @@ instance Vector_ (V1 r) 1 r where
 instance ConstructableVector_ (V1 r) 1 r where
   mkVector = Vector1
 
+instance Additive_ (V1 r) where
+  zero = pure 0
+  liftU2 = liftA2
+  liftI2 = liftA2
+
+instance Metric_ (V1 r)
 
 
 instance UniformRange r => UniformRange (V1 r) where

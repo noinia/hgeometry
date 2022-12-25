@@ -47,21 +47,24 @@ type    Vector     :: Nat -> Type -> Type
 newtype Vector d r = MkVector (VectorFamily' d r)
 
 type instance Dimension (Vector d r) = d
-type instance NumType  (Vector d r)  = r
-type instance IxValue  (Vector d r)  = r
-type instance Index    (Vector d r)  = Int
+type instance NumType   (Vector d r) = r
+type instance IxValue   (Vector d r) = r
+type instance Index     (Vector d r) = Int
 
 instance (forall a b. HasComponents (Vector d a) (Vector d b))
          => Functor (Vector d) where
   fmap = over components
+  {-# INLINE fmap #-}
 
 instance (forall a b. HasComponents (Vector d a) (Vector d b))
          => Traversable (Vector d) where
   traverse = components
+  {-# INLINE traverse #-}
 
 instance (forall a b. HasComponents (Vector d a) (Vector d b))
           => Foldable (Vector d) where
   foldMap = foldMapOf components
+  {-# INLINE foldMap #-}
 
 -- | The type family to specialize vector implementations. For 0 and 1
 -- dimensions we already decide how to implement the vector, since

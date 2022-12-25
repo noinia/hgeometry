@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
@@ -36,7 +37,14 @@ class ( NumType hyperPlane ~ r
                                       , hyperPlane -> r where
 --  {-# MINIMAL hyperPlaneTrough #-}
 
-  -- | Given the coefficients of the equation, construct the hyperplane form it.
+  -- | Given the coefficients \(a_0,..,a_d\) of the equation, i.e.
+  -- so that
+  --
+  -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
+  --
+  -- construct the hyperplane form it.
+  --
+  --
   hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
 
   -- -- | Constructs the hyperplane through d points
@@ -99,19 +107,24 @@ class ( NumType hyperPlane ~ r
 
 --------------------------------------------------------------------------------
 
-
 -- | Non-vertical hyperplanes.
 class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
-  {-# MINIMAL  #-}
+--  {-# MINIMAL  #-}
 
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   evalAt     :: ( Num r
                 , 1 <= d
-                , OptMetric_ d r
                 , Point_ point (d-1) r
-                , OptVector_ ((d-1)+1) r
                 ) => point -> hyperPlane -> r
+  default evalAt :: ( Num r
+                    , 1 <= d
+                    , Point_ point (d-1) r
+                    , OptMetric_ d r
+                    , OptVector_ ((d-1)+1) r
+                    ) => point -> hyperPlane -> r
   evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
+  {-# INLINE evalAt #-}
+
 
   -- | The coefficients \( \langle a_0,..,a_{d-1} \rangle \) such that
   -- a point \(p = (p_1,..,p_d) \) lies on the hyperplane the given coefficients iff
@@ -126,6 +139,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   hyperPlaneCoefficients h = a ^/ (-x)
     where
       (a,x) = unsnoc $ hyperPlaneEquation h
+  {-# INLINE hyperPlaneCoefficients #-}
 
 
 --------------------------------------------------------------------------------

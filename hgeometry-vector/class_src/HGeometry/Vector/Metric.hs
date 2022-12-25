@@ -12,10 +12,10 @@ module HGeometry.Vector.Metric
   ( Metric_(..)
   ) where
 
-import           Control.Lens
-import           HGeometry.Number.Radical
-import           HGeometry.Vector.Additive
-import           Prelude hiding (sqrt)
+import Control.Lens
+import HGeometry.Number.Radical
+import HGeometry.Vector.Additive
+import Prelude hiding (sqrt)
 
 --------------------------------------------------------------------------------
 
@@ -24,6 +24,8 @@ import           Prelude hiding (sqrt)
 -- Note that we do not define a distance itself, and that norm and
 -- signorm have a Radical constraint rather than Floating.
 class Additive_ vector => Metric_ vector where
+  {-# MINIMAL #-}
+
   -- | Compute the inner product of two vectors or (equivalently)
   -- convert a vector f a into a covector f a -> a.
   dot :: Num (IxValue vector) => vector -> vector -> IxValue vector
@@ -54,4 +56,4 @@ class Additive_ vector => Metric_ vector where
   signorm v = v ^/ norm v
   {-# INLINE signorm #-}
 
-  {-# MINIMAL #-}
+instance Monoid c => Metric_ (Const c a)

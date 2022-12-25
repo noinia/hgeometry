@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -13,11 +15,12 @@ module HGeometry.HyperPlane.NonVertical
   ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
   ) where
 
+import Data.Type.Ord
+import GHC.TypeLits
 import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.Properties
 import HGeometry.Vector
--- import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -30,8 +33,15 @@ type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
 
+deriving instance Eq  (VectorFamily' d r) => Eq (NonVerticalHyperPlane d r)
+deriving instance Ord (VectorFamily' d r) => Ord (NonVerticalHyperPlane d r)
+
+
 instance ( MkHyperPlaneConstraints d r
          , Fractional r
+
+         , OptMetric_ d r
+         , 1 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
   -- | pre: the last component is not zero
@@ -41,6 +51,9 @@ instance ( MkHyperPlaneConstraints d r
 
 instance ( MkHyperPlaneConstraints d r
          , Fractional r
+         , OptVector_ ((d-1)+1) r
+         , OptMetric_ d r
+         , 1 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
 
 --------------------------------------------------------------------------------
