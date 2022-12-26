@@ -11,9 +11,11 @@
 module HGeometry.Line
   ( module HGeometry.Line.Class
   , module HGeometry.Line.LineEQ
+  , LineLineIntersection(..)
   ) where
 
 import HGeometry.Line.Class
 import HGeometry.Line.LineEQ
+import HGeometry.Line.Intersection
 
 --------------------------------------------------------------------------------

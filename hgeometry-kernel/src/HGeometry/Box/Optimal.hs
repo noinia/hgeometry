@@ -17,17 +17,11 @@ module HGeometry.Box.Optimal
 import Control.Lens
 import GHC.Generics hiding (prec)
 import HGeometry.Box.Class
-import HGeometry.Intersection
 import HGeometry.Interval
-import HGeometry.Line.LineEQ
--- import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
 import Text.Read
-
-import Data.Coerce
--- import Data.Functor.Apply
 
 --------------------------------------------------------------------------------
 -- | D-dimensional boxes.
@@ -67,7 +61,7 @@ instance ( Affine_ point
   extent (Box p q) = vZipWith ClosedInterval (p^.vector) (q^.vector)
 
 
-instance ( Show point, OptCVector_ 2 point) => Show (Box point) where
+instance (Show point, OptCVector_ 2 point) => Show (Box point) where
   showsPrec k (Box p q) = showParen (k > appPrec) $
                               showString "Box "
                             . showsPrec (appPrec+1) p
@@ -85,17 +79,6 @@ instance (Read point, OptCVector_ 2 point) => Read (Box point) where
                           return (Box p q))
 
 --------------------------------------------------------------------------------
-{-
-data LineBoxIntersection d r = Line_x_Box_Point (Point d r)
-                             | Line_x_Box_Segment (ClosedLineSegment (Point d r))
-                             deriving (Show,Eq)
-
-type instance Intersection (LineEQ r) (Rectangle r) = Maybe (LineBoxIntersection 2 r)
-
--- instance HasIntersection (LineEQ r) (Rectangle r) where
---   (LineEQ a b) `intersects` (Rectangle p q) =
--}
-
 --------------------------------------------------------------------------------
 
 myRect :: Rectangle (Point 2 Double)

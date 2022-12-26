@@ -28,7 +28,8 @@ import HGeometry.Vector.Boxed
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: forall point d r. (Point_ point d r, HasIndex point, Num r)
+toSymbolic    :: forall point d r.
+                 (Point_ point d r, HasIndex point, Num r)
               => point -> Point d (Symbolic SoSI r)
 toSymbolic p = let i  = sosIndex p
                    -- p' = pointFromPoint @point @(Point d r) p

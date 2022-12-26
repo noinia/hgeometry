@@ -1,7 +1,6 @@
 module HGeometry.BoxSpec where
 
 import Control.Lens
-import Data.Ext
 import Data.Ratio
 import HGeometry.Box
 import HGeometry.Intersection
@@ -31,11 +30,11 @@ spec = do
     it "vector closed interval test" $ do
       let intervalVec :: Vector 2 (ClosedInterval Int)
           intervalVec = Vector2 (ClosedInterval 5 10) (ClosedInterval 20 40)
-      (intervalVec&components %~ view start) `shouldBe` (Vector2 5 20)
+      (intervalVec&components %~ view start) `shouldBe` Vector2 5 20
     it "show Box" $ do
       show myRect `shouldBe` "Box (Point2 1.0 1.0) (Point2 10.0 20.0)"
     it "size" $
-      size myRect `shouldBe` (Vector2 9 19)
+      size myRect `shouldBe` Vector2 9 19
 --     it "intersect tests" $
 --       ((boundingBoxList' $ [Point2 (-4) (-3), Point2 (-4) (10 :: Int)])
 --        `intersects`

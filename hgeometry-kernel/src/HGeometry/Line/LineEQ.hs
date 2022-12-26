@@ -14,12 +14,14 @@
 module HGeometry.Line.LineEQ
   ( LineEQ
   , pattern LineEQ
+
+
+  , evalAt'
   ) where
 
-import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.HyperPlane.NonVertical
-import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Line.Intersection
 import HGeometry.Point

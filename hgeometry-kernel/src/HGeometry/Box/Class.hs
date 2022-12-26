@@ -34,6 +34,9 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> let myRect = Rectangle (Point2 1 1) (Point2 10 20.0) :: Rectangle (Point 2 Double)
+
 -- | Types that have a 'minPoint' field lens
 class HasMinPoint box point | box -> point where
   -- | Lens to access the lexicographically smallest point
@@ -77,7 +80,8 @@ type Rectangle_ rectangle point = (Box_ rectangle point, Dimension rectangle ~ 2
 -- resulting vector is 0 indexed whereas one would normally count
 -- dimensions starting at zero.
 --
---
+-- >>> size myRect
+-- Vector2 9.0 19.0
 size :: forall box d point r.
         ( Box_ box point, Point_ point d r
         , Num r

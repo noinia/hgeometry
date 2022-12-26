@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Line.Intersection
@@ -20,3 +21,7 @@ import HGeometry.Properties (NumType)
 -- | Line x Line intersections are either just points or lines.
 data LineLineIntersection line = Line_x_Line_Point (Point 2 (NumType line))
                                | Line_x_Line_Line line
+
+
+deriving instance (Show (Point 2 (NumType line)), Show line) => Show (LineLineIntersection line)
+deriving instance (Eq (Point 2 (NumType line)), Eq line)     => Eq (LineLineIntersection line)
