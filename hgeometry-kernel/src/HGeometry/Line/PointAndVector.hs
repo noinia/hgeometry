@@ -29,6 +29,7 @@ import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
+import           Data.Type.Ord
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
@@ -39,6 +40,7 @@ import           HGeometry.Point
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties (NumType, Dimension)
+import           HGeometry.Transformation.Internal
 import           HGeometry.Vector
 import           Text.Read
 
@@ -362,3 +364,17 @@ cmpSlope :: forall r. (Num r, Ord r, OptCVector_ 2 r, OptMetric_ 2 r
                                   (EQ,True) -> w
                                   _         -> (-1) *^ w
                                   -- x < 0, or (x==0 and y <0 ; i.e. a vertical line)
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Lines are transformable, via line segments
+instance ( Fractional r
+         , TransformationConstraints (LinePV d r)
+         , OptVector_ d r, OptMetric_ d r
+         ) => IsTransformable (LinePV d r) where
+  transformBy t (LinePV p v) = lineThrough p' q'
+    where
+      p' = transformBy t p
+      q' = transformBy t (p .+^ v)

@@ -23,9 +23,11 @@ import HGeometry.HyperPlane
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
+import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Point
 import HGeometry.Properties(NumType, Dimension)
+import HGeometry.Transformation.Internal
 import HGeometry.Vector
 import Text.Read
 
@@ -42,6 +44,7 @@ pattern LineEQ a b = MkLineEQ (NonVerticalHyperPlane (Vector2 a b))
 type instance NumType   (LineEQ r) = r
 type instance Dimension (LineEQ r) = 2
 type instance VectorFor (LineEQ r) = Vector 2 r
+
 
 
 instance (Show r, OptCVector_ 2 r) => Show (LineEQ r) where
@@ -76,6 +79,12 @@ instance ( MkHyperPlaneConstraints 2 r
          , OptMetric_ 2 r
          ) => NonVerticalHyperPlane_ (LineEQ r) 2 r where
   evalAt (Point1_ x) = evalAt' x
+
+
+instance ( OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r, Fractional r
+         ) => Line_ (LineEQ r) 2 r where
+  fromPointAndVec p (Vector2_ vx vy) =
+    fromPointAndNormal (pointFromPoint @_ @(Point 2 r) p) (Vector2 (-vy) vx)
 
 ----------------------------------------
 
@@ -136,3 +145,18 @@ evalAt' x (LineEQ a b) = a*x + b
 --               , OptCVector_ 3 r, OptMetric_ 2 r
 --               ) => r -> LineEQ r -> r
 -- evalAt'' x = evalAt (Point1 x)
+
+
+--------------------------------------------------------------------------------
+
+-- | Lines are transformable, via line segments
+instance ( Fractional r
+         , TransformationConstraints (LineEQ r)
+         , OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r
+         ) => IsTransformable (LineEQ r) where
+  -- | Warning, this may create vertical lines, which cannot be
+  -- represented by this type. So be careful.
+  transformBy t (LineEQ a b) = lineThrough p' q'
+    where
+      p' = transformBy t (Point2 0 b)
+      q' = transformBy t (Point2 1 (a + b))
