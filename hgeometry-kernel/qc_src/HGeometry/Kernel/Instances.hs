@@ -2,16 +2,19 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Kernel.Instances where
 
+import GHC.TypeLits
 import HGeometry.Ball
+import HGeometry.Box
 import HGeometry.Interval
+import HGeometry.Line.LineEQ
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Triangle
 import HGeometry.Properties
+import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Vector.Instances ()
 import Test.QuickCheck
-
 --------------------------------------------------------------------------------
 
 instance Arbitrary v => Arbitrary (PointF v) where
@@ -60,3 +63,23 @@ instance ( Arbitrary point
                  c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b)
                  pure $ Triangle a b c
     -- TODO: probably we don't awant to allow degenerate triangles?
+
+instance (Arbitrary r, OptCVector_ 2 r) => Arbitrary (LineEQ r) where
+  arbitrary = LineEQ <$> arbitrary <*> arbitrary
+
+instance ( Arbitrary r
+         , OptVector_ d r
+         , OptAdditive_ d r
+         , Eq (VectorFamily' d r), Num r
+         , KnownNat d
+         ) => Arbitrary (LinePV d r) where
+  arbitrary = LinePV <$> arbitrary
+                     <*> (arbitrary `suchThat` (/= zero))
+
+
+instance ( Arbitrary point, Arbitrary (VectorFor point)
+         , Point_ point d r, OptCVector_ 2 point, OptVector_ d r
+         , Num r, Ord (VectorFor point)
+         ) => Arbitrary (Box point) where
+  arbitrary = (\p v -> Box p (p .+^ v)) <$> arbitrary
+                                        <*> arbitrary `suchThat` (> zero)

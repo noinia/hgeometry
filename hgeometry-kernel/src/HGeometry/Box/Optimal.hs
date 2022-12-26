@@ -80,8 +80,3 @@ instance (Read point, OptCVector_ 2 point) => Read (Box point) where
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-
-myRect :: Rectangle (Point 2 Double)
-myRect = Rectangle origin (Point2 10 20.0)
-
-test = size myRect

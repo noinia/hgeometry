@@ -27,6 +27,7 @@ import HGeometry.Line.Intersection
 import HGeometry.Point
 import HGeometry.Properties(NumType, Dimension)
 import HGeometry.Vector
+import Text.Read
 
 --------------------------------------------------------------------------------
 
@@ -41,6 +42,24 @@ pattern LineEQ a b = MkLineEQ (NonVerticalHyperPlane (Vector2 a b))
 type instance NumType   (LineEQ r) = r
 type instance Dimension (LineEQ r) = 2
 type instance VectorFor (LineEQ r) = Vector 2 r
+
+
+instance (Show r, OptCVector_ 2 r) => Show (LineEQ r) where
+  showsPrec k (LineEQ a b) = showParen (k > appPrec) $
+                              showString "LineEQ "
+                            . showsPrec (appPrec+1) a
+                            . showChar ' '
+                            . showsPrec (appPrec+1) b
+
+appPrec :: Int
+appPrec = 10
+
+instance (Read r, OptCVector_ 2 r) => Read (LineEQ r) where
+  readPrec = parens (prec appPrec $ do
+                          Ident "LineEQ" <- lexP
+                          a <- step readPrec
+                          b <- step readPrec
+                          return (LineEQ a b))
 
 instance ( MkHyperPlaneConstraints 2 r
          , Fractional r
@@ -83,17 +102,17 @@ type instance Intersection (LineEQ r) (HyperPlane 2 r) =
 instance (Eq r, Fractional r, OptCVector_ 2 r, OptCVector_ 3 r
          ) => HasIntersectionWith (LineEQ r) (HyperPlane 2 r) where
   (LineEQ a _) `intersects` (HyperPlane (Vector3 _ a' b'))
-    = b' == 0 || a /= (a'/(negate b'))
+    = b' == 0 || a /= (a'/ (-b'))
 
 instance (Eq r, Fractional r, OptCVector_ 2 r, OptCVector_ 3 r)
          => IsIntersectableWith (LineEQ r) (HyperPlane 2 r) where
   l@(LineEQ a b) `intersect` (HyperPlane (Vector3 c' a' b'))
-      | b' == 0   = point $ (c'/(negate a'))
+      | b' == 0   = point $ c'/ (-a')
       | a == d'   = if b == e' then Just (Line_x_Line_Line l) else Nothing
       | otherwise = point $ (e'-b) / (a-d')
     where
-      d' = a'/(negate b')
-      e' = c'/(negate b')
+      d' = a'/(-b')
+      e' = c'/(-b')
 
       point x = Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
 

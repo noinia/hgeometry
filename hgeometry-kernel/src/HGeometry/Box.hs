@@ -45,7 +45,7 @@ instance (Num r, Ord r, OptCVector_ 2 r, OptCVector_ 2 point
          , Point_ point 2 r
          ) =>  HasIntersectionWith (LineEQ r) (Rectangle point) where
   l@(LineEQ a b) `intersects` (Rectangle p q) = case a `compare` 0 of
-      LT -> ly >= q^.yCoord && ry <= p^.yCoord
+      LT -> ly >= p^.yCoord && ry <= q^.yCoord
       EQ -> Point1 b `intersects` ClosedInterval (p^.yCoord) (q^.yCoord)
       GT -> ly <= q^.yCoord && ry >= p^.yCoord
     where
@@ -66,7 +66,7 @@ instance (Fractional r, Ord r, OptCVector_ 2 r, OptCVector_ 2 point
                                 t = if bx <= q^.xCoord then Point2 bx (q^.yCoord)
                                                        else Point2 (q^.xCoord) ry
                             in Just . Line_x_Box_Segment $ ClosedLineSegment s t
-                      EQ -> Just . Line_x_Box_Point $ Point2 (q^.xCoord) (p^.yCoord)
+                      EQ -> Just . Line_x_Box_Point $ Point2 (q^.xCoord) (q^.yCoord)
                       GT -> Nothing
       EQ | inRange   -> Just . Line_x_Box_Segment
                       $ ClosedLineSegment (Point2 (p^.xCoord) b) (Point2 (q^.xCoord) b)
@@ -95,3 +95,7 @@ instance (Fractional r, Ord r, OptCVector_ 2 r, OptCVector_ 2 point
       -- x-coordinate of the intersection with a horizontal line at height h
       horX h = (h-b) / a
   {-# INLINE intersect #-}
+
+
+myRect :: Rectangle (Point 2 Rational)
+myRect = Rectangle origin (Point2 10 20.0)

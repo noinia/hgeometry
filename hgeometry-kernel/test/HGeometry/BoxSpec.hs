@@ -1,17 +1,25 @@
 module HGeometry.BoxSpec where
 
 import Control.Lens
+import Data.Maybe
 import Data.Ratio
 import HGeometry.Box
 import HGeometry.Intersection
 import HGeometry.Interval
+import HGeometry.Kernel.Instances ()
+import HGeometry.Line.LineEQ
+import HGeometry.LineSegment
+import HGeometry.Number.Real.Rational (RealNumber)
 import HGeometry.Point
 import HGeometry.Vector
 import Test.Hspec
+import Test.Hspec.QuickCheck
 import Test.QuickCheck
 -- import Test.Util
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 -- arbitraryPointInBoundingBox   :: Box (Point 2 Rational) -> Gen (Point 2 Rational)
 -- arbitraryPointInBoundingBox b = do
@@ -35,6 +43,23 @@ spec = do
       show myRect `shouldBe` "Box (Point2 1.0 1.0) (Point2 10.0 20.0)"
     it "size" $
       size myRect `shouldBe` Vector2 9 19
+    describe "intersection tests with lines " $ do
+      let myIncLine = LineEQ 2 (-3)  :: LineEQ Double
+          myDecLine = LineEQ (-1) 30 :: LineEQ Double
+      it "intersects" $ do
+        (myIncLine `intersects` myRect) `shouldBe` True
+        (myDecLine `intersects` myRect) `shouldBe` True
+      it "intersect" $ do
+        (myIncLine `intersect` myRect)
+          `shouldBe`
+          Just (Line_x_Box_Segment (ClosedLineSegment (Point2 2 1) (Point2 10.0 17.0)))
+        (myDecLine `intersect` myRect)
+          `shouldBe`
+          Just (Line_x_Box_Point (Point2 10 20))
+      prop "intersect agrees with intersects" $
+        \(l :: LineEQ R) (r :: Rectangle (Point 2 R)) ->
+          l `intersects` r == isJust (l `intersect` r)
+
 --     it "intersect tests" $
 --       ((boundingBoxList' $ [Point2 (-4) (-3), Point2 (-4) (10 :: Int)])
 --        `intersects`

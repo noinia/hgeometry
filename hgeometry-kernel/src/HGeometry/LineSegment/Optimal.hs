@@ -70,6 +70,10 @@ pattern OpenLineSegment s t = LineSegment (OpenE s) (OpenE t)
 type instance NumType   (LineSegment endPoint point) = NumType point
 type instance Dimension (LineSegment endPoint point) = Dimension point
 
+deriving instance (Eq (endPoint point), OptCVector_ 2 (endPoint point)
+                  ) => Eq (LineSegment endPoint point)
+deriving instance (Ord (endPoint point), OptCVector_ 2 (endPoint point)
+                  ) => Ord (LineSegment endPoint point)
 
 -- | Lens to get the underlying interval
 _LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' point')
@@ -209,7 +213,7 @@ instance ( d ~ Dimension point, r ~ NumType point
          , OptCVector_ 2 (endPoint point)
          , Num r
          ) => HasSupportingLine (LineSegment endPoint point) where
-  supportingLine seg = lineThrough @(Line d r) @(Point d r)
+  supportingLine seg = lineThrough @(LinePV d r) @(Point d r)
                                    (seg^.start.to pointFromPoint) (seg^.end.to pointFromPoint)
 
 instance ( Fractional r, Ord r
