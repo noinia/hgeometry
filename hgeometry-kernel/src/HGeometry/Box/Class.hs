@@ -24,6 +24,7 @@ module HGeometry.Box.Class
   ) where
 
 import Control.Lens
+import Control.Subcategory.Functor
 import Data.Ext
 import Data.Type.Ord
 import GHC.TypeLits
@@ -88,9 +89,9 @@ size :: forall box d point r.
         , OptCVector_ 2 r
         , OptVector_ d r
         , OptVector_ d (ClosedInterval r)
-        , HasComponents (Vector d (ClosedInterval r)) (Vector d r)
+        -- , HasComponents (Vector d (ClosedInterval r)) (Vector d r)
         ) => box -> Vector d r
-size = over components duration . extent
+size = cmap duration . extent
 
 
 -- instance HasComponents (VectorFamily' d (Interval (EndPoint et r) r))
@@ -107,8 +108,8 @@ widthIn :: forall i box d point r. ( Box_ box point, Point_ point d r
                                    , OptCVector_ 2 r
                                    , OptVector_ d (ClosedInterval r)
                                    , OptVector_ d r
-                                   , HasComponents (Vector d (ClosedInterval r))
-                                                   (Vector d r)
+                                   -- , HasComponents (Vector d (ClosedInterval r))
+                                   --                 (Vector d r)
                                    , Num r
                                    ) => box -> r
 widthIn = view (component @i) . size
@@ -120,8 +121,8 @@ width :: ( Box_ box point, Point_ point d r
          , OptCVector_ 2 r
          , OptVector_ d r
          , OptVector_ d (ClosedInterval r)
-         , HasComponents (Vector d (ClosedInterval r))
-                         (Vector d r)
+         -- , HasComponents (Vector d (ClosedInterval r))
+         --                 (Vector d r)
          , Num r
          ) => box -> r
 width  = widthIn @0
@@ -132,8 +133,8 @@ height :: ( Box_ box point, Point_ point d r
          , OptCVector_ 2 r
          , OptVector_ d r
          , OptVector_ d (ClosedInterval r)
-         , HasComponents (Vector d (ClosedInterval r))
-                         (Vector d r)
+         -- , HasComponents (Vector d (ClosedInterval r))
+         --                 (Vector d r)
          , Num r
          ) => box -> r
 height = widthIn @1

@@ -57,20 +57,35 @@ type instance Index     (Vector d r) = Int
 
 instance Constrained (Vector d) where
   type Dom (Vector d) r = OptVector_ d r
-instance CFoldable (Vector d) where
-  cfoldMap = foldMapOf components
 
+instance CFoldable (Vector d) where
+  {-# SPECIALIZE instance CFoldable (Vector 1) #-}
+  {-# SPECIALIZE instance CFoldable (Vector 2) #-}
+  {-# SPECIALIZE instance CFoldable (Vector 3) #-}
+  {-# SPECIALIZE instance CFoldable (Vector 4) #-}
+  cfoldMap = foldMapOf components
+  {-# INLINE cfoldMap #-}
 instance CFunctor (Vector d) where
+  {-# SPECIALIZE instance CFunctor (Vector 1) #-}
+  {-# SPECIALIZE instance CFunctor (Vector 2) #-}
+  {-# SPECIALIZE instance CFunctor (Vector 3) #-}
+  {-# SPECIALIZE instance CFunctor (Vector 4) #-}
   cmap f v = uncheckedVectorFromList . fmap f $ v^..components
     where
       uncheckedVectorFromList = fromMaybe (error "Geometry.Vector.Optimal cmap")
                               . vectorFromList
+  {-# INLINE cmap #-}
+
 instance CTraversable (Vector d) where
+  {-# SPECIALIZE instance CTraversable (Vector 1) #-}
+  {-# SPECIALIZE instance CTraversable (Vector 2) #-}
+  {-# SPECIALIZE instance CTraversable (Vector 3) #-}
+  {-# SPECIALIZE instance CTraversable (Vector 4) #-}
   ctraverse f v = fmap uncheckedVectorFromList . traverse f $ v^..components
     where
       uncheckedVectorFromList = fromMaybe (error "Geometry.Vector.Optimal ctraverse")
                               . vectorFromList
-
+  {-# INLINE ctraverse #-}
 
 -- instance (forall a b. HasComponents (Vector d a) (Vector d b))
 --          => Functor (Vector d) where
