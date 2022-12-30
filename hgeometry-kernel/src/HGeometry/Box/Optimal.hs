@@ -47,6 +47,9 @@ pattern Rectangle minP maxP = Box minP maxP
 type instance Dimension (Box point) = Dimension point
 type instance NumType   (Box point) = NumType point
 
+deriving newtype instance Eq (VectorFamily 2 point)  => Eq  (Box point)
+deriving newtype instance Ord (VectorFamily 2 point) => Ord (Box point)
+
 instance OptCVector_ 2 point => HasMinPoint (Box point) point where
   minPoint = lens (\(Box p _) -> p) (\(Box _ q) p -> Box p q)
 
