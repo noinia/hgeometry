@@ -45,7 +45,8 @@ type instance NumType   (LineEQ r) = r
 type instance Dimension (LineEQ r) = 2
 type instance VectorFor (LineEQ r) = Vector 2 r
 
-
+deriving instance Eq  (VectorFamily' 2 r) => Eq  (LineEQ r)
+deriving instance Ord (VectorFamily' 2 r) => Ord (LineEQ r)
 
 instance (Show r, OptCVector_ 2 r) => Show (LineEQ r) where
   showsPrec k (LineEQ a b) = showParen (k > appPrec) $

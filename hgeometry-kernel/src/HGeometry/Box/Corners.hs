@@ -84,7 +84,7 @@ instance Monoid a => Monoid (Corners a) where
 corners   :: ( Num r, Rectangle_ rectangle point, Point_ point 2 r
              , OptCVector_ 2 r
              , OptVector_ 2 (ClosedInterval r)
-             , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+             -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
              )
           => rectangle -> Corners point
 corners r = let w = width r

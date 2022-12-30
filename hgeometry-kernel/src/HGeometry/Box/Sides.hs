@@ -87,7 +87,7 @@ sideDirections = Sides North East South West
 topSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
         => rectangle  -> ClosedLineSegment point
 topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
@@ -96,7 +96,7 @@ topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
 bottomSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
            => rectangle  -> ClosedLineSegment point
 bottomSide = (\(Corners _ _ r l) -> ClosedLineSegment l r) . corners
@@ -105,7 +105,7 @@ bottomSide = (\(Corners _ _ r l) -> ClosedLineSegment l r) . corners
 leftSide  :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
           => rectangle -> ClosedLineSegment point
 leftSide = (\(Corners t _ _ b) -> ClosedLineSegment b t) . corners
@@ -114,7 +114,7 @@ leftSide = (\(Corners t _ _ b) -> ClosedLineSegment b t) . corners
 rightSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
           => rectangle -> ClosedLineSegment point
 rightSide = (\(Corners _ t b _) -> ClosedLineSegment b t) . corners
@@ -127,7 +127,7 @@ rightSide = (\(Corners _ t b _) -> ClosedLineSegment b t) . corners
 sides   :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
         => rectangle -> Sides (ClosedLineSegment point)
 sides r = let Corners nw ne se sw = corners r
@@ -142,7 +142,7 @@ sides r = let Corners nw ne se sw = corners r
 sides'   :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            , OptCVector_ 2 point, OptCVector_ 2 r
            , OptVector_ 2 (ClosedInterval r)
-           , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
+           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
          => rectangle -> Sides (ClosedLineSegment point)
 sides' r = Sides (topSide r) (rightSide r) (bottomSide r) (leftSide r)

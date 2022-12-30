@@ -49,6 +49,7 @@ type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = NumType v
 type instance VectorFor (PointF v) = v
 
+
 instance ( Vector_ v (Dimension v) (IxValue v)
          , Metric_ v
          , Show (IxValue v)
