@@ -18,10 +18,12 @@ module Optimal
 import qualified Boxed
 import           Data.Ext
 import           Data.Functor.Identity (Identity(..))
+import           Data.Int
 import           Data.RealNumber.Rational
 import qualified Double.Unpacked
 import qualified Float.Unpacked
 import qualified Int.Unpacked
+import qualified Int32.Unpacked
 import           Optimal.Internal
 import           Optimal.Wrap
 
@@ -42,6 +44,25 @@ type instance VectorFamily 12 Int = Int.Unpacked.VecLarge 12
 type instance VectorFamily 13 Int = Int.Unpacked.VecLarge 13
 type instance VectorFamily 14 Int = Int.Unpacked.VecLarge 14
 type instance VectorFamily 15 Int = Int.Unpacked.VecLarge 15
+
+
+type instance VectorFamily 2 Int32    = Int32.Unpacked.Vec2
+type instance VectorFamily 3 Int32    = Int32.Unpacked.Vec3
+type instance VectorFamily 4 Int32    = Int32.Unpacked.Vec4
+-- this is unfortunately a bit silly :( )
+type instance VectorFamily  5 Int32 = Int32.Unpacked.VecLarge 5
+type instance VectorFamily  6 Int32 = Int32.Unpacked.VecLarge 6
+type instance VectorFamily  7 Int32 = Int32.Unpacked.VecLarge 7
+type instance VectorFamily  8 Int32 = Int32.Unpacked.VecLarge 8
+type instance VectorFamily  9 Int32 = Int32.Unpacked.VecLarge 9
+type instance VectorFamily 10 Int32 = Int32.Unpacked.VecLarge 10
+type instance VectorFamily 11 Int32 = Int32.Unpacked.VecLarge 11
+type instance VectorFamily 12 Int32 = Int32.Unpacked.VecLarge 12
+type instance VectorFamily 13 Int32 = Int32.Unpacked.VecLarge 13
+type instance VectorFamily 14 Int32 = Int32.Unpacked.VecLarge 14
+type instance VectorFamily 15 Int32 = Int32.Unpacked.VecLarge 15
+
+
 
 type instance VectorFamily 2  Double = Double.Unpacked.Vec2
 type instance VectorFamily 3  Double = Double.Unpacked.Vec3
@@ -89,5 +110,6 @@ type instance VectorFamily d (a,b,c,e,f)    = Boxed.Vector d (a,b,c,e,f)
 type instance VectorFamily d (a,b,c,e,f,g)  = Boxed.Vector d (a,b,c,e,f,g)
 
 type instance VectorFamily d (c :+ e)       = Boxed.Vector d (c :+ e)
+-- todo, store two vectors here.
 
 type instance VectorFamily d (Identity a) = WrapVector d a (Identity a)

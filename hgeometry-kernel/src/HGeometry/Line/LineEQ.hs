@@ -19,6 +19,8 @@ module HGeometry.Line.LineEQ
   , evalAt'
   ) where
 
+import Control.Subcategory.Foldable
+import Control.Subcategory.Functor
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.HyperPlane.NonVertical
@@ -47,6 +49,16 @@ type instance VectorFor (LineEQ r) = Vector 2 r
 
 deriving instance Eq  (VectorFamily' 2 r) => Eq  (LineEQ r)
 deriving instance Ord (VectorFamily' 2 r) => Ord (LineEQ r)
+
+instance Constrained LineEQ where
+  type Dom LineEQ r = OptCVector_ 2 r
+instance CFunctor LineEQ where
+  cmap f (LineEQ a b) = LineEQ (f a) (f b)
+instance CTraversable LineEQ where
+  ctraverse f (LineEQ a b) = LineEQ <$> f a <*> f b
+instance CFoldable LineEQ where
+  cfoldMap f (LineEQ a b) = f a <> f b
+
 
 instance (Show r, OptCVector_ 2 r) => Show (LineEQ r) where
   showsPrec k (LineEQ a b) = showParen (k > appPrec) $

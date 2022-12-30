@@ -144,6 +144,7 @@ library numtypes
   hs-source-dirs: numtypes_src
   exposed-modules:
     Int
+    Int32
     Double
     Float
 
@@ -171,6 +172,7 @@ library optimal
 
   mixins:
       hgeometry-vector:unpacked (Unpacked as Int.Unpacked)    requires (R as Int)
+    , hgeometry-vector:unpacked (Unpacked as Int32.Unpacked)  requires (R as Int32)
     , hgeometry-vector:unpacked (Unpacked as Double.Unpacked) requires (R as Double)
     , hgeometry-vector:unpacked (Unpacked as Float.Unpacked)  requires (R as Float)
   build-depends: hgeometry-vector:class
