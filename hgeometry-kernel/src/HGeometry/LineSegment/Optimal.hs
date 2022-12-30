@@ -18,6 +18,8 @@ module HGeometry.LineSegment.Optimal
 
 
 import Control.Lens
+import Control.Subcategory.Foldable
+import Control.Subcategory.Functor
 import Data.Functor.Apply
 import Data.Kind (Type)
 import Data.Type.Ord
@@ -74,6 +76,20 @@ deriving instance (Eq (endPoint point), OptCVector_ 2 (endPoint point)
                   ) => Eq (LineSegment endPoint point)
 deriving instance (Ord (endPoint point), OptCVector_ 2 (endPoint point)
                   ) => Ord (LineSegment endPoint point)
+
+
+instance Constrained (LineSegment endPoint) where
+  type Dom (LineSegment endPoint) r = OptCVector_ 2 (endPoint r)
+instance Foldable endPoint => CFoldable (LineSegment endPoint) where
+  cfoldMap f (LineSegment s t) = foldMap f s <> foldMap f t
+
+instance Functor endPoint => CFunctor (LineSegment endPoint) where
+  cmap f (LineSegment s t) = LineSegment (fmap f s) (fmap f t)
+instance Traversable endPoint => CTraversable (LineSegment endPoint) where
+  ctraverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
+
+
+
 
 -- | Lens to get the underlying interval
 _LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' point')

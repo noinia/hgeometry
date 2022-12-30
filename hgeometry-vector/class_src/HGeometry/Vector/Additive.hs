@@ -13,7 +13,6 @@ module HGeometry.Vector.Additive
   , HasComponents(..)
   ) where
 
-import           Control.Applicative (liftA2)
 import           Control.Lens
 import qualified Data.Foldable as F
 

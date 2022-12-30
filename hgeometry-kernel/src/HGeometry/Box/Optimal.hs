@@ -15,6 +15,8 @@ module HGeometry.Box.Optimal
   ) where
 
 import Control.Lens
+import Control.Subcategory.Foldable
+import Control.Subcategory.Functor
 import GHC.Generics hiding (prec)
 import HGeometry.Box.Class
 import HGeometry.Interval
@@ -49,6 +51,16 @@ type instance NumType   (Box point) = NumType point
 
 deriving newtype instance Eq (VectorFamily 2 point)  => Eq  (Box point)
 deriving newtype instance Ord (VectorFamily 2 point) => Ord (Box point)
+
+instance Constrained Box where
+  type Dom Box point = OptCVector_ 2 point
+instance CFunctor Box where
+  cmap f (Box p q) = Box (f p) (f q)
+  -- cmap f (MkBox v) = MkBox $ v&components %~ f
+instance CFoldable Box where
+  cfoldMap f (Box p q) = f p <> f q
+instance CTraversable Box where
+  ctraverse f (Box p q) = Box <$> f p <*> f q
 
 instance OptCVector_ 2 point => HasMinPoint (Box point) point where
   minPoint = lens (\(Box p _) -> p) (\(Box _ q) p -> Box p q)

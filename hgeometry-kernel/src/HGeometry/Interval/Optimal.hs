@@ -14,11 +14,13 @@ module HGeometry.Interval.Optimal
   , ClosedInterval, OpenInterval
   ) where
 
+import Control.Subcategory.Foldable
+import Control.Subcategory.Functor
 import Control.Lens
 import Data.Kind (Type)
 import HGeometry.Intersection
 import HGeometry.Interval.Class
-import HGeometry.Interval.EndPoint
+import HGeometry.Interval.EndPoint()
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
@@ -55,6 +57,18 @@ pattern OpenInterval s t = Interval (OpenE s) (OpenE t)
 type instance NumType   (Interval endPoint r) = r
 type instance Dimension (Interval endPoint r) = 1
 
+instance Constrained (Interval endPoint) where
+  type Dom (Interval endPoint) r = OptCVector_ 2 (endPoint r)
+instance Foldable endPoint => CFoldable (Interval endPoint) where
+  cfoldMap f (Interval s t) = foldMap f s <> foldMap f t
+
+instance Functor endPoint => CFunctor (Interval endPoint) where
+  cmap f (Interval s t) = Interval (fmap f s) (fmap f t)
+instance Traversable endPoint => CTraversable (Interval endPoint) where
+  ctraverse f (Interval s t) = Interval <$> traverse f s <*> traverse f t
+
+
+
 instance ( Show (endPoint r)
          , OptCVector_ 2 (endPoint r)
          ) => Show (Interval endPoint r) where
@@ -63,15 +77,6 @@ instance ( Show (endPoint r)
                                . showsPrec (app_prec+1) s
                                . showChar ' '
                                . showsPrec (app_prec+1) t
-
--- instance ( Show r, OptCVector_ 2 r
---          ) => Show (ClosedInterval r) where
---   showsPrec k (ClosedInterval s t) = showParen (k > app_prec) $
---                                        showString "ClosedInterval "
---                                      . showsPrec (app_prec+1) s
---                                      . showChar ' '
---                                      . showsPrec (app_prec+1) t
-
 
 -- | application precedence
 app_prec :: Int
@@ -83,42 +88,6 @@ instance (Read (endPoint r), OptCVector_ 2 (endPoint r)) => Read (Interval endPo
                           p <- step readPrec
                           q <- step readPrec
                           return (Interval p q))
-
-
--- instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
---   showsPrec d (LineSegment p' q') = case (p',q') of
---       (Closed p, Closed q) -> f "ClosedLineSegment" p q
---       (Open p, Open q)     -> f "OpenLineSegment"   p q
---       (p,q)                -> f "LineSegment"       p q
---     where
---       app_prec = 10
---       f        :: (Show a, Show b) => String -> a -> b -> String -> String
---       f cn p q = showParen (d > app_prec) $
---                      showString cn . showString " "
---                    . showsPrec (app_prec+1) p
---                    . showString " "
---                    . showsPrec (app_prec+1) q
-
--- instance (Read r, Read p, Arity d) => Read (LineSegment d p r) where
---   readPrec = parens $ (prec app_prec $ do
---                                   Ident "ClosedLineSegment" <- lexP
---                                   p <- step readPrec
---                                   q <- step readPrec
---                                   return (ClosedLineSegment p q))
---                        +++
---                        (prec app_prec $ do
---                                   Ident "OpenLineSegment" <- lexP
---                                   p <- step readPrec
---                                   q <- step readPrec
---                                   return (OpenLineSegment p q))
---                        +++
---                        (prec app_prec $ do
---                                   Ident "LineSegment" <- lexP
---                                   p <- step readPrec
---                                   q <- step readPrec
---                                   return (LineSegment p q))
---     where app_prec = 10
-
 
 -- it is not so nice that we cannot derrive those:
 instance (Eq (endPoint r), OptCVector_ 2 (endPoint r)) => Eq (Interval endPoint r) where

@@ -19,8 +19,11 @@ module Optimal.Internal
 import           Control.Applicative
 import           Control.DeepSeq
 import           Control.Lens
+import           Control.Subcategory.Foldable
+import           Control.Subcategory.Functor
 import           Data.Coerce
 import           Data.Kind
+import           Data.Maybe
 import           GHC.Generics
 import           GHC.TypeLits
 import           HGeometry.Properties
@@ -51,20 +54,38 @@ type instance NumType   (Vector d r) = r
 type instance IxValue   (Vector d r) = r
 type instance Index     (Vector d r) = Int
 
-instance (forall a b. HasComponents (Vector d a) (Vector d b))
-         => Functor (Vector d) where
-  fmap = over components
-  {-# INLINE fmap #-}
 
-instance (forall a b. HasComponents (Vector d a) (Vector d b))
-         => Traversable (Vector d) where
-  traverse = components
-  {-# INLINE traverse #-}
+instance Constrained (Vector d) where
+  type Dom (Vector d) r = OptVector_ d r
+instance CFoldable (Vector d) where
+  cfoldMap = foldMapOf components
 
-instance (forall a b. HasComponents (Vector d a) (Vector d b))
-          => Foldable (Vector d) where
-  foldMap = foldMapOf components
-  {-# INLINE foldMap #-}
+instance CFunctor (Vector d) where
+  cmap f v = uncheckedVectorFromList . fmap f $ v^..components
+    where
+      uncheckedVectorFromList = fromMaybe (error "Geometry.Vector.Optimal cmap")
+                              . vectorFromList
+instance CTraversable (Vector d) where
+  ctraverse f v = fmap uncheckedVectorFromList . traverse f $ v^..components
+    where
+      uncheckedVectorFromList = fromMaybe (error "Geometry.Vector.Optimal ctraverse")
+                              . vectorFromList
+
+
+-- instance (forall a b. HasComponents (Vector d a) (Vector d b))
+--          => Functor (Vector d) where
+--   fmap = over components
+--   {-# INLINE fmap #-}
+
+-- instance (forall a b. HasComponents (Vector d a) (Vector d b))
+--          => Traversable (Vector d) where
+--   traverse = components
+--   {-# INLINE traverse #-}
+
+-- instance (forall a b. HasComponents (Vector d a) (Vector d b))
+--           => Foldable (Vector d) where
+--   foldMap = foldMapOf components
+--   {-# INLINE foldMap #-}
 
 -- | The type family to specialize vector implementations. For 0 and 1
 -- dimensions we already decide how to implement the vector, since
