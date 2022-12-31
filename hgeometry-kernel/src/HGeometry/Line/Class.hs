@@ -24,7 +24,7 @@ import HGeometry.Vector
 
 -- $setup
 -- import HGeometry.Point
--- import HGeometry.Line.PointAndVector
+-- import HGeometry.Line
 
 -- | Types that can act as lines in d-dimensional space.
 class Line_ line d r | line -> d
@@ -38,7 +38,7 @@ class Line_ line d r | line -> d
 
 -- | Construct a line through two points.
 --
--- >>> lineThrough origin (Point2 4 5) :: Line 2 Int
+-- >>> lineThrough origin (Point2 4 5) :: LinePV 2 Int
 -- LinePV (Point2 0 0) (Vector2 4 5)
 lineThrough     :: forall line point d r.
                    ( Line_ line d r

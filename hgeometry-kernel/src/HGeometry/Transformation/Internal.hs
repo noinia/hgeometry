@@ -22,6 +22,12 @@ import           HGeometry.Vector.List (ListVector(..))
 import qualified HGeometry.Vector as V
 
 --------------------------------------------------------------------------------
+
+-- $setup
+-- >>> import HGeometry.Point
+-- >>> import HGeometry.Vector
+
+--------------------------------------------------------------------------------
 -- * Transformations
 
 -- | A type representing a Transformation for d dimensional objects

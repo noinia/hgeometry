@@ -29,9 +29,10 @@ module HGeometry.Interval.Class
 
 
   , inInterval
+  , compareInterval
 
-  , shiftLeft
-  , flipInterval
+  , shiftLeft, shiftRight
+  -- , flipInterval
   , duration
   , module HGeometry.Interval.EndPoint
   ) where
@@ -39,10 +40,15 @@ module HGeometry.Interval.Class
 import Control.Lens
 import Data.Ext
 import Data.Kind (Type,Constraint)
-import Data.Tuple (swap)
 import HGeometry.Boundary
 import HGeometry.Interval.EndPoint
 import HGeometry.Properties
+
+--------------------------------------------------------------------------------
+
+-- $setup
+-- >>> import HGeometry.Interval.EndPoint
+-- >>> import HGeometry.Interval
 
 --------------------------------------------------------------------------------
 
@@ -142,7 +148,9 @@ clampTo (ClosedInterval_ l u) x = (x `max` l) `min` u
 class ( Interval_ interval r
       , EndPointOf interval ~ EndPoint Open r
       ) => OpenInterval_ interval r | interval -> r where
-  -- | Construct an interval given its start and end point.
+  -- | Construct an interval given its start s and end point t.
+  --
+  -- pre: s < t
   mkOpenInterval     :: r -> r -> interval
   mkOpenInterval s e = mkInterval (OpenE s) (OpenE e)
   {-# MINIMAL #-}
@@ -184,16 +192,42 @@ x `inInterval` i =
               GT -> Outside
 
 
--- | Shifts the interval to the left by delta
-shiftLeft       :: ( Num r
-                   , Functor interval
-                   )
-                => r -> interval r -> interval r
-shiftLeft delta = fmap (subtract delta)
+-- | test if te point appears before (=LT), in (=EQ), or after (=GT) te interval.
+--
+-- >>> 1 `compareInterval` (OpenInterval 0 2)
+-- EQ
+-- >>> 1 `compareInterval` (OpenInterval 0 1)
+-- GT
+-- >>> 1 `compareInterval` (ClosedInterval 0 1)
+-- EQ
+-- >>> 10 `compareInterval` (OpenInterval 1 10)
+-- GT
+-- >>> 10 `compareInterval` (ClosedInterval 0 1)
+-- GT
+compareInterval     :: (Ord r, Interval_ interval r) => r -> interval -> Ordering
+compareInterval q i = case q `compare` (i^.start) of
+      LT -> LT
+      EQ -> if i^.startPoint.to endPointType == Open then LT else EQ
+            -- since the interval is non-degenerate, the right endpoint must be strictly
+            -- larger than the left endpoint
+      GT -> case q `compare` (i^.end) of
+              LT -> EQ
+              EQ -> if i^.endPoint.to endPointType == Open then GT else EQ
+              GT -> GT
 
--- | Flips the start and endpoint of the interval.
-flipInterval :: Interval_ interval r => interval -> interval
-flipInterval = uncurry mkInterval . swap . startAndEndPoint
+-- | Shifts the interval to the left by delta
+shiftLeft         :: ( Num r, Interval_ interval r) => r -> interval -> interval
+shiftLeft delta i = i&start %~ subtract delta
+                     &end   %~ subtract delta
+
+-- | Shifts the interval to the right by delta
+shiftRight         :: ( Num r, Interval_ interval r ) => r -> interval -> interval
+shiftRight delta i = i&start %~ (+ delta)
+                      &end   %~ (+ delta)
+
+-- -- | Flips the start and endpoint of the interval.
+-- flipInterval :: Interval_ interval r => interval -> interval
+-- flipInterval = uncurry mkInterval . swap . startAndEndPoint
 
 -- | Get the duration, or length of an interval.
 duration   :: (Interval_ interval r, Num r) => interval -> r

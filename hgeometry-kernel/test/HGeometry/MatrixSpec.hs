@@ -30,6 +30,15 @@ instance ( Arbitrary m
          ) => Arbitrary (NonZeroM m) where
   arbitrary = NonZeroM <$> arbitrary `suchThat` (anyOf elements (/= 0))
 
+-- newtype Invertible n r = Invertible (Matrix n n r) deriving (Show,Eq)
+
+-- instance ( Arbitrary r
+--          , HasDeterminant n
+--          ) => Arbitrary (Invertible m r) where
+--   arbitrary = Invertible <$> arbitrary `suchThat` ((/= 0) . det)
+
+
+
 spec = describe "Matrix tests" $ do
          describe "determinant the same as linear" $ do
            prop "2d" $

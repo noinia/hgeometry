@@ -1,21 +1,20 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module HGeometry.LineSegmentSpec where
 
-import Control.Lens
-import Data.Bifunctor
+-- import Control.Lens
 import Data.Ext
 import HGeometry.Intersection
 import HGeometry.Number.Real.Rational
 -- import Data.Vinyl
-import HGeometry.Boundary
-import HGeometry.Box
-import HGeometry.Line
+-- import HGeometry.Boundary
+-- import HGeometry.Box
+-- import HGeometry.Line
 import HGeometry.LineSegment
 -- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
 import HGeometry.Interval
 import HGeometry.Vector
-import Test.Hspec.QuickCheck
+-- import Test.Hspec.QuickCheck
 import Test.Hspec
 import Test.QuickCheck.Instances ()
 

@@ -294,5 +294,22 @@ instance Invertible 3 where
   {-# INLINE inverseMatrix #-}
   -- it is a bit silly we are using the list vectors here.
 
+-- inv33 m@(V3 (V3 a b c)
+--             (V3 d e f)
+--             (V3 g h i))
+--   = (1 / det) *!! V3 (V3 a' b' c')
+--                      (V3 d' e' f')
+--                      (V3 g' h' i')
+--   where a' = cofactor (e,f,h,i)
+--         b' = cofactor (c,b,i,h)
+--         c' = cofactor (b,c,e,f)
+--         d' = cofactor (f,d,i,g)
+--         e' = cofactor (a,c,g,i)
+--         f' = cofactor (c,a,f,d)
+--         g' = cofactor (d,e,g,h)
+--         h' = cofactor (b,a,h,g)
+--         i' = cofactor (a,b,d,e)
+--         cofactor (q,r,s,t) = det22 (V2 (V2 q r) (V2 s t))
+--         det = det33 m
 
 --------------------------------------------------------------------------------
