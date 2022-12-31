@@ -10,7 +10,10 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.BezierSpline
-  ( BezierSplineF(..), BezierSpline
+  ( BezierSplineF(..)
+  , BezierSpline
+  , QuadraticBezier
+  , CubicBezier
   -- , module HGeometry.BezierSpline.Class
   ) where
 
@@ -31,6 +34,8 @@ import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
 import Data.Kind (Type)
+-- import GHC.TypeLits
+
 --------------------------------------------------------------------------------
 
 -- | A Bezier spline.
@@ -42,7 +47,10 @@ newtype BezierSplineF f point = BezierSpline (f point)
 -- | By default we store simple poylline as non-empty vectors.
 type BezierSpline = BezierSplineF NonEmptyVector
 
-
+-- | Quadratic Bezier splines
+type QuadraticBezier = BezierSplineF (Vector 3)
+-- | Cubic Bezier splines
+type CubicBezier     = BezierSplineF (Vector 4)
 
 type instance Dimension (BezierSplineF f point) = 2
 type instance NumType   (BezierSplineF f point) = NumType point
