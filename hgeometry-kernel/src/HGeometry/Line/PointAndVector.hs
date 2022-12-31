@@ -27,6 +27,8 @@ module HGeometry.Line.PointAndVector
 
 import           Control.DeepSeq
 import           Control.Lens
+import           Control.Subcategory.Foldable
+import           Control.Subcategory.Functor
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import           Data.Type.Ord
@@ -50,22 +52,26 @@ import           Text.Read
 -- | A line is given by an anchor point and a vector indicating the
 -- direction.
 data LinePV d r = LinePV { _anchorPoint :: !(Point  d r)
-                       , _direction   :: !(Vector d r)
-                       } deriving Generic
+                         , _direction   :: !(Vector d r)
+                         } deriving Generic
 
 instance ( OptVector_ d r
          , OptMetric_ d r
          ) => Line_ (LinePV d r) d r where
   fromPointAndVec p v = LinePV (pointFromPoint p) (vectorFromVector v)
 
--- -- this will require constraints on the r, and is thus not a valid functor.
--- this may become troubling at some point I'm afraid.
--- instance Functor (Line d) where
---   fmap f (LinePV p v) = LinePV (p&coordinates %~ f)
---                                (v&components %~ f)
+instance Constrained (LinePV d) where
+  type Dom (LinePV d) r = (OptVector_ d r, OptMetric_ d r)
 
--- instance Foldable (Line d) where
---   foldMap f (LinePV p v) = foldMapOf coordinates f p <> foldMapOf components f v
+instance CFunctor (LinePV d) where
+  cmap f (LinePV p v) = LinePV (cmap f <$> p) (f <$:> v)
+
+instance CFoldable (LinePV d) where
+  cfoldMap f (LinePV p v) = foldMapOf coordinates f p <> foldMapOf components f v
+
+instance CTraversable (LinePV d) where
+  ctraverse f (LinePV p v) = LinePV <$> traverse (ctraverse f) p <*> ctraverse f v
+
 
 instance ( OptCVector_ 2 r, OptCVector_ 3 r, Eq r, Fractional r
          ) => HyperPlane_ (LinePV 2 r) 2 r where
