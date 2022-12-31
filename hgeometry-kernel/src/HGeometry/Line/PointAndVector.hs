@@ -40,7 +40,7 @@ import           HGeometry.Point
 import           HGeometry.Point.EuclideanDistance
 import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties (NumType, Dimension)
-import           HGeometry.Transformation.Internal
+import           HGeometry.Transformation
 import           HGeometry.Vector
 import           Text.Read
 
@@ -371,7 +371,7 @@ cmpSlope :: forall r. (Num r, Ord r, OptCVector_ 2 r, OptMetric_ 2 r
 
 -- | Lines are transformable, via line segments
 instance ( Fractional r
-         , TransformationConstraints (LinePV d r)
+         , TransformationConstraints d r
          , OptVector_ d r, OptMetric_ d r
          ) => IsTransformable (LinePV d r) where
   transformBy t (LinePV p v) = lineThrough p' q'

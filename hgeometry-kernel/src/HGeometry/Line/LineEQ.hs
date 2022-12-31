@@ -29,7 +29,7 @@ import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Point
 import HGeometry.Properties(NumType, Dimension)
-import HGeometry.Transformation.Internal
+import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
 
@@ -164,7 +164,7 @@ evalAt' x (LineEQ a b) = a*x + b
 
 -- | Lines are transformable, via line segments
 instance ( Fractional r
-         , TransformationConstraints (LineEQ r)
+         , TransformationConstraints 2 r
          , OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r
          ) => IsTransformable (LineEQ r) where
   -- | Warning, this may create vertical lines, which cannot be

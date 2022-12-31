@@ -79,13 +79,15 @@ inverseOf = Transformation . inverseMatrix . _transformationMatrix
 --------------------------------------------------------------------------------
 -- * Transformable geometry objects
 
-type TransformationConstraints g =
-  ( KnownNat (Dimension g)
-  , OptMatrix_ (Dimension g+1) (NumType g)
-  , HasComponents (VectorFamily' (Dimension g+1) (NumType g))
-                  (VectorFamily' (Dimension g+1) (Vector (Dimension g+1) (NumType g)))
-  , OptAdditive_ (Dimension g+1) (NumType g)
- , Dimension g < Dimension g + 1 -- TODO: get rid of this constraint somehow
+-- | Some constraints that we will pretty much need to transform a d
+-- dimensional object whose numtype is r
+type TransformationConstraints d r =
+  ( KnownNat d
+  , OptVector_ d r, OptMatrix_ (d+1) r
+  , HasComponents (VectorFamily' (d+1) r)
+                  (VectorFamily' (d+1) (Vector (d+1) r))
+  , OptAdditive_ (d+1) r
+  , d < d + 1 -- TODO: get rid of this constraint somehow
   )
 
 -- | Bunch of constraints we need for the default implementation of transformBy
@@ -136,18 +138,24 @@ instance (Fractional r, OptVector_ d r, OptMatrix_ (d+1) r
 -- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
 -- Point2 3.0 5.0
 translation   :: forall d r vector. ( Num r
-                 , Vector_ vector d r
-                 , d < d+1, KnownNat d
-                 , OptMatrix_ (d+1) r
-                 , HasComponents (VectorFamily' (d+1) r)
-                                 (VectorFamily' (d+1) (Vector (d+1) r))
-                 , OptAdditive_ (d+1) r
-                 )
+                                    , Vector_ vector d r
+                                    , TransformationConstraints d r
+                                    )
               => vector -> Transformation d r
 translation v = Transformation . Matrix
              $ iover components transRow (snoc v 1 :: Vector (d+1) r)
 
+-- class CFunctorWithIndex
 
+
+-- type TransformationConstraints d r =
+--   ( KnownNat d
+--   , OptMatrix_ d r
+--   , HasComponents (VectorFamily' (d+1) r)
+--                   (VectorFamily' (d+1) (Vector (d+1) r))
+--   , OptAdditive_ d r
+--   , d < d + 1 -- TODO: get rid of this constraint somehow
+--   )
 
 
 -- | Create scaling transformation from a vector.
@@ -156,11 +164,7 @@ translation v = Transformation . Matrix
 -- Point2 4.0 (-3.0)
 scaling   :: forall d r vector. ( Num r
              , Vector_ vector d r
-             , d < d+1, KnownNat d
-             , OptMatrix_ (d+1) r
-             , HasComponents (VectorFamily' (d+1) r)
-                             (VectorFamily' (d+1) (Vector (d+1) r))
-             , OptAdditive_ (d+1) r
+             , TransformationConstraints d r
              )
           => vector -> Transformation d r
 scaling v = Transformation . Matrix
@@ -176,10 +180,7 @@ scaling v = Transformation . Matrix
 -- True
 -- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
 -- True
-uniformScaling :: forall d r. (Num r, d < d+1, KnownNat d
-                              , OptMatrix_ (d+1) r
-                              , HasComponents (VectorFamily' (d+1) r)
-                                              (VectorFamily' (d+1) (Vector (d+1) r))
+uniformScaling :: forall d r. (Num r, TransformationConstraints d r
                               ) => r -> Transformation d r
 uniformScaling = scaling . pure @(ListVector d)
 
@@ -204,7 +205,7 @@ uniformScaling = scaling . pure @(ListVector d)
 translateBy :: ( IsTransformable g
                , Num (NumType g)
                , Vector_ vector (Dimension g) (NumType g)
-               , TransformationConstraints g
+               , TransformationConstraints (Dimension g) (NumType g)
                ) => vector -> g -> g
 translateBy = transformBy . translation
 
@@ -214,7 +215,7 @@ translateBy = transformBy . translation
 -- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
            , Vector_ vector (Dimension g) (NumType g)
-           , TransformationConstraints g
+           , TransformationConstraints (Dimension g) (NumType g)
            ) => vector -> g -> g
 scaleBy = transformBy . scaling
 
@@ -224,7 +225,7 @@ scaleBy = transformBy . scaling
 -- >>> scaleUniformlyBy 5 $ Point2 2 3
 -- Point2 10.0 15.0
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
-                    , TransformationConstraints g
+                    , TransformationConstraints (Dimension g) (NumType g)
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 

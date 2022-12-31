@@ -33,6 +33,7 @@ import           GHC.TypeNats
 import           HGeometry.Properties
 import qualified HGeometry.Vector as Vector
 import           HGeometry.Vector.Class
+import qualified Linear.Affine as Linear
 
 --------------------------------------------------------------------------------
 
@@ -324,3 +325,21 @@ instance Affine_ point => Affine_ (point :+ extra) where
 instance (Point_ point d r, Monoid extra) => Point_ (point :+ extra) d r where
   {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
   fromVector v = fromVector v :+ mempty
+
+
+type instance Dimension (Linear.Point v r) = Dimension (v r)
+type instance NumType   (Linear.Point v r) = NumType   (v r)
+type instance VectorFor (Linear.Point v r) = v r
+
+instance ( Vector_ (v r) d r
+         , NumType (v r) ~ r
+         , NumType (v s) ~ s
+         ) => HasVector (Linear.Point v r) (Linear.Point v s) r s where
+  vector = Linear.lensP
+
+-- instance Affine_ (Linear.Point v r)
+-- instance ( d ~ Dimension (v r)
+--          , Vector_ (v r) d r
+--          , NumType (v r) ~ r
+--          , NumType (v s) ~ s
+--          ) => Point_ (Linear.Point v r) d r where

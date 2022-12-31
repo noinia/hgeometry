@@ -48,7 +48,7 @@ fitToBox     :: forall rectangle g point r.
                 , Rectangle_ rectangle point
                 , Point_ point 2 r
                 , Ord r, Fractional r
-                , TransformationConstraints g
+                , TransformationConstraints 2 r
                 , OptCVector_ 2 r, OptMetric_ 2 r
                 , OptVector_ 3 r
                 , OptCVector_ 2 (ClosedInterval r)
@@ -66,7 +66,7 @@ fitToBoxTransform     :: forall rectangle g point r.
                          , Rectangle_ rectangle point
                          , Point_ point 2 r
                          , Ord r, Fractional r
-                         , TransformationConstraints g
+                         , TransformationConstraints 2 r
                          , OptCVector_ 2 r, OptMetric_ 2 r
                          , OptVector_ 3 r
                          , OptCVector_ 2 (ClosedInterval r)

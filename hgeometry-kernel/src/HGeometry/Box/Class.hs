@@ -14,6 +14,7 @@ module HGeometry.Box.Class
   ( Box_(..)
   , HasMinPoint(..)
   , HasMaxPoint(..)
+  , centerPoint
 
   , Rectangle_
   , width
@@ -139,6 +140,14 @@ height :: ( Box_ box point, Point_ point d r
          ) => box -> r
 height = widthIn @1
 
+-- | Get the center point of a box
+--
+-- >>> centerPoint myRect
+-- Point2 5.5 10.5
+centerPoint   :: (Box_ box point, Point_ point d r, Fractional r)
+              => box -> point
+centerPoint r = let v = (r^.maxPoint) .-. (r^.minPoint)
+                in (r^.minPoint) .+^ ((1/2) *^ v)
 
 --------------------------------------------------------------------------------
 
