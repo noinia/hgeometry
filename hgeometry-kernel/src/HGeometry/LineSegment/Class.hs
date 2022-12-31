@@ -11,14 +11,18 @@
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Class
   ( LineSegment_(..), pattern LineSegment_
-  , ClosedLineSegment_(..)
-  , OpenLineSegment_(..)
+  , ClosedLineSegment_
+  , OpenLineSegment_
 
   , interpolate
   , OnSegment(..)
 
   , HasStart(..), HasEnd(..)
   , HasStartPoint(..), HasEndPoint(..)
+
+
+  , ordAtY, ordAtX
+  , xCoordAt, yCoordAt
   ) where
 
 import Control.Lens

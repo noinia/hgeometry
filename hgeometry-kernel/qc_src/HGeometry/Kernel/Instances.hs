@@ -9,6 +9,7 @@ import HGeometry.Interval
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
+import HGeometry.Matrix
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Triangle
@@ -83,3 +84,12 @@ instance ( Arbitrary point, Arbitrary (VectorFor point)
          ) => Arbitrary (Box point) where
   arbitrary = (\p v -> Box p (p .+^ v)) <$> arbitrary
                                         <*> arbitrary `suchThat` (> zero)
+
+instance ( OptVector_ m r
+         , OptVector_ n (Vector m r), KnownNat n, KnownNat m
+         , Arbitrary r, OptAdditive_ m r
+         ) =>
+
+  Arbitrary (Matrix n m r) where
+  arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
+           <$> arbitrary

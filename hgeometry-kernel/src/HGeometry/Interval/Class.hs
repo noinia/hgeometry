@@ -10,10 +10,13 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Class
-  ( Interval_(..), pattern Interval_
+  ( Interval_, pattern Interval_
   , IntervalLike_(..)
-  , ClosedInterval_(..)
-  , OpenInterval_(..)
+
+  , ClosedInterval_(..), pattern ClosedInterval_
+  , clampTo
+
+  , OpenInterval_(..), pattern OpenInterval_
 
   , HasStart(..)
   , HasEnd(..)
@@ -100,6 +103,9 @@ class ( IntervalLike_ interval r
       ) => Interval_ interval r | interval -> r where
 
 
+--------------------------------------------------------------------------------
+-- * Closed Intervals
+
 -- | A class representing closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval_ :: Type -> Type -> Constraint
 class (Interval_ interval r
@@ -110,6 +116,27 @@ class (Interval_ interval r
   mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
   {-# MINIMAL #-}
 
+-- | Pattern matching on an arbitrary closed interval
+pattern ClosedInterval_     :: ClosedInterval_ interval r => r -> r -> interval
+pattern ClosedInterval_ l u <- (startAndEnd -> (l,u))
+  where
+    ClosedInterval_ l u = mkClosedInterval l u
+{-# COMPLETE ClosedInterval_ #-}
+
+-- | Clamps a value to an interval. I.e. if the value lies outside the range we
+-- report the closest value "in the range".
+--
+-- >>> clampTo (ClosedInterval 0 10) 20
+-- 10
+-- >>> clampTo (ClosedInterval 0 10) (-20)
+-- 0
+-- >>> clampTo (ClosedInterval 0 10) 5
+-- 5
+clampTo                         :: (ClosedInterval_ interval r, Ord r) => interval -> r -> r
+clampTo (ClosedInterval_ l u) x = (x `max` l) `min` u
+
+--------------------------------------------------------------------------------
+
 
 -- | A class representing open intervals, i.e. intervals that exclude their endpoints
 class ( Interval_ interval r
@@ -119,6 +146,13 @@ class ( Interval_ interval r
   mkOpenInterval     :: r -> r -> interval
   mkOpenInterval s e = mkInterval (OpenE s) (OpenE e)
   {-# MINIMAL #-}
+
+-- | Pattern matching on an arbitrary open interval
+pattern OpenInterval_     :: OpenInterval_ interval r => r -> r -> interval
+pattern OpenInterval_ l u <- (startAndEnd -> (l,u))
+  where
+    OpenInterval_ l u = mkOpenInterval l u
+{-# COMPLETE OpenInterval_ #-}
 
 --------------------------------------------------------------------------------
 

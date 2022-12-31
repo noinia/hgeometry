@@ -21,7 +21,6 @@ module HGeometry.Interval.EndPoint
 
 import           Control.Lens
 import           Data.Semigroup.Foldable.Class
-import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified HGeometry.Vector.Boxed as Boxed
@@ -45,11 +44,11 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
 data EndPointType = Open | Closed deriving (Show,Eq,Enum,Bounded)
 
 
-testV :: Vector 2 (Point 2 Double)
-testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 1.0)
+-- testV :: Vector 2 (Point 2 Double)
+-- testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 1.0)
 
-testV1 :: Vector 2 (EndPoint Closed (Point 2 Double))
-testV1 = Vector2 (mkEndPoint$ Point2 5.0 6.0) (mkEndPoint$ Point2 10.0 1.0)
+-- testV1 :: Vector 2 (EndPoint Closed (Point 2 Double))
+-- testV1 = Vector2 (mkEndPoint$ Point2 5.0 6.0) (mkEndPoint$ Point2 10.0 1.0)
 
 --------------------------------------------------------------------------------
 

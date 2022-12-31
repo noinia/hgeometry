@@ -79,8 +79,8 @@ instance ( OptVector_ n (Vector m r)
 
   rows = _MatrixVector .> components
 
-test :: Matrix 2 2 Int
-test = identityMatrix
+-- test :: Matrix 2 2 Int
+-- test = identityMatrix
 
 --  columns = undefined
 

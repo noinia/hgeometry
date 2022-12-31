@@ -125,10 +125,10 @@ type OptVector_ d r = Vector_ (VectorFamily' d r) d r
 type OptCVector_ d r = ConstructableVector_ (VectorFamily' d r) d r
 
 -- | The optimized family should be Additive
-type OptAdditive_ d r = Additive_ (VectorFamily' d r)
+type OptAdditive_ d r = (Additive_ (VectorFamily' d r), Additive_ (VectorFamily d r))
 
 -- | Shorthand for having a Optimal vector as a Metric
-type OptMetric_ d r = Metric_ (VectorFamily' d r)
+type OptMetric_ d r = (Metric_ (VectorFamily' d r), Metric_ (VectorFamily d r))
 
 ---------------------------------------------------------------------------------
 -- * Constructors for Small vectors
