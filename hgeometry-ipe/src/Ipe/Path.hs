@@ -33,8 +33,9 @@ module Ipe.Path(
   , _ClosePath
   ) where
 
-import Control.Lens hiding (rmap)
-import Data.Bitraversable
+import Control.Lens
+import Control.Subcategory.Foldable
+import Control.Subcategory.Functor
 import HGeometry.BezierSpline
 import HGeometry.Point
 -- import           HGeometry.Ellipse(Ellipse)
@@ -66,7 +67,7 @@ data PathSegment r = PolyLineSegment        (PolyLine (Point 2 r))
 
 _PolyLineSegment ::  Prism' (PathSegment r) (PolyLine (Point 2 r))
 _PolyLineSegment
-  = (prism (\ x1_adRP -> PolyLineSegment x1_adRP))
+  = prism PolyLineSegment
       (\ x_adRQ
          -> case x_adRQ of
               PolyLineSegment y1_adRR -> Right y1_adRR
