@@ -6,7 +6,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- A Polyline and some basic functions to interact with them.
+-- Basic Bezier splines.
 --
 --------------------------------------------------------------------------------
 module HGeometry.BezierSpline
@@ -30,54 +30,55 @@ import HGeometry.Transformation
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
-import GHC.TypeLits
 import Data.Kind (Type)
 --------------------------------------------------------------------------------
 
--- | A Bezier spline of degree n.
-type BezierSplineF :: (Type -> Type) -> Nat -> Type -> Type
-newtype BezierSplineF f n point = BezierSpline (f point)
+-- | A Bezier spline.
+type BezierSplineF              :: (Type -> Type) -> Type -> Type
+newtype BezierSplineF f point = BezierSpline (f point)
   deriving (Generic)
   deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
 
 -- | By default we store simple poylline as non-empty vectors.
 type BezierSpline = BezierSplineF NonEmptyVector
 
-type instance Dimension (BezierSplineF f n point) = 2
-type instance NumType   (BezierSplineF f n point) = NumType point
+
+
+type instance Dimension (BezierSplineF f point) = 2
+type instance NumType   (BezierSplineF f point) = NumType point
 
 
 -- | Access the container
-_BezierSplineF :: Iso (BezierSplineF f n point) (BezierSplineF f' n' point')
+_BezierSplineF :: Iso (BezierSplineF f point) (BezierSplineF f' point')
                       (f point)                 (f' point' )
 _BezierSplineF = iso (\(BezierSpline vs) -> vs) BezierSpline
 
-instance Traversable f => Traversable (BezierSplineF f n) where
+instance Traversable f => Traversable (BezierSplineF f) where
   traverse f (BezierSpline vs) = BezierSpline <$> traverse f vs
-instance Traversable1 f => Traversable1 (BezierSplineF f n) where
+instance Traversable1 f => Traversable1 (BezierSplineF f) where
   traverse1 f (BezierSpline vs) = BezierSpline <$> traverse1 f vs
 
 instance (TraversableWithIndex Int f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
-         ) => HasVertices (BezierSplineF f n point) (BezierSplineF f n point') where
+         ) => HasVertices (BezierSplineF f point) (BezierSplineF f point') where
   vertices = _BezierSplineF . itraversed
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
-         ) => HasPoints (BezierSplineF f n point) (BezierSplineF f n point') point point' where
+         ) => HasPoints (BezierSplineF f point) (BezierSplineF f point') point point' where
   allPoints = _BezierSplineF . traversed1
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
-         , DefaultTransformByConstraints (BezierSplineF f n point) 2 r
+         , DefaultTransformByConstraints (BezierSplineF f point) 2 r
          , Point_ point 2 r
-         ) => IsTransformable (BezierSplineF f n point)
+         ) => IsTransformable (BezierSplineF f point)
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
@@ -85,13 +86,13 @@ instance ( Traversable1 f
          , Ixed    (f point)
          , Point_ point 2 r
          , OptVector_ 2 r, OptMetric_ 2 r, Ord (VectorFamily' 2 r)
-         ) => IsBoxable (BezierSplineF f n point)
+         ) => IsBoxable (BezierSplineF f point)
 
 instance ( TraversableWithIndex Int f
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int
-         ) => HasVertices' (BezierSplineF f n point) where
-  type Vertex   (BezierSplineF f n point) = point
-  type VertexIx (BezierSplineF f n point) = Int
+         ) => HasVertices' (BezierSplineF f point) where
+  type Vertex   (BezierSplineF f point) = point
+  type VertexIx (BezierSplineF f point) = Int
   vertexAt i = _BezierSplineF . iix i
