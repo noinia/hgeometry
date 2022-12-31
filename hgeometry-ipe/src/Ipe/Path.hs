@@ -46,6 +46,7 @@ import HGeometry.Transformation
 import HGeometry.Matrix
 import Data.Sequence (Seq)
 import Data.Traversable
+import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 -- | Paths
@@ -65,25 +66,24 @@ data PathSegment r = PolyLineSegment        (PolyLine (Point 2 r))
                    -- deriving (Show,Eq)
 -- makePrisms ''PathSegment
 
+
+
 _PolyLineSegment ::  Prism' (PathSegment r) (PolyLine (Point 2 r))
-_PolyLineSegment
-  = prism PolyLineSegment
+_PolyLineSegment = prism PolyLineSegment
       (\ x_adRQ
          -> case x_adRQ of
               PolyLineSegment y1_adRR -> Right y1_adRR
               _ -> Left x_adRQ)
 {-# INLINE _PolyLineSegment #-}
 _PolygonPath ::  Prism' (PathSegment r) (SimplePolygon (Point 2 r))
-_PolygonPath
-  = (prism (\ x1_adRS -> PolygonPath x1_adRS))
+_PolygonPath = prism PolygonPath
       (\ x_adRT
          -> case x_adRT of
               PolygonPath y1_adRU -> Right y1_adRU
               _ -> Left x_adRT)
 {-# INLINE _PolygonPath #-}
 _CubicBezierSegment ::  Prism' (PathSegment r) (CubicBezier (Point 2 r))
-_CubicBezierSegment
-  = (prism (\ x1_adRV -> CubicBezierSegment x1_adRV))
+_CubicBezierSegment = prism CubicBezierSegment
       (\ x_adRW
          -> case x_adRW of
               CubicBezierSegment y1_adRX -> Right y1_adRX
@@ -134,20 +134,22 @@ _ClosedSplineSegment
 type instance NumType   (PathSegment r) = r
 type instance Dimension (PathSegment r) = 2
 
--- instance Functor PathSegment where
---   fmap = fmapDefault
--- instance Foldable PathSegment where
---   foldMap = foldMapDefault
--- instance Traversable PathSegment where
---   traverse f = \case
---     PolyLineSegment p        -> PolyLineSegment <$> bitraverse pure f p
---     PolygonPath p            -> PolygonPath <$> bitraverse pure f p
---     CubicBezierSegment b     -> CubicBezierSegment <$> traverse f b
---     QuadraticBezierSegment b -> QuadraticBezierSegment <$> traverse f b
---     EllipseSegment e         -> pure $ EllipseSegment () -- EllipseSegment <$> traverse f e
---     ArcSegment               -> pure ArcSegment
---     SplineSegment            -> pure SplineSegment
---     ClosedSplineSegment      -> pure ClosedSplineSegment
+instance Functor PathSegment where
+  fmap = fmapDefault
+instance Foldable PathSegment where
+  foldMap = foldMapDefault
+instance Traversable PathSegment where
+  traverse f = \case
+    PolyLineSegment p        -> PolyLineSegment <$> p&vertices.ctraverse %~ f
+      -- vertices f p
+      -- traverse f p
+    PolygonPath p            -> PolygonPath <$> traverse f p
+    CubicBezierSegment b     -> CubicBezierSegment <$> traverse f b
+    QuadraticBezierSegment b -> QuadraticBezierSegment <$> traverse f b
+    EllipseSegment e         -> pure $ EllipseSegment () -- EllipseSegment <$> traverse f e
+    ArcSegment               -> pure ArcSegment
+    SplineSegment            -> pure SplineSegment
+    ClosedSplineSegment      -> pure ClosedSplineSegment
 
 -- instance Fractional r => IsTransformable (PathSegment r) where
 --   transformBy t = \case
