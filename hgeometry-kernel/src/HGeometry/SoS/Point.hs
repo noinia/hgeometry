@@ -18,9 +18,10 @@ import Control.Lens hiding (Index)
 import HGeometry.Indexed
 import HGeometry.Number.Ratio.Generalized
 import HGeometry.Number.Real.Symbolic
-import HGeometry.Point.Boxed (Point)
+import HGeometry.Point
 import HGeometry.Point.Class
-import HGeometry.Vector.Boxed
+import HGeometry.Vector
+
 -- import Geometry.Vector
 -- import Test.QuickCheck (Arbitrary(..))
 
@@ -28,8 +29,10 @@ import HGeometry.Vector.Boxed
 
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic    :: forall point d r.
-                 (Point_ point d r, HasIndex point, Num r)
+toSymbolic    :: ( Point_ point d r, HasIndex point, Num r
+                 , OptVector_ d (Symbolic SoSI r)
+                 , HasVector point (Point d (Symbolic SoSI r)) r (Symbolic SoSI r)
+                 )
               => point -> Point d (Symbolic SoSI r)
 toSymbolic p = let i  = sosIndex p
                    -- p' = pointFromPoint @point @(Point d r) p

@@ -19,7 +19,8 @@ import qualified Boxed
 import           Data.Ext
 import           Data.Functor.Identity (Identity(..))
 import           Data.Int
-import           Data.RealNumber.Rational
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Symbolic
 import qualified Double.Unpacked
 import qualified Float.Unpacked
 import qualified Int.Unpacked
@@ -101,6 +102,7 @@ type instance VectorFamily d Rational       = Boxed.Vector d Rational
 type instance VectorFamily d [r]            = Boxed.Vector d [r]
 type instance VectorFamily d (Maybe r)      = Boxed.Vector d (Maybe r)
 type instance VectorFamily d (RealNumber n) = Boxed.Vector d (RealNumber n)
+type instance VectorFamily d (Symbolic i r) = Boxed.Vector d (Symbolic i r)
 type instance VectorFamily d (Vector d' r)  = Boxed.Vector d (Vector d' r)
 
 type instance VectorFamily d (a,b)          = Boxed.Vector d (a,b)
