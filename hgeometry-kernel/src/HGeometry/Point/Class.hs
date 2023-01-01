@@ -331,11 +331,11 @@ type instance Dimension (Linear.Point v r) = Dimension (v r)
 type instance NumType   (Linear.Point v r) = NumType   (v r)
 type instance VectorFor (Linear.Point v r) = v r
 
-instance ( Vector_ (v r) d r
-         , NumType (v r) ~ r
-         , NumType (v s) ~ s
-         ) => HasVector (Linear.Point v r) (Linear.Point v s) r s where
-  vector = Linear.lensP
+-- instance ( Vector_ (v r) d r
+--          , NumType (v r) ~ r
+--          , NumType (v s) ~ s
+--          ) => HasVector (Linear.Point v r) (Linear.Point v s) r s where
+--   vector = Linear.lensP
 
 -- instance Affine_ (Linear.Point v r)
 -- instance ( d ~ Dimension (v r)

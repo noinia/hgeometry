@@ -31,6 +31,12 @@ import           Prelude hiding (zipWith)
 -- >>> import HGeometry.Point
 -- >>> import HGeometry.Matrix
 -- >>> let printMatrix = mapMOf_ rows print
+-- >>> let :{
+-- matrixFromList' :: ( KnownNat n, KnownNat m, Matrix_ matrix n m r, OptVector_  m r
+--                    ) => [r] -> matrix
+-- matrixFromList' = fromMaybe (error "") . matrixFromList
+-- :}
+
 
 -- | Types that have an 'elements' field lens.
 class HasElements matrix matrix' where
@@ -199,9 +205,13 @@ instance HasDeterminant 1 where
 instance HasDeterminant 2 where
   det m = case m^..elements of
             [ a, b,
-              c, d] -> a*d - b*c
+              c, d] -> det22 a b c d -- a*d - b*c
             _       -> error "det: 2x2, absurd"
   {-# INLINE det #-}
+
+-- | determinant of a 2x2 matrix [[a,b], [c,d]]
+det22         :: Num r => r -> r -> r -> r -> r
+det22 a b c d = a*d - b*c
 
 instance HasDeterminant 3 where
   det m = case m^..elements of
@@ -255,7 +265,7 @@ instance Invertible 1 where
   {-# INLINE inverseMatrix #-}
 
 instance Invertible 2 where
-  -- >>> printMatrix $ inverseMatrix $ matrixFromList @(Matrix 2 2 Double) [1,2, 3,4]
+  -- >>> printMatrix $ inverseMatrix $ matrixFromList' @(Matrix 2 2 Double) [1,2, 3,4]
   -- (Vector2 (-2.0) 1.0)
   -- (Vector2 1.5 (-0.5))
   inverseMatrix m = case m^..elements of
@@ -269,47 +279,30 @@ instance Invertible 2 where
   -- it is a bit silly we are using the list vectors here.
 
 instance Invertible 3 where
-  -- >>> printMatrix $ inverseMatrix $ matrixFromList @(Matrix 3 3 Double) [1,2,4,     4,2,2,    1,1,1]
+  -- >>> printMatrix $ inverseMatrix $ matrixFromList' @(Matrix 3 3 Double) [1,2,4,     4,2,2,    1,1,1]
   -- (Vector3 0.0 0.5 (-1.0))
   -- (Vector3 (-0.5) (-0.75) 3.5)
   -- (Vector3 0.5 0.25 (-1.5))
   inverseMatrix m = case m^..elements of
-    [ a, b, c,
-      d, e, f,
-      g, h, i] -> let s  = 1 / det m
-                      aa = e*i - f*h
-                      bb = negate $ d*i-f*g
-                      cc = d*h - e*g
-                      dd = negate $ b*i - c*h
-                      ee = a*i - c*g
-                      ff = negate $ a*h - b*g
-                      gg = b*f - c*e
-                      hh = negate $ a*f - c*d
-                      ii = a*e - b*d
-                  in s *!! (matrixFromRows $ Vector3_ @(ListVector 3 _)
-                                  (Vector3_ aa bb cc)
-                                  (Vector3_ dd ee ff)
-                                  (Vector3_ gg hh ii))
-    _          -> error "inverseMatrix 3x3: absurd"
+      [ a, b, c,
+        d, e, f,
+        g, h, i] -> let lambda  = 1 / det m
+                        aa = det22 e f h i
+                        bb = det22 c b i h
+                        cc = det22 b c e f
+                        dd = det22 f d i g
+                        ee = det22 a c g i
+                        ff = det22 c a f d
+                        gg = det22 d e g h
+                        hh = det22 b a h g
+                        ii = det22 a b d e
+                    in lambda *!! (matrixFromRows $ Vector3_ @(ListVector 3 _)
+                                     (Vector3_ aa bb cc)
+                                     (Vector3_ dd ee ff)
+                                     (Vector3_ gg hh ii))
+      _          -> error "inverseMatrix 3x3: absurd"
   {-# INLINE inverseMatrix #-}
   -- it is a bit silly we are using the list vectors here.
-
--- inv33 m@(V3 (V3 a b c)
---             (V3 d e f)
---             (V3 g h i))
---   = (1 / det) *!! V3 (V3 a' b' c')
---                      (V3 d' e' f')
---                      (V3 g' h' i')
---   where a' = cofactor (e,f,h,i)
---         b' = cofactor (c,b,i,h)
---         c' = cofactor (b,c,e,f)
---         d' = cofactor (f,d,i,g)
---         e' = cofactor (a,c,g,i)
---         f' = cofactor (c,a,f,d)
---         g' = cofactor (d,e,g,h)
---         h' = cofactor (b,a,h,g)
---         i' = cofactor (a,b,d,e)
---         cofactor (q,r,s,t) = det22 (V2 (V2 q r) (V2 s t))
---         det = det33 m
+  -- adapted form Linear.inv33
 
 --------------------------------------------------------------------------------
