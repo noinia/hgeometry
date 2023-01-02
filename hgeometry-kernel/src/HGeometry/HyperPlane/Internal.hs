@@ -11,6 +11,7 @@ import Data.Type.Ord
 import HGeometry.HyperPlane.Class
 import HGeometry.Properties
 import HGeometry.Vector
+import HGeometry (lineThrough)
 
 --------------------------------------------------------------------------------
 
@@ -23,6 +24,7 @@ newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
 type instance NumType   (HyperPlane d r) = r
 type instance Dimension (HyperPlane d r) = d
 type instance VectorFor (HyperPlane d r) = Vector d r
+type instance VectorFamily n (HyperPlane d r) = WrapVector n (Vector (d+1) r) (HyperPlane d r)
 
 --------------------------------------------------------------------------------
 
@@ -41,6 +43,13 @@ instance ( MkHyperPlaneConstraints d r
          ) => HyperPlane_ (HyperPlane d r) d r where
   hyperPlaneEquation (HyperPlane v) = v
   hyperPlaneFromEquation = HyperPlane
+
+
+instance HyperPlaneFromPoints (HyperPlane 2 r) where
+  hyperPlaneTrough (Vector2 p q)
+    | p^.xCoord /= q^.yCoord = let LineEQ a b = lineThrough p q
+                               in HyperPlane $ Vector3 b a (-1)
+    | otherwise              = HyperPlane $ Vector3 (p^.xCoord) (-1) 0
 
 
 --  hyperPlaneTrough pts = fromPointAndNormal p0 n

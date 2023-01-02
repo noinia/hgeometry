@@ -46,6 +46,7 @@ pattern LineEQ a b = MkLineEQ (NonVerticalHyperPlane (Vector2 a b))
 type instance NumType   (LineEQ r) = r
 type instance Dimension (LineEQ r) = 2
 type instance VectorFor (LineEQ r) = Vector 2 r
+type instance VectorFamily d (LineEQ r) = WrapVector d (NonVerticalHyperPlane 2 r) (LineEQ r)
 
 deriving instance Eq  (VectorFamily' 2 r) => Eq  (LineEQ r)
 deriving instance Ord (VectorFamily' 2 r) => Ord (LineEQ r)

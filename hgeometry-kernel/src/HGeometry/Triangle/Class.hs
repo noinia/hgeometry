@@ -9,21 +9,57 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Triangle.Class
-  ( Triangle_(..)
+  ( Triangle_(..), pattern Triangle_
+  , intersectingHalfPlanes
   ) where
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           HGeometry.HalfSpace
+import           HGeometry.HyperPlane
+import           HGeometry.Intersection
 import           HGeometry.Point.Class
+import           HGeometry.Properties (NumType, Dimension)
 import           HGeometry.Vector
-import           HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
 -- | Class representing triangles
 class ( Point_   point (Dimension point) (NumType point)
+      , OptCVector_ 3 point
       )
      => Triangle_ triangle point | triangle -> point where
 
   -- | Construct a triangle from its three vertices.
   mkTriangle :: point -> point -> point -> triangle
+
+  -- | traversal of the corners of the triangle
+  corners :: Lens' triangle (Vector 3 point)
+
+    -- IndexedTraversal1' Int triangle point
+
+-- | Constructs a triangle
+pattern Triangle_ :: Triangle_ triangle point => point -> point -> point -> triangle
+pattern Triangle_ u v w <- (view corners -> Vector3 u v w)
+  where
+    Triangle_ u v w = mkTriangle u v w
+
+
+--------------------------------------------------------------------------------
+-- * Two dimensional convenience functions
+
+-- | Get the three halfplanes such that the triangle is the intersection of those
+-- halfspaces.
+--
+intersectingHalfPlanes                    :: ( Triangle_ triangle point
+                                             , Point_ point 2 r
+                                             , Fractional r
+                                             , OptCVector_ 3 (HalfSpace 2 r)
+                                             , OptMetric_ 2 r, OptCVector_ 2 r
+                                             , OptCVector_ 3 r
+                                             )
+                                          => triangle
+                                          -> Vector 3 (HalfSpace 2 r)
+intersectingHalfPlanes (Triangle_ u v w) = Vector3 (above u v) (above v w) (above w u)
+  where
+    above p q = HalfSpace (hyperPlaneThrough p q)

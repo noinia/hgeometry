@@ -88,10 +88,11 @@ toHostFrom vp = transformBy (vp^.worldToHost)
 --------------------------------------------------------------------------------
 
 -- | Flips the y-coordinate so that the origin is in the bottom left.
-flipY               :: ( Num r, OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r
-                       , TransformationConstraints 2 r
-                       ) => Vector 2 r -> Viewport r
-flipY (Vector2 w h) =  Viewport (Box origin (Point2 w h))
+flipY                :: ( Num r, OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r
+                        , Vector_ vector 2 r
+                        , TransformationConstraints 2 r
+                        ) => vector -> Viewport r
+flipY (Vector2_ w h) = Viewport (Box origin (Point2 w h))
                                 (flipY' h)
 
 -- | Transformation that flips the y-axis and shifts by h, essenitally

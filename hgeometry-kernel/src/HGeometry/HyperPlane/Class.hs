@@ -16,6 +16,8 @@ module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
   , NonVerticalHyperPlane_(..)
   , isParallelTo
+
+  , HyperPlaneFromPoints(..)
   ) where
 
 import Control.Lens hiding (snoc, cons, unsnoc)
@@ -64,6 +66,7 @@ class ( NumType hyperPlane ~ r
   hyperPlaneEquation h = snoc a (-1)
     where
       a = hyperPlaneCoefficients h
+  {-# INLINE hyperPlaneEquation #-}
 
   -- | Construct a Hyperplane from a point and a normal.
   fromPointAndNormal     :: ( Point_ point d r
@@ -74,7 +77,7 @@ class ( NumType hyperPlane ~ r
   fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
     where
       a0 = negate $ (q^.vector) `dot` n
-
+  {-# INLINE fromPointAndNormal #-}
 
   -- | Get the normal vector of the hyperlane.
   normalVector :: Num r => hyperPlane -> Vector d r
@@ -83,6 +86,8 @@ class ( NumType hyperPlane ~ r
                           )
                        => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
   normalVector = suffix . hyperPlaneEquation
+  {-# INLINE normalVector #-}
+
 
   -- | Test if a point lies on a hyperplane.
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
@@ -93,6 +98,7 @@ class ( NumType hyperPlane ~ r
   q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
     where
       (a,a0) = unsnoc $ hyperPlaneEquation h
+  {-# INLINE onHyperPlane #-}
 
   -- | Test if a point lies on a hyperplane.
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
@@ -103,7 +109,7 @@ class ( NumType hyperPlane ~ r
   q `onSideTest` h = (a0 + (a `dot` (q^.vector))) `compare` 0
     where
       (a,a0) = unsnoc $ hyperPlaneEquation h
-
+  {-# INLINE onSideTest #-}
 
 --------------------------------------------------------------------------------
 
@@ -151,3 +157,10 @@ isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       , Num r, Eq r
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)
+
+
+class HyperPlaneFromPoints hyperPlane where
+  -- | Construct a hyperplane through the given d points.
+  hyperPlaneThrough     :: ( Point_ point d r
+                           , HyperPlane_ hyperPlane d r
+                           ) => Vector d point -> hyperPlane

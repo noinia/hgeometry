@@ -32,6 +32,8 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
+type instance VectorFamily n (NonVerticalHyperPlane d r) =
+  WrapVector n (Vector d r) (NonVerticalHyperPlane d r)
 
 deriving instance Eq  (VectorFamily' d r) => Eq (NonVerticalHyperPlane d r)
 deriving instance Ord (VectorFamily' d r) => Ord (NonVerticalHyperPlane d r)

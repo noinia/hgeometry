@@ -17,6 +17,8 @@ module HGeometry.Triangle
 import Control.Lens
 import Data.Type.Ord
 import HGeometry.Box.Boxable
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Transformation
@@ -49,6 +51,7 @@ instance ( OptCVector_ 3 point
          , Point_ point (Dimension point) (NumType point)
          ) => Triangle_ (Triangle point) point where
   mkTriangle = Triangle
+  corners = _TriangleVector
 
 instance ( OptVector_ 3 point
          , OptVector_ 3 point'
@@ -86,3 +89,13 @@ instance ( OptVector_ 3 point
          , Point_ point d r
          , OptVector_ d r, OptMetric_ d r, Ord (VectorFamily' d r)
          ) => IsBoxable (Triangle point)
+
+
+
+instance ( Point_ point 2 r
+         , Fractional r
+         , OptCVector_ 3 (HalfSpace 2 r)
+         , OptMetric_ 2 r, OptCVector_ 2 r
+         , OptCVector_ 3 r
+         ) => HasIntersectionWith (Point 2 r) (Triangle point) where
+  q `intersects` t = allOf components (q `intersects`) $ intersectingHalfPlanes t
