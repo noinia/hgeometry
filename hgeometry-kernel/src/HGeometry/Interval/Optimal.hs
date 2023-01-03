@@ -14,13 +14,13 @@ module HGeometry.Interval.Optimal
   , ClosedInterval, OpenInterval
   ) where
 
+import Control.Lens
 import Control.Subcategory.Foldable
 import Control.Subcategory.Functor
-import Control.Lens
 import Data.Kind (Type)
 import HGeometry.Intersection
 import HGeometry.Interval.Class
-import HGeometry.Interval.EndPoint()
+import HGeometry.Interval.EndPoint ()
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
@@ -195,12 +195,12 @@ intersectImpl  :: HasIntersectionWith (Point 1 r) i => Point 1 r -> i -> Maybe r
 q@(Point1 q') `intersectImpl` int | q `intersects` int = Just q'
                                   | otherwise          = Nothing
 
-instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `IsIntersectableWith` (ClosedInterval r) where
+instance (Ord r, OptCVector_ 2 r) => Point 1 r `IsIntersectableWith` ClosedInterval r where
   intersect = intersectImpl
-instance (Ord r, OptCVector_ 2 r) => (Point 1 r) `IsIntersectableWith` (OpenInterval r) where
+instance (Ord r, OptCVector_ 2 r) => Point 1 r `IsIntersectableWith` OpenInterval r where
   intersect = intersectImpl
 instance (Ord r, OptCVector_ 2 (AnEndPoint r))
-         => (Point 1 r) `IsIntersectableWith` (Interval AnEndPoint r) where
+         => Point 1 r `IsIntersectableWith` Interval AnEndPoint r where
   intersect = intersectImpl
 
 
@@ -212,16 +212,36 @@ data instance IntersectionOf (ClosedInterval r) (ClosedInterval r) =
   | ClosedInterval_x_ClosedInterval_Contained !(ClosedInterval r)
   | ClosedInterval_x_ClosedInterval_Partial   !(ClosedInterval r)
 
+deriving stock instance (Eq r, OptCVector_ 2 r) => Eq (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
+deriving stock instance (Show r, OptCVector_ 2 r) => Show (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
 
--- instance (ClosedInterval r) `HasIntersectionWith` (ClosedInterval r) where
---   intA `intersects` intB =
+
+instance (Ord r, OptCVector_ 2 r) => ClosedInterval r `HasIntersectionWith` ClosedInterval r where
+  intA `intersects` intB = case (intA^.start) `compareInterval` intB of
+    LT -> case (intA^.end) `compareInterval` intB of
+            LT -> False
+            EQ -> True
+            GT -> True
+    EQ -> True
+    GT -> False -- by invariant, intA^.end > intA.start, so they don't intersect
 
 
--- instance (ClosedInterval r) `IsIntersectableWith` (ClosedInterval r) where
---   intA `intersect` intB = case intA^.start `compare` intB^.start of
---     LT -> case intB^.start `compare` intA^.end of
---             LT -> _
---             EQ -> _
---             GT -> _
---     EQ -> _
---     GT -> _
+
+-- instance ( Ord r, OptVector_ 2 r
+--          ) => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
+--   intA `intersect` intB = case (intA^.start) `compareInterval` intB of
+--       LT -> case (intA^.end) `compareInterval` intB of
+--               LT -> Nothing
+--               EQ -> Just . ClosedInterval_x_ClosedInterval_Partial
+--                     $ ClosedInterval (intB^.start) (intA^.end)
+--               GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
+--                 -- intB is fully contained
+--       EQ -> case (intA^.end) `compareInterval` intB of
+--               LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
+--               EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
+--               GT -> Just $ mkInterval' (intA^.start) (intB^.end)
+--       GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
+--     where
+--       mkInterval' l r
+--         | l == r    = ClosedInterval_x_ClosedInterval_Point l
+--         | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
