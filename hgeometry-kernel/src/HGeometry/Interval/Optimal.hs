@@ -12,6 +12,8 @@
 module HGeometry.Interval.Optimal
   ( Interval(MkInterval, Interval, ClosedInterval, OpenInterval)
   , ClosedInterval, OpenInterval
+
+  , IntersectionOf(..)
   ) where
 
 import Control.Lens
@@ -131,11 +133,6 @@ type instance VectorFamily d (Interval endPoint r) =
 
   -- (Show,Eq,Ord)
 
-test :: ClosedInterval Int
-test = ClosedInterval 5 10
-
-test' :: ClosedInterval Int
-test' = read "Interval (ClosedE 5) (ClosedE 10)"
 
 {-
 
@@ -231,14 +228,15 @@ instance ( Ord r, OptCVector_ 2 r
   intA `intersect` intB = case (intA^.start) `compareInterval` intB of
       LT -> case (intA^.end) `compareInterval` intB of
               LT -> Nothing
-              EQ -> Just . ClosedInterval_x_ClosedInterval_Partial
-                    $ ClosedInterval (intB^.start) (intA^.end)
+              EQ -> Just $ mkInterval' (intB^.start) (intA^.end)
               GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
                 -- intB is fully contained
       EQ -> case (intA^.end) `compareInterval` intB of
               LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
               EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
-              GT -> Just $ mkInterval' (intA^.start) (intB^.end)
+              GT -> Just $ if intA^.start == intB^.start then
+                             ClosedInterval_x_ClosedInterval_Contained intB
+                           else mkInterval' (intA^.start) (intB^.end)
       GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
     where
       mkInterval' l r

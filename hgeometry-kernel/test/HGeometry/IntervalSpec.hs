@@ -1,14 +1,31 @@
 module HGeometry.IntervalSpec where
 
+import Data.Maybe (isJust)
 import HGeometry.Intersection
 import HGeometry.Interval
+import HGeometry.Kernel.Instances ()
+import HGeometry.Vector
 import Test.Hspec
+import Test.Hspec.QuickCheck
 
 --------------------------------------------------------------------------------
 
+
 spec :: Spec
 spec = do
+  describe "interval " $ do
+    let test :: ClosedInterval Int
+        test = ClosedInterval 5 10
+        test' :: ClosedInterval Int
+        test' = read "Interval (ClosedE 5) (ClosedE 10)"
+    it "show,read" $ test `shouldBe` test'
+
   describe "Interval_x_Interval Intersection" $ do
+    prop "intersects and intersect consistent" $
+      \(intA :: ClosedInterval Int) (intB :: ClosedInterval Int) ->
+        (intA `intersects` intB) == isJust (intA `intersect` intB)
+
+
     -- it "openInterval cap openrange" $ do
     --   ((OpenInterval 1 (10 :: Int))  `intersect` (OpenInterval 5 (10 :: Int)))
     --   `shouldBe` (ClosedInterval_x_ClosedInterval_Partial $ OpenInterval 5 (10 :: Int))
@@ -20,11 +37,13 @@ spec = do
     --   `shouldBe` (coRec NoIntersection)
     -- it "endpoints overlap but open/closed" $ do
 
-    it "manual " $ do
-      let r1, r2 :: ClosedInterval Int
-          r1 = ClosedInterval 3 6
-          r2 = ClosedInterval 1 3 --Interval (Open 1) (Open 3)
-      (r1 `intersects` r2) `shouldBe` True
+    it "manual tests " $ do
+      mapM_ (\t@((i,j),_) -> ((i,j),testInt i `intersect` testInt j) `shouldBe` t ) answers
+
+
+
+      -- let r1, r2 :: ClosedInterval Int
+      -- (r1 `intersects` r2) `shouldBe` True
     -- it "closed intersect open" $
     --   ((OpenInterval 1 (10 :: Int)) `intersect` (ClosedInterval 10 (12 :: Int)))
     --   `shouldBe` (coRec NoIntersection)
@@ -42,7 +61,7 @@ spec = do
     --   (Col (Interval (Open 5) (Closed 10)))
             -- encode "no-padding!!" `shouldBe` "bm8tcGFkZGluZyEh"
 
-    -- |
+    --
   --
   -- >>>
   --
@@ -52,3 +71,32 @@ spec = do
   -- (Col Interval {_lower = Closed 10, _upper = Open 10})
   -- >>> (OpenInterval 1 10) `intersect` (ClosedInterval 10 12)
   -- FALSE
+
+--------------------------------------------------------------------------------
+-- * Some manual intersection tests
+
+testInts :: [ClosedInterval Int]
+testInts = [ ClosedInterval 10 20 -- 0
+           , ClosedInterval 1 15  -- 1
+           , ClosedInterval 20 30 -- 2
+           , ClosedInterval 0 20  -- 3
+           , ClosedInterval 10 16 -- 4
+           ]
+
+testInt   :: Int -> ClosedInterval Int
+testInt i = testInts !! i
+
+answers = [ ( (0,1) , Just $ ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval 10 15)
+          , ( (0,2) , Just $ ClosedInterval_x_ClosedInterval_Point 20 )
+          , ( (0,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 0 )
+          , ( (0,4) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 4 )
+          , ( (1,1) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 1 )
+          , ( (1,2) , Nothing )
+          , ( (1,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 1  )
+          , ( (1,4) , Just $ ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval 10 15  )
+          , ( (2,2) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 2 )
+          , ( (2,3) , Just $ ClosedInterval_x_ClosedInterval_Point 20  )
+          , ( (2,4) , Nothing  )
+          , ( (3,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 3 )
+          , ( (3,4) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 4 )
+          ]
