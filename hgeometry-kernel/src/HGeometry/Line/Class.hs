@@ -17,7 +17,8 @@ module HGeometry.Line.Class
 
 
 import HGeometry.HyperPlane.Class
-import HGeometry.Point
+import HGeometry.Point.Class
+import HGeometry.Point.PointF
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -54,12 +55,12 @@ type Line2_ line r = (Line_ line 2 r, HyperPlane_ line 2 r)
 verticalLine   :: forall r line.
                   ( Line_ line 2 r, Num r, OptCVector_ 2 r, OptMetric_ 2 r)
                => r -> line
-verticalLine x = fromPointAndVec (Point2 x 0) (Vector2 0 1)
+verticalLine x = fromPointAndVec (Point $ Vector2 x 0) (Vector2 0 1)
 
 -- | Horizontal line with a given Y-coordinate.
 horizontalLine   :: forall r line. (Line_ line 2 r, Num r, OptCVector_ 2 r, OptMetric_ 2 r)
                  => r -> line
-horizontalLine y = fromPointAndVec (Point2 0 y) (Vector2 1 0)
+horizontalLine y = fromPointAndVec (Point $ Vector2 0 y) (Vector2 1 0)
 
 --}
 

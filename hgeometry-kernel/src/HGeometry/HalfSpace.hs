@@ -19,7 +19,7 @@ newtype HalfSpaceF boundingHyperPlane = HalfSpace boundingHyperPlane
   deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 -- | Arbitrary halfspaces in r^d.
-type HalfSpace d r = HallfSpaceF (HyperPlane d r)
+type HalfSpace d r = HalfSpaceF (HyperPlane d r)
 
 type instance Dimension (HalfSpaceF boundingHyperPlane) = Dimension boundingHyperPlane
 type instance NumType   (HalfSpaceF boundingHyperPlane) = NumType boundingHyperPlane

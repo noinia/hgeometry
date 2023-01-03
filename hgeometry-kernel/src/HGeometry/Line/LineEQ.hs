@@ -84,6 +84,12 @@ instance ( MkHyperPlaneConstraints 2 r
          , OptMetric_ 2 r
          ) => HyperPlane_ (LineEQ r) 2 r where
 
+instance ( MkHyperPlaneConstraints 2 r
+         , Fractional r
+         , OptCVector_ 2 r
+         , OptMetric_ 2 r
+         ) => ConstructableHyperPlane_ (LineEQ r) 2 r where
+
   -- | pre: the last component is not zero
   hyperPlaneFromEquation = MkLineEQ . hyperPlaneFromEquation
 
@@ -97,8 +103,8 @@ instance ( MkHyperPlaneConstraints 2 r
 
 instance ( OptCVector_ 2 r, OptMetric_ 2 r, OptCVector_ 3 r, Fractional r
          ) => Line_ (LineEQ r) 2 r where
-  fromPointAndVec p (Vector2_ vx vy) =
-    fromPointAndNormal (pointFromPoint @_ @(Point 2 r) p) (Vector2 (-vy) vx)
+  fromPointAndVec (Point2_ px py) (Vector2_ vx vy) =
+    fromPointAndNormal (Point2 px py) (Vector2 (-vy) vx)
 
 ----------------------------------------
 

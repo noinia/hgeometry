@@ -6,12 +6,14 @@ module HGeometry.HyperPlane.Internal
   , MkHyperPlaneConstraints
   ) where
 
-import GHC.TypeNats
+import Control.Lens
 import Data.Type.Ord
+import GHC.TypeNats
 import HGeometry.HyperPlane.Class
+-- import HGeometry.Line.Class
+import HGeometry.Point.Class
 import HGeometry.Properties
 import HGeometry.Vector
-import HGeometry (lineThrough)
 
 --------------------------------------------------------------------------------
 
@@ -42,14 +44,19 @@ type MkHyperPlaneConstraints d r =
 instance ( MkHyperPlaneConstraints d r
          ) => HyperPlane_ (HyperPlane d r) d r where
   hyperPlaneEquation (HyperPlane v) = v
+
+instance ( MkHyperPlaneConstraints d r
+         ) => ConstructableHyperPlane_ (HyperPlane d r) d r where
   hyperPlaneFromEquation = HyperPlane
 
-
-instance HyperPlaneFromPoints (HyperPlane 2 r) where
-  hyperPlaneTrough (Vector2 p q)
-    | p^.xCoord /= q^.yCoord = let LineEQ a b = lineThrough p q
-                               in HyperPlane $ Vector3 b a (-1)
-    | otherwise              = HyperPlane $ Vector3 (p^.xCoord) (-1) 0
+instance (OptCVector_ 3 r, Eq r
+         ) => HyperPlaneFromPoints (HyperPlane 2 r) where
+  hyperPlaneThrough (Vector2_ (Point2_ px py) (Point2_ qx qy))
+    | px /= qx  = let a = qy - py
+                      b = px - qx
+                      c = (qx-px)*py - px*(qy-py)
+                  in HyperPlane $ Vector3 c a b
+    | otherwise = HyperPlane $ Vector3 px (-1) 0
 
 
 --  hyperPlaneTrough pts = fromPointAndNormal p0 n

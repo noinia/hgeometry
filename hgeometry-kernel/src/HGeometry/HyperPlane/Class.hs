@@ -14,6 +14,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
+  , ConstructableHyperPlane_(..)
   , NonVerticalHyperPlane_(..)
   , isParallelTo
 
@@ -29,6 +30,8 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+
+
 -- | A class to represent hyperplanes in d-dimensional space.
 class ( NumType hyperPlane ~ r
       , Dimension hyperPlane ~ d
@@ -38,16 +41,6 @@ class ( NumType hyperPlane ~ r
       ) => HyperPlane_ hyperPlane d r | hyperPlane -> d
                                       , hyperPlane -> r where
 --  {-# MINIMAL hyperPlaneTrough #-}
-
-  -- | Given the coefficients \(a_0,..,a_d\) of the equation, i.e.
-  -- so that
-  --
-  -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
-  --
-  -- construct the hyperplane form it.
-  --
-  --
-  hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
 
   -- -- | Constructs the hyperplane through d points
   -- hyperPlaneTrough :: Num r => Point_ point d r => Vector d point -> hyperPlane
@@ -74,6 +67,12 @@ class ( NumType hyperPlane ~ r
                             , Num r
                             )
                          => point -> Vector d r -> hyperPlane
+  default fromPointAndNormal :: ( Point_ point d r
+                                , VectorFor point ~ Vector d r
+                                , Num r
+                                , ConstructableHyperPlane_ hyperPlane d r
+                                )
+                             => point -> Vector d r -> hyperPlane
   fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
     where
       a0 = negate $ (q^.vector) `dot` n
@@ -111,6 +110,20 @@ class ( NumType hyperPlane ~ r
       (a,a0) = unsnoc $ hyperPlaneEquation h
   {-# INLINE onSideTest #-}
 
+class HyperPlane_ hyperPlane d r
+     => ConstructableHyperPlane_ hyperPlane d r where
+
+  -- | Given the coefficients \(a_0,..,a_d\) of the equation, i.e.
+  -- so that
+  --
+  -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
+  --
+  -- construct the hyperplane form it.
+  --
+  --
+  hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
+
+
 --------------------------------------------------------------------------------
 
 -- | Non-vertical hyperplanes.
@@ -132,11 +145,11 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   {-# INLINE evalAt #-}
 
 
-  -- | The coefficients \( \langle a_0,..,a_{d-1} \rangle \) such that
+  -- | The coefficients \( \langle a_1,..,a_d \rangle \) such that
   -- a point \(p = (p_1,..,p_d) \) lies on the hyperplane the given coefficients iff
   --
   --
-  --  \( a_0 + \sum_i=1^{d-1} a_i*p_i = p_d \)
+  --  \( a_d + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
   hyperPlaneCoefficients :: hyperPlane -> Vector d r
   default hyperPlaneCoefficients :: ( Fractional r, KnownNat d
@@ -162,5 +175,7 @@ isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)
 class HyperPlaneFromPoints hyperPlane where
   -- | Construct a hyperplane through the given d points.
   hyperPlaneThrough     :: ( Point_ point d r
+                           , Vector_ vector d point
                            , HyperPlane_ hyperPlane d r
-                           ) => Vector d point -> hyperPlane
+                           , Num r
+                           ) => vector -> hyperPlane

@@ -18,7 +18,7 @@ import qualified Data.Foldable as F
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane
 import           HGeometry.Intersection
-import           HGeometry.Point.Class
+import           HGeometry.Point
 import           HGeometry.Properties (NumType, Dimension)
 import           HGeometry.Vector
 
@@ -43,17 +43,16 @@ pattern Triangle_ :: Triangle_ triangle point => point -> point -> point -> tria
 pattern Triangle_ u v w <- (view corners -> Vector3 u v w)
   where
     Triangle_ u v w = mkTriangle u v w
-
+{-# COMPLETE Triangle_ #-}
 
 --------------------------------------------------------------------------------
 -- * Two dimensional convenience functions
 
 -- | Get the three halfplanes such that the triangle is the intersection of those
 -- halfspaces.
---
 intersectingHalfPlanes                    :: ( Triangle_ triangle point
                                              , Point_ point 2 r
-                                             , Fractional r
+                                             , Num r, Eq r
                                              , OptCVector_ 3 (HalfSpace 2 r)
                                              , OptMetric_ 2 r, OptCVector_ 2 r
                                              , OptCVector_ 3 r
@@ -62,4 +61,8 @@ intersectingHalfPlanes                    :: ( Triangle_ triangle point
                                           -> Vector 3 (HalfSpace 2 r)
 intersectingHalfPlanes (Triangle_ u v w) = Vector3 (above u v) (above v w) (above w u)
   where
-    above p q = HalfSpace (hyperPlaneThrough p q)
+    above p q = HalfSpace . hyperPlaneThrough
+             $ Vector2 (pointFromPoint' p) (pointFromPoint' q)
+
+    pointFromPoint' :: (Point_ point d r, OptVector_ d r, OptMetric_ d r) => point -> Point d r
+    pointFromPoint' = pointFromPoint

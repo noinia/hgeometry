@@ -56,7 +56,8 @@ module HGeometry.Point
 import Control.Lens ((^.))
 import Data.Type.Ord
 import GHC.TypeLits
-import HGeometry.HyperPlane
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.Internal
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation

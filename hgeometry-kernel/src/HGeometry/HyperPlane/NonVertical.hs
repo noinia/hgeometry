@@ -40,23 +40,35 @@ deriving instance Ord (VectorFamily' d r) => Ord (NonVerticalHyperPlane d r)
 
 
 instance ( MkHyperPlaneConstraints d r
-         , Fractional r
-
          , OptMetric_ d r
          , 1 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
+  fromPointAndNormal _ n = NonVerticalHyperPlane n
+  -- see https://en.wikipedia.org/wiki/Normal_(geometry)
+  -- FIXME: this seems fishy; don't we need the point?
+
+
+instance ( MkHyperPlaneConstraints d r
+         , OptMetric_ d r
+         , Fractional r
+         , 1 <= d
+         ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
   -- | pre: the last component is not zero
   hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-x)
     where
       (a,x) = unsnoc e
 
+
+
+
 instance ( MkHyperPlaneConstraints d r
-         , Fractional r
+         , Num r
          , OptVector_ ((d-1)+1) r
          , OptMetric_ d r
          , 1 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
+  hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
 
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
