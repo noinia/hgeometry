@@ -226,22 +226,21 @@ instance (Ord r, OptCVector_ 2 r) => ClosedInterval r `HasIntersectionWith` Clos
     GT -> False -- by invariant, intA^.end > intA.start, so they don't intersect
 
 
-
--- instance ( Ord r, OptVector_ 2 r
---          ) => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
---   intA `intersect` intB = case (intA^.start) `compareInterval` intB of
---       LT -> case (intA^.end) `compareInterval` intB of
---               LT -> Nothing
---               EQ -> Just . ClosedInterval_x_ClosedInterval_Partial
---                     $ ClosedInterval (intB^.start) (intA^.end)
---               GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
---                 -- intB is fully contained
---       EQ -> case (intA^.end) `compareInterval` intB of
---               LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
---               EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
---               GT -> Just $ mkInterval' (intA^.start) (intB^.end)
---       GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
---     where
---       mkInterval' l r
---         | l == r    = ClosedInterval_x_ClosedInterval_Point l
---         | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
+instance ( Ord r, OptCVector_ 2 r
+         ) => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
+  intA `intersect` intB = case (intA^.start) `compareInterval` intB of
+      LT -> case (intA^.end) `compareInterval` intB of
+              LT -> Nothing
+              EQ -> Just . ClosedInterval_x_ClosedInterval_Partial
+                    $ ClosedInterval (intB^.start) (intA^.end)
+              GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
+                -- intB is fully contained
+      EQ -> case (intA^.end) `compareInterval` intB of
+              LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
+              EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
+              GT -> Just $ mkInterval' (intA^.start) (intB^.end)
+      GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
+    where
+      mkInterval' l r
+        | l == r    = ClosedInterval_x_ClosedInterval_Point l
+        | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
