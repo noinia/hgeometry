@@ -1,0 +1,137 @@
+cabal-version:      3.4
+name:               hgeometry-vector
+version:            1.0.0.0
+-- synopsis:
+-- description:
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+--------------------------------------------------------------------------------
+
+common setup
+    ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+
+    build-depends:
+        base                    >= 4.16.4.0
+      , containers              >= 0.6
+      , vector                  >= 0.13
+      , lens                    >= 5.2
+      , deepseq                 >= 1.1
+      , semigroupoids           >= 5
+      , semigroups              >= 0.18
+      , random                  >= 1.2
+      , witherable              >= 0.4
+
+    default-language: GHC2021
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+
+--------------------------------------------------------------------------------
+-- * Main Library
+
+library
+    import:           setup
+    exposed-modules:
+      HGeometry.Vector.Additive
+      HGeometry.Vector.Additive.Fractional
+
+    re-exported-modules:
+      HGeometry.Properties
+
+    -- other-modules:
+    -- other-extensions:
+    hs-source-dirs:   src
+    build-depends:
+        hgeometry-vector:signatures
+
+--------------------------------------------------------------------------------
+-- * Public Library
+
+library signatures
+    import:           setup
+    signatures:
+      HGeometry.Sigs.R
+      HGeometry.Sigs.R.Num
+      HGeometry.Sigs.R.Fractional
+      HGeometry.Sigs.D
+      HGeometry.Sigs.Vector
+      HGeometry.Sigs.Vector.Additive
+    exposed-modules:
+      HGeometry.Properties
+
+    -- other-modules:
+    -- other-extensions:
+    hs-source-dirs:   signatures
+
+--------------------------------------------------------------------------------
+-- * NumTypes
+
+library numtypes
+  import: setup
+  -- visibility: public
+  hs-source-dirs: numtypes
+  exposed-modules:
+    Int
+    Int32
+    Double
+    Float
+
+--------------------------------------------------------------------------------
+-- * NumTypes
+
+library dimensions
+  import: setup
+  -- visibility: public
+  hs-source-dirs: dimensions
+  exposed-modules:
+    One
+    Two
+    Three
+    Four
+
+
+--------------------------------------------------------------------------------
+-- * NumTypes
+
+library Vec2
+  import: setup
+  -- visibility: public
+  hs-source-dirs: src_v2
+  exposed-modules:
+    Vec2
+  build-depends:
+      hgeometry-vector
+
+--------------------------------------------------------------------------------
+
+test-suite hgeometry-vector-test
+    import:           setup
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Main.hs
+    -- build-depends:
+    --     hgeometry-vector
