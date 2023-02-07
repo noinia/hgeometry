@@ -13,9 +13,16 @@ import           HGeometry.Sigs.R
 
 --------------------------------------------------------------------------------
 
+myVec :: Vector
+myVec = Vector2 5 11
+
+
+
 type D = 2
 
-data Vector = Vector2 {-# UNPACK #-}!R {-# UNPACK #-}!R
+-- | 2-dimensional vector
+data Vector = Vector2 {-# UNPACK #-}!R
+                      {-# UNPACK #-}!R
   deriving stock (Show,Eq,Ord,Generic)
 
 instance NFData Vector
@@ -25,6 +32,7 @@ type instance Dimension Vector = D
 
 --------------------------------------------------------------------------------
 -- * HGeometry.Sigs.Vector
+
 
 components :: IndexedTraversal1' Int Vector R
 components = conjoined trav (itrav.indexed)
