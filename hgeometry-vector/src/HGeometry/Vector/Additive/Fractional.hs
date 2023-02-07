@@ -3,7 +3,7 @@ module HGeometry.Vector.Additive.Fractional
   , module HGeometry.Vector.Additive
   ) where
 
-import HGeometry.Sigs.R.Fractional
+import HGeometry.Sigs.R --Fractional
 import HGeometry.Sigs.Vector
 import HGeometry.Vector.Additive
 

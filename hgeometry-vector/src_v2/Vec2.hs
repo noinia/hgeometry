@@ -33,7 +33,7 @@ components = conjoined trav (itrav.indexed)
 
     itrav                 :: Apply.Apply f => (Int -> R -> f R) -> Vector -> f Vector
     itrav f (Vector2 x y) = Vector2 <$> f 0 x Apply.<.> f 1 y
-{-# INLINE coordinates #-}
+{-# INLINE components #-}
 
 --------------------------------------------------------------------------------
 
@@ -53,4 +53,4 @@ component = let i = fromInteger @Int (natVal $ Proxy @i)
              0 -> ilens (\(Vector2 x _) -> (i,x)) (\(Vector2 _ y) x -> Vector2 x y)
              1 -> ilens (\(Vector2 _ y) -> (i,y)) (\(Vector2 x _) y -> Vector2 x y)
              _ -> error "coord: absurd"
-{-# INLINE coord #-}
+{-# INLINE component #-}

@@ -57,8 +57,8 @@ library
       HGeometry.Vector.Additive
       HGeometry.Vector.Additive.Fractional
 
-    re-exported-modules:
-      HGeometry.Properties
+    -- re-exported-modules:
+    --   HGeometry.Properties
 
     -- other-modules:
     -- other-extensions:
@@ -73,11 +73,12 @@ library signatures
     import:           setup
     signatures:
       HGeometry.Sigs.R
-      HGeometry.Sigs.R.Num
-      HGeometry.Sigs.R.Fractional
+      -- HGeometry.Sigs.R.Num
+      -- HGeometry.Sigs.R.Fractional
       HGeometry.Sigs.D
       HGeometry.Sigs.Vector
       HGeometry.Sigs.Vector.Additive
+
     exposed-modules:
       HGeometry.Properties
 
@@ -123,6 +124,7 @@ library Vec2
     Vec2
   build-depends:
       hgeometry-vector
+    , hgeometry-vector:signatures
 
 --------------------------------------------------------------------------------
 

@@ -16,7 +16,7 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           HGeometry.Sigs.Vector
 import           HGeometry.Sigs.Vector.Additive
-import           HGeometry.Sigs.R
+import           HGeometry.Sigs.R -- .Num
 
 --------------------------------------------------------------------------------
 
