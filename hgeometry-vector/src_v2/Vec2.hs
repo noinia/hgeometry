@@ -24,6 +24,7 @@ type instance NumType   Vector = R
 type instance Dimension Vector = D
 
 --------------------------------------------------------------------------------
+-- * HGeometry.Sigs.Vector
 
 components :: IndexedTraversal1' Int Vector R
 components = conjoined trav (itrav.indexed)
@@ -35,7 +36,7 @@ components = conjoined trav (itrav.indexed)
     itrav f (Vector2 x y) = Vector2 <$> f 0 x Apply.<.> f 1 y
 {-# INLINE components #-}
 
---------------------------------------------------------------------------------
+----------------------------------------
 
 type instance Index   Vector = Int
 type instance IxValue Vector = R
@@ -47,6 +48,7 @@ instance Ixed Vector where
                              _ -> pure v
   {-# INLINE ix #-}
 
+
 component :: forall i. (i <= D, KnownNat i) => IndexedLens' Int Vector R
 component = let i = fromInteger @Int (natVal $ Proxy @i)
         in case i of
@@ -54,3 +56,21 @@ component = let i = fromInteger @Int (natVal $ Proxy @i)
              1 -> ilens (\(Vector2 _ y) -> (i,y)) (\(Vector2 x _) y -> Vector2 x y)
              _ -> error "coord: absurd"
 {-# INLINE component #-}
+
+
+--------------------------------------------------------------------------------
+-- * HGeometry.Sigs.Vector.Additive
+
+zero :: Vector
+zero = Vector2 0 0
+
+liftU2                                 :: (R -> R -> R) -> Vector -> Vector -> Vector
+liftU2 f (Vector2 x y) (Vector2 x' y') = Vector2 (f x x') (f y y')
+
+liftI2                                 :: (R -> R -> R) -> Vector -> Vector -> Vector
+liftI2 f (Vector2 x y) (Vector2 x' y') = Vector2 (f x x') (f y y')
+
+--------------------------------------------------------------------------------
+-- * HGeometry.Sigs.Vector.Metric
+
+-- nothing to implement.
