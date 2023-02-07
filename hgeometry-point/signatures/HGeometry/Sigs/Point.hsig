@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Sigs.Point
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Signature for D-dimensional points
+--
+--------------------------------------------------------------------------------
+signature HGeometry.Sigs.Point where
+
+import Control.DeepSeq
+import Control.Lens
+import Data.Kind (Type)
+import Data.Type.Ord
+import HGeometry.Sigs.D
+import HGeometry.Sigs.R
+import HGeometry.Sigs.Vector
+
+--------------------------------------------------------------------------------
+
+-- | d-dimensional points
+data Point :: Type
+
+
+instance Eq Point
+instance Ord Point
+instance NFData Point
+
+instance Show Point
+
+
+--------------------------------------------------------------------------------
+
+-- | Lens to access the vector of this point
+vector :: Lens' Point Vector
+
+
+--------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Numeric type representing real numbers; used in the unboxed implementations.
+-- Signature for D-dimensional Vectors
 --
 --------------------------------------------------------------------------------
 signature HGeometry.Sigs.Vector where
@@ -22,8 +22,7 @@ import HGeometry.Sigs.R
 
 --------------------------------------------------------------------------------
 
-type Vector :: Type
-data Vector
+data Vector :: Type
 
 -- apparently GHC does not support this yet :S
 -- type instance NumType   Vector = R
@@ -42,7 +41,7 @@ components :: IndexedTraversal1' Int Vector R
 
 
 -- | Lens to access the i^th coordinate.
-component :: forall i. (i <= D) => IndexedLens' Int Vector R
+component :: forall i. (i < D) => IndexedLens' Int Vector R
 
 
 --------------------------------------------------------------------------------

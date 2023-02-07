@@ -1,5 +1,5 @@
 cabal-version:      3.4
-name:               hgeometry-vector
+name:               hgeometry-point
 version:            1.0.0.0
 -- synopsis:
 -- description:
@@ -20,6 +20,7 @@ common setup
 
     build-depends:
         base                    >= 4.16.4.0
+      , hgeometry-vector        >= 1.0.0.0
       , containers              >= 0.6
       , vector                  >= 0.13
       , lens                    >= 5.2
@@ -57,9 +58,9 @@ common setup
 library
     import:           setup
     exposed-modules:
-      HGeometry.Vector.Additive
-      HGeometry.Vector.Additive.Fractional
-      HGeometry.Vector.Metric
+      HGeometry.Point.Common
+      HGeometry.Point.Affine
+      -- HGeometry.Vector.Metric
       -- HGeometry.Vector.Metric.Radical
 
     -- re-exported-modules:
@@ -69,8 +70,7 @@ library
     -- other-extensions:
     hs-source-dirs:   src
     build-depends:
-        hgeometry-vector:signatures
-
+        hgeometry-point:signatures
 -- I wonder if we should create e.g. a 'fractional' library that would export
 -- all *.Fractional modules,
 --
@@ -82,70 +82,37 @@ library signatures
     import:           setup
     visibility: public
     signatures:
-      HGeometry.Sigs.R
-      -- HGeometry.Sigs.R.Num
-      -- HGeometry.Sigs.R.Fractional
-      HGeometry.Sigs.D
-      HGeometry.Sigs.Vector
-      HGeometry.Sigs.Vector.Additive
+      HGeometry.Sigs.Point
+      HGeometry.Sigs.Point.Affine
 
-    exposed-modules:
-      HGeometry.Properties
+    -- exposed-modules:
+      -- HGeometry.Properties
 
     -- other-modules:
     -- other-extensions:
     hs-source-dirs:   signatures
 
-
-
-
 --------------------------------------------------------------------------------
--- * NumTypes
+-- * Point Implementations
 
-library numtypes
-  import: setup
-  -- visibility: public
-  hs-source-dirs: numtypes
-  exposed-modules:
-    Int
-    Int32
-    Double
-    Float
-
---------------------------------------------------------------------------------
--- * Dimension ; not sure if we will need this, as it feels a bit silly
-
-library dimensions
-  import: setup
-  -- visibility: public
-  hs-source-dirs: dimensions
-  exposed-modules:
-    One
-    Two
-    Three
-    Four
-
---------------------------------------------------------------------------------
--- * Vector Implementations
-
-library Vec2
-  import: setup
-  -- visibility: public
-  hs-source-dirs: src_v2
-  exposed-modules:
-    Vec2
-  build-depends:
-      hgeometry-vector
-    , hgeometry-vector:signatures
+-- library newtype
+--   import: setup
+--   -- visibility: public
+--   hs-source-dirs: src_newtype
+--   exposed-modules:
+--     HGeometry.Point.PointF
+--   build-depends:
+--       hgeometry-point
+--     , hgeometry-point:signatures
 
 --------------------------------------------------------------------------------
 
-test-suite hgeometry-vector-test
-    import:           setup
-    -- other-modules:
-    -- other-extensions:
-    type:             exitcode-stdio-1.0
-    hs-source-dirs:   test
-    main-is:          Main.hs
-    -- build-depends:
-    --     hgeometry-vector
+-- test-suite hgeometry-point-test
+--     import:           setup
+--     -- other-modules:
+--     -- other-extensions:
+--     type:             exitcode-stdio-1.0
+--     hs-source-dirs:   test
+--     main-is:          Main.hs
+--     -- build-depends:
+--     --     hgeometry-vector
