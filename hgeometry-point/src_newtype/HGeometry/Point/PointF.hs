@@ -60,9 +60,7 @@ instance ( Show (IxValue v)
       constr   = "Point" <> show (fromIntegral (natVal @(Dimension v) Proxy))
       unwordsS = foldr (.) id . intersperse (showChar ' ')
 
-instance ( Vector_ v (Dimension v) (IxValue v)
-         , Metric_ v
-         , Read (IxValue v)
+instance ( Read (IxValue v)
          , KnownNat (Dimension v)
          , IxValue v ~ NumType v
          ) => Read (PointF v) where
