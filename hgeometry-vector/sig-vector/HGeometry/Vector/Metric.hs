@@ -14,10 +14,10 @@ module HGeometry.Vector.Metric
   , qd
   ) where
 
-import           Control.Lens
-import           R -- .Num
-import           Vector
-import           HGeometry.Vector.Additive
+import Control.Lens
+import HGeometry.Vector.Additive
+import R
+import Vector
 
 --------------------------------------------------------------------------------
 

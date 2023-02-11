@@ -8,9 +8,13 @@
 -- Implements a point by wrapping some Vector type
 --
 --------------------------------------------------------------------------------
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Point.PointF
   ( Point
   , PointF(..)
+  , vector
+  , (.-.)
+  , (.+^)
   ) where
 
 import Control.DeepSeq
@@ -22,12 +26,14 @@ import Data.List (intersperse)
 import Data.Proxy
 import GHC.Generics (Generic)
 import GHC.TypeLits
--- import           HGeometry.Point.Class
--- import HGeometry.Properties
--- import HGeometry.Vector
-import HGeometry.Vector.Vector2
-import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import HGeometry.Properties
+import HGeometry.Vector
+import Vector -- somehow it doesn't like loading just HGeometry.Vector which also exports Vector
+import HGeometry.Vector.Additive
+import Vector.Additive
+import D
+import System.Random (Random (..))
+import System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
 import Text.Read (Read (..), readListPrecDefault)
 -- import qualified Data.Vector.Generic as GV
@@ -48,38 +54,34 @@ newtype PointF v = Point { toVec :: v }
                           -- , ToJSON, FromJSON -- not sure we want these like this
                           )
 
-{-
 
 type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = NumType v
 -- type instance VectorFor (PointF v) = v
 
 
-instance ( Show (IxValue v)
-         , KnownNat (Dimension v)
-         , NumType v ~ IxValue v
-         ) => Show (PointF v) where
+instance Show Point where
   showsPrec k p = showParen (k > app_prec) $
                     showString constr . showChar ' ' .
-                    unwordsS (map (showsPrec 11) (p^..coordinates))
+                    unwordsS (map (showsPrec 11) (p^..vector.components))
     where
       app_prec = 10
-      constr   = "Point" <> show (fromIntegral (natVal @(Dimension v) Proxy))
+      constr   = "Point" <> show (fromIntegral (natVal @D Proxy))
       unwordsS = foldr (.) id . intersperse (showChar ' ')
 
-instance ( Read (IxValue v)
-         , KnownNat (Dimension v)
-         , IxValue v ~ NumType v
-         ) => Read (PointF v) where
-  readPrec = readData $
-      readUnaryWith (replicateM d readPrec) constr $ \rs ->
-        case pointFromList rs of
-          Just p -> p
-          _      -> error "internal error in HGeometry.Point read instance."
-    where
-      d        = fromIntegral (natVal @(Dimension v) Proxy)
-      constr   = "Point" <> show d
-  readListPrec = readListPrecDefault
+-- instance ( Read (IxValue v)
+--          , KnownNat (Dimension v)
+--          , IxValue v ~ NumType v
+--          ) => Read (PointF v) where
+--   readPrec = readData $
+--       readUnaryWith (replicateM d readPrec) constr $ \rs ->
+--         case pointFromList rs of
+--           Just v -> p
+--           _      -> error "internal error in HGeometry.Point read instance."
+--     where
+--       d        = fromIntegral (natVal @(Dimension v) Proxy)
+--       constr   = "Point" <> show d
+--   readListPrec = readListPrecDefault
 
 --------------------------------------------------------------------------------
 -- * Point signature
@@ -150,6 +152,3 @@ p .+^ v = Point $ toVec p ^+^ v
 --   {-# INLINE basicUnsafeIndexM #-}
 
 -- instance UV.Unbox v => UV.Unbox (PointF v)
-
-
--}

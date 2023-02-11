@@ -14,9 +14,10 @@ module HGeometry.Point.Affine
   , (.-^)
   ) where
 
+import HGeometry.Vector
 import Point
 import Point.Affine
-import HGeometry.Vector
+import Vector.Additive
 
 --------------------------------------------------------------------------------
 

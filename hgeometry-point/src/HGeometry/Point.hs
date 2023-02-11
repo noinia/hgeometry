@@ -13,6 +13,7 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.Point
   ( Point(..)
+  , vector
   , coordinates
   , coord
   , xCoord
@@ -31,6 +32,7 @@ import HGeometry.Point.Affine
 import HGeometry.Vector
 import Point
 import R
+import Vector
 
 --------------------------------------------------------------------------------
 
@@ -40,7 +42,7 @@ coordinates = reindexed (+1) $ vector .> components
 {-# INLINE coordinates #-}
 
 -- | Lens to access the i^th coordinate.
-coord :: forall i. (1 <= i, (i-1) < D) => IndexedLens' Int Point R
+coord :: forall i. (KnownNat i, 1 <= i, (i-1) < D) => IndexedLens' Int Point R
 coord = reindexed (+1) $ vector .> component @(i-1)
 {-# INLINE coord #-}
 
@@ -63,3 +65,28 @@ zCoord = coord @3
 wCoord :: 3 < D => IndexedLens' Int Point R
 wCoord = coord @4
 {-# INLINE wCoord #-}
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- * Convenience functions to construct 1..4 dimensional points
+
+-- -- | A bidirectional pattern synonym for 1 dimensional points.
+-- pattern Point1   :: R -> Point
+-- pattern Point1 x = Point (Vector1 x)
+-- {-# COMPLETE Point1 #-}
+
+-- -- | A bidirectional pattern synonym for 2 dimensional points.
+-- pattern Point2       :: R -> R -> Point
+-- pattern Point2 x y = Point (Vector2 x y)
+-- {-# COMPLETE Point2 #-}
+
+-- -- | A bidirectional pattern synonym for 3 dimensional points.
+-- pattern Point3       :: R -> R -> R -> Point
+-- pattern Point3 x y z = (Point (Vector3 x y z))
+-- {-# COMPLETE Point3 #-}
+
+-- -- | A bidirectional pattern synonym for 4 dimensional points.
+-- pattern Point4         :: R -> R -> R -> R -> Point
+-- pattern Point4 x y z w = (Point (Vector4 x y z w))
+-- {-# COMPLETE Point4 #-}

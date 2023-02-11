@@ -1,25 +1,35 @@
-module Vector2Spec where
+module Point2Spec where
 
 import Control.Lens
+import HGeometry.Point
+import HGeometry.Point.PointF
 import HGeometry.Vector
 import HGeometry.Vector.Vector2
+import HGeometry.Properties
 import Test.Hspec
 
 --------------------------------------------------------------------------------
 
-myVec :: Vector
-myVec = Vector2 5 11
+myPoint :: Point
+myPoint = Point2 5 11
+
+type R = NumType Point
+
+-- | A bidirectional pattern synonym for 2 dimensional points.
+pattern Point2       :: R -> R -> Point
+pattern Point2 x y = Point (Vector2 x y)
+{-# COMPLETE Point2 #-}
 
 spec :: Spec
-spec = describe "vector2 tests" $ do
-         it "components" $
-           myVec^..components `shouldBe` [5,11]
-         it "component" $ do
-           myVec^.(component @0) `shouldBe` 5
-           myVec^.(component @1) `shouldBe` 11
-         it "xComponent" $
-           myVec^.xComponent `shouldBe` 5
-         it "yComponent" $
-           myVec^.yComponent `shouldBe` 11
+spec = describe "point2 tests" $ do
+         it "coordinatess" $
+           myPoint^..coordinates `shouldBe` [5,11]
+         it "coordinates" $ do
+           myPoint^.(coord @1) `shouldBe` 5
+           myPoint^.(coord @2) `shouldBe` 11
+         it "xCoord" $
+           myPoint^.xCoord `shouldBe` 5
+         it "yCoord" $
+           myPoint^.yCoord `shouldBe` 11
          it "add" $
-           myVec ^+^ myVec `shouldBe` Vector2 10 22
+           myPoint .+^ Vector2 5 11 `shouldBe` Point2 10 22
