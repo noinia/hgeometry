@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Additive
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Additive operations for vectors
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Additive
   ( zero
   , liftU2

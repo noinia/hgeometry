@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Vector2
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Two dimensional vectors
+--
+--------------------------------------------------------------------------------
 {-# LANGUAGE AllowAmbiguousTypes #-}
 module HGeometry.Vector.Vector2
   ( Vector(..)

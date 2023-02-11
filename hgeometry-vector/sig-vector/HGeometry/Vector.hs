@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- D-dimensional vectors storing elements of type R
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector
   ( module Vector
   , xComponent
