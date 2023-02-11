@@ -1,8 +1,11 @@
-module HGeometry.Vector.Helper
-  ( xComponent
+module HGeometry.Vector
+  ( module Vector
+  , xComponent
   , yComponent
   , zComponent
   , wComponent
+  , module HGeometry.Vector.Additive
+  , module HGeometry.Vector.Metric
   ) where
 
 import Control.Lens
@@ -10,6 +13,8 @@ import D
 import Data.Type.Ord
 import R
 import Vector
+import HGeometry.Vector.Additive
+import HGeometry.Vector.Metric
 
 --------------------------------------------------------------------------------
 

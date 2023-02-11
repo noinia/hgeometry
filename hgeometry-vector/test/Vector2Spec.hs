@@ -1,9 +1,8 @@
 module Vector2Spec where
 
 import Control.Lens
-import HGeometry.Vector.Additive
+import HGeometry.Vector
 import HGeometry.Vector.Vector2
-import HGeometry.Vector.Helper
 import Test.Hspec
 
 --------------------------------------------------------------------------------
