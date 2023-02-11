@@ -165,34 +165,6 @@ library sig-vector
         , hgeometry-vector:shared
 
 --------------------------------------------------------------------------------
-
--- should be superfluous
--- library sig-vector-fractional
---     import:           setup
---     visibility: public
---     exposed-modules:
---       HGeometry.Vector.Additive.Fractional
-
---     -- other-modules:
---     hs-source-dirs: sig-vector-fractional
---     build-depends:
---           hgeometry-vector:sig-vector
---         , hgeometry-vector:sig-fractional
-
--- --------------------------------------------------------------------------------
--- -- * Additive Signature
-
--- library additive
---   import: setup
---   build-depends:
---       hgeometry-vector
---     , hgeometry-vector:vector2
---   mixins:
---       hgeometry-vector requires ( HGeometry.Sigs.Vector          as HGeometry.Vector.Vector2
---                                 , HGeometry.Sigs.Vector.Additive as HGeometry.Vector.Vector2
---                                 )
-
---------------------------------------------------------------------------------
 -- * NumType Implementations:
 
 library numtypes
@@ -228,6 +200,17 @@ library vector2
   hs-source-dirs: src-vector2
   exposed-modules:
     HGeometry.Vector.Vector2
+  build-depends:
+      hgeometry-vector:sig-num
+    , hgeometry-vector:shared
+
+
+library linear
+  import: setup
+  visibility: public
+  hs-source-dirs: src-linear
+  exposed-modules:
+    HGeometry.Vector.Vector2.V2
   build-depends:
       hgeometry-vector:sig-num
     , hgeometry-vector:shared
