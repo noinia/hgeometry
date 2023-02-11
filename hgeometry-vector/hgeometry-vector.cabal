@@ -128,6 +128,13 @@ library sig-random
       R
     hs-source-dirs: sig-random
 
+library sig-unboxed
+    import:           setup
+    visibility: public
+    signatures:
+      R
+    hs-source-dirs: sig-unboxed
+
 library sig-dim
     import:           setup
     visibility: public
@@ -196,6 +203,7 @@ library numtypes
     Int32
     Double
     Float
+    Rational
 
 --------------------------------------------------------------------------------
 -- * Dimension implementations ; these feel a bit silly.

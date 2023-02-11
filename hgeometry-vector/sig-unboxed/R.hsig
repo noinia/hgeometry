@@ -1,0 +1,23 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  R
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Unboxable real number types
+--
+--------------------------------------------------------------------------------
+signature R where
+
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UMV
+
+-- | The numeric data type representing real numbers
+data R
+
+instance GV.Vector   UV.Vector   R
+instance GMV.MVector UMV.MVector R
+instance UV.Unbox R
