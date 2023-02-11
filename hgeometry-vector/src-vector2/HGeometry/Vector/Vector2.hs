@@ -15,7 +15,6 @@ import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Properties
 import           R
--- import           D
 
 --------------------------------------------------------------------------------
 
