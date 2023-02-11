@@ -1,9 +1,19 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Additive.Fractional
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Additive operations for vectors that have a fractional numtype
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Additive.Fractional
   ( (^/)
   , module HGeometry.Vector.Additive
   ) where
 
-import R --Fractional
+import R
 import Vector
 import HGeometry.Vector.Additive
 
