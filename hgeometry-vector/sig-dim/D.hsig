@@ -1,0 +1,20 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  D
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- The Dimension
+--
+--------------------------------------------------------------------------------
+signature D where
+
+import Data.Type.Ord
+import GHC.TypeLits
+
+
+-- | The dimension
+data D :: Nat
+
+instance KnownNat D

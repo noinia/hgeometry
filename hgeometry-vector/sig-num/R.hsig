@@ -1,0 +1,35 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  R
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Numeric type representing real numbers
+--
+--------------------------------------------------------------------------------
+signature R where
+
+import Control.DeepSeq
+
+-- | The numeric data type representing real numbers
+data R
+
+instance Eq  R
+instance Ord R
+instance NFData R
+
+instance Show R
+
+instance Num R
+
+-- instance ToJSON R
+-- instance FromJSON R
+
+-- -- instance Uniform R
+-- instance UniformRange R
+-- instance Random R
+
+-- instance GV.Vector   UV.Vector   R
+-- instance GMV.MVector UMV.MVector R
+-- instance UV.Unbox R
