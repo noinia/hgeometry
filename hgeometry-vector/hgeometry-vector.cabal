@@ -148,6 +148,7 @@ library sig-vector
     exposed-modules:
       HGeometry.Vector.Additive
       HGeometry.Vector.Metric
+      HGeometry.Vector.Helper
 
     -- other-modules:
     hs-source-dirs: sig-vector
@@ -223,26 +224,73 @@ library vector2
     , hgeometry-vector:shared
 
 --------------------------------------------------------------------------------
+-- * Generic Test stup
 
-test-suite hgeometry-vector-test
+common hgeometry-vector-test
     import:           setup, test-setup
-    type:             exitcode-stdio-1.0
     hs-source-dirs:   test
-    main-is:          Main.hs
     build-tool-depends: hspec-discover:hspec-discover
     other-modules:
-         Spec
-       , Vector2Spec
+       GenericSpec
+       Spec
+       Vector2Spec
     build-depends:
          hgeometry-vector:vector2
        , hgeometry-vector:numtypes
        , hgeometry-vector:sig-vector
 
     mixins:
-         hgeometry-vector:numtypes (Int as R)
        , hgeometry-vector:sig-vector
            requires
            ( Vector          as HGeometry.Vector.Vector2
            , Vector.Additive as HGeometry.Vector.Vector2
            , D               as HGeometry.Vector.Vector2
            )
+
+----------------------------------------
+-- * Concrete Test stuites
+
+test-suite hgeometry-vector-test-int
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        ShowSpec
+    hs-source-dirs:   test-int
+    mixins:
+         hgeometry-vector:numtypes (Int as R)
+
+test-suite hgeometry-vector-test-double
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        ShowSpec
+    hs-source-dirs:   test-double
+    mixins:
+         hgeometry-vector:numtypes (Double as R)
+
+--------------------------------------------------------------------------------
+
+-- test-suite hgeometry-vector-doctest
+--     import:           setup, test-setup
+--     type:             exitcode-stdio-1.0
+--     hs-source-dirs:   doctest
+--     main-is:          Main.hs
+--     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
+--     code-generators: doctest-codegen-driver
+
+--     build-depends:
+--          hgeometry-vector:vector2
+--        , hgeometry-vector:numtypes
+--        , hgeometry-vector:sig-vector
+--        , doctest
+
+--     mixins:
+--          hgeometry-vector:numtypes (Int as R)
+--        , hgeometry-vector:sig-vector
+--            requires
+--            ( Vector          as HGeometry.Vector.Vector2
+--            , Vector.Additive as HGeometry.Vector.Vector2
+--            , D               as HGeometry.Vector.Vector2
+--            )

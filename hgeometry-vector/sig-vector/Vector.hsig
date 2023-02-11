@@ -22,6 +22,9 @@ import R
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> let myVector2 = Vector2 5 11
+
 data Vector :: Type
 
 -- apparently GHC does not support this yet :S
@@ -37,6 +40,9 @@ instance Show Vector
 --------------------------------------------------------------------------------
 
 -- | Traversal over the components of the vector
+--
+-- >>> myVector2^..components
+-- [5,11]
 components :: IndexedTraversal1' Int Vector R
 
 
