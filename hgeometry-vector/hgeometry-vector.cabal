@@ -51,60 +51,128 @@ common setup
       , ViewPatterns
       , FunctionalDependencies
 
+common test-setup
+    build-depends:
+        hspec                   >= 2.9
+      , QuickCheck              >= 2.10
+      , quickcheck-instances
+
 --------------------------------------------------------------------------------
--- * Main Library
+-- * Main Library ; signature
 
 library
     import:           setup
     exposed-modules:
-      HGeometry.Vector.Additive
-      HGeometry.Vector.Additive.Fractional
-      HGeometry.Vector.Metric
       -- HGeometry.Vector.Metric.Radical
 
-    -- re-exported-modules:
-    --   HGeometry.Properties
+    reexported-modules:
+        HGeometry.Properties
+      -- , HGeometry.Vector
+      , HGeometry.Vector.Additive
+      , HGeometry.Vector.Metric
 
     -- other-modules:
     -- other-extensions:
     hs-source-dirs:   src
     build-depends:
-        hgeometry-vector:signatures
+        hgeometry-vector:sig-vector
+      , hgeometry-vector:shared
 
 -- I wonder if we should create e.g. a 'fractional' library that would export
 -- all *.Fractional modules,
 --
 
 --------------------------------------------------------------------------------
--- * Signatures for everything that is vector-like.
+-- * Shared
 
-library signatures
+-- Don't use any signatures here; so that either a sig or an implementation can import this
+-- library
+
+library shared
+    import:           setup
+    -- visibility: public
+    exposed-modules:
+      HGeometry.Properties
+    hs-source-dirs: src-shared
+
+--------------------------------------------------------------------------------
+-- * Base Signatures, i.e. R and D.
+
+library sig-num
     import:           setup
     visibility: public
     signatures:
-      HGeometry.Sigs.R
-      -- HGeometry.Sigs.R.Num
-      -- HGeometry.Sigs.R.Fractional
-      HGeometry.Sigs.D
-      HGeometry.Sigs.Vector
-      HGeometry.Sigs.Vector.Additive
+      R
+    hs-source-dirs: sig-num
 
-    exposed-modules:
-      HGeometry.Properties
+library sig-fractional
+    import:           setup
+    visibility: public
+    signatures:
+      R
+    hs-source-dirs: sig-fractional
 
-    -- other-modules:
-    -- other-extensions:
-    hs-source-dirs:   signatures
-
-
-
+library sig-dim
+    import:           setup
+    visibility: public
+    signatures:
+      D
+    hs-source-dirs: sig-dim
 
 --------------------------------------------------------------------------------
--- * NumTypes
+-- * Signatures for everything that is vector-like.
+
+library sig-vector
+    import:           setup
+    visibility: public
+    signatures:
+      Vector
+      Vector.Additive
+
+    exposed-modules:
+      HGeometry.Vector.Additive
+      HGeometry.Vector.Metric
+
+    -- other-modules:
+    hs-source-dirs: sig-vector
+    build-depends:
+          hgeometry-vector:sig-num
+        , hgeometry-vector:sig-dim
+        , hgeometry-vector:shared
+
+--------------------------------------------------------------------------------
+
+library sig-vector-fractional
+    import:           setup
+    visibility: public
+    exposed-modules:
+      HGeometry.Vector.Additive.Fractional
+
+    -- other-modules:
+    hs-source-dirs: sig-vector-fractional
+    build-depends:
+          hgeometry-vector:sig-vector
+        , hgeometry-vector:sig-fractional
+
+-- --------------------------------------------------------------------------------
+-- -- * Additive Signature
+
+-- library additive
+--   import: setup
+--   build-depends:
+--       hgeometry-vector
+--     , hgeometry-vector:vector2
+--   mixins:
+--       hgeometry-vector requires ( HGeometry.Sigs.Vector          as HGeometry.Vector.Vector2
+--                                 , HGeometry.Sigs.Vector.Additive as HGeometry.Vector.Vector2
+--                                 )
+
+--------------------------------------------------------------------------------
+-- * NumType Implementations:
 
 library numtypes
   import: setup
-  -- visibility: public
+  visibility: public
   hs-source-dirs: numtypes
   exposed-modules:
     Int
@@ -113,7 +181,7 @@ library numtypes
     Float
 
 --------------------------------------------------------------------------------
--- * Dimension ; not sure if we will need this, as it feels a bit silly
+-- * Dimension implementations ; these feel a bit silly.
 
 library dimensions
   import: setup
@@ -125,27 +193,37 @@ library dimensions
     Three
     Four
 
---------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- * Vector Implementations
 
 library vector2
   import: setup
-  -- visibility: public
-  hs-source-dirs: src_v2
+  visibility: public
+  hs-source-dirs: src-vector2
   exposed-modules:
-    Vec2
+    HGeometry.Vector.Vector2
   build-depends:
-      hgeometry-vector
-    , hgeometry-vector:signatures
+      hgeometry-vector:sig-num
+    , hgeometry-vector:shared
 
 --------------------------------------------------------------------------------
 
 test-suite hgeometry-vector-test
-    import:           setup
+    import:           setup, test-setup
     -- other-modules:
     -- other-extensions:
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
-    -- build-depends:
-    --     hgeometry-vector
+    build-depends:
+         hgeometry-vector:vector2
+       , hgeometry-vector:numtypes
+       , hgeometry-vector:sig-vector
+    mixins:
+         hgeometry-vector:numtypes (Int as R)
+       , hgeometry-vector:sig-vector
+           requires
+           ( Vector          as HGeometry.Vector.Vector2
+           , Vector.Additive as HGeometry.Vector.Vector2
+           , D               as HGeometry.Vector.Vector2
+           )

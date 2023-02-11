@@ -10,9 +10,9 @@ module HGeometry.Point.Common
 import Control.Lens
 import Data.Type.Ord
 import GHC.TypeLits
-import HGeometry.Sigs.D
+import D
 import HGeometry.Sigs.Point
-import HGeometry.Sigs.R
+import R
 import HGeometry.Sigs.Vector
 
 --------------------------------------------------------------------------------
