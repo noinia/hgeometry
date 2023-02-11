@@ -13,6 +13,8 @@ build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
+tested-with: GHC == 9.2.2
+
 --------------------------------------------------------------------------------
 
 common setup
@@ -114,17 +116,17 @@ library newtype
   exposed-modules:
     HGeometry.Point.PointF
   build-depends:
-        hgeometry-vector        >= 1.0.0.0
-      , hgeometry-vector:numtypes
+        -- hgeometry-vector        >= 1.0.0.0
+      -- , hgeometry-vector:numtypes
       , hgeometry-vector:vector2
 
-  mixins:
-       , hgeometry-vector
-           requires
-           ( Vector          as HGeometry.Vector.Vector2
-           , Vector.Additive as HGeometry.Vector.Vector2
-           , D               as HGeometry.Vector.Vector2
-           )
+--  mixins:
+--       , hgeometry-vector
+--           requires
+--           ( Vector          as HGeometry.Vector.Vector2
+--           , Vector.Additive as HGeometry.Vector.Vector2
+--           , D               as HGeometry.Vector.Vector2
+--           )
 
 --       hgeometry-point
 --     , hgeometry-point:signatures

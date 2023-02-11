@@ -23,11 +23,11 @@ import Data.Proxy
 import GHC.Generics (Generic)
 import GHC.TypeLits
 -- import           HGeometry.Point.Class
-import HGeometry.Properties
+-- import HGeometry.Properties
 -- import HGeometry.Vector
-import HGeometry.Vector
--- import           System.Random (Random (..))
--- import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import HGeometry.Vector.Vector2
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
 import Text.Read (Read (..), readListPrecDefault)
 -- import qualified Data.Vector.Generic as GV
@@ -47,6 +47,8 @@ newtype PointF v = Point { toVec :: v }
                           , NFData, Bounded, Enum, Random
                           -- , ToJSON, FromJSON -- not sure we want these like this
                           )
+
+{-
 
 type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = NumType v
@@ -82,7 +84,7 @@ instance ( Read (IxValue v)
 --------------------------------------------------------------------------------
 -- * Point signature
 
-vector :: Lens' (PointF v) v
+vector :: Lens' Point Vector
 vector = lens toVec (const Point)
 
 --------------------------------------------------------------------------------
@@ -148,3 +150,6 @@ p .+^ v = Point $ toVec p ^+^ v
 --   {-# INLINE basicUnsafeIndexM #-}
 
 -- instance UV.Unbox v => UV.Unbox (PointF v)
+
+
+-}
