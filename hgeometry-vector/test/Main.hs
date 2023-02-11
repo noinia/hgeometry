@@ -1,10 +1,7 @@
 module Main (main) where
 
-import HGeometry.Vector.Vector2
-
-
-myVec :: Vector
-myVec = Vector2 5 11
+import qualified Spec
+import           Test.Hspec.Runner
 
 main :: IO ()
-main = print $ myVec
+main = hspecWith defaultConfig Spec.spec

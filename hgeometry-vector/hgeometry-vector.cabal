@@ -52,6 +52,13 @@ common setup
       , FunctionalDependencies
 
 common test-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
     build-depends:
         hspec                   >= 2.9
       , QuickCheck              >= 2.10
@@ -217,15 +224,18 @@ library vector2
 
 test-suite hgeometry-vector-test
     import:           setup, test-setup
-    -- other-modules:
-    -- other-extensions:
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
+    build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+         Spec
+       , Vector2Spec
     build-depends:
          hgeometry-vector:vector2
        , hgeometry-vector:numtypes
        , hgeometry-vector:sig-vector
+
     mixins:
          hgeometry-vector:numtypes (Int as R)
        , hgeometry-vector:sig-vector
