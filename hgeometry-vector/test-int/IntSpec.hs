@@ -1,8 +1,10 @@
 module IntSpec where
 
 import HGeometry.Vector.Vector2
-import HGeometry.Vector.Additive
+-- import HGeometry.Vector
 import Test.Hspec
+
+--------------------------------------------------------------------------------
 
 myVec :: Vector
 myVec = Vector2 5 11

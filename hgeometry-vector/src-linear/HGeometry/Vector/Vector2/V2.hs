@@ -1,5 +1,16 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Vector2.V2
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Two dimensional vectors, using the implementation from Linear.V2
+--
+--------------------------------------------------------------------------------
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module HGeometry.Vector.Vector2.V2
-  ( Vector(.., Vector2)
+  ( Vector(..), pattern Vector2
   , components, component
   , zero, liftU2, liftI2
   , D
@@ -13,10 +24,11 @@ import           Data.Type.Ord
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Properties
-import           Linear.Additive
+import           Linear.Vector
 import           Linear.V2
 import           R
 
+--------------------------------------------------------------------------------
 
 type D = 2
 

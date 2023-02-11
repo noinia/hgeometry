@@ -72,13 +72,14 @@ common test-setup
 library
     import:           setup
     exposed-modules:
-      -- HGeometry.Vector.Metric.Radical
+      -- HGeometry.Vector.Metric.Radical -- just move this into Metric.
 
     reexported-modules:
         HGeometry.Properties
-      -- , HGeometry.Vector
+      , HGeometry.Vector
       , HGeometry.Vector.Additive
       , HGeometry.Vector.Metric
+      -- HGeometry.Vector.Vector2
 
     -- other-modules:
     -- other-extensions:
@@ -86,10 +87,17 @@ library
     build-depends:
         hgeometry-vector:sig-vector
       , hgeometry-vector:shared
+      -- , hgeometry-vector:vector2
 
--- I wonder if we should create e.g. a 'fractional' library that would export
--- all *.Fractional modules,
---
+    -- mixins:
+    --    , hgeometry-vector:sig-vector
+    --        requires
+    --        ( Vector          as HGeometry.Vector.Vector2
+    --        , Vector.Additive as HGeometry.Vector.Vector2
+    --        , D               as HGeometry.Vector.Vector2
+    --        )
+
+-- possibly just move everything from sig-vector to here?
 
 --------------------------------------------------------------------------------
 -- * Shared
@@ -205,7 +213,7 @@ library vector2
     , hgeometry-vector:shared
 
 
-library linear
+library vector-linear
   import: setup
   visibility: public
   hs-source-dirs: src-linear
@@ -214,6 +222,8 @@ library linear
   build-depends:
       hgeometry-vector:sig-num
     , hgeometry-vector:shared
+    , linear                    >= 1.20
+
 
 --------------------------------------------------------------------------------
 -- * Generic Test stup
@@ -227,12 +237,12 @@ common hgeometry-vector-test
        Spec
        Vector2Spec
     build-depends:
-         hgeometry-vector:vector2
+         hgeometry-vector
        , hgeometry-vector:numtypes
-       , hgeometry-vector:sig-vector
+       , hgeometry-vector:vector2
 
     mixins:
-       , hgeometry-vector:sig-vector
+       , hgeometry-vector
            requires
            ( Vector          as HGeometry.Vector.Vector2
            , Vector.Additive as HGeometry.Vector.Vector2
