@@ -7,6 +7,7 @@ module HGeometry.Vector.Additive
   , unit, negated
   , (*^)
   , (^*)
+  , (^/)
   , sumV
   , basis
   , basisFor
@@ -21,7 +22,7 @@ import           R -- .Num
 --------------------------------------------------------------------------------
 
 infixl 6 ^+^, ^-^
-infixl 7 ^*, *^
+infixl 7 ^*, *^, ^/
 
 -- | add two vectors
 (^+^)   :: Vector -> Vector -> Vector
@@ -52,6 +53,11 @@ s *^ v = over components (s*) v
 (^*)   :: Vector -> R -> Vector
 v ^* s = s *^ v
 {-# INLINE (^*) #-}
+
+-- | scalar division
+(^/)   :: Fractional R => Vector -> R -> Vector
+v ^/ s = v ^* (1/s)
+{-# INLINE (^/) #-}
 
 --------------------------------------------------------------------------------
 --

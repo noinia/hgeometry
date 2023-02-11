@@ -166,17 +166,18 @@ library sig-vector
 
 --------------------------------------------------------------------------------
 
-library sig-vector-fractional
-    import:           setup
-    visibility: public
-    exposed-modules:
-      HGeometry.Vector.Additive.Fractional
+-- should be superfluous
+-- library sig-vector-fractional
+--     import:           setup
+--     visibility: public
+--     exposed-modules:
+--       HGeometry.Vector.Additive.Fractional
 
-    -- other-modules:
-    hs-source-dirs: sig-vector-fractional
-    build-depends:
-          hgeometry-vector:sig-vector
-        , hgeometry-vector:sig-fractional
+--     -- other-modules:
+--     hs-source-dirs: sig-vector-fractional
+--     build-depends:
+--           hgeometry-vector:sig-vector
+--         , hgeometry-vector:sig-fractional
 
 -- --------------------------------------------------------------------------------
 -- -- * Additive Signature
@@ -263,7 +264,7 @@ test-suite hgeometry-vector-test-int
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     other-modules:
-        ShowSpec
+        IntSpec
     hs-source-dirs:   test-int
     mixins:
          hgeometry-vector:numtypes (Int as R)
@@ -273,7 +274,7 @@ test-suite hgeometry-vector-test-double
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     other-modules:
-        ShowSpec
+        DoubleSpec
     hs-source-dirs:   test-double
     mixins:
          hgeometry-vector:numtypes (Double as R)
