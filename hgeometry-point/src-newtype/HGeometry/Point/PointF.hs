@@ -9,43 +9,48 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Point.PointF
-  ( PointF(..)
+  ( Point
+  , PointF(..)
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import           Control.Monad (replicateM)
-import           Data.Aeson
-import           Data.Functor.Classes
-import           Data.List (intersperse)
-import           Data.Proxy
-import           GHC.Generics (Generic)
-import           GHC.TypeLits
-import           HGeometry.Point.Class
-import           HGeometry.Properties
-import           HGeometry.Vector
-import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import Control.DeepSeq
+import Control.Lens
+import Control.Monad (replicateM)
+-- import           Data.Aeson
+import Data.Functor.Classes
+import Data.List (intersperse)
+import Data.Proxy
+import GHC.Generics (Generic)
+import GHC.TypeLits
+-- import           HGeometry.Point.Class
+import HGeometry.Properties
+-- import HGeometry.Vector
+import HGeometry.Vector
+-- import           System.Random (Random (..))
+-- import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
-import           Text.Read (Read (..), readListPrecDefault)
-import qualified Data.Vector.Generic as GV
-import qualified Data.Vector.Generic.Mutable as GMV
-import qualified Data.Vector.Unboxed.Mutable as UMV
-import qualified Data.Vector.Unboxed as UV
+import Text.Read (Read (..), readListPrecDefault)
+-- import qualified Data.Vector.Generic as GV
+-- import qualified Data.Vector.Generic.Mutable as GMV
+-- import qualified Data.Vector.Unboxed.Mutable as UMV
+-- import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
+
+-- | The Point
+type Point = PointF Vector
 
 -- | A Point wraps a vector
 newtype PointF v = Point { toVec :: v }
                  deriving ( Eq, Ord, Generic
                           , Functor, Foldable, Traversable
                           , NFData, Bounded, Enum, Random
-                          , ToJSON, FromJSON -- not sure we want these like this
+                          -- , ToJSON, FromJSON -- not sure we want these like this
                           )
 
 type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = NumType v
-type instance VectorFor (PointF v) = v
+-- type instance VectorFor (PointF v) = v
 
 
 instance ( Show (IxValue v)
@@ -74,24 +79,32 @@ instance ( Read (IxValue v)
       constr   = "Point" <> show d
   readListPrec = readListPrecDefault
 
+--------------------------------------------------------------------------------
+-- * Point signature
 
+vector :: Lens' (PointF v) v
+vector = lens toVec (const Point)
+
+--------------------------------------------------------------------------------
+-- * Affine signature
+
+(.-.) :: Point -> Point -> Vector
 p .-. q = toVec p ^-^ toVec q
 
+(.+^)   :: Point -> Vector -> Point
 p .+^ v = Point $ toVec p ^+^ v
 
-p .-^ v = Point $ toVec p ^-^ v
-
-vector = lens toVec (const Point)
+--------------------------------------------------------------------------------
 
 
 -- instance HasPoints (PointF v) (PointF v') (PointF v) (PointF v') where
 --   allPoints = id
 
-instance Uniform v => Uniform (PointF v) where
-  uniformM gen = Point <$> uniformM gen
+-- instance Uniform v => Uniform (PointF v) where
+--   uniformM gen = Point <$> uniformM gen
 
-instance (UniformRange v) => UniformRange (PointF v) where
-  uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
+-- instance (UniformRange v) => UniformRange (PointF v) where
+--   uniformRM (Point lows, Point highs) gen = Point <$> uniformRM (lows,highs) gen
 
 
 -- -- | use the optimal representation for v.
