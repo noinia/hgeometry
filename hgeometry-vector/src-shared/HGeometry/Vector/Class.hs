@@ -33,6 +33,7 @@ import           Linear.V1 (V1(..))
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
+-- import           Text.Read (Read (..), ReadPrec)
 
 --------------------------------------------------------------------------------
 
@@ -45,11 +46,24 @@ type instance Dimension (Vector d r) = d
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> let myVec3 = Vector3 1 10 3
+
 -- | Types that have a 'components' indexed traversal
 class VectorLike_ vector where
   -- | An Indexed Traversal over the components of a vector
+  --
+  -- >>> myVec3 ^.. components
+  -- [1,10,3]
+  -- >>> myVec ^@.. components
+  -- [(0,1),(1,10),(2,3)]
   components :: IndexedTraversal1' Int vector (IxValue vector)
   -- | Access the i^th component. Consider using 'component' instead.
+  --
+  -- >>> myVec ^@. unsafeComponent 0
+  -- (0,1)
+  -- >>> myVec & unsafeComponent 2 %@~ \i x -> 100*i + x
+  -- Vector3 1 10 303
   unsafeComponent :: Int -> IndexedLens' Int vector (IxValue vector)
   default unsafeComponent :: (Index vector ~ Int, Ixed vector)
                           => Int -> IndexedLens' Int vector (IxValue vector)
@@ -114,6 +128,20 @@ instance ( VectorLike_ (Vector d r)
       app_prec = 10
       constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
+
+-- instance ( VectorLike_ (Vector d r)
+--          , Read r
+--          , KnownNat d
+--          ) => Read (Vector d r) where
+--   readPrec = readData $
+--       readUnaryWith (replicateM d readPrec) constr $ \rs ->
+--         case vectorFromList rs of
+--           Just p -> p
+--           _      -> error "internal error in HGeometry.Vector read instance."
+--     where
+--       d        = fromIntegral (natVal @d Proxy)
+--       constr   = "Vector" <> show d
+
 
 instance Additive_ (Vector d r) => Metric_ (Vector d r)
 
