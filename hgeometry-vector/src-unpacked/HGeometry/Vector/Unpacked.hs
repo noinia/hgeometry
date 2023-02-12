@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Vector.Unpacked
-  ( Vector(Vector1, Vector2)
+  ( Vector(Vector1, Vector2, Vector3, Vector4)
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -11,6 +11,7 @@ import           R
 import qualified V1
 import qualified V2
 import qualified V3
+import qualified V4
 
 --------------------------------------------------------------------------------
 
@@ -32,22 +33,27 @@ instance VectorLike_ (Vector 1 R) where
   {-# INLINE unsafeComponent #-}
 
 --------------------------------------------------------------------------------
--- | 2D vectors
-newtype instance Vector 2 R = V_2 V2.Vec
-  deriving newtype (Eq,Ord,Generic,Additive_,NFData)
+-- | Convenience constructors
 
 -- | Construct a 2 dimensional vector
 pattern Vector2     :: R -> R -> Vector 2 R
-pattern Vector2 x y = V_2 (V2.Cons x (V1.Single y))
+pattern Vector2 x y = V2.V_D (V2.Cons x
+                                      (V1.Single y)
+                             )
 
-_V2 :: Iso' (Vector 2 R) V2.Vec
-_V2 = iso (\(V_2 v) -> v) V_2
+-- | Construct a 3 dimensional vector
+pattern Vector3       :: R -> R -> R -> Vector 3 R
+pattern Vector3 x y z = V3.V_D (V3.Cons x
+                                        (V2.Cons y (V1.Single z))
+                               )
 
-instance VectorLike_ (Vector 2 R) where
-  components = components' _V2
-  {-# INLINE components #-}
-  unsafeComponent i = unsafeComponent' _V2 i
-  {-# INLINE unsafeComponent #-}
+-- | Construct a 4 dimensional vector
+pattern Vector4         :: R -> R -> R -> R -> Vector 4 R
+pattern Vector4 x y z w = V4.V_D (V4.Cons x
+                                   (V3.Cons y
+                                     (V2.Cons z (V1.Single w)))
+                                 )
+
 
 
 --------------------------------------------------------------------------------

@@ -27,6 +27,13 @@ data Vec = Cons {-# UNPACK #-}!R {-# UNPACK #-}!In.Vec
 
 type instance IxValue Vec = R
 
+-- instance Eq Vec where
+--   (Cons x r) == (Cons x' r') = x == x' && r == r'
+--   {-# INLINE (==)#-}
+-- instance Ord Vec where
+--   (Cons x r) `compare` (Cons x' r') = x `compare` x' <> r `compare` r'
+--   {-# INLINE compare #-}
+
 instance NFData Vec
 
 instance (IxValue In.Vec ~ R) => VectorLike_ Vec where

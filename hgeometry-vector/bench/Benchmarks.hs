@@ -1,4 +1,4 @@
-
+{-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques -ddump-to-file #-}
 import           Control.DeepSeq
 import           Test.Tasty.Bench
 import           GHC.Generics (Generic)
@@ -10,11 +10,11 @@ import qualified Linear.V2
 -- import           HGeometry.Point
 -- import           HGeometry.Vector.Unboxed.V2
 import           System.Random
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           System.Random.Stateful (UniformRange(..))
 
 -- import           Data.Foldable.Sort
-import qualified Data.Vector as V
-import qualified Data.Vector.Unboxed as UV
+-- import qualified Data.Vector as V
+-- import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
 
@@ -65,8 +65,8 @@ main = do
   defaultMain
     [ bgroup "sorting tests"
       [ bench "unpacked"          $ nf List.sort unpackedPts
-      , bench "linar "            $ nf List.sort linearPts
-      , bench "manual "           $ nf List.sort manualPts
+      , bench "linear"            $ nf List.sort linearPts
+      , bench "manual"            $ nf List.sort manualPts
       -- , bench "introSort unpacked boxed vector" $ nf (sort @V.Vector) unpackedPts
       -- , bench "introSort boxed"   $ nf (sort @Boxed.Vector) boxedPts
       -- , bench "introSort unpacked unboxed" $ nf (sort @UnBoxed.Vector) pts

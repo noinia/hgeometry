@@ -19,7 +19,7 @@ tested-with: GHC == 9.2.2
 
 common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
-
+                 -- -fspecialise-aggressively -fexpose-all-unfoldings
     build-depends:
         base                    >= 4.16.1.0
       , containers              >= 0.6
@@ -147,21 +147,47 @@ library cons
         hgeometry-vector:shared
      ,  hgeometry-vector:sig-num
 
-library v2
+library vectord
     import:           setup
     build-depends:
-        hgeometry-vector:cons
-      , hgeometry-vector:v1
+        hgeometry-vector:shared
+     ,  hgeometry-vector:sig-num
+     ,  hgeometry-vector:sig-dim
+     ,  hgeometry-vector:cons
+    exposed-modules: VectorD
+    hs-source-dirs: src-vectord
+
+common setup-vectord
+    build-depends:
+        hgeometry-vector:dimensions
+      , hgeometry-vector:vectord
+
+library v2
+    import:           setup, setup-vectord
+    build-depends:
+        hgeometry-vector:v1
     reexported-modules: V2
-    mixins: hgeometry-vector:cons (Out as V2) requires (In as V1)
+    mixins:
+        hgeometry-vector:dimensions (Two as D)
+      , hgeometry-vector:vectord (VectorD as V2) requires (In as V1)
 
 library v3
-    import:           setup
+    import:           setup, setup-vectord
     build-depends:
-        hgeometry-vector:cons
-      , hgeometry-vector:v2
+        hgeometry-vector:v2
     reexported-modules: V3
-    mixins: hgeometry-vector:cons (Out as V3) requires (In as V2)
+    mixins:
+        hgeometry-vector:dimensions (Three as D)
+      , hgeometry-vector:vectord (VectorD as V3) requires (In as V2)
+
+library v4
+    import:           setup, setup-vectord
+    build-depends:
+        hgeometry-vector:v3
+    reexported-modules: V4
+    mixins:
+        hgeometry-vector:dimensions (Four as D)
+      , hgeometry-vector:vectord (VectorD as V4) requires (In as V3)
 
 --------------------------------------------------------------------------------
 
@@ -172,11 +198,13 @@ library unpacked
       , hgeometry-vector:v1
       , hgeometry-vector:v2
       , hgeometry-vector:v3
+      , hgeometry-vector:v4
       , hgeometry-vector:numtypes
       , hgeometry-vector:shared
     hs-source-dirs: src-unpacked
     exposed-modules:
         HGeometry.Vector.Unpacked
+    -- mixins: hgeometry-vector:v2 (VectorD as V2)
 
 
     -- mixins: hgeometry-vector:v1 requires (R as Int)
@@ -211,13 +239,13 @@ library sig-unboxed
     signatures:
       R
     hs-source-dirs: sig-unboxed
----
---- library sig-dim
----     import:           setup
----     visibility: public
----     signatures:
----       D
----     hs-source-dirs: sig-dim
+
+library sig-dim
+    import:           setup
+    visibility: public
+    signatures:
+      D
+    hs-source-dirs: sig-dim
 ---
 --- --------------------------------------------------------------------------------
 --- -- * Signatures for everything that is vector-like.
@@ -254,19 +282,19 @@ library numtypes
     Double
     Float
     Rational
----
---- --------------------------------------------------------------------------------
---- -- * Dimension implementations ; these feel a bit silly.
----
---- library dimensions
----   import: setup
----   -- visibility: public
----   hs-source-dirs: dimensions
----   exposed-modules:
----     One
----     Two
----     Three
----     Four
+
+--------------------------------------------------------------------------------
+-- * Dimension implementations
+
+library dimensions
+  import: setup
+  -- visibility: public
+  hs-source-dirs: dimensions
+  exposed-modules:
+    One
+    Two
+    Three
+    Four
 ---
 --- -----------------------------------------------------------------------
 --- -- * Vector Implementations
