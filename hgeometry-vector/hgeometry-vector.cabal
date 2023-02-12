@@ -386,12 +386,14 @@ common hgeometry-vector-bench
        , hgeometry-vector:numtypes
        , hgeometry-vector:unpacked
        , hgeometry-vector:shared
+       , tasty-bench              >= 0.3
+       , tasty                    >= 1.4
 
--- benchmark hgeometry-vector-bench-int
---     import: setup, hgeometry-vector-bench
---     hs-source-dirs: bench
---     main-is: Benchmarks.hs
---     type: exitcode-stdio-1.0
---     -- other-modules:
---     mixins:
---            hgeometry-vector:numtypes (Int as R)
+benchmark hgeometry-vector-bench-int
+    import: setup, hgeometry-vector-bench
+    hs-source-dirs: bench
+    main-is: Benchmarks.hs
+    type: exitcode-stdio-1.0
+    -- other-modules:
+    mixins:
+           hgeometry-vector:numtypes (Int as R)

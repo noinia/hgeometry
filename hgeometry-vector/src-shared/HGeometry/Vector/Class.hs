@@ -19,6 +19,7 @@ module HGeometry.Vector.Class
   , Metric_(..)
   ) where
 
+import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Kind (Type)
@@ -26,6 +27,7 @@ import qualified Data.List as List
 import           Data.Proxy
 import           Data.Type.Ord
 import           GHC.TypeLits (Nat, KnownNat, natVal)
+-- import           GHC.Generics
 import           HGeometry.Properties
 import qualified Linear.V1
 import qualified Linear.V2
@@ -113,6 +115,8 @@ instance ( VectorLike_ (Vector d r)
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
 
 instance Additive_ (Vector d r) => Metric_ (Vector d r)
+
+-- instance Generic (Vector d r) => NFData (Vector d r)
 
 --------------------------------------------------------------------------------
 

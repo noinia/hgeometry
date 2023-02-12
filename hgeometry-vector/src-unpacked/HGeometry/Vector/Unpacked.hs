@@ -3,6 +3,7 @@ module HGeometry.Vector.Unpacked
   ( Vector(Vector1, Vector2)
   ) where
 
+import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
@@ -15,7 +16,7 @@ import qualified V3
 
 -- | 1D vectors
 newtype instance Vector 1 R = V_1 V1.Vec
-  deriving newtype (Eq,Ord,Generic,Additive_)
+  deriving newtype (Eq,Ord,Generic,Additive_,NFData)
 
 -- | Construct a 1 dimensional vector
 pattern Vector1   :: R -> Vector 1 R
@@ -33,7 +34,7 @@ instance VectorLike_ (Vector 1 R) where
 --------------------------------------------------------------------------------
 -- | 2D vectors
 newtype instance Vector 2 R = V_2 V2.Vec
-  deriving newtype (Eq,Ord,Generic,Additive_)
+  deriving newtype (Eq,Ord,Generic,Additive_,NFData)
 
 -- | Construct a 2 dimensional vector
 pattern Vector2     :: R -> R -> Vector 2 R
@@ -47,6 +48,7 @@ instance VectorLike_ (Vector 2 R) where
   {-# INLINE components #-}
   unsafeComponent i = unsafeComponent' _V2 i
   {-# INLINE unsafeComponent #-}
+
 
 --------------------------------------------------------------------------------
 -- * Helpers
