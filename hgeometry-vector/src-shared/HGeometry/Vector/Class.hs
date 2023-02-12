@@ -10,11 +10,13 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DefaultSignatures #-}
 module HGeometry.Vector.Class
   ( Vector
   , VectorLike_(..)
-  , component
-  -- , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
+  , component, xComponent, yComponent, zComponent, wComponent
+  , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
+  , Metric_(..)
   ) where
 
 import           Control.Lens
@@ -35,6 +37,7 @@ import qualified Linear.V4
 -- | d-dimensional vectors
 data family Vector (d :: Nat) (r :: Type) :: Type
 
+type instance Index     (Vector d r) = Int
 type instance IxValue   (Vector d r) = r
 type instance Dimension (Vector d r) = d
 
@@ -45,7 +48,13 @@ class VectorLike_ vector where
   -- | An Indexed Traversal over the components of a vector
   components :: IndexedTraversal1' Int vector (IxValue vector)
   -- | Access the i^th component. Consider using 'component' instead.
-  unsafeComponent  :: Int -> IndexedLens' Int vector (IxValue vector)
+  unsafeComponent :: Int -> IndexedLens' Int vector (IxValue vector)
+  default unsafeComponent :: (Index vector ~ Int, Ixed vector)
+                          => Int -> IndexedLens' Int vector (IxValue vector)
+  unsafeComponent i = singular $ iix i
+
+--------------------------------------------------------------------------------
+-- * Generic functions on VectorLike things
 
 -- | Lens to access te i^t component.
 --
@@ -62,6 +71,33 @@ component :: forall i vector. (VectorLike_ vector, i < Dimension vector, KnownNa
 component = unsafeComponent (fromInteger . natVal $ Proxy @i)
 {-# INLINE component #-}
 
+-- | Shorthand for accessing the x-component
+xComponent :: (VectorLike_ vector, 0 < Dimension vector)
+           => IndexedLens' Int vector (IxValue vector)
+xComponent = component @0
+{-# INLINE xComponent #-}
+
+-- | Shorthand for accessing the x-component
+yComponent :: (VectorLike_ vector, 1 < Dimension vector)
+           => IndexedLens' Int vector (IxValue vector)
+yComponent = component @1
+{-# INLINE yComponent #-}
+
+-- | Shorthand for accessing the x-component
+zComponent :: (VectorLike_ vector, 2 < Dimension vector)
+           => IndexedLens' Int vector (IxValue vector)
+zComponent = component @2
+{-# INLINE zComponent #-}
+
+-- | Shorthand for accessing the x-component
+wComponent :: (VectorLike_ vector, 3 < Dimension vector)
+           => IndexedLens' Int vector (IxValue vector)
+wComponent = component @3
+{-# INLINE wComponent #-}
+
+
+--------------------------------------------------------------------------------
+-- * Generic instances
 
 instance ( VectorLike_ (Vector d r)
          , Show r
@@ -76,7 +112,7 @@ instance ( VectorLike_ (Vector d r)
       constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
 
-
+instance Additive_ (Vector d r) => Metric_ (Vector d r)
 
 --------------------------------------------------------------------------------
 
@@ -166,3 +202,43 @@ basisFor = \t ->
 --   zero = Const mempty
 --   liftU2 _f l _ = l
 --   liftI2 _f l _ = l
+
+--------------------------------------------------------------------------------
+-- * Metric
+
+-- | The equivalent class of Linear.Metric
+--
+-- Note that we do not define a distance itself, and that norm and
+-- signorm have a Radical constraint rather than Floating.
+class Additive_ vector => Metric_ vector where
+  {-# MINIMAL #-}
+
+  -- | Compute the inner product of two vectors or (equivalently)
+  -- convert a vector f a into a covector f a -> a.
+  dot :: Num (IxValue vector) => vector -> vector -> IxValue vector
+  dot u v = sumOf components $ liftI2 (*) u v
+  {-# INLINE dot #-}
+
+  -- | Compute the squared norm. The name quadrance arises from Norman
+  -- J. Wildberger's rational trigonometry.
+  quadrance   :: Num (IxValue vector) => vector -> IxValue vector
+  quadrance v = dot v v
+  {-# INLINE quadrance #-}
+
+  -- | Compute the quadrance of the difference
+  qd     :: Num (IxValue vector) => vector -> vector -> IxValue vector
+  qd u v = quadrance $ u ^-^ v
+  {-# INLINE qd #-}
+
+  -- -- | Compute the distance between two vectors in a metric space
+  -- distance :: Radical (IxValue vector) => vector -> vector -> IxValue vector
+
+--   -- | Compute the norm of a vector in a metric space
+--   norm :: Radical (IxValue vector) => vector -> IxValue vector
+--   norm = sqrt . quadrance
+--   {-# INLINE norm #-}
+--
+--   -- | Convert a non-zero vector to unit vector.
+--   signorm   :: (Radical (IxValue vector), Fractional (IxValue vector)) => vector -> vector
+--   signorm v = v ^/ norm v
+--   {-# INLINE signorm #-}

@@ -1,12 +1,13 @@
 module IntSpec where
 
-import HGeometry.Vector.Vector2
--- import HGeometry.Vector
+import HGeometry.Vector.Unpacked
+import HGeometry.Vector.Class
 import Test.Hspec
+import R
 
 --------------------------------------------------------------------------------
 
-myVec :: Vector
+myVec :: Vector 2 R
 myVec = Vector2 5 11
 
 spec :: Spec

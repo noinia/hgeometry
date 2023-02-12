@@ -33,3 +33,8 @@ instance (IxValue In.Vec ~ R) => VectorLike_ Vec where
                                    (\(Cons x r) y -> Cons x $ r&unsafeComponent (i-1) .~ y)
   {-# INLINE unsafeComponent  #-}
   -- not sure this will be all that efficient
+
+instance  (IxValue In.Vec ~ R) => Additive_ Vec where
+  zero = Cons 0 zero
+  liftU2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftU2 f r r')
+  liftI2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftU2 f r r')

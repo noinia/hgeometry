@@ -182,7 +182,7 @@ library unpacked
       , hgeometry-vector:shared
     hs-source-dirs: src-unpacked
     exposed-modules:
-        Vector
+        HGeometry.Vector.Unpacked
 
 
     -- mixins: hgeometry-vector:v1 requires (R as Int)
@@ -300,42 +300,40 @@ library numtypes
 ---     , linear                    >= 1.20
 ---
 ---
---- --------------------------------------------------------------------------------
---- -- * Generic Test stup
----
---- common hgeometry-vector-test
----     import:           setup, test-setup
----     hs-source-dirs:   test
----     build-tool-depends: hspec-discover:hspec-discover
----     other-modules:
----        GenericSpec
----        Spec
----        Vector2Spec
----     build-depends:
----          hgeometry-vector
----        , hgeometry-vector:numtypes
----        , hgeometry-vector:vector2
----     mixins:
----          hgeometry-vector
----            requires
----            ( Vector          as HGeometry.Vector.Vector2
----            , Vector.Additive as HGeometry.Vector.Vector2
----            , D               as HGeometry.Vector.Vector2
----            )
----
----
---- ----------------------------------------
---- -- * Concrete Test stuites
----
---- test-suite hgeometry-vector-test-int
----     import:           setup, test-setup, hgeometry-vector-test
----     type:             exitcode-stdio-1.0
----     main-is:          Main.hs
----     other-modules:
----         IntSpec
----     hs-source-dirs:   test-int
----     mixins:
----          hgeometry-vector:numtypes (Int as R)
+--------------------------------------------------------------------------------
+-- * Generic Test stup
+
+common hgeometry-vector-test
+    import:           setup, test-setup
+    hs-source-dirs:   test
+    build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+       GenericSpec
+       Spec
+       Vector2Spec
+    build-depends:
+       , hgeometry-vector:numtypes
+       , hgeometry-vector:unpacked
+       , hgeometry-vector:shared
+    -- mixins:
+    --      hgeometry-vector:unpacked
+    --        requires
+    --        ( R
+    --        )
+
+----------------------------------------
+-- * Concrete Test stuites
+
+test-suite hgeometry-vector-test-int
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        IntSpec
+    hs-source-dirs:   test-int
+    mixins:
+         hgeometry-vector:numtypes (Int as R)
+
 ---
 --- test-suite hgeometry-vector-test-double
 ---     import:           setup, test-setup, hgeometry-vector-test
