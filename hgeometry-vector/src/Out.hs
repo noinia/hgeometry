@@ -11,8 +11,8 @@ import           HGeometry.Vector.Class
 import qualified In
 import           R
 import           Control.DeepSeq
-import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+-- import           System.Random (Random (..))
+-- import           System.Random.Stateful (UniformRange(..), Uniform(..))
 
 --------------------------------------------------------------------------------
 
