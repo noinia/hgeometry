@@ -49,12 +49,12 @@ pattern Vector3 x y z = V3.V_D (V3.Cons x
                                         (V2.Cons y (V1.Single z))
                                )
 
--- | Construct a 4 dimensional vector
-pattern Vector4         :: R -> R -> R -> R -> Vector 4 R
-pattern Vector4 x y z w = V4.V_D (V4.Cons x
-                                   (V3.Cons y
-                                     (V2.Cons z (V1.Single w)))
-                                 )
+-- -- | Construct a 4 dimensional vector
+-- pattern Vector4         :: R -> R -> R -> R -> Vector 4 R
+-- pattern Vector4 x y z w = V4.V_D (V4.Cons x
+--                                    (V3.Cons y
+--                                      (V2.Cons z (V1.Single w)))
+--                                  )
 
 
 

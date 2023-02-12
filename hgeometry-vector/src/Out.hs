@@ -22,7 +22,8 @@ import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --------------------------------------------------------------------------------
 
 -- | Our vector type
-data Vec = Cons {-# UNPACK #-}!R {-# UNPACK #-}!In.Vec
+data Vec = Cons {-# UNPACK #-}!R
+                {-# UNPACK #-}!In.Vec
   deriving stock (Eq,Ord,Generic)
 
 type instance IxValue Vec = R

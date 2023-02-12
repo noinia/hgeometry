@@ -180,14 +180,22 @@ library v3
         hgeometry-vector:dimensions (Three as D)
       , hgeometry-vector:vectord (VectorD as V3) requires (In as V2)
 
+-- library v4
+--     import:           setup, setup-vectord
+--     build-depends:
+--         hgeometry-vector:v3
+--     reexported-modules: V4
+--     mixins:
+--         hgeometry-vector:dimensions (Four as D)
+--       , hgeometry-vector:vectord (VectorD as V4) requires (In as V3)
+
 library v4
-    import:           setup, setup-vectord
+    import:           setup
+    hs-source-dirs: src
     build-depends:
-        hgeometry-vector:v3
-    reexported-modules: V4
-    mixins:
-        hgeometry-vector:dimensions (Four as D)
-      , hgeometry-vector:vectord (VectorD as V4) requires (In as V3)
+        hgeometry-vector:sig-num
+      , hgeometry-vector:shared
+    exposed-modules: V4
 
 --------------------------------------------------------------------------------
 
