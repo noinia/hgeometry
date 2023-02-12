@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  VectorD
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- D-dimensional vector instance for numtype R
+--
+--------------------------------------------------------------------------------
 {-# OPTIONS_GHC -Wno-orphans #-}
 module VectorD
   ( Vector(..)

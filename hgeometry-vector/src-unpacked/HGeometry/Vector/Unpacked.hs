@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Unpacked
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Unpacked low dimensional vectors
+--
+--------------------------------------------------------------------------------
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Vector.Unpacked
   ( Vector(Vector1, Vector2, Vector3, Vector4)

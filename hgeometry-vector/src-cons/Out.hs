@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Out
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of unrolled vectors. Based on an the ideas from
+-- https://www.well-typed.com/blog/2019/11/unrolling-data-with-backpack/
+--
+--------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module Out where
 

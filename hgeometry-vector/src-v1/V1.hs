@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  V1
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of a one dimensional vector
+--
+--------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module V1 where
 
@@ -14,6 +24,7 @@ import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --------------------------------------------------------------------------------
 
+-- | The Vector type
 newtype Vec = Single R
   deriving stock (Eq,Ord,Generic)
   deriving newtype NFData
