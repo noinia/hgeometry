@@ -32,6 +32,8 @@ instance VectorLike_ (Vector 1 R) where
   unsafeComponent i = unsafeComponent' _V1 i
   {-# INLINE unsafeComponent #-}
 
+-- we implement the V1 stuff manually; since the VD setup requires the cons library
+
 --------------------------------------------------------------------------------
 -- | Convenience constructors
 
