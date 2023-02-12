@@ -122,11 +122,11 @@ library shared
 --------------------------------------------------------------------------------
 -- implementations
 
-library v0
-    import:           setup
-    -- visibility: public
-    exposed-modules: V0
-    hs-source-dirs: src
+-- library v0
+--     import:           setup
+--     -- visibility: public
+--     exposed-modules: V0
+--     hs-source-dirs: src
 
 library v1
     import:           setup
@@ -162,19 +162,12 @@ library v3
     reexported-modules: V3
     mixins: hgeometry-vector:cons (Out as V3) requires (In as V2)
 
-
--- library intElem
---     import:           setup
---     -- visibility: public
---     exposed-modules: IntElem
---     hs-source-dirs: src
-
 --------------------------------------------------------------------------------
 
 library unpacked
     import:           setup
     build-depends:
-        hgeometry-vector:v0
+        -- hgeometry-vector:v0
       , hgeometry-vector:v1
       , hgeometry-vector:v2
       , hgeometry-vector:v3
@@ -334,17 +327,26 @@ test-suite hgeometry-vector-test-int
     mixins:
          hgeometry-vector:numtypes (Int as R)
 
----
---- test-suite hgeometry-vector-test-double
----     import:           setup, test-setup, hgeometry-vector-test
----     type:             exitcode-stdio-1.0
----     main-is:          Main.hs
----     other-modules:
----         DoubleSpec
----     hs-source-dirs:   test-double
----     mixins:
----          hgeometry-vector:numtypes (Double as R)
----
+test-suite hgeometry-vector-test-double
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        DoubleSpec
+    hs-source-dirs:   test-double
+    mixins:
+         hgeometry-vector:numtypes (Double as R)
+
+test-suite hgeometry-vector-test-rational
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        RationalSpec
+    hs-source-dirs:   test-rational
+    mixins:
+         hgeometry-vector:numtypes (Rational as R)
+
 --- --------------------------------------------------------------------------------
 ---
 --- -- test-suite hgeometry-vector-doctest
