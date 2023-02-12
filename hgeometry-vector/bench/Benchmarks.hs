@@ -5,6 +5,7 @@ import           GHC.Generics (Generic)
 import qualified Data.List as List
 import qualified HGeometry.Vector.Unpacked as Unpacked
 import qualified Linear.V2
+import qualified Linear.V4
 -- import qualified HGeometry.Point.Boxed as BoxedPoint
 -- import           HGeometry.Point.PointF
 -- import           HGeometry.Point
@@ -18,16 +19,37 @@ import           System.Random.Stateful (UniformRange(..))
 
 --------------------------------------------------------------------------------
 
-data ManualInt2 = Manual {-# UNPACK #-}!Int {-# UNPACK #-}!Int
+data ManualInt2 = Manual2 {-# UNPACK #-}!Int
+                          {-# UNPACK #-}!Int
                 deriving stock (Show,Eq,Ord,Generic)
 
 instance NFData ManualInt2
 
 instance Uniform ManualInt2
 instance UniformRange ManualInt2 where
-  uniformRM (Manual lowX lowR, Manual highX highR) gen = Manual <$> uniformRM (lowX, highX) gen
-                                                                <*> uniformRM (lowR, highR) gen
+  uniformRM ( Manual2 lowX lowR
+            , Manual2 highX highR
+            ) gen = Manual2 <$> uniformRM (lowX, highX) gen
+                            <*> uniformRM (lowR, highR) gen
 
+
+data ManualInt4 = Manual4 {-# UNPACK #-}!Int
+                          {-# UNPACK #-}!Int
+                          {-# UNPACK #-}!Int
+                          {-# UNPACK #-}!Int
+                deriving stock (Show,Eq,Ord,Generic)
+
+instance NFData ManualInt4
+
+instance Uniform ManualInt4
+instance UniformRange ManualInt4 where
+  uniformRM ( Manual4 lowX  lowY  lowZ  lowW
+            , Manual4 highX highY highZ highW
+            ) gen = Manual4
+                    <$> uniformRM (lowX, highX) gen
+                    <*> uniformRM (lowY, highY) gen
+                    <*> uniformRM (lowZ, highZ) gen
+                    <*> uniformRM (lowW, highW) gen
 
 --------------------------------------------------------------------------------
 
@@ -42,17 +64,15 @@ randomPoints n = take n . points <$> getStdGen
   where
     points = List.unfoldr (Just . uniform)
 
-type Point2 = Unpacked.Vector 2 Int -- quick hack :)
-
-thePoints   :: Int -> IO ( [Unpacked.Vector 2 Int]
-                         , [Linear.V2.V2 Int]
-                         , [ManualInt2]
+thePoints   :: Int -> IO ( [Unpacked.Vector 4 Int]
+                         , [Linear.V4.V4 Int]
+                         , [ManualInt4]
                          )
-thePoints n = (\pts -> ( map (\(Manual x y) -> Unpacked.Vector2 x y) pts
-                       , map (\(Manual x y) -> Linear.V2.V2 x y) pts
+thePoints n = (\pts -> ( map (\(Manual4 x y z w) -> Unpacked.Vector4 x y z w) pts
+                       , map (\(Manual4 x y z w) -> Linear.V4.V4 x y z w) pts
                        , pts
                        )
-              ) <$> randomPoints @ManualInt2 n
+              ) <$> randomPoints @ManualInt4 n
 
 --------------------------------------------------------------------------------
 
