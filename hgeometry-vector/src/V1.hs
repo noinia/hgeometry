@@ -36,8 +36,13 @@ instance VectorLike_ Vec where
 
 instance Additive_ Vec where
   zero = Single 0
+  {-# INLINE zero #-}
   liftU2 f (Single x) (Single x') = Single (f x x')
+  {-# INLINE liftU2 #-}
   liftI2 f (Single x) (Single x') = Single (f x x')
+  {-# INLINE liftI2 #-}
+  liftI2A f (Single x) (Single x') = Single <$> f x x'
+  {-# INLINE liftI2A #-}
 
 
 --------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques -ddump-to-file #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  V4
@@ -24,7 +25,6 @@ import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 import           GHC.Generics (Generic)
-import           HGeometry.Properties
 import           HGeometry.Vector.Class
 import           R
 -- import           System.Random (Random (..))
@@ -39,7 +39,8 @@ data instance Vector 4 R = Vector4 {-# UNPACK #-} !R
                                    {-# UNPACK #-} !R
                          deriving (Eq,Ord,Generic)
 
-instance NFData (Vector 4 R)
+instance NFData (Vector 4 R) where
+  rnf (Vector4 x y z w) = seq x $ seq y $ seq z $ seq w ()
 
 -- instance Random (Vector 4 R) where
 

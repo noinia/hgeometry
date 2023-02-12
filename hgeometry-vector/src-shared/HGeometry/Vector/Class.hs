@@ -34,6 +34,8 @@ import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
 -- import           Text.Read (Read (..), ReadPrec)
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 
 --------------------------------------------------------------------------------
 
@@ -147,6 +149,19 @@ instance Additive_ (Vector d r) => Metric_ (Vector d r)
 
 -- instance Generic (Vector d r) => NFData (Vector d r)
 
+instance ( Additive_ (Vector d r)
+         , UniformRange r
+         ) => UniformRange (Vector d r) where
+  uniformRM (lows,highs) gen = liftI2A (\l h -> uniformRM (l,h) gen) lows highs
+
+instance ( Additive_ (Vector d r)
+         , Uniform r, Num r
+         ) => Uniform (Vector d r) where
+  uniformM gen = mapMOf components (const $ uniformM gen) zero
+instance (Additive_ (Vector d r), Uniform r, UniformRange r, Num r) => Random (Vector d r) where
+
+
+
 --------------------------------------------------------------------------------
 
 infixl 6 ^+^, ^-^
@@ -154,7 +169,7 @@ infixl 7 ^*, *^, ^/
 
 -- | Basically a copy of the Linear.Additive class
 class VectorLike_ vector => Additive_ vector where
-  {-# MINIMAL zero, liftU2, liftI2 #-}
+  {-# MINIMAL zero, liftU2, liftI2A #-}
 
   -- | zero vector
   zero :: Num (IxValue vector) => vector
@@ -180,8 +195,15 @@ class VectorLike_ vector => Additive_ vector where
                -> vector -> vector -> vector
 
   -- | Apply a function to the components of two vectors.
-  liftI2 :: (IxValue vector -> IxValue vector -> IxValue vector) -> vector -> vector -> vector
+  liftI2       :: (IxValue vector -> IxValue vector -> IxValue vector)
+               -> vector -> vector -> vector
+  liftI2 f u v = runIdentity $ liftI2A (\x x' -> Identity $ f x x') u v
+  {-# INLINE liftI2 #-}
 
+  -- | Apply an Applicative function to the components of two vectors.
+  liftI2A :: Applicative f
+          => (IxValue vector -> IxValue vector -> f (IxValue vector)) -> vector -> vector
+          -> f vector
 
 -- | unit vector
 unit :: forall vector. (Additive_ vector, Num (IxValue vector)) => vector
@@ -346,6 +368,8 @@ instance Additive_ (V1 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V1 x) (V1 x') = V1 (f x x')
   {-# INLINE liftI2 #-}
+  liftI2A f (V1 x) (V1 x') = V1 <$> f x x'
+  {-# INLINE liftI2A #-}
 
 instance Additive_ (V2 r) where
   zero   = V2 0 0
@@ -354,6 +378,8 @@ instance Additive_ (V2 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V2 x y) (V2 x' y') = V2 (f x x') (f y y')
   {-# INLINE liftI2 #-}
+  liftI2A f (V2 x y) (V2 x' y') = V2 <$> f x x' <*> f y y'
+  {-# INLINE liftI2A #-}
 
 instance Additive_ (V3 r) where
   zero   = V3 0 0 0
@@ -362,6 +388,8 @@ instance Additive_ (V3 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V3 x y z) (V3 x' y' z') = V3 (f x x') (f y y') (f z z')
   {-# INLINE liftI2 #-}
+  liftI2A f (V3 x y z) (V3 x' y' z') = V3 <$> f x x' <*> f y y' <*> f z z'
+  {-# INLINE liftI2A #-}
 
 instance Additive_ (V4 r) where
   zero   = V4 0 0 0 0
@@ -370,6 +398,8 @@ instance Additive_ (V4 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V4 x y z w) (V4 x' y' z' w') = V4 (f x x') (f y y') (f z z') (f w w')
   {-# INLINE liftI2 #-}
+  liftI2A f (V4 x y z w) (V4 x' y' z' w') = V4 <$> f x x' <*> f y y' <*> f z z' <*> f w w'
+  {-# INLINE liftI2A #-}
 
 instance Metric_ (V1 r)
 instance Metric_ (V2 r)

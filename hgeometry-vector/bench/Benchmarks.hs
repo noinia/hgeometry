@@ -64,15 +64,24 @@ randomPoints n = take n . points <$> getStdGen
   where
     points = List.unfoldr (Just . uniform)
 
+type Point4 = Unpacked.Vector 4 Int
+
 thePoints   :: Int -> IO ( [Unpacked.Vector 4 Int]
                          , [Linear.V4.V4 Int]
                          , [ManualInt4]
                          )
-thePoints n = (\pts -> ( map (\(Manual4 x y z w) -> Unpacked.Vector4 x y z w) pts
-                       , map (\(Manual4 x y z w) -> Linear.V4.V4 x y z w) pts
-                       , pts
+thePoints n = (\pts -> ( pts
+                       , map (\(Unpacked.Vector4 x y z w) -> Linear.V4.V4 x y z w) pts
+                       , map (\(Unpacked.Vector4 x y z w) -> Manual4 x y z w) pts
                        )
-              ) <$> randomPoints @ManualInt4 n
+              ) <$> randomPoints @Point4 n
+
+
+-- thePoints n = (\pts -> ( map (\(Manual4 x y z w) -> Unpacked.Vector4 x y z w) pts
+--                        , map (\(Manual4 x y z w) -> Linear.V4.V4 x y z w) pts
+--                        , pts
+--                        )
+--               ) <$> randomPoints @ManualInt4 n
 
 --------------------------------------------------------------------------------
 
@@ -84,9 +93,11 @@ main = do
 
   defaultMain
     [ bgroup "sorting tests"
-      [ bench "unpacked"          $ nf List.sort unpackedPts
+      [ bench "ignore this"       $ nf List.sort unpackedPts
       , bench "linear"            $ nf List.sort linearPts
       , bench "manual"            $ nf List.sort manualPts
+      , bench "unpacked"          $ nf List.sort unpackedPts
+      , bench "linearAg"          $ nf List.sort linearPts
       -- , bench "introSort unpacked boxed vector" $ nf (sort @V.Vector) unpackedPts
       -- , bench "introSort boxed"   $ nf (sort @Boxed.Vector) boxedPts
       -- , bench "introSort unpacked unboxed" $ nf (sort @UnBoxed.Vector) pts
