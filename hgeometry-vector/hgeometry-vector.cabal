@@ -30,6 +30,7 @@ common setup
       , semigroups              >= 0.18
       , random                  >= 1.2
       , witherable              >= 0.4
+      , linear                  >= 1.21
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -69,35 +70,39 @@ common test-setup
 --------------------------------------------------------------------------------
 -- * Main Library ; signature
 
-library
-    import:           setup
-    exposed-modules:
-      -- HGeometry.Vector.Metric.Radical -- just move this into Metric.
+--- library
+---     import:           setup
+---     exposed-modules:
+---       -- HGeometry.Vector.Metric.Radical -- just move this into Metric.
+---
+---     reexported-modules:
+---         HGeometry.Properties
+---       , HGeometry.Vector
+---       , HGeometry.Vector.Additive
+---       , HGeometry.Vector.Metric
+---       -- HGeometry.Vector.Vector2
+---
+---     -- other-modules:
+---     -- other-extensions:
+---     hs-source-dirs:   src
+---     build-depends:
+---         hgeometry-vector:sig-vector
+---       , hgeometry-vector:shared
+---       -- , hgeometry-vector:vector2
+---
+---     -- mixins:
+---     --    , hgeometry-vector:sig-vector
+---     --        requires
+---     --        ( Vector          as HGeometry.Vector.Vector2
+---     --        , Vector.Additive as HGeometry.Vector.Vector2
+---     --        , D               as HGeometry.Vector.Vector2
+---     --        )
+---
+--- -- possibly just move everything from sig-vector to here?
+---
 
-    reexported-modules:
-        HGeometry.Properties
-      , HGeometry.Vector
-      , HGeometry.Vector.Additive
-      , HGeometry.Vector.Metric
-      -- HGeometry.Vector.Vector2
 
-    -- other-modules:
-    -- other-extensions:
-    hs-source-dirs:   src
-    build-depends:
-        hgeometry-vector:sig-vector
-      , hgeometry-vector:shared
-      -- , hgeometry-vector:vector2
 
-    -- mixins:
-    --    , hgeometry-vector:sig-vector
-    --        requires
-    --        ( Vector          as HGeometry.Vector.Vector2
-    --        , Vector.Additive as HGeometry.Vector.Vector2
-    --        , D               as HGeometry.Vector.Vector2
-    --        )
-
--- possibly just move everything from sig-vector to here?
 
 --------------------------------------------------------------------------------
 -- * Shared
@@ -110,68 +115,138 @@ library shared
     -- visibility: public
     exposed-modules:
       HGeometry.Properties
+      HGeometry.Vector.Class
+
     hs-source-dirs: src-shared
 
 --------------------------------------------------------------------------------
--- * Base Signatures, i.e. R and D.
+-- implementations
 
-library sig-num
+library v0
     import:           setup
-    visibility: public
-    signatures:
-      R
-    hs-source-dirs: sig-num
+    -- visibility: public
+    exposed-modules: V0
+    hs-source-dirs: src
 
-library sig-fractional
+library v1
     import:           setup
-    visibility: public
-    signatures:
-      R
-    hs-source-dirs: sig-fractional
+    -- visibility: public
+    signatures: R
+    exposed-modules: V1
+    hs-source-dirs: src
+    build-depends:
+        hgeometry-vector:shared
 
-library sig-random
+library cons
     import:           setup
-    visibility: public
-    signatures:
-      R
-    hs-source-dirs: sig-random
+    signatures: In, R
+    -- visibility: public
+    exposed-modules: Out
+    hs-source-dirs: src
+    build-depends:
+        hgeometry-vector:shared
 
-library sig-unboxed
+library v2
     import:           setup
-    visibility: public
-    signatures:
-      R
-    hs-source-dirs: sig-unboxed
+    build-depends:
+        hgeometry-vector:cons
+      , hgeometry-vector:v1
+    reexported-modules: V2
+    mixins: hgeometry-vector:cons (Out as V2) requires (In as V1)
 
-library sig-dim
+library v3
     import:           setup
-    visibility: public
-    signatures:
-      D
-    hs-source-dirs: sig-dim
+    build-depends:
+        hgeometry-vector:cons
+      , hgeometry-vector:v2
+    reexported-modules: V3
+    mixins: hgeometry-vector:cons (Out as V3) requires (In as V2)
+
+
+-- library intElem
+--     import:           setup
+--     -- visibility: public
+--     exposed-modules: IntElem
+--     hs-source-dirs: src
 
 --------------------------------------------------------------------------------
--- * Signatures for everything that is vector-like.
 
-library sig-vector
+library unpacked
     import:           setup
-    visibility: public
-    signatures:
-      Vector
-      Vector.Additive
-
-    exposed-modules:
-      HGeometry.Vector.Additive
-      HGeometry.Vector.Metric
-      HGeometry.Vector
-
-    -- other-modules:
-    hs-source-dirs: sig-vector
     build-depends:
-          hgeometry-vector:sig-num
-        , hgeometry-vector:sig-dim
-        , hgeometry-vector:shared
+        hgeometry-vector:v0
+      , hgeometry-vector:v1
+      , hgeometry-vector:v2
+      , hgeometry-vector:v3
+      , hgeometry-vector:numtypes
+      , hgeometry-vector:shared
+    hs-source-dirs: src-unpacked
+    exposed-modules:
+        Vector
 
+
+    -- mixins: hgeometry-vector:v1 requires (R as Int)
+
+--- --------------------------------------------------------------------------------
+--- -- * Base Signatures, i.e. R and D.
+---
+--- library sig-num
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       R
+---     hs-source-dirs: sig-num
+---
+--- library sig-fractional
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       R
+---     hs-source-dirs: sig-fractional
+---
+--- library sig-random
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       R
+---     hs-source-dirs: sig-random
+---
+--- library sig-unboxed
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       R
+---     hs-source-dirs: sig-unboxed
+---
+--- library sig-dim
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       D
+---     hs-source-dirs: sig-dim
+---
+--- --------------------------------------------------------------------------------
+--- -- * Signatures for everything that is vector-like.
+---
+--- library sig-vector
+---     import:           setup
+---     visibility: public
+---     signatures:
+---       Vector
+---       Vector.Additive
+---
+---     exposed-modules:
+---       HGeometry.Vector.Additive
+---       HGeometry.Vector.Metric
+---       HGeometry.Vector
+---
+---     -- other-modules:
+---     hs-source-dirs: sig-vector
+---     build-depends:
+---           hgeometry-vector:sig-num
+---         , hgeometry-vector:sig-dim
+---         , hgeometry-vector:shared
+---
 --------------------------------------------------------------------------------
 -- * NumType Implementations:
 
@@ -185,114 +260,114 @@ library numtypes
     Double
     Float
     Rational
-
---------------------------------------------------------------------------------
--- * Dimension implementations ; these feel a bit silly.
-
-library dimensions
-  import: setup
-  -- visibility: public
-  hs-source-dirs: dimensions
-  exposed-modules:
-    One
-    Two
-    Three
-    Four
-
------------------------------------------------------------------------
--- * Vector Implementations
-
-library vector2
-  import: setup
-  visibility: public
-  hs-source-dirs: src-vector2
-  exposed-modules:
-    HGeometry.Vector.Vector2
-  build-depends:
-      hgeometry-vector:sig-num
-    , hgeometry-vector:shared
-
-
-library vector-linear
-  import: setup
-  visibility: public
-  hs-source-dirs: src-linear
-  exposed-modules:
-    HGeometry.Vector.Vector2.V2
-  build-depends:
-      hgeometry-vector:sig-num
-    , hgeometry-vector:shared
-    , linear                    >= 1.20
-
-
---------------------------------------------------------------------------------
--- * Generic Test stup
-
-common hgeometry-vector-test
-    import:           setup, test-setup
-    hs-source-dirs:   test
-    build-tool-depends: hspec-discover:hspec-discover
-    other-modules:
-       GenericSpec
-       Spec
-       Vector2Spec
-    build-depends:
-         hgeometry-vector
-       , hgeometry-vector:numtypes
-       , hgeometry-vector:vector2
-    mixins:
-         hgeometry-vector
-           requires
-           ( Vector          as HGeometry.Vector.Vector2
-           , Vector.Additive as HGeometry.Vector.Vector2
-           , D               as HGeometry.Vector.Vector2
-           )
-
-
-----------------------------------------
--- * Concrete Test stuites
-
-test-suite hgeometry-vector-test-int
-    import:           setup, test-setup, hgeometry-vector-test
-    type:             exitcode-stdio-1.0
-    main-is:          Main.hs
-    other-modules:
-        IntSpec
-    hs-source-dirs:   test-int
-    mixins:
-         hgeometry-vector:numtypes (Int as R)
-
-test-suite hgeometry-vector-test-double
-    import:           setup, test-setup, hgeometry-vector-test
-    type:             exitcode-stdio-1.0
-    main-is:          Main.hs
-    other-modules:
-        DoubleSpec
-    hs-source-dirs:   test-double
-    mixins:
-         hgeometry-vector:numtypes (Double as R)
-
---------------------------------------------------------------------------------
-
--- test-suite hgeometry-vector-doctest
---     import:           setup, test-setup
---     type:             exitcode-stdio-1.0
---     hs-source-dirs:   doctest
---     main-is:          Main.hs
---     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
---     code-generators: doctest-codegen-driver
-
---     build-depends:
---          hgeometry-vector:vector2
---        , hgeometry-vector:numtypes
---        , hgeometry-vector:sig-vector
---        , doctest
-
---     mixins:
---          hgeometry-vector:numtypes (Int as R)
---        , hgeometry-vector:sig-vector
---            requires
---            ( Vector          as HGeometry.Vector.Vector2
---            , Vector.Additive as HGeometry.Vector.Vector2
---            , D               as HGeometry.Vector.Vector2
---            )
+---
+--- --------------------------------------------------------------------------------
+--- -- * Dimension implementations ; these feel a bit silly.
+---
+--- library dimensions
+---   import: setup
+---   -- visibility: public
+---   hs-source-dirs: dimensions
+---   exposed-modules:
+---     One
+---     Two
+---     Three
+---     Four
+---
+--- -----------------------------------------------------------------------
+--- -- * Vector Implementations
+---
+--- library vector2
+---   import: setup
+---   visibility: public
+---   hs-source-dirs: src-vector2
+---   exposed-modules:
+---     HGeometry.Vector.Vector2
+---   build-depends:
+---       hgeometry-vector:sig-num
+---     , hgeometry-vector:shared
+---
+---
+--- library vector-linear
+---   import: setup
+---   visibility: public
+---   hs-source-dirs: src-linear
+---   exposed-modules:
+---     HGeometry.Vector.Vector2.V2
+---   build-depends:
+---       hgeometry-vector:sig-num
+---     , hgeometry-vector:shared
+---     , linear                    >= 1.20
+---
+---
+--- --------------------------------------------------------------------------------
+--- -- * Generic Test stup
+---
+--- common hgeometry-vector-test
+---     import:           setup, test-setup
+---     hs-source-dirs:   test
+---     build-tool-depends: hspec-discover:hspec-discover
+---     other-modules:
+---        GenericSpec
+---        Spec
+---        Vector2Spec
+---     build-depends:
+---          hgeometry-vector
+---        , hgeometry-vector:numtypes
+---        , hgeometry-vector:vector2
+---     mixins:
+---          hgeometry-vector
+---            requires
+---            ( Vector          as HGeometry.Vector.Vector2
+---            , Vector.Additive as HGeometry.Vector.Vector2
+---            , D               as HGeometry.Vector.Vector2
+---            )
+---
+---
+--- ----------------------------------------
+--- -- * Concrete Test stuites
+---
+--- test-suite hgeometry-vector-test-int
+---     import:           setup, test-setup, hgeometry-vector-test
+---     type:             exitcode-stdio-1.0
+---     main-is:          Main.hs
+---     other-modules:
+---         IntSpec
+---     hs-source-dirs:   test-int
+---     mixins:
+---          hgeometry-vector:numtypes (Int as R)
+---
+--- test-suite hgeometry-vector-test-double
+---     import:           setup, test-setup, hgeometry-vector-test
+---     type:             exitcode-stdio-1.0
+---     main-is:          Main.hs
+---     other-modules:
+---         DoubleSpec
+---     hs-source-dirs:   test-double
+---     mixins:
+---          hgeometry-vector:numtypes (Double as R)
+---
+--- --------------------------------------------------------------------------------
+---
+--- -- test-suite hgeometry-vector-doctest
+--- --     import:           setup, test-setup
+--- --     type:             exitcode-stdio-1.0
+--- --     hs-source-dirs:   doctest
+--- --     main-is:          Main.hs
+--- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
+--- --     code-generators: doctest-codegen-driver
+---
+--- --     build-depends:
+--- --          hgeometry-vector:vector2
+--- --        , hgeometry-vector:numtypes
+--- --        , hgeometry-vector:sig-vector
+--- --        , doctest
+---
+--- --     mixins:
+--- --          hgeometry-vector:numtypes (Int as R)
+--- --        , hgeometry-vector:sig-vector
+--- --            requires
+--- --            ( Vector          as HGeometry.Vector.Vector2
+--- --            , Vector.Additive as HGeometry.Vector.Vector2
+--- --            , D               as HGeometry.Vector.Vector2
+--- --            )
