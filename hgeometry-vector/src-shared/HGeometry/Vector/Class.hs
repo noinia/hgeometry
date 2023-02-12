@@ -19,9 +19,9 @@ module HGeometry.Vector.Class
   , Metric_(..)
   ) where
 
-import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
+import qualified Data.Functor.Apply as Apply
 import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.Proxy
@@ -29,10 +29,10 @@ import           Data.Type.Ord
 import           GHC.TypeLits (Nat, KnownNat, natVal)
 -- import           GHC.Generics
 import           HGeometry.Properties
-import qualified Linear.V1
-import qualified Linear.V2
-import qualified Linear.V3
-import qualified Linear.V4
+import           Linear.V1 (V1(..))
+import           Linear.V2 (V2(..))
+import           Linear.V3 (V3(..))
+import           Linear.V4 (V4(..))
 
 --------------------------------------------------------------------------------
 
@@ -54,6 +54,7 @@ class VectorLike_ vector where
   default unsafeComponent :: (Index vector ~ Int, Ixed vector)
                           => Int -> IndexedLens' Int vector (IxValue vector)
   unsafeComponent i = singular $ iix i
+  {-# INLINE unsafeComponent #-}
 
 --------------------------------------------------------------------------------
 -- * Generic functions on VectorLike things
@@ -246,3 +247,103 @@ class Additive_ vector => Metric_ vector where
 --   signorm   :: (Radical (IxValue vector), Fractional (IxValue vector)) => vector -> vector
 --   signorm v = v ^/ norm v
 --   {-# INLINE signorm #-}
+
+
+
+--------------------------------------------------------------------------------
+-- * Linear implementations
+
+instance VectorLike_ (V1 r) where
+  components = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse'  :: Apply.Apply f => (r -> f r) -> V1 r -> f (V1 r)
+      traverse' f (V1 x)  = V1 <$> f x
+      itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V1 r -> f (V1 r)
+      itraverse' f (V1 x) = V1 <$> f 0 x
+  {-# INLINE components #-}
+  unsafeComponent i = case i of
+    0 -> ilens (\(V1 x) -> (i,x)) (\(V1 _) x' -> V1 x')
+    _ -> error $ "unsafeComponent: V1. index out of bounds" <> show i
+  {-# INLINE unsafeComponent #-}
+
+instance VectorLike_ (V2 r) where
+  components = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse'  :: Apply.Apply f => (r -> f r) -> V2 r -> f (V2 r)
+      traverse' f (V2 x y)  = V2 <$> f x Apply.<.> f y
+      itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V2 r -> f (V2 r)
+      itraverse' f (V2 x y) = V2 <$> f 0 x Apply.<.> f 1 y
+  {-# INLINE components #-}
+  unsafeComponent i = case i of
+    0 -> ilens (\(V2 x _) -> (i,x)) (\(V2 _ y) x' -> V2 x' y )
+    1 -> ilens (\(V2 _ y) -> (i,y)) (\(V2 x _) y' -> V2 x  y')
+    _ -> error $ "unsafeComponent: V2. index out of bounds" <> show i
+  {-# INLINE unsafeComponent #-}
+
+instance VectorLike_ (V3 r) where
+  components = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse'  :: Apply.Apply f => (r -> f r) -> V3 r -> f (V3 r)
+      traverse' f (V3 x y z)  = V3 <$> f x Apply.<.> f y Apply.<.> f z
+      itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V3 r -> f (V3 r)
+      itraverse' f (V3 x y z) = V3 <$> f 0 x Apply.<.> f 1 y Apply.<.> f 2 z
+  {-# INLINE components #-}
+  unsafeComponent i = case i of
+    0 -> ilens (\(V3 x _ _) -> (i,x)) (\(V3 _ y z) x' -> V3 x' y  z )
+    1 -> ilens (\(V3 _ y _) -> (i,y)) (\(V3 x _ z) y' -> V3 x  y' z )
+    2 -> ilens (\(V3 _ _ z) -> (i,z)) (\(V3 x y _) z' -> V3 x  y  z')
+    _ -> error $ "unsafeComponent: V3. index out of bounds" <> show i
+  {-# INLINE unsafeComponent #-}
+
+instance VectorLike_ (V4 r) where
+  components = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse'  :: Apply.Apply f => (r -> f r) -> V4 r -> f (V4 r)
+      traverse' f (V4 x y z w)  = V4 <$> f x Apply.<.> f y Apply.<.> f z Apply.<.> f w
+      itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V4 r -> f (V4 r)
+      itraverse' f (V4 x y z w) = V4 <$> f 0 x Apply.<.> f 1 y Apply.<.> f 2 z Apply.<.> f 3 w
+  {-# INLINE components #-}
+  unsafeComponent i = case i of
+    0 -> ilens (\(V4 x _ _ _) -> (i,x)) (\(V4 _ y z w) x' -> V4 x' y  z  w)
+    1 -> ilens (\(V4 _ y _ _) -> (i,y)) (\(V4 x _ z w) y' -> V4 x  y' z  w)
+    2 -> ilens (\(V4 _ _ z _) -> (i,z)) (\(V4 x y _ w) z' -> V4 x  y  z' w)
+    3 -> ilens (\(V4 _ _ _ w) -> (i,w)) (\(V4 x y z _) w' -> V4 x  y  z  w')
+    _ -> error $ "unsafeComponent: V4. index out of bounds" <> show i
+  {-# INLINE unsafeComponent #-}
+
+instance Additive_ (V1 r) where
+  zero   = V1 0
+  {-# INLINE zero #-}
+  liftU2 f (V1 x) (V1 x') = V1 (f x x')
+  {-# INLINE liftU2 #-}
+  liftI2 f (V1 x) (V1 x') = V1 (f x x')
+  {-# INLINE liftI2 #-}
+
+instance Additive_ (V2 r) where
+  zero   = V2 0 0
+  {-# INLINE zero #-}
+  liftU2 f (V2 x y) (V2 x' y') = V2 (f x x') (f y y')
+  {-# INLINE liftU2 #-}
+  liftI2 f (V2 x y) (V2 x' y') = V2 (f x x') (f y y')
+  {-# INLINE liftI2 #-}
+
+instance Additive_ (V3 r) where
+  zero   = V3 0 0 0
+  {-# INLINE zero #-}
+  liftU2 f (V3 x y z) (V3 x' y' z') = V3 (f x x') (f y y') (f z z')
+  {-# INLINE liftU2 #-}
+  liftI2 f (V3 x y z) (V3 x' y' z') = V3 (f x x') (f y y') (f z z')
+  {-# INLINE liftI2 #-}
+
+instance Additive_ (V4 r) where
+  zero   = V4 0 0 0 0
+  {-# INLINE zero #-}
+  liftU2 f (V4 x y z w) (V4 x' y' z' w') = V4 (f x x') (f y y') (f z z') (f w w')
+  {-# INLINE liftU2 #-}
+  liftI2 f (V4 x y z w) (V4 x' y' z' w') = V4 (f x x') (f y y') (f z z') (f w w')
+  {-# INLINE liftI2 #-}
+
+instance Metric_ (V1 r)
+instance Metric_ (V2 r)
+instance Metric_ (V3 r)
+instance Metric_ (V4 r)
