@@ -13,6 +13,14 @@ import           D
 import qualified Out
 import qualified In
 
+
+-- import qualified Data.Vector.Generic as GV
+-- import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
+-- import qualified Data.Vector.Generic.Mutable as GVM
+-- import qualified Data.Vector.Unboxed as UV
+-- import qualified Data.Vector.Unboxed.Mutable as UVM
+
+
 --------------------------------------------------------------------------------
 
 -- | vectors
@@ -23,6 +31,8 @@ _VD :: Iso' (Vector D R) Out.Vec
 _VD = iso (\(V_D v) -> v) V_D
 
 instance (IxValue In.Vec ~ R) => VectorLike_ (Vector D R) where
+  generateM f = V_D <$> generateM f
+  {-# INLINE generateM #-}
   components = components' _VD
   {-# INLINE components #-}
   unsafeComponent i = unsafeComponent' _VD i

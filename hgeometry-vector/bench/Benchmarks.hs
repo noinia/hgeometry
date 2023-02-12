@@ -14,8 +14,8 @@ import           System.Random
 import           System.Random.Stateful (UniformRange(..))
 
 -- import           Data.Foldable.Sort
--- import qualified Data.Vector as V
--- import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
 
