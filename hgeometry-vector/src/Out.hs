@@ -4,10 +4,13 @@ module Out where
 import           Control.Lens ( IxValue, conjoined, indexed, reindexed, Indexed(..)
                               , ilens, (&), (^.), (.~)
                               )
+-- import           D
 import           Data.Functor.Apply
-import qualified Data.Vector.Generic as G
-import qualified Data.Vector.Generic.Mutable as GM
-import qualified Data.Vector.Unboxed as U
+import qualified Data.Vector.Generic as GV
+import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
+import qualified Data.Vector.Generic.Mutable as GVM
+import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UVM
 import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
 import qualified In
@@ -46,6 +49,57 @@ instance  (IxValue In.Vec ~ R) => Additive_ Vec where
 --------------------------------------------------------------------------------
 -- * Unboxed vector instance
 
+{-
+-- | elements of the vector are stored consecutively
+newtype instance UVM.MVector s Vec = MV_Cons (UVM.MVector s R)
+newtype instance UV.Vector     Vec = V_Cons  (UV.Vector     R)
+
+natVal' :: forall d. KnownNat d => Int
+natVal' = fromInteger . natVal
+
+instance GVM.MVector UVM.MVector Cons where
+  basicLength (MV_Cons v) = let d = natVal' @D
+                            in GVM.basicLength v `div` d
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (MV_Cons v) = let d = natVal' @D
+                                     in MV_Cons $ GVM.basicUnsafeSlice (d*s) (d*l) v
+  {-# INLINE basicUnsafeSlice #-}
+  basicOverlaps  (MV_Cons v) (MV_Cons v') = GVM.basicOverlaps v v'
+  {-# INLINE basicOverlaps #-}
+  basicUnsafeNew n = let d = natVal' @D
+                     in MV_Cons <$> GVM.basicUnsafeNew (d*n)
+  {-# INLINE basicUnsafeNew #-}
+  basicInitialize (MV_Cons v) = GVM.basicInitialize v
+  {-# INLINE basicInitialize#-}
+  basicUnsafeRead (MV_Cons v) i = let d = natVal' @D
+                                  in do x <- GVM.basicUnsafeRead v (2*i)
+                                        y <- GVM.basicUnsafeRead v (2*i+1)
+                                        pure $ Cons x y
+  {-# INLINE basicUnsafeRead #-}
+  basicUnsafeWrite (MV_Cons v) i (Cons x y) = do GVM.basicUnsafeWrite v (2*i)   x
+                                                 GVM.basicUnsafeWrite v (2*i+1) y
+  {-# INLINE basicUnsafeWrite #-}
+
+
+-- type instance GV.Mutable UV.Vector2
+
+instance GV.Vector UV.Vector Vec where
+
+  basicUnsafeFreeze (MV_Cons mv) = V_Cons <$> GV.basicUnsafeFreeze mv
+  {-# INLINE basicUnsafeFreeze #-}
+  basicUnsafeThaw (V_Cons v) = MV_Cons <$> GV.basicUnsafeThaw v
+  {-# INLINE basicUnsafeThaw #-}
+  basicLength (V_Cons v) = GV.basicLength v `div` 2
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (V_Cons v) = V_Cons $ GV.basicUnsafeSlice (2*s) (2*l) v
+  {-# INLINE basicUnsafeSlice #-}
+  basicUnsafeIndexM (V_Cons v) i = Cons <$> GV.basicUnsafeIndexM v (2*i)
+                                        <*> GV.basicUnsafeIndexM v (2*i+1)
+  {-# INLINE basicUnsafeIndexM #-}
+
+instance UV.Unbox Vec
+
+
 -- newtype instance U.MVector s Vec = MV_Vec (U.MVector s R)
 -- newtype instance U.Vector    Vec = V_Vec  (U.Vector    R)
 --
@@ -58,3 +112,5 @@ instance  (IxValue In.Vec ~ R) => Additive_ Vec where
 -- deriving via (Vec `U.As` R) instance U.Unbox R => GM.MVector U.MVector Vec
 -- deriving via (Vec `U.As` R) instance U.Unbox R => G.Vector   U.Vector  Vec
 -- instance U.Unbox R => U.Unbox Vec
+
+-}
