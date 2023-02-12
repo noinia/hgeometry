@@ -1,10 +1,14 @@
+{-# LANGUAGE UndecidableInstances #-}
 module V1 where
 
-import Control.Lens
-import Data.Functor.Apply
-import GHC.Generics (Generic)
-import HGeometry.Vector.Class
-import R
+import           Control.Lens
+import           Data.Functor.Apply
+import qualified Data.Vector.Generic as G
+import qualified Data.Vector.Generic.Mutable as GM
+import qualified Data.Vector.Unboxed as U
+import           GHC.Generics (Generic)
+import           HGeometry.Vector.Class
+import           R
 
 --------------------------------------------------------------------------------
 
@@ -31,3 +35,20 @@ instance Additive_ Vec where
   zero = Single 0
   liftU2 f (Single x) (Single x') = Single (f x x')
   liftI2 f (Single x) (Single x') = Single (f x x')
+
+
+--------------------------------------------------------------------------------
+-- * Unboxed vector instance
+
+newtype instance U.MVector s Vec = MV_Vec (U.MVector s R)
+newtype instance U.Vector    Vec = V_Vec  (U.Vector    R)
+
+instance U.IsoUnbox Vec R where
+  toURepr (Single x) = x
+  fromURepr = Single
+  {-# INLINE toURepr #-}
+  {-# INLINE fromURepr #-}
+
+deriving via (Vec `U.As` R) instance U.Unbox R => GM.MVector U.MVector Vec
+deriving via (Vec `U.As` R) instance U.Unbox R => G.Vector   U.Vector  Vec
+instance U.Unbox R => U.Unbox Vec

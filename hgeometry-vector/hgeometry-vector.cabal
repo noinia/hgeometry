@@ -131,20 +131,21 @@ library shared
 library v1
     import:           setup
     -- visibility: public
-    signatures: R
     exposed-modules: V1
     hs-source-dirs: src
     build-depends:
         hgeometry-vector:shared
+     ,  hgeometry-vector:sig-num
 
 library cons
     import:           setup
-    signatures: In, R
+    signatures: In
     -- visibility: public
     exposed-modules: Out
-    hs-source-dirs: src
+    hs-source-dirs: src sig-num
     build-depends:
         hgeometry-vector:shared
+     ,  hgeometry-vector:sig-num
 
 library v2
     import:           setup
@@ -180,15 +181,15 @@ library unpacked
 
     -- mixins: hgeometry-vector:v1 requires (R as Int)
 
---- --------------------------------------------------------------------------------
---- -- * Base Signatures, i.e. R and D.
----
---- library sig-num
----     import:           setup
----     visibility: public
----     signatures:
----       R
----     hs-source-dirs: sig-num
+--------------------------------------------------------------------------------
+-- * Base Signatures, i.e. R and D.
+
+library sig-num
+    import:           setup
+    visibility: public
+    signatures:
+      R
+    hs-source-dirs: sig-num
 ---
 --- library sig-fractional
 ---     import:           setup
@@ -204,12 +205,12 @@ library unpacked
 ---       R
 ---     hs-source-dirs: sig-random
 ---
---- library sig-unboxed
----     import:           setup
----     visibility: public
----     signatures:
----       R
----     hs-source-dirs: sig-unboxed
+library sig-unboxed
+    import:           setup
+    visibility: public
+    signatures:
+      R
+    hs-source-dirs: sig-unboxed
 ---
 --- library sig-dim
 ---     import:           setup

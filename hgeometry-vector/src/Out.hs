@@ -5,10 +5,14 @@ import           Control.Lens ( IxValue, conjoined, indexed, reindexed, Indexed(
                               , ilens, (&), (^.), (.~)
                               )
 import           Data.Functor.Apply
+import qualified Data.Vector.Generic as G
+import qualified Data.Vector.Generic.Mutable as GM
+import qualified Data.Vector.Unboxed as U
 import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
 import qualified In
 import           R
+
 --------------------------------------------------------------------------------
 
 -- | Our vector type
@@ -38,3 +42,19 @@ instance  (IxValue In.Vec ~ R) => Additive_ Vec where
   zero = Cons 0 zero
   liftU2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftU2 f r r')
   liftI2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftU2 f r r')
+
+--------------------------------------------------------------------------------
+-- * Unboxed vector instance
+
+-- newtype instance U.MVector s Vec = MV_Vec (U.MVector s R)
+-- newtype instance U.Vector    Vec = V_Vec  (U.Vector    R)
+--
+-- instance U.IsoUnbox Vec R where
+--   toURepr (Single x) = x
+--   fromURepr = Single
+--   {-# INLINE toURepr #-}
+--   {-# INLINE fromURepr #-}
+--
+-- deriving via (Vec `U.As` R) instance U.Unbox R => GM.MVector U.MVector Vec
+-- deriving via (Vec `U.As` R) instance U.Unbox R => G.Vector   U.Vector  Vec
+-- instance U.Unbox R => U.Unbox Vec

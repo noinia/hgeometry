@@ -5,32 +5,19 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Numeric type representing real numbers
+-- Unboxable real number types
 --
 --------------------------------------------------------------------------------
 signature R where
 
-import Control.DeepSeq
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UMV
 
 -- | The numeric data type representing real numbers
 data R
 
-instance Eq  R
-instance Ord R
-instance Num R
-
-instance NFData R
-
-instance Show R
-
-
--- instance ToJSON R
--- instance FromJSON R
-
--- -- instance Uniform R
--- instance UniformRange R
--- instance Random R
-
--- instance GV.Vector   UV.Vector   R
--- instance GMV.MVector UMV.MVector R
--- instance UV.Unbox R
+instance GV.Vector   UV.Vector   R
+instance GMV.MVector UMV.MVector R
+instance UV.Unbox R
