@@ -372,3 +372,26 @@ test-suite hgeometry-vector-test-rational
 --- --            , Vector.Additive as HGeometry.Vector.Vector2
 --- --            , D               as HGeometry.Vector.Vector2
 --- --            )
+
+
+--------------------------------------------------------------------------------
+-- * Benchmarks
+
+common hgeometry-vector-bench
+    import:           setup, test-setup
+    -- hs-source-dirs:   test
+    -- build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+    build-depends:
+       , hgeometry-vector:numtypes
+       , hgeometry-vector:unpacked
+       , hgeometry-vector:shared
+
+-- benchmark hgeometry-vector-bench-int
+--     import: setup, hgeometry-vector-bench
+--     hs-source-dirs: bench
+--     main-is: Benchmarks.hs
+--     type: exitcode-stdio-1.0
+--     -- other-modules:
+--     mixins:
+--            hgeometry-vector:numtypes (Int as R)

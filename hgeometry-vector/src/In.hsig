@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 signature In where
 
+import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
 import HGeometry.Vector.Class
 
@@ -9,7 +10,10 @@ import HGeometry.Vector.Class
 data Vec
 
 instance Generic Vec
+instance NFData Vec
+
 instance Eq Vec
 instance Ord Vec
+
 instance VectorLike_ Vec
 instance Additive_ Vec

@@ -15,6 +15,9 @@ import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
 import qualified In
 import           R
+import           Control.DeepSeq
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 
 --------------------------------------------------------------------------------
 
@@ -23,6 +26,8 @@ data Vec = Cons {-# UNPACK #-}!R {-# UNPACK #-}!In.Vec
   deriving stock (Eq,Ord,Generic)
 
 type instance IxValue Vec = R
+
+instance NFData Vec
 
 instance (IxValue In.Vec ~ R) => VectorLike_ Vec where
   components = conjoined traverse' (itraverse' . indexed)
@@ -114,3 +119,16 @@ instance UV.Unbox Vec
 -- instance U.Unbox R => U.Unbox Vec
 
 -}
+
+
+--------------------------------------------------------------------------------
+-- * Random stuff
+
+instance ( UniformRange R, UniformRange In.Vec
+         ) => UniformRange Vec where
+  uniformRM (Cons lowX lowR, Cons highX highR) gen = Cons <$> uniformRM (lowX, highX) gen
+                                                          <*> uniformRM (lowR, highR) gen
+
+instance ( Uniform R, Uniform In.Vec ) => Uniform Vec
+
+instance ( Uniform R, UniformRange R, Uniform In.Vec, UniformRange In.Vec ) => Random Vec

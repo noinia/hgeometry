@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module V1 where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Functor.Apply
 import qualified Data.Vector.Generic as G
@@ -9,11 +10,13 @@ import qualified Data.Vector.Unboxed as U
 import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
 import           R
-
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --------------------------------------------------------------------------------
 
 newtype Vec = Single R
   deriving stock (Eq,Ord,Generic)
+  deriving newtype NFData
 
 type instance IxValue   Vec = R
 
@@ -52,3 +55,12 @@ instance U.IsoUnbox Vec R where
 deriving via (Vec `U.As` R) instance U.Unbox R => GM.MVector U.MVector Vec
 deriving via (Vec `U.As` R) instance U.Unbox R => G.Vector   U.Vector  Vec
 instance U.Unbox R => U.Unbox Vec
+
+--------------------------------------------------------------------------------
+
+deriving newtype instance Random R => Random Vec
+
+instance UniformRange R => UniformRange Vec where
+  uniformRM (Single low, Single high) gen = Single <$> uniformRM (low,high) gen
+
+instance Uniform R => Uniform Vec
