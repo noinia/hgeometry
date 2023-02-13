@@ -17,6 +17,7 @@ module HGeometry.Vector.Class
   , component, xComponent, yComponent, zComponent, wComponent
   , vectorFromList
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
+  , foldMapZip
   , Metric_(..)
   ) where
 
@@ -193,7 +194,8 @@ instance Additive_ (Vector d r) => Metric_ (Vector d r)
 instance ( Additive_ (Vector d r)
          , UniformRange r
          ) => UniformRange (Vector d r) where
-  uniformRM (lows,highs) gen = liftI2A (\l h -> uniformRM (l,h) gen) lows highs
+  uniformRM (lows,highs) gen = Apply.unwrapApplicative $
+      liftI2A (\l h -> Apply.WrapApplicative $ uniformRM (l,h) gen) lows highs
 
 instance (VectorLike_ (Vector d r), Uniform r) => Uniform (Vector d r) where
   uniformM gen = generateA (const $ uniformM gen)
@@ -240,9 +242,17 @@ class VectorLike_ vector => Additive_ vector where
   {-# INLINE liftI2 #-}
 
   -- | Apply an Applicative function to the components of two vectors.
-  liftI2A :: Applicative f
+  liftI2A :: Apply.Apply f
           => (IxValue vector -> IxValue vector -> f (IxValue vector)) -> vector -> vector
           -> f vector
+
+-- | "zip through the two vectors", folding over the result.
+foldMapZip       :: (Semigroup m, Additive_ vector)
+                 => (IxValue vector -> IxValue vector -> m) -> vector -> vector -> m
+foldMapZip f u v = getConst $ liftI2A (\x x' -> Const $ f x x') u v
+
+
+
 
 -- | unit vector
 unit :: forall vector. (Additive_ vector, Num (IxValue vector)) => vector
@@ -421,7 +431,7 @@ instance Additive_ (V2 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V2 x y) (V2 x' y') = V2 (f x x') (f y y')
   {-# INLINE liftI2 #-}
-  liftI2A f (V2 x y) (V2 x' y') = V2 <$> f x x' <*> f y y'
+  liftI2A f (V2 x y) (V2 x' y') = V2 <$> f x x' Apply.<.> f y y'
   {-# INLINE liftI2A #-}
 
 instance Additive_ (V3 r) where
@@ -431,7 +441,7 @@ instance Additive_ (V3 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V3 x y z) (V3 x' y' z') = V3 (f x x') (f y y') (f z z')
   {-# INLINE liftI2 #-}
-  liftI2A f (V3 x y z) (V3 x' y' z') = V3 <$> f x x' <*> f y y' <*> f z z'
+  liftI2A f (V3 x y z) (V3 x' y' z') = V3 <$> f x x' Apply.<.> f y y' Apply.<.> f z z'
   {-# INLINE liftI2A #-}
 
 instance Additive_ (V4 r) where
@@ -441,7 +451,7 @@ instance Additive_ (V4 r) where
   {-# INLINE liftU2 #-}
   liftI2 f (V4 x y z w) (V4 x' y' z' w') = V4 (f x x') (f y y') (f z z') (f w w')
   {-# INLINE liftI2 #-}
-  liftI2A f (V4 x y z w) (V4 x' y' z' w') = V4 <$> f x x' <*> f y y' <*> f z z' <*> f w w'
+  liftI2A f (V4 x y z w) (V4 x' y' z' w') = V4 <$> f x x' Apply.<.> f y y' Apply.<.> f z z' Apply.<.> f w w'
   {-# INLINE liftI2A #-}
 
 instance Metric_ (V1 r)

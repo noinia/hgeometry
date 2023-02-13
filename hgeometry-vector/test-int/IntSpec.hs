@@ -2,6 +2,7 @@
 module IntSpec where
 
 import           Data.Proxy
+import           Data.Semigroup
 import           Data.Typeable
 import qualified Data.Vector.Unboxed as UV
 import           HGeometry.Vector.Class
@@ -40,6 +41,9 @@ spec = describe "Int vector spec" $ do
            readShow @(Vector 2 R)
            readShow @(Vector 3 R)
            readShow @(Vector 4 R)
+         prop "dot implemented as foldMapZip" $ \(u :: Vector 3 R) v ->
+           (getSum $ foldMapZip (\x x' -> Sum $ x * x') u v) == (u `dot` v)
+
 
 readShow :: forall t. (Read t, Show t, Eq t, Arbitrary t, Typeable t) => Spec
 readShow = prop ("Read after show @" <> show (typeRep $ Proxy @t)) $
