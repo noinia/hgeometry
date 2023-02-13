@@ -33,7 +33,8 @@ common setup
       , semigroupoids           >= 5
       , semigroups              >= 0.18
       , random                  >= 1.2
-      , witherable              >= 0.4
+      , mtl                     >= 2.2
+      -- , witherable              >= 0.4
       , linear                  >= 1.21
 
       , ghc-typelits-natnormalise >= 0.7.7
@@ -58,7 +59,13 @@ common setup
       , ViewPatterns
       , FunctionalDependencies
 
+common quickcheck-setup
+    build-depends:
+        QuickCheck              >= 2.10
+      , quickcheck-instances
+
 common test-setup
+    import: quickcheck-setup
     ghc-options:
          -Wall
          -fno-warn-unticked-promoted-constructors
@@ -68,8 +75,6 @@ common test-setup
          -fno-warn-orphans
     build-depends:
         hspec                   >= 2.9
-      , QuickCheck              >= 2.10
-      , quickcheck-instances
 
 --------------------------------------------------------------------------------
 -- * Main Library ; signature
@@ -334,6 +339,19 @@ library dimensions
 ---     , linear                    >= 1.20
 ---
 ---
+
+--------------------------------------------------------------------------------
+-- * Helper Libraries
+
+library quickcheck
+    import: setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Vector.Instances
+    build-depends:
+         hgeometry-vector:shared
+
 --------------------------------------------------------------------------------
 -- * Generic Test stup
 
@@ -349,6 +367,7 @@ common hgeometry-vector-test
        , hgeometry-vector:numtypes
        , hgeometry-vector:unpacked
        , hgeometry-vector:shared
+       , hgeometry-vector:quickcheck
     -- mixins:
     --      hgeometry-vector:unpacked
     --        requires

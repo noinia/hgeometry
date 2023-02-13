@@ -15,13 +15,16 @@ module HGeometry.Vector.Class
   ( Vector
   , VectorLike_(..)
   , component, xComponent, yComponent, zComponent, wComponent
+  , vectorFromList
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
   , Metric_(..)
   ) where
 
 import           Control.Lens
+import           Control.Monad.State
 import qualified Data.Foldable as F
 import qualified Data.Functor.Apply as Apply
+import           Data.Functor.Classes (readData, readUnaryWith)
 import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.Proxy
@@ -33,7 +36,7 @@ import           Linear.V1 (V1(..))
 import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
--- import           Text.Read (Read (..), ReadPrec)
+import           Text.Read (Read (..))
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 import qualified Data.Vector.Generic as GV
@@ -58,9 +61,10 @@ type instance Dimension (Vector d r) = d
 
 -- | Types that have a 'components' indexed traversal
 class VectorLike_ vector where
+  {-# MINIMAL generateA, components #-}
 
   -- | Generates a vector from a monadic operation (that takes the index)
-  generateM :: Monad m => (Int -> m (IxValue vector)) -> m vector
+  generateA :: Applicative f => (Int -> f (IxValue vector)) -> f vector
 
   -- | An Indexed Traversal over the components of a vector
   --
@@ -83,8 +87,31 @@ class VectorLike_ vector where
 
 -- | Generate a vector from a given function.
 generate   :: VectorLike_ vector => (Int -> IxValue vector) -> vector
-generate f = runIdentity $ generateM (Identity . f)
+generate f = runIdentity $ generateA (Identity . f)
 {-# INLINE generate #-}
+
+-- | Convert a list of exactly d elements into a vector with dimension d.
+--
+-- >>> vectorFromList [10,2,3] :: Maybe (Vector 3 Int)
+-- Just (Vector 10 2 3)
+-- >>> vectorFromList [10,2,3,5] :: Maybe (Vector 3 Int)
+-- Nothing
+-- >>> vectorFromList [10,2] :: Maybe (Vector 3 Int)
+-- Nothing
+vectorFromList :: VectorLike_ vector => [IxValue vector] -> Maybe vector
+vectorFromList = evalStateT $ do v <- generateA next
+                                 rest <- get
+                                 guard (null rest)
+                                 pure v
+  where
+    -- Note that this depends on the specific order in which we evaluate
+    -- elements in generateA, so arguably this is somewhat dangerous.
+    next   :: Int -> StateT [r] Maybe r
+    next _ = get >>= \case
+               []   -> fail "vectorFromList: no next element"
+               x:xs -> do put xs
+                          pure x
+{-# INLINE vectorFromList #-}
 
 --------------------------------------------------------------------------------
 -- * Generic functions on VectorLike things
@@ -145,18 +172,18 @@ instance ( VectorLike_ (Vector d r)
       constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
 
--- instance ( VectorLike_ (Vector d r)
---          , Read r
---          , KnownNat d
---          ) => Read (Vector d r) where
---   readPrec = readData $
---       readUnaryWith (replicateM d readPrec) constr $ \rs ->
---         case vectorFromList rs of
---           Just p -> p
---           _      -> error "internal error in HGeometry.Vector read instance."
---     where
---       d        = fromIntegral (natVal @d Proxy)
---       constr   = "Vector" <> show d
+instance ( VectorLike_ (Vector d r)
+         , Read r
+         , KnownNat d
+         ) => Read (Vector d r) where
+  readPrec = readData $
+      readUnaryWith (replicateM d readPrec) constr $ \rs ->
+        case vectorFromList rs of
+          Just p -> p
+          _      -> error "internal error in HGeometry.Vector read instance."
+    where
+      d        = fromIntegral (natVal @d Proxy)
+      constr   = "Vector" <> show d
 
 
 instance Additive_ (Vector d r) => Metric_ (Vector d r)
@@ -169,7 +196,7 @@ instance ( Additive_ (Vector d r)
   uniformRM (lows,highs) gen = liftI2A (\l h -> uniformRM (l,h) gen) lows highs
 
 instance (VectorLike_ (Vector d r), Uniform r) => Uniform (Vector d r) where
-  uniformM gen = generateM (const $ uniformM gen)
+  uniformM gen = generateA (const $ uniformM gen)
 instance (Additive_ (Vector d r), Uniform r, UniformRange r) => Random (Vector d r) where
 
 --------------------------------------------------------------------------------
@@ -316,7 +343,7 @@ class Additive_ vector => Metric_ vector where
 -- * Linear implementations
 
 instance VectorLike_ (V1 r) where
-  generateM f = V1 <$> f 0
+  generateA f = V1 <$> f 0
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V1 r -> f (V1 r)
@@ -330,7 +357,7 @@ instance VectorLike_ (V1 r) where
   {-# INLINE unsafeComponent #-}
 
 instance VectorLike_ (V2 r) where
-  generateM f = V2 <$> f 0 <*> f 1
+  generateA f = V2 <$> f 0 <*> f 1
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V2 r -> f (V2 r)
@@ -345,7 +372,7 @@ instance VectorLike_ (V2 r) where
   {-# INLINE unsafeComponent #-}
 
 instance VectorLike_ (V3 r) where
-  generateM f = V3 <$> f 0 <*> f 1 <*> f 2
+  generateA f = V3 <$> f 0 <*> f 1 <*> f 2
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V3 r -> f (V3 r)
@@ -361,7 +388,7 @@ instance VectorLike_ (V3 r) where
   {-# INLINE unsafeComponent #-}
 
 instance VectorLike_ (V4 r) where
-  generateM f = V4 <$> f 0 <*> f 1 <*> f 2 <*> f 3
+  generateA f = V4 <$> f 0 <*> f 1 <*> f 2 <*> f 3
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V4 r -> f (V4 r)
@@ -451,7 +478,7 @@ instance ( KnownNat d
   basicInitialize (MV_VectorD v) = GMV.basicInitialize v
   {-# INLINE basicInitialize#-}
   basicUnsafeRead (MV_VectorD v) i = let d = natVal' @d
-                                     in generateM $ \j -> GMV.basicUnsafeRead v (d*i+j)
+                                     in generateA $ \j -> GMV.basicUnsafeRead v (d*i+j)
   {-# INLINE basicUnsafeRead #-}
   basicUnsafeWrite (MV_VectorD v) i w = imapMOf_ components f w
     where
@@ -476,7 +503,7 @@ instance ( KnownNat d
                                        in V_VectorD $ GV.basicUnsafeSlice (d*s) (d*l) v
   {-# INLINE basicUnsafeSlice #-}
   basicUnsafeIndexM (V_VectorD v) i = let d = natVal' @d
-                                      in generateM $ \j -> GV.basicUnsafeIndexM v (d*i+j)
+                                      in generateA $ \j -> GV.basicUnsafeIndexM v (d*i+j)
   {-# INLINE basicUnsafeIndexM #-}
 
 instance ( KnownNat d, UV.Unbox r, VectorLike_ (Vector d r)

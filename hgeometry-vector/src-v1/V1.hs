@@ -32,8 +32,8 @@ newtype Vec = Single R
 type instance IxValue   Vec = R
 
 instance VectorLike_ Vec where
-  generateM f = Single <$> f 0
-  {-# INLINE generateM #-}
+  generateA f = Single <$> f 0
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       -- traverse'            :: Apply f => (R -> f R) -> Vec -> f Vec

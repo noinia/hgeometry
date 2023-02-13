@@ -1,11 +1,15 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module IntSpec where
 
 import qualified Data.Vector.Unboxed as UV
 import           HGeometry.Vector.Class
+import           HGeometry.Vector.Instances ()
 import           HGeometry.Vector.Unpacked
 import           R
 import           Test.Hspec
-
+import           Test.Hspec.QuickCheck
+import           Test.QuickCheck
+import           Text.Read (readMaybe)
 --------------------------------------------------------------------------------
 
 myVec :: Vector 2 R
@@ -31,3 +35,11 @@ spec = describe "Int vector spec" $ do
                  (UV.toList (myVecVec UV.// [(0, Vector2 200 20)]))
                    `shouldBe`
                    ((Vector2 200 20) : tail vecList)
+         describe "show/read tests" $ do
+           readShow @(Vector 2 R) "Vector 2 R"
+           readShow @(Vector 3 R) "Vector 3 R"
+           readShow @(Vector 4 R) "Vector 3 R"
+
+readShow       :: forall t. (Read t, Show t, Eq t, Arbitrary t) => String -> Spec
+readShow descr = prop ("Read after show @" <> descr) $
+                   \(x :: t) -> readMaybe @t (show x) == Just x

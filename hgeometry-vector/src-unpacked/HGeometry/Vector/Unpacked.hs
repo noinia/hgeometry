@@ -38,8 +38,8 @@ _V1 :: Iso' (Vector 1 R) V1.Vec
 _V1 = iso (\(V_1 v) -> v) V_1
 
 instance VectorLike_ (Vector 1 R) where
-  generateM f = V_1 <$> generateM f
-  {-# INLINE generateM #-}
+  generateA f = V_1 <$> generateA f
+  {-# INLINE generateA #-}
   components = components' _V1
   {-# INLINE components #-}
   unsafeComponent i = unsafeComponent' _V1 i

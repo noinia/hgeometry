@@ -41,8 +41,8 @@ _VD :: Iso' (Vector D R) Out.Vec
 _VD = iso (\(V_D v) -> v) V_D
 
 instance (IxValue In.Vec ~ R) => VectorLike_ (Vector D R) where
-  generateM f = V_D <$> generateM f
-  {-# INLINE generateM #-}
+  generateA f = V_D <$> generateA f
+  {-# INLINE generateA #-}
   components = components' _VD
   {-# INLINE components #-}
   unsafeComponent i = unsafeComponent' _VD i

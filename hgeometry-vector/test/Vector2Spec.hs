@@ -26,3 +26,7 @@ spec = describe "vector2 tests" $ do
            myVec ^+^ myVec `shouldBe` Vector2 10 22
          it "dot" $
            myVec `dot` Vector2 100 2 `shouldBe` 522
+         it "vectorFromList" $ do
+           vectorFromList @(Vector 3 R) [10,2,3]   `shouldBe` Just (Vector3 10 2 3)
+           vectorFromList @(Vector 3 R) [10,2,3,5] `shouldBe` Nothing
+           vectorFromList @(Vector 3 R) [10,2]     `shouldBe` Nothing

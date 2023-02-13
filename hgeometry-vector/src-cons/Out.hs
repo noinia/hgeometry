@@ -44,8 +44,8 @@ type instance IxValue Vec = R
 instance NFData Vec
 
 instance (IxValue In.Vec ~ R) => VectorLike_ Vec where
-  generateM f = Cons <$> f 0 <*> generateM (\i -> f (i+1))
-  {-# INLINE generateM #-}
+  generateA f = Cons <$> f 0 <*> generateA (\i -> f (i+1))
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'               :: Apply f => (R -> f R) -> Vec -> f Vec
