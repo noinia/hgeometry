@@ -1,6 +1,8 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 module IntSpec where
 
+import           Data.Proxy
+import           Data.Typeable
 import qualified Data.Vector.Unboxed as UV
 import           HGeometry.Vector.Class
 import           HGeometry.Vector.Instances ()
@@ -20,7 +22,6 @@ vecList = [ myVec
           , Vector2 100 20
           ]
 
-
 spec :: Spec
 spec = describe "Int vector spec" $ do
          it "showtest" $
@@ -36,10 +37,10 @@ spec = describe "Int vector spec" $ do
                    `shouldBe`
                    ((Vector2 200 20) : tail vecList)
          describe "show/read tests" $ do
-           readShow @(Vector 2 R) "Vector 2 R"
-           readShow @(Vector 3 R) "Vector 3 R"
-           readShow @(Vector 4 R) "Vector 3 R"
+           readShow @(Vector 2 R)
+           readShow @(Vector 3 R)
+           readShow @(Vector 4 R)
 
-readShow       :: forall t. (Read t, Show t, Eq t, Arbitrary t) => String -> Spec
-readShow descr = prop ("Read after show @" <> descr) $
-                   \(x :: t) -> readMaybe @t (show x) == Just x
+readShow :: forall t. (Read t, Show t, Eq t, Arbitrary t, Typeable t) => Spec
+readShow = prop ("Read after show @" <> show (typeRep $ Proxy @t)) $
+             \(x :: t) -> readMaybe @t (show x) == Just x
