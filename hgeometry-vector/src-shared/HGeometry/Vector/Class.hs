@@ -62,6 +62,7 @@ type instance Dimension (Vector d r) = d
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import HGeometry.Vector.Unpacked
 -- >>> let myVec3 = Vector3 1 10 3
 
 -- | Types that have a 'components' indexed traversal
