@@ -79,17 +79,18 @@ class VectorLike_ vector where
   -- >>> myVec ^@.. components
   -- [(0,1),(1,10),(2,3)]
   components :: IndexedTraversal1' Int vector (IxValue vector)
+
   -- | Access the i^th component. Consider using 'component' instead.
   --
-  -- >>> myVec ^@. unsafeComponent 0
+  -- >>> myVec ^@. omponent' 0
   -- (0,1)
-  -- >>> myVec & unsafeComponent 2 %@~ \i x -> 100*i + x
+  -- >>> myVec & component' 2 %@~ \i x -> 100*i + x
   -- Vector3 1 10 303
-  unsafeComponent :: Int -> IndexedLens' Int vector (IxValue vector)
-  default unsafeComponent :: (Index vector ~ Int, Ixed vector)
-                          => Int -> IndexedLens' Int vector (IxValue vector)
-  unsafeComponent i = singular $ iix i
-  {-# INLINE unsafeComponent #-}
+  component' :: Int -> IndexedTraversal' Int vector (IxValue vector)
+  default component' :: (Index vector ~ Int, Ixed vector)
+                          => Int -> IndexedTraversal' Int vector (IxValue vector)
+  component' = iix
+  {-# INLINE component' #-}
 
 -- | Generate a vector from a given function.
 generate   :: VectorLike_ vector => (Int -> IxValue vector) -> vector
@@ -134,7 +135,7 @@ vectorFromList = evalStateT $ do v <- generateA next
 -- Vector2 10 100
 component :: forall i vector. (VectorLike_ vector, i < Dimension vector, KnownNat i)
           => IndexedLens' Int vector (IxValue vector)
-component = unsafeComponent (fromInteger . natVal $ Proxy @i)
+component = singular $ component' (fromInteger . natVal $ Proxy @i)
 {-# INLINE component #-}
 
 -- | Shorthand for accessing the x-component
@@ -370,10 +371,10 @@ instance VectorLike_ (V1 r) where
       itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V1 r -> f (V1 r)
       itraverse' f (V1 x) = V1 <$> f 0 x
   {-# INLINE components #-}
-  unsafeComponent i = case i of
-    0 -> ilens (\(V1 x) -> (i,x)) (\(V1 _) x' -> V1 x')
-    _ -> error $ "unsafeComponent: V1. index out of bounds" <> show i
-  {-# INLINE unsafeComponent #-}
+  component' i f v@(V1 x) = case (i :: Int) of
+                              0 -> V1 <$> indexed f i x
+                              _ -> pure v
+  {-# INLINE component' #-}
 
 instance VectorLike_ (V2 r) where
   generateA f = V2 <$> f 0 <*> f 1
@@ -384,11 +385,11 @@ instance VectorLike_ (V2 r) where
       itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V2 r -> f (V2 r)
       itraverse' f (V2 x y) = V2 <$> f 0 x Apply.<.> f 1 y
   {-# INLINE components #-}
-  unsafeComponent i = case i of
-    0 -> ilens (\(V2 x _) -> (i,x)) (\(V2 _ y) x' -> V2 x' y )
-    1 -> ilens (\(V2 _ y) -> (i,y)) (\(V2 x _) y' -> V2 x  y')
-    _ -> error $ "unsafeComponent: V2. index out of bounds" <> show i
-  {-# INLINE unsafeComponent #-}
+  component' i f v@(V2 x y) = case (i :: Int) of
+                                 0 -> (\x' -> V2 x' y) <$> indexed f i x
+                                 1 -> (\y' -> V2 x y') <$> indexed f i y
+                                 _ -> pure v
+  {-# INLINE component' #-}
 
 instance VectorLike_ (V3 r) where
   generateA f = V3 <$> f 0 <*> f 1 <*> f 2
@@ -399,12 +400,12 @@ instance VectorLike_ (V3 r) where
       itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V3 r -> f (V3 r)
       itraverse' f (V3 x y z) = V3 <$> f 0 x Apply.<.> f 1 y Apply.<.> f 2 z
   {-# INLINE components #-}
-  unsafeComponent i = case i of
-    0 -> ilens (\(V3 x _ _) -> (i,x)) (\(V3 _ y z) x' -> V3 x' y  z )
-    1 -> ilens (\(V3 _ y _) -> (i,y)) (\(V3 x _ z) y' -> V3 x  y' z )
-    2 -> ilens (\(V3 _ _ z) -> (i,z)) (\(V3 x y _) z' -> V3 x  y  z')
-    _ -> error $ "unsafeComponent: V3. index out of bounds" <> show i
-  {-# INLINE unsafeComponent #-}
+  component' i f v@(V3 x y z) = case (i :: Int) of
+                                 0 -> (\x' -> V3 x' y z) <$> indexed f i x
+                                 1 -> (\y' -> V3 x y' z) <$> indexed f i y
+                                 2 -> (\z' -> V3 x y z') <$> indexed f i z
+                                 _ -> pure v
+  {-# INLINE component' #-}
 
 instance VectorLike_ (V4 r) where
   generateA f = V4 <$> f 0 <*> f 1 <*> f 2 <*> f 3
@@ -415,13 +416,13 @@ instance VectorLike_ (V4 r) where
       itraverse' :: Apply.Apply f => (Int -> r -> f r) -> V4 r -> f (V4 r)
       itraverse' f (V4 x y z w) = V4 <$> f 0 x Apply.<.> f 1 y Apply.<.> f 2 z Apply.<.> f 3 w
   {-# INLINE components #-}
-  unsafeComponent i = case i of
-    0 -> ilens (\(V4 x _ _ _) -> (i,x)) (\(V4 _ y z w) x' -> V4 x' y  z  w)
-    1 -> ilens (\(V4 _ y _ _) -> (i,y)) (\(V4 x _ z w) y' -> V4 x  y' z  w)
-    2 -> ilens (\(V4 _ _ z _) -> (i,z)) (\(V4 x y _ w) z' -> V4 x  y  z' w)
-    3 -> ilens (\(V4 _ _ _ w) -> (i,w)) (\(V4 x y z _) w' -> V4 x  y  z  w')
-    _ -> error $ "unsafeComponent: V4. index out of bounds" <> show i
-  {-# INLINE unsafeComponent #-}
+  component' i f v@(V4 x y z w) = case (i :: Int) of
+                                    0 -> (\x' -> V4 x' y z w) <$> indexed f i x
+                                    1 -> (\y' -> V4 x y' z w) <$> indexed f i y
+                                    2 -> (\z' -> V4 x y z' w) <$> indexed f i z
+                                    3 -> (\w' -> V4 x y z w') <$> indexed f i w
+                                    _ -> pure v
+  {-# INLINE component' #-}
 
 instance Additive_ (V1 r) where
   zero   = V1 0

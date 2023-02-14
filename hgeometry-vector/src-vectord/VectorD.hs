@@ -45,8 +45,8 @@ instance (IxValue In.Vec ~ R) => VectorLike_ (Vector D R) where
   {-# INLINE generateA #-}
   components = components' _VD
   {-# INLINE components #-}
-  unsafeComponent i = unsafeComponent' _VD i
-  {-# INLINE unsafeComponent #-}
+  component' i = component'' _VD i
+  {-# INLINE component' #-}
 
 instance (IxValue In.Vec ~ R) => Additive_ (Vector D R) where
   zero = V_D zero
@@ -67,8 +67,8 @@ components'    :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
 components' is = is.components
 {-# INLINE components' #-}
 
--- | implementation of unsafeComponent
-unsafeComponent'      :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
-                      => Iso' vector vecImpl -> Int -> IndexedLens' Int vector R
-unsafeComponent' is i = is.unsafeComponent i
-{-# INLINE unsafeComponent' #-}
+-- | implementation of component'
+component''      :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
+                      => Iso' vector vecImpl -> Int -> IndexedTraversal' Int vector R
+component'' is i = is.component' i
+{-# INLINE component'' #-}

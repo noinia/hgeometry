@@ -42,10 +42,10 @@ instance VectorLike_ Vec where
       itraverse' f (Single x) = Single <$> f 0 x
   {-# INLINE components #-}
 
-  unsafeComponent i = case i of
-    0 -> ilens (\(Single x) -> (i,x)) (const Single)
-    _ -> error $ "V1.unsafeComponent: Index " <> show i <> " out of bounds."
-  {-# INLINE unsafeComponent #-}
+  component' i f s@(Single x) = case i of
+    0 -> Single <$> indexed f (0 :: Int) x
+    _ -> pure s
+  {-# INLINE component' #-}
 
 instance Additive_ Vec where
   zero = Single 0

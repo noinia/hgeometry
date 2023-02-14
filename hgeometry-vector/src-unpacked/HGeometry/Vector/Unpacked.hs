@@ -43,8 +43,8 @@ instance VectorLike_ (Vector 1 R) where
   {-# INLINE generateA #-}
   components = components' _V1
   {-# INLINE components #-}
-  unsafeComponent i = unsafeComponent' _V1 i
-  {-# INLINE unsafeComponent #-}
+  component' i = component'' _V1 i
+  {-# INLINE component' #-}
 
 instance Additive_ (Vector 1 R) where
   zero = V_1 zero
@@ -102,8 +102,8 @@ components'    :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
 components' is = is.components
 {-# INLINE components' #-}
 
--- | implementation of unsafeComponent
-unsafeComponent'      :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
-                      => Iso' vector vecImpl -> Int -> IndexedLens' Int vector R
-unsafeComponent' is i = is.unsafeComponent i
-{-# INLINE unsafeComponent' #-}
+-- | implementation of component'
+component''      :: (VectorLike_ vecImpl, IxValue vecImpl ~ R)
+                      => Iso' vector vecImpl -> Int -> IndexedTraversal' Int vector R
+component'' is i = is.component' i
+{-# INLINE component'' #-}

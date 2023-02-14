@@ -13,7 +13,6 @@
 module Out where
 
 import           Control.Lens ( IxValue, conjoined, indexed, reindexed, Indexed(..)
-                              , ilens, (&), (^.), (.~)
                               )
 -- import           D
 import           Data.Functor.Apply
@@ -54,12 +53,10 @@ instance (IxValue In.Vec ~ R) => VectorLike_ Vec where
       itraverse' f (Cons x r) = Cons <$> f 0 x <.> reindexed (+1) components (Indexed f) r
   {-# INLINE components #-}
 
-  unsafeComponent i = case i of
-                        0 -> ilens (\(Cons x _) -> (i, x))
-                                   (\(Cons _ r) x -> Cons x r)
-                        _ -> ilens (\(Cons _ r) -> (i, r^.unsafeComponent (i-1)))
-                                   (\(Cons x r) y -> Cons x $ r&unsafeComponent (i-1) .~ y)
-  {-# INLINE unsafeComponent  #-}
+  component' i f (Cons x r) = case i of
+                                0 -> (\x' -> Cons x' r)  <$> indexed f i x
+                                _ -> (\r' -> Cons x  r') <$> component' (i-1) f r
+  {-# INLINE component'  #-}
   -- not sure this will be all that efficient
 
 instance  (IxValue In.Vec ~ R) => Additive_ Vec where
