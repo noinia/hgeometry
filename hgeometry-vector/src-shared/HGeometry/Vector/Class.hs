@@ -13,6 +13,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 module HGeometry.Vector.Class
   ( Vector
+  , Vector_(..)
   , VectorLike_(..)
   , component, xComponent, yComponent, zComponent, wComponent
   , vectorFromList
@@ -52,6 +53,12 @@ import qualified Data.Vector.Unboxed.Mutable as UMV
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import HGeometry.Vector.Unpacked
+-- >>> let myVec3 = Vector3 1 10 3
+
+--------------------------------------------------------------------------------
+
 -- | d-dimensional vectors
 data family Vector (d :: Nat) (r :: Type) :: Type
 
@@ -61,9 +68,24 @@ type instance Dimension (Vector d r) = d
 
 --------------------------------------------------------------------------------
 
--- $setup
--- >>> import HGeometry.Vector.Unpacked
--- >>> let myVec3 = Vector3 1 10 3
+class Vector_ vector where
+  -- | Convert between an arbitrary vector of dimension d storing
+  -- elements of type r and a Vector d r
+  _Vector :: Iso' vector (Vector (Dimension vector) (IxValue vector))
+  default _Vector :: ( VectorLike_ vector
+                     , VectorLike_  (Vector (Dimension vector) (IxValue vector))
+                     )
+                  => Iso' vector (Vector (Dimension vector) (IxValue vector))
+  _Vector = iso (\v -> generate (\i -> v^?!component' i))
+                (\v -> generate (\i -> v^?!component' i))
+  {-# INLINE _Vector #-}
+
+instance Vector_ (Vector d r) where
+  _Vector = id
+  {-# INLINE _Vector #-}
+
+--------------------------------------------------------------------------------
+
 
 -- | Types that have a 'components' indexed traversal
 class VectorLike_ vector where
@@ -362,8 +384,19 @@ class Additive_ vector => Metric_ vector where
 --------------------------------------------------------------------------------
 -- * Linear implementations
 
+type instance Dimension (V1 r) = 1
+type instance Dimension (V2 r) = 2
+type instance Dimension (V3 r) = 3
+type instance Dimension (V4 r) = 4
+
+instance VectorLike_ (Vector 1 r) => Vector_ (V1 r)
+instance VectorLike_ (Vector 2 r) => Vector_ (V2 r)
+instance VectorLike_ (Vector 3 r) => Vector_ (V3 r)
+instance VectorLike_ (Vector 4 r) => Vector_ (V4 r)
+
 instance VectorLike_ (V1 r) where
   generateA f = V1 <$> f 0
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V1 r -> f (V1 r)
@@ -378,6 +411,7 @@ instance VectorLike_ (V1 r) where
 
 instance VectorLike_ (V2 r) where
   generateA f = V2 <$> f 0 <*> f 1
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V2 r -> f (V2 r)
@@ -393,6 +427,7 @@ instance VectorLike_ (V2 r) where
 
 instance VectorLike_ (V3 r) where
   generateA f = V3 <$> f 0 <*> f 1 <*> f 2
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V3 r -> f (V3 r)
@@ -409,6 +444,7 @@ instance VectorLike_ (V3 r) where
 
 instance VectorLike_ (V4 r) where
   generateA f = V4 <$> f 0 <*> f 1 <*> f 2 <*> f 3
+  {-# INLINE generateA #-}
   components = conjoined traverse' (itraverse' . indexed)
     where
       traverse'  :: Apply.Apply f => (r -> f r) -> V4 r -> f (V4 r)

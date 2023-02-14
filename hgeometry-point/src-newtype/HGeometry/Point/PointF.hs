@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Point.PointF
@@ -8,43 +9,33 @@
 -- Implements a point by wrapping some Vector type
 --
 --------------------------------------------------------------------------------
-{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Point.PointF
-  ( Point
-  , PointF(..)
-  , vector
-  , (.-.)
-  , (.+^)
+  ( PointF(..)
   ) where
 
-import Control.DeepSeq
-import Control.Lens
-import Control.Monad (replicateM)
+
+import           Control.DeepSeq
+import           Control.Lens
+import           Control.Monad (replicateM)
 -- import           Data.Aeson
-import Data.Functor.Classes
-import Data.List (intersperse)
-import Data.Proxy
-import GHC.Generics (Generic)
-import GHC.TypeLits
-import HGeometry.Properties
-import HGeometry.Vector
-import Vector -- somehow it doesn't like loading just HGeometry.Vector which also exports Vector
-import HGeometry.Vector.Additive
-import Vector.Additive
-import D
-import System.Random (Random (..))
-import System.Random.Stateful (UniformRange(..), Uniform(..))
+import           Data.Functor.Classes
+import           Data.List (intersperse)
+import           Data.Proxy
+import           GHC.Generics (Generic)
+import           GHC.TypeLits
+import           HGeometry.Point.Class
+import           HGeometry.Properties
+import           HGeometry.Vector.Class
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance
-import Text.Read (Read (..), readListPrecDefault)
--- import qualified Data.Vector.Generic as GV
--- import qualified Data.Vector.Generic.Mutable as GMV
--- import qualified Data.Vector.Unboxed.Mutable as UMV
--- import qualified Data.Vector.Unboxed as UV
+import           Text.Read (Read (..), readListPrecDefault)
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified Data.Vector.Unboxed as UV
 
 --------------------------------------------------------------------------------
-
--- | The Point
-type Point = PointF Vector
 
 -- | A Point wraps a vector
 newtype PointF v = Point { toVec :: v }
@@ -54,52 +45,60 @@ newtype PointF v = Point { toVec :: v }
                           -- , ToJSON, FromJSON -- not sure we want these like this
                           )
 
-
 type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = NumType v
 -- type instance VectorFor (PointF v) = v
 
 
-instance Show Point where
-  showsPrec k p = showParen (k > app_prec) $
-                    showString constr . showChar ' ' .
-                    unwordsS (map (showsPrec 11) (p^..vector.components))
-    where
-      app_prec = 10
-      constr   = "Point" <> show (fromIntegral (natVal @D Proxy))
-      unwordsS = foldr (.) id . intersperse (showChar ' ')
-
--- instance ( Read (IxValue v)
+-- instance ( VectorLike_ v
+--          , Additive_ v
+--          , Show (IxValue v)
 --          , KnownNat (Dimension v)
---          , IxValue v ~ NumType v
+--          -- , NumType v ~ IxValue v
+--          ) => Show (PointF v) where
+--   showsPrec k p = showParen (k > app_prec) $
+--                     showString constr . showChar ' ' .
+--                     unwordsS (map (showsPrec 11) (p^..coordinates))
+--     where
+--       app_prec = 10
+--       constr   = "Point" <> show (fromIntegral (natVal @(Dimension v) Proxy))
+--       unwordsS = foldr (.) id . intersperse (showChar ' ')
+
+-- instance ( VectorLike_ v
+--          , Additive_ v
+--          , Read (IxValue v)
+--          , KnownNat (Dimension v)
+--          -- , IxValue v ~ NumType v
 --          ) => Read (PointF v) where
 --   readPrec = readData $
 --       readUnaryWith (replicateM d readPrec) constr $ \rs ->
 --         case pointFromList rs of
---           Just v -> p
+--           Just p -> p
 --           _      -> error "internal error in HGeometry.Point read instance."
 --     where
 --       d        = fromIntegral (natVal @(Dimension v) Proxy)
 --       constr   = "Point" <> show d
 --   readListPrec = readListPrecDefault
 
---------------------------------------------------------------------------------
--- * Point signature
+-- instance ( Vector_ v (Dimension v) (IxValue v)
+--          , Metric_ v
+--          , IxValue v ~ NumType v
+--          ) => Affine_ (PointF v) where
+--   p .-. q = toVec p ^-^ toVec q
+--   p .+^ v = Point $ toVec p ^+^ v
+--   p .-^ v = Point $ toVec p ^-^ v
 
-vector :: Lens' Point Vector
-vector = lens toVec (const Point)
+-- instance ( Vector_ v  d r
+--          , Vector_ v' d s
+--          , NumType v ~ r, NumType v' ~ s
+--          ) => HasVector (PointF v) (PointF v') r s where
+--   vector = lens toVec (const Point)
 
---------------------------------------------------------------------------------
--- * Affine signature
-
-(.-.) :: Point -> Point -> Vector
-p .-. q = toVec p ^-^ toVec q
-
-(.+^)   :: Point -> Vector -> Point
-p .+^ v = Point $ toVec p ^+^ v
-
---------------------------------------------------------------------------------
-
+-- instance ( Vector_ v d r
+--          , Metric_ v
+--          , NumType v ~ r
+--          ) => Point_ (PointF v) d r where
+--   fromVector = Point . vectorFromVector
 
 -- instance HasPoints (PointF v) (PointF v') (PointF v) (PointF v') where
 --   allPoints = id

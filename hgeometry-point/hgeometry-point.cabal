@@ -20,6 +20,10 @@ common depends-hgeometry-vector
   build-depends:
       hgeometry-vector        >= 1.0.0.0
 
+-- common setup-extras
+--     build-depends:
+--         aeson                   >= 2.1
+
 common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
@@ -33,6 +37,7 @@ common setup
       , semigroups              >= 0.18
       , random                  >= 1.2
       , witherable              >= 0.4
+      , linear                  >= 1.21
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -72,106 +77,124 @@ common test-setup
 --------------------------------------------------------------------------------
 -- * Main Library
 
-library
-    import:           setup, depends-hgeometry-vector
+-- library
+--     import:           setup, depends-hgeometry-vector
+--     exposed-modules:
+--       HGeometry.Point
+--       HGeometry.Point.Affine
+
+--     -- re-exported-modules:
+--     --   HGeometry.Properties
+
+--     -- other-modules:
+--     -- other-extensions:
+--     hs-source-dirs:   src
+--     build-depends:
+--         hgeometry-point:sig-point
+
+--------------------------------------------------------------------------------
+-- * Shared
+
+-- Don't use any signatures here; so that either a sig or an implementation can import this
+-- library
+
+library shared
+    import:           setup
+    -- visibility: public
     exposed-modules:
-      HGeometry.Point
-      HGeometry.Point.Affine
+      HGeometry.Point.Class
 
-    -- re-exported-modules:
-    --   HGeometry.Properties
-
-    -- other-modules:
-    -- other-extensions:
-    hs-source-dirs:   src
+    hs-source-dirs: src-shared
     build-depends:
-        hgeometry-point:sig-point
-
+      hgeometry-vector:shared        >= 1.0.0.0
 
 --------------------------------------------------------------------------------
 -- * Signatures for everything that is vector-like.
 
-library sig-point
-    import:           setup, depends-hgeometry-vector
-    visibility: public
-    signatures:
-      Point
-      Point.Affine
-    -- exposed-modules:
-      -- HGeometry.Properties
+-- library sig-point
+--     import:           setup, depends-hgeometry-vector
+--     visibility: public
+--     signatures:
+--       Point
+--       Point.Affine
+--     -- exposed-modules:
+--       -- HGeometry.Properties
 
-    -- other-modules:
-    -- other-extensions:
-    hs-source-dirs:   sig-point
+--     -- other-modules:
+--     -- other-extensions:
+--     hs-source-dirs:   sig-point
 
 --------------------------------------------------------------------------------
 -- * Point Implementations
 
 library newtype
-  import: setup, depends-hgeometry-vector
-  visibility: public
-  hs-source-dirs: src-newtype
-  exposed-modules:
-    HGeometry.Point.PointF
+    import: setup
+    visibility: public
+    hs-source-dirs: src-newtype
+    exposed-modules:
+      HGeometry.Point.PointF
+    build-depends:
+        hgeometry-vector:shared        >= 1.0.0.0
+      , hgeometry-point:shared        >= 1.0.0.0
 
 --------------------------------------------------------------------------------
 -- * Generic Test stup
 
-common hgeometry-point-test
-    import:           setup, test-setup, depends-hgeometry-vector
-    hs-source-dirs:   test
-    build-tool-depends: hspec-discover:hspec-discover
-    other-modules:
-       GenericSpec
-       Spec
-       Point2Spec
-    build-depends:
-       , hgeometry-point
-       , hgeometry-point:newtype
-       , hgeometry-vector:numtypes
-       , hgeometry-vector:vector2
+-- common hgeometry-point-test
+--     import:           setup, test-setup, depends-hgeometry-vector
+--     hs-source-dirs:   test
+--     build-tool-depends: hspec-discover:hspec-discover
+--     other-modules:
+--        GenericSpec
+--        Spec
+--        Point2Spec
+--     build-depends:
+--        , hgeometry-point
+--        , hgeometry-point:newtype
+--        , hgeometry-vector:numtypes
+--        , hgeometry-vector:vector2
 
-    mixins:
-         hgeometry-vector
-           requires
-           ( D               as HGeometry.Vector.Vector2
-           , Vector          as HGeometry.Vector.Vector2
-           , Vector.Additive as HGeometry.Vector.Vector2
-           )
-       , hgeometry-point:newtype
-           requires
-           ( D               as HGeometry.Vector.Vector2
-           , Vector          as HGeometry.Vector.Vector2
-           , Vector.Additive as HGeometry.Vector.Vector2
-           )
-       , hgeometry-point
-          requires
-          ( Point           as HGeometry.Point.PointF
-          , Point.Affine    as HGeometry.Point.PointF
-          , D               as HGeometry.Vector.Vector2
-          , Vector          as HGeometry.Vector.Vector2
-          , Vector.Additive as HGeometry.Vector.Vector2
-          )
+--     mixins:
+--          hgeometry-vector
+--            requires
+--            ( D               as HGeometry.Vector.Vector2
+--            , Vector          as HGeometry.Vector.Vector2
+--            , Vector.Additive as HGeometry.Vector.Vector2
+--            )
+--        , hgeometry-point:newtype
+--            requires
+--            ( D               as HGeometry.Vector.Vector2
+--            , Vector          as HGeometry.Vector.Vector2
+--            , Vector.Additive as HGeometry.Vector.Vector2
+--            )
+--        , hgeometry-point
+--           requires
+--           ( Point           as HGeometry.Point.PointF
+--           , Point.Affine    as HGeometry.Point.PointF
+--           , D               as HGeometry.Vector.Vector2
+--           , Vector          as HGeometry.Vector.Vector2
+--           , Vector.Additive as HGeometry.Vector.Vector2
+--           )
 
-----------------------------------------
--- * Concrete Test stuites
+-- ----------------------------------------
+-- -- * Concrete Test stuites
 
-test-suite hgeometry-point-test-int
-    import:           setup, test-setup, hgeometry-point-test
-    type:             exitcode-stdio-1.0
-    main-is:          Main.hs
-    other-modules:
-        IntSpec
-    hs-source-dirs:   test-int
-    mixins:
-         hgeometry-vector:numtypes (Int as R)
+-- test-suite hgeometry-point-test-int
+--     import:           setup, test-setup, hgeometry-point-test
+--     type:             exitcode-stdio-1.0
+--     main-is:          Main.hs
+--     other-modules:
+--         IntSpec
+--     hs-source-dirs:   test-int
+--     mixins:
+--          hgeometry-vector:numtypes (Int as R)
 
---test-suite hgeometry-point-test-double
---    import:           setup, test-setup, hgeometry-point-test
---    type:             exitcode-stdio-1.0
---    main-is:          Main.hs
---    other-modules:
---        DoubleSpec
---    hs-source-dirs:   test-double
---    mixins:
---         hgeometry-vector:numtypes (Double as R)
+-- --test-suite hgeometry-point-test-double
+-- --    import:           setup, test-setup, hgeometry-point-test
+-- --    type:             exitcode-stdio-1.0
+-- --    main-is:          Main.hs
+-- --    other-modules:
+-- --        DoubleSpec
+-- --    hs-source-dirs:   test-double
+-- --    mixins:
+-- --         hgeometry-vector:numtypes (Double as R)
