@@ -2,23 +2,14 @@ module Point2Spec where
 
 import Control.Lens
 import HGeometry.Point
-import HGeometry.Point.PointF
 import HGeometry.Vector
-import HGeometry.Vector.Vector2
-import HGeometry.Properties
 import Test.Hspec
+import R
 
 --------------------------------------------------------------------------------
 
-myPoint :: Point
+myPoint :: Point 2 R
 myPoint = Point2 5 11
-
-type R = NumType Point
-
--- | A bidirectional pattern synonym for 2 dimensional points.
-pattern Point2       :: R -> R -> Point
-pattern Point2 x y = Point (Vector2 x y)
-{-# COMPLETE Point2 #-}
 
 spec :: Spec
 spec = describe "point2 tests" $ do

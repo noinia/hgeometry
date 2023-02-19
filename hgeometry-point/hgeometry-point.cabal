@@ -16,9 +16,9 @@ extra-doc-files:    CHANGELOG.md
 tested-with: GHC == 9.2.2
 
 --------------------------------------------------------------------------------
-common depends-hgeometry-vector
-  build-depends:
-      hgeometry-vector        >= 1.0.0.0
+-- common depends-hgeometry-vector
+--   build-depends:
+--       hgeometry-vector        >= 1.0.0.0
 
 -- common setup-extras
 --     build-depends:
@@ -111,18 +111,23 @@ library shared
 --------------------------------------------------------------------------------
 -- * Signatures for everything that is vector-like.
 
--- library sig-point
---     import:           setup, depends-hgeometry-vector
---     visibility: public
---     signatures:
---       Point
---       Point.Affine
---     -- exposed-modules:
---       -- HGeometry.Properties
+library sig-point
+    import:           setup
+    visibility: public
+    signatures:
+      Point
+      -- Point.Affine
+    build-depends:
+        hgeometry-vector
+      , hgeometry-vector:sig-dim
+      , hgeometry-point:shared
 
---     -- other-modules:
---     -- other-extensions:
---     hs-source-dirs:   sig-point
+    -- exposed-modules:
+      -- HGeometry.Properties
+
+    -- other-modules:
+    -- other-extensions:
+    hs-source-dirs:   sig-point
 
 --------------------------------------------------------------------------------
 -- * Point Implementations
@@ -137,7 +142,7 @@ library pointf
       HGeometry.Point.PointF
     build-depends:
         hgeometry-vector:shared        >= 1.0.0.0
-      , hgeometry-point:shared        >= 1.0.0.0
+      , hgeometry-point:shared
 
 -- this one should not depend on Vector itself; so that we can
 -- instantiate it with any sort of vector.
@@ -152,45 +157,26 @@ library newtype
       , hgeometry-point:shared        >= 1.0.0.0
       , hgeometry-point:pointf        >= 1.0.0.0
 
-
 --------------------------------------------------------------------------------
 -- * Generic Test stup
 
--- common hgeometry-point-test
---     import:           setup, test-setup, depends-hgeometry-vector
---     hs-source-dirs:   test
---     build-tool-depends: hspec-discover:hspec-discover
---     other-modules:
---        GenericSpec
---        Spec
---        Point2Spec
---     build-depends:
---        , hgeometry-point
---        , hgeometry-point:newtype
---        , hgeometry-vector:numtypes
---        , hgeometry-vector:vector2
+common hgeometry-point-test
+    import:           setup, test-setup
+    hs-source-dirs:   test
+    build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+       GenericSpec
+       Spec
+       Point2Spec
+    build-depends:
+       -- , hgeometry-point
+       , hgeometry-point:newtype
+       , hgeometry-vector:numtypes
+       , hgeometry-vector
 
---     mixins:
---          hgeometry-vector
---            requires
---            ( D               as HGeometry.Vector.Vector2
---            , Vector          as HGeometry.Vector.Vector2
---            , Vector.Additive as HGeometry.Vector.Vector2
---            )
---        , hgeometry-point:newtype
---            requires
---            ( D               as HGeometry.Vector.Vector2
---            , Vector          as HGeometry.Vector.Vector2
---            , Vector.Additive as HGeometry.Vector.Vector2
---            )
---        , hgeometry-point
---           requires
---           ( Point           as HGeometry.Point.PointF
---           , Point.Affine    as HGeometry.Point.PointF
---           , D               as HGeometry.Vector.Vector2
---           , Vector          as HGeometry.Vector.Vector2
---           , Vector.Additive as HGeometry.Vector.Vector2
---           )
+    mixins:
+         hgeometry-vector
+       , hgeometry-point:newtype
 
 -- ----------------------------------------
 -- -- * Concrete Test stuites
@@ -205,12 +191,12 @@ library newtype
 --     mixins:
 --          hgeometry-vector:numtypes (Int as R)
 
--- --test-suite hgeometry-point-test-double
--- --    import:           setup, test-setup, hgeometry-point-test
--- --    type:             exitcode-stdio-1.0
--- --    main-is:          Main.hs
--- --    other-modules:
--- --        DoubleSpec
--- --    hs-source-dirs:   test-double
--- --    mixins:
--- --         hgeometry-vector:numtypes (Double as R)
+test-suite hgeometry-point-test-double
+   import:           setup, test-setup, hgeometry-point-test
+   type:             exitcode-stdio-1.0
+   main-is:          Main.hs
+   other-modules:
+       DoubleSpec
+   hs-source-dirs:   test-double
+   mixins:
+        hgeometry-vector:numtypes (Double as R)

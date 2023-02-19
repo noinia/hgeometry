@@ -11,9 +11,10 @@
 signature Point where
 
 import Control.DeepSeq
-import Control.Lens
+import D
 import Data.Kind (Type)
-import Vector (Vector)
+import HGeometry.Point.Class
+import R
 
 --------------------------------------------------------------------------------
 
@@ -28,10 +29,15 @@ instance NFData Point
 instance Show Point
 
 
+instance HasVector Point
+instance Affine_ Point D R
+instance Point_ Point D R
+
+
 --------------------------------------------------------------------------------
 
--- | Lens to access the vector of this point
-vector :: Lens' Point Vector
+-- -- | Lens to access the vector of this point
+-- vector :: Lens' Point Vector
 
 
 --------------------------------------------------------------------------------

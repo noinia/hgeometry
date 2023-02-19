@@ -19,7 +19,7 @@ module HGeometry.Point.Class
   -- , pointFromPoint
   , pointFromList
   , coord
-  -- , xCoord, yCoord, zCoord, wCoord
+  , xCoord, yCoord, zCoord, wCoord
 
   -- , projectPoint
   -- , PointFor
@@ -233,7 +233,47 @@ pointFromList :: ( Point_ point d r
                  ) => [r] -> Maybe point
 pointFromList = fmap fromVector . vectorFromList
 
+--------------------------------------------------------------------------------
 
+-- | Shorthand to access the first coordinate
+--
+-- >>> myPoint ^. xCoord
+-- 1
+-- >>> Point2 1 (2 :: Int) & xCoord .~ 10
+-- Point2 10 2
+xCoord :: (1 <= d, Point_ point d r) => IndexedLens' Int point r
+xCoord = coord @1
+{-# INLINABLE xCoord #-}
+
+-- | Shorthand to access the second coordinate
+--
+-- >>> Point2 1 (2 :: Int) ^. yCoord
+-- 2
+-- >>> myPoint & yCoord %~ (+1)
+-- Point3 1 3 3
+yCoord :: (2 <= d, Point_ point d r) => IndexedLens' Int point r
+yCoord = coord @2
+{-# INLINABLE yCoord #-}
+
+-- | Shorthand to access the third coordinate
+--
+-- >>> myPoint ^. zCoord
+-- 3
+-- >>> myPoint & zCoord %~ (+1)
+-- Point3 1 2 4
+zCoord :: (3 <= d, Point_ point d r) => IndexedLens' Int point r
+zCoord = coord @3
+{-# INLINABLE zCoord #-}
+
+-- | Shorthand to access the fourth coordinate
+--
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) ^. wCoord
+-- 4
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) & wCoord %~ (+1)
+-- Point4 1 2 3 5
+wCoord :: (4 <= d, Point_ point d r) => IndexedLens' Int point r
+wCoord = coord @4
+{-# INLINABLE wCoord #-}
 
 --------------------------------------------------------------------------------
 
