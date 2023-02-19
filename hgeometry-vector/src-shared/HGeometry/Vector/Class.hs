@@ -50,6 +50,7 @@ import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
 import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
 
@@ -370,15 +371,17 @@ class Additive_ vector => Metric_ vector where
   -- -- | Compute the distance between two vectors in a metric space
   -- distance :: Radical (IxValue vector) => vector -> vector -> IxValue vector
 
---   -- | Compute the norm of a vector in a metric space
---   norm :: Radical (IxValue vector) => vector -> IxValue vector
---   norm = sqrt . quadrance
---   {-# INLINE norm #-}
---
---   -- | Convert a non-zero vector to unit vector.
---   signorm   :: (Radical (IxValue vector), Fractional (IxValue vector)) => vector -> vector
---   signorm v = v ^/ norm v
---   {-# INLINE signorm #-}
+  -- | Compute the norm of a vector in a metric space
+  norm :: Radical.Radical (IxValue vector) => vector -> IxValue vector
+  norm = Radical.sqrt . quadrance
+  {-# INLINE norm #-}
+
+  -- | Convert a non-zero vector to unit vector.
+  signorm   :: ( Radical.Radical (IxValue vector)
+               , Fractional (IxValue vector)
+               ) => vector -> vector
+  signorm v = v ^/ norm v
+  {-# INLINE signorm #-}
 
 
 

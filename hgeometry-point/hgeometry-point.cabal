@@ -16,10 +16,6 @@ extra-doc-files:    CHANGELOG.md
 tested-with: GHC == 9.2.2
 
 --------------------------------------------------------------------------------
--- common depends-hgeometry-vector
---   build-depends:
---       hgeometry-vector        >= 1.0.0.0
-
 -- common setup-extras
 --     build-depends:
 --         aeson                   >= 2.1
@@ -29,6 +25,7 @@ common setup
 
     build-depends:
         base                    >= 4.16.1.0      &&  < 5
+      , hgeometry-combinatorial >= 1.0.0.0
       , containers              >= 0.6
       , vector                  >= 0.13
       , lens                    >= 5.2
@@ -38,6 +35,8 @@ common setup
       , random                  >= 1.2
       , witherable              >= 0.4
       , linear                  >= 1.21
+      , data-clist              >= 0.2
+
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -77,20 +76,27 @@ common test-setup
 --------------------------------------------------------------------------------
 -- * Main Library
 
--- library
---     import:           setup, depends-hgeometry-vector
---     exposed-modules:
---       HGeometry.Point
---       HGeometry.Point.Affine
+library
+    import:           setup
+    exposed-modules:
+     HGeometry.Point.EuclideanDistance
+     HGeometry.Point.Orientation
+      -- HGeometry.Point
+      -- HGeometry.Point.Affine
 
---     -- re-exported-modules:
---     --   HGeometry.Properties
+    reexported-modules:
+       HGeometry.Point
 
---     -- other-modules:
---     -- other-extensions:
---     hs-source-dirs:   src
---     build-depends:
---         hgeometry-point:sig-point
+    other-modules:
+     HGeometry.Point.Orientation.Degenerate
+
+
+    -- other-extensions:
+    hs-source-dirs:   src
+    build-depends:
+        hgeometry-point:shared
+     ,  hgeometry-point:newtype
+     ,  hgeometry-vector
 
 --------------------------------------------------------------------------------
 -- * Shared
