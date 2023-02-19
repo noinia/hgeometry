@@ -5,6 +5,7 @@ module HGeometry.Combinatorial.Instances where
 
 import HGeometry.Number.Ratio.Generalized
 import HGeometry.Number.Real.Rational
+import HGeometry.Ext
 -- import HGeometry.Number.Real.Symbolic
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
@@ -12,7 +13,11 @@ import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
+instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
+  arbitrary = (:+) <$> arbitrary <*> arbitrary
 
+
+--------------------------------------------------------------------------------
 
 -- instance ( forall r. VectorLike_ (Vector d r)
 --          ) => Arbitrary1 (Vector d) where

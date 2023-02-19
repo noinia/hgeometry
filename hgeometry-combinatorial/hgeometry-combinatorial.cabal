@@ -26,7 +26,8 @@ common setup
     build-depends:
         base                    >= 4.16.1.0    &&  < 5
       , containers              >= 0.6
-       , lens                   >= 5.2
+      , lens                    >= 5.2
+      , bifunctors              >= 4.1
       , deepseq                 >= 1.1
       , semigroupoids           >= 5
       , semigroups              >= 0.18
@@ -100,6 +101,8 @@ library
         HGeometry.Foldable.Util
 
         HGeometry.Vector.NonEmpty.Util
+
+        HGeometry.Ext
 
         HGeometry.Cyclic
         HGeometry.Permutation
