@@ -123,7 +123,9 @@ jobs:
       - name: initial cabal.project for sdist
         run: |
           touch cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-combinatorial" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-vector" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-point" >> cabal.project
           cat cabal.project
       - name: sdist
         run: |
@@ -135,17 +137,28 @@ jobs:
           find sdist -maxdepth 1 -type f -name '*.tar.gz' -exec tar -C $GITHUB_WORKSPACE/unpacked -xzvf {} \;
       - name: generate cabal.project
         run: |
+          PKGDIR_hgeometry_combinatorial="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-combinatorial-[0-9.]*')"
+          echo "PKGDIR_hgeometry_combinatorial=${PKGDIR_hgeometry_combinatorial}" >> "$GITHUB_ENV"
           PKGDIR_hgeometry_vector="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-vector-[0-9.]*')"
           echo "PKGDIR_hgeometry_vector=${PKGDIR_hgeometry_vector}" >> "$GITHUB_ENV"
+          PKGDIR_hgeometry_point="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-point-[0-9.]*')"
+          echo "PKGDIR_hgeometry_point=${PKGDIR_hgeometry_point}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
+          echo "packages: ${PKGDIR_hgeometry_combinatorial}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry_vector}" >> cabal.project
+          echo "packages: ${PKGDIR_hgeometry_point}" >> cabal.project
+          echo "package hgeometry-combinatorial" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry-vector" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package hgeometry-point" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
+          allow-newer: vector-circular:vector
           EOF
-          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry-vector)$/; }' >> cabal.project.local
+          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry-combinatorial|hgeometry-point|hgeometry-vector)$/; }' >> cabal.project.local
           cat cabal.project
           cat cabal.project.local
       - name: dump install plan
@@ -173,7 +186,11 @@ jobs:
           $CABAL v2-test $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --test-show-details=direct
       - name: cabal check
         run: |
+          cd ${PKGDIR_hgeometry_combinatorial} || false
+          ${CABAL} -vnormal check
           cd ${PKGDIR_hgeometry_vector} || false
+          ${CABAL} -vnormal check
+          cd ${PKGDIR_hgeometry_point} || false
           ${CABAL} -vnormal check
       - name: haddock
         run: |
