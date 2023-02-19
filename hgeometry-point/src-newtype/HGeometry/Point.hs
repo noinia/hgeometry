@@ -34,3 +34,5 @@ pattern Point3 x y z = Point (Vector3 x y z)
 pattern Point4         :: R -> R -> R -> R -> Point 4 R
 pattern Point4 x y z w = Point (Vector4 x y z w)
 {-# COMPLETE Point2 #-}
+
+--------------------------------------------------------------------------------

@@ -1,0 +1,190 @@
+cabal-version:      3.4
+name:               hgeometry-combinatorial
+version:            1.0.0.0
+synopsis:
+    Data structures, and Data types.
+description:
+    The Non-geometric data types and algorithms used in HGeometry.
+license:            MIT
+license-file:       LICENSE
+homepage:            https://fstaals.net/software/hgeometry
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+tested-with: GHC == 9.2.5
+
+--------------------------------------------------------------------------------
+
+common setup
+    ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+                 -- -fspecialise-aggressively -fexpose-all-unfoldings
+    build-depends:
+        base                    >= 4.16.1.0    &&  < 5
+      , containers              >= 0.6
+       , lens                   >= 5.2
+      , deepseq                 >= 1.1
+      , semigroupoids           >= 5
+      , semigroups              >= 0.18
+      , random                  >= 1.2
+      , mtl                     >= 2.2
+
+      , vector                  >= 0.13
+      , vector-builder          >= 0.3.7
+      , vector-algorithms       >= 0.8
+      , nonempty-vector         >= 0.2.0.0
+      , vector-circular         >= 0.1.4
+
+      , aeson                   >= 2.0
+      , MonadRandom             >= 0.5
+
+      -- , witherable              >= 0.4
+      -- , linear                  >= 1.21
+
+      -- , ghc-typelits-natnormalise >= 0.7.7
+      -- , ghc-typelits-knownnat     >= 0.7.6
+
+    default-language: GHC2021
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+
+common quickcheck-setup
+    build-depends:
+        QuickCheck              >= 2.10
+      , quickcheck-instances
+
+common test-setup
+    import: quickcheck-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                   >= 2.9
+
+--------------------------------------------------------------------------------
+-- * Main Library
+
+library
+    import:           setup
+    exposed-modules:
+        HGeometry.Number.Real.Rational
+        HGeometry.Number.Real.Symbolic
+        HGeometry.Number.Ratio.Generalized
+        HGeometry.Number.Radical
+        HGeometry.Sign
+        HGeometry.Indexed
+        HGeometry.Foldable.Sort
+        HGeometry.Foldable.Util
+
+        HGeometry.Vector.NonEmpty.Util
+
+        HGeometry.Cyclic
+    -- other-modules:
+    -- other-extensions:
+
+    hs-source-dirs:   src
+
+    -- build-depends:
+    --     hgeometry-combinatorial:unpacked
+    --   , hgeometry-combinatorial:shared
+
+--------------------------------------------------------------------------------
+-- * Helper Libraries
+
+library quickcheck
+    import: setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Combinatorial.Instances
+    build-depends:
+         hgeometry-combinatorial
+
+--------------------------------------------------------------------------------
+-- * Tests
+
+test-suite hgeometry-combinatorial-hspec
+    import:           setup, test-setup
+    type:             exitcode-stdio-1.0
+    build-tool-depends: hspec-discover:hspec-discover
+    hs-source-dirs:   test
+    main-is:          Main.hs
+    other-modules:
+       Spec
+
+
+    build-depends:
+         hgeometry-combinatorial
+
+--- --------------------------------------------------------------------------------
+---
+--- -- test-suite hgeometry-combinatorial-doctest
+--- --     import:           setup, test-setup
+--- --     type:             exitcode-stdio-1.0
+--- --     hs-source-dirs:   doctest
+--- --     main-is:          Main.hs
+--- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
+--- --     code-generators: doctest-codegen-driver
+---
+--- --     build-depends:
+--- --          hgeometry-combinatorial:combinatorial2
+--- --        , hgeometry-combinatorial:numtypes
+--- --        , hgeometry-combinatorial:sig-combinatorial
+--- --        , doctest
+---
+--- --     mixins:
+--- --          hgeometry-combinatorial:numtypes (Int as R)
+--- --        , hgeometry-combinatorial:sig-combinatorial
+--- --            requires
+--- --            ( Combinatorial          as HGeometry.Combinatorial.Combinatorial2
+--- --            , Combinatorial.Additive as HGeometry.Combinatorial.Combinatorial2
+--- --            , D               as HGeometry.Combinatorial.Combinatorial2
+--- --            )
+
+
+--------------------------------------------------------------------------------
+-- * Benchmarks
+
+-- common hgeometry-combinatorial-bench
+--     import:           setup, test-setup
+--     -- hs-source-dirs:   test
+--     -- build-tool-depends: hspec-discover:hspec-discover
+--     other-modules:
+--     build-depends:
+--        , hgeometry-combinatorial:numtypes
+--        , hgeometry-combinatorial:unpacked
+--        , hgeometry-combinatorial:shared
+--        , tasty-bench              >= 0.3
+--        , tasty                    >= 1.4
+
+-- benchmark hgeometry-combinatorial-bench-int
+--     import: setup, hgeometry-combinatorial-bench
+--     hs-source-dirs: bench
+--     main-is: Benchmarks.hs
+--     type: exitcode-stdio-1.0
+--     -- other-modules:
+--     mixins:
+--            hgeometry-combinatorial:numtypes (Int as R)
