@@ -1,4 +1,14 @@
-module HGeometry.Point
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Point.Unpacked
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- d -dimensional Points, represented using unpacked vectors.
+--
+--------------------------------------------------------------------------------
+module HGeometry.Point.Unpacked
   ( Point
   , PointF(Point, Point1, Point2, Point3, Point4)
   , module HGeometry.Point.Class

@@ -83,12 +83,13 @@ library
     exposed-modules:
      HGeometry.Point.EuclideanDistance
      HGeometry.Point.Orientation
-      -- HGeometry.Point
+     HGeometry.Point
       -- HGeometry.Point.Affine
 
     reexported-modules:
-        HGeometry.Point
+        HGeometry.Point.Unpacked
       , HGeometry.Point.Class
+      , HGeometry.Point.PointF
 
     other-modules:
      HGeometry.Point.Orientation.Degenerate
@@ -99,6 +100,7 @@ library
     build-depends:
         hgeometry-point:shared
      ,  hgeometry-point:newtype
+     ,  hgeometry-point:pointf
      ,  hgeometry-vector
 
 --------------------------------------------------------------------------------
@@ -160,7 +162,7 @@ library newtype
     visibility: public
     hs-source-dirs: src-newtype
     exposed-modules:
-      HGeometry.Point
+      HGeometry.Point.Unpacked
     build-depends:
         hgeometry-vector              >= 1.0.0.0
       , hgeometry-point:shared        >= 1.0.0.0

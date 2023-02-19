@@ -15,6 +15,7 @@ module HGeometry.Vector.Class
   ( Vector
   , Vector_(..)
   , VectorLike_(..)
+  , generate
   , component, xComponent, yComponent, zComponent, wComponent
   , vectorFromList
   , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit

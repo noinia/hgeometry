@@ -1,0 +1,43 @@
+* benchmarking graham scan
+
+tried to inline Vector2_
+
+    1e4Int
+      GrahamScan:        OK (0.85s)
+        121  ms ± 3.8 ms
+      GrahamScanAnnot:   OK (0.26s)
+        84.6 ms ± 7.3 ms
+      GrahamScanV2:      OK (0.68s)
+        10.8 ms ± 392 μs
+      GrahamScanInt:     OK (0.35s)
+        5.54 ms ± 247 μs
+      GrahamScanFastest: OK (0.32s)
+        2.42 ms ± 107 μs
+      GrahamScanClassy:  OK (0.61s)
+        85.1 ms ± 7.0 ms
+
+so even the GrahamScanClassy version, which is the grahmscan as a
+typeclass implemented on top of an Unpacked Vector of Int's is slow.
+
+profiling seems to think a lot of time is spent on the 'getting' of
+lens. Not sure where/why that is exactly, or if that is just an
+artifact of profiling
+
+* this is with an unboxed vector / unboxed constraints. So somehow it seems we've made it even slower now :S
+
+      GrahamScan:        OK (0.48s)
+        167  ms ± 3.8 ms
+      GrahamScanAnnot:   OK (0.36s)
+        119  ms ± 3.6 ms
+      GrahamScanV2:      OK (0.16s)
+        10.7 ms ± 755 μs
+      GrahamScanInt:     OK (1.44s)
+        5.55 ms ±  87 μs
+      GrahamScanFastest: OK (0.59s)
+        2.26 ms ± 122 μs
+      GrahamScanClassy:  OK (3.73s)
+        119  ms ± 687 μs
+      ClassySort:        OK (1.00s)
+        1.91 ms ± 175 μs
+      Sort:              OK (0.51s)
+        2.00 ms ±  85 μs

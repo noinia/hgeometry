@@ -9,7 +9,7 @@ import           Control.Lens
 import           Data.Ord (comparing)
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point.Class
-import           HGeometry.Point
+import           HGeometry.Point.Unpacked
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
 
