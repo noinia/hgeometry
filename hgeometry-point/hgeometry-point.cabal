@@ -127,15 +127,31 @@ library shared
 --------------------------------------------------------------------------------
 -- * Point Implementations
 
-library newtype
+-- this one should not depend on Vector itself; so that we can
+-- instantiate it with any sort of vector.
+library pointf
     import: setup
     visibility: public
-    hs-source-dirs: src-newtype
+    hs-source-dirs: src-pointf
     exposed-modules:
       HGeometry.Point.PointF
     build-depends:
         hgeometry-vector:shared        >= 1.0.0.0
       , hgeometry-point:shared        >= 1.0.0.0
+
+-- this one should not depend on Vector itself; so that we can
+-- instantiate it with any sort of vector.
+library newtype
+    import: setup
+    visibility: public
+    hs-source-dirs: src-newtype
+    exposed-modules:
+      HGeometry.Point
+    build-depends:
+        hgeometry-vector              >= 1.0.0.0
+      , hgeometry-point:shared        >= 1.0.0.0
+      , hgeometry-point:pointf        >= 1.0.0.0
+
 
 --------------------------------------------------------------------------------
 -- * Generic Test stup

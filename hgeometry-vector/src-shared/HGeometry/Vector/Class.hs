@@ -64,6 +64,7 @@ data family Vector (d :: Nat) (r :: Type) :: Type
 
 type instance Index     (Vector d r) = Int
 type instance IxValue   (Vector d r) = r
+type instance NumType   (Vector d r) = r
 type instance Dimension (Vector d r) = d
 
 --------------------------------------------------------------------------------

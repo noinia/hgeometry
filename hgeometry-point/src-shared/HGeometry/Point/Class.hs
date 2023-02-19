@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DefaultSignatures #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Point.Class
@@ -14,19 +15,20 @@ module HGeometry.Point.Class
   ( HasVector(..)
   , Affine_(..)
   , Point_(..) -- , pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
-  -- , origin
-  -- , pointFromPoint, pointFromList
+  , origin
+  -- , pointFromPoint
+  , pointFromList
   , coord
   -- , xCoord, yCoord, zCoord, wCoord
 
   -- , projectPoint
   -- , PointFor
-  -- , HasPoints(..), HasPoints'
+  , HasPoints(..), HasPoints'
   ) where
 
 import           Control.Lens
 -- import           Data.Ext
-import           Data.Function (on)
+-- import           Data.Function (on)
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
@@ -68,16 +70,22 @@ class ( Additive_ (Vector d r)
       , d ~ Dimension point, r ~ NumType point
       ) => Affine_ point d r | point -> d
                              , point -> r where
-  {-# MINIMAL (.-.), (.+^) #-}
+  {-# MINIMAL #-}
 
   -- | p .-. q represents the vector from q to p
   (.-.) :: Num r => point -> point -> Vector d r
+  default (.-.) :: (HasVector point, Num r) => point -> point -> Vector d r
+  p .-. q = (p^.vector) ^-^ (q^.vector)
+  {-# INLINE (.-.) #-}
 
   -- | add a vector to a point
   --
   -- >>> myPoint .+^ Vector3 100 200 300
   -- Point3 101 202 303
   (.+^) :: Num r => point -> Vector d r -> point
+  default (.+^) :: (HasVector point, Num r) => point -> Vector d r -> point
+  p .+^ v = p&vector %~ (^+^ v)
+  {-# INLINE (.+^) #-}
 
   -- | subtract a vector from a point
   --
@@ -92,10 +100,7 @@ instance ( d ~ Dimension (v r)
          , Vector_ (v r)
          , Additive_ (Vector d r)
          ) => Affine_ (Linear.Point v r) d r where
-  p .-. q = (p^.vector) ^-^ (q^.vector)
-  {-# INLINE (.-.) #-}
-  p .+^ v = p&vector %~ (^+^ v)
-  {-# INLINE (.+^) #-}
+
 
 --------------------------------------------------------------------------------
 
@@ -168,3 +173,90 @@ instance ( d ~ Dimension (v r)
          , Additive_ (Vector d r)
          ) => Point_ (Linear.Point v r) d r where
   fromVector = Linear.P . review _Vector
+
+
+-- | Point representing the origin in d dimensions
+--
+-- >>> origin :: Point 4 Int
+-- Point4 0 0 0 0
+origin :: forall point d r. (Num r, Point_ point d r) => point
+origin = fromVector zero
+
+
+-- -- | A bidirectional pattern synonym for 1 dimensional points.
+-- pattern Point1_   :: Point_ point 1 r => r -> point
+-- pattern Point1_ x <- (view vector -> Vector1 x)
+--   where
+--     Point1_ x = fromVector (Vector.Vector1 x)
+-- {-# COMPLETE Point1_ #-}
+
+-- -- | A bidirectional pattern synonym for 2 dimensional points.
+-- pattern Point2_     :: ( Point_ point 2 r
+--                        -- , ConstructableVector_ (Vector.VectorFamily 2 r) 2 r
+--                        ) => r -> r -> point
+-- pattern Point2_ x y <- (view vector -> Vector2 x y)
+-- --  where
+-- --    Point2_ x y = fromVector (Vector.Vector2 x y)
+-- {-# COMPLETE Point2_ #-}
+
+
+-- -- | A bidirectional pattern synonym for 3 dimensional points.
+-- pattern Point3_       :: ( Point_ point 3 r
+--                          -- , ConstructableVector_ (Vector.VectorFamily 3 r) 3 r
+--                          ) => r -> r -> r -> point
+-- pattern Point3_ x y z <- (view vector -> Vector3 x y z)
+--   -- where
+--   --   Point3_ x y z = fromVector (Vector.Vector3 x y z)
+-- {-# COMPLETE Point3_ #-}
+
+-- -- | A bidirectional pattern synonym for 4 dimensional points.
+-- pattern Point4_         :: ( Point_ point 4 r
+--                            -- , ConstructableVector_ (Vector.VectorFamily 4 r) 4 r
+--                            ) => r -> r -> r -> r -> point
+-- pattern Point4_ x y z w <- (view vector -> Vector4 x y z w)
+--   -- where
+--   --   Point4_ x y z w = fromVector (Vector.Vector4 x y z w)
+-- {-# COMPLETE Point4_ #-}
+
+
+-- | Constructs a point from a list of coordinates. The length of the
+-- list has to match the dimension exactly.
+--
+-- >>> pointFromList [1,2,3] :: Maybe (Point 3 Int)
+-- Just (Point3 1 2 3)
+-- >>> pointFromList [1] :: Maybe (Point 3 Int)
+-- Nothing
+-- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
+-- Nothing
+pointFromList :: ( Point_ point d r
+                 , VectorLike_ (Vector d r)
+                 ) => [r] -> Maybe point
+pointFromList = fmap fromVector . vectorFromList
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Data types that store points
+class HasPoints s t point point' | s -> point
+                                 , t -> point' where
+  -- | Traversal over all points in the structure
+  --
+  -- >>> let seg = ClosedLineSegment (Point2 10 10) (Point2 20 (30 :: Int))
+  -- >>> seg^..allPoints
+  -- [Point2 10 10,Point2 20 30]
+  -- >>> over allPoints (.+^ Vector2 10 10) seg :: ClosedLineSegment (Point 2 Int)
+  -- ClosedLineSegment (Point2 20 20) (Point2 30 40)
+  allPoints :: ( Point_ point  d r
+               , Point_ point' d r'
+               , NumType s ~ r
+               , NumType t ~ r'
+               , Dimension s ~ d, Dimension t ~ d
+               ) => Traversal1 s t point point'
+
+-- | Shorthand for 'HasPoints s s point point'
+type HasPoints' s point = HasPoints s s point point
+
+instance HasPoints (Linear.Point v r) (Linear.Point v' r')
+                   (Linear.Point v r) (Linear.Point v' r') where
+  allPoints = id
