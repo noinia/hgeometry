@@ -118,7 +118,7 @@ runBenchmark = do
                   -- , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
 
                   -- , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
-                  -- , bench "Sort" $ nf sort' pts
+                  , bench "Sort" $ nf sort' pts
                   ]
       where
         pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)
