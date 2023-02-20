@@ -77,6 +77,13 @@ myConvexHull :: NonEmpty      (Point 2 Int)
 myConvexHull = GrahamScan.convexHull
 
 
+
+
+sort'' :: NonEmpty      (Point 2 Int) ->
+         NonEmpty      (Point 2 Int)
+sort'' = NonEmpty.fromList . UV.toList . sortBy compare
+
+
 sort' :: NonEmpty      (Point 2 Int) ->
          NonEmpty      (Point 2 Int)
 sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
@@ -84,6 +91,8 @@ sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
 incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
+
+
 
 -- this already seems to make a difference versus just using Point 2 Int:
 
@@ -118,7 +127,8 @@ runBenchmark = do
                   -- , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
 
                   -- , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
-                  , bench "Sort" $ nf sort' pts
+                  , bench "Sort'" $ nf sort' pts
+                  , bench "Sort''" $ nf sort'' pts
                   ]
       where
         pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)
