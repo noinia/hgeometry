@@ -101,6 +101,19 @@ common setup
               , mtl                     >= 2.2
               , template-haskell
 
+common test-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                   >= 2.9
+      , QuickCheck              >= 2.10
+      , quickcheck-instances
+
 --------------------------------------------------------------------------------
 -- * Main HGeometry Library
 
@@ -147,23 +160,23 @@ library
 --   type: exitcode-stdio-1.0
 --
 --   other-modules:
---     ConvexHull.Bench
+--     -- ConvexHull.Bench
 --
---     ConvexHull.GrahamBench
---     ConvexHull.GrahamV2
---     ConvexHull.GrahamInt
---     ConvexHull.GrahamFastest
---     ConvexHull.GrahamClassy
+--     -- ConvexHull.GrahamBench
+--     -- ConvexHull.GrahamV2
+--     -- ConvexHull.GrahamInt
+--     -- ConvexHull.GrahamFastest
+--     -- ConvexHull.GrahamClassy
 --
 --     Util
 --
 --
---   mixins:
---       hgeometry-vector:unpacked (Unpacked as Int.Unpacked)    requires (R as Int)
+--   -- mixins:
+--   --      hgeometry requires (R as Int)
 --
 --   build-depends: tasty-bench
---                , hgeometry
---                , hgeometry-vector:unpacked
+--                -- , hgeometry
+--                -- , hgeometry-vector
 --                , hgeometry-vector:numtypes
 --                , deepseq-generics
 --                , optparse-applicative
@@ -172,6 +185,30 @@ library
 
 --------------------------------------------------------------------------------
 -- * Test Suites
+
+common hgeometry-test
+    import:           setup, test-setup
+    hs-source-dirs:   test
+    build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+       GenericSpec
+       Spec
+       Point2Spec
+    build-depends:
+       -- , hgeometry-point
+       , hgeometry-point
+       , hgeometry-vector:numtypes
+       , hgeometry-vector
+
+test-suite hgeometry-hspec-double
+   import:           setup, test-setup, hgeometry-test
+   type:             exitcode-stdio-1.0
+   main-is:          Main.hs
+   other-modules:
+       DoubleSpec
+   hs-source-dirs:   test-double
+   mixins:
+        hgeometry-vector:numtypes (Double as R)
 
 -- test-suite doctests-hgeometry
 --   type:          exitcode-stdio-1.0
@@ -183,22 +220,3 @@ library
 --                , QuickCheck
 --                , quickcheck-instances
 --
--- test-suite hspec-hgeometry
---   import: setup
---   type:                 exitcode-stdio-1.0
---   default-language:     Haskell2010
---   hs-source-dirs:       test
---   main-is:              Main.hs
---
---   build-depends: hgeometry
---                , hspec         >= 2.9
---   ghc-options:   -Wall
---                  -fno-warn-unticked-promoted-constructors
---                  -fno-warn-partial-type-signatures
---                  -fno-warn-missing-signatures
---                  -fno-warn-type-defaults
---                  -fno-warn-orphans
---
---   build-tool-depends: hspec-discover:hspec-discover
---
---   other-modules: Spec
