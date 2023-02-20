@@ -177,7 +177,7 @@ instance ( d ~ Dimension (v r)
          , Additive_ (Vector d r)
          ) => Point_ (Linear.Point v r) d r where
   fromVector = Linear.P . review _Vector
-
+  {-# INLINE fromVector #-}
 
 -- | Point representing the origin in d dimensions
 --
@@ -192,6 +192,7 @@ pattern Point1_   :: Point_ point 1 r => r -> point
 pattern Point1_ x <- (view xCoord -> x)
   where
     Point1_ x = fromVector (generate $ const x)
+{-# INLINE Point1_ #-}
 {-# COMPLETE Point1_ #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
@@ -200,6 +201,7 @@ pattern Point2_     :: ( Point_ point 2 r
 pattern Point2_ x y <- (view xCoord &&& view yCoord -> (x,y))
  where
    Point2_ x y = fromVector . view _Vector $ V2 x y
+{-# INLINE Point2_ #-}
 {-# COMPLETE Point2_ #-}
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
@@ -209,6 +211,7 @@ pattern Point3_       :: ( Point_ point 3 r
 pattern Point3_ x y z <- (view xCoord &&& view yCoord &&& view zCoord -> (x,(y,z)))
   where
     Point3_ x y z = fromVector . view _Vector $ V3 x y z
+{-# INLINE Point3_ #-}
 {-# COMPLETE Point3_ #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
@@ -219,6 +222,7 @@ pattern Point4_ x y z w <- (view xCoord &&& view yCoord &&& view zCoord &&& view
                            -> (x,(y,(z,w))))
   where
     Point4_ x y z w = fromVector . view _Vector $ V4 x y z w
+{-# INLINE Point4_ #-}
 {-# COMPLETE Point4_ #-}
 
 
