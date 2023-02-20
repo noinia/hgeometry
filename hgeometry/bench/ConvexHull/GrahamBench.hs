@@ -11,18 +11,18 @@ import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 
 
 import qualified ConvexHull.GrahamV2 as GrahamV2
-import qualified ConvexHull.GrahamInt as GrahamInt
+-- import qualified ConvexHull.GrahamInt as GrahamInt
 import qualified ConvexHull.GrahamFastest as GrahamFastest
   -- hand written implementation for Int, this should be the fastest possible somehow.
   -- FIXME: currently still uses merge-sort, switch to quicksort/introsort
 
 import           Control.DeepSeq
-import qualified ConvexHull.GrahamClassy as GrahamClassy
+-- import qualified ConvexHull.GrahamClassy as GrahamClassy
 import           HGeometry.Foldable.Sort
 import qualified Data.Vector.Unboxed as UV
 import           System.Random
 -- import           Data.Double.Approximate
-import           Data.Ext
+-- import           Data.Ext
 import           Control.Lens
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
@@ -30,7 +30,7 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.RealNumber.Rational
+import           HGeometry.Number.Real.Rational
 import           Test.Tasty.Bench
 import           Data.Hashable
 import qualified Data.List as List
@@ -54,10 +54,11 @@ gen = genByName "convex hull"
 
 
 runProfile :: IO ()
-runProfile = do
-    let pts = take' (10^(4 :: Int)) $ randomPoints @(Point 2 Int) gen 100000
-    let pg = force $ GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
-    print (lengthOf outerBoundary pg)
+runProfile = print "runProfile diabled"
+-- runProfile = do
+--     let pts = take' (10^(4 :: Int)) $ randomPoints @(Point 2 Int) gen 100000
+--     let pg = force $ GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
+--     print (lengthOf outerBoundary pg)
 
 --------------------------------------------------------------------------------
 
@@ -71,8 +72,8 @@ curcial in making sure this benchmark is sufficiently fast.
 --              -> ConvexPolygon (PointF (VectorFamily 2 Int))
 -- myConvexHull = GrahamScan.convexHull
 
-myConvexHull :: NonEmpty      (Point 2 Double)
-             -> ConvexPolygon (Point 2 Double)
+myConvexHull :: NonEmpty      (Point 2 Int)
+             -> ConvexPolygon (Point 2 Int)
 myConvexHull = GrahamScan.convexHull
 
 
@@ -110,14 +111,14 @@ runBenchmark = do
   where
     chBench     :: NonEmpty (Point 2 Int) -> [Benchmark]
     chBench pts = [ bench "GrahamScan"    $ nf GrahamScan.convexHull pts
-                  , bench "GrahamScanAnnot"    $ nf myConvexHull pts'
+                  -- , bench "GrahamScanAnnot"    $ nf myConvexHull pts'
                   , bench "GrahamScanV2"  $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
-                  , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
+                  -- , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
                   , bench "GrahamScanFastest" $ nf GrahamFastest.convexHull (GrahamFastest.fromP <$> pts)
-                  , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
+                  -- , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pts)
 
-                  , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
-                  , bench "Sort" $ nf sort' pts
+                  -- , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
+                  -- , bench "Sort" $ nf sort' pts
                   ]
       where
         pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)
@@ -136,40 +137,3 @@ benchmark name sizes f pts = bgroup "ConvexHull" $
     | i <- sizes
     , let n = 10^i
     ]
-
-
-
--- --      [ bgroup ("1e"++show i ++ "/RealNumber") (convexHullFractional $ genPts @R n)
--- --      | i <- [3, 4::Int]
--- --      , let n = 10^i
--- --      ] ++
---       [ bgroup ("1e"++show i ++ "/Int:+()") (convexHullNum $ fmap ext $ genPts @Int n)
---       | i <- [4, 5::Int]
---       , let n = 10^i
---       ] ++
-
---       -- [ bgroup ("1e"++show i ++ "/Int") (convexHullNum $ genPts @Int n)
---       -- | i <- [4, 5::Int]
---       -- , let n = 10^i
---       -- ] ++
-
---       -- [ bgroup ("1e"++show i ++ "/SafeDouble") (convexHullFractional $ genPts @SafeDouble n)
---       -- | i <- [4, 5::Int]
---       -- , let n = 10^i
---       -- ] ++
---      [ bgroup ("1e"++show i ++ "/Double") (convexHullFractional $ genPts @Double n)
---      | i <- [4, 5::Int]
---      , let n = 10^i ]
---   where
---     convexHullFractional (force -> pts) =
---                 [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
---                 -- , bench "DivideAndConquer" $ nf DivideAndConquer.convexHull pts
---                 -- , bench "QuickHull" $ nf QuickHull.convexHull pts
---                 -- , bench "JarvisMarch" $ nf JarvisMarch.convexHull pts
---                 ]
---     convexHullNum (force -> pts) = let pts' = force (GrahamV2.fromP <$> pts) in
---                 [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
---                 , bench "GrahamBaseLine" $ nf GrahamV2.convexHull pts'
---                 -- , bench "DivideAndConquer" $ nf DivideAndConquer.convexHull pts
---                 -- , bench "JarvisMarch" $ nf JarvisMarch.convexHull pts
---                 ]

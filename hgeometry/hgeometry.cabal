@@ -40,7 +40,7 @@ source-repository head
 
 common setup
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
-               -- -fspecialise-aggressively -fexpose-all-unfoldings
+               -fspecialise-aggressively -fexpose-all-unfoldings
 
   default-language: GHC2021
 
@@ -152,27 +152,46 @@ library
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
--- benchmark benchmarks
---   import: setup
---   hs-source-dirs: bench
+common hgeometry-bench-setup
+    import:           setup, test-setup
+    hs-source-dirs:   bench
+    -- build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+       -- GenericSpec
+       -- Spec
+       -- Point2Spec
+    build-depends:
+       , hgeometry
+       , hgeometry-combinatorial
+       , hgeometry-point
+       , hgeometry-vector:numtypes
+       , hgeometry-vector
+       , deepseq-generics
+       , tasty-bench                 >= 0.3
+     -- , optparse-applicative
+       , hashable              >= 1.4
+
+benchmark hgeometry-bench
+    import: setup, hgeometry-bench-setup
+    main-is: Benchmarks.hs
+    type: exitcode-stdio-1.0
+    other-modules:
+    -- ConvexHull.Bench
+
+      ConvexHull.GrahamBench
+      ConvexHull.GrahamV2
+      ConvexHull.GrahamInt
+      ConvexHull.GrahamFastest
+    -- ConvexHull.GrahamClassy
+
+      Util
+
+
+    mixins:
+        hgeometry-vector:numtypes (Int as R)
+
 --
---   main-is: Benchmarks.hs
---   type: exitcode-stdio-1.0
 --
---   other-modules:
---     -- ConvexHull.Bench
---
---     -- ConvexHull.GrahamBench
---     -- ConvexHull.GrahamV2
---     -- ConvexHull.GrahamInt
---     -- ConvexHull.GrahamFastest
---     -- ConvexHull.GrahamClassy
---
---     Util
---
---
---   -- mixins:
---   --      hgeometry requires (R as Int)
 --
 --   build-depends: tasty-bench
 --                -- , hgeometry

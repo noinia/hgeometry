@@ -3,7 +3,7 @@ module Main where
 -- -- import           Control.DeepSeq (force)
 -- import           Test.Tasty.Bench
 -- import qualified ConvexHull.Bench as ConvexHull
--- import qualified ConvexHull.GrahamBench as Graham
+import qualified ConvexHull.GrahamBench as Graham
 
 -- import qualified Data.List as List
 -- import           HGeometry.Point.PointF
@@ -49,11 +49,11 @@ module Main where
 -- --   ]
 
 main :: IO ()
-main = print "woei"
+main = Graham.runBenchmark
 
   -- ConvexHull.runBenchmark
           -- ConvexHull.runProfile
 
-allBenchmarks = do
-                   Graham.runBenchmark
-                   ConvexHull.runBenchmark
+-- allBenchmarks = do
+--                    Graham.runBenchmark
+--                    ConvexHull.runBenchmark

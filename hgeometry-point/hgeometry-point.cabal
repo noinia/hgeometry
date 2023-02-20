@@ -24,6 +24,7 @@ tested-with: GHC == 9.2.5
 
 common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+                -fspecialise-aggressively -fexpose-all-unfoldings
 
     build-depends:
         base                    >= 4.16.1.0      &&  < 5

@@ -12,6 +12,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 -- import           Data.RealNumber.Rational
 import           HGeometry.Point
 import           HGeometry.Vector
+import           HGeometry.Vector.Class
 import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
@@ -21,8 +22,8 @@ import           System.Random.Stateful
 randomPoints       :: forall point r. ( UniformRange point
                       , Point_ point 2 r
                       , Num r
-                      , OptCVector_ 2 r
-                      , OptMetric_ 2 r
+                      -- , OptCVector_ 2 r
+                      -- , OptMetric_ 2 r
                       )
                    => StdGen -- ^ generator to use
                    -> r -- ^ max coordinate value
@@ -31,7 +32,7 @@ randomPoints gen m = points
   where
     points = NonEmpty.unfoldr (fmap Just . uniformR box) gen
 
-    box = (origin, pointFromPoint $ Point2 m m)
+    box = (origin, fromVector $ generate (const m))
 
 -- | construct a determinsitc generator based on a name.
 genByName      :: String ->  StdGen

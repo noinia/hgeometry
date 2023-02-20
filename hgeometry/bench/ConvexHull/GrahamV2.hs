@@ -6,13 +6,13 @@ module ConvexHull.GrahamV2( convexHull
 
 import           Control.DeepSeq
 import           Control.Lens ((^.))
-import           Data.Ext
+import           HGeometry.Ext
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid
 import           GHC.Generics
 import           HGeometry.Point
-import qualified HGeometry.Vector.Boxed as Boxed
+-- import qualified HGeometry.Vector.Boxed as Boxed
 import qualified Linear.V2 as V2
 
 
@@ -24,18 +24,17 @@ pattern MyPoint x y = MKPoint (V2.V2 x y)
 
 instance NFData r => NFData (MyPoint r)
 
-
-toP                    :: MyPoint r :+ e -> Boxed.Vector 2 r :+ e
-toP (MyPoint x y :+ e) = Boxed.Vector2 x y :+ e
-
-
+toP = id
+-- toP                    :: MyPoint r :+ e -> Boxed.Vector 2 r :+ e
+-- toP (MyPoint x y :+ e) = Boxed.Vector2 x y :+ e
 
 fromP (Point2_ x y) = MyPoint x y :+ ()
+
 
 (MyPoint x y) `subt` (MyPoint a b) = MyPoint (x-a) (y-b)
 
 
-newtype ConvexPolygon p r = ConvexPolygon [Boxed.Vector 2 r :+ p] deriving (NFData)
+newtype ConvexPolygon p r = ConvexPolygon [MyPoint r :+ p] deriving (NFData)
 
 -- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is
 -- given in clockwise order.
