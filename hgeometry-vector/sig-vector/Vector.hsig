@@ -1,0 +1,60 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE RoleAnnotations #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Vector
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Signature for D-dimensional Vectors
+--
+--------------------------------------------------------------------------------
+signature Vector where
+
+import Control.DeepSeq
+import Control.Lens
+import D
+import Data.Kind (Type)
+import Data.Type.Ord
+import GHC.TypeLits
+import HGeometry.Vector.Class
+-- import HGeometry.Properties
+import R
+
+--------------------------------------------------------------------------------
+
+-- $setup
+-- >>> let myVector2 = Vector2 5 11
+
+-- | a 'Vector d r' is a d-dimensional vector whose components are of
+-- type r.
+data Vector :: Nat -> Type -> Type
+type role Vector nominal nominal
+
+instance Eq R => Eq (Vector D R)
+instance Ord R => Ord (Vector D R)
+instance NFData R => NFData (Vector D R)
+instance (Show R, KnownNat D) => Show (Vector D R)
+
+--------------------------------------------------------------------------------
+
+instance VectorLike_ (Vector D R)
+instance Additive_ (Vector D R)
+instance Metric_ (Vector D R)
+
+
+
+
+-- -- | Traversal over the components of the vector
+-- --
+-- -- >>> myVector2^..components
+-- -- [5,11]
+-- components :: IndexedTraversal1' Int Vector R
+
+
+-- -- | Lens to access the i^th coordinate.
+-- component :: forall i. (i < D, KnownNat i) => IndexedLens' Int Vector R
+
+
+--------------------------------------------------------------------------------

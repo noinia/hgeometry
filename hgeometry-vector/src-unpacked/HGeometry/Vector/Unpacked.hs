@@ -8,6 +8,8 @@
 -- Unpacked low dimensional vectors
 --
 --------------------------------------------------------------------------------
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Vector.Unpacked
   ( Vector(Vector1, Vector2, Vector3, Vector4)
@@ -15,13 +17,37 @@ module HGeometry.Vector.Unpacked
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
+import           Control.Monad.State
+-- import qualified Data.Foldable as F
+import qualified Data.Functor.Apply as Apply
+import           Data.Functor.Classes (readData, readUnaryWith)
+-- import           Data.Kind (Type)
+import qualified Data.List as List
+import           Data.Proxy
+-- import           Data.Semigroup
+-- import           Data.Type.Ord
 import           GHC.Generics (Generic)
+import           GHC.TypeLits (KnownNat, natVal)
 import           HGeometry.Vector.Class
 import           R
 import qualified V1
 import qualified V2
 import qualified V3
 import qualified V4
+import           VectorDef
+-- import           GHC.Generics
+-- import           HGeometry.Properties
+import           Text.Read (Read (..))
+import           System.Random (Random (..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..))
+-- import qualified Data.Vector.Generic as GV
+-- import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
+-- import qualified Data.Vector.Generic.Mutable as GMV
+-- import qualified Data.Vector.Unboxed as UV
+-- import qualified Data.Vector.Unboxed.Mutable as UMV
+-- import qualified HGeometry.Number.Radical as Radical
+
+
 
 --------------------------------------------------------------------------------
 -- * 1 Dimensional Vectors
@@ -87,10 +113,49 @@ pattern Vector4 x y z w = V4.V_D (V4.Cons x
 -- * Additional Functionality
 
 
+--------------------------------------------------------------------------------
+-- * Generic instances
+
+instance ( VectorLike_ (Vector d r)
+         , Show r
+         , KnownNat d
+         ) => Show (Vector d r) where
+  -- | Show implementation for vectors
+  showsPrec k v = showParen (k > app_prec) $
+                     showString constr . showChar ' ' .
+                     unwordsS (map (showsPrec 11) (v^..components))
+    where
+      app_prec = 10
+      constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
+      unwordsS = foldr (.) id . List.intersperse (showChar ' ')
+
+instance ( VectorLike_ (Vector d r)
+         , Read r
+         , KnownNat d
+         ) => Read (Vector d r) where
+  readPrec = readData $
+      readUnaryWith (replicateM d readPrec) constr $ \rs ->
+        case vectorFromList rs of
+          Just p -> p
+          _      -> error "internal error in HGeometry.Vector read instance."
+    where
+      d        = fromIntegral (natVal @d Proxy)
+      constr   = "Vector" <> show d
 
 
--- -- {-# SPECIALIZE
--- --     scalarMultiple' :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}
+instance Additive_ (Vector d r) => Metric_ (Vector d r)
+
+-- instance Generic (Vector d r) => NFData (Vector d r)
+
+instance ( Additive_ (Vector d r)
+         , UniformRange r
+         ) => UniformRange (Vector d r) where
+  uniformRM (lows,highs) gen = Apply.unwrapApplicative $
+      liftI2A (\l h -> Apply.WrapApplicative $ uniformRM (l,h) gen) lows highs
+
+instance (VectorLike_ (Vector d r), Uniform r) => Uniform (Vector d r) where
+  uniformM gen = generateA (const $ uniformM gen)
+instance (Additive_ (Vector d r), Uniform r, UniformRange r) => Random (Vector d r) where
 
 
 --------------------------------------------------------------------------------

@@ -16,13 +16,14 @@ module VectorD
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
-import           GHC.Generics (Generic)
-import           HGeometry.Vector.Class
-import           R
 import           D
-import qualified Out
+import           GHC.Generics (Generic)
+-- import           GHC.TypeLits
+import           HGeometry.Vector.Class
 import qualified In
-
+import qualified Out
+import           R
+import           VectorDef
 
 -- import qualified Data.Vector.Generic as GV
 -- import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
