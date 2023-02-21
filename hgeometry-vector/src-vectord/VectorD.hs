@@ -11,6 +11,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module VectorD
   ( Vector(..)
+  , UnpackedVector(..)
   , Out.Vec(..)
   ) where
 
@@ -35,13 +36,13 @@ import           VectorDef
 --------------------------------------------------------------------------------
 
 -- | vectors
-newtype instance Vector D R = V_D Out.Vec
+newtype instance UnpackedVector D R = V_D Out.Vec
   deriving newtype (Eq,Ord,Generic,NFData)
 
-_VD :: Iso' (Vector D R) Out.Vec
+_VD :: Iso' (UnpackedVector D R) Out.Vec
 _VD = iso (\(V_D v) -> v) V_D
 
-instance (IxValue In.Vec ~ R) => VectorLike_ (Vector D R) where
+instance (IxValue In.Vec ~ R) => VectorLike_ (UnpackedVector D R) where
   generateA f = V_D <$> generateA f
   {-# INLINE generateA #-}
   components = components' _VD
@@ -49,7 +50,7 @@ instance (IxValue In.Vec ~ R) => VectorLike_ (Vector D R) where
   component' i = component'' _VD i
   {-# INLINE component' #-}
 
-instance (IxValue In.Vec ~ R) => Additive_ (Vector D R) where
+instance (IxValue In.Vec ~ R) => Additive_ (UnpackedVector D R) where
   zero = V_D zero
   {-# INLINE zero #-}
   liftU2 f (V_D v) (V_D v')  = V_D $ liftU2 f v v'
