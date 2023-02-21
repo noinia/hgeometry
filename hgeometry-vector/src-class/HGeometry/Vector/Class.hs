@@ -44,11 +44,6 @@ import           Linear.V4 (V4(..))
 import           Text.Read (Read (..))
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
-import qualified Data.Vector.Generic as GV
-import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
-import qualified Data.Vector.Generic.Mutable as GMV
-import qualified Data.Vector.Unboxed as UV
-import qualified Data.Vector.Unboxed.Mutable as UMV
 import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
@@ -464,73 +459,8 @@ instance Metric_ (V2 r)
 instance Metric_ (V3 r)
 instance Metric_ (V4 r)
 
---------------------------------------------------------------------------------
--- * unboxed vectors
-
--- | elements of the vector are stored consecutively
-newtype instance UMV.MVector s (Vector d r) = MV_VectorD (UMV.MVector s r)
-newtype instance UV.Vector     (Vector d r) = V_VectorD  (UV.Vector     r)
-
-natVal' :: forall d. KnownNat d => Int
-natVal' = fromInteger $ natVal (Proxy @d)
-
-instance ( KnownNat d
-         , GMV.MVector UMV.MVector r
-         , VectorLike_ (Vector d r)
-         ) => GMV.MVector UMV.MVector (Vector d r) where
-
-  basicLength (MV_VectorD v) = let d = natVal' @d
-                               in GMV.basicLength v `div` d
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice s l (MV_VectorD v) = let d = natVal' @d
-                                        in MV_VectorD $ GMV.basicUnsafeSlice (d*s) (d*l) v
-  {-# INLINE basicUnsafeSlice #-}
-  basicOverlaps  (MV_VectorD v) (MV_VectorD v') = GMV.basicOverlaps v v'
-  {-# INLINE basicOverlaps #-}
-  basicUnsafeNew n = let d = natVal' @d
-                     in MV_VectorD <$> GMV.basicUnsafeNew (d*n)
-  {-# INLINE basicUnsafeNew #-}
-  basicInitialize (MV_VectorD v) = GMV.basicInitialize v
-  {-# INLINE basicInitialize#-}
-  basicUnsafeRead (MV_VectorD v) i = let d = natVal' @d
-                                     in generateA $ \j -> GMV.basicUnsafeRead v (d*i+j)
-  {-# INLINE basicUnsafeRead #-}
-  basicUnsafeWrite (MV_VectorD v) i w = imapMOf_ components f w
-    where
-      f j x = GMV.basicUnsafeWrite v (d*i+j) x
-      d = natVal' @d
-  {-# INLINE basicUnsafeWrite #-}
-
-
-instance ( KnownNat d
-         , GV.Vector UV.Vector r
-         , VectorLike_ (Vector d r)
-         ) => GV.Vector UV.Vector (Vector d r) where
-
-  basicUnsafeFreeze (MV_VectorD mv) = V_VectorD <$> GV.basicUnsafeFreeze mv
-  {-# INLINE basicUnsafeFreeze #-}
-  basicUnsafeThaw (V_VectorD v) = MV_VectorD <$> GV.basicUnsafeThaw v
-  {-# INLINE basicUnsafeThaw #-}
-  basicLength (V_VectorD v) = let d = natVal' @d
-                              in GV.basicLength v `div` d
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice s l (V_VectorD v) = let d = natVal' @d
-                                       in V_VectorD $ GV.basicUnsafeSlice (d*s) (d*l) v
-  {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM (V_VectorD v) i = let d = natVal' @d
-                                      in generateA $ \j -> GV.basicUnsafeIndexM v (d*i+j)
-  {-# INLINE basicUnsafeIndexM #-}
-
-instance ( KnownNat d, UV.Unbox r, VectorLike_ (Vector d r)
-         ) => UV.Unbox (Vector d r) where
-
 
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * Additional Functionality
--- not sure if I should specialize these
-
 
 
 -}

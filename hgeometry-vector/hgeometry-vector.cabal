@@ -78,24 +78,50 @@ common test-setup
         hspec                   >= 2.9
 
 --------------------------------------------------------------------------------
--- * Main Library ; signature
+-- * This is the Abstract Library that implements the vector signature,
+-- and pretty much all functionality in terms of this signature.
+
+library sig-vector
+    import:           setup
+    visibility: public
+    signatures:
+      Vector
+
+    exposed-modules:
+      HGeometry.Vector.Impl
+    --    HGeometry.Vector.Additive
+    --    HGeometry.Vector.Metric
+    --    HGeometry.Vector
+
+    -- other-modules:
+    hs-source-dirs: sig-vector
+    build-depends:
+        hgeometry-vector:sig-num
+      , hgeometry-vector:sig-dim
+      , hgeometry-vector:class
+
+--------------------------------------------------------------------------------
+-- * This is the main library, it gives various implementations of
+-- d-dimensional vectors with numbers of type r.
 
 library
     import:           setup
+    signatures:
+      R
+    -- this is to make sure the remaining signatures, in particular
+    -- Vector and D have been instantiated.
+
     exposed-modules:
-      -- HGeometry.Vector.Metric.Radical -- just move this into Metric.
         HGeometry.Vector
 
     reexported-modules:
         HGeometry.Properties
       , HGeometry.Vector.Class
       , HGeometry.Vector.Unpacked
-      -- , HGeometry.Vector.Additive
-      -- , HGeometry.Vector.Metric
-      -- HGeometry.Vector.Vector2
+
     -- other-modules:
     -- other-extensions:
-    -- hs-source-dirs:   src
+    hs-source-dirs:   src
     build-depends:
         hgeometry-vector:unpacked
       , hgeometry-vector:class
@@ -290,28 +316,6 @@ library sig-dim
       D
     hs-source-dirs: sig-dim
 
---------------------------------------------------------------------------------
--- * Signatures for everything that is vector-like.
-
-library sig-vector
-    import:           setup
-    visibility: public
-    signatures:
-      Vector
-      -- Vector.Additive
-
-    exposed-modules:
-      HGeometry.Vector.Impl
-    --    HGeometry.Vector.Additive
-    --    HGeometry.Vector.Metric
-    --    HGeometry.Vector
-
-    -- other-modules:
-    hs-source-dirs: sig-vector
-    build-depends:
-        hgeometry-vector:sig-num
-      , hgeometry-vector:sig-dim
-      , hgeometry-vector:class
 
 --------------------------------------------------------------------------------
 -- * NumType Implementations:
@@ -393,11 +397,12 @@ common hgeometry-vector-test
        Vector2Spec
     build-depends:
        , hgeometry-vector:numtypes
-       , hgeometry-vector:unpacked
-       , hgeometry-vector:class
-       , hgeometry-vector:quickcheck
-       , hgeometry-vector:sig-vector
        , hgeometry-vector:dimensions
+       , hgeometry-vector:unpacked
+       -- , hgeometry-vector
+       , hgeometry-vector:class
+       , hgeometry-vector:sig-vector
+       , hgeometry-vector:quickcheck
     mixins:
          hgeometry-vector:unpacked (HGeometry.Vector.Unpacked as Vector)
       ,  hgeometry-vector:dimensions (Two as D)

@@ -23,7 +23,8 @@ spec = describe "double spec" $ do
              -- With sufficiently large numbers, isScalarMultipleOf fails for Doubles.
            it "1e10 (fail)" $
              isScalarMultipleOf (Vector2 1 10) (Vector2 1e10 (1e10*10::R)) `shouldBe` False
-
+         -- it "norm" $
+         --   norm myVec `shouldBe` 2 -- this is nonsense, but just to verify
          -- SafeDouble should work better.
            -- it "1e10 (pass)" $
            --   isScalarMultipleOf (Vector2 1 10) (Vector2 1e10 (1e10*10::SafeDouble)) `shouldBe` True
