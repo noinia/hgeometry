@@ -13,10 +13,10 @@
 signature Vector where
 
 import Control.DeepSeq
-import Control.Lens
+-- import Control.Lens
 import D
 import Data.Kind (Type)
-import Data.Type.Ord
+-- import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.Vector.Class
 -- import HGeometry.Properties
@@ -35,7 +35,7 @@ type role Vector nominal nominal
 instance Eq R => Eq (Vector D R)
 instance Ord R => Ord (Vector D R)
 instance NFData R => NFData (Vector D R)
-instance (Show R, KnownNat D) => Show (Vector D R)
+instance Show R => Show (Vector D R)
 
 --------------------------------------------------------------------------------
 

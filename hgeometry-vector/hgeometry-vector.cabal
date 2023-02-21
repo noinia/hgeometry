@@ -84,11 +84,12 @@ library
     import:           setup
     exposed-modules:
       -- HGeometry.Vector.Metric.Radical -- just move this into Metric.
+        HGeometry.Vector
 
     reexported-modules:
         HGeometry.Properties
-      , HGeometry.Vector
       , HGeometry.Vector.Class
+      , HGeometry.Vector.Unpacked
       -- , HGeometry.Vector.Additive
       -- , HGeometry.Vector.Metric
       -- HGeometry.Vector.Vector2
@@ -98,12 +99,13 @@ library
     build-depends:
         hgeometry-vector:unpacked
       , hgeometry-vector:class
+      , hgeometry-vector:sig-vector
 
     mixins:
-        hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
+        , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
+         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
 
-    --    , hgeometry-vector:sig-vector
-    --        requires
+
     --        ( Vector          as HGeometry.Vector.Vector2
     --        , Vector.Additive as HGeometry.Vector.Vector2
     --        , D               as HGeometry.Vector.Vector2
@@ -298,7 +300,8 @@ library sig-vector
       Vector
       -- Vector.Additive
 
-    -- exposed-modules:
+    exposed-modules:
+      HGeometry.Vector.Impl
     --    HGeometry.Vector.Additive
     --    HGeometry.Vector.Metric
     --    HGeometry.Vector
@@ -416,15 +419,15 @@ test-suite hgeometry-vector-test-int
     mixins:
          hgeometry-vector:numtypes (Int as R)
 
--- test-suite hgeometry-vector-test-double
---     import:           setup, test-setup, hgeometry-vector-test
---     type:             exitcode-stdio-1.0
---     main-is:          Main.hs
---     other-modules:
---         DoubleSpec
---     hs-source-dirs:   test-double
---     mixins:
---          hgeometry-vector:numtypes (Double as R)
+test-suite hgeometry-vector-test-double
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        DoubleSpec
+    hs-source-dirs:   test-double
+    mixins:
+         hgeometry-vector:numtypes (Double as R)
 --
 -- test-suite hgeometry-vector-test-rational
 --     import:           setup, test-setup, hgeometry-vector-test
