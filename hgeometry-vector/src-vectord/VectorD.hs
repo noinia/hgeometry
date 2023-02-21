@@ -55,8 +55,8 @@ instance (IxValue In.Vec ~ R) => Additive_ (UnpackedVector D R) where
   -- {-# INLINE zero #-}
   liftU2 f (V_D v) (V_D v')  = V_D $ liftU2 f v v'
   {-# INLINE liftU2 #-}
-  liftI2 f (V_D v) (V_D v')  = V_D $ liftI2 f v v'
-  {-# INLINE liftI2 #-}
+  -- liftI2 f (V_D v) (V_D v')  = V_D $ liftI2 f v v'
+  -- {-# INLINE liftI2 #-}
   liftI2A f (V_D v) (V_D v') = V_D <$> liftI2A f v v'
   {-# INLINE liftI2A #-}
 

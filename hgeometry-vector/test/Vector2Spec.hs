@@ -2,6 +2,7 @@ module Vector2Spec where
 
 import Control.Lens
 import Vector
+import HGeometry.Vector.Impl
 import HGeometry.Vector.Class
 import Test.Hspec
 import R

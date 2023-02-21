@@ -13,6 +13,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Vector.Unpacked
   ( Vector(MkVector, Vector1, Vector2, Vector3, Vector4)
+  -- , liftU2, liftI2A
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -28,7 +29,8 @@ import           Data.Proxy
 -- import           Data.Type.Ord
 import           GHC.Generics (Generic)
 import           GHC.TypeLits (KnownNat, natVal)
-import           HGeometry.Vector.Class
+import           HGeometry.Vector.Class (VectorLike_(..))
+import qualified HGeometry.Vector.Class as Class
 import           R
 import qualified V1
 import qualified V2
@@ -40,6 +42,8 @@ import           VectorDef
 import           Text.Read (Read (..))
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import qualified Data.Functor.Apply as Apply
+
 -- import qualified Data.Vector.Generic as GV
 -- import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
 -- import qualified Data.Vector.Generic.Mutable as GMV
@@ -59,9 +63,18 @@ instance VectorLike_ (UnpackedVector d R) => VectorLike_ (Vector d R) where
 instance VectorLike_ (UnpackedVector d R) => Ixed (Vector d R) where
   ix i = unV . component' i
 
-instance Additive_ (UnpackedVector d R) => Additive_ (Vector d R) where
-  liftU2 f (MkVector u) (MkVector v) = MkVector $ liftU2 f u v
-  liftI2A f (MkVector u) (MkVector v) = MkVector <$> liftI2A f u v
+
+-- liftU2 :: Class.Additive_ (UnpackedVector d R)
+--        => (R -> R -> R) -> Vector d R -> Vector d R -> Vector d R
+-- liftU2 = Class.liftU2
+
+-- liftI2A :: (Apply.Apply f, Class.Additive_ (UnpackedVector d R) )
+--         => (R -> R -> f R) -> Vector d R -> Vector d R -> f (Vector d R)
+-- liftI2A = Class.liftI2A
+
+instance Class.Additive_ (UnpackedVector d R) => Class.Additive_ (Vector d R) where
+  liftU2 f (MkVector u) (MkVector v) = MkVector $ Class.liftU2 f u v
+  liftI2A f (MkVector u) (MkVector v) = MkVector <$> Class.liftI2A f u v
 
 deriving newtype instance Eq (UnpackedVector d R) => Eq (Vector d R)
 deriving newtype instance Ord (UnpackedVector d R) => Ord (Vector d R)
@@ -92,14 +105,14 @@ instance VectorLike_ (UnpackedVector 1 R) where
   component' i = component'' _V1 i
   {-# INLINE component' #-}
 
-instance Additive_ (UnpackedVector 1 R) where
+instance Class.Additive_ (UnpackedVector 1 R) where
   -- zero = V_1 zero
   -- {-# INLINE zero #-}
-  liftU2 f (V_1 v) (V_1 v')  = V_1 $ liftU2 f v v'
+  liftU2 f (V_1 v) (V_1 v')  = V_1 $ Class.liftU2 f v v'
   {-# INLINE liftU2 #-}
-  liftI2 f (V_1 v) (V_1 v')  = V_1 $ liftI2 f v v'
-  {-# INLINE liftI2 #-}
-  liftI2A f (V_1 v) (V_1 v') = V_1 <$> liftI2A f v v'
+  -- liftI2 f (V_1 v) (V_1 v')  = V_1 $ liftI2 f v v'
+  -- {-# INLINE liftI2 #-}
+  liftI2A f (V_1 v) (V_1 v') = V_1 <$> Class.liftI2A f v v'
   {-# INLINE liftI2A #-}
 
 -- we implement the V1 stuff manually; since the VD setup requires the cons library
@@ -155,7 +168,7 @@ instance ( VectorLike_ (Vector d r)
          ) => Read (Vector d r) where
   readPrec = readData $
       readUnaryWith (replicateM d readPrec) constr $ \rs ->
-        case vectorFromList rs of
+        case Class.vectorFromList rs of
           Just p -> p
           _      -> error "internal error in HGeometry.Vector read instance."
     where
@@ -163,19 +176,19 @@ instance ( VectorLike_ (Vector d r)
       constr   = "Vector" <> show d
 
 
-instance Additive_ (Vector d r) => Metric_ (Vector d r)
+-- instance Additive_ (Vector d r) => Metric_ (Vector d r)
 
 -- instance Generic (Vector d r) => NFData (Vector d r)
 
-instance ( Additive_ (Vector d r)
+instance ( Class.Additive_ (Vector d r)
          , UniformRange r
          ) => UniformRange (Vector d r) where
   uniformRM (lows,highs) gen = Apply.unwrapApplicative $
-      liftI2A (\l h -> Apply.WrapApplicative $ uniformRM (l,h) gen) lows highs
+      Class.liftI2A (\l h -> Apply.WrapApplicative $ uniformRM (l,h) gen) lows highs
 
 instance (VectorLike_ (Vector d r), Uniform r) => Uniform (Vector d r) where
   uniformM gen = generateA (const $ uniformM gen)
-instance (Additive_ (Vector d r), Uniform r, UniformRange r) => Random (Vector d r) where
+instance (Class.Additive_ (Vector d r), Uniform r, UniformRange r) => Random (Vector d r) where
 
 
 --------------------------------------------------------------------------------

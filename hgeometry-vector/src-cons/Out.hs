@@ -64,8 +64,8 @@ instance  (IxValue In.Vec ~ R) => Additive_ Vec where
   -- {-# INLINE zero #-}
   liftU2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftU2 f r r')
   {-# INLINE liftU2 #-}
-  liftI2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftI2 f r r')
-  {-# INLINE liftI2 #-}
+  -- liftI2 f (Cons x r) (Cons x' r') = Cons (f x x') (liftI2 f r r')
+  -- {-# INLINE liftI2 #-}
   liftI2A f (Cons x r) (Cons x' r') = Cons <$> f x x' <.> liftI2A f r r'
   {-# INLINE liftI2A #-}
 

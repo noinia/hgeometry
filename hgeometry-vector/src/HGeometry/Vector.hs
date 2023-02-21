@@ -12,13 +12,15 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector(
     module HGeometry.Vector.Class
-  -- , module HGeometry.Vector.Optimal
+  , component, xComponent, yComponent, zComponent, wComponent
   , generate
+
+  , zero, sumV, basis, unit
+
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection
 
-  -- , Optimize(..), Choose
   ) where
 
 import HGeometry.Vector.Class

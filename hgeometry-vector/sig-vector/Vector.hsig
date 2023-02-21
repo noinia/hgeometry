@@ -21,6 +21,7 @@ import GHC.TypeLits
 import HGeometry.Vector.Class
 -- import HGeometry.Properties
 import R
+import qualified Data.Functor.Apply as Apply
 
 --------------------------------------------------------------------------------
 
@@ -41,7 +42,9 @@ instance Show R => Show (Vector D R)
 
 instance VectorLike_ (Vector D R)
 instance Additive_ (Vector D R)
-instance Metric_ (Vector D R)
+
+
+-- instance Metric_ (Vector D R)
 
 
 
@@ -58,3 +61,12 @@ instance Metric_ (Vector D R)
 
 
 --------------------------------------------------------------------------------
+-- * Additive operations
+
+-- -- | Apply a function to merge the 'non-zero' components of two
+-- -- vectors, unioning the rest of the values.
+-- liftU2       :: (R -> R -> R) -> Vector D R -> Vector D R -> Vector D R
+
+-- -- | Apply an Applicative function to the components of two vectors.
+-- liftI2A :: Apply.Apply f
+--         => (R -> R -> f R) -> Vector D R -> Vector D R -> f (Vector D R)

@@ -1,13 +1,19 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Vector.Impl
   ( generate
+  , component, xComponent, yComponent, zComponent, wComponent
+
+  , zero, (^+^), (^-^), lerp, negated, (*^), (^*), (^/), liftI2, sumV, basis, unit
+  , foldMapZip
+
+
+  , dot, quadrance, qd, norm, signorm
+
   , sameDirection
   , scalarMultiple
   , isScalarMultipleOf
-
-
-  , sumV, basis, unit
   ) where
 
 import           Control.Lens
@@ -15,17 +21,21 @@ import           D
 import qualified Data.Foldable as F
 import           Data.Proxy
 import           Data.Semigroup
+import           Data.Type.Ord
 import qualified Data.Vector.Generic as GV
 import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
 import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-import           GHC.TypeLits (natVal)
-import           HGeometry.Vector.Class
+import           GHC.TypeLits (natVal, KnownNat)
+import           HGeometry.Vector.Class(VectorLike_(..), Additive_(..))
 import           R
 import           Vector
+import qualified HGeometry.Number.Radical as Radical
+
 
 --------------------------------------------------------------------------------
+-- * Basic Vector Operations
 
 -- | Generate a vector from a given function.
 generate   :: (R ~ IxValue (Vector D R))
@@ -33,10 +43,51 @@ generate   :: (R ~ IxValue (Vector D R))
 generate f = runIdentity $ generateA (Identity . f)
 {-# INLINE generate #-}
 
+-- | Lens to access te i^t component.
+--
+-- >>> myVec3 ^. component @0
+-- 1
+-- >>> myVec3 ^. component @1
+-- 2
+-- >>> myVec3 & component @1 %~ (*5)
+-- Vector3 1 10 3
+-- >>> myVec2 & component @1 %~ (*5)
+-- Vector2 10 100
+component :: forall i. (i < D, KnownNat i, R ~ IxValue (Vector D R))
+          => IndexedLens' Int (Vector D R) R
+component = singular $ component' (fromInteger . natVal $ Proxy @i)
+{-# INLINE component #-}
 
+-- | Shorthand for accessing the x-component
+xComponent :: (0 < D, R ~ IxValue (Vector D R))
+           => IndexedLens' Int (Vector D R) R
+xComponent = component @0
+{-# INLINE xComponent #-}
+
+-- | Shorthand for accessing the x-component
+yComponent :: (1 < D, R ~ IxValue (Vector D R))
+           => IndexedLens' Int (Vector D R) R
+yComponent = component @1
+{-# INLINE yComponent #-}
+
+-- | Shorthand for accessing the x-component
+zComponent :: (2 < D, R ~ IxValue (Vector D R))
+           => IndexedLens' Int (Vector D R) R
+zComponent = component @2
+{-# INLINE zComponent #-}
+
+-- | Shorthand for accessing the x-component
+wComponent :: (3 < D, R ~ IxValue (Vector D R))
+           => IndexedLens' Int (Vector D R) R
+wComponent = component @3
+{-# INLINE wComponent #-}
 
 --------------------------------------------------------------------------------
--- * Additive additional
+-- * Additive Operations
+
+infixl 7 ^*, *^, ^/
+infixl 6 ^+^, ^-^
+
 
 -- | zero vector
 zero :: (Num R, R ~ IxValue (Vector D R)) => Vector D R
@@ -47,6 +98,53 @@ zero = generate (const 0)
 unit :: (Num R, R ~ IxValue (Vector D R)) => Vector D R
 unit = over components (const 1) zero
 {-# INLINE unit #-}
+
+-- | add two vectors
+(^+^)   :: (Num R, R ~ IxValue (Vector D R))
+        => Vector D R -> Vector D R -> Vector D R
+u ^+^ v = liftU2 (+) u v
+{-# INLINE (^+^) #-}
+
+-- | subtract vectors
+(^-^)   :: (Num R,  R ~ IxValue (Vector D R))
+        => Vector D R -> Vector D R -> Vector D R
+u ^-^ v = u ^+^ negated v
+{-# INLINE (^-^) #-}
+
+-- | Linearly interpolate between the two vectors
+lerp           :: (Num R, R ~ IxValue (Vector D R))
+               => R -> Vector D R -> Vector D R -> Vector D R
+lerp alpha u v = alpha *^ u ^+^ (1-alpha) *^ v
+{-# INLINE lerp #-}
+
+-- | Apply a function to the components of two vectors.
+liftI2       :: (R ~ IxValue (Vector D R))
+             => (R -> R -> R)
+             -> Vector D R -> Vector D R -> Vector D R
+liftI2 f u v = runIdentity $ liftI2A (\x x' -> Identity $ f x x') u v
+{-# INLINE liftI2 #-}
+
+-- | negate v
+negated :: (Num R, R ~ IxValue (Vector D R)) => Vector D R -> Vector D R
+negated = ((-1) *^)
+{-# INLINABLE negated #-}
+
+-- | left scalar multiplication
+(*^)   :: (Num R, R ~ IxValue (Vector D R)) => R -> Vector D R -> Vector D R
+s *^ v = over components (s*) v
+{-# INLINABLE (*^) #-}
+
+-- | right scalar multiplication
+(^*)   :: (Num R, R ~ IxValue (Vector D R))
+       => Vector D R -> R -> Vector D R
+v ^* s = s *^ v
+{-# INLINABLE (^*) #-}
+
+-- | scalar division
+(^/)   :: (Fractional R, R ~ IxValue (Vector D R))
+       => Vector D R -> R -> Vector D R
+v ^/ s = v ^* (1/s)
+{-# INLINABLE (^/) #-}
 
 -- | sum a collection of vectors.
 sumV :: (Foldable f, Num R, R ~ IxValue (Vector D R)) => f (Vector D R) -> Vector D R
@@ -69,8 +167,56 @@ basisFor = \t ->
          if i == j then 1 else 0
 {-# INLINABLE basisFor #-}
 
---------------------------------------------------------------------------------
+-- | "zip through the two vectors", folding over the result.
+--
+-- as an example, we can implement the dot product of two vectors u and v using:
+--
+-- >>> let myDot u v = getSum $ foldMapZip (\x x' -> Sum $ x * x') u v
+-- >>> myDot (Vector3 1 2 3) (Vector3 10 20 30)
+-- 140
+foldMapZip       :: (Semigroup m, R ~ IxValue (Vector D R))
+                 => (R -> R -> m) -> Vector D R -> Vector D R -> m
+foldMapZip f u v = getConst $ liftI2A (\x x' -> Const $ f x x') u v
+{-# INLINE foldMapZip #-}
 
+--------------------------------------------------------------------------------
+-- * Metric
+
+-- | Compute the inner product of two vectors or (equivalently)
+-- convert a vector f a into a covector f a -> a.
+dot :: (Num R, R ~ IxValue (Vector D R)) => Vector D R -> Vector D R -> R
+dot u v = sumOf components $ liftI2 (*) u v
+{-# INLINE dot #-}
+
+-- | Compute the squared norm. The name quadrance arises from Norman
+-- J. Wildberger's rational trigonometry.
+quadrance   :: (Num R, R ~ IxValue (Vector D R)) => Vector D R -> R
+quadrance v = dot v v
+{-# INLINE quadrance #-}
+
+-- | Compute the quadrance of the difference
+qd     :: (Num R, R ~ IxValue (Vector D R)) => Vector D R -> Vector D R -> R
+qd u v = quadrance $ u ^-^ v
+{-# INLINE qd #-}
+
+-- -- | Compute the distance between two vectors in a metric space
+-- distance :: Radical R => vector -> vector -> R
+
+-- | Compute the norm of a vector in a metric space
+norm :: (Radical.Radical R, R ~ IxValue (Vector D R)) => Vector D R -> R
+norm = Radical.sqrt . quadrance
+{-# INLINE norm #-}
+
+-- | Convert a non-zero vector to unit vector.
+signorm   :: ( Radical.Radical R
+             , Fractional R
+             , R ~ IxValue (Vector D R)
+             ) => Vector D R -> Vector D R
+signorm v = v ^/ norm v
+{-# INLINE signorm #-}
+
+
+--------------------------------------------------------------------------------
 
 -- | 'isScalarmultipleof u v' test if v is a scalar multiple of u.
 --
