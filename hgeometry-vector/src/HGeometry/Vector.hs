@@ -13,6 +13,7 @@
 module HGeometry.Vector(
     module HGeometry.Vector.Class
   -- , module HGeometry.Vector.Optimal
+  , generate
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection

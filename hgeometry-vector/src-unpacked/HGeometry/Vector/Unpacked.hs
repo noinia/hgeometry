@@ -93,8 +93,8 @@ instance VectorLike_ (UnpackedVector 1 R) where
   {-# INLINE component' #-}
 
 instance Additive_ (UnpackedVector 1 R) where
-  zero = V_1 zero
-  {-# INLINE zero #-}
+  -- zero = V_1 zero
+  -- {-# INLINE zero #-}
   liftU2 f (V_1 v) (V_1 v')  = V_1 $ liftU2 f v v'
   {-# INLINE liftU2 #-}
   liftI2 f (V_1 v) (V_1 v')  = V_1 $ liftI2 f v v'

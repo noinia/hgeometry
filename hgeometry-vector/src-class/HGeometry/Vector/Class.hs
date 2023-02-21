@@ -13,10 +13,10 @@
 {-# LANGUAGE DefaultSignatures #-}
 module HGeometry.Vector.Class
   ( VectorLike_(..)
-  , generate
+  -- , generate
   , component, xComponent, yComponent, zComponent, wComponent
   , vectorFromList
-  , Additive_(..), negated, (*^), (^*), (^/), sumV, basis, unit
+  , Additive_(..), negated, (*^), (^*), (^/)--, sumV, basis, unit
   , foldMapZip
   -- , sameDirection
   -- , scalarMultiple
@@ -110,10 +110,6 @@ class VectorLike_ vector where
   component' = iix
   {-# INLINE component' #-}
 
--- | Generate a vector from a given function.
-generate   :: VectorLike_ vector => (Int -> IxValue vector) -> vector
-generate f = runIdentity $ generateA (Identity . f)
-{-# INLINE generate #-}
 
 -- | Convert a list of exactly d elements into a vector with dimension d.
 --
@@ -189,10 +185,10 @@ infixl 7 ^*, *^, ^/
 class VectorLike_ vector => Additive_ vector where
   {-# MINIMAL liftU2, liftI2A #-}
 
-  -- | zero vector
-  zero :: Num (IxValue vector) => vector
-  zero = generate (const 0)
-  {-# INLINE zero #-}
+  -- -- | zero vector
+  -- zero :: Num (IxValue vector) => vector
+  -- zero = generate (const 0)
+  -- {-# INLINE zero #-}
 
   -- | add two vectors
   (^+^) :: Num (IxValue vector) => vector -> vector -> vector
@@ -237,10 +233,10 @@ foldMapZip       :: (Semigroup m, Additive_ vector)
 foldMapZip f u v = getConst $ liftI2A (\x x' -> Const $ f x x') u v
 {-# INLINE foldMapZip #-}
 
--- | unit vector
-unit :: forall vector. (Additive_ vector, Num (IxValue vector)) => vector
-unit = over components (const 1) (zero @vector)
-{-# INLINE unit #-}
+-- -- | unit vector
+-- unit :: forall vector. (Additive_ vector, Num (IxValue vector)) => vector
+-- unit = over components (const 1) (zero @vector)
+-- {-# INLINE unit #-}
 
 -- | negate v
 negated :: (Num (IxValue vector), VectorLike_ vector) => vector -> vector
@@ -264,26 +260,26 @@ v ^* s = s *^ v
 v ^/ s = v ^* (1/s)
 {-# INLINABLE (^/) #-}
 
--- | sum a collection of vectors.
-sumV :: (Foldable f, Additive_ vector, Num (IxValue vector)) => f vector -> vector
-sumV = F.foldl' (^+^) zero
-{-# INLINABLE sumV #-}
+-- -- | sum a collection of vectors.
+-- sumV :: (Foldable f, Additive_ vector, Num (IxValue vector)) => f vector -> vector
+-- sumV = F.foldl' (^+^) zero
+-- {-# INLINABLE sumV #-}
 
--- | Produce a default basis for a vector space. If the dimensionality
--- of the vector space is not statically known, see 'basisFor'.
-basis :: (Additive_ vector, Num (IxValue vector)) => [vector]
-basis = basisFor zero
-{-# INLINABLE basis #-}
+-- -- | Produce a default basis for a vector space. If the dimensionality
+-- -- of the vector space is not statically known, see 'basisFor'.
+-- basis :: (Additive_ vector, Num (IxValue vector)) => [vector]
+-- basis = basisFor zero
+-- {-# INLINABLE basis #-}
 
--- | Produce a default basis for a vector space from which the
--- argument is drawn.
-basisFor :: (Additive_ vector, Num (IxValue vector)) => vector -> [vector]
-basisFor = \t ->
-   ifoldMapOf components ?? t $ \i _ ->
-     return                  $
-       iover  components ?? t $ \j _ ->
-         if i == j then 1 else 0
-{-# INLINABLE basisFor #-}
+-- -- | Produce a default basis for a vector space from which the
+-- -- argument is drawn.
+-- basisFor :: (Additive_ vector, Num (IxValue vector)) => vector -> [vector]
+-- basisFor = \t ->
+--    ifoldMapOf components ?? t $ \i _ ->
+--      return                  $
+--        iover  components ?? t $ \j _ ->
+--          if i == j then 1 else 0
+-- {-# INLINABLE basisFor #-}
 
 -- instance Monoid c => Additive_ (Const c a) where
 --   zero = Const mempty

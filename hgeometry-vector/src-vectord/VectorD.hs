@@ -51,8 +51,8 @@ instance (IxValue In.Vec ~ R) => VectorLike_ (UnpackedVector D R) where
   {-# INLINE component' #-}
 
 instance (IxValue In.Vec ~ R) => Additive_ (UnpackedVector D R) where
-  zero = V_D zero
-  {-# INLINE zero #-}
+  -- zero = V_D zero
+  -- {-# INLINE zero #-}
   liftU2 f (V_D v) (V_D v')  = V_D $ liftU2 f v v'
   {-# INLINE liftU2 #-}
   liftI2 f (V_D v) (V_D v')  = V_D $ liftI2 f v v'

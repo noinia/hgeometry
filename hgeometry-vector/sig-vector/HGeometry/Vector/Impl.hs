@@ -1,13 +1,19 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Vector.Impl
-  ( sameDirection
+  ( generate
+  , sameDirection
   , scalarMultiple
   , isScalarMultipleOf
+
+
+  , sumV, basis, unit
   ) where
 
 import           Control.Lens
 import           D
+import qualified Data.Foldable as F
+import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Vector.Generic as GV
 import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
@@ -15,10 +21,53 @@ import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 import           GHC.TypeLits (natVal)
-import           Data.Proxy
 import           HGeometry.Vector.Class
 import           R
 import           Vector
+
+--------------------------------------------------------------------------------
+
+-- | Generate a vector from a given function.
+generate   :: (R ~ IxValue (Vector D R))
+           => (Int -> R) -> Vector D R
+generate f = runIdentity $ generateA (Identity . f)
+{-# INLINE generate #-}
+
+
+
+--------------------------------------------------------------------------------
+-- * Additive additional
+
+-- | zero vector
+zero :: (Num R, R ~ IxValue (Vector D R)) => Vector D R
+zero = generate (const 0)
+{-# INLINE zero #-}
+
+-- | unit vector
+unit :: (Num R, R ~ IxValue (Vector D R)) => Vector D R
+unit = over components (const 1) zero
+{-# INLINE unit #-}
+
+-- | sum a collection of vectors.
+sumV :: (Foldable f, Num R, R ~ IxValue (Vector D R)) => f (Vector D R) -> Vector D R
+sumV = F.foldl' (^+^) zero
+{-# INLINABLE sumV #-}
+
+-- | Produce a default basis for a vector space. If the dimensionality
+-- of the vector space is not statically known, see 'basisFor'.
+basis :: (Num R, R ~ IxValue (Vector D R)) => [Vector D R]
+basis = basisFor zero
+{-# INLINABLE basis #-}
+
+-- | Produce a default basis for a vector space from which the
+-- argument is drawn.
+basisFor :: (Num R, R ~ IxValue (Vector D R)) => Vector D R-> [Vector D R]
+basisFor = \t ->
+   ifoldMapOf components ?? t $ \i _ ->
+     return                  $
+       iover  components ?? t $ \j _ ->
+         if i == j then 1 else 0
+{-# INLINABLE basisFor #-}
 
 --------------------------------------------------------------------------------
 
