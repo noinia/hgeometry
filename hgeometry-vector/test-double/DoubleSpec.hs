@@ -1,8 +1,8 @@
 module DoubleSpec where
 
-import HGeometry.Vector.Impl
+import HGeometry.Vector
 import Vector
-import HGeometry.Vector.Class
+-- import HGeometry.Vector.Class
 import Test.Hspec
 import R
 

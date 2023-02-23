@@ -11,17 +11,25 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Vector(
-    module HGeometry.Vector.Class
-  , component, xComponent, yComponent, zComponent, wComponent
+    VectorLike_(..)
+  , vectorFromList
+  , Additive_(..)
+
+  , Vector
   , generate
+  , component, xComponent, yComponent, zComponent, wComponent
 
-  , zero, sumV, basis, unit
+  , zero, (^+^), (^-^), lerp, negated, (*^), (^*), (^/), liftI2, sumV, basis, unit
+  , foldMapZip
 
-  , isScalarMultipleOf
-  , scalarMultiple
+
+  , dot, quadrance, qd, norm, signorm
+
   , sameDirection
-
+  , scalarMultiple
+  , isScalarMultipleOf
   ) where
 
 import HGeometry.Vector.Class
 import HGeometry.Vector.Impl
+import Vector

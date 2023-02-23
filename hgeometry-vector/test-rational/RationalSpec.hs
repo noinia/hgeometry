@@ -1,9 +1,9 @@
 module RationalSpec where
 
-import HGeometry.Vector.Unpacked
-import HGeometry.Vector.Class
-import Test.Hspec
+import HGeometry.Vector
 import R
+import Test.Hspec
+import Vector
 
 --------------------------------------------------------------------------------
 

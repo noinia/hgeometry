@@ -108,28 +108,26 @@ library
     import:           setup
     signatures:
       R
-    -- this is to make sure the remaining signatures, in particular
-    -- Vector and D have been instantiated.
-
+      D
     exposed-modules:
         HGeometry.Vector
 
     reexported-modules:
         HGeometry.Properties
-      , HGeometry.Vector.Class
-      , HGeometry.Vector.Unpacked
+      -- , HGeometry.Vector.Class
+      -- , HGeometry.Vector.Unpacked
 
     -- other-modules:
     -- other-extensions:
     hs-source-dirs:   src
     build-depends:
-        hgeometry-vector:unpacked
+      , hgeometry-vector:unpacked
       , hgeometry-vector:class
       , hgeometry-vector:sig-vector
 
-    mixins:
-        , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
-         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
+--    mixins:
+--        , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
+--         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
 
 
     --        ( Vector          as HGeometry.Vector.Vector2
@@ -138,8 +136,6 @@ library
     --        )
 
 -- possibly just move everything from sig-vector to here?
-
-
 
 
 
@@ -260,6 +256,7 @@ library v4
 
 library unpacked
     import:           setup
+    visibility: public
     build-depends:
         -- hgeometry-vector:v0
       , hgeometry-vector:v1
@@ -399,9 +396,9 @@ common hgeometry-vector-test
        , hgeometry-vector:numtypes
        , hgeometry-vector:dimensions
        , hgeometry-vector:unpacked
-       -- , hgeometry-vector
-       , hgeometry-vector:class
-       , hgeometry-vector:sig-vector
+       , hgeometry-vector
+       -- , hgeometry-vector:class
+       -- , hgeometry-vector:sig-vector
        , hgeometry-vector:quickcheck
     mixins:
          hgeometry-vector:unpacked (HGeometry.Vector.Unpacked as Vector)
@@ -433,17 +430,17 @@ test-suite hgeometry-vector-test-double
     hs-source-dirs:   test-double
     mixins:
          hgeometry-vector:numtypes (Double as R)
---
--- test-suite hgeometry-vector-test-rational
---     import:           setup, test-setup, hgeometry-vector-test
---     type:             exitcode-stdio-1.0
---     main-is:          Main.hs
---     other-modules:
---         RationalSpec
---     hs-source-dirs:   test-rational
---     mixins:
---          hgeometry-vector:numtypes (Rational as R)
---
+
+test-suite hgeometry-vector-test-rational
+    import:           setup, test-setup, hgeometry-vector-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    other-modules:
+        RationalSpec
+    hs-source-dirs:   test-rational
+    mixins:
+         hgeometry-vector:numtypes (Rational as R)
+
 -- --- --------------------------------------------------------------------------------
 -- ---
 -- --- -- test-suite hgeometry-vector-doctest

@@ -4,10 +4,11 @@ module IntSpec where
 import           Data.Proxy
 import           Data.Semigroup
 import           Data.Typeable
-import Vector
+import           Vector
 import qualified Vector as UV
 -- import qualified Data.Vector.Unboxed as UV
-import           HGeometry.Vector.Class
+-- import           HGeometry.Vector.Class
+import           HGeometry.Vector
 import           HGeometry.Vector.Instances ()
 -- import           HGeometry.Vector.Unpacked
 import           R

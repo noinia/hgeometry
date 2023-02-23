@@ -20,7 +20,7 @@ import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Control.Monad.State
 -- import qualified Data.Foldable as F
-import qualified Data.Functor.Apply as Apply
+-- import qualified Data.Functor.Apply as Apply
 import           Data.Functor.Classes (readData, readUnaryWith)
 -- import           Data.Kind (Type)
 import qualified Data.List as List
