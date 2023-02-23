@@ -13,31 +13,38 @@ signature Point where
 import Control.DeepSeq
 import D
 import Data.Kind (Type)
+import GHC.TypeLits
 import HGeometry.Point.Class
+import HGeometry.Vector.Class
 import R
 
 --------------------------------------------------------------------------------
 
--- | d-dimensional points
-data Point :: Type
+-- |
+--
+-- A 'Point d r' represents a d dimensional point whose coordinates
+-- are of type r.
+data Point :: Nat -> Type -> Type
 
 
-instance Eq Point
-instance Ord Point
-instance NFData Point
+instance Eq R  => Eq (Point D R)
+instance Ord R => Ord (Point D R)
+instance NFData R => NFData (Point D R)
 
-instance Show Point
+instance (Show R, KnownNat D) => Show (Point D R)
 
-
-instance HasVector Point
-instance Affine_ Point D R
-instance Point_ Point D R
-
+instance HasVector (Point D R)
+instance Affine_ (Point D R) D R
+instance Point_ (Point D R) D R
 
 --------------------------------------------------------------------------------
 
 -- -- | Lens to access the vector of this point
--- vector :: Lens' Point Vector
+-- vector :: Lens' (Point D R) (Vector D R)
 
 
---------------------------------------------------------------------------------
+-- -- | Construct a point from a vector
+-- --
+-- -- >>> fromVector (Vector4 1 2 3 4) :: Point 4 Int
+-- -- Point4 1 2 3 4
+-- fromVector :: Vector D R -> Point D R

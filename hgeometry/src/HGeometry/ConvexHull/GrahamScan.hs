@@ -39,7 +39,7 @@ convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                        in uncheckedFromCCWPoints . reverse $ lh ++ uh
 -- {-# INLINABLE convexHull #-}
 
--- {-# SPECIALIZE convexHull :: NonEmpty (Point 2 Int) -> ConvexPolygon (Point 2 Int) #-}
+{-# SPECIALIZE convexHull :: NonEmpty (Point 2 R) -> ConvexPolygon (Point 2 R) #-}
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --
@@ -109,6 +109,7 @@ incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
 --{-# INLINABLE incXdecY #-}
+{-# SPECIALIZE incXdecY :: Point 2 R -> Point 2 R -> Ordering #-}
 
 -- | Given a sequence of points that is sorted on increasing
 -- x-coordinate and decreasing y-coordinate, computes the upper

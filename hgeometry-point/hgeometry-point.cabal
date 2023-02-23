@@ -44,6 +44,10 @@ common setup
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
 
+      , hgeometry-vector:dimensions  >= 1.0.0
+      , hgeometry-vector:numtypes
+
+
     default-language: GHC2021
 
     default-extensions:
@@ -82,27 +86,30 @@ common test-setup
 library
     import:           setup
     exposed-modules:
-     HGeometry.Point.EuclideanDistance
-     HGeometry.Point.Orientation
-     HGeometry.Point
+       HGeometry.Point.EuclideanDistance
+       HGeometry.Point.Orientation
+       HGeometry.Point
       -- HGeometry.Point.Affine
 
-    reexported-modules:
-        HGeometry.Point.Unpacked
-      , HGeometry.Point.Class
-      , HGeometry.Point.PointF
+    -- reexported-modules:
+    --     HGeometry.Point.Unpacked
+    --   , HGeometry.Point.Class
+    --   , HGeometry.Point.PointF
 
     other-modules:
-     HGeometry.Point.Orientation.Degenerate
+      HGeometry.Point.Orientation.Degenerate
 
 
     -- other-extensions:
     hs-source-dirs:   src
     build-depends:
         hgeometry-point:shared
-     ,  hgeometry-point:newtype
-     ,  hgeometry-point:pointf
+     -- ,  hgeometry-point:unpacked
+     -- ,  hgeometry-point:pointf
+     ,  hgeometry-point:sig-point
      ,  hgeometry-vector
+     ,  hgeometry-vector:sig-dim
+     ,  hgeometry-vector:sig-num
 
 --------------------------------------------------------------------------------
 -- * Shared
@@ -118,7 +125,8 @@ library shared
 
     hs-source-dirs: src-shared
     build-depends:
-      hgeometry-vector:shared        >= 1.0.0.0
+        hgeometry-vector:class         >= 1.0.0.0
+      , hgeometry-vector:unpacked-def
 
 --------------------------------------------------------------------------------
 -- * Signatures for everything that is vector-like.
@@ -153,21 +161,21 @@ library pointf
     exposed-modules:
       HGeometry.Point.PointF
     build-depends:
-        hgeometry-vector:shared        >= 1.0.0.0
+        hgeometry-vector:class        >= 1.0.0.0
       , hgeometry-point:shared
 
 -- this one should not depend on Vector itself; so that we can
 -- instantiate it with any sort of vector.
-library newtype
+library unpacked
     import: setup
     visibility: public
-    hs-source-dirs: src-newtype
+    hs-source-dirs: src-unpacked
     exposed-modules:
       HGeometry.Point.Unpacked
     build-depends:
         hgeometry-vector              >= 1.0.0.0
       , hgeometry-point:shared        >= 1.0.0.0
-      , hgeometry-point:pointf        >= 1.0.0.0
+      , hgeometry-point:pointf
 
 --------------------------------------------------------------------------------
 -- * Generic Test stup
@@ -183,12 +191,16 @@ common hgeometry-point-test
     build-depends:
        -- , hgeometry-point
        , hgeometry-point
-       , hgeometry-vector:numtypes
+       , hgeometry-point:unpacked
        , hgeometry-vector
+       , hgeometry-vector:unpacked
 
-    -- mixins:
+    mixins:
     --      hgeometry-vector
-    --    , hgeometry-point:newtype
+      , hgeometry-point:unpacked (HGeometry.Point.Unpacked as Point)
+      , hgeometry-vector:unpacked (HGeometry.Vector.Unpacked as Vector)
+      , hgeometry-vector:dimensions (Two as D)
+
 
 -- ----------------------------------------
 -- -- * Concrete Test stuites
@@ -212,3 +224,4 @@ test-suite hgeometry-point-test-double
    hs-source-dirs:   test-double
    mixins:
         hgeometry-vector:numtypes (Double as R)
+      , hgeometry-vector:dimensions (Two as D)

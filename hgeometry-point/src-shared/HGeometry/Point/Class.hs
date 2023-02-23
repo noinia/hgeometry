@@ -34,6 +34,7 @@ import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
+import           VectorDef
 -- import           HGeometry.Vector
 import qualified Linear.Affine as Linear
 import           Linear.V2 (V2(..))
@@ -62,11 +63,11 @@ type instance Dimension (Linear.Point v r) = Dimension (v r)
 type instance NumType (Linear.Point v r)   = r
 
 
-instance ( Vector_ (v r)
-         , IxValue (v r) ~ r
-         ) => HasVector (Linear.Point v r) where
-  vector = Linear._Point._Vector
-  {-# INLINE vector #-}
+-- instance ( Vector_ (v r)
+--          , IxValue (v r) ~ r
+--          ) => HasVector (Linear.Point v r) where
+--   vector = Linear._Point._Vector
+--   {-# INLINE vector #-}
 
 -- | Affine space; essentially the same as Linear.Affine, but for
 -- points of kind Type rather than (Type -> Type).
@@ -99,11 +100,11 @@ class ( Additive_ (Vector d r)
   p .-^ v = p .+^ negated v
   {-# INLINE (.-^) #-}
 
-instance ( d ~ Dimension (v r)
-         , r ~ IxValue (v r)
-         , Vector_ (v r)
-         , Additive_ (Vector d r)
-         ) => Affine_ (Linear.Point v r) d r where
+-- instance ( d ~ Dimension (v r)
+--          , r ~ IxValue (v r)
+--          , Vector_ (v r)
+--          , Additive_ (Vector d r)
+--          ) => Affine_ (Linear.Point v r) d r where
 
 
 --------------------------------------------------------------------------------
@@ -171,13 +172,13 @@ coord = singular $ coord' (fromIntegral . natVal $ Proxy @i)
 {-# INLINE coord #-}
 
 
-instance ( d ~ Dimension (v r)
-         , r ~ IxValue (v r)
-         , Vector_ (v r)
-         , Additive_ (Vector d r)
-         ) => Point_ (Linear.Point v r) d r where
-  fromVector = Linear.P . review _Vector
-  {-# INLINE fromVector #-}
+-- instance ( d ~ Dimension (v r)
+--          , r ~ IxValue (v r)
+--          , Vector_ (v r)
+--          , Additive_ (Vector d r)
+--          ) => Point_ (Linear.Point v r) d r where
+--   fromVector = Linear.P . review _Vector
+--   {-# INLINE fromVector #-}
 
 -- | Point representing the origin in d dimensions
 --
@@ -199,8 +200,8 @@ pattern Point1_ x <- (view xCoord -> x)
 pattern Point2_     :: ( Point_ point 2 r
                        ) => r -> r -> point
 pattern Point2_ x y <- (view xCoord &&& view yCoord -> (x,y))
- where
-   Point2_ x y = fromVector . view _Vector $ V2 x y
+ -- where
+ --   Point2_ x y = fromVector . view _Vector $ V2 x y
 {-# INLINE Point2_ #-}
 {-# COMPLETE Point2_ #-}
 
@@ -209,8 +210,8 @@ pattern Point3_       :: ( Point_ point 3 r
                          -- , ConstructableVector_ (Vector.VectorFamily 3 r) 3 r
                          ) => r -> r -> r -> point
 pattern Point3_ x y z <- (view xCoord &&& view yCoord &&& view zCoord -> (x,(y,z)))
-  where
-    Point3_ x y z = fromVector . view _Vector $ V3 x y z
+  -- where
+  --   Point3_ x y z = fromVector . view _Vector $ V3 x y z
 {-# INLINE Point3_ #-}
 {-# COMPLETE Point3_ #-}
 
@@ -220,8 +221,8 @@ pattern Point4_         :: ( Point_ point 4 r
                            ) => r -> r -> r -> r -> point
 pattern Point4_ x y z w <- (view xCoord &&& view yCoord &&& view zCoord &&& view wCoord
                            -> (x,(y,(z,w))))
-  where
-    Point4_ x y z w = fromVector . view _Vector $ V4 x y z w
+  -- where
+  --   Point4_ x y z w = fromVector . view _Vector $ V4 x y z w
 {-# INLINE Point4_ #-}
 {-# COMPLETE Point4_ #-}
 

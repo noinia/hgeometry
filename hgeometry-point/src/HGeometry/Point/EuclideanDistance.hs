@@ -2,34 +2,39 @@
 module HGeometry.Point.EuclideanDistance
   ( cmpByDistanceTo
   , squaredEuclideanDist, euclideanDist
-  , HasSquaredEuclideanDistance(..)
+  -- , HasSquaredEuclideanDistance(..)
   ) where
 
 import           Control.Lens
+import           D
 import           Data.Ord (comparing)
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point.Class
-import           HGeometry.Point.Unpacked
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
+import           Point
+import           R
+
 
 --------------------------------------------------------------------------------
 -- * Distances
 
 -- | Squared Euclidean distance between two points
-squaredEuclideanDist     :: (Num r, Point_ point d r) => point -> point -> r
+squaredEuclideanDist     :: Num R => Point D R -> Point D R -> R
 squaredEuclideanDist p q = quadrance $ p .-. q
 
 -- | Euclidean distance between two points
-euclideanDist     :: (Radical.Radical r, Point_ point d r) => point -> point -> r
+euclideanDist     :: Radical.Radical R => Point D R -> Point D R -> R
 euclideanDist p q = Radical.sqrt $ squaredEuclideanDist p q
 
 -- | Compare two points by their distance to the first argument
-cmpByDistanceTo   :: (Ord r, Num r, Point_ point d r)
-                  => point -> point -> point -> Ordering
+cmpByDistanceTo   :: (Ord R, Num R)
+                  => Point D R -> Point D R -> Point D R -> Ordering
 cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 
 --------------------------------------------------------------------------------
+
+{-
 
 -- | Types for which we can compute the squared Euclidean distance.
 class HasSquaredEuclideanDistance g where
@@ -71,3 +76,5 @@ instance ( Vector_ v
          ) => HasSquaredEuclideanDistance (PointF v) where
   pointClosestTo _ p = Point $ p^.vector
   {-# INLINE pointClosestTo #-}
+
+-}
