@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 -- {-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques -ddump-to-file #-}
 module Impl
-  ( pattern Vector1_, pattern Vector2_
+  ( pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
     -- * Constructing Vectors.
   , generate
   , vectorFromList
@@ -95,6 +95,38 @@ v2 v = (v^.xComponent, v^.yComponent)
 
 ----------------------------------------
 
+-- | Construct or Destruct a 4 dimensional vector.
+pattern Vector3_ :: (0 < D, 1 < D, 2 < D, Vector_ Vector 3 R) => R -> R -> R -> Vector
+pattern Vector3_ x y z <- (v3 -> (x,y,z))
+  where
+    Vector3_ x y z = generate $ \case
+                                    0 -> x
+                                    1 -> y
+                                    _ -> z
+{-# INLINE Vector3_ #-}
+{-# COMPLETE Vector3_ #-}
+
+v3   :: (0 < D, 1 < D, 2 < D) => Vector -> (R,R,R)
+v3 v = (v^.xComponent, v^.yComponent, v^.zComponent)
+{-# INLINE v3 #-}
+
+----------------------------------------
+
+-- | Construct or Destruct a 4 dimensional vector.
+pattern Vector4_ :: (0 < D, 1 < D, 2 < D, 3 < D, Vector_ Vector 4 R) => R -> R -> R -> R -> Vector
+pattern Vector4_ x y z w <- (v4 -> (x,y,z,w))
+  where
+    Vector4_ x y z w = generate $ \case
+                                    0 -> x
+                                    1 -> y
+                                    2 -> z
+                                    _ -> w
+{-# INLINE Vector4_ #-}
+{-# COMPLETE Vector4_ #-}
+
+v4   :: (0 < D, 1 < D, 2 < D, 3 < D) => Vector -> (R,R,R,R)
+v4 v = (v^.xComponent, v^.yComponent, v^.zComponent, v^.wComponent)
+{-# INLINE v4 #-}
 
 --------------------------------------------------------------------------------
 

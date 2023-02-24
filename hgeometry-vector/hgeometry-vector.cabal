@@ -121,38 +121,38 @@ library sig-vector
 -- * This is the main library, it gives various implementations of
 -- d-dimensional vectors with numbers of type r.
 
-library
-    import:           setup
-    hs-source-dirs:   src
-    signatures:
-      R
-      D
-    exposed-modules:
-        HGeometry.Vector
-
-    -- reexported-modules:
-    --     Vector
---        HGeometry.Properties
---      , HGeometry.Vector.Class
---      -- , HGeometry.Vector.Unpacked
-
-    -- other-modules:
-    -- other-extensions:
-    build-depends:
-      -- , hgeometry-vector:vec-linear
-      , hgeometry-vector:shared
-      , hgeometry-vector:sig-vector
-
-    -- mixins:
-    --    hgeometry-vector:vec-linear (V2 as Vector)
---       , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
---         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
-
-
-    --        ( Vector          as HGeometry.Vector.Vector2
-    --        , Vector.Additive as HGeometry.Vector.Vector2
-    --        , D               as HGeometry.Vector.Vector2
-    --        )
+-- library
+--     import:           setup
+--     hs-source-dirs:   src
+--     signatures:
+--       R
+--       D
+--     exposed-modules:
+--         HGeometry.Vector
+--
+--     -- reexported-modules:
+--     --     Vector
+-- --        HGeometry.Properties
+-- --      , HGeometry.Vector.Class
+-- --      -- , HGeometry.Vector.Unpacked
+--
+--     -- other-modules:
+--     -- other-extensions:
+--     build-depends:
+--       -- , hgeometry-vector:vec-linear
+--       , hgeometry-vector:shared
+--       , hgeometry-vector:sig-vector
+--
+--     -- mixins:
+--     --    hgeometry-vector:vec-linear (V2 as Vector)
+-- --       , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
+-- --         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
+--
+--
+--     --        ( Vector          as HGeometry.Vector.Vector2
+--     --        , Vector.Additive as HGeometry.Vector.Vector2
+--     --        , D               as HGeometry.Vector.Vector2
+--     --        )
 
 
 --------------------------------------------------------------------------------
@@ -175,22 +175,22 @@ library shared
 
 --- Unpacked vector implementations
 
--- library unpacked
---     import:           setup
---     visibility: public
---     hs-source-dirs: src-unpacked
---     reexported-modules:
---         HGeometry.Vector.Unpacked.V1
---       , HGeometry.Vector.Unpacked.V2
---       , HGeometry.Vector.Unpacked.V3
---       , HGeometry.Vector.Unpacked.V4
---     build-depends:
---       --   hgeometry-vector:sig-num
---       -- , hgeometry-vector:shared
---       , hgeometry-vector:v1
---       , hgeometry-vector:v2
---       , hgeometry-vector:v3
---       , hgeometry-vector:v4
+library unpacked
+    import:           setup
+    visibility: public
+    hs-source-dirs: src-unpacked
+    reexported-modules:
+        HGeometry.Vector.Unpacked.V1
+      , HGeometry.Vector.Unpacked.V2
+      , HGeometry.Vector.Unpacked.V3
+      , HGeometry.Vector.Unpacked.V4
+    build-depends:
+      --   hgeometry-vector:sig-num
+      -- , hgeometry-vector:shared
+      , hgeometry-vector:v1
+      , hgeometry-vector:v2
+      , hgeometry-vector:v3
+      , hgeometry-vector:v4
 
 --       -- , hgeometry-vector:numtypes
 --      --  , hgeometry-vector:class

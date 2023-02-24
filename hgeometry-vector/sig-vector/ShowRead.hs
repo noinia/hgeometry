@@ -8,14 +8,10 @@ module ShowRead
 import           Control.Lens
 import           Control.Monad.State
 import           D
-import qualified Data.Foldable as F
 import           Data.Functor.Classes (readData, readUnaryWith)
 import qualified Data.List as List
 import           Data.Proxy
-import           Data.Semigroup
-import           Data.Type.Ord
-import           GHC.TypeLits (natVal, KnownNat)
-import qualified HGeometry.Number.Radical as Radical
+import           GHC.TypeLits (natVal)
 import           Impl
 import           R
 import           Text.Read (Read (..))
