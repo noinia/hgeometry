@@ -40,8 +40,8 @@ instance Vector_ Vector 1 R
 
 -- type Dim = 1
 
-deriving stock instance Show R => Show Vector
-deriving stock instance Read R => Read Vector
+-- deriving stock instance Show R => Show Vector
+-- deriving stock instance Read R => Read Vector
 
 deriving newtype instance Eq R => Eq Vector
 deriving newtype instance Ord R => Ord Vector

@@ -1,12 +1,12 @@
 module Vector2Spec where
 
 import Control.Lens
-import Vector
+-- import Vector
+import HGeometry.Vector.Generic
 -- import HGeometry.Vector
 -- import HGeometry.Vector.Class
 import Test.Hspec
 import R
-import Impl
 import Vector
 
 --------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import Vector
 -- import qualified Data.Vector.Unboxed as UV
 -- import           HGeometry.Vector.Class
 -- import           HGeometry.Vector
+import HGeometry.Vector.Generic
 import HGeometry.Vector.Instances ()
 -- import           HGeometry.Vector.Unpacked
 import R
@@ -16,7 +17,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Text.Read (readMaybe)
-import Impl
+
 --------------------------------------------------------------------------------
 
 myVec :: Vector

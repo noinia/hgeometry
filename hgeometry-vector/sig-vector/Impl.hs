@@ -1,9 +1,11 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- {-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques -ddump-to-file #-}
 module Impl
-  ( Vector, pattern Vector1_, pattern Vector2_
+  ( pattern Vector1_, pattern Vector2_
     -- * Constructing Vectors.
-  ,  generate
+  , generate
+  , vectorFromList
   -- * Additonal Accessors
   , component, xComponent, yComponent, zComponent, wComponent
   -- * Applicative operations
@@ -18,6 +20,7 @@ module Impl
   ) where
 
 import           Control.Lens
+import           Control.Monad.State
 import           D
 import qualified Data.Foldable as F
 import           Data.Proxy
@@ -36,6 +39,29 @@ import           Vector
 generate   :: (Int -> R) -> Vector
 generate f = runIdentity $ generateA (Identity . f)
 {-# INLINE generate #-}
+
+-- | Convert a list of exactly d elements into a vector with dimension d.
+--
+-- >>> vectorFromList [10,2,3] :: Maybe (Vector 3 Int)
+-- Just (Vector 10 2 3)
+-- >>> vectorFromList [10,2,3,5] :: Maybe (Vector 3 Int)
+-- Nothing
+-- >>> vectorFromList [10,2] :: Maybe (Vector 3 Int)
+-- Nothing
+vectorFromList :: [R] -> Maybe Vector
+vectorFromList = evalStateT $ do v <- generateA next
+                                 rest <- get
+                                 guard (null rest)
+                                 pure v
+  where
+    -- Note that this depends on the specific order in which we evaluate
+    -- elements in generateA, so arguably this is somewhat dangerous.
+    next   :: Int -> StateT [r] Maybe r
+    next _ = get >>= \case
+               []   -> fail "vectorFromList: no next element"
+               x:xs -> do put xs
+                          pure x
+{-# INLINE vectorFromList #-}
 
 --------------------------------------------------------------------------------
 

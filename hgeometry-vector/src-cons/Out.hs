@@ -38,8 +38,8 @@ type instance IxValue Vector = R
 -- instance (0 < d, d ~ Dim) => Vector_ Vector d R
 instance (0 < D, D ~ DIn.D + 1) => Vector_ Vector D R
 
-deriving stock instance Show R => Show Vector
-deriving stock instance Read R => Read Vector
+-- deriving stock instance Show R => Show Vector
+-- deriving stock instance Read R => Read Vector
 
 deriving stock instance Eq R => Eq Vector
 deriving stock instance Ord R => Ord Vector

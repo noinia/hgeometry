@@ -106,8 +106,11 @@ library sig-vector
     signatures:
       Vector
     exposed-modules:
+      HGeometry.Vector.Generic
+    other-modules:
       Impl
-      -- UnboxedVecImpl
+      UnboxedVecImpl
+      ShowRead
     -- other-modules:
     build-depends:
         hgeometry-vector:sig-num

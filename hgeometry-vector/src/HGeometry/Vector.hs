@@ -1,8 +1,8 @@
 module HGeometry.Vector
   ( Vector_
-  , module Impl
+  , module HGeometry.Vector.Generic
   ) where
 
-import Vector
-import Impl
 import HGeometry.Vector.Class
+import HGeometry.Vector.Generic
+import Vector()
