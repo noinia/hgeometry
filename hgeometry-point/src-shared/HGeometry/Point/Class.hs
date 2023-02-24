@@ -34,7 +34,7 @@ import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
-import           VectorDef
+import           HGeometry.Vector.Unpacked.Def
 -- import           HGeometry.Vector
 import qualified Linear.Affine as Linear
 import           Linear.V2 (V2(..))

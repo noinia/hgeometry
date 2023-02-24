@@ -16,9 +16,9 @@ module HGeometry.Point.Unpacked
 
 import HGeometry.Point.Class
 import HGeometry.Point.PointF
-import HGeometry.Vector
+-- import HGeometry.Vector
+import HGeometry.Vector.Unpacked
 import R
-
 
 -- | d dimensional points
 type Point d r = PointF (Vector d r)

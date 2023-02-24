@@ -2,7 +2,7 @@ module DoubleSpec where
 
 import HGeometry.Vector
 import Vector
--- import HGeometry.Vector.Class
+-- import HGeometry.Vector.Class -- figure out why we need this?
 import Test.Hspec
 import R
 

@@ -26,6 +26,7 @@ import           GHC.TypeLits
 import           HGeometry.Point.Class
 import           HGeometry.Properties
 import           HGeometry.Vector.Class
+import           HGeometry.Vector.Unpacked.Def
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 --import HGeometry.Point.EuclideanDistance

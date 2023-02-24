@@ -1,5 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE RoleAnnotations #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Vector
@@ -12,61 +12,54 @@
 --------------------------------------------------------------------------------
 signature Vector where
 
-import Control.DeepSeq
--- import Control.Lens
-import D
-import Data.Kind (Type)
--- import Data.Type.Ord
-import GHC.TypeLits
-import HGeometry.Vector.Class
--- import HGeometry.Properties
-import R
+import           Control.DeepSeq
+import           Control.Lens
+import           D
 import qualified Data.Functor.Apply as Apply
+import           HGeometry.Vector.Class
+import           R
 
 --------------------------------------------------------------------------------
 
 -- $setup
 -- >>> let myVector2 = Vector2 5 11
 
--- | a 'Vector d r' is a d-dimensional vector whose components are of
--- type r.
-data Vector :: Nat -> Type -> Type
-type role Vector nominal nominal
+-- | The Vector data type
+data Vector
 
-instance Eq R => Eq (Vector D R)
-instance Ord R => Ord (Vector D R)
-instance NFData R => NFData (Vector D R)
-instance Show R => Show (Vector D R)
+-- | Vector is actually a D-dimension vector whose coordinates are of type R.
+instance Vector_ Vector D R
+
+instance Eq R     => Eq Vector
+instance Ord R    => Ord Vector
+instance NFData R => NFData Vector
+instance Show R   => Show Vector
 
 --------------------------------------------------------------------------------
+-- * Construcitng Vectors
 
-instance VectorLike_ (Vector D R)
-instance Additive_ (Vector D R)
+-- | Generates a vector from an Applicative operation (that takes the
+-- index)
+generateA :: Applicative f => (Int -> f R) -> f Vector
 
+--------------------------------------------------------------------------------
+-- * Accessing the vector Data
 
--- instance Metric_ (Vector D R)
+-- | Traversal over the components of the vector
+--
+-- >>> myVector2^..components
+-- [5,11]
+components :: IndexedTraversal1' Int Vector R
 
-
-
-
--- -- | Traversal over the components of the vector
--- --
--- -- >>> myVector2^..components
--- -- [5,11]
--- components :: IndexedTraversal1' Int Vector R
-
-
--- -- | Lens to access the i^th coordinate.
--- component :: forall i. (i < D, KnownNat i) => IndexedLens' Int Vector R
-
+-- | Lens to access the i^th coordinate.
+component' :: Int -> IndexedTraversal' Int Vector R
 
 --------------------------------------------------------------------------------
 -- * Additive operations
 
--- -- | Apply a function to merge the 'non-zero' components of two
--- -- vectors, unioning the rest of the values.
--- liftU2       :: (R -> R -> R) -> Vector D R -> Vector D R -> Vector D R
+-- | Apply a function to merge the 'non-zero' components of two
+-- vectors, unioning the rest of the values.
+liftU2  :: (R -> R -> R) -> Vector -> Vector -> Vector
 
--- -- | Apply an Applicative function to the components of two vectors.
--- liftI2A :: Apply.Apply f
---         => (R -> R -> f R) -> Vector D R -> Vector D R -> f (Vector D R)
+-- | Apply an Applicative function to the components of two vectors.
+liftI2A :: Apply.Apply f => (R -> R -> f R) -> Vector -> Vector -> f Vector

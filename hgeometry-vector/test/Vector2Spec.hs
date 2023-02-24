@@ -2,15 +2,17 @@ module Vector2Spec where
 
 import Control.Lens
 import Vector
-import HGeometry.Vector
+-- import HGeometry.Vector
 -- import HGeometry.Vector.Class
 import Test.Hspec
 import R
+import Impl
+import Vector
 
 --------------------------------------------------------------------------------
 
-myVec :: Vector 2 R
-myVec = Vector2 5 11
+myVec :: Vector
+myVec = Vector2_ 5 11
 
 spec :: Spec
 spec = describe "vector2 tests" $ do
@@ -24,9 +26,9 @@ spec = describe "vector2 tests" $ do
          it "yComponent" $
            myVec^.yComponent `shouldBe` 11
          it "add" $
-           myVec ^+^ myVec `shouldBe` Vector2 10 22
+           myVec ^+^ myVec `shouldBe` Vector2_ 10 22
          it "dot" $
-           myVec `dot` Vector2 100 2 `shouldBe` 522
+           myVec `dot` Vector2_ 100 2 `shouldBe` 522
 --         it "vectorFromList" $ do
 --           vectorFromList @(Vector 3 R) [10,2,3]   `shouldBe` Just (Vector3 10 2 3)
 --           vectorFromList @(Vector 3 R) [10,2,3,5] `shouldBe` Nothing
