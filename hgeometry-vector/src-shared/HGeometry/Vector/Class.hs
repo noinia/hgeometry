@@ -3,7 +3,7 @@ module HGeometry.Vector.Class
   ) where
 
 
-import           Data.Type.Ord
+import Data.Type.Ord
 -- import HGeometry.Properties
 
 -- | Declare that the type vector represents a d dimensional vector
@@ -11,5 +11,8 @@ import           Data.Type.Ord
 --
 -- This class does not have any methods, since all such methods are
 -- provided using a backpack Signature instead.
-class 0 < d => Vector_ vector d r | vector -> d
-                                  , vector -> r
+class ( 0 < d
+      -- , r ~ NumType vector
+      -- , d ~ Dimension vector
+      ) => Vector_ vector d r | vector -> d
+                              , vector -> r

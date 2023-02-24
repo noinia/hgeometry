@@ -10,6 +10,7 @@ module V1
 
 import           Control.Lens
 import qualified Data.Functor.Apply as Apply
+import           HGeometry.Properties
 import           HGeometry.Vector.Class
 import           Linear.V1 (V1(..))
 import           R
@@ -19,6 +20,8 @@ import           R
 type D = 1
 type Vector = V1 R
 instance Vector_ Vector D R
+type instance Dimension Vector = 1
+type instance NumType Vector = R
 
 -- | Generates a vector from an Applicative operation (that takes the
 -- index)

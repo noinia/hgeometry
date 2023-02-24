@@ -1,6 +1,5 @@
 module HGeometry.Vector
   ( Vector_
-  , Vector
   , module Impl
   ) where
 
