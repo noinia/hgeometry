@@ -2,11 +2,9 @@ cabal-version:      3.4
 name:               hgeometry-vector
 version:            1.0.0.0
 synopsis:
-    Small Vectors with type level tags and an optimized representation
+    Small Vectors with type level tags
 description:
-    Vectors indexed by type level natural numbers. The package
-    uses backpack to select and monomorphize an unpacked
-    representation based on the type of elements.
+    Vectors indexed by type level natural numbers.
 license:            MIT
 license-file:       LICENSE
 author:             Frank Staals
@@ -95,7 +93,6 @@ library
         HGeometry.Vector
       , HGeometry.Properties
       , HGeometry.Vector.Class
-      -- , HGeometry.Vector.Additive
 
   other-modules:
         HGeometry.Vector.Type
@@ -154,12 +151,12 @@ test-suite hgeometry-vector-hspec
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
---benchmark hgeometry-vector-bench
---    import: setup, test-setup
---    hs-source-dirs: bench
---    main-is: Benchmarks.hs
---    type: exitcode-stdio-1.0
---    build-depends:
---       , hgeometry-vector
---       , tasty-bench              >= 0.3
---       , tasty                    >= 1.4
+benchmark hgeometry-vector-bench
+    import: setup, test-setup
+    hs-source-dirs: bench
+    main-is: Benchmarks.hs
+    type: exitcode-stdio-1.0
+    build-depends:
+       , hgeometry-vector
+       , tasty-bench              >= 0.3
+       , tasty                    >= 1.4
