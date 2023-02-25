@@ -42,8 +42,8 @@ instance V_ Vector 1 R
 -- deriving stock instance Show R => Show Vector
 -- deriving stock instance Read R => Read Vector
 
-deriving newtype instance Eq R => Eq Vector
-deriving newtype instance Ord R => Ord Vector
+deriving newtype instance Eq R     => Eq Vector
+deriving newtype instance Ord R    => Ord Vector
 deriving newtype instance NFData R => NFData Vector
 
 

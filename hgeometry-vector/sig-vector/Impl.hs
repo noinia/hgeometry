@@ -67,7 +67,11 @@ vectorFromList = evalStateT $ do v <- generateA next
 
 --------------------------------------------------------------------------------
 
--- | Construct or Destruct a 2 dimensional vector.
+-- -- aliasing V like this seems to have the right effec,t
+-- type V_ v d r = (Vector_ v d r, D ~ d, d <= D)
+
+
+-- | Construct or Destruct a 1 dimensional vector.
 pattern Vector1_ :: (1 <= D, V_ Vector 1 R) => R -> Vector
 pattern Vector1_ x <- (v1 -> x)
   where
@@ -80,6 +84,7 @@ v1 = view xComponent
 {-# INLINE v1 #-}
 
 ----------------------------------------
+
 
 -- | Construct or Destruct a 2 dimensional vector.
 pattern Vector2_ :: (2 <= D, V_ Vector 2 R) => R -> R -> Vector
