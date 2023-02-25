@@ -1,3 +1,6 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Vector
@@ -17,10 +20,17 @@ module HGeometry.Vector
   , sameDirection
   ) where
 
-import Control.Lens
-import Data.Semigroup
-import HGeometry.Vector.Class
-import HGeometry.Vector.Type
+import           GHC.TypeNats(KnownNat, natVal)
+import           Control.Lens
+import           Data.Proxy
+import           Data.Semigroup
+import qualified Data.Vector.Generic as GV
+import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
+import qualified Data.Vector.Generic.Mutable as GMV
+import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UMV
+import           HGeometry.Vector.Class
+import           HGeometry.Vector.Type
 
 --------------------------------------------------------------------------------
 
@@ -107,3 +117,62 @@ scalarMultiple' u v = g $ foldMapZip f u v
     g No      = Nothing
     g Maybe   = error "scalarMultiple': found a Maybe, which means the vectors either have length zero, or one of them is all Zero!"
     g (Yes x) = Just x
+
+
+--------------------------------------------------------------------------------
+-- * unboxed vectors
+
+-- | elements of the vector are stored consecutively
+newtype instance UMV.MVector s (Vector d r) = MV_VectorD (UMV.MVector s r)
+newtype instance UV.Vector     (Vector d r) = V_VectorD  (UV.Vector     r)
+
+natVal' :: forall d. KnownNat d => Int
+natVal' = fromIntegral $ natVal (Proxy @d)
+
+instance ( GMV.MVector UMV.MVector r
+         , Vector_ (Vector d r) d r
+         ) => GMV.MVector UMV.MVector (Vector d r) where
+
+  basicLength (MV_VectorD v) = let d = natVal' @d
+                               in GMV.basicLength v `div` d
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (MV_VectorD v) = let d = natVal' @d
+                                        in MV_VectorD $ GMV.basicUnsafeSlice (d*s) (d*l) v
+  {-# INLINE basicUnsafeSlice #-}
+  basicOverlaps  (MV_VectorD v) (MV_VectorD v') = GMV.basicOverlaps v v'
+  {-# INLINE basicOverlaps #-}
+  basicUnsafeNew n = let d = natVal' @d
+                     in MV_VectorD <$> GMV.basicUnsafeNew (d*n)
+  {-# INLINE basicUnsafeNew #-}
+  basicInitialize (MV_VectorD v) = GMV.basicInitialize v
+  {-# INLINE basicInitialize#-}
+  basicUnsafeRead (MV_VectorD v) i = let d = natVal' @d
+                                     in generateA $ \j -> GMV.basicUnsafeRead v (d*i+j)
+  {-# INLINE basicUnsafeRead #-}
+  basicUnsafeWrite (MV_VectorD v) i w = imapMOf_ components f w
+    where
+      f j x = GMV.basicUnsafeWrite v (d*i+j) x
+      d = natVal' @d
+  {-# INLINE basicUnsafeWrite #-}
+
+
+instance ( GV.Vector UV.Vector r
+         , Vector_ (Vector d r) d r
+         ) => GV.Vector UV.Vector (Vector d r) where
+
+  basicUnsafeFreeze (MV_VectorD mv) = V_VectorD <$> GV.basicUnsafeFreeze mv
+  {-# INLINE basicUnsafeFreeze #-}
+  basicUnsafeThaw (V_VectorD v) = MV_VectorD <$> GV.basicUnsafeThaw v
+  {-# INLINE basicUnsafeThaw #-}
+  basicLength (V_VectorD v) = let d = natVal' @d
+                              in GV.basicLength v `div` d
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice s l (V_VectorD v) = let d = natVal' @d
+                                       in V_VectorD $ GV.basicUnsafeSlice (d*s) (d*l) v
+  {-# INLINE basicUnsafeSlice #-}
+  basicUnsafeIndexM (V_VectorD v) i = let d = natVal' @d
+                                      in generateA $ \j -> GV.basicUnsafeIndexM v (d*i+j)
+  {-# INLINE basicUnsafeIndexM #-}
+
+instance ( UV.Unbox r, Vector_ (Vector d r) d r
+         ) => UV.Unbox (Vector d r) where

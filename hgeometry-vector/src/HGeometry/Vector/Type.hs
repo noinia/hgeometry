@@ -242,3 +242,5 @@ instance ( HasComponents (Vector d r) (Vector d r)
       app_prec = 10
       constr   = "Vector" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
+
+--------------------------------------------------------------------------------
