@@ -16,6 +16,7 @@ import           Control.DeepSeq
 import           Control.Lens
 import           D
 import qualified Data.Functor.Apply as Apply
+import           GHC.Generics (Generic)
 import           HGeometry.Vector.Class
 import           R
 
@@ -28,20 +29,19 @@ import           R
 data Vector
 
 -- | Vector is actually a D-dimension vector whose coordinates are of type R.
-instance Vector_ Vector D R
+instance V_ Vector D R
 
-instance Eq R     => Eq Vector
-instance Ord R    => Ord Vector
-instance NFData R => NFData Vector
--- instance Show R   => Show Vector
--- instance Read R   => Read Vector
+instance Eq R      => Eq Vector
+instance Ord R     => Ord Vector
+instance NFData R  => NFData Vector
+instance Generic R => Generic Vector
 
 --------------------------------------------------------------------------------
 -- * Construcitng Vectors
 
 -- | Generates a vector from an Applicative operation (that takes the
 -- index)
-generateA :: Applicative f => (Int -> f R) -> f Vector
+generateA :: (Applicative f) => (Int -> f R) -> f Vector
 
 --------------------------------------------------------------------------------
 -- * Accessing the vector Data

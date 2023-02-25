@@ -4,10 +4,9 @@ module IntSpec where
 import Data.Proxy
 import Data.Semigroup
 import Data.Typeable
-import HGeometry.Vector.V2
+-- import HGeometry.Vector.V2
 -- import qualified Vector as UV
 -- import qualified Data.Vector.Unboxed as UV
--- import           HGeometry.Vector.Class
 -- import           HGeometry.Vector
 import HGeometry.Vector.Generic
 import HGeometry.Vector.Instances ()
@@ -20,7 +19,7 @@ import Text.Read (readMaybe)
 
 --------------------------------------------------------------------------------
 
-myVec :: Vector
+myVec :: V_ Vector 2 R => Vector
 myVec = Vector2_ 5 11
 
 vecList :: [Vector]

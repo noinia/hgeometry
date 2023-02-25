@@ -1,5 +1,5 @@
 module HGeometry.Vector.Class
-  ( Vector_
+  ( V_
   ) where
 
 
@@ -14,5 +14,5 @@ import Data.Type.Ord
 class ( 0 < d
       -- , r ~ NumType vector
       -- , d ~ Dimension vector
-      ) => Vector_ vector d r | vector -> d
-                              , vector -> r
+      ) => V_ vector d r | vector -> d
+                         , vector -> r

@@ -66,7 +66,7 @@ vectorFromList = evalStateT $ do v <- generateA next
 --------------------------------------------------------------------------------
 
 -- | Construct or Destruct a 2 dimensional vector.
-pattern Vector1_ :: (0 < D, Vector_ Vector 1 R) => R -> Vector
+pattern Vector1_ :: (0 < D, V_ Vector 1 R) => R -> Vector
 pattern Vector1_ x <- (v1 -> x)
   where
     Vector1_ x = generate $ const x
@@ -80,7 +80,7 @@ v1 = view xComponent
 ----------------------------------------
 
 -- | Construct or Destruct a 2 dimensional vector.
-pattern Vector2_ :: (0 < D, 1 < D, Vector_ Vector 2 R) => R -> R -> Vector
+pattern Vector2_ :: (0 < D, 1 < D, V_ Vector 2 R) => R -> R -> Vector
 pattern Vector2_ x y <- (v2 -> (x,y))
   where
     Vector2_ x y = generate $ \case
@@ -96,7 +96,7 @@ v2 v = (v^.xComponent, v^.yComponent)
 ----------------------------------------
 
 -- | Construct or Destruct a 4 dimensional vector.
-pattern Vector3_ :: (0 < D, 1 < D, 2 < D, Vector_ Vector 3 R) => R -> R -> R -> Vector
+pattern Vector3_ :: (0 < D, 1 < D, 2 < D, V_ Vector 3 R) => R -> R -> R -> Vector
 pattern Vector3_ x y z <- (v3 -> (x,y,z))
   where
     Vector3_ x y z = generate $ \case
@@ -113,7 +113,7 @@ v3 v = (v^.xComponent, v^.yComponent, v^.zComponent)
 ----------------------------------------
 
 -- | Construct or Destruct a 4 dimensional vector.
-pattern Vector4_ :: (0 < D, 1 < D, 2 < D, 3 < D, Vector_ Vector 4 R) => R -> R -> R -> R -> Vector
+pattern Vector4_ :: (0 < D, 1 < D, 2 < D, 3 < D, V_ Vector 4 R) => R -> R -> R -> R -> Vector
 pattern Vector4_ x y z w <- (v4 -> (x,y,z,w))
   where
     Vector4_ x y z w = generate $ \case

@@ -19,7 +19,7 @@ import           R
 
 type D = 1
 type Vector = V1 R
-instance Vector_ Vector D R
+instance V_ Vector D R
 type instance Dimension Vector = 1
 type instance NumType Vector = R
 

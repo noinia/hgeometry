@@ -17,7 +17,7 @@ import           R
 --------------------------------------------------------------------------------
 type D = 2
 type Vector = V2 R
-instance Vector_ Vector D R
+instance V_ Vector D R
 -- type instance Dimension Vector = 2
 -- type instance NumType Vector = R
 

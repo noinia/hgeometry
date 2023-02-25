@@ -35,7 +35,7 @@ newtype Vector = Vector1 R
 
 -- type instance Dimension Vector = 1
 -- type instance NumType Vector = R
-instance Vector_ Vector 1 R
+instance V_ Vector 1 R
 
 -- type Dim = 1
 
