@@ -10,6 +10,8 @@
 --
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 module Out
   ( Vector(..)
   , generateA
@@ -43,7 +45,7 @@ data Vector = Cons {-# UNPACK #-}!R
 type instance IxValue Vector = R
 -- type Dim = In.Dim + 1
 -- instance (0 < d, d ~ Dim) => V_ Vector d R
-instance (0 < D, D ~ DIn.D + 1) => V_ Vector D R
+instance (2 <= D, D ~ DIn.D + 1) => V_ Vector D R
 
 -- deriving stock instance Show R => Show Vector
 -- deriving stock instance Read R => Read Vector

@@ -11,7 +11,7 @@ import Data.Type.Ord
 --
 -- This class does not have any methods, since all such methods are
 -- provided using a backpack Signature instead.
-class ( 0 < d
+class ( 1 <= d
       -- , r ~ NumType vector
       -- , d ~ Dimension vector
       ) => V_ vector d r | vector -> d

@@ -1,5 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 -- {-# OPTIONS_GHC -ddump-simpl -dsuppress-module-prefixes -dsuppress-uniques -ddump-to-file #-}
 module Impl
   ( pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
@@ -26,7 +28,7 @@ import qualified Data.Foldable as F
 import           Data.Proxy
 import           Data.Semigroup
 import           Data.Type.Ord
-import           GHC.TypeLits (natVal, KnownNat)
+import           GHC.TypeNats
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Vector.Class
 import           R
@@ -66,21 +68,21 @@ vectorFromList = evalStateT $ do v <- generateA next
 --------------------------------------------------------------------------------
 
 -- | Construct or Destruct a 2 dimensional vector.
-pattern Vector1_ :: (0 < D, V_ Vector 1 R) => R -> Vector
+pattern Vector1_ :: (1 <= D, V_ Vector 1 R) => R -> Vector
 pattern Vector1_ x <- (v1 -> x)
   where
     Vector1_ x = generate $ const x
 {-# INLINE Vector1_ #-}
 {-# COMPLETE Vector1_ #-}
 
-v1 :: 0 < D => Vector -> R
+v1 :: 1 <= D => Vector -> R
 v1 = view xComponent
 {-# INLINE v1 #-}
 
 ----------------------------------------
 
 -- | Construct or Destruct a 2 dimensional vector.
-pattern Vector2_ :: (0 < D, 1 < D, V_ Vector 2 R) => R -> R -> Vector
+pattern Vector2_ :: (2 <= D, V_ Vector 2 R) => R -> R -> Vector
 pattern Vector2_ x y <- (v2 -> (x,y))
   where
     Vector2_ x y = generate $ \case
@@ -89,14 +91,14 @@ pattern Vector2_ x y <- (v2 -> (x,y))
 {-# INLINE Vector2_ #-}
 {-# COMPLETE Vector2_ #-}
 
-v2   :: (0 < D, 1 < D) => Vector -> (R,R)
+v2   :: (2 <= D) => Vector -> (R,R)
 v2 v = (v^.xComponent, v^.yComponent)
 {-# INLINE v2 #-}
 
 ----------------------------------------
 
 -- | Construct or Destruct a 4 dimensional vector.
-pattern Vector3_ :: (0 < D, 1 < D, 2 < D, V_ Vector 3 R) => R -> R -> R -> Vector
+pattern Vector3_ :: (3 <= D, V_ Vector 3 R) => R -> R -> R -> Vector
 pattern Vector3_ x y z <- (v3 -> (x,y,z))
   where
     Vector3_ x y z = generate $ \case
@@ -106,14 +108,14 @@ pattern Vector3_ x y z <- (v3 -> (x,y,z))
 {-# INLINE Vector3_ #-}
 {-# COMPLETE Vector3_ #-}
 
-v3   :: (0 < D, 1 < D, 2 < D) => Vector -> (R,R,R)
+v3   :: (3 <= D) => Vector -> (R,R,R)
 v3 v = (v^.xComponent, v^.yComponent, v^.zComponent)
 {-# INLINE v3 #-}
 
 ----------------------------------------
 
 -- | Construct or Destruct a 4 dimensional vector.
-pattern Vector4_ :: (0 < D, 1 < D, 2 < D, 3 < D, V_ Vector 4 R) => R -> R -> R -> R -> Vector
+pattern Vector4_ :: (4 <= D, V_ Vector 4 R) => R -> R -> R -> R -> Vector
 pattern Vector4_ x y z w <- (v4 -> (x,y,z,w))
   where
     Vector4_ x y z w = generate $ \case
@@ -124,7 +126,7 @@ pattern Vector4_ x y z w <- (v4 -> (x,y,z,w))
 {-# INLINE Vector4_ #-}
 {-# COMPLETE Vector4_ #-}
 
-v4   :: (0 < D, 1 < D, 2 < D, 3 < D) => Vector -> (R,R,R,R)
+v4   :: (4 <= D) => Vector -> (R,R,R,R)
 v4 v = (v^.xComponent, v^.yComponent, v^.zComponent, v^.wComponent)
 {-# INLINE v4 #-}
 
@@ -140,31 +142,31 @@ v4 v = (v^.xComponent, v^.yComponent, v^.zComponent, v^.wComponent)
 -- Vector3 1 10 3
 -- >>> myVec2 & component @1 %~ (*5)
 -- Vector2 10 100
-component :: forall i. (i < D, KnownNat i)
+component :: forall i. (i <= D-1, KnownNat i)
           => IndexedLens' Int Vector R
-component = singular $ component' (fromInteger . natVal $ Proxy @i)
+component = singular $ component' (fromIntegral . natVal $ Proxy @i)
 {-# INLINE component #-}
 
 -- | Shorthand for accessing the x-component
-xComponent :: (0 < D)
+xComponent :: (1 <= D)
            => IndexedLens' Int Vector R
 xComponent = component @0
 {-# INLINE xComponent #-}
 
 -- | Shorthand for accessing the x-component
-yComponent :: (1 < D)
+yComponent :: (2 <= D)
            => IndexedLens' Int Vector R
 yComponent = component @1
 {-# INLINE yComponent #-}
 
 -- | Shorthand for accessing the x-component
-zComponent :: (2 < D)
+zComponent :: (3 <= D)
            => IndexedLens' Int Vector R
 zComponent = component @2
 {-# INLINE zComponent #-}
 
 -- | Shorthand for accessing the x-component
-wComponent :: (3 < D)
+wComponent :: (4 <= D)
            => IndexedLens' Int Vector R
 wComponent = component @3
 {-# INLINE wComponent #-}
