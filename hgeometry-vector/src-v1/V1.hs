@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Vector.Unpacked.V1
+-- Module      :  V1
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,14 +9,13 @@
 --
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.Vector.Unpacked.V1
+module V1
   ( Vector(..)
   , generateA
   , components
   , component'
   , liftU2
   , liftI2A
-  -- , Dim
   ) where
 
 import           Control.DeepSeq

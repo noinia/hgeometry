@@ -182,17 +182,28 @@ library unpacked
     signatures:
         R
     reexported-modules:
-        HGeometry.Vector.Unpacked.V1
-      , HGeometry.Vector.Unpacked.V2
-      , HGeometry.Vector.Unpacked.V3
-      , HGeometry.Vector.Unpacked.V4
+        HGeometry.Vector.V1
+      , HGeometry.Vector.V2
+      , HGeometry.Vector.V3
+      , HGeometry.Vector.V4
     build-depends:
-      --   hgeometry-vector:sig-num
-      -- , hgeometry-vector:shared
+      -- , hgeometry-vector:dimensions
+      -- , hgeometry-vector:sig-vector
       , hgeometry-vector:v1
       , hgeometry-vector:v2
       , hgeometry-vector:v3
       , hgeometry-vector:v4
+    mixins:
+      , hgeometry-vector:v1 (V1 as HGeometry.Vector.V1)
+
+
+    --     hgeometry-vector:sig-vector ( HGeometry.Vector.Generic as HGeometry.Vector.V4
+    --                                 )
+    --        requires ( Vector as V4
+    --                 , D      as Four
+    --                 )
+
+
 
 --       -- , hgeometry-vector:numtypes
 --      --  , hgeometry-vector:class
@@ -215,7 +226,7 @@ library unpacked
 library v1
     import:           setup
     -- visibility: public
-    exposed-modules: HGeometry.Vector.Unpacked.V1
+    exposed-modules: V1
     hs-source-dirs: src-v1
     build-depends:
         hgeometry-vector:shared
@@ -248,29 +259,31 @@ common setup-cons
 library v2
     import:             setup, setup-cons
     build-depends:      hgeometry-vector:v1
-    reexported-modules: HGeometry.Vector.Unpacked.V2
+    reexported-modules:
+        HGeometry.Vector.V2
     mixins:
         hgeometry-vector:dimensions (Two as D, One as DIn)
-      , hgeometry-vector:cons       (Out as HGeometry.Vector.Unpacked.V2)
-                           requires (In  as HGeometry.Vector.Unpacked.V1)
+      , hgeometry-vector:cons       (Out as HGeometry.Vector.V2)
+                           requires (In  as V1)
 
 library v3
     import:             setup, setup-cons
     build-depends:      hgeometry-vector:v2
-    reexported-modules: HGeometry.Vector.Unpacked.V3
+    reexported-modules:
+        HGeometry.Vector.V3
     mixins:
         hgeometry-vector:dimensions (Three as D, Two as DIn)
-      , hgeometry-vector:cons       (Out as HGeometry.Vector.Unpacked.V3)
-                           requires (In  as HGeometry.Vector.Unpacked.V2)
+      , hgeometry-vector:cons       (Out as HGeometry.Vector.V3)
+                           requires (In  as HGeometry.Vector.V2)
 
 library v4
     import:             setup, setup-cons
     build-depends:      hgeometry-vector:v3
-    reexported-modules: HGeometry.Vector.Unpacked.V4
+    reexported-modules: HGeometry.Vector.V4
     mixins:
         hgeometry-vector:dimensions (Four as D, Three as DIn)
-      , hgeometry-vector:cons       (Out as HGeometry.Vector.Unpacked.V4)
-                           requires (In  as HGeometry.Vector.Unpacked.V3)
+      , hgeometry-vector:cons       (Out as HGeometry.Vector.V4)
+                           requires (In  as HGeometry.Vector.V3)
 
 --------------------------------------------------------------------------------
 -- implementaions based on Linear
@@ -348,8 +361,15 @@ common hgeometry-vector-test
        -- , hgeometry-vector:sig-vector
        , hgeometry-vector:quickcheck
     mixins:
-      ,  hgeometry-vector:dimensions (Two as D)
-      ,  hgeometry-vector:unpacked (HGeometry.Vector.Unpacked.V2 as Vector)
+      -- , hgeometry-vector:dimensions (Two as D)
+      , hgeometry-vector:sig-vector
+            requires ( Vector as HGeometry.Vector.V2
+                     , D as Two
+                     )
+      , hgeometry-vector:quickcheck
+            requires ( Vector as HGeometry.Vector.V2
+                     , D as Two
+                     )
 
 --     --        requires
 --     --        ( R

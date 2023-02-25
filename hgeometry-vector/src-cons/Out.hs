@@ -10,7 +10,14 @@
 --
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
-module Out where
+module Out
+  ( Vector(..)
+  , generateA
+  , components
+  , component'
+  , liftU2
+  , liftI2A
+  ) where
 
 import           Control.DeepSeq
 import           Control.Lens

@@ -1,13 +1,11 @@
 module Vector2Spec where
 
-import Control.Lens
--- import Vector
-import HGeometry.Vector.Generic
--- import HGeometry.Vector
--- import HGeometry.Vector.Class
-import Test.Hspec
-import R
-import Vector
+import           Control.Lens
+import           HGeometry.Vector.Generic
+import           HGeometry.Vector.V2
+import qualified HGeometry.Vector.V3 as V3
+import           R
+import           Test.Hspec
 
 --------------------------------------------------------------------------------
 
@@ -30,6 +28,6 @@ spec = describe "vector2 tests" $ do
          it "dot" $
            myVec `dot` Vector2_ 100 2 `shouldBe` 522
 --         it "vectorFromList" $ do
---           vectorFromList @(Vector 3 R) [10,2,3]   `shouldBe` Just (Vector3 10 2 3)
---           vectorFromList @(Vector 3 R) [10,2,3,5] `shouldBe` Nothing
---           vectorFromList @(Vector 3 R) [10,2]     `shouldBe` Nothing
+--           vectorFromList @V3.Vector [10,2,3]   `shouldBe` Just (V3.Vector3_ 10 2 3)
+--           vectorFromList @V3.Vector [10,2,3,5] `shouldBe` Nothing
+--           vectorFromList @V3.Vector [10,2]     `shouldBe` Nothing

@@ -4,7 +4,7 @@ module IntSpec where
 import Data.Proxy
 import Data.Semigroup
 import Data.Typeable
-import Vector
+import HGeometry.Vector.V2
 -- import qualified Vector as UV
 -- import qualified Data.Vector.Unboxed as UV
 -- import           HGeometry.Vector.Class

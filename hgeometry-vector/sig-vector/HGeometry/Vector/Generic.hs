@@ -1,6 +1,6 @@
 module HGeometry.Vector.Generic
   ( Vector_
-  , Vector
+  , module Vector
   , module Impl
   ) where
 
