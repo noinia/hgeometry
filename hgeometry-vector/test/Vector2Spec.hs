@@ -4,6 +4,7 @@ import           Control.Lens
 import           HGeometry.Vector.Generic
 import           HGeometry.Vector.V2
 import qualified HGeometry.Vector.V3 as V3
+import qualified HGeometry.Vector.V1 as V1
 import           R
 import           Test.Hspec
 
@@ -27,7 +28,8 @@ spec = describe "vector2 tests" $ do
            myVec ^+^ myVec `shouldBe` Vector2_ 10 22
          it "dot" $
            myVec `dot` Vector2_ 100 2 `shouldBe` 522
---         it "vectorFromList" $ do
---           vectorFromList @V3.Vector [10,2,3]   `shouldBe` Just (V3.Vector3_ 10 2 3)
+         it "vectorFromList" $ do
+           V1.vectorFromList [10]   `shouldBe` Just (V1.Vector1_ 10)
+          -- vectorFromList @V3.Vector [10,2,3]   `shouldBe` Just (V3.Vector3_ 10 2 3)
 --           vectorFromList @V3.Vector [10,2,3,5] `shouldBe` Nothing
 --           vectorFromList @V3.Vector [10,2]     `shouldBe` Nothing
