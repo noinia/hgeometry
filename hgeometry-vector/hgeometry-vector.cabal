@@ -237,9 +237,14 @@ library v1
 
 library cons
     import:           setup
-    signatures: In, DIn, D
-    -- visibility: public
-    exposed-modules: Out
+    signatures:
+        In
+      , DIn
+      , D
+    exposed-modules:
+        Out
+    reexported-modules:
+        GenericIn
     hs-source-dirs: src-cons
     build-depends:
         hgeometry-vector:shared
@@ -247,9 +252,11 @@ library cons
      ,  hgeometry-vector:sig-num
      ,  hgeometry-vector:sig-dim
     mixins:
-        hgeometry-vector:sig-vector requires ( Vector as In
-                                             , D      as DIn
-                                             )
+        hgeometry-vector:sig-vector
+            ( HGeometry.Vector.Generic as GenericIn )
+            requires ( Vector as In
+                     , D      as DIn
+                     )
 
 common setup-cons
     build-depends:
