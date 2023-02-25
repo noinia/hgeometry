@@ -193,8 +193,8 @@ library unpacked
       , hgeometry-vector:v2
       , hgeometry-vector:v3
       , hgeometry-vector:v4
-    mixins:
-      , hgeometry-vector:v1 (V1 as HGeometry.Vector.V1)
+    -- mixins:
+    --   , hgeometry-vector:v1 (V1 as HGeometry.Vector.V1)
 
 
     --     hgeometry-vector:sig-vector ( HGeometry.Vector.Generic as HGeometry.Vector.V4
@@ -268,10 +268,13 @@ library v2
     build-depends:      hgeometry-vector:v1
     reexported-modules:
         HGeometry.Vector.V2
+      , HGeometry.Vector.V1
     mixins:
         hgeometry-vector:dimensions (Two as D, One as DIn)
-      , hgeometry-vector:cons       (Out as HGeometry.Vector.V2)
-                           requires (In  as V1)
+      , hgeometry-vector:cons       ( Out       as HGeometry.Vector.V2
+                                    , GenericIn as HGeometry.Vector.V1
+                                    )
+                         requires (In  as V1)
 
 library v3
     import:             setup, setup-cons
