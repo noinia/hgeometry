@@ -6,20 +6,15 @@ module UnboxedVecImpl
 
 import           Control.Lens
 import           D
-import qualified Data.Foldable as F
 import           Data.Proxy
-import           Data.Semigroup
-import           Data.Type.Ord
 import qualified Data.Vector.Generic as GV
 import           Data.Vector.Generic.Mutable (MVector(basicInitialize))
 import qualified Data.Vector.Generic.Mutable as GMV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-import           GHC.TypeLits (natVal, KnownNat)
--- import           HGeometry.Vector.Class
+import           GHC.TypeLits (natVal)
 import           R
 import           Vector
-import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
 -- * unboxed vectors

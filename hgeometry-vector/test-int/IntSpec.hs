@@ -46,8 +46,8 @@ spec = describe "Int vector spec" $ do
            readShow @Vector
            -- readShow @(Vector 3 R)
            -- readShow @(Vector 4 R)
-         -- prop "dot implemented as foldMapZip" $ \(u :: Vector 3 R) v ->
-         --   (getSum $ foldMapZip (\x x' -> Sum $ x * x') u v) == (u `dot` v)
+         prop "dot implemented as foldMapZip" $ \(u :: Vector) v ->
+           (getSum $ foldMapZip (\x x' -> Sum $ x * x') u v) == (u `dot` v)
 
 
 readShow :: forall t. (Read t, Show t, Eq t, Arbitrary t, Typeable t) => Spec

@@ -110,7 +110,7 @@ library sig-vector
     other-modules:
       Impl
       UnboxedVecImpl
-      ShowRead
+      OrphanInstances
     -- other-modules:
     build-depends:
         hgeometry-vector:sig-num
@@ -179,6 +179,8 @@ library unpacked
     import:           setup
     visibility: public
     hs-source-dirs: src-unpacked
+    signatures:
+        R
     reexported-modules:
         HGeometry.Vector.Unpacked.V1
       , HGeometry.Vector.Unpacked.V2
@@ -281,15 +283,6 @@ library vec-linear
         hgeometry-vector:sig-num
       , hgeometry-vector:shared
 
-     --    -- hgeometry-vector:v0
-     --  , hgeometry-vector:v1
-     --  , hgeometry-vector:v2
-     --  , hgeometry-vector:v3
-     --  , hgeometry-vector:v4
-     --  , hgeometry-vector:numtypes
-     --  , hgeometry-vector:class
-     -- ,  hgeometry-vector:unpacked-def
-
     exposed-modules:
         V1
         V2
@@ -349,14 +342,14 @@ common hgeometry-vector-test
        , hgeometry-vector:numtypes
        , hgeometry-vector:dimensions
        -- , hgeometry-vector
-       , hgeometry-vector:v2
+       , hgeometry-vector:unpacked
        , hgeometry-vector:sig-vector
        -- , hgeometry-vector:class
        -- , hgeometry-vector:sig-vector
        , hgeometry-vector:quickcheck
     mixins:
       ,  hgeometry-vector:dimensions (Two as D)
-      ,  hgeometry-vector:v2 (HGeometry.Vector.Unpacked.V2 as Vector)
+      ,  hgeometry-vector:unpacked (HGeometry.Vector.Unpacked.V2 as Vector)
 
 --     --        requires
 --     --        ( R
