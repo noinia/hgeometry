@@ -1,14 +1,13 @@
 module VectorSpec (spec) where
 
 import Control.Lens
--- import Data.Double.Approximate (SafeDouble)
+import Data.Semigroup
 import HGeometry.Vector
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck.Instances ()
 import HGeometry.Vector.Instances ()
 -- import           Test.Util
--- import qualified HGeometry.Vector.Boxed as Boxed
 
 --------------------------------------------------------------------------------
 
@@ -23,6 +22,8 @@ spec = do
     -- SafeDouble should work better.
     -- it "1e10 (pass)" $
     --   isScalarMultipleOf (Vector2 1 10) (Vector2 1e10 (1e10*10::SafeDouble)) `shouldBe` True
+    it "division" $
+      Vector2 5 (11 :: Double) ^/ 2 `shouldBe` Vector2 2.5 5.5
 
     it "vecVec" $
       let vecVec :: Vector 2 (Vector 2 Int)
@@ -31,9 +32,16 @@ spec = do
          `shouldBe`
          Vector2 5 20
 
+  prop "dot implemented as foldMapZip" $ \(u :: Vector 3 Int) v ->
+      (getSum $ foldMapZip (\x x' -> Sum $ x * x') u v) == (u `dot` v)
+  it "vectorFromList" $ do
+    vectorFromList @(Vector 1 Int) [10]       `shouldBe` Just (Vector1 10)
+    vectorFromList @(Vector 3 Int) [10,2,3]   `shouldBe` Just (Vector3 10 2 3)
+    vectorFromList @(Vector 3 Int) [10,2,3,5] `shouldBe` Nothing
+    vectorFromList @(Vector 3 Int) [10,2]     `shouldBe` Nothing
+
   -- ordTests
   showReadTests
-  -- fromListTests
 
 showReadTests :: Spec
 showReadTests = describe "show/read tests for" $ do
