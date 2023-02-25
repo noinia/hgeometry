@@ -70,6 +70,7 @@ common quickcheck-setup
 
 common test-setup
     import: quickcheck-setup
+    build-tool-depends: hspec-discover:hspec-discover
     ghc-options:
          -Wall
          -fno-warn-unticked-promoted-constructors
@@ -79,268 +80,25 @@ common test-setup
          -fno-warn-orphans
     build-depends:
         hspec                   >= 2.9
+      , hgeometry-vector
+      , hgeometry-vector:quickcheck
 
---------------------------------------------------------------------------------
--- * Base Signatures, i.e. R and D.
-
-library sig-num
-    import:           setup
-    visibility: public
-    signatures:
-      R
-    hs-source-dirs: sig-num
-
-library sig-dim
-    import:           setup
-    visibility: public
-    signatures:
-      D
-    hs-source-dirs: sig-dim
-
---------------------------------------------------------------------------------
--- * This is the Abstract Library that implements the vector signature,
--- and pretty much all functionality in terms of this signature.
-
-library sig-vector
-    import:           setup
-    visibility: public
-    hs-source-dirs: sig-vector
-    signatures:
-      Vector
-    exposed-modules:
-      HGeometry.Vector.Generic
-    other-modules:
-      Impl
-      UnboxedVecImpl
-      OrphanInstances
-    -- other-modules:
-    build-depends:
-        hgeometry-vector:sig-num
-      , hgeometry-vector:sig-dim
-      , hgeometry-vector:shared
 
 --------------------------------------------------------------------------------
 -- * This is the main library, it gives various implementations of
 -- d-dimensional vectors with numbers of type r.
 
--- library
---     import:           setup
---     hs-source-dirs:   src
---     signatures:
---       R
---       D
---     exposed-modules:
---         HGeometry.Vector
---
---     -- reexported-modules:
---     --     Vector
--- --        HGeometry.Properties
--- --      , HGeometry.Vector.Class
--- --      -- , HGeometry.Vector.Unpacked
---
---     -- other-modules:
---     -- other-extensions:
---     build-depends:
---       -- , hgeometry-vector:vec-linear
---       , hgeometry-vector:shared
---       , hgeometry-vector:sig-vector
---
---     -- mixins:
---     --    hgeometry-vector:vec-linear (V2 as Vector)
--- --       , hgeometry-vector:sig-vector requires (Vector as HGeometry.Vector.Unpacked )
--- --         -- hgeometry-vector:unpacked ( HGeometry.Vector.Unpacked as HGeometry.Vector )
---
---
---     --        ( Vector          as HGeometry.Vector.Vector2
---     --        , Vector.Additive as HGeometry.Vector.Vector2
---     --        , D               as HGeometry.Vector.Vector2
---     --        )
-
-
---------------------------------------------------------------------------------
--- * Shared
-
--- Don't use any signatures here; so that either a sig or an implementation can import this
--- library
-
-library shared
+library
     import:           setup
-    visibility: public
+    hs-source-dirs:   src
     exposed-modules:
-      HGeometry.Properties
-      HGeometry.Vector.Class
-    hs-source-dirs: src-shared
+        HGeometry.Vector
+      , HGeometry.Properties
+      , HGeometry.Vector.Class
+      -- , HGeometry.Vector.Additive
 
-
---------------------------------------------------------------------------------
--- * Vector implementations
-
---- Unpacked vector implementations
-
-library unpacked
-    import:           setup
-    visibility: public
-    hs-source-dirs: src-unpacked
-    signatures:
-        R
-    reexported-modules:
-        -- HGeometry.Vector.V1
-      , HGeometry.Vector.V2
-      , HGeometry.Vector.V3
-      , HGeometry.Vector.V4
-    build-depends:
-      -- , hgeometry-vector:dimensions
-      -- , hgeometry-vector:sig-vector
-      , hgeometry-vector:v1
-      , hgeometry-vector:v2
-      , hgeometry-vector:v3
-      , hgeometry-vector:v4
-    mixins:
-      , hgeometry-vector:v2 (V2 as HGeometry.Vector.V2)
-
-
-    --     hgeometry-vector:sig-vector ( HGeometry.Vector.Generic as HGeometry.Vector.V4
-    --                                 )
-    --        requires ( Vector as V4
-    --                 , D      as Four
-    --                 )
-
-
-
---       -- , hgeometry-vector:numtypes
---      --  , hgeometry-vector:class
---      -- ,  hgeometry-vector:unpacked-def
---     exposed-modules:
---         HGeometry.Vector.Unpacked
---         HGeometry.Vector.Unpacked.Def
---     mixins:
---       , hgeometry-vector:v1 (V1 as HGeometry.Vector.Unpacked.V1)
---       , hgeometry-vector:v2 (V2 as HGeometry.Vector.Unpacked.V2)
---       , hgeometry-vector:v3 (V3 as HGeometry.Vector.Unpacked.V3)
---       , hgeometry-vector:v4 (V4 as HGeometry.Vector.Unpacked.V4)
-
-
-    -- mixins: hgeometry-vector:v2 (VectorD as V2)
-
--- * this implementation itself uses backpack
-----------------------------------------
-
-library v1
-    import:           setup
-    -- visibility: public
-    exposed-modules: V1
-    hs-source-dirs: src-v1
-    build-depends:
-        hgeometry-vector:shared
-      , hgeometry-vector:sig-num
-      , hgeometry-vector:dimensions
-    mixins:
-      , hgeometry-vector:dimensions (One as D)
-
-library cons
-    import:           setup
-    signatures:
-        In
-      , DIn
-      , D
-    exposed-modules:
-        Out
-    reexported-modules:
-        GenericIn
-    hs-source-dirs: src-cons
-    build-depends:
-        hgeometry-vector:shared
-     ,  hgeometry-vector:sig-vector
-     ,  hgeometry-vector:sig-num
-     ,  hgeometry-vector:sig-dim
-    mixins:
-        hgeometry-vector:sig-vector
-            ( HGeometry.Vector.Generic as GenericIn )
-            requires ( Vector as In
-                     , D      as DIn
-                     )
-
-common setup-cons
-    build-depends:
-        hgeometry-vector:cons
-      , hgeometry-vector:dimensions
-
-library v2
-    import:             setup, setup-cons
-    build-depends:      hgeometry-vector:v1
-    reexported-modules:
-        V2
-      , HGeometry.Vector.V1
-    mixins:
-        hgeometry-vector:dimensions ( Two as D, One as DIn )
-      , hgeometry-vector:cons       ( Out       as V2
-                                    , GenericIn as HGeometry.Vector.V1
-                                    )
-                         requires (In  as V1)
-
-library v3
-    import:             setup, setup-cons
-    build-depends:      hgeometry-vector:v2
-    reexported-modules:
-        -- HGeometry.Vector.V2
-      , HGeometry.Vector.V3
-    mixins:
-        hgeometry-vector:dimensions ( Three as D, Two as DIn)
-      , hgeometry-vector:cons       ( Out       as HGeometry.Vector.V3
-                                    -- , GenericIn as HGeometry.Vector.V2
-                                    )
-                         requires (In  as V2)
-
-library v4
-    import:             setup, setup-cons
-    build-depends:      hgeometry-vector:v3
-    reexported-modules: HGeometry.Vector.V4
-    mixins:
-        hgeometry-vector:dimensions (Four as D, Three as DIn)
-      , hgeometry-vector:cons       (Out as HGeometry.Vector.V4)
-                           requires (In  as HGeometry.Vector.V3)
-
---------------------------------------------------------------------------------
--- implementaions based on Linear
-
-library vec-linear
-    import:           setup
-    visibility: public
-    hs-source-dirs: src-linear
-    build-depends:
-        hgeometry-vector:sig-num
-      , hgeometry-vector:shared
-
-    exposed-modules:
-        V1
-        V2
-
---------------------------------------------------------------------------------
--- * NumType Implementations:
-
-library numtypes
-  import: setup
-  visibility: public
-  hs-source-dirs: numtypes
-  exposed-modules:
-    Int
-    Int32
-    Double
-    Float
-    Rational
-
---------------------------------------------------------------------------------
--- * Dimension implementations
-
-library dimensions
-  import: setup
-  visibility: public
-  hs-source-dirs: dimensions
-  exposed-modules:
-    One
-    Two
-    Three
-    Four
+  other-modules:
+        HGeometry.Vector.Type
 
 --------------------------------------------------------------------------------
 -- * Helper Libraries
@@ -352,123 +110,56 @@ library quickcheck
     exposed-modules:
       HGeometry.Vector.Instances
     build-depends:
-         hgeometry-vector:shared
-      ,  hgeometry-vector:sig-vector
+         hgeometry-vector
 
 --------------------------------------------------------------------------------
--- * Generic Test stup
+-- * Testss
 
-common hgeometry-vector-test
-    import:           setup, test-setup
-    hs-source-dirs:   test
-    build-tool-depends: hspec-discover:hspec-discover
-    other-modules:
-       GenericSpec
+
+test-suite hgeometry-vector-hspec
+   import:           setup, test-setup
+   type:             exitcode-stdio-1.0
+   main-is:          Main.hs
+   other-modules:
        Spec
-       Vector2Spec
-    build-depends:
-       , hgeometry-vector:numtypes
-       , hgeometry-vector:dimensions
-       -- , hgeometry-vector
-       , hgeometry-vector:unpacked
-       , hgeometry-vector:sig-vector
-       -- , hgeometry-vector:class
-       -- , hgeometry-vector:sig-vector
-       , hgeometry-vector:quickcheck
-    mixins:
-      -- , hgeometry-vector:dimensions (Two as D)
-      , hgeometry-vector:sig-vector
-            requires ( Vector as HGeometry.Vector.V2
-                     , D as Two
-                     )
-      , hgeometry-vector:quickcheck
-            requires ( Vector as HGeometry.Vector.V2
-                     , D as Two
-                     )
+       VectorSpec
+   hs-source-dirs:   test
 
---     --        requires
---     --        ( R
---     --        )
+--- --------------------------------------------------------------------------------
+---
+--- -- test-suite hgeometry-vector-doctest
+--- --     import:           setup, test-setup
+--- --     type:             exitcode-stdio-1.0
+--- --     hs-source-dirs:   doctest
+--- --     main-is:          Main.hs
+--- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
+--- --     code-generators: doctest-codegen-driver
+---
+--- --     build-depends:
+--- --          hgeometry-vector:vector2
+--- --        , hgeometry-vector:numtypes
+--- --        , hgeometry-vector:sig-vector
+--- --        , doctest
+---
+--- --     mixins:
+--- --          hgeometry-vector:numtypes (Int as R)
+--- --        , hgeometry-vector:sig-vector
+--- --            requires
+--- --            ( Vector          as HGeometry.Vector.Vector2
+--- --            , Vector.Additive as HGeometry.Vector.Vector2
+--- --            , D               as HGeometry.Vector.Vector2
+--- --            )
 
-----------------------------------------
--- * Concrete Test stuites
 
-test-suite hgeometry-vector-test-int
-    import:           setup, test-setup, hgeometry-vector-test
-    type:             exitcode-stdio-1.0
-    main-is:          Main.hs
-    other-modules:
-        IntSpec
-    hs-source-dirs:   test-int
-    mixins:
-         hgeometry-vector:numtypes (Int as R)
+--------------------------------------------------------------------------------
+-- * Benchmarks
 
--- test-suite hgeometry-vector-test-double
---     import:           setup, test-setup, hgeometry-vector-test
---     type:             exitcode-stdio-1.0
---     main-is:          Main.hs
---     other-modules:
---         DoubleSpec
---     hs-source-dirs:   test-double
---     mixins:
---          hgeometry-vector:numtypes (Double as R)
-
--- test-suite hgeometry-vector-test-rational
---     import:           setup, test-setup, hgeometry-vector-test
---     type:             exitcode-stdio-1.0
---     main-is:          Main.hs
---     other-modules:
---         RationalSpec
---     hs-source-dirs:   test-rational
---     mixins:
---          hgeometry-vector:numtypes (Rational as R)
-
--- --- --------------------------------------------------------------------------------
--- ---
--- --- -- test-suite hgeometry-vector-doctest
--- --- --     import:           setup, test-setup
--- --- --     type:             exitcode-stdio-1.0
--- --- --     hs-source-dirs:   doctest
--- --- --     main-is:          Main.hs
--- --- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
--- --- --     code-generators: doctest-codegen-driver
--- ---
--- --- --     build-depends:
--- --- --          hgeometry-vector:vector2
--- --- --        , hgeometry-vector:numtypes
--- --- --        , hgeometry-vector:sig-vector
--- --- --        , doctest
--- ---
--- --- --     mixins:
--- --- --          hgeometry-vector:numtypes (Int as R)
--- --- --        , hgeometry-vector:sig-vector
--- --- --            requires
--- --- --            ( Vector          as HGeometry.Vector.Vector2
--- --- --            , Vector.Additive as HGeometry.Vector.Vector2
--- --- --            , D               as HGeometry.Vector.Vector2
--- --- --            )
---
---
--- --------------------------------------------------------------------------------
--- -- * Benchmarks
---
--- common hgeometry-vector-bench
---     import:           setup, test-setup
---     -- hs-source-dirs:   test
---     -- build-tool-depends: hspec-discover:hspec-discover
---     other-modules:
---     build-depends:
---        , hgeometry-vector:numtypes
---        , hgeometry-vector:unpacked
---        , hgeometry-vector:class
---        , tasty-bench              >= 0.3
---        , tasty                    >= 1.4
---
--- benchmark hgeometry-vector-bench-int
---     import: setup, hgeometry-vector-bench
---     hs-source-dirs: bench
---     main-is: Benchmarks.hs
---     type: exitcode-stdio-1.0
---     -- other-modules:
---     mixins:
---            hgeometry-vector:numtypes (Int as R)
+--benchmark hgeometry-vector-bench
+--    import: setup, test-setup
+--    hs-source-dirs: bench
+--    main-is: Benchmarks.hs
+--    type: exitcode-stdio-1.0
+--    build-depends:
+--       , hgeometry-vector
+--       , tasty-bench              >= 0.3
+--       , tasty                    >= 1.4
