@@ -192,7 +192,7 @@ signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
 outerBoundaryEdgeSegments :: forall polygon point r.
                              ( HasOuterBoundary polygon
                              , Vertex polygon ~ point
-                             , Point_ point 2 r, OptCVector_ 2 point
+                             , Point_ point 2 r
                              )
                           => IndexedFold1 (VertexIx polygon) polygon (ClosedLineSegment point)
 outerBoundaryEdgeSegments = outerBoundaryEdges . to (uncurry ClosedLineSegment)
@@ -239,8 +239,8 @@ class ( HasOuterBoundary polygon
   -- | Finds the extreme points, minimum and maximum, in a given direction
   --
   -- running time: \(O(n)\)
-  extremes      :: (Num r, Ord r, Point_ point 2 r, VectorFor point ~ vector)
-                => vector -> polygon -> (point, point)
+  extremes      :: (Num r, Ord r, Point_ point 2 r)
+                => Vector 2 r -> polygon -> (point, point)
   extremes u pg = ( first1Of (minimumVertexBy (cmpExtreme u)) pg
                   , first1Of (maximumVertexBy (cmpExtreme u)) pg
                   )
@@ -251,8 +251,8 @@ class ( HasOuterBoundary polygon
 
 -- | Comparison that compares which point is 'larger' in the direction given by
 -- the vector u.
-cmpExtreme       :: (Num r, Ord r, Point_ point 2 r, VectorFor point ~ vector)
-                 => vector -> point -> point -> Ordering
+cmpExtreme       :: (Num r, Ord r, Point_ point 2 r)
+                 => Vector 2 r -> point -> point -> Ordering
 cmpExtreme u p q = u `dot` (p .-. q) `compare` 0
 
 --------------------------------------------------------------------------------
