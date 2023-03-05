@@ -1,10 +1,14 @@
 cabal-version:      3.4
-name:               hgeometry-point
+name:               hgeometry
 version:            1.0.0.0
-synopsis:
-        d-dimensional Points
+synopsis:            Geometric Algorithms, Data structures, and Data types.
 description:
-        d-dimensional Points with an optimized vector representation.
+  HGeometry provides some basic geometry types, and geometric algorithms and
+  data structures for them. The main two focusses are: (1) Strong type safety,
+  and (2) implementations of geometric algorithms and data structures with good
+  asymptotic running time guarantees. Note that HGeometry is still highly experimental, don't be surprised to find bugs.
+
+homepage:           https://fstaals.net/software/hgeometry
 license:            MIT
 license-file:       LICENSE
 author:             Frank Staals
@@ -19,6 +23,10 @@ tested-with:
     GHC == 9.2.5
     GHC == 9.4.4
 
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
 --------------------------------------------------------------------------------
 -- common setup-extras
 --     build-depends:
@@ -32,6 +40,8 @@ common setup
         base                    >= 4.16.1.0      &&  < 5
       , hgeometry-combinatorial >= 1.0.0.0
       , hgeometry-vector        >= 1.0.0.0
+      , hgeometry-point         >= 1.0.0.0
+      , hiraffe                 >= 0.1
       , containers              >= 0.6
       , vector                  >= 0.13
       , lens                    >= 5.2
@@ -77,7 +87,7 @@ common quickcheck-setup
         hspec                   >= 2.9
       , QuickCheck              >= 2.10
       , quickcheck-instances
-      , hgeometry-point
+      , hgeometry
 --------------------------------------------------------------------------------
 -- * Main Library
 
@@ -85,21 +95,27 @@ library
     import:           setup
     hs-source-dirs:   src
     exposed-modules:
-       HGeometry.Point
-       HGeometry.Point.Class
-       HGeometry.Point.PointF
-       HGeometry.Point.EuclideanDistance
-       HGeometry.Point.Orientation
-      -- HGeometry.Point.Affine
+--        HGeometry
 
-    -- reexported-modules:
-    --     HGeometry.Point.Unpacked
-    --   , HGeometry.Point.Class
-    --   , HGeometry.Point.PointF
+        HGeometry.Polygon.Class
+
+--        HGeometry.Polygon.Simple
+--        HGeometry.Polygon.Simple.Class
+--
+--        HGeometry.Polygon.Convex
+--        HGeometry.Polygon.Convex.Class
+
+--        HGeometry.PolyLine
+--        HGeometry.PolyLine.Class
+--
+--        HGeometry.ConvexHull
+--        HGeometry.ConvexHull.GrahamScan
+--
+--        HGeometry.BezierSpline
 
     other-modules:
-        HGeometry.Point.Type
-        HGeometry.Point.Orientation.Degenerate
+--        HGeometry.Polygon.Simple.Implementation
+--        HGeometry.Polygon.Convex.Implementation
 
 
     -- other-extensions:
@@ -114,12 +130,12 @@ library
 --     exposed-modules:
 --       HGeometry.Point.Instances
 --     build-depends:
---          hgeometry-point
+--          hgeometry
 
 --------------------------------------------------------------------------------
 -- * Tests stup
 
---test-suite hgeometry-point-hspec
+--test-suite hgeometry-hspec
 --   import:           setup, quickcheck-setup
 --    build-tool-depends: hspec-discover:hspec-discover
 --   type:             exitcode-stdio-1.0

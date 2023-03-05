@@ -16,7 +16,6 @@ module HGeometry.Point.Class
   , Affine_(..)
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , origin
-  -- , pointFromPoint
   , pointFromList
   , coord
   , xCoord, yCoord, zCoord, wCoord
