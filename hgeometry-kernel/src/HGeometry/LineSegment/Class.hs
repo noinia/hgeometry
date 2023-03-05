@@ -65,7 +65,8 @@ class ( IntervalLike_ lineSegment point
 
   -- | smart constructor that creates a valid segment, i.e. it
   -- validates that the endpoints are disjoint.
-  mkLineSegment              :: Eq (VectorFor point) => point -> point -> Maybe lineSegment
+  mkLineSegment              :: Eq (Vector (Dimension point) (NumType point))
+                             => point -> point -> Maybe lineSegment
   mkLineSegment s t
     | s^.vector /= t^.vector = Just $ uncheckedLineSegment s t
     | otherwise              = Nothing

@@ -18,22 +18,22 @@ module HGeometry.LineSegment
 
 
 import Control.Lens
-import Control.Subcategory.Foldable
-import Control.Subcategory.Functor
+-- import Control.Subcategory.Foldable
+-- import Control.Subcategory.Functor
 import Data.Functor.Apply
 import Data.Kind (Type)
 import Data.Type.Ord
 import GHC.TypeLits
-import HGeometry.Box.Boxable
+-- import HGeometry.Box.Boxable
 import HGeometry.Intersection
 import HGeometry.Interval.Class
-import HGeometry.Interval.Optimal
+import HGeometry.Interval
 import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
-import HGeometry.Transformation
+-- import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
 
@@ -52,43 +52,38 @@ type ClosedLineSegment point = LineSegment (EndPoint Closed) point
 type OpenLineSegment point   = LineSegment (EndPoint Open) point
 
 -- | Construct a line Segment
-pattern LineSegment     :: OptCVector_ 2 (endPoint point)
-                        => endPoint point -> endPoint point -> LineSegment endPoint point
+pattern LineSegment     :: endPoint point -> endPoint point -> LineSegment endPoint point
 pattern LineSegment p q = MkLineSegment (Interval p q)
 {-# COMPLETE LineSegment #-}
 
 -- | Construct a closed interval
-pattern ClosedLineSegment     :: OptCVector_ 2 point
-                              =>  point -> point -> ClosedLineSegment point
+pattern ClosedLineSegment     :: point -> point -> ClosedLineSegment point
 pattern ClosedLineSegment s t = LineSegment (ClosedE s) (ClosedE t)
 {-# COMPLETE ClosedLineSegment #-}
 
 -- | Construct an open ended interval
-pattern OpenLineSegment     :: OptCVector_ 2 point
-                            =>  point -> point -> OpenLineSegment point
+pattern OpenLineSegment     :: point -> point -> OpenLineSegment point
 pattern OpenLineSegment s t = LineSegment (OpenE s) (OpenE t)
 {-# COMPLETE OpenLineSegment #-}
 
 type instance NumType   (LineSegment endPoint point) = NumType point
 type instance Dimension (LineSegment endPoint point) = Dimension point
 
-deriving instance (Eq (endPoint point), OptCVector_ 2 (endPoint point)
+deriving instance (Eq (endPoint point)--, OptCVector_ 2 (endPoint point)
                   ) => Eq (LineSegment endPoint point)
-deriving instance (Ord (endPoint point), OptCVector_ 2 (endPoint point)
+deriving instance (Ord (endPoint point)--, OptCVector_ 2 (endPoint point)
                   ) => Ord (LineSegment endPoint point)
 
 
-instance Constrained (LineSegment endPoint) where
-  type Dom (LineSegment endPoint) r = OptCVector_ 2 (endPoint r)
-instance Foldable endPoint => CFoldable (LineSegment endPoint) where
-  cfoldMap f (LineSegment s t) = foldMap f s <> foldMap f t
+-- instance Constrained (LineSegment endPoint) where
+--   type Dom (LineSegment endPoint) r = OptCVector_ 2 (endPoint r)
+-- instance Foldable endPoint => CFoldable (LineSegment endPoint) where
+--   cfoldMap f (LineSegment s t) = foldMap f s <> foldMap f t
 
-instance Functor endPoint => CFunctor (LineSegment endPoint) where
-  cmap f (LineSegment s t) = LineSegment (fmap f s) (fmap f t)
-instance Traversable endPoint => CTraversable (LineSegment endPoint) where
-  ctraverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
-
-
+-- instance Functor endPoint => CFunctor (LineSegment endPoint) where
+--   cmap f (LineSegment s t) = LineSegment (fmap f s) (fmap f t)
+-- instance Traversable endPoint => CTraversable (LineSegment endPoint) where
+--   ctraverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
 
 
 -- | Lens to get the underlying interval
@@ -97,54 +92,57 @@ _LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' 
 _LineSegmentInterval = iso (\(MkLineSegment i) -> i) MkLineSegment
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => HasStart (LineSegment endPoint point) point where
   start = _LineSegmentInterval.start
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          ) => HasStartPoint (LineSegment endPoint point) (endPoint point) where
   startPoint = _LineSegmentInterval.startPoint
 
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => HasEnd (LineSegment endPoint point) point where
   end = _LineSegmentInterval.end
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          ) => HasEndPoint (LineSegment endPoint point) (endPoint point) where
   endPoint = _LineSegmentInterval.endPoint
 
 type instance EndPointOf (LineSegment endPoint point) = endPoint point
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => IntervalLike_ (LineSegment endPoint point) point where
   mkInterval = LineSegment
 
 instance ( IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          , Point_ point (Dimension point) (NumType point)
          ) => LineSegment_ (LineSegment endPoint point) point where
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
-instance ( OptCVector_ 2 (EndPoint Closed point)
-         , Point_ point (Dimension point) (NumType point)
+instance ( --OptCVector_ 2 (EndPoint Closed point)
+--         ,
+         Point_ point (Dimension point) (NumType point)
          ) => ClosedLineSegment_ (ClosedLineSegment point) point where
 
-instance ( OptCVector_ 2 (EndPoint Open point)
-         , Point_ point (Dimension point) (NumType point)
+instance ( -- OptCVector_ 2 (EndPoint Open point)
+--         ,
+         Point_ point (Dimension point) (NumType point)
          ) => OpenLineSegment_ (OpenLineSegment point) point where
 
-instance ( OptCVector_ 2 (endPoint point)
-         , OptCVector_ 2 (endPoint point')
-         , Traversable1 endPoint
+instance ( -- OptCVector_ 2 (endPoint point)
+--         , OptCVector_ 2 (endPoint point')
+--         ,
+          Traversable1 endPoint
          , Dimension point ~ Dimension point'
          , Point_ point  (Dimension point) (NumType point)
          , Point_ point' (Dimension point) (NumType point')
@@ -162,21 +160,21 @@ instance ( OptCVector_ 2 (endPoint point)
 
 
 
-instance ( OptCVector_ 2 (endPoint point)
-         , Traversable1 endPoint
-         , Point_ point d r
-         , OptVector_ d r, OptMetric_ d r
-         , d ~ Dimension point, r ~  NumType point
-         , Ord r
-         , Ord (VectorFamily' d r) -- dummy; this basically follows from Ord r
-         ) => IsBoxable (LineSegment endPoint point)
+-- instance ( -- OptCVector_ 2 (endPoint point)
+--            Traversable1 endPoint
+--          , Point_ point d r
+--          , Has_ Metric_ d r
+--          , d ~ Dimension point, r ~  NumType point
+--          , Ord r
+--          , Ord (VectorFamily' d r) -- dummy; this basically follows from Ord r
+--          ) => IsBoxable (LineSegment endPoint point)
 
 
 -- deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)
 
 instance {-# OVERLAPPABLE #-}
          ( Show (endPoint point)
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          ) => Show (LineSegment endPoint point) where
   showsPrec k (LineSegment s t) = showParen (k > appPrec) $
                                     showString "LineSegment "
@@ -186,7 +184,7 @@ instance {-# OVERLAPPABLE #-}
 
 instance {-# OVERLAPPING #-}
          ( Show point
-         , OptCVector_ 2 point
+         -- , OptCVector_ 2 point
          ) => Show (ClosedLineSegment point) where
   showsPrec k (ClosedLineSegment s t) = showParen (k > appPrec) $
                                     showString "ClosedLineSegment "
@@ -197,8 +195,8 @@ instance {-# OVERLAPPING #-}
 appPrec :: Int
 appPrec = 10
 
-instance (Read (endPoint point), OptCVector_ 2 (endPoint point))
-         => Read (LineSegment endPoint point) where
+instance ( Read (endPoint point) --, OptCVector_ 2 (endPoint point))
+         ) => Read (LineSegment endPoint point) where
   readPrec = parens (prec appPrec $ do
                           Ident "LineSegment" <- lexP
                           p <- step readPrec
@@ -206,8 +204,8 @@ instance (Read (endPoint point), OptCVector_ 2 (endPoint point))
                           return (LineSegment p q))
 
 instance {-# OVERLAPPING #-}
-         (Read point, OptCVector_ 2 point)
-         => Read (ClosedLineSegment point) where
+         (Read point -- , OptCVector_ 2 point)
+         ) => Read (ClosedLineSegment point) where
   readPrec = parens (prec appPrec $ do
                           Ident "ClosedLineSegment" <- lexP
                           p <- step readPrec
@@ -215,30 +213,29 @@ instance {-# OVERLAPPING #-}
                           return (ClosedLineSegment p q))
 
 
-type instance VectorFamily d (LineSegment endPoint point) =
-  WrapVector d (Interval endPoint point) (LineSegment endPoint point)
+-- type instance VectorFamily d (LineSegment endPoint point) =
+--   WrapVector d (Interval endPoint point) (LineSegment endPoint point)
 
 
 
-instance ( d ~ Dimension point, r ~ NumType point
-         , Point_ point d r
-         , OptVector_ d r
-         , OptMetric_ d r
+instance ( Point_ point d r
+         -- , OptVector_ d r
+         , Has_ Metric_ d r
          , EndPoint_ (endPoint point)
          , IxValue (endPoint point) ~ point
-         , OptCVector_ 2 (endPoint point)
+         -- , OptCVector_ 2 (endPoint point)
          , Num r
          ) => HasSupportingLine (LineSegment endPoint point) where
-  supportingLine seg = lineThrough @(LinePV d r) @(Point d r)
-                                   (seg^.start.to pointFromPoint) (seg^.end.to pointFromPoint)
+  supportingLine seg = lineThrough @(LinePV d r) @point
+                                   (seg^.start) (seg^.end)
 
 instance ( Fractional r, Ord r
          , HasSquaredEuclideanDistance point
          , Point_ point d r
-         , OptCVector_ 2 point
-         , OptCVector_ 2 (EndPoint Closed point)
-         , OptMetric_ d r
-         , OptVector_ (d+1) r
+         -- , OptCVector_ 2 point
+         -- , OptCVector_ 2 (EndPoint Closed point)
+         -- , OptMetric_ d r
+         -- , OptVector_ (d+1) r
          ) => HasSquaredEuclideanDistance (ClosedLineSegment point) where
   pointClosestToWithDistance q seg@(ClosedLineSegment a b)
       | m `intersects` seg = z
@@ -256,34 +253,37 @@ instance ( Fractional r, Ord r
 instance ( OnSegment (LineSegment endPoint point)
          , Point_ point d r
          , Fractional r, Ord r
-         , OptVector_ d r, OptMetric_ d r
+         -- , OptVector_ d r, OptMetric_ d r
          ) => Point d r `HasIntersectionWith` LineSegment endPoint point where
   intersects = onSegment
 
-instance ( OptCVector_ 2 point
-         , Point_ point d r
+instance ( -- OptCVector_ 2 point
+         -- ,
+           Point_ point d r
          , Fractional r
          ) => OnSegment (ClosedLineSegment point) where
-  onSegment (pointFromPoint -> q) seg =
-    case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+  onSegment (view asPoint -> q) seg =
+    case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
       Nothing     -> False
       Just lambda -> 0 <= lambda && lambda <= 1
 
-instance ( OptCVector_ 2 point
-         , Point_ point d r
+instance ( -- OptCVector_ 2 point
+         -- ,
+           Point_ point d r
          , Fractional r
          ) => OnSegment (OpenLineSegment point) where
-  onSegment (pointFromPoint -> q) seg =
-    case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+  onSegment (view asPoint -> q) seg =
+    case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
       Nothing     -> False
       Just lambda -> 0 < lambda && lambda < 1
 
-instance ( OptCVector_ 2 (AnEndPoint point)
-         , Point_ point d r
+instance ( -- OptCVector_ 2 (AnEndPoint point)
+         -- ,
+           Point_ point d r
          , Fractional r
          ) => OnSegment (LineSegment AnEndPoint point) where
-  onSegment (pointFromPoint -> q) seg =
-      case (q .-. (seg^.start)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
+  onSegment (view asPoint -> q) seg =
+      case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
         Nothing     -> False
         Just lambda -> compare' (seg^.startPoint.to endPointType) 0      lambda
                     && compare' (seg^.endPoint.to endPointType)   lambda 1
@@ -293,10 +293,10 @@ instance ( OptCVector_ 2 (AnEndPoint point)
         Closed -> (<=)
 
 
-instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r
-         , Point_ point d r
-         , d > 0
-         ) => IsTransformable (LineSegment endPoint point)
+-- instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r
+--          , Point_ point d r
+--          , d > 0
+--          ) => IsTransformable (LineSegment endPoint point)
 
 
 testseg :: ClosedLineSegment (Point 2 Double)
