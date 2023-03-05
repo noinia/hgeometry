@@ -26,7 +26,6 @@ import HGeometry.Interval
 import HGeometry.Line.LineEQ
 import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 

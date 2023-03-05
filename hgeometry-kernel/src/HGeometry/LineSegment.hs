@@ -75,15 +75,14 @@ deriving instance (Ord (endPoint point)--, OptCVector_ 2 (endPoint point)
                   ) => Ord (LineSegment endPoint point)
 
 
--- instance Constrained (LineSegment endPoint) where
---   type Dom (LineSegment endPoint) r = OptCVector_ 2 (endPoint r)
--- instance Foldable endPoint => CFoldable (LineSegment endPoint) where
---   cfoldMap f (LineSegment s t) = foldMap f s <> foldMap f t
+instance Foldable endPoint => Foldable (LineSegment endPoint) where
+  foldMap f (LineSegment s t) = foldMap f s <> foldMap f t
 
--- instance Functor endPoint => CFunctor (LineSegment endPoint) where
---   cmap f (LineSegment s t) = LineSegment (fmap f s) (fmap f t)
--- instance Traversable endPoint => CTraversable (LineSegment endPoint) where
---   ctraverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
+instance Functor endPoint => Functor (LineSegment endPoint) where
+  fmap f (LineSegment s t) = LineSegment (fmap f s) (fmap f t)
+
+instance Traversable endPoint => Traversable (LineSegment endPoint) where
+  traverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
 
 
 -- | Lens to get the underlying interval
