@@ -17,7 +17,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector.Class
   ( AsVector_(..)
-  , Vector_(..) -- , pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
+  , Vector_(..) --, pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
   , Has_
   , generate, vectorFromList
   , component
@@ -39,6 +39,7 @@ module HGeometry.Vector.Class
   -- , VectorFor
   ) where
 
+-- import           Control.Arrow ((&&&))
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
 import           Control.Monad.State
 import           Data.Coerce
@@ -110,7 +111,6 @@ type Has_ c d r = c (Vector d r) d r
 generate   :: Vector_ vector d r => (Int -> r) -> vector
 generate f = runIdentity $ generateA (Identity . f)
 {-# INLINE generate #-}
-
 
 -- | Convert a list of exactly d elements into a vector with dimension d.
 --
@@ -691,3 +691,39 @@ instance ConstructableVector_ (LinearV4.V4 r) 4 r where
   mkVector = LinearV4.V4
 
 -}
+
+--------------------------------------------------------------------------------
+
+-- -- | A bidirectional pattern synonym for 1 dimensional vectors.
+-- pattern Vector1_   :: Vector_ vector 1 r => r -> vector
+-- pattern Vector1_ x <- (view (component @0) -> x)
+--   where
+--     Vector1_ x = generate (const x)
+-- {-# COMPLETE Vector1_ #-}
+-- {-# INLINE Vector1_ #-}
+
+-- -- | A bidirectional pattern synonym for 2 dimensional vectors.
+-- pattern Vector2_     :: Vector_ vector 2 r => r -> r -> vector
+-- pattern Vector2_ x y <- (view (component @0) &&& view (component @1) -> (x,y))
+--   where
+--     Vector2_ x y = uncheckedVectorFromList [x,y]
+-- {-# COMPLETE Vector2_ #-}
+-- {-# INLINE Vector2_ #-}
+
+
+-- -- | A bidirectional pattern synonym for 3 dimensional vectors.
+-- pattern Vector3_       :: Vector_ vector 3 r => r -> r -> r -> vector
+-- pattern Vector3_ x y z <- (view (component @0) &&& view (component @1) &&& view (component @2)
+--                           -> (x,(y,z)))
+--   where
+--     Vector3_ x y z = uncheckedVectorFromList [x,y,z]
+-- {-# COMPLETE Vector3_ #-}
+
+-- -- | A bidirectional pattern synonym for 4 dimensional vectors.
+-- pattern Vector4_         :: Vector_ vector 4 r => r -> r -> r -> r -> vector
+-- pattern Vector4_ x y z w <- (    view (component @0) &&& view (component @1)
+--                              &&& view (component @2) &&& view (component @3)
+--                             -> (x,(y,(z,w))))
+--   where
+--     Vector4_ x y z w = uncheckedVectorFromList [x,y,z,w]
+-- {-# COMPLETE Vector4_ #-}

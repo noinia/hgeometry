@@ -173,7 +173,6 @@ isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)
 class HyperPlaneFromPoints hyperPlane where
   -- | Construct a hyperplane through the given d points.
   hyperPlaneThrough     :: ( Point_ point d r
-                           , Vector_ vector d point
                            , HyperPlane_ hyperPlane d r
                            , Num r
-                           ) => vector -> hyperPlane
+                           ) => Vector d point -> hyperPlane

@@ -6,7 +6,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Helper types for implementin line intersections
+-- Helper types for implementing line intersections
 --
 --------------------------------------------------------------------------------
 module HGeometry.Line.Intersection

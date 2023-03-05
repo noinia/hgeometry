@@ -70,6 +70,7 @@ common setup
       , LambdaCase
       , ViewPatterns
       , FunctionalDependencies
+      , QuantifiedConstraints
 
 common quickcheck-setup
     ghc-options:
@@ -97,8 +98,8 @@ library
     --     HGeometry.Matrix.Class
 
     --     HGeometry.Line
-    --     HGeometry.Line.Class
-    --     HGeometry.Line.PointAndVector
+        HGeometry.Line.Class
+        HGeometry.Line.PointAndVector
     --     HGeometry.Line.LineEQ
 
     --     HGeometry.HyperPlane
@@ -125,7 +126,7 @@ library
     --     HGeometry.LineSegment.Class
     --     HGeometry.LineSegment.Optimal
 
-    --     HGeometry.Intersection
+        HGeometry.Intersection
 
     --     HGeometry.Triangle
     --     HGeometry.Triangle.Class
@@ -141,6 +142,7 @@ library
     --     HGeometry.Viewport
 
     other-modules:
+      HGeometry.Line.Intersection
 
     -- other-extensions:
 

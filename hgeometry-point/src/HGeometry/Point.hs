@@ -20,6 +20,7 @@ module HGeometry.Point
   -- , {- | construct a 3-dimensional point -} pattern Point3
   -- , {- | construct a 4-dimensional point -} pattern Point4
   , Point_(..) -- , pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , asPoint
   , origin, vector
   -- , pointFromPoint
   , pointFromList
@@ -54,7 +55,7 @@ module HGeometry.Point
   , HasPoints(..), HasPoints'
   ) where
 
-import Control.Lens ((^.))
+import Control.Lens (Lens', Iso', (^.), coerced)
 import Data.Type.Ord
 import GHC.TypeLits
 -- import HGeometry.HyperPlane.Class
@@ -66,6 +67,8 @@ import HGeometry.Point.Orientation.Degenerate
 -- import HGeometry.Point.Quadrants
 import HGeometry.Vector
 import HGeometry.Point.PointF
+import Data.Coerce
+import HGeometry.Properties (NumType)
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -73,7 +76,14 @@ import HGeometry.Point.PointF
 
 --------------------------------------------------------------------------------
 
+-- | d-dimensional points
 type Point d r = PointF (Vector d r)
+
+-- | Convert a generic point into a Point d r, dropping any additional
+-- information we may now about it.
+asPoint :: forall point d r. Point_ point d r => Lens' point (Point d r)
+asPoint = vector.(coerced :: Iso' (Vector d r) (Point d r))
+{-# INLINE asPoint #-}
 
 --------------------------------------------------------------------------------
 -- * Convenience functions to construct 1, 2 and 3 dimensional points

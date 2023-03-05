@@ -53,12 +53,12 @@ type Line2_ line r = (Line_ line 2 r, HyperPlane_ line 2 r)
 
 -- | Vertical line with a given X-coordinate.
 verticalLine   :: forall r line.
-                  ( Line_ line 2 r, Num r, OptCVector_ 2 r, OptMetric_ 2 r)
+                  ( Line_ line 2 r, Num r)
                => r -> line
 verticalLine x = fromPointAndVec (Point $ Vector2 x 0) (Vector2 0 1)
 
 -- | Horizontal line with a given Y-coordinate.
-horizontalLine   :: forall r line. (Line_ line 2 r, Num r, OptCVector_ 2 r, OptMetric_ 2 r)
+horizontalLine   :: forall r line. (Line_ line 2 r, Num r)
                  => r -> line
 horizontalLine y = fromPointAndVec (Point $ Vector2 0 y) (Vector2 1 0)
 

@@ -38,12 +38,19 @@ import qualified Data.Vector.Unboxed as U
 
 -- | A Point wraps a vector
 newtype PointF v = Point { toVec :: v }
-                 deriving stock   (Generic, Functor, Foldable, Traversable)
+                 deriving stock   (Generic)
                  deriving newtype (Eq, Ord, Random, NFData, Bounded, Enum)
+-- don't derive functor, or so here. since that will be confusing.
 
 type instance Dimension (PointF v) = Dimension v
 type instance NumType   (PointF v) = IxValue v
 type instance IxValue   (PointF v) = IxValue v
+
+-- deriving newtype instance Functor v => Functor (PointF v)
+-- deriving newtype instance Foldable v => Foldable (PointF v)
+-- deriving newtype instance Traversable v => Traversable (PointF v)
+
+-- Functor, Foldable, Traversable
 
 _PointF :: Iso (PointF v) (PointF v') v v'
 _PointF = iso toVec Point
