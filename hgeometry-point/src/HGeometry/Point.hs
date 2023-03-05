@@ -19,7 +19,7 @@ module HGeometry.Point
   -- , {- | construct a 2-dimensional point -} pattern Point2
   -- , {- | construct a 3-dimensional point -} pattern Point3
   -- , {- | construct a 4-dimensional point -} pattern Point4
-  , Point_(..) -- , pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , asPoint
   , origin, vector
   -- , pointFromPoint

@@ -26,7 +26,6 @@ module HGeometry.Point.Class
   , HasPoints(..), HasPoints'
   ) where
 
-import           Control.Arrow ((&&&))
 import           Control.Lens
 -- import           HGeometry.Ext
 -- import           Data.Function (on)
@@ -197,16 +196,16 @@ origin = fromVector zero
 pattern Point1_   :: Point_ point 1 r => r -> point
 pattern Point1_ x <- (view xCoord -> x)
   where
-    Point1_ x = fromVector (generate $ const x)
+    Point1_ x = fromVector $ Vector1 x
 {-# INLINE Point1_ #-}
 {-# COMPLETE Point1_ #-}
 
 -- | A bidirectional pattern synonym for 2 dimensional points.
 pattern Point2_     :: ( Point_ point 2 r
                        ) => r -> r -> point
-pattern Point2_ x y <- (view xCoord &&& view yCoord -> (x,y))
- -- where
- --   Point2_ x y = fromVector . view _Vector $ V2 x y
+pattern Point2_ x y <- (view vector -> Vector2 x y)
+ where
+   Point2_ x y = fromVector $ Vector2 x y
 {-# INLINE Point2_ #-}
 {-# COMPLETE Point2_ #-}
 
@@ -214,9 +213,9 @@ pattern Point2_ x y <- (view xCoord &&& view yCoord -> (x,y))
 pattern Point3_       :: ( Point_ point 3 r
                          -- , ConstructableVector_ (Vector.VectorFamily 3 r) 3 r
                          ) => r -> r -> r -> point
-pattern Point3_ x y z <- (view xCoord &&& view yCoord &&& view zCoord -> (x,(y,z)))
-  -- where
-  --   Point3_ x y z = fromVector . view _Vector $ V3 x y z
+pattern Point3_ x y z <- (view vector -> Vector3 x y z)
+  where
+    Point3_ x y z = fromVector $ Vector3 x y z
 {-# INLINE Point3_ #-}
 {-# COMPLETE Point3_ #-}
 
@@ -224,10 +223,9 @@ pattern Point3_ x y z <- (view xCoord &&& view yCoord &&& view zCoord -> (x,(y,z
 pattern Point4_         :: ( Point_ point 4 r
                            -- , ConstructableVector_ (Vector.VectorFamily 4 r) 4 r
                            ) => r -> r -> r -> r -> point
-pattern Point4_ x y z w <- (view xCoord &&& view yCoord &&& view zCoord &&& view wCoord
-                           -> (x,(y,(z,w))))
-  -- where
-  --   Point4_ x y z w = fromVector . view _Vector $ V4 x y z w
+pattern Point4_ x y z w <- (view vector -> Vector4 x y z w)
+  where
+    Point4_ x y z w = fromVector $ Vector4 x y z w
 {-# INLINE Point4_ #-}
 {-# COMPLETE Point4_ #-}
 

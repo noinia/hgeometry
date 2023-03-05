@@ -34,7 +34,7 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Properties
-import           HGeometry.Transformation
+-- import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
@@ -88,14 +88,13 @@ instance ( VertexContainer f point
          ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
   allPoints = _SimplePolygonF . traversed1
 
-instance ( VertexContainer f point
-         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
-         , Point_ point 2 r
-         ) => IsTransformable (SimplePolygonF f point)
+-- instance ( VertexContainer f point
+--          , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
+--          , Point_ point 2 r
+--          ) => IsTransformable (SimplePolygonF f point)
 
 instance ( VertexContainer f point
          , Point_ point 2 r
-         , OptVector_ 2 r, OptMetric_ 2 r, Ord (VectorFamily' 2 r)
          ) => IsBoxable (SimplePolygonF f point)
 
 instance ( VertexContainer f point
