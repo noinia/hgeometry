@@ -28,6 +28,11 @@ jobs:
     strategy:
       matrix:
         include:
+          - compiler: ghc-9.4.4
+            compilerKind: ghc
+            compilerVersion: 9.4.4
+            setup-method: ghcup
+            allow-failure: false
           - compiler: ghc-9.2.5
             compilerKind: ghc
             compilerVersion: 9.2.5
@@ -126,6 +131,8 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-combinatorial" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-vector" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-point" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-kernel" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry" >> cabal.project
           cat cabal.project
       - name: sdist
         run: |
@@ -143,22 +150,38 @@ jobs:
           echo "PKGDIR_hgeometry_vector=${PKGDIR_hgeometry_vector}" >> "$GITHUB_ENV"
           PKGDIR_hgeometry_point="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-point-[0-9.]*')"
           echo "PKGDIR_hgeometry_point=${PKGDIR_hgeometry_point}" >> "$GITHUB_ENV"
+          PKGDIR_hgeometry_kernel="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-kernel-[0-9.]*')"
+          echo "PKGDIR_hgeometry_kernel=${PKGDIR_hgeometry_kernel}" >> "$GITHUB_ENV"
+          PKGDIR_hgeometry="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-[0-9.]*')"
+          echo "PKGDIR_hgeometry=${PKGDIR_hgeometry}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
           echo "packages: ${PKGDIR_hgeometry_combinatorial}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry_vector}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry_point}" >> cabal.project
+          echo "packages: ${PKGDIR_hgeometry_kernel}" >> cabal.project
+          echo "packages: ${PKGDIR_hgeometry}" >> cabal.project
           echo "package hgeometry-combinatorial" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry-vector" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry-point" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package hgeometry-kernel" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package hgeometry" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
           allow-newer: vector-circular:vector
+          allow-newer: base
+          allow-newer: template-haskell
+
+          source-repository-package
+            type:     git
+            location: https://github.com/noinia/hiraffe
           EOF
-          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry-combinatorial|hgeometry-point|hgeometry-vector)$/; }' >> cabal.project.local
+          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry|hgeometry-combinatorial|hgeometry-kernel|hgeometry-point|hgeometry-vector)$/; }' >> cabal.project.local
           cat cabal.project
           cat cabal.project.local
       - name: dump install plan
@@ -191,6 +214,10 @@ jobs:
           cd ${PKGDIR_hgeometry_vector} || false
           ${CABAL} -vnormal check
           cd ${PKGDIR_hgeometry_point} || false
+          ${CABAL} -vnormal check
+          cd ${PKGDIR_hgeometry_kernel} || false
+          ${CABAL} -vnormal check
+          cd ${PKGDIR_hgeometry} || false
           ${CABAL} -vnormal check
       - name: haddock
         run: |
