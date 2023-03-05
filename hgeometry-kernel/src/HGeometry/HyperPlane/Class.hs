@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
@@ -35,6 +36,8 @@ import HGeometry.Vector
 -- | A class to represent hyperplanes in d-dimensional space.
 class ( NumType hyperPlane ~ r
       , Dimension hyperPlane ~ d
+      , Has_ Vector_ d r
+      , Has_ Vector_ (1+d) r
       -- , NumType (EquationFor hyperPlane) ~ r
       ) => HyperPlane_ hyperPlane d r | hyperPlane -> d
                                       , hyperPlane -> r where
@@ -64,6 +67,7 @@ class ( NumType hyperPlane ~ r
                          => point -> Vector d r -> hyperPlane
   default fromPointAndNormal :: ( Point_ point d r, Num r
                                 , ConstructableHyperPlane_ hyperPlane d r
+                                , Has_ Metric_ d r
                                 )
                              => point -> Vector d r -> hyperPlane
   fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
@@ -84,7 +88,7 @@ class ( NumType hyperPlane ~ r
   -- | Test if a point lies on a hyperplane.
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
   default onHyperPlane :: ( Point_ point d r, Eq r, Num r
-                          , KnownNat d
+                          , Has_ Metric_ d r
                           , d < d+1
                           ) => point -> hyperPlane -> Bool
   q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
@@ -95,7 +99,7 @@ class ( NumType hyperPlane ~ r
   -- | Test if a point lies on a hyperplane.
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
   default onSideTest :: ( Point_ point d r, Ord r, Num r
-                        , KnownNat d
+                        , Has_ Metric_ d r
                         , d < d+1 -- silly constraints
                         ) => point -> hyperPlane -> Ordering
   q `onSideTest` h = (a0 + (a `dot` (q^.vector))) `compare` 0
@@ -131,8 +135,8 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   default evalAt :: ( Num r
                     , 1 <= d
                     , Point_ point (d-1) r
-                    -- , OptMetric_ d r
-                    -- , OptVector_ ((d-1)+1) r
+                    , 1 + (d-1) ~ d -- silly silly agian :(
+                    , Has_ Metric_ d r
                     ) => point -> hyperPlane -> r
   evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
   {-# INLINE evalAt #-}
@@ -160,6 +164,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 -- | Test if two hyperplanes are parallel.
 isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       , HyperPlane_ hyperPlane' d r
+                      , Has_ Additive_ d r
                       , Num r, Eq r
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)

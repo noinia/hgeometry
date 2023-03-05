@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
@@ -17,6 +18,7 @@
 module HGeometry.Vector.Class
   ( AsVector_(..)
   , Vector_(..) -- , pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
+  , Has_
   , generate, vectorFromList
   , component
   , xComponent, yComponent, zComponent, wComponent
@@ -25,11 +27,10 @@ module HGeometry.Vector.Class
   -- , ConstructVector, ConstructableVector_(..)
 
   -- , vectorFromVector
-  -- , prefix, suffix
-  -- , cons, snoc
-  -- , uncons, unsnoc
-  -- , vZipWith
   , prefix, suffix
+  , cons, snoc
+  , uncons, unsnoc
+  -- , vZipWith
 
   , Additive_(..), zero, liftI2, lerp, (^+^), (^-^)
   , negated, (*^), (^*), (^/), sumV, basis, unit
@@ -38,7 +39,7 @@ module HGeometry.Vector.Class
   -- , VectorFor
   ) where
 
-import           Control.Lens
+import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
 import           Control.Monad.State
 import           Data.Coerce
 import qualified Data.Foldable as F
@@ -99,6 +100,9 @@ class ( HasComponents vector vector
                           => Int -> IndexedTraversal' Int vector r
   component' = iix
   {-# INLINE component' #-}
+
+-- | Specifies that we have an appropriate constraint for the vector implementation
+type Has_ c d r = c (Vector d r) d r
 
 ----------------------------------------
 
@@ -558,6 +562,51 @@ instance ( Vector_ (Vector d r) d r
 
 --------------------------------------------------------------------------------
 
+-- | Add an element to the front of the vector
+--
+-- >>> cons 5 myVec2 :: Vector 3 Int
+-- Vector3 5 10 20
+cons     :: forall vector' vector d r.
+            (Vector_ vector d r, Vector_ vector' (d+1) r)
+         => r -> vector -> vector'
+cons x v = generate $ \case
+                        0 -> x
+                        i -> v^?!component' (i-1)
+{-# INLINE cons #-}
+
+-- | Add an element to the back of the vector.
+--
+-- >>> snoc myVec2 5 :: Vector 3 Int
+-- Vector3 10 20 5
+snoc     :: forall vector' vector d r.
+            ( Vector_ vector d r, Vector_ vector' (d+1) r)
+         => vector -> r -> vector'
+snoc v x = let d = fromIntegral . natVal $ Proxy @d
+           in generate $ \i -> if i == d then x else v^?!component' i
+{-# INLINE snoc #-}
+
+-- | Extract the first element from the vector
+--
+-- >>> uncons myVec3 :: (Int, Vector 2 Int)
+-- (1,Vector2 2 3)
+uncons   :: forall vector' vector d r.
+            ( Vector_ vector (d+1) r, Vector_ vector' d r
+            , 0 <= (d+1)-1, d <= Dimension vector -- these ones are silly
+            ) => vector -> (r, vector')
+uncons v = ( v^.component @0, suffix v)
+{-# INLINE uncons #-}
+
+-- | Extract the last element from the vector
+--
+-- >>> unsnoc myVec3 :: (Vector 2 Int, Int)
+-- (Vector2 1 2, 3)
+unsnoc   :: forall vector' vector d r.
+            (Vector_ vector (d+1) r, Vector_ vector' d r
+            , d <= d+1-1, d <= Dimension vector -- these are silly
+            ) => vector -> (vector',r)
+unsnoc v = ( prefix v, v^.component @d )
+{-# INLINE unsnoc #-}
+
 {-
 -- | Type family that expresses that we can construct a d-dimensional
 -- vector from an arity d function.
@@ -574,69 +623,6 @@ class Vector_ vector d r => ConstructableVector_ vector d r where
   -- | Construct a vector from a d-arity function.
   --
   mkVector :: ConstructVector vector d
-
-
-
---------------------------------------------------------------------------------
-
--- | Take a prefix of length i of the vector
---
--- >>> prefix myVec3 :: Vector 2 Int
--- Vector2 1 2
-prefix :: forall i d vector vector' r. ( i <= d, KnownNat i
-                                       , Vector_ vector d r, Vector_ vector' i r)
-       => vector -> vector'
-prefix = uncheckedVectorFromList . List.genericTake (natVal $ Proxy @i) . toListOf components
-
--- | Take a suffix of length i  of the vector
---
--- >>> suffix myVec3 :: Vector 2 Int
--- Vector2 2 3
-suffix :: forall i d vector vector' r. ( i <= d, KnownNat i, KnownNat d
-                                       , Vector_ vector d r, Vector_ vector' i r)
-       => vector -> vector'
-suffix = uncheckedVectorFromList . List.genericDrop (natVal $ Proxy @(d-i)) . toListOf components
-
-
--- | Add an element to the front of the vector
---
--- >>> cons 5 myVec2 :: Vector 3 Int
--- Vector3 5 10 20
-cons     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
-         => r -> vector -> vector'
-cons x v = uncheckedVectorFromList $ x : (v^..components)
-
--- | Add an element to the back of the vector.
---
--- >>> snoc myVec2 5 :: Vector 3 Int
--- Vector3 10 20 5
-snoc     :: (Vector_ vector d r, Vector_ vector' (d+1) r)
-         => vector -> r -> vector'
-snoc v x = uncheckedVectorFromList $ (v^..components) <> [x]
-
---------------------------------------------------------------------------------
-
--- | Extract the first element from the vector
---
--- >>> uncons myVec3 :: (Int, Vector 2 Int)
--- (1,Vector2 2 3)
-uncons   :: forall vector vector' d r.
-            ( Vector_ vector (d+1) r, Vector_ vector' d r
-            , 0 < d+1 -- this one is silly
-            , KnownNat d
-            ) => vector -> (r, vector')
-uncons v = ( v^.component @0, suffix v)
-
--- | Extract the last element from the vector
---
--- >>> unsnoc myVec3 :: (Vector 2 Int, Int)
--- (Vector2 1 2, 3)
-unsnoc   :: forall vector vector' d r.
-            (Vector_ vector (d+1) r, Vector_ vector' d r
-            , d < d+1 -- these are silly
-            , KnownNat d
-            ) => vector -> (vector',r)
-unsnoc v = ( prefix v, v^.component @d )
 
 
 --------------------------------------------------------------------------------
