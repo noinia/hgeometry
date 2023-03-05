@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point.Class
   ( HasVector(..)
+  , HasCoordinates(..)
   , Affine_(..)
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
   , origin
@@ -64,9 +65,34 @@ instance ( Vector_ (v r) d r
   vector = Linear._Point._Vector
   {-# INLINE vector #-}
 
+class ( Has_ Vector_ (Dimension point) (NumType point)
+      , HasVector point
+      )
+      => HasCoordinates point where
+  -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
+  --
+  -- >>> imapMOf_ coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
+  -- (1,10)
+  -- (2,20)
+  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20) :: IO (Point 2 ())
+  -- (1,10)
+  -- (2,20)
+  -- Point2 () ()
+  -- >>> over coordinates (+1) $ Point2 10 20 :: Point 2 Int
+  -- Point2 11 21
+  coordinates :: IndexedTraversal1 Int point point (NumType point) (NumType point)
+  coordinates = vector  . reindexed (+1) components
+    -- where
+      -- tr :: IndexedTraversal Int (Vector d ) (VectorFor point') r s
+      -- tr =
+  {-# INLINE coordinates #-}
+
+
+
 -- | Affine space; essentially the same as Linear.Affine, but for
 -- points of kind Type rather than (Type -> Type).
 class ( Additive_ (Vector d r) d r
+      , HasCoordinates point
       , d ~ Dimension point
       , r ~ NumType point
       ) => Affine_ point d r | point -> d
@@ -99,6 +125,12 @@ class ( Additive_ (Vector d r) d r
 instance ( d ~ Dimension (v r)
          , r ~ IxValue (v r)
          , Vector_ (v r) d r
+         , Has_ Vector_ d r
+         ) => HasCoordinates (Linear.Point v r)
+
+instance ( d ~ Dimension (v r)
+         , r ~ IxValue (v r)
+         , Vector_ (v r) d r
          , Additive_ (Vector d r) d r
          ) => Affine_ (Linear.Point v r) d r where
 
@@ -115,24 +147,6 @@ class ( Affine_ point d r
   -- >>> fromVector (Vector4 1 2 3 4) :: Point 4 Int
   -- Point4 1 2 3 4
   fromVector :: Vector d r -> point
-
-  -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
-  --
-  -- >>> imapMOf_ coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
-  -- (1,10)
-  -- (2,20)
-  -- >>> itraverseOf coordinates (\i x -> print (i,x)) (Point2 10 20) :: IO (Point 2 ())
-  -- (1,10)
-  -- (2,20)
-  -- Point2 () ()
-  -- >>> over coordinates (+1) $ Point2 10 20 :: Point 2 Int
-  -- Point2 11 21
-  coordinates :: IndexedTraversal1 Int point point r r
-  coordinates = vector  . reindexed (+1) components
-    -- where
-      -- tr :: IndexedTraversal Int (Vector d ) (VectorFor point') r s
-      -- tr =
-  {-# INLINE coordinates #-}
 
   -- | Get the coordinate in a given dimension. This operation is unsafe in the
   -- sense that no bounds are checked. Consider using `coord` instead.

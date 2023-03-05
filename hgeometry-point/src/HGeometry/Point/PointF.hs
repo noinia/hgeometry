@@ -87,6 +87,10 @@ instance Vector_ vector d r => HasVector (PointF vector) where
   vector = _PointF._Vector
   {-# INLINE vector #-}
 
+instance ( Has_ Vector_ d r
+         , Vector_ vector d r
+         ) => HasCoordinates (PointF vector)
+
 instance ( Additive_ vector       d r
          , Additive_ (Vector d r) d r
          ) => Affine_ (PointF vector) d r where

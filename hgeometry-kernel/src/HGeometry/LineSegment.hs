@@ -216,23 +216,18 @@ instance {-# OVERLAPPING #-}
 
 
 instance ( Point_ point d r
-         -- , OptVector_ d r
          , Has_ Metric_ d r
          , EndPoint_ (endPoint point)
          , IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          , Num r
          ) => HasSupportingLine (LineSegment endPoint point) where
   supportingLine seg = lineThrough @(LinePV d r) @point
                                    (seg^.start) (seg^.end)
+  {-# INLINE supportingLine #-}
 
 instance ( Fractional r, Ord r
          , HasSquaredEuclideanDistance point
          , Point_ point d r
-         -- , OptCVector_ 2 point
-         -- , OptCVector_ 2 (EndPoint Closed point)
-         -- , OptMetric_ d r
-         -- , OptVector_ (d+1) r
          ) => HasSquaredEuclideanDistance (ClosedLineSegment point) where
   pointClosestToWithDistance q seg@(ClosedLineSegment a b)
       | m `intersects` seg = z
