@@ -18,6 +18,7 @@ module HGeometry.Properties(
   ) where
 
 import Data.Kind (Type)
+import Data.List.NonEmpty (NonEmpty)
 -- import HGeometry.Intersection
 -- import Data.Range
 import GHC.TypeNats
@@ -36,5 +37,9 @@ type family NumType t :: Type
 type instance NumType   (core :+ extra) = NumType core
 type instance Dimension (core :+ extra) = Dimension core
 
-type instance NumType [t] = NumType t
+type instance NumType   [t] = NumType t
+type instance Dimension [t] = Dimension t
 -- type instance NumType (Range a) = a
+
+type instance Dimension (NonEmpty g) = Dimension g
+type instance NumType   (NonEmpty g) = NumType g

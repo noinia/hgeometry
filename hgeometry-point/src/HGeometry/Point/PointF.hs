@@ -33,6 +33,7 @@ import           Text.Read (Read (..), readListPrecDefault)
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Generic.Mutable as GM
 import qualified Data.Vector.Unboxed as U
+-- import           Data.Zip
 
 --------------------------------------------------------------------------------
 

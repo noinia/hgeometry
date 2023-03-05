@@ -22,6 +22,8 @@ import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.Proxy
 import           Data.Semigroup.Foldable
+import           Data.These
+import           Data.Zip
 import           GHC.Generics (Generic)
 import           GHC.TypeNats
 import           HGeometry.Properties
@@ -29,6 +31,7 @@ import qualified Linear.V1 as Linear
 import qualified Linear.V2 as Linear
 import qualified Linear.V3 as Linear
 import qualified Linear.V4 as Linear
+import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
@@ -55,6 +58,7 @@ class HasComponents vector vector' where
 
 newtype instance Vector 1 r = MkVector1 (Linear.V1 r)
   deriving newtype (Eq,Ord,NFData,Foldable1)
+  deriving (Semialign,Zip) via Identity
   deriving stock (Generic,Functor,Foldable,Traversable)
 
 -- | Construct a vector1
@@ -84,6 +88,7 @@ instance Ixed (Vector 1 r) where
 instance HasComponents (Vector 1 r) (Vector 1 s) where
   components = asV1 . components
   {-# INLINE components #-}
+
 
 --------------------------------------------------------------------------------
 
@@ -119,6 +124,13 @@ instance Ixed (Vector 2 r) where
 instance HasComponents (Vector 2 r) (Vector 2 s) where
   components = asV2 . components
   {-# INLINE components #-}
+
+instance Semialign (Vector 2) where
+  align = zipWith These
+  {-# INLINE align #-}
+instance Zip (Vector 2) where
+  zipWith f (Vector2 x y) (Vector2 x' y') = Vector2 (f x x') (f y y')
+  {-# INLINE zipWith #-}
 
 --------------------------------------------------------------------------------
 
@@ -156,6 +168,13 @@ instance HasComponents (Vector 3 r) (Vector 3 s) where
   components = asV3 . components
   {-# INLINE components #-}
 
+instance Semialign (Vector 3) where
+  align = zipWith These
+  {-# INLINE align #-}
+instance Zip (Vector 3) where
+  zipWith f (Vector3 x y z) (Vector3 x' y' z') = Vector3 (f x x') (f y y') (f z z')
+  {-# INLINE zipWith #-}
+
 --------------------------------------------------------------------------------
 
 newtype instance Vector 4 r = MkVector4 (Linear.V4 r)
@@ -192,6 +211,13 @@ instance Ixed (Vector 4 r) where
 instance HasComponents (Vector 4 r) (Vector 4 s) where
   components = asV4 . components
   {-# INLINE components #-}
+
+instance Semialign (Vector 4) where
+  align = zipWith These
+  {-# INLINE align #-}
+instance Zip (Vector 4) where
+  zipWith f (Vector4 x y z w) (Vector4 x' y' z' w') = Vector4 (f x x') (f y y') (f z z') (f w w')
+  {-# INLINE zipWith #-}
 
 --------------------------------------------------------------------------------
 -- * Linear Instances

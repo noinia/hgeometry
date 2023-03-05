@@ -24,7 +24,7 @@ import Data.Functor.Apply
 import Data.Kind (Type)
 import Data.Type.Ord
 import GHC.TypeLits
--- import HGeometry.Box.Boxable
+import HGeometry.Box.Boxable
 import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Interval
@@ -160,14 +160,12 @@ instance ( -- OptCVector_ 2 (endPoint point)
 
 
 
--- instance ( -- OptCVector_ 2 (endPoint point)
---            Traversable1 endPoint
---          , Point_ point d r
---          , Has_ Metric_ d r
---          , d ~ Dimension point, r ~  NumType point
---          , Ord r
---          , Ord (VectorFamily' d r) -- dummy; this basically follows from Ord r
---          ) => IsBoxable (LineSegment endPoint point)
+instance ( Traversable1 endPoint
+         , Point_ point d r
+         , d ~ Dimension point, r ~  NumType point
+         , Ord r
+         , Ord (Vector d r)
+         ) => IsBoxable (LineSegment endPoint point)
 
 
 -- deriving instance (Show (Interval endPoint point)) => Show (LineSegment endPoint point)

@@ -32,10 +32,9 @@ class Line_ line d r | line -> d
                      , line -> r where
   -- | Constructs a line through a point and a vector
   fromPointAndVec ::  ( Point_ point d r
-                      , Vector_ vector d r
                       , Line_ line d r
                       , Num r
-                      ) => point -> vector -> line
+                      ) => point -> Vector d r -> line
 
 -- | Construct a line through two points.
 --

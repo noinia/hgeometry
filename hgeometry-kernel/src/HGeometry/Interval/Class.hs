@@ -128,6 +128,7 @@ pattern ClosedInterval_ l u <- (startAndEnd -> (l,u))
   where
     ClosedInterval_ l u = mkClosedInterval l u
 {-# COMPLETE ClosedInterval_ #-}
+{-# INLINE ClosedInterval_ #-}
 
 -- | Clamps a value to an interval. I.e. if the value lies outside the range we
 -- report the closest value "in the range".

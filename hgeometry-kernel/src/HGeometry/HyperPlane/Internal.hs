@@ -25,8 +25,6 @@ newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
 
 type instance NumType   (HyperPlane d r) = r
 type instance Dimension (HyperPlane d r) = d
-type instance VectorFor (HyperPlane d r) = Vector d r
-type instance VectorFamily n (HyperPlane d r) = WrapVector n (Vector (d+1) r) (HyperPlane d r)
 
 --------------------------------------------------------------------------------
 
@@ -36,9 +34,7 @@ type instance VectorFamily n (HyperPlane d r) = WrapVector n (Vector (d+1) r) (H
 -- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
 -- these are satisfied by default, it is just that the typechecker does not realize that.
 type MkHyperPlaneConstraints d r =
-  ( d < d+1, KnownNat d
-  , OptVector_ (d+1) r
-  , OptVector_ d     r
+  ( d < d+1, KnownNat d, Has_ Metric_ d r, Has_ Vector_ d r, Has_ Vector_ (d+1) r
   )
 
 instance ( MkHyperPlaneConstraints d r
@@ -49,9 +45,9 @@ instance ( MkHyperPlaneConstraints d r
          ) => ConstructableHyperPlane_ (HyperPlane d r) d r where
   hyperPlaneFromEquation = HyperPlane
 
-instance (OptCVector_ 3 r, Eq r
+instance ( Eq r
          ) => HyperPlaneFromPoints (HyperPlane 2 r) where
-  hyperPlaneThrough (Vector2_ (Point2_ px py) (Point2_ qx qy))
+  hyperPlaneThrough (Vector2 (Point2_ px py) (Point2_ qx qy))
     | px /= qx  = let a = qy - py
                       b = px - qx
                       c = (qx-px)*py - px*(qy-py)

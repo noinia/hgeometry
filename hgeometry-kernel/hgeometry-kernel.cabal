@@ -48,6 +48,7 @@ common setup
       , witherable              >= 0.4
       , linear                  >= 1.21
       , data-clist              >= 0.2
+      , semialign               ^>= 1.2
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -100,17 +101,16 @@ library
     --     HGeometry.Line
         HGeometry.Line.Class
         HGeometry.Line.PointAndVector
-    --     HGeometry.Line.LineEQ
+        HGeometry.Line.LineEQ
 
-    --     HGeometry.HyperPlane
+        HGeometry.HyperPlane
         HGeometry.HyperPlane.Class
-    --     HGeometry.HyperPlane.NonVertical
+        HGeometry.HyperPlane.NonVertical
 
     --     HGeometry.HalfSpace
 
-    --     HGeometry.Box
-    --     HGeometry.Box.Class
-    --     HGeometry.Box.Optimal
+        HGeometry.Box
+        HGeometry.Box.Class
     -- --
     -- --    HGeometry.SoS.Point
     -- --    HGeometry.SoS.Orientation
@@ -119,12 +119,11 @@ library
         HGeometry.Interval
         HGeometry.Interval.Class
         HGeometry.Interval.EndPoint
-    -- --
+
         HGeometry.Boundary
 
         HGeometry.LineSegment
         HGeometry.LineSegment.Class
-    --     HGeometry.LineSegment.Optimal
 
         HGeometry.Intersection
 
@@ -143,6 +142,9 @@ library
 
     other-modules:
       HGeometry.Line.Intersection
+      HGeometry.Box.Internal
+      HGeometry.Box.Boxable
+      HGeometry.HyperPlane.Internal
 
     -- other-extensions:
 

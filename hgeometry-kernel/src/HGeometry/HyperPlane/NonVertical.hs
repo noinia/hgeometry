@@ -31,16 +31,12 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
-type instance VectorFor (NonVerticalHyperPlane d r) = Vector d r
-type instance VectorFamily n (NonVerticalHyperPlane d r) =
-  WrapVector n (Vector d r) (NonVerticalHyperPlane d r)
 
-deriving instance Eq  (VectorFamily' d r) => Eq (NonVerticalHyperPlane d r)
-deriving instance Ord (VectorFamily' d r) => Ord (NonVerticalHyperPlane d r)
+deriving instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
+deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 
 
 instance ( MkHyperPlaneConstraints d r
-         , OptMetric_ d r
          , 1 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
@@ -50,7 +46,6 @@ instance ( MkHyperPlaneConstraints d r
 
 
 instance ( MkHyperPlaneConstraints d r
-         , OptMetric_ d r
          , Fractional r
          , 1 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
@@ -64,8 +59,7 @@ instance ( MkHyperPlaneConstraints d r
 
 instance ( MkHyperPlaneConstraints d r
          , Num r
-         , OptVector_ ((d-1)+1) r
-         , OptMetric_ d r
+         , 1 + (d-1) ~ d
          , 1 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
   hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
@@ -74,6 +68,5 @@ instance ( MkHyperPlaneConstraints d r
 -- * Specific 3D Functions
 
 -- | Constructs a Plane in R^3 for the equation z = ax + by + c
-pattern Plane       :: ConstructableVector_ (VectorFamily 3 r) 3 r
-                    => r -> r -> r -> NonVerticalHyperPlane 3 r
+pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
