@@ -86,6 +86,9 @@ common quickcheck-setup
       , QuickCheck              >= 2.10
       , quickcheck-instances
       , hgeometry-kernel
+      , hgeometry-vector:quickcheck
+      , hgeometry-point:quickcheck
+
 --------------------------------------------------------------------------------
 -- * Main Library
 
@@ -150,14 +153,14 @@ library
 --------------------------------------------------------------------------------
 -- * Helper Libraries
 
--- library quickcheck
---     import: setup, quickcheck-setup
---     visibility: public
---     hs-source-dirs: src-quickcheck
---     exposed-modules:
---       HGeometry.Point.Instances
---     build-depends:
---          hgeometry
+library quickcheck
+    import: setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Kernel.Instances
+    build-depends:
+         hgeometry-kernel
 
 --------------------------------------------------------------------------------
 -- * Tests stup
