@@ -132,15 +132,13 @@ class ( r ~ NumType matrix
   -- >>> let m = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
   -- >>> m !* Vector3 2 3 1
   -- Vector2 11 29
-  (!*)  :: forall vector.
-           ( Vector_ vector  m r
-           , Additive_ vector n (Vector m r)
-           , HasComponents (Vector m (Vector m r)) (Vector m r)
+  (!*)  :: ( Has_ Vector_ n (Vector m r)
+           , HasComponents (Vector n (Vector m r)) (Vector n r)
            -- , Additive_
            -- , OptVector_ n r, OptVector_ m r
            , Has_ Additive_ m r
            , Num r
-           ) => matrix -> vector -> Vector n r
+           ) => matrix -> Vector m r -> Vector n r
   m !* v = rows'&components %~ dotWithV
     where
       rows'  :: Vector n (Vector m r)
