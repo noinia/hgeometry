@@ -27,10 +27,10 @@ module HGeometry.Point.Class
   ) where
 
 import           Control.Lens
--- import           HGeometry.Ext
--- import           Data.Function (on)
+import           Data.Function (on)
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
+import           HGeometry.Ext
 import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified Linear.Affine as Linear
@@ -312,3 +312,25 @@ type HasPoints' s point = HasPoints s s point point
 instance HasPoints (Linear.Point v r) (Linear.Point v' r')
                    (Linear.Point v r) (Linear.Point v' r') where
   allPoints = id
+
+
+--------------------------------------------------------------------------------
+
+-- instance HasVector point point' r s => HasVector (point :+ extra) (point' :+ extra) r s where
+instance HasVector point => HasVector (point :+ extra) where
+  vector = core.vector
+  {-# INLINE vector #-}
+
+instance HasCoordinates point => HasCoordinates (point :+ extra) where
+  coordinates = core.coordinates
+  {-# INLINE coordinates #-}
+
+instance Affine_ point d r => Affine_ (point :+ extra) d r where
+  (.-.)   = (.-.) `on` view core
+  {-# INLINE (.-.) #-}
+  p .+^ v = p&core %~ (.+^ v)
+  {-# INLINE (.+^) #-}
+
+instance (Point_ point d r, Monoid extra) => Point_ (point :+ extra) d r where
+  {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
+  fromVector v = fromVector v :+ mempty

@@ -46,10 +46,9 @@ module HGeometry.Point
 --  , strictCcw
 --
 --
---  , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
+ , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
   , cmpByDistanceTo
-  -- , cmpInDirection
 
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
@@ -58,19 +57,14 @@ module HGeometry.Point
   ) where
 
 import Control.Lens (Lens', Iso', (^.), coerced)
-import Data.Type.Ord
-import GHC.TypeLits
--- import HGeometry.HyperPlane.Class
--- import HGeometry.HyperPlane.Internal
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
--- import HGeometry.Point.Quadrants
+import HGeometry.Point.Quadrants
 import HGeometry.Vector
 import HGeometry.Point.PointF
-import Data.Coerce
-import HGeometry.Properties (NumType)
+-- import Data.Coerce
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -111,31 +105,3 @@ pattern Point4 x y z w = (Point (Vector4 x y z w))
 {-# COMPLETE Point4 #-}
 
 --------------------------------------------------------------------------------
-
--- | Compare the points with respect to the direction given by the
--- vector, i.e. by taking planes whose normal is the given vector.
---
--- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 (0 :: Int))
--- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (0 :: Int))
--- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (10 :: Int))
--- LT
--- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 (10 :: Int))
--- GT
--- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 (10 :: Int))
--- EQ
--- cmpInDirection       :: forall vector point d r.
---                         ( Ord r, Num r, Point_ point d r
---                         , vector ~ VectorFor point
---                         , d < d+1, 0 < d
---                         , KnownNat ((d+1)-d), KnownNat d
---                         , Vector_ (VectorFamily' d r) d r
---                         , Vector_ (VectorFamily' (d+1) r) (d+1) r
---                         )
---                      => vector -> point -> point -> Ordering
--- cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n
---   where
---     fromPointAndNormal' q' n' = HyperPlane $ cons a0 n'
---       where
---         a0 = negate $ (q'^.vector) `dot` n'

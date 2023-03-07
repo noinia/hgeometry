@@ -104,6 +104,7 @@ library
     other-modules:
         HGeometry.Point.Type
         HGeometry.Point.Orientation.Degenerate
+        HGeometry.Point.Quadrants
 
 
     -- other-extensions:
@@ -132,3 +133,8 @@ test-suite hgeometry-point-hspec
   other-modules:
       Spec
       Point2Spec
+      PointSpec
+      PointSpec
+      Point.CmpAround
+  build-depends:
+      hgeometry-point:quickcheck
