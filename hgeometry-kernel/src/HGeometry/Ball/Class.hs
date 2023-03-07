@@ -19,9 +19,9 @@ module HGeometry.Ball.Class
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
-import           Data.Ord (comparing)
+-- import           Data.Ord (comparing)
 import           GHC.TypeLits
-import           HGeometry.Interval.Class
+-- import           HGeometry.Interval.Class
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point
 import           HGeometry.Properties

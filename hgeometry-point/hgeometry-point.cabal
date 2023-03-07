@@ -123,12 +123,12 @@ library quickcheck
 --------------------------------------------------------------------------------
 -- * Tests stup
 
---test-suite hgeometry-point-hspec
---   import:           setup, quickcheck-setup
---    build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   other-modules:
---       Spec
---       PointSpec
---   hs-source-dirs:   test
+test-suite hgeometry-point-hspec
+  import:           setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs:   test
+  other-modules:
+      Spec
+      Point2Spec
