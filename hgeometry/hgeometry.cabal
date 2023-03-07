@@ -90,6 +90,9 @@ common quickcheck-setup
         hspec                   >= 2.9
       , QuickCheck              >= 2.10
       , quickcheck-instances
+      , hgeometry-kernel:quickcheck
+      , hgeometry-vector:quickcheck
+      , hgeometry-point:quickcheck
       , hgeometry
 --------------------------------------------------------------------------------
 -- * Main Library
@@ -131,7 +134,7 @@ library
 --     visibility: public
 --     hs-source-dirs: src-quickcheck
 --     exposed-modules:
---       HGeometry.Point.Instances
+--       HGeometry.Instances
 --     build-depends:
 --          hgeometry
 
@@ -147,3 +150,28 @@ library
 --       Spec
 --       PointSpec
 --   hs-source-dirs:   test
+
+--------------------------------------------------------------------------------
+-- * Benchmarks
+
+benchmark benchmarks
+  import: setup
+  hs-source-dirs: bench
+
+  main-is: Benchmarks.hs
+  type: exitcode-stdio-1.0
+
+  other-modules:
+    ConvexHull.Bench
+
+    -- ConvexHull.GrahamBench
+    ConvexHull.GrahamV2
+    ConvexHull.GrahamInt
+    ConvexHull.GrahamFastest
+    -- ConvexHull.GrahamClassy
+
+    Util
+  build-depends: tasty-bench
+               , hgeometry
+               , deepseq-generics
+               , hashable              >= 1.4
