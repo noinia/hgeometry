@@ -31,6 +31,7 @@ import           HGeometry.Box.Boxable
 import           HGeometry.Box.Class
 import qualified HGeometry.Box.Class as Box
 import           HGeometry.Point
+import           HGeometry.Matrix
 import           HGeometry.Properties
 import           HGeometry.Transformation.Internal
 import           HGeometry.Vector

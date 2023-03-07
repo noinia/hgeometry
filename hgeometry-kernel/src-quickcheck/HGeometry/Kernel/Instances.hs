@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Kernel.Instances where
 
+import Control.Lens
 import GHC.TypeLits
 import HGeometry.Ball
 import HGeometry.Box
@@ -9,14 +10,16 @@ import HGeometry.Interval
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
--- import HGeometry.Matrix
+import HGeometry.Matrix
 import HGeometry.Point
+import HGeometry.Point.Instances ()
+import HGeometry.Combinatorial.Instances ()
 import HGeometry.Properties
 import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Vector.Instances ()
-import HGeometry.Point.Instances ()
 import Test.QuickCheck
+
 --------------------------------------------------------------------------------
 
 -- instance Arbitrary v => Arbitrary (PointF v) where
@@ -84,11 +87,12 @@ instance ( Arbitrary point
   arbitrary = (\p v -> Box p (p .+^ v)) <$> arbitrary
                                         <*> arbitrary `suchThat` (> zero)
 
--- instance ( OptVector_ m r
---          , OptVector_ n (Vector m r), KnownNat n, KnownNat m
---          , Arbitrary r, OptAdditive_ m r
---          ) =>
-
---   Arbitrary (Matrix n m r) where
---   arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
---            <$> arbitrary
+instance ( Has_ Additive_ m r
+         , Has_ Vector_ n (Vector m r)
+         , Ixed (Vector n (Vector m r))
+         , Ixed (Vector m r)
+         , Arbitrary r
+         ) =>
+  Arbitrary (Matrix n m r) where
+  arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
+           <$> arbitrary

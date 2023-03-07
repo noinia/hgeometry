@@ -86,6 +86,7 @@ common quickcheck-setup
       , QuickCheck              >= 2.10
       , quickcheck-instances
       , hgeometry-kernel
+      , hgeometry-combinatorial:quickcheck
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
 
@@ -182,3 +183,5 @@ test-suite hgeometry-kernel-hspec
       HGeometry.HalfSpaceSpec
       HGeometry.IntervalSpec
   hs-source-dirs:   test
+  build-depends:
+      hgeometry-kernel:quickcheck

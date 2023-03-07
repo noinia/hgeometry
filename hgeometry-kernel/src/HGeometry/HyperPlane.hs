@@ -11,6 +11,7 @@
 module HGeometry.HyperPlane
   ( module HGeometry.HyperPlane.Class
   , HyperPlane(..)
+  , cmpInDirection
   ) where
 
 --------------------------------------------------------------------------------

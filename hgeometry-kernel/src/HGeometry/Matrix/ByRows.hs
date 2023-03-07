@@ -12,6 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Matrix.ByRows(
     Matrix(Matrix)
+  , OptMatrix_
   ) where
 
 import           Control.Lens
@@ -48,6 +49,13 @@ deriving stock instance ( Show r
                         ) => Show (Matrix n m r)
 deriving newtype instance ( Eq (Vector n (Vector m r)))  => Eq  (Matrix n m r)
 deriving newtype instance ( Ord (Vector n (Vector m r))) => Ord (Matrix n m r)
+
+-- | shorthand for square matrixecs
+type OptMatrix_ d r = ( Has_ Additive_ d r
+                      , Has_ Vector_ d (Vector d r)
+                      , Ixed (Vector d r)
+                      , Ixed (Vector d (Vector d r))
+                      )
 
 instance ( Has_ Vector_ n (Vector m r)
          , Has_ Vector_ m r

@@ -13,6 +13,7 @@ module HGeometry.Interval
   ( Interval(Interval,ClosedInterval,OpenInterval)
   , ClosedInterval, OpenInterval
   , module HGeometry.Interval.Class
+  , IntersectionOf(..)
   ) where
 
 import Control.Lens

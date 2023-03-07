@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Transformation.Internal where
 
-import           Control.Lens (iso,set,Iso,over,iover,Ixed(..))
+import           Control.Lens (iso,set,Iso,over,iover)
 import           GHC.TypeLits
 import           HGeometry.Matrix
 import           HGeometry.Point
@@ -41,12 +41,6 @@ deriving newtype instance (Eq (Matrix (d+1) (d+1) r))   => Eq (Transformation d 
 deriving newtype instance (Ord (Matrix (d+1) (d+1) r))  => Ord (Transformation d r)
 
 type instance NumType (Transformation d r) = r
-
-type OptMatrix_ d r = ( Has_ Additive_ d r
-                      , Has_ Vector_ d (Vector d r)
-                      , Ixed (Vector d r)
-                      , Ixed (Vector d (Vector d r))
-                      )
 
 -- | Compose transformations (right to left)
 (|.|)                                     :: (Num r, OptMatrix_ (d+1) r)

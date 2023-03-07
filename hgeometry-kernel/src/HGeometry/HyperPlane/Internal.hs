@@ -4,9 +4,10 @@
 module HGeometry.HyperPlane.Internal
   ( HyperPlane(..)
   , MkHyperPlaneConstraints
+  , cmpInDirection
   ) where
 
-import Control.Lens
+import Control.Lens hiding (cons)
 import Data.Type.Ord
 import GHC.TypeNats
 import HGeometry.HyperPlane.Class
@@ -61,3 +62,31 @@ instance ( Eq r
 --      -- (p0, pts') = uncons pts
 --      -- vecs = (.-. p0) <$> pts'
 --      n = error "hyperPlaneTrhough: undefined!"
+
+
+-- | Compare points with respect to the direction given by the
+-- vector, i.e. by taking planes whose normal is the given vector.
+
+-- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 (0 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (0 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (10 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 (10 :: Int))
+-- GT
+-- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 (10 :: Int))
+-- EQ
+cmpInDirection       :: forall point d r.
+                        ( Ord r, Num r
+                        , Has_ Metric_ (d+1) r
+                        , Has_ Metric_ d r
+                        , Point_ point d r
+                        , d < d+1--, 0 < d
+                        )
+                     => Vector d r -> point -> point -> Ordering
+cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n
+  where
+    fromPointAndNormal' q' n' = HyperPlane $ cons a0 n'
+      where
+        a0 = negate $ (q'^.vector) `dot` n'

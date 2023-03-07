@@ -10,9 +10,10 @@
 --------------------------------------------------------------------------------
 module HGeometry.Matrix(
     Matrix(Matrix)
+  , OptMatrix_
   , module HGeometry.Matrix.Class
   ) where
 
 
-import HGeometry.Matrix.ByRows(Matrix(Matrix))
+import HGeometry.Matrix.ByRows
 import HGeometry.Matrix.Class
