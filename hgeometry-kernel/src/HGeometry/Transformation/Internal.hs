@@ -40,6 +40,8 @@ deriving stock   instance (Show (Matrix (d+1) (d+1) r)) => Show (Transformation 
 deriving newtype instance (Eq (Matrix (d+1) (d+1) r))   => Eq (Transformation d r)
 deriving newtype instance (Ord (Matrix (d+1) (d+1) r))  => Ord (Transformation d r)
 
+
+
 type instance NumType (Transformation d r) = r
 
 -- | Compose transformations (right to left)
