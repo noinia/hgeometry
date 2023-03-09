@@ -15,7 +15,7 @@ module HGeometry.Ellipse(
   , circleToEllipse, ellipseToCircle, _EllipseCircle
   ) where
 
-import           Control.Lens
+import           Control.Lens hiding (elements)
 import           HGeometry.Ball
 import           HGeometry.Matrix
 import qualified HGeometry.Number.Radical as Radical
@@ -35,6 +35,18 @@ affineTransformation = iso _affineTransformation Ellipse
 
 type instance Dimension (Ellipse r) = 2
 type instance NumType   (Ellipse r) = r
+
+instance Functor Ellipse where
+  fmap = over $ affineTransformation.transformationMatrix.elements
+
+instance Foldable Ellipse where
+  foldMap = foldMapOf $ affineTransformation.transformationMatrix.elements
+
+instance Traversable Ellipse where
+  traverse f e = e&elements' %%~ f
+    where
+      elements' = cloneTraversal $ affineTransformation.transformationMatrix.elements
+
 
 instance Num r => IsTransformable (Ellipse r) where
   transformBy t (Ellipse t') = Ellipse $ t |.| t'
