@@ -52,8 +52,8 @@ import HGeometry.Transformation
 -- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine (Point 2 r))
                    | PolygonPath            (SimplePolygon (Point 2 r))
-                   | CubicBezierSegment     (BezierSpline 3 2 r)
-                   | QuadraticBezierSegment (BezierSpline 2 2 r)
+                   | CubicBezierSegment     (CubicBezier (Point 2 r))
+                   | QuadraticBezierSegment (QuadraticBezier (Point 2 r))
                    | EllipseSegment         (Ellipse r)
                      -- TODO
                    | ArcSegment

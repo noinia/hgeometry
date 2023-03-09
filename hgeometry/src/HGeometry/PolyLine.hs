@@ -27,7 +27,7 @@ import           HGeometry.Box
 import           HGeometry.Point
 import           HGeometry.PolyLine.Class
 import           HGeometry.Properties
--- import           HGeometry.Transformation
+import           HGeometry.Transformation
 -- import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
@@ -70,13 +70,13 @@ instance ( Traversable1 f
          ) => HasPoints (PolyLineF f point) (PolyLineF f point') point point' where
   allPoints = _PolyLineF . traversed1
 
--- instance ( Traversable1 f
---          , IxValue (f point) ~ point
---          , Index   (f point) ~ Int
---          , Ixed    (f point)
---          , DefaultTransformByConstraints (PolyLineF f point) 2 r
---          , Point_ point 2 r
---          ) => IsTransformable (PolyLineF f point)
+instance ( Traversable1 f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         , DefaultTransformByConstraints (PolyLineF f point) 2 r
+         , Point_ point 2 r
+         ) => IsTransformable (PolyLineF f point)
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
