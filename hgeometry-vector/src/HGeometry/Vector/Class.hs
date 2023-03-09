@@ -67,6 +67,14 @@ import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
 
+
+{- $setup
+>>> import HGeometry.Vector
+>>> import Data.Semigroup
+>>> let myVec2 = Vector2 10 20 :: Vector 2 Int
+>>> let myVec3 = Vector3 1 2 3 :: Vector 3 Int
+-}
+
 --------------------------------------------------------------------------------
 
 class ( r ~ IxValue vector
@@ -125,7 +133,7 @@ generate f = runIdentity $ generateA (Identity . f)
 -- | Convert a list of exactly d elements into a vector with dimension d.
 --
 -- >>> vectorFromList [10,2,3] :: Maybe (Vector 3 Int)
--- Just (Vector 10 2 3)
+-- Just (Vector3 10 2 3)
 -- >>> vectorFromList [10,2,3,5] :: Maybe (Vector 3 Int)
 -- Nothing
 -- >>> vectorFromList [10,2] :: Maybe (Vector 3 Int)
@@ -229,7 +237,7 @@ prefix v = generate (\i -> v^?!component' i)
 
 -- | Take a suffix of length i  of the vector
 --
--- >>> suffix myVec3 :: Vector 2 Int
+-- >>> suffix @_ @_ @_ @(Vector 2 Int) myVec3
 -- Vector2 2 3
 suffix   :: forall i d vector vector' r. ( i <= d
                                        , Vector_ vector  d r
@@ -237,7 +245,8 @@ suffix   :: forall i d vector vector' r. ( i <= d
                                        )
          => vector -> vector'
 suffix v = let d = fromIntegral . natVal $ Proxy @d
-           in generate $ (\i -> v^?!component' (d-i))
+               s = d - (fromIntegral . natVal $ Proxy @i)
+           in generate $ (\j -> v^?!component' (s+j))
 {-# INLINE suffix #-}
 
 --------------------------------------------------------------------------------
@@ -608,8 +617,8 @@ uncons v = ( v^.component @0, suffix v)
 
 -- | Extract the last element from the vector
 --
--- >>> unsnoc myVec3 :: (Vector 2 Int, Int)
--- (Vector2 1 2, 3)
+-- >>> unsnoc myVec3  :: (Vector 2 Int, Int)
+-- (Vector2 1 2,3)
 unsnoc   :: forall vector' vector d r.
             (Vector_ vector (d+1) r, Vector_ vector' d r
             , d <= d+1-1, d <= Dimension vector -- these are silly

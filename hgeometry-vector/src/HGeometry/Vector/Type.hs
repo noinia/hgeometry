@@ -44,14 +44,22 @@ type instance Index     (Vector d r) = Int
 
 --------------------------------------------------------------------------------
 
+{- $setup
+>>> import HGeometry.Vector
+>>> let myVec2 = Vector2 10 20 :: Vector 2 Int
+>>> let myVec3 = Vector3 1 2 3 :: Vector 3 Int
+-}
+
+--------------------------------------------------------------------------------
+
 -- | Types that have a 'components' indexed traversal
 class HasComponents vector vector' where
   -- | An Indexed Traversal over the components of a vector
   --
   -- >>> myVec3 ^.. components
-  -- [1,10,3]
-  -- >>> myVec ^@.. components
-  -- [(0,1),(1,10),(2,3)]
+  -- [1,2,3]
+  -- >>> myVec3 ^@.. components
+  -- [(0,1),(1,2),(2,3)]
   components :: IndexedTraversal1 Int vector vector' (IxValue vector) (IxValue vector')
 
 --------------------------------------------------------------------------------
