@@ -124,30 +124,22 @@ test-suite hgeometry-vector-hspec
        VectorSpec
    hs-source-dirs:   test
 
---- --------------------------------------------------------------------------------
----
---- -- test-suite hgeometry-vector-doctest
---- --     import:           setup, test-setup
---- --     type:             exitcode-stdio-1.0
---- --     hs-source-dirs:   doctest
---- --     main-is:          Main.hs
---- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
---- --     code-generators: doctest-codegen-driver
----
---- --     build-depends:
---- --          hgeometry-vector:vector2
---- --        , hgeometry-vector:numtypes
---- --        , hgeometry-vector:sig-vector
---- --        , doctest
----
---- --     mixins:
---- --          hgeometry-vector:numtypes (Int as R)
---- --        , hgeometry-vector:sig-vector
---- --            requires
---- --            ( Vector          as HGeometry.Vector.Vector2
---- --            , Vector.Additive as HGeometry.Vector.Vector2
---- --            , D               as HGeometry.Vector.Vector2
---- --            )
+--------------------------------------------------------------------------------
+
+test-suite hgeometry-vector-doctest
+    import:           setup, test-setup
+    type:             exitcode-stdio-1.0
+    -- hs-source-dirs:   doctest
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+
+    -- build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
+    -- code-generators: doctest-codegen-driver
+
+    build-depends:
+       doctest             >= 0.8
+
+
 
 
 --------------------------------------------------------------------------------
