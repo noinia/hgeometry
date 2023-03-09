@@ -40,9 +40,7 @@ import qualified Linear.Affine as Linear
 
 --------------------------------------------------------------------------------
 
--- | Types that have a 'vector' field lens
-class HasVector point where
-
+class HasVector point point' where
   -- | Lens to access the vector corresponding to this point.
   --
   -- >>> myPoint ^. vector
@@ -52,22 +50,30 @@ class HasVector point where
   -- >>> (myPoint & coordinates %~ show ) :: Point 3 String
   -- Point3 "1" "2" "3"
   vector :: ( Dimension point ~ d
-            , NumType point ~ r
-            )
-         => Lens' point (Vector d r)
+             , NumType point ~ r
+             , Dimension point' ~  d
+             , NumType point' ~ s
+             )
+          => Lens point point' (Vector d r) (Vector d s)
 
 type instance Dimension (Linear.Point v r) = Dimension (v r)
 type instance NumType (Linear.Point v r)   = r
 
 instance ( Vector_ (v r) d r
-         ) => HasVector (Linear.Point v r) where
-  vector = Linear._Point._Vector
+         , Vector_ (v s) d s
+         ) => HasVector (Linear.Point v r) (Linear.Point v s) where
+  vector = undefined -- Linear._Point._Vector
   {-# INLINE vector #-}
+  -- FIXME
 
 class ( Has_ Vector_ (Dimension point) (NumType point)
-      , HasVector point
+      , Has_ Vector_ (Dimension point') (NumType point')
+      , HasComponents (Vector (Dimension point') (NumType point))
+                      (Vector (Dimension point') (NumType point'))
+      , Dimension point ~ Dimension point'
+      , HasVector point point'
       )
-      => HasCoordinates point where
+      => HasCoordinates point point' where
   -- | Traversal over *all* coordinates of the points. Coordinates are 1-indexed.
   --
   -- >>> imapMOf_ coordinates (\i x -> print (i,x)) (Point2 10 20 :: Point 2 Int)
@@ -79,7 +85,7 @@ class ( Has_ Vector_ (Dimension point) (NumType point)
   -- Point2 () ()
   -- >>> over coordinates (+1) $ Point2 10 20 :: Point 2 Int
   -- Point2 11 21
-  coordinates :: IndexedTraversal1 Int point point (NumType point) (NumType point)
+  coordinates :: IndexedTraversal1 Int point point' (NumType point) (NumType point')
   coordinates = vector  . reindexed (+1) components
     -- where
       -- tr :: IndexedTraversal Int (Vector d ) (VectorFor point') r s
@@ -91,7 +97,7 @@ class ( Has_ Vector_ (Dimension point) (NumType point)
 -- | Affine space; essentially the same as Linear.Affine, but for
 -- points of kind Type rather than (Type -> Type).
 class ( Additive_ (Vector d r) d r
-      , HasCoordinates point
+      , HasCoordinates point point
       , d ~ Dimension point
       , r ~ NumType point
       ) => Affine_ point d r | point -> d
@@ -100,7 +106,7 @@ class ( Additive_ (Vector d r) d r
 
   -- | p .-. q represents the vector from q to p
   (.-.) :: Num r => point -> point -> Vector d r
-  default (.-.) :: (HasVector point, Num r) => point -> point -> Vector d r
+  default (.-.) :: (HasVector point point, Num r) => point -> point -> Vector d r
   p .-. q = (p^.vector) ^-^ (q^.vector)
   {-# INLINE (.-.) #-}
 
@@ -109,7 +115,7 @@ class ( Additive_ (Vector d r) d r
   -- >>> myPoint .+^ Vector3 100 200 300
   -- Point3 101 202 303
   (.+^) :: Num r => point -> Vector d r -> point
-  default (.+^) :: (HasVector point, Num r) => point -> Vector d r -> point
+  default (.+^) :: (HasVector point point, Num r) => point -> Vector d r -> point
   p .+^ v = p&vector %~ (^+^ v)
   {-# INLINE (.+^) #-}
 
@@ -123,9 +129,14 @@ class ( Additive_ (Vector d r) d r
 
 instance ( d ~ Dimension (v r)
          , r ~ IxValue (v r)
+         , s ~ IxValue (v s)
+         , d ~ Dimension (v s)
          , Vector_ (v r) d r
+         , Vector_ (v s) d s
          , Has_ Vector_ d r
-         ) => HasCoordinates (Linear.Point v r)
+         , Has_ Vector_ d s
+         , HasComponents (Vector d r) (Vector d s)
+         ) => HasCoordinates (Linear.Point v r) (Linear.Point v s)
 
 instance ( d ~ Dimension (v r)
          , r ~ IxValue (v r)
@@ -137,7 +148,7 @@ instance ( d ~ Dimension (v r)
 
 -- | A class representing points in d-dimensional space.
 class ( Affine_ point d r
-      , HasVector point
+      , HasVector point point
       ) => Point_ point d r where
   {-# MINIMAL fromVector #-}
 
@@ -316,12 +327,11 @@ instance HasPoints (Linear.Point v r) (Linear.Point v' r')
 
 --------------------------------------------------------------------------------
 
--- instance HasVector point point' r s => HasVector (point :+ extra) (point' :+ extra) r s where
-instance HasVector point => HasVector (point :+ extra) where
+instance HasVector point point' => HasVector (point :+ extra) (point' :+ extra) where
   vector = core.vector
   {-# INLINE vector #-}
 
-instance HasCoordinates point => HasCoordinates (point :+ extra) where
+instance HasCoordinates point point' => HasCoordinates (point :+ extra) (point' :+ extra) where
   coordinates = core.coordinates
   {-# INLINE coordinates #-}
 

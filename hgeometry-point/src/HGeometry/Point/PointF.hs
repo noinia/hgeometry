@@ -83,13 +83,22 @@ instance ( Additive_ vector       d r
       constr   = "Point" <> show d
   readListPrec = readListPrecDefault
 
-instance Vector_ vector d r => HasVector (PointF vector) where
+instance ( Vector_ vector d r
+         , Vector_ vector' d s
+         , Has_ Vector_ d r
+         , Has_ Vector_ d s
+         , HasComponents vector vector'
+         ) => HasVector (PointF vector) (PointF vector') where
   vector = _PointF._Vector
   {-# INLINE vector #-}
 
 instance ( Has_ Vector_ d r
+         , Has_ Vector_ d s
          , Vector_ vector d r
-         ) => HasCoordinates (PointF vector)
+         , Vector_ vector' d s
+         , HasComponents (Vector d r) (Vector d s)
+         , HasComponents vector vector'
+         ) => HasCoordinates (PointF vector) (PointF vector')
 
 instance ( Additive_ vector       d r
          , Additive_ (Vector d r) d r
