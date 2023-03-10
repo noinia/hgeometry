@@ -15,7 +15,6 @@ module HGeometry.Box.Corners
 import Control.Lens hiding ((<.>))
 import Data.Functor.Apply
 import Data.Semigroup.Foldable.Class
-import Data.Util
 import GHC.Generics (Generic)
 import HGeometry.Box.Class
 import HGeometry.Direction
@@ -82,8 +81,6 @@ instance Monoid a => Monoid (Corners a) where
 -- Any additional information from in the top points is taken from the Top point,
 -- Any additional information from in the bottom points is taken from the Bottom point,
 corners   :: ( Num r, Rectangle_ rectangle point, Point_ point 2 r
-             , OptCVector_ 2 r
-             , OptVector_ 2 (ClosedInterval r)
              -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
              )
           => rectangle -> Corners point
@@ -96,5 +93,5 @@ corners r = let w = width r
 --------------------------------------------------------------------------------
 
 -- | Gets the corners in a particular direction
-cornersInDirection     :: CardinalDirection -> Corners p -> Two p
+cornersInDirection     :: CardinalDirection -> Corners p -> Vector 2 p
 cornersInDirection d c = (\icd -> c^?!ix icd) <$> interCardinalsOf d

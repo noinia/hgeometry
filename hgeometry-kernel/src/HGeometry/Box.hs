@@ -13,6 +13,8 @@
 module HGeometry.Box
   ( module HGeometry.Box.Class
   , module HGeometry.Box.Internal
+  , module HGeometry.Box.Corners
+  , module HGeometry.Box.Sides
   , IsBoxable(..)
   , LineBoxIntersection(..)
   ) where
@@ -21,6 +23,8 @@ import Control.Lens
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Internal
+import HGeometry.Box.Corners
+import HGeometry.Box.Sides
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Line.LineEQ

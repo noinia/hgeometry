@@ -151,6 +151,8 @@ library
         HGeometry.Line.Intersection
         HGeometry.Box.Internal
         HGeometry.Box.Boxable
+        HGeometry.Box.Corners
+        HGeometry.Box.Sides
         HGeometry.HyperPlane.Internal
         HGeometry.Matrix.Internal
         HGeometry.Matrix.ByRows
@@ -188,3 +190,11 @@ test-suite hgeometry-kernel-hspec
   hs-source-dirs:   test
   build-depends:
       hgeometry-kernel:quickcheck
+
+test-suite hgeometry-kernel-doctest
+    import:           setup, quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8

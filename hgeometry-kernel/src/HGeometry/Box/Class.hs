@@ -39,6 +39,7 @@ import HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import HGeometry.Box
 -- >>> let myRect = Rectangle (Point2 1 1) (Point2 10 20.0) :: Rectangle (Point 2 Double)
 
 -- | Types that have a 'minPoint' field lens

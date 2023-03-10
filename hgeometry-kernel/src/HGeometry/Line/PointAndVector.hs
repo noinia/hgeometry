@@ -156,11 +156,11 @@ instance (NFData (Vector d r)) => NFData (LinePV d r)
 
 -- | Test if point q lies on line l
 --
--- >>> origin `onLine` lineThrough @(LinePV 2 Int) origin (Point2 1 0)
+-- >>> Point2 0 0 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 1 0)
 -- True
--- >>> Point2 10 10 `onLine` lineThrough @(LinePV 2 Int) origin (Point2 2 2)
+-- >>> Point2 10 10 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
 -- True
--- >>> Point2 10 5 `onLine` lineThrough @(LinePV 2 Int) origin (Point2 2 2)
+-- >>> Point2 10 5 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
 -- False
 onLine :: ( Point_ point d r, Has_ Metric_ d r
           , Fractional r, Eq r, Eq (Vector d r)

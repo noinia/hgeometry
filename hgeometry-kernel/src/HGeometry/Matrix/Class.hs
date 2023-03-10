@@ -32,8 +32,7 @@ import           Prelude hiding (zipWith)
 -- >>> import HGeometry.Matrix
 -- >>> let printMatrix = mapMOf_ rows print
 -- >>> let :{
--- matrixFromList' :: ( KnownNat n, KnownNat m, Matrix_ matrix n m r, OptVector_  m r
---                    ) => [r] -> matrix
+-- matrixFromList' :: Matrix_ matrix n m r => [r] -> matrix
 -- matrixFromList' = fromMaybe (error "") . matrixFromList
 -- :}
 

@@ -85,36 +85,24 @@ sideDirections = Sides North East South West
 
 -- | The top side of the box, from left to right.
 topSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
         => rectangle  -> ClosedLineSegment point
 topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
 
 -- | Oriented from *left to right*
 bottomSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
            => rectangle  -> ClosedLineSegment point
 bottomSide = (\(Corners _ _ r l) -> ClosedLineSegment l r) . corners
 
 -- | Left side of the box, from bottom to top
 leftSide  :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
           => rectangle -> ClosedLineSegment point
 leftSide = (\(Corners t _ _ b) -> ClosedLineSegment b t) . corners
 
 -- | The right side, oriented from *bottom* to top
 rightSide :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
           => rectangle -> ClosedLineSegment point
 rightSide = (\(Corners _ t b _) -> ClosedLineSegment b t) . corners
@@ -125,9 +113,6 @@ rightSide = (\(Corners _ t b _) -> ClosedLineSegment b t) . corners
 -- same order as the functions `topSide`, `bottomSide`, `leftSide`, and
 -- `rightSide`, use `sides'` instead.
 sides   :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
         => rectangle -> Sides (ClosedLineSegment point)
 sides r = let Corners nw ne se sw = corners r
@@ -140,9 +125,6 @@ sides r = let Corners nw ne se sw = corners r
 -- left to right, and from bottom to top). If you want the segments oriented
 -- along the boundary of the rectangle, use the `sides` function instead.
 sides'   :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
-           , OptCVector_ 2 point, OptCVector_ 2 r
-           , OptVector_ 2 (ClosedInterval r)
-           -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
            )
          => rectangle -> Sides (ClosedLineSegment point)
 sides' r = Sides (topSide r) (rightSide r) (bottomSide r) (leftSide r)

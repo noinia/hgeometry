@@ -129,18 +129,10 @@ test-suite hgeometry-vector-hspec
 test-suite hgeometry-vector-doctest
     import:           setup, test-setup
     type:             exitcode-stdio-1.0
-    -- hs-source-dirs:   doctest
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-
-    -- build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
-    -- code-generators: doctest-codegen-driver
-
     build-depends:
        doctest             >= 0.8
-
-
-
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
