@@ -15,7 +15,6 @@ module HGeometry.ConvexHull.JarvisMarch(
 
 import           Control.Lens ((^.))
 import           Data.Bifunctor
-import           Data.Ext
 import           Data.Foldable
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..), (<|))
@@ -23,6 +22,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (extractMinimaBy)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup.Foldable
+import           HGeometry.Ext
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Vector

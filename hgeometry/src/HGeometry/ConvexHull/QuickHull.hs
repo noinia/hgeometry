@@ -14,7 +14,6 @@ import qualified Data.Foldable as F
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
-import           Data.Util
 import           HGeometry.Line
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex

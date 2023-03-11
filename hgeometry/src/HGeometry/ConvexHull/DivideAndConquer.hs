@@ -17,13 +17,13 @@ module HGeometry.ConvexHull.DivideAndConquer
 
 import           Algorithms.DivideAndConquer
 import           Control.Arrow ((&&&))
-import           Data.Ext
-import           HGeometry.Point
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Convex
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Util
+import           HGeometry.Ext
+import           HGeometry.Point
+import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
@@ -71,9 +71,9 @@ instance (Num r, Ord r) => Semigroup (UH r p) where
 ----------------------------------------
 
 -- | The function that does the actual merging part
-hull               :: (NonEmpty point -> NonEmpty point -> Two (point :+ [point]))
+hull               :: (NonEmpty point -> NonEmpty point -> Vector 2 (point :+ [point]))
                    -> NonEmpty point -> NonEmpty point -> NonEmpty point
-hull tangent lh rh = let Two (l :+ lh') (r :+ rh') = tangent (NonEmpty.reverse lh) rh
+hull tangent lh rh = let Vector2 (l :+ lh') (r :+ rh') = tangent (NonEmpty.reverse lh) rh
                      in NonEmpty.fromList $ reverse lh' <> [l,r] <> rh'
 
 --------------------------------------------------------------------------------

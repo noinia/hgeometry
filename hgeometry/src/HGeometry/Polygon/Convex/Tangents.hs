@@ -203,7 +203,7 @@ upperTangent lp rp = ClosedLineSegment l r
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
 upperTangent'       :: (Ord r, Num r, Foldable1 f, Point_ point 2 r)
-                    => f point -> f point -> Two (point :+ [point])
+                    => f point -> f point -> Vector 2 (point :+ [point])
 upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
