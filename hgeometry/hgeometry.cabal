@@ -129,27 +129,35 @@ library
 --------------------------------------------------------------------------------
 -- * Helper Libraries
 
--- library quickcheck
---     import: setup, quickcheck-setup
---     visibility: public
---     hs-source-dirs: src-quickcheck
---     exposed-modules:
---       HGeometry.Instances
---     build-depends:
---          hgeometry
+library quickcheck
+    import: setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Instances
+    build-depends:
+         hgeometry
 
 --------------------------------------------------------------------------------
 -- * Tests stup
 
---test-suite hgeometry-hspec
---   import:           setup, quickcheck-setup
---    build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   other-modules:
---       Spec
---       PointSpec
---   hs-source-dirs:   test
+test-suite hgeometry-hspec
+  import:           setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+  hs-source-dirs:   test
+
+test-suite hgeometry-doctest
+    import:           setup, quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8
+
 
 --------------------------------------------------------------------------------
 -- * Benchmarks

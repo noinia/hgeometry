@@ -4,9 +4,11 @@ import Control.Lens
 import HGeometry.Point
 import HGeometry.Vector
 import Test.Hspec
-import R
+
 
 --------------------------------------------------------------------------------
+
+type R = Int
 
 myPoint :: Point 2 R
 myPoint = Point2 5 11

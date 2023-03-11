@@ -8,14 +8,13 @@ module HGeometry.Polygon.Convex.Tangents
   ) where
 
 import           Control.Lens
-import           Data.Ext
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable (Foldable1 (..))
-import           Data.Util
+import           HGeometry.Ext
 -- import           Data.Vector.Circular (CircularVector)
 -- import qualified Data.Vector.Circular as CV
 -- import qualified Data.Vector.Circular.Util as CV
@@ -95,7 +94,6 @@ findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (lengthOf outerBoundary p
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 lowerTangent       :: ( Num r, Ord r
                       , ConvexPolygon_ convexPolygon point r, Point_ point 2 r
-                      , OptCVector_ 2 point
                       )
                    => convexPolygon
                    -> convexPolygon
@@ -104,7 +102,7 @@ lowerTangent lp rp = ClosedLineSegment l r
   where
     lh = toNonEmptyOf (ifoldRightFrom (rightMostIdx lp)) lp
     rh = toNonEmptyOf (ifoldLeftFrom  (leftMostIdx rp))  rp
-    (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
+    (Vector2 (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Index of the rightmost vertex. Returns the topmost such vertex if there are multiple
 rightMostIdx :: (Ord r, ConvexPolygon_ convexPolygon point r, Point_ point 2 r)
@@ -147,7 +145,7 @@ ifoldLeftFrom = undefined
 -- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
 -- respectively
 lowerTangent'       :: forall point r f. (Ord r, Num r, Foldable1 f, Point_ point 2 r)
-                    => f point -> f point -> Two (point :+ [point])
+                    => f point -> f point -> Vector 2 (point :+ [point])
 lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
   where
     ne = NonEmpty.fromList
@@ -156,7 +154,7 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 
     go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
                              | isRight' ls l r = go (ne ls) rh
-                             | otherwise       = Two (l :+ ls) (r :+ rs)
+                             | otherwise       = Vector2 (l :+ ls) (r :+ rs)
 
 
 
@@ -179,7 +177,7 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent       :: forall convexPolygon point r.
-                      ( Num r, Ord r, OptCVector_ 2 point
+                      ( Num r, Ord r
                       , ConvexPolygon_ convexPolygon point r)
                    => convexPolygon
                    -> convexPolygon
@@ -188,7 +186,7 @@ upperTangent lp rp = ClosedLineSegment l r
   where
     lh = toNonEmptyOf (ifoldLeftFrom  (rightMostIdx lp)) lp
     rh = toNonEmptyOf (ifoldRightFrom (leftMostIdx rp))  rp
-    (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
+    (Vector2 (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
 --

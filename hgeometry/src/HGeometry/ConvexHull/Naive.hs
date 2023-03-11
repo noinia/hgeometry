@@ -1,30 +1,31 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Algorithms.Geometry.ConvexHull.Naive
+-- Module      :  HGeometry.ConvexHull.Naive
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.ConvexHull.Naive( ConvexHull
-                                           , lowerHull', lowerHullAll
+module Heometry.ConvexHull.Naive( ConvexHull
+                                , lowerHull', lowerHullAll
 
-                                           , isValidTriangle, upperHalfSpaceOf
-                                           ) where
+                                , isValidTriangle, upperHalfSpaceOf
+                                ) where
 
-import           Control.Lens
-import           Data.Ext
-import           Data.Foldable (toList)
-import           Geometry.HalfSpace
-import           Geometry.HyperPlane
-import           Geometry.Line
-import           Geometry.Point
-import           Geometry.Triangle
-import           Geometry.Vector
-import           Data.Intersection(intersects)
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.List (find)
-import           Data.Maybe (isNothing)
-import           Data.Util
+import Control.Lens
+import Data.Foldable (toList)
+import Data.List (find)
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe (isNothing)
+import Data.Util
+import HGeometry.Ext
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane
+import HGeometry.Intersection (intersects)
+import HGeometry.Line
+import HGeometry.Point
+import HGeometry.Triangle
+import HGeometry.Vector
+
 --------------------------------------------------------------------------------
 
 type ConvexHull d p r = [Triangle 3 p r]
