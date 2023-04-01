@@ -77,8 +77,8 @@ type VertexContainer f point = ( IxValue (f point) ~ point
                                , TraversableWithIndex Int f
                                , Traversable1 f
                                , Ixed (f point)
+                               , HasDirectedTraversals f
                                )
-
 
 instance ( VertexContainer f point
          ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
@@ -103,22 +103,13 @@ instance ( VertexContainer f point
   type VertexIx (SimplePolygonF f point) = Int
   vertexAt i = _SimplePolygonF . iix i
 
-
-
-
-
-
-
-
 instance ( VertexContainer f point
          ) => HasOuterBoundary (SimplePolygonF f point) where
   outerBoundary = _SimplePolygonF . traversed1
   outerBoundaryVertexAt i = singular (vertexAt i)
 
--- FIXME
---  ccwOuterBoundaryFrom i = _SimplePolygonF.ifoldRightFrom  i
-  -- cwOuterBoundaryFrom  i = _SimplePolygonF.ifoldLeftFrom   i
-
+  ccwOuterBoundaryFrom i = _SimplePolygonF.traverseRightFrom i
+  cwOuterBoundaryFrom  i = _SimplePolygonF.traverseLeftFrom  i
 
 instance ( Point_ point 2 r
          , HasFromFoldable1 f

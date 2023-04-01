@@ -4,18 +4,24 @@
 module HGeometry.Cyclic
   ( Cyclic(..)
   , toCircularVector
+  , HasDirectedTraversals(..)
   ) where
 
 --------------------------------------------------------------------------------
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
+import           Control.Monad (forM_)
 import qualified Data.Foldable as F
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
+import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector(..))
-import           Data.Vector.NonEmpty (NonEmptyVector)
+import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector.NonEmpty as NV
 import           GHC.Generics (Generic)
 import           HGeometry.Foldable.Util
+import           HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
 -- | A cyclic sequence type
@@ -55,5 +61,47 @@ instance (Index (v a) ~ Int, Foldable v, Ixed (v a)) => Ixed (Cyclic v a) where
                           in Cyclic <$> ix (i `mod` n) f v
 
 -- | Turn the cyclic vector into a circular Vector
-toCircularVector            :: Cyclic NonEmptyVector a -> CircularVector a
+toCircularVector            :: Cyclic NV.NonEmptyVector a -> CircularVector a
 toCircularVector (Cyclic v) = CircularVector v 0
+
+
+class HasDirectedTraversals v where
+  -- | A rightward-traversal over all elements starting from the given one.
+  --
+  -- running time : \(O(n)\)
+  traverseRightFrom          :: Index (v a) -> IndexedTraversal1' (Index (v a)) (v a) a
+
+  -- | A rightward-traversal over all elements starting from the given one.
+  --
+  -- running time : \(O(n)\)
+  traverseLeftFrom          :: Index (v a) -> IndexedTraversal1' (Index (v a)) (v a) a
+
+instance HasDirectedTraversals v => HasDirectedTraversals (Cyclic v) where
+  traverseRightFrom s paFa (Cyclic v) = Cyclic <$> traverseRightFrom s paFa v
+  traverseLeftFrom  s paFa (Cyclic v) = Cyclic <$> traverseLeftFrom  s paFa v
+
+instance HasDirectedTraversals NV.NonEmptyVector where
+  traverseRightFrom s paFa v = traverseByOrder indices' paFa v
+    where
+      n        = F.length v
+      indices' = NonEmpty.fromList [s..(s+n-1)]
+
+  traverseLeftFrom s paFa v = traverseByOrder indices' paFa v
+    where
+      n        = F.length v
+      indices' = NonEmpty.fromList [s,s-1..(s-n+1)]
+
+-- | traverse the vector in the given order
+traverseByOrder                 :: NonEmpty.NonEmpty Int
+                                -> IndexedTraversal1' Int (NV.NonEmptyVector a) a
+traverseByOrder indices' paFa v = build <$> xs
+  where
+    n = F.length v
+    xs = traverse1 (\i' -> let i = i' `mod` n
+                           in (i,) <$> indexed paFa i (v NV.! i)
+                   ) indices'
+    build ys = NV.unsafeFromVector $ V.create $ do
+                   v' <- MV.unsafeNew n
+                   forM_ ys $ \(i,y) ->
+                     MV.write v' i y
+                   pure v'
