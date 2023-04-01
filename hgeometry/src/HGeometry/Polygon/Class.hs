@@ -44,9 +44,9 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
   --
   -- running time :: \(O(n)\)
   outerBoundary :: IndexedTraversal1' (VertexIx polygon) polygon (Vertex polygon)
-  -- default outerBoundary :: Num (VertexIx polygon)
-  --                       => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
-  -- outerBoundary = ccwOuterBoundaryFrom 0
+  default outerBoundary :: Num (VertexIx polygon)
+                        => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+  outerBoundary = ccwOuterBoundaryFrom 0
 
   -- | A CCW-traversal over all vertices of the outer boundary, starting
   -- from the vertex with the given index.

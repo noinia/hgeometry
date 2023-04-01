@@ -100,8 +100,8 @@ lowerTangent       :: ( Num r, Ord r
                    -> ClosedLineSegment point
 lowerTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (ifoldRightFrom (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ifoldLeftFrom  (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (cwOuterBoundaryFrom   (rightMostIdx lp)) lp
+    rh = toNonEmptyOf (ccwOuterBoundaryFrom  (leftMostIdx rp))  rp
     (Vector2 (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Index of the rightmost vertex. Returns the topmost such vertex if there are multiple
@@ -125,10 +125,6 @@ maximum1ByOf l cmp = fromMaybe (error "maximum1ByOf") . maximumByOf l cmp
 -- | get the minimum of the elements the lens points to using the given comparison function
 minimum1ByOf       :: Getting (Endo (Endo (Maybe a))) s a -> (a -> a -> Ordering) -> s -> a
 minimum1ByOf l cmp = fromMaybe (error "minimum1ByOf") . minimumByOf l cmp
-
-
-ifoldRightFrom = undefined
-ifoldLeftFrom = undefined
 
 -- | Compute the lower tangent of the two convex chains lp and rp
 --
@@ -184,8 +180,8 @@ upperTangent       :: forall convexPolygon point r.
                    -> ClosedLineSegment point
 upperTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (ifoldLeftFrom  (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ifoldRightFrom (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (cwOuterBoundaryFrom  (rightMostIdx lp)) lp
+    rh = toNonEmptyOf (ccwOuterBoundaryFrom (leftMostIdx rp))  rp
     (Vector2 (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp

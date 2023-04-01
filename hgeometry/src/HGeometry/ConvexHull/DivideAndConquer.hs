@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.ConvexHull.DivideAndConquer
@@ -15,13 +16,14 @@ module HGeometry.ConvexHull.DivideAndConquer
   , lowerHull
   ) where
 
-import           Algorithms.DivideAndConquer
+import           HGeometry.Algorithms.DivideAndConquer
 import           Control.Arrow ((&&&))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Ext
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Tangents
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Vector
 --------------------------------------------------------------------------------
@@ -40,16 +42,16 @@ convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy i
 
 -- | \(O(n \log n)\) time LowerHull using divide and conquer. The resulting Hull is
 -- given from left to right, i.e. in counter clockwise order.
-lowerHull :: (Ord r, Num r)
+lowerHull :: (Ord r, Num r, Point_ point 2 r)
           => NonEmpty point -> NonEmpty point
 lowerHull = lowerHull' . NonEmpty.sortBy incXdecY
 
-lowerHull' :: (Ord r, Num r) => NonEmpty point -> NonEmpty point
+lowerHull' :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 lowerHull' = unLH . divideAndConquer1 (LH . (:|[]))
 
 newtype LH point = LH { unLH :: NonEmpty point } deriving (Eq,Show)
 
-instance (Num r, Ord r) => Semigroup (LH point) where
+instance (Point_ point 2 r, Num r, Ord r) => Semigroup (LH point) where
   (LH lh) <> (LH rh) = LH $ hull lowerTangent' lh rh
 
 ----------------------------------------
@@ -60,12 +62,12 @@ instance (Num r, Ord r) => Semigroup (LH point) where
 upperHull :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 upperHull = upperHull' . NonEmpty.sortBy incXdecY
 
-upperHull' :: (Ord r, Num r) => NonEmpty point -> NonEmpty point
+upperHull' :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
 upperHull' = unUH . divideAndConquer1 (UH . (:|[]))
 
-newtype UH r p = UH { unUH :: NonEmpty point  }
+newtype UH point = UH { unUH :: NonEmpty point  }
 
-instance (Num r, Ord r) => Semigroup (UH r p) where
+instance ( Point_ point 2 r, Num r, Ord r) => Semigroup (UH point) where
   (UH lh) <> (UH rh) = UH $ hull upperTangent' lh rh
 
 ----------------------------------------
