@@ -29,7 +29,7 @@ import GHC.Generics
 import HGeometry.Box
 import HGeometry.Point
 import HGeometry.Properties
--- import HGeometry.Transformation
+import HGeometry.Transformation
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
@@ -41,7 +41,7 @@ import Data.Kind (Type)
 -- | A Bezier spline.
 type BezierSplineF            :: (Type -> Type) -> Type -> Type
 newtype BezierSplineF f point = BezierSpline (f point)
-  deriving (Generic)
+  deriving stock (Generic,Show)
   deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
 
 -- | By default we store simple poylline as non-empty vectors.
@@ -80,13 +80,13 @@ instance ( Traversable1 f
          ) => HasPoints (BezierSplineF f point) (BezierSplineF f point') point point' where
   allPoints = _BezierSplineF . traversed1
 
--- instance ( Traversable1 f
---          , IxValue (f point) ~ point
---          , Index   (f point) ~ Int
---          , Ixed    (f point)
---          , DefaultTransformByConstraints (BezierSplineF f point) 2 r
---          , Point_ point 2 r
---          ) => IsTransformable (BezierSplineF f point)
+instance ( Traversable1 f
+         , IxValue (f point) ~ point
+         , Index   (f point) ~ Int
+         , Ixed    (f point)
+         , DefaultTransformByConstraints (BezierSplineF f point) 2 r
+         , Point_ point 2 r
+         ) => IsTransformable (BezierSplineF f point)
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point

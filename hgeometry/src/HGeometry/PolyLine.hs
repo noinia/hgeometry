@@ -36,7 +36,7 @@ import           Hiraffe.Graph
 
 -- | Simple polygons just store their vertices in CCCW order
 newtype PolyLineF f point = PolyLine (f point)
-  deriving (Generic)
+  deriving stock (Generic,Show)
   deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
 
 -- | By default we store simple poylline as non-empty vectors.

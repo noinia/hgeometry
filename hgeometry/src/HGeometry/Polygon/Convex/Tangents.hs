@@ -212,4 +212,4 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 
     go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
                              | isLeft' ls l r = go (ne ls) rh
-                             | otherwise      = Two (l :+ ls) (r :+ rs)
+                             | otherwise      = Vector2 (l :+ ls) (r :+ rs)

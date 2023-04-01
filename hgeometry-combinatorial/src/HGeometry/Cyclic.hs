@@ -20,8 +20,9 @@ import           HGeometry.Foldable.Util
 
 -- | A cyclic sequence type
 newtype Cyclic v a = Cyclic (v a)
- deriving newtype (Functor,Foldable,NFData)
- deriving (Generic)
+ deriving newtype (Functor,Foldable,NFData,Eq)
+ deriving stock (Generic)
+-- not sure if we want this Eq instance or not .
 
 instance Foldable1 v    => Foldable1    (Cyclic v)
 

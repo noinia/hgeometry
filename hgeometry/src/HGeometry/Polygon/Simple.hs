@@ -104,6 +104,12 @@ instance ( VertexContainer f point
   vertexAt i = _SimplePolygonF . iix i
 
 
+
+
+
+
+
+
 instance ( VertexContainer f point
          ) => HasOuterBoundary (SimplePolygonF f point) where
   outerBoundary = _SimplePolygonF . traversed1
@@ -112,7 +118,6 @@ instance ( VertexContainer f point
 -- FIXME
 --  ccwOuterBoundaryFrom i = _SimplePolygonF.ifoldRightFrom  i
   -- cwOuterBoundaryFrom  i = _SimplePolygonF.ifoldLeftFrom   i
-
 
 
 instance ( Point_ point 2 r
