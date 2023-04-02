@@ -15,6 +15,7 @@ module HGeometry.Polygon.Simple
   ( SimplePolygon_(..)
   , SimplePolygon
   , SimplePolygonF
+  , toCyclic
   , VertexContainer
   ) where
 
@@ -44,7 +45,7 @@ import           Hiraffe.Graph
 
 -- | Simple polygons just store their vertices in CCCW order
 newtype SimplePolygonF f point = MkSimplePolygon (f point)
-  deriving (Generic)
+  deriving stock (Generic)
   deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
 
 
@@ -136,6 +137,13 @@ instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
          => HasSquaredEuclideanDistance (SimplePolygonF f point) where
   pointClosestToWithDistance = pointClosestToWithDistanceSimplePolygon
 -}
+
+--------------------------------------------------------------------------------
+
+-- | Get the underlying cyclic vector.
+toCyclic :: SimplePolygonF (Cyclic v) point -> Cyclic v point
+toCyclic = view _SimplePolygonF
+
 --------------------------------------------------------------------------------
 
 _testPoly :: SimplePolygon (Point 2 Int)

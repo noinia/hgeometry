@@ -35,7 +35,7 @@ import Hiraffe.Graph
 -- | Convex polygons
 newtype ConvexPolygonF f point =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point }
-  deriving newtype (NFData)
+  deriving newtype (NFData, Eq)
 
 -- | By default we use a cyclic non-empty vector to represent convex polygons.
 type ConvexPolygon = ConvexPolygonF (Cyclic NonEmptyVector)
@@ -102,6 +102,16 @@ fromSimplePolygon :: (Ord r, Num r, Point_ point 2 r, VertexContainer f point)
 fromSimplePolygon pg
   | isStrictlyConvex pg = Just (ConvexPolygon pg)
   | otherwise           = Nothing
+
+
+instance ( Show point
+         , SimplePolygon_ (ConvexPolygonF f point) point r
+         ) => Show (ConvexPolygonF f point) where
+  show = showSimplePolygon
+
+
+
+
 
 
 {-

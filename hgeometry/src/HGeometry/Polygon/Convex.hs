@@ -1,7 +1,11 @@
 module HGeometry.Polygon.Convex
   ( ConvexPolygon_(..)
-  , ConvexPolygonF
   , ConvexPolygon
+  , ConvexPolygonF
+  , fromSimplePolygon, toSimplePolygon
+  , _ConvexPolygon
+  , isStrictlyConvex, isConvex
+  , verifyConvex
   ) where
 
 import HGeometry.Polygon.Convex.Class

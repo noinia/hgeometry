@@ -5,6 +5,7 @@ module HGeometry.Cyclic
   ( Cyclic(..)
   , toCircularVector
   , HasDirectedTraversals(..)
+  , isShiftOf
   ) where
 
 --------------------------------------------------------------------------------
@@ -14,6 +15,7 @@ import           Control.Lens
 import           Control.Monad (forM_)
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
 import           Data.Vector.Circular (CircularVector(..))
@@ -21,6 +23,7 @@ import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as NV
 import           GHC.Generics (Generic)
 import           HGeometry.Foldable.Util
+import           HGeometry.StringSearch.KMP (isSubStringOf)
 import           HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
@@ -105,3 +108,15 @@ traverseByOrder indices' paFa v = build <$> xs
                    forM_ ys $ \(i,y) ->
                      MV.write v' i y
                    pure v'
+
+-- | Test if the circular list is a cyclic shift of the second
+-- list.
+--
+-- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of
+-- the lists.
+isShiftOf         :: (Eq a, Foldable1 v) => Cyclic v a -> Cyclic v a -> Bool
+xs `isShiftOf` ys = let twice zs     = let zs' = leftElements zs in zs' <> zs'
+                        once         = leftElements
+                        leftElements = NV.fromNonEmpty . toNonEmpty
+                        check as bs  = isJust $ once as `isSubStringOf` twice bs
+                    in length xs == length ys && check xs ys

@@ -110,13 +110,15 @@ library
 --
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
+        HGeometry.Polygon.Convex.Tangents
 
         HGeometry.PolyLine
         HGeometry.PolyLine.Class
 --
         HGeometry.ConvexHull
         HGeometry.ConvexHull.GrahamScan
---
+        HGeometry.ConvexHull.DivideAndConquer
+
         HGeometry.BezierSpline
 
     other-modules:
@@ -148,7 +150,11 @@ test-suite hgeometry-hspec
   main-is:          Main.hs
   other-modules:
       Spec
+      ConvexHull.ConvexHullSpec
   hs-source-dirs:   test
+  build-depends:
+      hgeometry:quickcheck
+
 
 test-suite hgeometry-doctest
     import:           setup, quickcheck-setup
