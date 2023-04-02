@@ -34,17 +34,19 @@ module Ipe.Path(
   , _ClosePath
   ) where
 
-import Control.Lens hiding (rmap)
-import Data.Bitraversable
-import Data.Traversable
-import HGeometry.BezierSpline
-import HGeometry.Ellipse (Ellipse)
-import HGeometry.Matrix
-import HGeometry.Point
-import HGeometry.PolyLine
-import HGeometry.Polygon.Simple
-import HGeometry.Properties
-import HGeometry.Transformation
+import           Control.Lens hiding (rmap, elements)
+import qualified Data.Sequence as Seq
+import           Data.Traversable
+import           HGeometry.BezierSpline
+import           HGeometry.Ellipse (Ellipse)
+import           HGeometry.Matrix
+import           HGeometry.Point
+import           HGeometry.PolyLine
+import           HGeometry.Polygon.Simple
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           Hiraffe.Graph
+
 
 --------------------------------------------------------------------------------
 -- | Paths
@@ -71,14 +73,19 @@ instance Foldable PathSegment where
   foldMap = foldMapDefault
 instance Traversable PathSegment where
   traverse f = \case
-    PolyLineSegment p        -> PolyLineSegment <$> bitraverse pure f p
-    PolygonPath p            -> PolygonPath <$> bitraverse pure f p
-    CubicBezierSegment b     -> CubicBezierSegment <$> traverse f b
-    QuadraticBezierSegment b -> QuadraticBezierSegment <$> traverse f b
-    EllipseSegment e         -> EllipseSegment <$> traverse f e
-    ArcSegment               -> pure ArcSegment
-    SplineSegment            -> pure SplineSegment
-    ClosedSplineSegment      -> pure ClosedSplineSegment
+      PolyLineSegment p        -> PolyLineSegment
+                                  <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
+      PolygonPath p            -> PolygonPath
+                                  <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
+      CubicBezierSegment b     -> CubicBezierSegment
+                                  <$> traverseOf (cloneTraversal $ vertices.coordinates) f b
+      QuadraticBezierSegment b -> QuadraticBezierSegment
+                                  <$> traverseOf (cloneTraversal $ vertices.coordinates) f b
+      EllipseSegment e         -> EllipseSegment <$> traverse f e
+      ArcSegment               -> pure ArcSegment
+      SplineSegment            -> pure SplineSegment
+      ClosedSplineSegment      -> pure ClosedSplineSegment
+
 
 instance Fractional r => IsTransformable (PathSegment r) where
   transformBy t = \case
@@ -94,7 +101,7 @@ instance Fractional r => IsTransformable (PathSegment r) where
 
 
 -- | A path is a non-empty sequence of PathSegments.
-newtype Path r = Path { _pathSegments :: LSeq.LSeq 1 (PathSegment r) }
+newtype Path r = Path { _pathSegments :: Seq.Seq (PathSegment r) }
                  deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''Path
 
@@ -118,6 +125,23 @@ data Operation r = MoveTo (Point 2 r)
                  -- these should be deprecated
                  | CurveTo (Point 2 r) (Point 2 r) (Point 2 r)
                  | QCurveTo (Point 2 r) (Point 2 r)
-                 deriving (Eq, Show,Functor,Foldable,Traversable)
+                 deriving (Eq,Show)
 makePrisms ''Operation
 
+instance Functor Operation where
+  fmap = fmapDefault
+instance Foldable Operation where
+  foldMap = foldMapDefault
+instance Traversable Operation where
+  traverse f = let coordinates' = cloneTraversal coordinates
+                   elements'    = cloneTraversal elements
+               in \case
+    MoveTo p         -> MoveTo <$> coordinates' f p
+    LineTo p         -> LineTo <$> coordinates' f p
+    Ellipse m        -> Ellipse <$> elements' f m
+    ArcTo m p        -> ArcTo   <$> elements' f m <*> coordinates' f p
+    Spline pts       -> Spline <$> traverse (coordinates' f) pts
+    ClosedSpline pts -> ClosedSpline  <$> traverse (coordinates' f) pts
+    ClosePath        -> pure ClosePath
+    CurveTo p q r    -> CurveTo  <$> coordinates' f p <*> coordinates' f q <*> coordinates' f r
+    QCurveTo p q     -> QCurveTo <$> coordinates' f p <*> coordinates' f q
