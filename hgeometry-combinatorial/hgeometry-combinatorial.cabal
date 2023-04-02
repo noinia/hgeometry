@@ -102,6 +102,9 @@ library
         HGeometry.Foldable.Sort
         HGeometry.Foldable.Util
 
+        HGeometry.List.Zipper
+        HGeometry.List.Util
+
         HGeometry.Vector.NonEmpty.Util
 
         HGeometry.Ext
@@ -149,7 +152,9 @@ test-suite hgeometry-combinatorial-hspec
     main-is:          Main.hs
     other-modules:
        Spec
-
+       Algorithms.DivideAndConquerSpec
+       Algorithms.LogarithmicMethodSpec
+       StringSearch.KMPSpec
 
     build-depends:
          hgeometry-combinatorial

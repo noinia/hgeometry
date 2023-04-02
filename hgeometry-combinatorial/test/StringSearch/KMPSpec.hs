@@ -1,13 +1,13 @@
-module Algorithms.StringSearch.KMPSpec where
+module StringSearch.KMPSpec where
 
-import           Algorithms.StringSearch.KMP
 import qualified Data.Foldable as F
 import qualified Data.List as List
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as UV
-import           Test.QuickCheck.Instances ()
+import           HGeometry.StringSearch.KMP
 import           Test.Hspec
 import           Test.QuickCheck
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
