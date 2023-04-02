@@ -11,12 +11,12 @@
 module Ipe.Matrix where
 
 import           Control.Lens hiding (rmap)
-import           Data.Ext
+import           HGeometry.Ext
 import qualified Ipe.Attributes as AT
 import           Ipe.Attributes hiding (Matrix)
 import           Ipe.Types
-import           Geometry.Properties
-import           Geometry.Transformation
+import           HGeometry.Properties
+import           HGeometry.Transformation
 import           Data.Proxy
 import           Data.Vinyl hiding (Label)
 

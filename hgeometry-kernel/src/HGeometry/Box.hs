@@ -30,6 +30,7 @@ import HGeometry.Interval
 import HGeometry.Line.LineEQ
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Transformation
 
 --------------------------------------------------------------------------------
 
@@ -102,3 +103,9 @@ instance (Fractional r, Ord r
 
 myRect :: Rectangle (Point 2 Rational)
 myRect = Rectangle origin (Point2 10 20.0)
+
+instance (Point_ point d r, IsTransformable point) => IsTransformable (Box point) where
+  -- ^ this instance is slighly misleading, as for arbitrary affine
+  -- transformations (e.g. rotations) the result may no longer be an
+  -- axis aligned box. So use with care!
+  transformBy t = over allPoints (transformBy t)

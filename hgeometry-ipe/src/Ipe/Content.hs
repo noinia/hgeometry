@@ -25,14 +25,7 @@ module Ipe.Content(
   , flattenGroups
   ) where
 
-import           Control.Lens hiding (views)
-import           Data.Bitraversable
-import           Data.Ext
-import           Geometry.Box (Rectangle)
-import           Geometry.Matrix
-import           Geometry.Point
-import           Geometry.Properties
-import           Geometry.Transformation
+import           Control.Lens hiding (views, elements)
 import           Data.Kind
 import           Data.Proxy
 import           Data.Singletons.TH (genDefunSymbols)
@@ -40,6 +33,12 @@ import           Data.Text (Text)
 import           Data.Traversable
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.TypeLevel (AllConstrained)
+import           HGeometry.Box (Rectangle)
+import           HGeometry.Ext
+import           HGeometry.Matrix
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Transformation
 import qualified Ipe.Attributes as AT
 import           Ipe.Attributes hiding (Matrix)
 import           Ipe.Color
@@ -50,7 +49,7 @@ import           Ipe.Path
 -- | Image Objects
 
 data Image r = Image { _imageData :: ()
-                     , _rect      :: Rectangle () r
+                     , _rect      :: Rectangle (Point 2 r)
                      } deriving (Show,Eq,Ord)
 makeLenses ''Image
 
@@ -65,25 +64,40 @@ instance Functor Image where
 instance Foldable Image where
   foldMap = foldMapDefault
 instance Traversable Image where
-  traverse f (Image d r) = Image d <$> bitraverse pure f r
+  traverse f (Image d r) = Image d <$> traverse (cloneTraversal coordinates f) r
 
 --------------------------------------------------------------------------------
 -- | Text Objects
 
+-- | A text label
 data TextLabel r = Label Text (Point 2 r)
-                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
-
-data MiniPage r = MiniPage Text (Point 2 r) r
-                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                 deriving (Show,Eq,Ord)
 
 type instance NumType   (TextLabel r) = r
 type instance Dimension (TextLabel r) = 2
 
-type instance NumType   (MiniPage r) = r
-type instance Dimension (MiniPage r) = 2
+instance Functor TextLabel  where fmap = fmapDefault
+instance Foldable TextLabel where foldMap = foldMapDefault
+instance Traversable TextLabel where
+  traverse f (Label t p) = let coordinates' = cloneTraversal coordinates
+                           in Label t <$> coordinates' f p
 
 instance Fractional r => IsTransformable (TextLabel r) where
   transformBy t (Label txt p) = Label txt (transformBy t p)
+
+
+-- | A Minipage
+data MiniPage r = MiniPage Text (Point 2 r) r
+                 deriving (Show,Eq,Ord)
+
+type instance NumType   (MiniPage r) = r
+type instance Dimension (MiniPage r) = 2
+
+instance Functor MiniPage  where fmap = fmapDefault
+instance Foldable MiniPage where foldMap = foldMapDefault
+instance Traversable MiniPage where
+  traverse f (MiniPage t p w) = let coordinates' = cloneTraversal coordinates
+                                in MiniPage t <$> coordinates' f p <*> f w
 
 instance Fractional r => IsTransformable (MiniPage r) where
   transformBy t (MiniPage txt p w) = MiniPage txt (transformBy t p) w
@@ -98,11 +112,17 @@ width (MiniPage _ _ w) = w
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text
                           }
-                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                 deriving (Show,Eq,Ord)
 makeLenses ''IpeSymbol
 
 type instance NumType   (IpeSymbol r) = r
 type instance Dimension (IpeSymbol r) = 2
+
+instance Functor IpeSymbol  where fmap = fmapDefault
+instance Foldable IpeSymbol where foldMap = foldMapDefault
+instance Traversable IpeSymbol where
+  traverse f (Symbol p t) = let coordinates' = cloneTraversal coordinates
+                            in flip Symbol t <$> coordinates' f p
 
 instance Fractional r => IsTransformable (IpeSymbol r) where
   transformBy t = over symbolPoint (transformBy t)
@@ -172,7 +192,7 @@ class TraverseIpeAttr (a :: AttributeUniverse) where
 
 -- CommonAttributeUnivers
 instance TraverseIpeAttr Layer           where traverseIpeAttr _ = pureAttr
-instance TraverseIpeAttr AT.Matrix       where traverseIpeAttr f = traverseAttr (traverse f)
+instance TraverseIpeAttr AT.Matrix       where traverseIpeAttr f = traverseAttr (cloneTraversal elements f)
 instance TraverseIpeAttr Pin             where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Transformations where traverseIpeAttr _ = pureAttr
 

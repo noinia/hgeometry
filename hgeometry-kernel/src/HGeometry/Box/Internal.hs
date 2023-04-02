@@ -67,6 +67,9 @@ instance HasMinPoint (Box point) point where
 instance HasMaxPoint (Box point) point where
   maxPoint = lens (\(Box _ q) -> q) (\(Box p _) q -> Box p q)
 
+instance HasPoints (Box point) (Box point') point point' where
+  allPoints f (MkBox v) = MkBox <$> components f v
+
 instance ( Point_ point d r
          , Zip (Vector d)
          ) => Box_ (Box point) point where

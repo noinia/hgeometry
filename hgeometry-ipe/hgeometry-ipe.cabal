@@ -62,6 +62,10 @@ common setup
       , bytestring              >= 0.11
       , colour                  >= 2.3.6
       , template-haskell
+      , vinyl                   >= 0.14
+      , singletons              >= 3.0
+      , singletons-th           >= 3.0
+
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -109,17 +113,17 @@ library
           Ipe.Literal
           Ipe.Value
           Ipe.Color
-          -- Ipe.Attributes
-          -- Ipe.Types
+          Ipe.Attributes
+          Ipe.Types
           -- Ipe.Writer
           -- Ipe.Reader
           Ipe.PathParser
           -- Ipe.IpeOut
           -- Ipe.FromIpe
           Ipe.Path
-          -- Ipe.Matrix
-          -- Ipe.Layer
-          -- Ipe.Content
+          Ipe.Matrix
+          Ipe.Layer
+          Ipe.Content
 
           -- Ipe.IpeRender
           -- Ipe.IpeToIpe

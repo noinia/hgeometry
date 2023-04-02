@@ -21,42 +21,42 @@ module Ipe.Writer(
   , ipeWriteAttrs, writeAttrValues
   ) where
 
-import           Control.Lens                 (view, (&), (.~), (^.), (^..))
-import qualified Data.ByteString              as B
-import qualified Data.ByteString.Char8        as C
-import           Data.Colour.SRGB             (RGB (..))
-import           Data.Ext
+import           Control.Lens (view, (&), (.~), (^.), (^..))
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as C
+import           Data.Colour.SRGB (RGB (..))
 import           Data.Fixed
-import qualified Data.Foldable                as F
-import           Geometry.BezierSpline
-import           Geometry.Box
-import           Geometry.Ellipse        (ellipseMatrix)
-import           Ipe.Attributes
-import qualified Ipe.Attributes as IA
-import           Ipe.Color      (IpeColor (..))
-import           Ipe.Path
-import           Ipe.Types
-import           Ipe.Value
-import           Geometry.LineSegment
-import qualified Geometry.Matrix         as Matrix
-import           Geometry.Point
-import           Geometry.PolyLine
-import           Geometry.Polygon        (Polygon, holeList, outerBoundary,
-                                               outerBoundaryVector)
-import           Geometry.Vector
-import qualified Data.LSeq                    as LSeq
-import           Data.List.NonEmpty           (NonEmpty (..))
-import           Data.Maybe                   (catMaybes, fromMaybe, mapMaybe)
+import qualified Data.Foldable as F
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty (..))
+import           Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Singletons
-import           Data.Text                    (Text)
-import qualified Data.Text                    as Text
-import           Data.Vinyl                   hiding (Label)
+import           Data.Text (Text)
+import qualified Data.Text as Text
+import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           System.IO                    (hPutStrLn, stderr)
-import           Text.XML.Expat.Format        (format')
+import           Geometry.BezierSpline
+import           Geometry.Box
+import           Geometry.Ellipse (ellipseMatrix)
+import           HGeometry.Ext
+import           HGeometry.LineSegment
+import qualified HGeometry.Matrix as Matrix
+import           HGeometry.Point
+import           HGeometry.PolyLine
+import           HGeometry.Polygon        (Polygon, holeList, outerBoundary,
+                                            outerBoundaryVector)
+import           HGeometry.Vector
+import           Ipe.Attributes
+import qualified Ipe.Attributes as IA
+import           Ipe.Color (IpeColor (..))
+import           Ipe.Path
+import           Ipe.Types
+import           Ipe.Value
+import           System.IO (hPutStrLn, stderr)
+import           Text.XML.Expat.Format (format')
 import           Text.XML.Expat.Tree
 
 --------------------------------------------------------------------------------
