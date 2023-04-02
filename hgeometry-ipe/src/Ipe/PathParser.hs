@@ -22,17 +22,16 @@ module Ipe.PathParser
 
 import           Data.Bifunctor
 import           Data.Char (isSpace)
-import           Data.Ext (ext)
 import           Data.Fixed
 import           Data.Functor (($>))
-import           Geometry.Box
-import           Geometry.Matrix
-import           Geometry.Point
-import           Geometry.Vector
 import           Data.Ratio
-import           Data.RealNumber.Rational
 import           Data.Text (Text)
 import qualified Data.Text as T
+import           HGeometry.Box
+import           HGeometry.Matrix
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Point
+import           HGeometry.Vector
 import           Ipe.ParserPrimitives
 import           Ipe.Path (Operation(..))
 import           Text.Parsec.Error (messageString, errorMessages)
@@ -135,7 +134,7 @@ readMatrix :: Coordinate r => Text -> Either Text (Matrix 3 3 r)
 readMatrix = runParser pMatrix
 
 -- | Try to read/parse a Rectangle
-readRectangle :: Coordinate r => Text -> Either Text (Rectangle () r)
+readRectangle :: Coordinate r => Text -> Either Text (Rectangle (Point 2 r))
 readRectangle = runParser pRectangle
 
 -----------------------------------------------------------------------
@@ -170,10 +169,10 @@ pCoordinate = fromSeq <$> pInteger <*> pDecimal
 
 
 -- | Parser for a rectangle
-pRectangle :: Coordinate r => Parser (Rectangle () r)
-pRectangle = (\p q -> box (ext p) (ext q)) <$> pPoint
-                                           <*  pWhiteSpace
-                                           <*> pPoint
+pRectangle :: Coordinate r => Parser (Rectangle (Point 2 r))
+pRectangle = Box <$> pPoint
+                 <*  pWhiteSpace
+                 <*> pPoint
 
 -- | Parser for a matrix.
 pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
