@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.BezierSpline
-  ( BezierSplineF(..)
+  ( BezierSplineF(.., Bezier2, Bezier3)
   , BezierSpline
   , QuadraticBezier
   , CubicBezier
@@ -54,6 +54,16 @@ type CubicBezier     = BezierSplineF (Vector 4)
 
 type instance Dimension (BezierSplineF f point) = 2
 type instance NumType   (BezierSplineF f point) = NumType point
+
+-- | Construct a QuadatricBezier
+pattern Bezier2       :: point -> point -> point -> QuadraticBezier point
+pattern Bezier2 p q r = BezierSpline (Vector3 p q r)
+{-# COMPLETE Bezier2 #-}
+
+-- | Construct a cubic bezier
+pattern Bezier3         :: point -> point -> point -> point -> CubicBezier point
+pattern Bezier3 p q r s = BezierSpline (Vector4 p q r s)
+{-# COMPLETE Bezier3 #-}
 
 
 -- | Access the container

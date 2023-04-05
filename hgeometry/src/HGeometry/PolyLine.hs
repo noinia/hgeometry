@@ -12,6 +12,8 @@
 module HGeometry.PolyLine
   ( PolyLineF(..), PolyLine
   , module HGeometry.PolyLine.Class
+  , HasVertices(..)
+  , HasEdges(..)
   ) where
 
 
@@ -22,9 +24,11 @@ import           Data.Functor.Classes
 -- import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+-- import qualified Data.Vector.NonEmpty as NV
 import           GHC.Generics
 import           HGeometry.Box
 import           HGeometry.Point
+import           HGeometry.Foldable.Util
 import           HGeometry.PolyLine.Class
 import           HGeometry.Properties
 import           HGeometry.Transformation
@@ -94,3 +98,12 @@ instance ( TraversableWithIndex Int f
   type Vertex   (PolyLineF f point) = point
   type VertexIx (PolyLineF f point) = Int
   vertexAt i = _PolyLineF . iix i
+
+instance ( Foldable1 f
+         , IxValue (f point) ~ point, Index (f point) ~ Int
+         , Ixed (f point)
+         , HasFromFoldable1 f
+         , Point_ point d r
+         , TraversableWithIndex Int f
+         ) => PolyLine_ (PolyLineF f point) point where
+  polylineFromPoints = PolyLine . fromFoldable1

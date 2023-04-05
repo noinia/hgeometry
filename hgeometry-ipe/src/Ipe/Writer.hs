@@ -21,33 +21,36 @@ module Ipe.Writer(
   , ipeWriteAttrs, writeAttrValues
   ) where
 
-import           Control.Lens (view, (&), (.~), (^.), (^..))
+import           Control.Lens (view, (^.), (^..), toNonEmptyOf, IxValue)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
 import           Data.Fixed
 import qualified Data.Foldable as F
-import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty (..))
 import           Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import           Data.Ratio
-import           Data.RealNumber.Rational
+import           Data.Semigroup.Foldable
+import qualified Data.Sequence as Seq
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           Geometry.BezierSpline
-import           Geometry.Box
-import           Geometry.Ellipse (ellipseMatrix)
+import           HGeometry.BezierSpline
+import           HGeometry.Box
+import           HGeometry.Ellipse (ellipseMatrix)
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
+import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
 import qualified HGeometry.Matrix as Matrix
+import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
-import           HGeometry.Polygon        (Polygon, holeList, outerBoundary,
-                                            outerBoundaryVector)
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import           Ipe.Attributes
 import qualified Ipe.Attributes as IA
@@ -160,7 +163,8 @@ instance IpeWriteText String where
 
 -- | Add attributes to a node
 addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
-n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
+n@(Element {}) `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
+_ `addAtts` _   = error "addAts, requires Element"
 
 -- | Same as `addAtts` but then for a Maybe node
 mAddAtts  :: Maybe (Node Text Text) -> [(Text, Text)] -> Maybe (Node Text Text)
@@ -303,24 +307,20 @@ instance IpeWriteText r => IpeWriteText (Operation r) where
   ipeWriteText ClosePath          = Just "h"
 
 
-instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
-  ipeWriteText pl = case pl^..points.traverse.core of
+instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (PolyLine point) where
+  ipeWriteText pl = case pl^..vertices.asPoint of
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
     _          -> error "ipeWriteText. absurd. no vertices polyline"
     -- the polyline type guarantees that there is at least one point
 
-instance IpeWriteText r => IpeWriteText (Polygon t () r) where
-  ipeWriteText pg = fmap mconcat . traverse f $ pg^.outerBoundary : holeList pg
-    where
-      f pg' = case pg'^..outerBoundaryVector.traverse.core of
-        (p : rest) -> unlines' . map ipeWriteText
-                    $ MoveTo p : map LineTo rest ++ [ClosePath]
-        _          -> Nothing
-    -- TODO: We are not really guaranteed that there is at least one point, it would
-    -- be nice if the type could guarantee that.
+instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (SimplePolygon point) where
+  ipeWriteText pg = case toNonEmptyOf (outerBoundary.asPoint) pg of
+        (p :| rest) -> unlines' . map ipeWriteText
+                     $ MoveTo p : map LineTo rest ++ [ClosePath]
 
-instance IpeWriteText r => IpeWriteText (BezierSpline 3 2 r) where
-  ipeWriteText (Bezier3 p q r s) = unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
+instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) where
+  ipeWriteText (fmap (^.asPoint) -> Bezier3 p q r s) =
+    unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment    p) = ipeWriteText p
@@ -362,8 +362,8 @@ instance IpeWriteText r => IpeWrite (Image r) where
                                    Element "image" [("rect", p <> " " <> q)] [Text dt]
                                  )
                                <$> ipeWriteText d
-                               <*> ipeWriteText (a^.core)
-                               <*> ipeWriteText (b^.core)
+                               <*> ipeWriteText a
+                               <*> ipeWriteText b
 
 -- TODO: Replace this one with s.t. that writes the actual image payload
 instance IpeWriteText () where
@@ -430,20 +430,20 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
 
 --------------------------------------------------------------------------------
 
-instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
-  ipeWrite p = ipeWrite path
-    where
-      path = fromPolyLine $ p & points.traverse.extra .~ ()
-      -- TODO: Do something with the p's
+instance (IpeWriteText r, Point_ point 2 r, Functor f, Foldable1 f
+         ) => IpeWrite (PolyLineF f point) where
+  ipeWrite = ipeWrite . fromPolyLine
 
-fromPolyLine :: PolyLine 2 () r -> Path r
-fromPolyLine = Path . LSeq.fromNonEmpty . (:| []) . PolyLineSegment
+fromPolyLine               :: (Point_ point 2 r, Functor f, Foldable1 f)
+                           => PolyLineF f point -> Path r
+fromPolyLine (PolyLine vs) =
+  Path . Seq.singleton . PolyLineSegment . PolyLine . fromFoldable1 . fmap (view asPoint) $ vs
 
 
-instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
-  ipeWrite (LineSegment' p q) =
-    ipeWrite . fromPolyLine . fromPointsUnsafe . map (extra .~ ()) $ [p,q]
-
+instance ( IpeWriteText r, IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , Point_ point 2 r
+         ) => IpeWrite (LineSegment endPoint point) where
+  ipeWrite = ipeWrite @(PolyLineF NonEmpty point) . lineSegmentToPolyLine
 
 instance IpeWrite () where
   ipeWrite = const Nothing
