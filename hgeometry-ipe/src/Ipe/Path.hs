@@ -45,8 +45,6 @@ import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Transformation
-import           Hiraffe.Graph
-
 
 --------------------------------------------------------------------------------
 -- | Paths

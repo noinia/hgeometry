@@ -38,12 +38,28 @@ import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
-import           Data.Ext
-import           Geometry hiding (head)
-import           Geometry.BezierSpline
-import           Geometry.Box
-import           Geometry.Ellipse (ellipseMatrix)
-import qualified Geometry.Matrix as Matrix
+import qualified Data.List as L
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Proxy
+import qualified Data.Sequence as Seq
+import           Data.Singletons
+import           Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Traversable as Tr
+import           Data.Vinyl hiding (Label)
+import           Data.Vinyl.Functor
+import           Data.Vinyl.TypeLevel
+import           HGeometry.BezierSpline
+import           HGeometry.Box
+import           HGeometry.Ellipse (ellipseMatrix)
+import           HGeometry.Ext
+import           HGeometry.Foldable.Util
+import qualified HGeometry.Matrix as Matrix
+import           HGeometry.Point
+import           HGeometry.Vector
+import           HGeometry.PolyLine (polylineFromPoints)
+import qualified HGeometry.Polygon.Simple as Polygon
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Matrix
@@ -52,21 +68,6 @@ import           Ipe.Path
 import           Ipe.PathParser
 import           Ipe.Types
 import           Ipe.Value
-
-
-import qualified Geometry.Polygon as Polygon
-import qualified Data.LSeq as LSeq
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromMaybe, mapMaybe)
-import           Data.Proxy
-import           Data.Singletons
-import           Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Traversable as Tr
-import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.Functor
-import           Data.Vinyl.TypeLevel
 import           Text.XML.Expat.Tree
 
 
@@ -196,7 +197,7 @@ ipeReadTextWith f t = case f t of
                         Left _  -> Right (Named t)
 
 
-instance Coordinate r => IpeReadText (Rectangle () r) where
+instance Coordinate r => IpeReadText (Rectangle (Point 2 r)) where
   ipeReadText = readRectangle
 
 instance Coordinate r => IpeReadText (RGB r) where
@@ -235,11 +236,13 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
 
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
-                                      pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
-                                      poly = Polygon.unsafeFromPoints . dropRepeats $ pts
-                                      pl   = fromPointsUnsafe pts
+                                      pts  = s NonEmpty.:| q:mapMaybe (^?_LineTo) ls
+                                      mPoly = Polygon.fromPoints . dropRepeats $ pts
+                                      pl    = polylineFromPoints pts
                                   in case xs of
-                                       (ClosePath : xs') -> PolygonPath poly   <<| xs'
+                                       (ClosePath : xs') -> case mPoly of
+                                         Nothing         -> Left "simple polygon failed"
+                                         Just poly       -> PolygonPath poly   <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
       fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
@@ -257,21 +260,24 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
 
 -- | Read a list of control points of a uniform cubic B-spline and conver it
 --   to cubic Bezier pieces
-splineToCubicBeziers :: Fractional r => [Point 2 r] -> [BezierSpline 3 2 r]
+splineToCubicBeziers :: Fractional r => [Point 2 r] -> [CubicBezier (Point 2 r)]
 splineToCubicBeziers [a, b, c, d] = [Bezier3 a b c d]
 splineToCubicBeziers (a : b : c : d : rest) =
-  let p = b .+^ (c .-. b) ^/ 2
-      q = c .+^ (d .-. c) ^/ 3
-      r = p .+^ (q .-. p) ^/ 2
+  let p = b .+^ ((c .-. b) ^/ 2)
+      q = c .+^ ((d .-. c) ^/ 3)
+      r = p .+^ ((q .-. p) ^/ 2)
   in (Bezier3 a b p r) : splineToCubicBeziers (r : q : d : rest)
 splineToCubicBeziers _ = error "splineToCubicBeziers needs at least four points"
 
 
-dropRepeats :: Eq a => [a] -> [a]
-dropRepeats = map head . L.group
+dropRepeats :: Eq a => NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
+dropRepeats = fmap NonEmpty.head . NonEmpty.group1
 
 instance (Coordinate r, Fractional r, Eq r) => IpeReadText (Path r) where
-  ipeReadText = fmap (Path . LSeq.fromNonEmpty) . ipeReadText
+  ipeReadText = fmap (Path . fromNonEmpty') . ipeReadText
+    where
+      fromNonEmpty' :: NonEmpty.NonEmpty a -> Seq.Seq a
+      fromNonEmpty' = fromFoldable
 
 --------------------------------------------------------------------------------
 -- Reading attributes

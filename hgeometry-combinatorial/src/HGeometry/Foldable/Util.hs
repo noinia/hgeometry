@@ -6,10 +6,10 @@ module HGeometry.Foldable.Util
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Semigroup.Foldable
+import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
 import qualified Data.Vector.NonEmpty as NonEmptyVector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-
 
 --------------------------------------------------------------------------------
 
@@ -36,5 +36,9 @@ instance HasFromFoldable1 NonEmpty where
 instance HasFromFoldable Vector.Vector  where
   fromList = Vector.fromList
 
+
 instance HasFromFoldable1 NonEmptyVector  where
   fromNonEmpty = NonEmptyVector.fromNonEmpty
+
+instance HasFromFoldable Seq.Seq where
+  fromList = Seq.fromList
