@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Point.Orientation
+-- Module      :  HGeometry.Point.Orientation.Strict
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -8,15 +8,15 @@
 -- Strict orientation tests using SoS
 --
 --------------------------------------------------------------------------------
-module HGeometry.Point.Orientation
+module HGeometry.Point.Orientation.Strict
   ( StrictCCW
   , pattern SCCW, pattern SCW
   , strictCcw
   ) where
 
-import Data.Indexed
-import Data.Sign
+import HGeometry.Indexed
 import HGeometry.Point.Class
+import HGeometry.Sign
 import HGeometry.SoS.Orientation
 import HGeometry.Vector
 
