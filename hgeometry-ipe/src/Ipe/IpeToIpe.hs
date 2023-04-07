@@ -13,7 +13,7 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeToIpe where
 
-import           Data.Range
+import           HGeometry.Interval
 import           Ipe.Types (IpeFile)
 import           Ipe.Writer (writeIpeFile, IpeWriteText)
 import           System.Directory (getTemporaryDirectory, removeFile)
@@ -42,7 +42,7 @@ ipeToIpeWith options fType inFp outFp =
            [ inFp
            , outFp
            ]
-    pageRange (Range' l u) = show l <> "-" <> show u
+    pageRange (ClosedInterval l u) = show l <> "-" <> show u
     pageView p v = show p <> "-" <> show v
 
 
@@ -87,7 +87,7 @@ data NoZip = NoZip | Zip
   deriving (Show,Eq,Enum)
 
 data PageRange = EntireFile
-               | PageRange (Range PageNumber) -- ^ only closed ranges are supported.
+               | PageRange (ClosedInterval PageNumber)
                deriving (Show,Eq)
 
 data Options = Options { export     :: Export

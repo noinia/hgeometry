@@ -68,7 +68,8 @@ module Ipe(
   , _asRectangle
   , _asTriangle
   , _asPolyLine
-  , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
+  , _asSimplePolygon
+  -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
   -- *** Dealing with Attributes
   , _withAttrs
   -- ** Default readers

@@ -65,6 +65,8 @@ common setup
       , vinyl                   >= 0.14
       , singletons              >= 3.0
       , singletons-th           >= 3.0
+      , directory               >= 1.3.7
+      , filepath                >= 1.4.2
 
 
       , ghc-typelits-natnormalise >= 0.7.7
@@ -109,7 +111,7 @@ library
     import:           setup
     hs-source-dirs:   src
     exposed-modules:
-          -- Ipe
+          Ipe
           Ipe.Literal
           Ipe.Value
           Ipe.Color
@@ -125,8 +127,8 @@ library
           Ipe.Layer
           Ipe.Content
 
-          -- Ipe.IpeRender
-          -- Ipe.IpeToIpe
+          Ipe.IpeRender
+          Ipe.IpeToIpe
 
 
     other-modules:
