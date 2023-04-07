@@ -126,9 +126,22 @@ instance ( Point_ point 2 r
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
                          . NonEmpty.fromList . F.toList
 
+  fromPoints = Just
+             . toCounterClockwiseOrder
+             . uncheckedFromCCWPoints
+             . requireThree "fromPoints" . F.toList
+
+-- | Validate that we have at least three points
+requireThree :: String -> [a] -> [a]
+requireThree _ lst@(_:_:_:_) = lst
+requireThree label _ = error $
+  "HGeometry.Polygon." ++ label ++ ": Polygons must have at least three points."
+
+  -- FIXME: Do the acutal tests verifying the preconditions !!!
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r
+     95
          ) => Show (SimplePolygonF f point) where
   show = showSimplePolygon
 

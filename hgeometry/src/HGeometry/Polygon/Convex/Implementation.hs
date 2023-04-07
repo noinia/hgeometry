@@ -87,10 +87,11 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
 instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Point_ point 2 r
          ) => SimplePolygon_ (ConvexPolygonF f point) point r where
-  type ConstructableSimplePolygon (ConvexPolygonF f point) = ( VertexContainer f point
-                                                             , Ord (NumType point)
-                                                             , Num (NumType point)
-                                                             )
+  type ConstructableSimplePolygon (ConvexPolygonF f point) point r =
+    ( VertexContainer f point
+    , Ord r
+    , Num r
+    )
   -- | Additional precondition: the points actually form a convex polygon
   uncheckedFromCCWPoints = ConvexPolygon . uncheckedFromCCWPoints
   fromPoints pts = fromPoints pts >>= fromSimplePolygon

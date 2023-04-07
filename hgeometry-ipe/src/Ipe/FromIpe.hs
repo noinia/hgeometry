@@ -52,22 +52,34 @@ import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
 
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import Ipe.Attributes
+-- import Ipe.Color(IpeColor(..))
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> :set -XOverloadedStrings
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
--- >>> import Geometry.Point
+-- >>> import qualified Data.List.NonEmpty as NonEmpty
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.fromPoints . map ext
+--              . PolyLine.polylineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor "red")
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
+
+-- testPath :: Path Int
+-- testPath = Path . fromSingleton  . PolyLineSegment
+--              . PolyLine.polylineFromPoints . NonEmpty.fromList
+--              $ [ origin, Point2 10 10, Point2 200 100 ]
+-- testPathAttrs :: IpeAttributes Path Int
+-- testPathAttrs = attr SStroke (IpeColor "red")
+-- testObject :: IpeObject Int
+-- testObject = IpePath (testPath :+ testPathAttrs)
 
 
 
@@ -90,7 +102,7 @@ _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
 -- >>> testPath ^? _asPolyLine
--- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])})
+-- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100])
 _asPolyLine :: Prism' (Path r) (PolyLine.PolyLine (Point 2 r))
 _asPolyLine = prism' poly2path path2poly
   where
@@ -194,7 +206,7 @@ pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
 -- object, directly with its attributes here.
 --
 -- >>> testObject ^? _withAttrs _IpePath _asPolyLine
--- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100] :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 _withAttrs       :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g
                  -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
 _withAttrs po pg = prism' g2o o2g

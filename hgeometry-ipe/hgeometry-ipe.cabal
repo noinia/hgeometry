@@ -162,3 +162,11 @@ test-suite hgeometry-ipe-hspec
       Spec
       Ipe.ReaderSpec
   hs-source-dirs:   test
+
+test-suite hgeometry-ipe-doctest
+    import:           setup, test-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8

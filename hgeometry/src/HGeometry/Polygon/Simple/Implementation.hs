@@ -3,6 +3,9 @@ module HGeometry.Polygon.Simple.Implementation
   (
   -- * Polygon
     areaSimplePolygon
+
+  , isCounterClockwise
+  , toCounterClockwiseOrder
   -- * Show
   , showSimplePolygon
   -- * Read
@@ -18,6 +21,7 @@ import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import           Data.Aeson.Types (Parser)
 import           Data.Foldable (minimumBy)
+import qualified Data.List as List
 import           Data.Ord (comparing)
 import           HGeometry.Point
 -- import           HGeometry.LineSegment.Boxed
@@ -33,6 +37,32 @@ areaSimplePolygon :: ( Fractional r
                      , SimplePolygon_ simplePolygon point r
                      ) => simplePolygon -> r
 areaSimplePolygon = signedArea
+
+
+-- | Test if the outer boundary of the polygon is in clockwise or counter
+-- clockwise order.
+--
+-- Note that this function is useful only for implementing fromPoints;
+-- since any valid simplePolygon should be in CCW order!
+--
+-- running time: \( O(n) \)
+isCounterClockwise :: (Num r, Eq r, SimplePolygon_ simplePolygon point r)
+                   => simplePolygon -> Bool
+isCounterClockwise = (\x -> x == abs x) . signedArea2X
+
+-- | Make sure that every edge has the polygon's interior on its left,
+-- by orienting the outer boundary into counter-clockwise order, and
+-- the inner borders (i.e. any holes, if they exist) into clockwise order.
+--
+-- Note that this function is useful only for implementing fromPoints;
+-- since any valid simplePolygon should be in CCW order!
+--
+-- running time: \( O(n) \)
+toCounterClockwiseOrder   :: (Num r, Eq r, SimplePolygon_ simplePolygon point r)
+                          => simplePolygon -> simplePolygon
+toCounterClockwiseOrder pg
+  | isCounterClockwise pg = pg
+  | otherwise             = uncheckedFromCCWPoints . List.reverse $ pg^..outerBoundary
 
 --------------------------------------------------------------------------------
 -- * Show

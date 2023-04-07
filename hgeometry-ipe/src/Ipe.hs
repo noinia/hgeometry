@@ -83,8 +83,8 @@ module Ipe(
   , module Ipe.IpeOut
   -- ** Batch reexports
 
-  , module Ipe.Types
-  , module Ipe.FromIpe
+  -- , module Ipe.Types
+  -- , module Ipe.FromIpe
   , module Ipe.Attributes
   , module Ipe.Value
   , IpeColor(..), named
