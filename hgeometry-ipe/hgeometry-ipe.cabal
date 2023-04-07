@@ -91,7 +91,7 @@ common setup
       , ViewPatterns
       , FunctionalDependencies
 
-common quickcheck-setup
+common test-setup
     ghc-options:
          -Wall
          -fno-warn-unticked-promoted-constructors
@@ -101,9 +101,10 @@ common quickcheck-setup
          -fno-warn-orphans
     build-depends:
         hspec                   >= 2.9
-      , QuickCheck              >= 2.10
-      , quickcheck-instances
+      -- , QuickCheck              >= 2.10
+      -- , quickcheck-instances
       , hgeometry-ipe
+
 --------------------------------------------------------------------------------
 -- * Main Library
 
@@ -152,12 +153,12 @@ library
 --------------------------------------------------------------------------------
 -- * Tests stup
 
---test-suite hgeometry-hspec
---   import:           setup, quickcheck-setup
---    build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   other-modules:
---       Spec
---       PointSpec
---   hs-source-dirs:   test
+test-suite hgeometry-ipe-hspec
+  import:           setup, test-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+      Ipe.ReaderSpec
+  hs-source-dirs:   test
