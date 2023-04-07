@@ -43,6 +43,7 @@ module HGeometry.Vector.Class
 -- import           Control.Arrow ((&&&))
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
 import           Control.Monad.State
+import           Control.Monad (guard, replicateM)
 import           Data.Coerce
 import qualified Data.Foldable as F
 import qualified Data.Functor.Apply as Apply
