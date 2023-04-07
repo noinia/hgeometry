@@ -63,7 +63,8 @@ instance Bifoldable (:+) where
 instance Bitraversable (:+) where
   bitraverse f g (c :+ e) = (:+) <$> f c <*> g e
 
-instance Bifoldable1 (:+)
+instance Bifoldable1 (:+) where
+  bifoldMap1 f g (c :+ e) = f c <> g e
 
 instance Bitraversable1 (:+) where
   bitraverse1 f g (c :+ e) = liftF2 (:+) (f c) (g e)

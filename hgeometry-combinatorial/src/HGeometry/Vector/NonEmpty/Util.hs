@@ -12,7 +12,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-
+import qualified Data.Vector.NonEmpty as NV
 --------------------------------------------------------------------------------
 
 
@@ -22,7 +22,10 @@ type instance IxValue (NonEmptyVector a) = a
 instance Ixed (NonEmptyVector a) where
   ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
 
-instance Foldable1 NonEmptyVector
+instance Foldable1 NonEmptyVector where
+  foldMap1 f v = let (v',x) = NV.unsnoc v
+                 in Vector.foldr (\x' a -> f x' <> a) (f x) v'
+
 instance Traversable1 NonEmptyVector where
   traverse1 f (NonEmptyVector v) =
       -- Get the length of the vector in /O(1)/ time

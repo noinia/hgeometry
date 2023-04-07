@@ -33,7 +33,8 @@ newtype Cyclic v a = Cyclic (v a)
  deriving stock (Generic)
 -- not sure if we want this Eq instance or not .
 
-instance Foldable1 v    => Foldable1    (Cyclic v)
+instance Foldable1 v => Foldable1    (Cyclic v) where
+  foldMap1 f (Cyclic v) = foldMap1 f v
 
 instance Traversable1 v => Traversable1 (Cyclic v) where
   traverse1 f (Cyclic v) = Cyclic <$> traverse1 f v
