@@ -2,7 +2,7 @@ module ConvexHull.ConvexHullSpec where
 
 import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
--- import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
+import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
 -- import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
 import qualified HGeometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens
@@ -62,24 +62,23 @@ spec = do
           property $ \(PS pts) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
-        -- it "JarvisMarch Manual test1" $
-        --   JarvisMarch.convexHull testPoints
-        --   `shouldBe`
-        --   fromPointsUnsafe [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
-        --                    ,mPoint2 [8,11],mPoint2 [8,6],mPoint2 [7,4]
-        --                    ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]
+        it "JarvisMarch Manual test1" $
+          JarvisMarch.convexHull testPoints
+          `shouldBe`
+          uncheckedFromCCWPoints [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
+                                 ,mPoint2 [8,11],mPoint2 [8,6],mPoint2 [7,4]
+                                 ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]
 
-        -- it "JarvisMarch Manual test2" $
-        --   JarvisMarch.convexHull testPoints2
-        --   `shouldBe`
-        --   fromPointsUnsafe [ mPoint2 [0,10], mPoint2 [2,20]
-        --                    , mPoint2 [6,20], mPoint2 [8,11]
-        --                    , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]
+        it "JarvisMarch Manual test2" $
+          JarvisMarch.convexHull testPoints2
+          `shouldBe`
+          uncheckedFromCCWPoints [ mPoint2 [0,10], mPoint2 [2,20]
+                                 , mPoint2 [6,20], mPoint2 [8,11]
+                                 , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]
 
-
-        -- it "GrahamScan and JarvisMarch are the same" $
-        --   property $ \pts ->
-        --     (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
+        it "GrahamScan and JarvisMarch are the same" $
+          property $ \(PS pts) ->
+            (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
 
 
