@@ -32,5 +32,6 @@
                 -optF -package=hgeometry-vector
                 -optF -package=hgeometry-point
                 -optF -package=hgeometry-kernel
+                -optF -package=hgeometry
 
 #-}

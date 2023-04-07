@@ -141,7 +141,6 @@ requireThree label _ = error $
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r
-     95
          ) => Show (SimplePolygonF f point) where
   show = showSimplePolygon
 

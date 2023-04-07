@@ -30,10 +30,14 @@ import           Prelude hiding (zipWith)
 -- $setup
 -- >>> import HGeometry.Point
 -- >>> import HGeometry.Matrix
--- >>> let printMatrix = mapMOf_ rows print
--- >>> let :{
--- matrixFromList' :: Matrix_ matrix n m r => [r] -> matrix
--- matrixFromList' = fromMaybe (error "") . matrixFromList
+-- >>> let printMatrix = mapMOf_ (rows.traverse) print
+-- >>> :{
+-- let matrixFromList' :: ( Matrix_ matrix n m r
+--                        , KnownNat n, KnownNat m
+--                        , Has_ Vector_  m r
+--                        , Has_ Vector_  n (Vector m r)
+--                        ) => [r] -> matrix
+--     matrixFromList' = fromMaybe (error "") . matrixFromList
 -- :}
 
 
