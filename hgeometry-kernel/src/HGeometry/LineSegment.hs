@@ -14,6 +14,8 @@ module HGeometry.LineSegment
   , ClosedLineSegment
   , OpenLineSegment
   , EndPoint(EndPoint,OpenE,ClosedE)
+  , module HGeometry.LineSegment.Class
+  , EndPoint_(..)
   ) where
 
 

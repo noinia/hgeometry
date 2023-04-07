@@ -18,7 +18,8 @@ module Ipe.FromIpe(
   , _asTriangle
 
   , _asPolyLine
-  , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
+  , _asSimplePolygon
+  -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
 
   -- * Dealing with Attributes
   , _withAttrs
@@ -31,20 +32,22 @@ module Ipe.FromIpe(
   ) where
 
 import           Control.Lens hiding (Simple)
-import           Data.Ext
 import           Data.Kind (Type)
-import qualified Data.LSeq as LSeq
-import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Sequence as Seq
+import           HGeometry.Ball
+import           HGeometry.Box
+import qualified HGeometry.Box as Box
+import           HGeometry.Ellipse (Ellipse, _EllipseCircle)
+import           HGeometry.Ext
+import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
-import           Geometry.Ball
-import           Geometry.Box
-import           Geometry.Ellipse (Ellipse, _EllipseCircle)
-import           Geometry.LineSegment
-import           Geometry.Point
-import qualified Geometry.PolyLine as PolyLine
-import           Geometry.Polygon
-import           Geometry.Properties
-import           Geometry.Triangle
+import           HGeometry.Point
+import qualified HGeometry.PolyLine as PolyLine
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple
+import           HGeometry.Properties
+import           HGeometry.Triangle
+import           Hiraffe.Graph
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
@@ -77,17 +80,18 @@ _asPoint = prism' (flip Symbol "mark/disk(sx)") (Just . view symbolPoint)
 -- segment or a polyline with more than two points.
 --
 --
-_asLineSegment :: Prism' (Path r) (LineSegment 2 () r)
-_asLineSegment = prism' seg2path path2seg
-  where
-    seg2path   = review _asPolyLine . PolyLine.fromLineSegment
-    path2seg p = PolyLine.asLineSegment' =<< preview _asPolyLine p
+_asLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
+_asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
+  -- prism' seg2path path2seg
+  -- where
+  --   seg2path   = review _asPolyLine . PolyLine.lineSegmentToPolyLine
+  --   path2seg p = PolyLine.asLineSegment' =<< preview _asPolyLine p
 
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
 -- >>> testPath ^? _asPolyLine
 -- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])})
-_asPolyLine :: Prism' (Path r) (PolyLine.PolyLine 2 () r)
+_asPolyLine :: Prism' (Path r) (PolyLine.PolyLine (Point 2 r))
 _asPolyLine = prism' poly2path path2poly
   where
     poly2path = Path . fromSingleton  . PolyLineSegment
@@ -96,37 +100,38 @@ _asPolyLine = prism' poly2path path2poly
     -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
-_asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
-_asSimplePolygon = _asSomePolygon._Left
+_asSimplePolygon :: Prism' (Path r) (SimplePolygon (Point 2 r))
+_asSimplePolygon = prism' polygonToPath pathToPolygon
 
 
 -- | Tries to convert a path into a rectangle.
-_asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle () r)
+_asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle (Point 2 r))
 _asRectangle = prism' rectToPath pathToRect
   where
-    rectToPath (corners -> Corners a b c d) = review _asSimplePolygon . fromPoints $ [a,b,c,d]
+    rectToPath (Box.corners -> Corners a b c d) =
+      review _asSimplePolygon . uncheckedFromCCWPoints $ [a,b,c,d]
     pathToRect p = p^?_asSimplePolygon >>= asRect
 
-    asRect    :: SimplePolygon () r -> Maybe (Rectangle () r)
-    asRect pg = case pg^..outerBoundaryVector.traverse of
-        [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (boundingBoxList' [a,c])
-        [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (boundingBoxList' [a,c])
+    asRect    :: SimplePolygon (Point 2  r) -> Maybe (Rectangle (Point 2 r))
+    asRect pg = case pg^..outerBoundary of
+        [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (Rectangle a c)
+        [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (Rectangle a c)
         _                                                    -> Nothing
 
-    isH (p :+ _) (q :+ _) = p^.xCoord == q^.xCoord
-    isV (p :+ _) (q :+ _) = p^.yCoord == q^.yCoord
+    isH p q = p^.xCoord == q^.xCoord
+    isV p q = p^.yCoord == q^.yCoord
 
 
 -- | Convert to a triangle
-_asTriangle :: Prism' (Path r) (Triangle 2 () r)
+_asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath (Triangle p q r) = polygonToPath . unsafeFromPoints . map (&extra .~ ()) $ [p,q,r]
+    triToPath (Triangle p q r) = polygonToPath $ uncheckedFromCCWPoints [p,q,r]
     path2tri p = case p^..pathSegments.traverse._PolygonPath of
                     []   -> Nothing
-                    [pg] -> case polygonVertices pg of
-                              (a :| [b,c]) -> Just $ Triangle a b c
-                              _            -> Nothing
+                    [pg] -> case pg^..vertices of
+                              [a,b,c] -> Just $ Triangle a b c
+                              _       -> Nothing
                     _    -> Nothing
 
 
@@ -143,38 +148,39 @@ _asEllipse = prism' toPath toEllipse
                     [e] -> Just e
                     _   -> Nothing
 
-_asCircle :: (Radical r, Eq r) => Prism' (Path r) (Circle () r)
+_asCircle :: (Radical r, Eq r) => Prism' (Path r) (Circle (Point 2 r))
 _asCircle = _asEllipse._EllipseCircle
 -- FIXME: For reading we should not need the Radical constraint!
 
-_asDisk :: (Radical r, Eq r) => Prism' (Path r) (Disk () r)
+_asDisk :: (Radical r, Eq r) => Prism' (Path r) (Disk (Point 2 r))
 _asDisk = _asCircle.from _DiskCircle
 
 
--- | Convert to a multipolygon
-_asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
-_asMultiPolygon = _asSomePolygon._Right
+-- -- | Convert to a multipolygon
+-- _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
+-- _asMultiPolygon = _asSomePolygon._Right
 
 -- _asPolygon :: Prism' (Path r) (forall t. Polygon t () r)
 -- _asPolygon = prism' polygonToPath (fmap (either id id) . pathToPolygon)
 
-_asSomePolygon :: Prism' (Path r) (SomePolygon () r)
-_asSomePolygon = prism' embed pathToPolygon
-  where
-    embed     = either polygonToPath polygonToPath
+-- _asSomePolygon :: Prism' (Path r) (SomePolygon () r)
+-- _asSomePolygon = prism' embed pathToPolygon
+--   where
+--     embed     = either polygonToPath polygonToPath
 
 
-polygonToPath                      :: Polygon t () r -> Path r
-polygonToPath pg@SimplePolygon{}   = Path . fromSingleton . PolygonPath $ pg
-polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
-                                   $ vs :| hs
+polygonToPath :: SimplePolygon (Point 2 r) -> Path r
+polygonToPath = Path . fromSingleton . PolygonPath
 
 
-pathToPolygon   :: Path r -> Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+-- polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
+--                                    $ vs :| hs
+
+pathToPolygon   :: Path r -> Maybe (SimplePolygon (Point 2 r))
 pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
-                    []    -> Nothing
-                    [pg]  -> Just . Left  $ pg
-                    vs:hs -> Just . Right $ MultiPolygon vs hs
+                    [pg]  -> Just pg
+                    _     -> Nothing
+                    -- vs:hs -> Just . Right $ MultiPolygon vs hs
 
 
 
@@ -214,40 +220,38 @@ class HasDefaultFromIpe g where
 instance HasDefaultFromIpe (Point 2 r) where
   type DefaultFromIpe (Point 2 r) = IpeSymbol
   defaultFromIpe = _withAttrs _IpeUse _asPoint
-    where
 
-
-instance HasDefaultFromIpe (LineSegment 2 () r) where
-  type DefaultFromIpe (LineSegment 2 () r) = Path
+instance HasDefaultFromIpe (ClosedLineSegment (Point 2 r)) where
+  type DefaultFromIpe (ClosedLineSegment (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asLineSegment
 
 instance HasDefaultFromIpe (Ellipse r) where
   type DefaultFromIpe (Ellipse r) = Path
   defaultFromIpe = _withAttrs _IpePath _asEllipse
 
-instance (Radical r, Eq r) => HasDefaultFromIpe (Circle () r) where
-  type DefaultFromIpe (Circle () r) = Path
+instance (Radical r, Eq r) => HasDefaultFromIpe (Circle (Point 2 r)) where
+  type DefaultFromIpe (Circle (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asCircle
 
-instance (Radical r, Eq r) => HasDefaultFromIpe (Disk () r) where
-  type DefaultFromIpe (Disk () r) = Path
+instance (Radical r, Eq r) => HasDefaultFromIpe (Disk (Point 2 r)) where
+  type DefaultFromIpe (Disk (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asDisk
 
-instance HasDefaultFromIpe (PolyLine.PolyLine 2 () r) where
-  type DefaultFromIpe (PolyLine.PolyLine 2 () r) = Path
+instance HasDefaultFromIpe (PolyLine.PolyLine (Point 2 r)) where
+  type DefaultFromIpe (PolyLine.PolyLine (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asPolyLine
 
 
-instance HasDefaultFromIpe (SimplePolygon () r) where
-  type DefaultFromIpe (SimplePolygon () r) = Path
+instance HasDefaultFromIpe (SimplePolygon (Point 2 r)) where
+  type DefaultFromIpe (SimplePolygon (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asSimplePolygon
 
-instance HasDefaultFromIpe (MultiPolygon () r) where
-  type DefaultFromIpe (MultiPolygon () r) = Path
-  defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
+-- instance HasDefaultFromIpe (MultiPolygon () r) where
+--   type DefaultFromIpe (MultiPolygon () r) = Path
+--   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
 
-instance (Num r, Ord r) => HasDefaultFromIpe (Rectangle () r) where
-  type DefaultFromIpe (Rectangle () r) = Path
+instance (Num r, Ord r) => HasDefaultFromIpe (Rectangle (Point 2 r)) where
+  type DefaultFromIpe (Rectangle (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asRectangle
 
 
@@ -262,5 +266,5 @@ readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r,
                => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
 
-fromSingleton :: a -> LSeq.LSeq 1 a
-fromSingleton = LSeq.fromNonEmpty . (:| [])
+fromSingleton :: a -> Seq.Seq a
+fromSingleton = Seq.singleton

@@ -30,6 +30,7 @@ import           HGeometry.Box
 import           HGeometry.Point
 import           HGeometry.Foldable.Util
 import           HGeometry.PolyLine.Class
+import           HGeometry.Interval.Class
 import           HGeometry.Properties
 import           HGeometry.Transformation
 -- import           HGeometry.Vector
@@ -99,7 +100,21 @@ instance ( TraversableWithIndex Int f
   type VertexIx (PolyLineF f point) = Int
   vertexAt i = _PolyLineF . iix i
 
-instance ( Foldable1 f
+instance ( Traversable1 f
+         -- , Ixed (f point)
+         -- , IxValue (f point) ~ point
+         -- , Index (f point) ~ Int
+         ) => HasStart (PolyLineF f point) point where
+  start = head1
+
+instance ( Traversable1 f
+         -- , Ixed (f point)
+         -- , IxValue (f point) ~ point
+         -- , Index (f point) ~ Int
+         ) => HasEnd (PolyLineF f point) point where
+  end = last1
+
+instance ( Traversable1 f
          , IxValue (f point) ~ point, Index (f point) ~ Int
          , Ixed (f point)
          , HasFromFoldable1 f

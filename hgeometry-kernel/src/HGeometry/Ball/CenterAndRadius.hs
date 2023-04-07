@@ -16,7 +16,11 @@ module HGeometry.Ball.CenterAndRadius
 
   , Sphere(Sphere,Circle,MkSphere)
   , Circle
+
+  , _BallSphere
+  , _DiskCircle
   ) where
+
 
 import           Control.Lens
 import           HGeometry.Ball.Class
@@ -108,7 +112,7 @@ pattern Disk c r = Ball c r
 -- | A sphere, i.e. the boudary of a Ball.
 newtype Sphere point = MkSphere (Ball point)
 
--- | Construct a Sphere
+-- | Construct a Sphere; the boundary of a ball
 pattern Sphere     :: point -> NumType point -> Sphere point
 pattern Sphere c r = MkSphere (Ball c r)
 {-# COMPLETE Sphere #-}
@@ -131,7 +135,17 @@ type instance Dimension (Sphere point) = Dimension point
 instance HasCenter (Sphere point) point where
   center = lens (\(Sphere c _) -> c) (\(Sphere _ r) c -> Sphere c r)
 
+--------------------------------------------------------------------------------
 
+-- | Iso to convert between a ball and a sphere.
+_BallSphere :: Iso (Ball point) (Ball point') (Sphere point) (Sphere point')
+_BallSphere = coerced
+{-# INLINE _BallSphere #-}
+
+-- | Iso to convert between a Disk and a Circle
+_DiskCircle :: Iso (Disk point) (Disk point') (Circle point) (Circle point')
+_DiskCircle = _BallSphere
+{-# INLINE _DiskCircle #-}
 
 --------------------------------------------------------------------------------
 

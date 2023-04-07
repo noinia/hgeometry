@@ -22,12 +22,15 @@ module HGeometry.Box
 import Control.Lens
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
-import HGeometry.Box.Internal
 import HGeometry.Box.Corners
+import HGeometry.Box.Internal
 import HGeometry.Box.Sides
+import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Line.LineEQ
+import HGeometry.Line.Class
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Transformation
@@ -44,6 +47,7 @@ deriving instance (Eq (Point d r), Eq (ClosedLineSegment (Point d r))) =>
                   Eq (LineBoxIntersection d r)
 
 type instance Intersection (LineEQ r) (Rectangle point) = Maybe (LineBoxIntersection 2 r)
+
 
 instance (Num r, Ord r
          , Point_ point 2 r
@@ -109,3 +113,20 @@ instance (Point_ point d r, IsTransformable point) => IsTransformable (Box point
   -- transformations (e.g. rotations) the result may no longer be an
   -- axis aligned box. So use with care!
   transformBy t = over allPoints (transformBy t)
+
+
+type instance Intersection (LinePV 2 r) (Rectangle point) = Maybe (LineBoxIntersection 2 r)
+
+instance ( Num r, Ord r
+         , Point_ point 2 r
+         ) =>  HasIntersectionWith (LinePV 2 r) (Rectangle point) where
+  l `intersects` (corners -> Corners tl tr br bl) = onOppositeSides tl br || onOppositeSides tr bl
+    where
+      onOppositeSides p q = onSideTest p l /= onSideTest q l
+  {-# INLINE intersects #-}
+
+instance ( Fractional r, Ord r
+         , Point_ point 2 r
+         ) =>  IsIntersectableWith (LinePV 2 r) (Rectangle point) where
+  (LinePV p v) `intersect` r = (fromPointAndVec @(LineEQ r) p v) `intersect` r
+  {-# INLINE intersect #-}

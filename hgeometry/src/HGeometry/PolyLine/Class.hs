@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PolyLine.Class
   ( PolyLine_(..)
-  , lineSegmentToPolyLine
+  , _PolyLineLineSegment
   ) where
 
 import           Control.Lens
@@ -32,6 +32,8 @@ import           Hiraffe.Graph
 
 -- | A class representing PolyLines
 class ( HasVertices polyLine polyLine
+      , HasStart polyLine point
+      , HasEnd polyLine point
       , Vertex polyLine ~ point
       , Point_ point (Dimension point) (NumType point)
       ) => PolyLine_ polyLine point | polyLine -> point where
@@ -41,8 +43,16 @@ class ( HasVertices polyLine polyLine
   -- pre: there should be at least two distinct points
   polylineFromPoints :: Foldable1 f => f point -> polyLine
 
--- | Convert a line segment into a polyline
-lineSegmentToPolyLine  :: ( LineSegment_ lineSegment point
-                          , PolyLine_ polyLine point
-                          ) => lineSegment -> polyLine
-lineSegmentToPolyLine s = polylineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
+
+-- maybe make these two functions into a prism instead
+
+-- | Prism between a polyline and a line segment
+_PolyLineLineSegment :: ( LineSegment_ lineSegment point
+                        , PolyLine_ polyLine point
+                        ) => Prism' polyLine lineSegment
+_PolyLineLineSegment = prism' lineSegmentToPolyLine polyLineToLineSegment
+  where
+    lineSegmentToPolyLine s = polylineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
+
+    polyLineToLineSegment pl
+      | lengthOf vertices pl == 2 = Just $ uncheckedLineSegment (pl^.start) (pl^.end)                     | otherwise                 = Nothing

@@ -23,7 +23,7 @@ import           Control.Lens
 import           Control.Lens.Internal.Fold (NonEmptyDList(..))
 import           Data.Function (on)
 import           Data.Functor.Apply (Apply)
-import qualified Data.Functor.Apply as Apply
+-- import qualified Data.Functor.Apply as Apply
 import           Data.Functor.Contravariant (phantom)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Semigroup (First(..))

@@ -21,7 +21,7 @@ module Ipe.Writer(
   , ipeWriteAttrs, writeAttrValues
   ) where
 
-import           Control.Lens (view, (^.), (^..), toNonEmptyOf, IxValue)
+import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
@@ -52,6 +52,7 @@ import           HGeometry.PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
+import           Hiraffe.Graph
 import           Ipe.Attributes
 import qualified Ipe.Attributes as IA
 import           Ipe.Color (IpeColor (..))
@@ -61,7 +62,6 @@ import           Ipe.Value
 import           System.IO (hPutStrLn, stderr)
 import           Text.XML.Expat.Format (format')
 import           Text.XML.Expat.Tree
-
 --------------------------------------------------------------------------------
 
 -- | Given a prism to convert something of type g into an ipe file, a file path,
@@ -440,10 +440,14 @@ fromPolyLine (PolyLine vs) =
   Path . Seq.singleton . PolyLineSegment . PolyLine . fromFoldable1 . fmap (view asPoint) $ vs
 
 
-instance ( IpeWriteText r, IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+instance ( IpeWriteText r
+         , EndPoint_ (endPoint point)
+         , IxValue (endPoint point) ~ point
+         , Vertex (LineSegment endPoint point) ~ point
+
          , Point_ point 2 r
          ) => IpeWrite (LineSegment endPoint point) where
-  ipeWrite = ipeWrite @(PolyLineF NonEmpty point) . lineSegmentToPolyLine
+  ipeWrite = ipeWrite @(PolyLineF NonEmpty point) . review _PolyLineLineSegment
 
 instance IpeWrite () where
   ipeWrite = const Nothing
