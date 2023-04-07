@@ -19,6 +19,7 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Triangle
+import           HGeometry.Intersection
 
 
 -- import Data.Ratio
@@ -38,25 +39,27 @@ convexHull            :: (Ord r, Fractional r, Show r, Point_ point 2 r)
 convexHull ps        = uncheckedFromCCWPoints
                      $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
   where
-    STR l r mids  = findExtremes ps
-    m             = lineThrough l r
-    (above,below) = List.partition (`liesAbove` m) mids
+    Extremes l r mids = findExtremes ps
+    m                 = lineThrough l r
+    (above,below)     = List.partition (`liesAbove` m) mids
+
+data Extremes p = Extremes !p !p [p] deriving (Show)
 
 -- | Finds the leftmost and rightmost point in the list
 findExtremes            :: (Ord r, Point_ point 2 r)
                         => NonEmpty point
-                        -> STR point point [point]
-findExtremes (p :| pts ) = foldr f (STR p p []) pts
+                        -> Extremes point
+findExtremes (p :| pts ) = foldr f (Extremes p p []) pts
   where
-    f q (STR l r ms) = case (incXdecY q l, incXdecY q r) of
-                         (LT,_)  -> STR q r (addIfNot r l ms)
-                         (EQ,_)  -> STR l r ms -- ditch q; it is the same as l
-                         (GT,GT) -> STR l q (addIfNot l r ms)
-                         (GT,EQ) -> STR l r ms -- ditch q; it is the same as r
-                         (GT,LT) -> STR l r (q:ms)
+    f q (Extremes l r ms) = case (incXdecY q l, incXdecY q r) of
+                              (LT,_)  -> Extremes q r (addIfNot r l ms)
+                              (EQ,_)  -> Extremes l r ms -- ditch q; it is the same as l
+                              (GT,GT) -> Extremes l q (addIfNot l r ms)
+                              (GT,EQ) -> Extremes l r ms -- ditch q; it is the same as r
+                              (GT,LT) -> Extremes l r (q:ms)
 
-    addIfNot y x xs | x /= y    = x:xs
-                    | otherwise = xs
+    addIfNot y x xs | (x^.asPoint) /= (y^.asPoint) = x:xs
+                    | otherwise                    = xs
 
 -- findExtremesBy         :: (a -> a -> Ordering)
 --                        -> NonEmpty a
@@ -73,11 +76,12 @@ incXdecY (Point2_ px py) (Point2_ qx qy) =
 
 -- | include neigher left or right
 --
-hull         :: (Fractional r, Ord r, Point_ point 2 r)
+hull         :: forall point r. (Fractional r, Ord r, Point_ point 2 r)
              => point -> point -> [point ] -> [point]
 hull _ _ []  = []
 hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
   where
+    m       :: LinePV 2 r
     m       = lineThrough l r
     mid     = F.maximumBy (comparing dist) pts
 
@@ -88,7 +92,7 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
     rightSide = r `onSide` splitL -- define the side containing r the right side
 
     (ls,rs) = List.partition (\p -> p `onSide` splitL /= rightSide)
-            . filter (\p -> not $ p `onTriangle` t) $ pts
+            . filter (\p -> not $ (p^.asPoint) `intersects` t) $ pts
 
 
 -- mPoint2 [x,y] = Point2 x y

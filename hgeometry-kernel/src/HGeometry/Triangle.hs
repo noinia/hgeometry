@@ -19,6 +19,7 @@ import HGeometry.Box.Boxable
 -- import HGeometry.HalfSpace
 -- import HGeometry.HyperPlane
 import HGeometry.Point
+import HGeometry.Intersection
 import HGeometry.Properties
 -- import HGeometry.Transformation
 import HGeometry.Triangle.Class
@@ -84,12 +85,12 @@ instance ( Point_ point d r
          , Ord (Vector d r)
          ) => IsBoxable (Triangle point)
 
--- instance ( Point_ point 2 r
---          , Num r, Ord r
---          , OptCVector_ 3 (HalfSpace 2 r)
---          , OptMetric_ 2 r, OptCVector_ 2 r
---          , OptCVector_ 3 r
---          , OptCVector_ 3 point
---          -- , HyperPlane_ (HyperPlane 2 r) 2 r
---          ) => HasIntersectionWith (Point 2 r) (Triangle point) where
---   q `intersects` t = allOf components (q `intersects`) $ intersectingHalfPlanes t
+instance ( Point_ point 2 r
+         , Num r, Ord r
+         -- , OptCVector_ 3 (HalfSpace 2 r)
+         -- , OptMetric_ 2 r, OptCVector_ 2 r
+         -- , OptCVector_ 3 r
+         -- , OptCVector_ 3 point
+         -- , HyperPlane_ (HyperPlane 2 r) 2 r
+         ) => HasIntersectionWith (Point 2 r) (Triangle point) where
+  q `intersects` t = allOf components (q `intersects`) $ intersectingHalfPlanes t

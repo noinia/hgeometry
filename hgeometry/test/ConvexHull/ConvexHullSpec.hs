@@ -4,7 +4,7 @@ import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 -- import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
 -- import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
--- import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
+import qualified HGeometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens
 import           HGeometry.Ext
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -16,13 +16,23 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Convex
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck (property)
+import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 import           HGeometry.Instances ()
+import           HGeometry.Number.Real.Rational
 
 --------------------------------------------------------------------------------
 
-type R = Rational
+type R = RealNumber 5
+
+newtype PointSet = PS (NonEmpty (Point 2 R))
+  deriving newtype (Show,Eq)
+
+instance Arbitrary PointSet where
+  arbitrary = do p <- arbitrary
+                 q <- arbitrary `suchThat` (/= p)
+                 r <- arbitrary `suchThat` (\r' -> r' /= p && r' /= q)
+                 (\pts' -> PS $ NonEmpty.fromList $ [p,q,r] <> pts') <$> arbitrary
 
 spec :: Spec
 spec = do
@@ -30,7 +40,7 @@ spec = do
       modifyMaxSize (const 1000) $ do
         describe "GrahamScan and DivideAnd Conquer are the same" $ do
           it "quickcheck convex hull " $
-            property $ \p q r (pts' :: [Point 2 R]) -> let pts = p :| q : r : pts' in
+            property $ \(PS pts) ->
               (PG $ GrahamScan.convexHull pts) == (PG $ DivideAndConquer.convexHull pts)
           it "quickcheck upper hull " $
             property $ \(pts :: NonEmpty (Point 2 Int)) ->
@@ -48,9 +58,9 @@ spec = do
         --   it "manual" $
         --     (PG $ GrahamScan.convexHull myPoints) == (PG $ OldDivAndConquer.convexHull myPoints)
 
-        -- it "GrahamScan and QuickHull are the same" $
-        --   property $ \pts ->
-        --     (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
+        it "GrahamScan and QuickHull are the same" $
+          property $ \(PS pts) ->
+            (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
         -- it "JarvisMarch Manual test1" $
         --   JarvisMarch.convexHull testPoints
