@@ -28,6 +28,7 @@ module HGeometry.Point.Class
 
 import           Control.Lens
 import           Data.Function (on)
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy (Proxy(..))
 import           GHC.TypeNats
 import           HGeometry.Ext
@@ -37,6 +38,16 @@ import qualified Linear.Affine as Linear
 -- import           Linear.V2 (V2(..))
 -- import           Linear.V3 (V3(..))
 -- import           Linear.V4 (V4(..))
+
+
+-- $setup
+-- >>> import HGeometry.Point
+-- >>> :{
+-- let myVector :: Vector 3 Int
+--     myVector = Vector3 1 2 3
+--     myPoint = Point myVector
+-- :}
+
 
 --------------------------------------------------------------------------------
 
@@ -305,17 +316,20 @@ class HasPoints s t point point' | s -> point
                                  , t -> point' where
   -- | Traversal over all points in the structure
   --
-  -- >>> let seg = ClosedLineSegment (Point2 10 10) (Point2 20 (30 :: Int))
-  -- >>> seg^..allPoints
+  -- >>> let xs = NonEmpty.fromList [Point2 10 10, Point2 20 (30 :: Int)]
+  -- >>> xs^..allPoints
   -- [Point2 10 10,Point2 20 30]
-  -- >>> over allPoints (.+^ Vector2 10 10) seg :: ClosedLineSegment (Point 2 Int)
-  -- ClosedLineSegment (Point2 20 20) (Point2 30 40)
+  -- >>> over allPoints (.+^ Vector2 10 10) xs :: NonEmpty.NonEmpty (Point 2 Int)
+  -- Point2 20 20 :| [Point2 30 40]
   allPoints :: ( Point_ point  d r
                , Point_ point' d r'
                , NumType s ~ r
                , NumType t ~ r'
                , Dimension s ~ d, Dimension t ~ d
                ) => Traversal1 s t point point'
+
+instance HasPoints (NonEmpty.NonEmpty point) (NonEmpty.NonEmpty point') point point' where
+  allPoints = traverse1
 
 -- | Shorthand for 'HasPoints s s point point'
 type HasPoints' s point = HasPoints s s point point

@@ -138,3 +138,11 @@ test-suite hgeometry-point-hspec
       Point.CmpAround
   build-depends:
       hgeometry-point:quickcheck
+
+test-suite hgeometry-point-doctest
+    import:           setup, quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8

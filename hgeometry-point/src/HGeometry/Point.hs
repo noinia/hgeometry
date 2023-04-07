@@ -23,7 +23,7 @@ module HGeometry.Point
   , HasVector(..)
   , HasCoordinates(..)
   , asPoint
-  , origin, vector
+  , origin
   -- , pointFromPoint
   , pointFromList
 
@@ -56,7 +56,7 @@ module HGeometry.Point
   , HasPoints(..), HasPoints'
   ) where
 
-import Control.Lens (Lens', Iso', (^.), coerced)
+import Control.Lens (Lens', Iso', coerced)
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 -- import HGeometry.Point.Orientation
@@ -69,6 +69,7 @@ import HGeometry.Point.PointF
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> import HGeometry.Vector
+-- >>> import Control.Lens(Lens', Iso', (^.), coerced)
 
 --------------------------------------------------------------------------------
 
