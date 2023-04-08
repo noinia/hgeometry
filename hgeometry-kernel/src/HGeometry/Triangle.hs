@@ -25,6 +25,7 @@ import HGeometry.Properties
 import HGeometry.Triangle.Class
 import HGeometry.Vector
 import Text.Read
+import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -51,6 +52,14 @@ instance ( Point_ point (Dimension point) (NumType point)
          ) => Triangle_ (Triangle point) point where
   mkTriangle = Triangle
   corners = _TriangleVector
+
+instance HasVertices' (Triangle point) where
+  type Vertex   (Triangle point) = point
+  type VertexIx (Triangle point) = Int
+  vertexAt i = _TriangleVector.iix i
+
+instance HasVertices (Triangle point) (Triangle point') where
+  vertices = cloneIndexedTraversal (_TriangleVector.components)
 
 instance HasPoints (Triangle point) (Triangle point') point point' where
   allPoints = _TriangleVector.components

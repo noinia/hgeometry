@@ -22,10 +22,12 @@ import           HGeometry.Triangle
 import           HGeometry.Intersection
 
 
+import           HGeometry.Number.Real.Rational
+
 -- import Data.Ratio
--- import qualified Data.List.NonEmpty as NonEmpty
--- import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GC
--- import Debug.Trace
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified HGeometry.ConvexHull.GrahamScan as GC
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | ConvexHull using Quickhull. The resulting polygon is
@@ -119,3 +121,16 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
 
 -- testPoints2 :: NonEmpty (Point 2 Rational :+ Int)
 -- testPoints2 = read "(Point2 [(-9876468593885) % 9254762894818,(-34982972348716) % 7450362538495] :+ 1) :| [Point2 [(-11974177119403) % 7705693443554,(-37634868551543) % 9311528788922] :+ 2,Point2 [(-32383659855458) % 9565531378857,20253950785876 % 8268868939819] :+ 3,Point2 [42425655100996 % 8786996213535,(-7972873491283) % 1604043452399] :+ 4]"
+
+type R = RealNumber 5
+
+testPts :: NonEmpty (Point 2 R)
+testPts = Point2 0 0 :| [Point2 0.16719 (-0.50324),Point2 0.59524 0.09425]
+
+test = convexHull testPts
+gHull = GC.convexHull testPts
+
+
+-- let t = Triangle l m r
+-- (m^.asPoint) `intersects` t
+-- the corners of a triangle should certainly intersect the triangle ..

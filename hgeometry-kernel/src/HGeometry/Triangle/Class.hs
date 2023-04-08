@@ -10,19 +10,24 @@
 --------------------------------------------------------------------------------
 module HGeometry.Triangle.Class
   ( Triangle_(..), pattern Triangle_
+  , toCounterClockwiseTriangle
+  , triangleSignedArea2X
   , intersectingHalfPlanes
+  , toBarricentric, fromBarricentric
   ) where
 
-import           Control.Lens
+import Control.Lens
 -- import qualified Data.Foldable as F
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane
 -- import           HGeometry.Intersection
-import           HGeometry.Point
-import           HGeometry.Properties (NumType, Dimension)
-import           HGeometry.Vector
+import HGeometry.Point
+import HGeometry.Properties (NumType, Dimension)
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
+
+
 
 -- | Class representing triangles
 class ( Point_   point (Dimension point) (NumType point)
@@ -48,14 +53,74 @@ pattern Triangle_ u v w <- (view corners -> Vector3 u v w)
 --------------------------------------------------------------------------------
 -- * Two dimensional convenience functions
 
+
+-- | Computes the double-signed area of a triangle
+triangleSignedArea2X                   :: ( Num r
+                                          , Point_ point 2 r
+                                          , Triangle_ triangle point
+                                          ) => triangle -> r
+triangleSignedArea2X (Triangle_ a b c) = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
+                                             | (p,q) <- edges
+                                             ]
+  where
+    edges = [(a,b),(b,c),(c,a)]
+{-# INLINE triangleSignedArea2X #-}
+
+-- | Make sure that the triangles vertices are given in counter clockwise order
+toCounterClockwiseTriangle :: ( Num r, Eq r
+                              , Point_ point 2 r
+                              , Triangle_ triangle point
+                              ) => triangle -> triangle
+toCounterClockwiseTriangle t@(Triangle_ a b c)
+    | isCounterClockwise t = t
+    | otherwise            = mkTriangle a c b
+  where
+    isCounterClockwise = (\x -> x == abs x) . triangleSignedArea2X
+
 -- | Get the three halfplanes such that the triangle is the intersection of those
 -- halfspaces.
-intersectingHalfPlanes                    :: ( Triangle_ triangle point
-                                             , Point_ point 2 r
-                                             , Num r, Eq r
-                                             )
-                                          => triangle
-                                          -> Vector 3 (HalfSpace 2 r)
-intersectingHalfPlanes (Triangle_ u v w) = Vector3 (above u v) (above v w) (above w u)
+intersectingHalfPlanes :: ( Triangle_ triangle point
+                          , Point_ point 2 r
+                          , Num r, Eq r
+                          )
+                       => triangle
+                       -> Vector 3 (HalfSpace 2 r)
+intersectingHalfPlanes (toCounterClockwiseTriangle -> Triangle_ u v w) =
+    Vector3 (above u v) (above v w) (above w u)
   where
-    above p q = HalfSpace . hyperPlaneThrough $ Vector2 p q
+    above p q = HalfSpace Positive . hyperPlaneThrough $ Vector2 p q
+
+
+-- | Given a point q and a triangle, q inside the triangle, get the baricentric
+-- cordinates of q
+toBarricentric                                   :: ( Fractional r
+                                                    , Point_ point 2 r
+                                                    , Triangle_ triangle point
+                                                    )
+                                                 => point -> triangle
+                                                 -> Vector 3 r
+toBarricentric (Point2_ qx qy) (Triangle_ a b c) = Vector3 alpha beta gamma
+  where
+    Point2_ ax ay = a
+    Point2_ bx by = b
+    Point2_ cx cy = c
+
+    dett  = (by - cy)*(ax - cx) + (cx - bx)*(ay - cy)
+
+    alpha = ((by - cy)*(qx - cx) + (cx - bx)*(qy - cy)) / dett
+    beta  = ((cy - ay)*(qx - cx) + (ax - cx)*(qy - cy)) / dett
+    gamma = 1 - alpha - beta
+    -- see https://en.wikipedia.org/wiki/Barycentric_coordinate_system#Conversion_between_barycentric_and_Cartesian_coordinates
+
+-- | Given a vector of barricentric coordinates and a triangle, get the
+-- corresponding point in the same coordinate sytsem as the vertices of the
+-- triangle.
+fromBarricentric                                   :: ( Triangle_ triangle point
+                                                      , Point_ point d r
+                                                      , Num r
+                                                      )
+                                                   => Vector 3 r
+                                                   -> triangle
+                                                   -> Point d r
+fromBarricentric (Vector3 a b c) (Triangle_ p q r) = let f = view vector in
+                                                       Point $ a *^ f p ^+^ b *^ f q ^+^ c *^ f r

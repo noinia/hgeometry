@@ -1,19 +1,30 @@
-module HGeometry.HalfSpaceSpec
+module HGeometry.HyperPlaneSpec
   (spec) where
 
-import HGeometry.HalfSpace
 import HGeometry.HyperPlane
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.Point
-import HGeometry.Intersection
+import HGeometry.Vector
 import Test.Hspec
 
 --------------------------------------------------------------------------------
 
 type R = Double
 
-myHalfspace :: HalfSpaceF (LineEQ R)
-myHalfspace = HalfSpace Positive (LineEQ 1 2)
+myHyp :: NonVerticalHyperPlane 2 R
+myHyp = NonVerticalHyperPlane $ Vector2 1 2
+-- should be the same as myLine
+
+myHyp2 :: NonVerticalHyperPlane 2 R
+myHyp2 = hyperPlaneFromEquation $ Vector3 2 1 (-1)
+-- should be the same as myLine
+
+
+
+myLine :: LineEQ R
+myLine = LineEQ 1 2
 
 myPoints :: [(Point 2 R, Bool)]
 myPoints = [ (Point2 10 10, False)
@@ -23,9 +34,10 @@ myPoints = [ (Point2 10 10, False)
            ]
 
 spec :: Spec
-spec = describe "halfspace Tests" $ do
-         it "in halfspace" $ do
-           mapM_ (\(q,ans) -> (q `intersects` myHalfspace) `shouldBe` ans) myPoints
+spec = describe "HyperPlane Tests" $ do
+         it "same hyperplane" $ myHyp `shouldBe` myHyp2
+         -- it "in halfspace" $ do
+         --   mapM_ (\(q,ans) -> (q `intersects` myHalfspace) `shouldBe` ans) myPoints
 
 
          -- it "intersect tests" $ do
@@ -33,3 +45,6 @@ spec = describe "halfspace Tests" $ do
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
+
+test :: Ordering
+test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)
