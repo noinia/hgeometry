@@ -47,4 +47,9 @@ spec = describe "HyperPlane Tests" $ do
          --   (l `intersects` h) `shouldBe` True
 
 test :: Ordering
-test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)
+test = (Point2 10 (10 :: R)) `onSideTest` (LineEQ 1 2)
+
+myHyp3 :: HyperPlane 2 R
+myHyp3 = hyperPlaneFromEquation $ Vector3 2 1 (-1)
+
+testz = Point2 0 2 `onHyperPlane` myHyp3

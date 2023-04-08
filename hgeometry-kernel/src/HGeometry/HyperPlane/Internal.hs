@@ -18,6 +18,12 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- 2 dimensional hyperplane representing the line: 2 + 1*x + (-1)* y = 0,
+-- in other words, the line y = 1*x + 2
+
+-- $setup
+-- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1)
+
 -- | A Hyperplane in d-dimensions, described by
 --
 -- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
@@ -26,6 +32,10 @@ newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
 
 type instance NumType   (HyperPlane d r) = r
 type instance Dimension (HyperPlane d r) = d
+
+
+deriving newtype instance Eq (Vector (d+1) r) => Eq (HyperPlane d r)
+deriving stock instance Show (Vector (d+1) r) => Show (HyperPlane d r)
 
 --------------------------------------------------------------------------------
 
@@ -40,6 +50,8 @@ type MkHyperPlaneConstraints d r =
 
 instance ( MkHyperPlaneConstraints d r
          ) => HyperPlane_ (HyperPlane d r) d r where
+  -- >>> hyperPlaneEquation myHyperPlane2
+  -- Vector3 2 1 (-1)
   hyperPlaneEquation (HyperPlane v) = v
 
 instance ( MkHyperPlaneConstraints d r
@@ -48,6 +60,8 @@ instance ( MkHyperPlaneConstraints d r
 
 instance ( Eq r
          ) => HyperPlaneFromPoints (HyperPlane 2 r) where
+  --
+  --
   hyperPlaneThrough (Vector2 (Point2_ px py) (Point2_ qx qy))
     | px /= qx  = let a = qy - py
                       b = px - qx

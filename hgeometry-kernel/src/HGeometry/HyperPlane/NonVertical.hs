@@ -15,6 +15,8 @@ module HGeometry.HyperPlane.NonVertical
   ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
   ) where
 
+import Control.Lens hiding (snoc, uncons)
+import Prelude hiding (last)
 import Data.Type.Ord
 import GHC.TypeLits
 import HGeometry.HyperPlane.Class
@@ -27,7 +29,6 @@ import HGeometry.Vector
 -- $setup
 -- >>> let myHyperPlane = NonVerticalHyperPlane $ Vector2 1 2
 --
-
 
 -- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
 -- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
@@ -68,9 +69,9 @@ instance ( MkHyperPlaneConstraints d r
   -- NonVerticalHyperPlane (Vector2 1 2)
   hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-ad)
     where
-      (e' :: Vector d r, ad :: r) = unsnoc e
-      (a0 :: r, as :: Vector (d-1) r) = uncons e'
-      a       = snoc as a0 :: Vector d r
+      (a0 :: r, as :: Vector d r) = uncons e
+      ad = as^.last
+      a  = as&last .~ a0
   {-# INLINE hyperPlaneFromEquation #-}
 
 instance ( MkHyperPlaneConstraints d r
@@ -78,8 +79,8 @@ instance ( MkHyperPlaneConstraints d r
          , 1 + (d-1) ~ d
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
-  --
-  -- >>> hyperPlaneCoefficients
+  -- >>> hyperPlaneCoefficients myHyperPlane
+  -- Vector2 1 2
   hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
 
 --------------------------------------------------------------------------------

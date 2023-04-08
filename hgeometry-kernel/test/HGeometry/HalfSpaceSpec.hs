@@ -27,8 +27,9 @@ myPoints = [ (Point2 10 10, False)
 
 spec :: Spec
 spec = describe "halfspace Tests" $ do
-         it "in halfspace" $ do
-           mapM_ (\(q,ans) -> (q `intersects` myHalfspace) `shouldBe` ans) myPoints
+         describe "in halfspace" $ do
+           mapM_ (\(q,ans) -> it (show q) $ do
+                     (q `intersects` myHalfspace) `shouldBe` ans) myPoints
 
 
          -- it "intersect tests" $ do
