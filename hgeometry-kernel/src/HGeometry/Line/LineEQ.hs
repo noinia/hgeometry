@@ -12,14 +12,14 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Line.LineEQ
-  ( LineEQ(LineEQ, MKLineEQ)
+  ( LineEQ(LineEQ, MkLineEQ)
   , slope, intercept
 
 
   , evalAt'
   ) where
 
-import Control.Lens((^.))
+import Control.Lens((^.), Lens', lens)
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import HGeometry.HyperPlane.NonVertical
@@ -51,7 +51,7 @@ type instance Dimension (LineEQ r) = 2
 -- >>> (LineEQ 10 20) ^. slope
 -- 10
 slope :: Lens' (LineEQ r) r
-slope = lens (\(LineEQ a _) -> a) (\(LineEQ _ b) -> LineEQ a b)
+slope = lens (\(LineEQ a _) -> a) (\(LineEQ _ b) a -> LineEQ a b)
 
 -- | Lens to access the intercept (i.e. the value at which it
 -- intersects the y-axis) of a line.
@@ -59,7 +59,7 @@ slope = lens (\(LineEQ a _) -> a) (\(LineEQ _ b) -> LineEQ a b)
 -- >>> (LineEQ 10 20) ^. slope
 -- 20
 intercept :: Lens' (LineEQ r) r
-intercept = lens (\(LineEQ _ b) -> b) (\(LineEQ a _) -> LineEQ a b)
+intercept = lens (\(LineEQ _ b) -> b) (\(LineEQ a _) b -> LineEQ a b)
 
 -- deriving instance Eq  (VectorFamily' 2 r) => Eq  (LineEQ r)
 -- deriving instance Ord (VectorFamily' 2 r) => Ord (LineEQ r)
@@ -167,7 +167,7 @@ evalAt'                :: Num r => r -> LineEQ r -> r
 evalAt' x (LineEQ a b) = a*x + b
 -- TODO: it would be nice if this was actually just evalAt from the typeclass ....
 
-evalAt''   :: Num r => r -> LineEQ r -> r
+evalAt''   :: Fractional r => r -> LineEQ r -> r
 evalAt'' p = evalAt (Point1 p)
 
 -- evalAt''   :: ( Fractional r, OptCVector_ 2 r

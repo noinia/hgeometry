@@ -31,6 +31,18 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- | myLine, myHyperPlane, and myNVHyperPlane all represent the same
+-- 2d hyperplane; i.e. a line in R^2.
+
+-- $setup
+-- >>> import HGeometry.HyperPlane.NonVertical
+-- >>> import HGeometry.HyperPlane
+-- >>> import HGeometry.Line.LineEQ
+--
+-- >>> let myLine = LineEQ 1 2
+-- >>> let myHyperPlane = HyperPlane $ Vector3 2 1 (-1)
+-- >>> let myNVHyperPlane = NonVerticalHyperPlane $ Vector2 1 2
+
 
 
 -- | A class to represent hyperplanes in d-dimensional space.
@@ -51,6 +63,13 @@ class ( NumType hyperPlane ~ r
   -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
   --
   -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\)
+  --
+  -- >>> hyperPlaneEquation myLine
+  -- Vector3 2 1 (-1)
+  -- >>> hyperPlaneEquation myHyperPlane
+  -- Vector3 2 1 (-1)
+  -- >>> hyperPlaneEquation myNVHyperPlane
+  -- Vector3 2 1 (-1)
   hyperPlaneEquation :: ( Num r
                         ) => hyperPlane -> Vector (d+1) r
   default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
@@ -75,7 +94,7 @@ class ( NumType hyperPlane ~ r
       a0 = negate $ (q^.vector) `dot` n
   {-# INLINE fromPointAndNormal #-}
 
-  -- | Get the normal vector of the hyperlane.
+  -- | Get the normal vector of the hyperplane.
   normalVector :: Num r => hyperPlane -> Vector d r
   default normalVector :: ( KnownNat d
                           , Num r

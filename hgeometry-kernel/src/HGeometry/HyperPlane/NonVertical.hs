@@ -24,9 +24,20 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> let myHyperPlane = NonVerticalHyperPlane $ Vector2 1 2
+--
+
+
 -- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
 -- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
 -- coefficients of te hyperplane.
+--
+--
+-- e.g. the 'myHyperPlane' defines the hyperplane described by
+--
+-- y = 2 + 1*x
+--
 newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 
 type instance NumType   (NonVerticalHyperPlane d r) = r
@@ -35,9 +46,10 @@ type instance Dimension (NonVerticalHyperPlane d r) = d
 deriving instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
 deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 
+deriving instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
 
 instance ( MkHyperPlaneConstraints d r
-         , 1 <= d
+         , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
   fromPointAndNormal _ n = NonVerticalHyperPlane n
@@ -47,21 +59,27 @@ instance ( MkHyperPlaneConstraints d r
 
 instance ( MkHyperPlaneConstraints d r
          , Fractional r
-         , 1 <= d
+         , 2 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
   -- | pre: the last component is not zero
-  hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-x)
+  --
+  --
+  -- >>> hyperPlaneFromEquation $ Vector3 2 1 (-1)
+  -- NonVerticalHyperPlane (Vector2 1 2)
+  hyperPlaneFromEquation e = NonVerticalHyperPlane $ a ^/ (-ad)
     where
-      (a,x) = unsnoc e
-
-
-
+      (e' :: Vector d r, ad :: r) = unsnoc e
+      (a0 :: r, as :: Vector (d-1) r) = uncons e'
+      a       = snoc as a0 :: Vector d r
+  {-# INLINE hyperPlaneFromEquation #-}
 
 instance ( MkHyperPlaneConstraints d r
          , Num r
          , 1 + (d-1) ~ d
-         , 1 <= d
+         , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
+  --
+  -- >>> hyperPlaneCoefficients
   hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
 
 --------------------------------------------------------------------------------
