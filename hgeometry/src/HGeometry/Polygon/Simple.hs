@@ -103,6 +103,7 @@ instance ( VertexContainer f point
   type Vertex   (SimplePolygonF f point) = point
   type VertexIx (SimplePolygonF f point) = Int
   vertexAt i = _SimplePolygonF . iix i
+  numVertices = F.length . view _SimplePolygonF
 
 instance ( VertexContainer f point
          ) => HasOuterBoundary (SimplePolygonF f point) where

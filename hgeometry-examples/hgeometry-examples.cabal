@@ -44,6 +44,7 @@ common setup
       , hgeometry-combinatorial >= 1.0.0.0
       , hgeometry-vector        >= 1.0.0.0
       , hgeometry-point         >= 1.0.0.0
+      , hgeometry-kernel        >= 1.0.0.0
       , hgeometry               >= 1.0.0.0
       , hgeometry-ipe           >= 1.0.0.0
       , hiraffe                 >= 0.1
@@ -58,6 +59,7 @@ common setup
       , linear                  >= 1.21
       , data-clist              >= 0.2
       , data-default-class      ^>= 0.1
+      , array                   >= 0.5
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -103,3 +105,11 @@ executable hgeometry-bapc2012-gunslinger
   import:         setup
   hs-source-dirs: bapc2012
   main-is:        Gunslinger.hs
+
+--------------------------------------------------------------------------------
+-- * BAPC 2014 Armybase
+
+executable hgeometry-bapc2014-armybase
+  import:         setup
+  hs-source-dirs: bapc2014
+  main-is:        Armybase.lhs

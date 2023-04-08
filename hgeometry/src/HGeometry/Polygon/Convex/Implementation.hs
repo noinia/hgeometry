@@ -69,6 +69,7 @@ instance HasVertices' (SimplePolygonF f point) => HasVertices' (ConvexPolygonF f
   type Vertex   (ConvexPolygonF f point) = Vertex   (SimplePolygonF f point)
   type VertexIx (ConvexPolygonF f point) = VertexIx (SimplePolygonF f point)
   vertexAt i = _UncheckedConvexPolygon . vertexAt i
+  numVertices = numVertices . view _UncheckedConvexPolygon
 
 instance ( HasOuterBoundary (SimplePolygonF f point)
          , VertexIx (SimplePolygonF f point) ~ Int

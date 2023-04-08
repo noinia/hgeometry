@@ -12,17 +12,18 @@ $O(n^2 \log n)$ solution.
 
 
 > {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-> module BAPC2014.Armybase where
+> module Main where
 
 
-> import Control.Lens((^.))
+> import Control.Lens((^.),(^..))
 > import Data.Ix
-> import Data.Ext
-> import Geometry.Triangle
-> import Geometry.Point
-> import Geometry.Polygon
-> import Geometry.Polygon.Convex
-> import Algorithms.Geometry.ConvexHull.GrahamScan
+> import HGeometry.Ext
+> import HGeometry.Triangle
+> import HGeometry.Point
+> import HGeometry.Polygon.Class
+> import HGeometry.Polygon.Convex
+> import HGeometry.ConvexHull.GrahamScan
+> import Hiraffe.Graph
 > import qualified Data.Array   as A
 > import qualified Data.Foldable as F
 > import qualified Data.List     as L
@@ -56,11 +57,8 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 > type Area = Half
 
 
-
-> triangArea :: Triangle 2 p Int -> Half
-> triangArea = Half . doubleArea
-
-
+> triangArea :: Triangle (Point 2 Int) -> Half
+> triangArea = Half . abs . triangleSignedArea2X
 
 
 TODO: Discuss degenerate cases here
@@ -84,12 +82,12 @@ Main Algorithm
 ---------------
 
 > maxBaseArea    :: PointSet -> Area
-> maxBaseArea [] = 0
-> maxBaseArea p  = case convexHull . NonEmpty.fromList $ map ext p of
->     ch@(ConvexPolygon h) -> case F.toList $ h ^. outerBoundaryVector  of
->                               [_,_]   -> 0
->                               [a,b,c] -> triangArea $ Triangle a b c
->                               _       -> maxAreaQuadrangle ch
+> maxBaseArea ps = case convexHull <$> NonEmpty.nonEmpty ps of
+>   Nothing -> 0
+>   Just ch -> case ch^..outerBoundary of
+>     [_,_]   -> 0
+>     [a,b,c] -> triangArea $ Triangle a b c
+>     _       -> maxAreaQuadrangle ch
 
 
 <div class="observation">
@@ -101,7 +99,7 @@ diagonals of our quadrangle. This splits the problem into two independent
 subproblems, in both of which we have to find the largest triangle that has $p$
 and $q$ as vertices.
 
-> maxAreaQuadrangle :: ConvexPolygon () Int -> Area
+> maxAreaQuadrangle :: ConvexPolygon (Point 2 Int) -> Area
 > maxAreaQuadrangle = maximum' . map (uncurry3 maxAreaQuadrangleWith) . allChains
 >   where
 >     uncurry3 f (a,b,c) = f a b c
@@ -112,13 +110,13 @@ vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 
 > type Chain = Array Int (Point 2 Int)
 
-> allChains                 :: ConvexPolygon () Int
->                           -> [(Point 2 Int, Point 2 Int, (Chain,Chain))]
-> allChains (ConvexPolygon ch) =
+> allChains     :: ConvexPolygon (Point 2 Int)
+>               -> [(Point 2 Int, Point 2 Int, (Chain,Chain))]
+> allChains ch  =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
 >   where
->     n   = F.length $ ch^.outerBoundaryVector
->     chA = listArray (1,n) . map (^.core) . F.toList $ ch^.outerBoundaryVector
+>     n   = numVertices ch
+>     chA = listArray (1,n) $ ch^..outerBoundary
 >     rest i = [i+2.. if i == 1 then n - 1 else n ]
 
 we make sure that we only select non-neighbouring pairs. Hence the i+2 in rest
@@ -190,10 +188,10 @@ ternary search.
 
 
 > findLargestTriang        :: Point 2 Int -> Point 2 Int
->                          -> Unimodal (Array Int) (Point 2 Int) -> Triangle 2 () Int
+>                          -> Unimodal (Array Int) (Point 2 Int) -> Triangle (Point 2 Int)
 > findLargestTriang p q us = triang . ternarySearchArray area' $ us
 >   where
->     triang v = Triangle (ext p) (ext q) (ext v)
+>     triang v = Triangle p q v
 >     area' = triangArea . triang
 
 
