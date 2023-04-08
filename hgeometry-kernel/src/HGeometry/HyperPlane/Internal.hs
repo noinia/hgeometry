@@ -35,8 +35,7 @@ type instance Dimension (HyperPlane d r) = d
 -- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
 -- these are satisfied by default, it is just that the typechecker does not realize that.
 type MkHyperPlaneConstraints d r =
-  ( 1 <= d, d < d+1, KnownNat d, Has_ Metric_ d r, Has_ Vector_ d r, Has_ Vector_ (d+1) r
-  , Has_ Vector_ (d-1) r
+  ( d < d+1, KnownNat d, Has_ Metric_ d r, Has_ Vector_ d r, Has_ Vector_ (d+1) r
   )
 
 instance ( MkHyperPlaneConstraints d r
@@ -82,10 +81,8 @@ cmpInDirection       :: forall point d r.
                         ( Ord r, Num r
                         , Has_ Metric_ (d+1) r
                         , Has_ Metric_ d r
-                        , Has_ Vector_ (d-1) r
                         , Point_ point d r
                         , d < d+1--, 0 < d
-                        , 1 <= d
                         )
                      => Vector d r -> point -> point -> Ordering
 cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n

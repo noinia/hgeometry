@@ -107,7 +107,7 @@ instance ( MkHyperPlaneConstraints 2 r
          , Fractional r
          ) => NonVerticalHyperPlane_ (LineEQ r) 2 r where
   evalAt p = evalAt' $ p^.xCoord
-
+  hyperPlaneCoefficients (MkLineEQ h) = hyperPlaneCoefficients h
 
 instance ( Fractional r
          ) => Line_ (LineEQ r) 2 r where

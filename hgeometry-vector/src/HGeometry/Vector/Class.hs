@@ -23,6 +23,7 @@ module HGeometry.Vector.Class
   , generate, vectorFromList
   , component
   , xComponent, yComponent, zComponent, wComponent
+  , head, last
   -- , HasComponents(..), components1
 
   -- , ConstructVector, ConstructableVector_(..)
@@ -61,7 +62,7 @@ import qualified Linear.V1 as Linear
 import qualified Linear.V2 as Linear
 import qualified Linear.V3 as Linear
 import qualified Linear.V4 as Linear
-import           Prelude hiding (zipWith)
+import           Prelude hiding (zipWith, head, last)
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 import qualified HGeometry.Number.Radical as Radical
@@ -221,6 +222,14 @@ wComponent :: (Vector_ vector d r, 4 <= d)
            => IndexedLens' Int vector r
 wComponent = component @3
 {-# INLINE wComponent #-}
+
+-- | Lens to access the first element of the vector
+head :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+head = xComponent
+
+-- | Lens to access the last element of the vector
+last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+last = component @(d-1)
 
 --------------------------------------------------------------------------------
 
