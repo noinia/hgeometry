@@ -13,7 +13,10 @@ import Test.Hspec
 type R = Double
 
 myHalfspace :: HalfSpaceF (LineEQ R)
-myHalfspace = HalfSpace Positive (LineEQ 1 2)
+myHalfspace = HalfSpace Positive myLine
+
+myLine :: LineEQ R
+myLine = LineEQ 1 2
 
 myPoints :: [(Point 2 R, Bool)]
 myPoints = [ (Point2 10 10, False)
@@ -33,3 +36,6 @@ spec = describe "halfspace Tests" $ do
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
+
+test :: Ordering
+test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)
