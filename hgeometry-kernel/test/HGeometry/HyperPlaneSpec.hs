@@ -62,8 +62,15 @@ spec = describe "HyperPlane Tests" $ do
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
 
-test :: Ordering
-test = (Point2 10 (10 :: R)) `onSideTest` (LineEQ 1 2)
+lineA, lineB :: LineEQ R
+lineA = LineEQ 1.1352896048 (-1.0479630631)
+lineB = LineEQ 0.8777185381 1.5392597445
+
+hypA = asHyp lineA
+hypB = asHyp lineB
+
+test :: Bool
+test = hypA `intersects` hypB
 
 myHyp3 :: HyperPlane 2 R
 myHyp3 = hyperPlaneFromEquation $ Vector3 2 1 (-1)

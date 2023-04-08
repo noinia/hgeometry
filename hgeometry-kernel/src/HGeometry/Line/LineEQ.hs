@@ -56,7 +56,7 @@ slope = lens (\(LineEQ a _) -> a) (\(LineEQ _ b) a -> LineEQ a b)
 -- | Lens to access the intercept (i.e. the value at which it
 -- intersects the y-axis) of a line.
 --
--- >>> (LineEQ 10 20) ^. slope
+-- >>> (LineEQ 10 20) ^. intercept
 -- 20
 intercept :: Lens' (LineEQ r) r
 intercept = lens (\(LineEQ _ b) -> b) (\(LineEQ a _) b -> LineEQ a b)
@@ -163,6 +163,8 @@ type instance Intersection (HyperPlane 2 r) (HyperPlane 2 r) =
 instance ( Num r, Eq r
          ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
   l `intersects` h = not $ isParallelTo l h
+
+
 
 -- instance ( Eq r, Fractional r
 --          ) => IsIntersectableWith (HyperPlane 2 r) (HyperPlane 2 r) where

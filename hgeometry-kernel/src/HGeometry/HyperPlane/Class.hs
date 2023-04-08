@@ -41,7 +41,7 @@ import Prelude hiding (head,last)
 -- >>> import HGeometry.Line.LineEQ
 --
 -- >>> let myLine = LineEQ 1 (2 :: Double)
--- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1 :: Dobule)
+-- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1 :: Double)
 -- >>> let myNVHyperPlane2 = NonVerticalHyperPlane $ Vector2 1 (2 :: Double)
 
 
@@ -228,10 +228,10 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 -- | Test if two hyperplanes are parallel.
 isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       , HyperPlane_ hyperPlane' d r
-                      , Has_ Additive_ d r
+                      , Has_ Metric_ d r
                       , Num r, Eq r
                       ) => hyperPlane -> hyperPlane' -> Bool
-isParallelTo h1 h2 = sameDirection (normalVector h1) (normalVector h2)
+isParallelTo h1 h2 = isScalarMultipleOf (normalVector h1) (normalVector h2)
 
 
 class HyperPlaneFromPoints hyperPlane where

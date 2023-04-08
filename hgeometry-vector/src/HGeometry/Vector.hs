@@ -68,7 +68,7 @@ sameDirection u v = getAll $ foldMapZip (\ux vx -> All $ signum ux == signum vx)
 -- False
 -- >>> Vector3 0 0 0 `isScalarMultipleOf` Vector3 4 0 5
 -- True
-isScalarMultipleOf       :: ( Eq r, Fractional r
+isScalarMultipleOf       :: ( Eq r, Num r
                             , Metric_ vector d r
                             )
                          => vector -> vector  -> Bool
