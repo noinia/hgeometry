@@ -1,0 +1,105 @@
+cabal-version:      3.4
+name:               hgeometry-examples
+version:            1.0.0.0
+synopsis:           Geometric Algorithms, Data structures, and Data types.
+description:
+  HGeometry provides some basic geometry types, and geometric algorithms and
+  data structures for them. The main two focusses are: (1) Strong type safety,
+  and (2) implementations of geometric algorithms and data structures with good
+  asymptotic running time guarantees. Note that HGeometry is still highly experimental, don't be surprised to find bugs.
+
+homepage:           https://fstaals.net/software/hgeometry
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+data-files:          data/**/*.in
+                     data/**/*.out
+
+tested-with:
+    GHC == 9.2.5
+  , GHC == 9.4.4
+  , GHC == 9.6.1
+
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+--------------------------------------------------------------------------------
+-- common setup-extras
+--     build-depends:
+--         aeson                   >= 2.1
+
+common setup
+    ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+                -fspecialise-aggressively -fexpose-all-unfoldings
+
+    build-depends:
+        base                    >= 4.16.1.0      &&  < 5
+      , hgeometry-combinatorial >= 1.0.0.0
+      , hgeometry-vector        >= 1.0.0.0
+      , hgeometry-point         >= 1.0.0.0
+      , hgeometry               >= 1.0.0.0
+      , hgeometry-ipe           >= 1.0.0.0
+      , hiraffe                 >= 0.1
+      , containers              >= 0.6
+      , vector                  >= 0.13
+      , lens                    >= 5.2
+      , deepseq                 >= 1.1
+      , semigroupoids           >= 5
+      , semigroups              >= 0.18
+      , random                  >= 1.2
+      , witherable              >= 0.4
+      , linear                  >= 1.21
+      , data-clist              >= 0.2
+      , data-default-class      ^>= 0.1
+
+      , ghc-typelits-natnormalise >= 0.7.7
+      , ghc-typelits-knownnat     >= 0.7.6
+
+    default-language: GHC2021
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+
+common quickcheck-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                   >= 2.9
+      , QuickCheck              >= 2.10
+      , quickcheck-instances
+      , hgeometry
+
+
+--------------------------------------------------------------------------------
+-- * BAPC 2012 Gunslinger
+
+executable hgeometry-bapc2012-gunslinger
+  import:         setup
+  hs-source-dirs: bapc2012
+  main-is:        Gunslinger.hs

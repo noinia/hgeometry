@@ -27,6 +27,7 @@ module HGeometry.Point.Class
   ) where
 
 import           Control.Lens
+import           Data.Default.Class
 import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy (Proxy(..))
@@ -355,6 +356,6 @@ instance Affine_ point d r => Affine_ (point :+ extra) d r where
   p .+^ v = p&core %~ (.+^ v)
   {-# INLINE (.+^) #-}
 
-instance (Point_ point d r, Monoid extra) => Point_ (point :+ extra) d r where
+instance (Point_ point d r, Default extra) => Point_ (point :+ extra) d r where
   {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
-  fromVector v = fromVector v :+ mempty
+  fromVector v = fromVector v :+ def
