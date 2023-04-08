@@ -12,6 +12,7 @@
 module HGeometry.Vector.Type
   ( Vector(.., Vector1, Vector2, Vector3, Vector4)
   , HasComponents(..)
+  , cross
   ) where
 
 import           Control.DeepSeq
@@ -182,6 +183,12 @@ instance Semialign (Vector 3) where
 instance Zip (Vector 3) where
   zipWith f (Vector3 x y z) (Vector3 x' y' z') = Vector3 (f x x') (f y y') (f z z')
   {-# INLINE zipWith #-}
+
+-- | cross product
+cross                            :: Num r
+                                  => Vector 3 r -> Vector 3 r -> Vector 3 r
+cross (MkVector3 u) (MkVector3 v) = MkVector3 $ Linear.cross u v
+{-# INLINE cross #-}
 
 --------------------------------------------------------------------------------
 

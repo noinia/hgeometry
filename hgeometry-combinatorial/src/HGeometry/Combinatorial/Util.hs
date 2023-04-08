@@ -14,7 +14,8 @@ import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.List as List
 import           GHC.Generics (Generic)
-import           HGeometry.Vector
+import           Linear.V2 (V2(..))
+import           Linear.V3 (V3(..))
 
 --------------------------------------------------------------------------------
 -- * Strict Triples
@@ -45,11 +46,11 @@ instance Field3 (STR a b c) (STR a b d) c d where
 
 --------------------------------------------------------------------------------
 -- | Strict Triple with all items the same
-type Three = Vector 3
+type Three = V3
 
 -- | Pattern synonym for strict triples.
 pattern Three :: a -> a -> a -> Three a
-pattern Three a b c = Vector3 a b c
+pattern Three a b c = V3 a b c
 {-# COMPLETE Three #-}
 
 -- | Generate All unique unordered triplets.
@@ -87,11 +88,11 @@ instance Bifunctor SP where
 -- | * Strict pair whose elements are of the same type.
 
 -- | Strict pair with both items the same
-type Two = Vector 2
+type Two = V2
 
 -- | Pattern synonym for strict pairs.
 pattern Two :: a -> a -> Two a
-pattern Two a b = Vector2 a b
+pattern Two a b = V2 a b
 {-# COMPLETE Two #-}
 
 -- | Given a list xs, generate all unique (unordered) pairs.

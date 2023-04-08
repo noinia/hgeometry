@@ -1,34 +1,33 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.ConvexHull.Naive
+-- Module      :  HGeometry.ConvexHull.R3.Naive
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Heometry.ConvexHull.Naive( ConvexHull
-                                , lowerHull', lowerHullAll
+module HGeometry.ConvexHull.R3.Naive
+  ( ConvexHull
+  , lowerHull', lowerHullAll
 
-                                , isValidTriangle, upperHalfSpaceOf
-                                ) where
+  , isValidTriangle, upperHalfSpaceOf
+  ) where
 
 import Control.Lens
 import Data.Foldable (toList)
 import Data.List (find)
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe (isNothing)
-import Data.Util
-import HGeometry.Ext
+import HGeometry.Combinatorial.Util
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.Intersection (intersects)
-import HGeometry.Line
 import HGeometry.Point
 import HGeometry.Triangle
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
-type ConvexHull d p r = [Triangle 3 p r]
+type ConvexHull point = [Triangle point]
 
 -- | Computes the lower hull without its vertical triangles.
 --
@@ -36,12 +35,12 @@ type ConvexHull d p r = [Triangle 3 p r]
 -- points should be coplanar.
 --
 -- running time: \(O(n^4)\)
-lowerHull' :: forall r p. (Ord r, Fractional r, Show r)
-           => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHull' :: forall point r. (Ord r, Fractional r, Show r, Point_ point 3 r)
+           => NonEmpty point -> ConvexHull point
 lowerHull' = filter (not . isVertical) . lowerHullAll
   where
-    toPt2   :: Point 3 r :+ p ->  Point 2 r :+ p
-    toPt2 p = p&core %~ projectPoint
+    toPt2 :: point ->  Point 2 r
+    toPt2 = projectPoint
 
     isVertical (Triangle p q r) = ccw (toPt2 p) (toPt2 q) (toPt2 r) == CoLinear
 
@@ -52,22 +51,23 @@ lowerHull' = filter (not . isVertical) . lowerHullAll
 -- points should be coplanar.
 --
 -- running time: \(O(n^4)\)
-lowerHullAll                 :: forall r p. (Ord r, Fractional r, Show r)
-                             => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHullAll                 :: (Ord r, Fractional r, Show r, Point_ point 3 r)
+                             => NonEmpty point -> ConvexHull point
 lowerHullAll (toList -> pts) = let mkT (Three p q r) = Triangle p q r in
     [ t | t <- mkT <$> uniqueTriplets pts, isNothing (isValidTriangle t pts) ]
 
 
 
-_killOverlapping :: (Ord r, Fractional r) => [Triangle 3 p r] -> [Triangle 3 p r]
+_killOverlapping :: ( Ord r, Fractional r
+                    , Point_ point 3 r
+                    ) => [Triangle point] -> [Triangle point]
 _killOverlapping = foldr keepIfNotOverlaps []
   where
     keepIfNotOverlaps t ts | any (t `overlaps`) ts = ts
                            | otherwise             = t:ts
 
-overlaps :: (Fractional r, Ord r) => Triangle 3 p1 r -> Triangle 3 p2 r -> Bool
+overlaps :: (Fractional r, Ord r, Point_ point 3 r) => Triangle point -> Triangle point -> Bool
 t1 `overlaps` t2 = upperHalfSpaceOf t1 == upperHalfSpaceOf t2 && False
-
 
 
 -- | Tests if this is a valid triangle for the lower envelope. That
@@ -75,27 +75,27 @@ t1 `overlaps` t2 = upperHalfSpaceOf t1 == upperHalfSpaceOf t2 && False
 -- a Maybe; if the result is a Nothing the triangle is valid, if not
 -- it returns a counter example.
 --
--- >>> let t = (Triangle (ext origin) (ext $ Point3 1 0 0) (ext $ Point3 0 1 0))
--- >>> isValidTriangle t [ext $ Point3 5 5 0]
+-- >>> let t = (Triangle origin (Point3 1 0 0) (Point3 0 1 0))
+-- >>> isValidTriangle t [Point3 5 5 0]
 -- Nothing
--- >>> let t = (Triangle (ext origin) (ext $ Point3 1 0 0) (ext $ Point3 0 1 0))
--- >>> isValidTriangle t [ext $ Point3 5 5 (-10)]
--- Just (Point3 5 5 (-10) :+ ())
-isValidTriangle   :: (Num r, Ord r)
-                  => Triangle 3 p r -> [Point 3 r :+ q] -> Maybe (Point 3 r :+ q)
-isValidTriangle t = find (\a -> not $ (a^.core) `intersects` h)
+-- >>> let t = (Triangle origin (Point3 1 0 0) (Point3 0 1 0))
+-- >>> isValidTriangle t [Point3 5 5 (-10)]
+-- Just (Point3 5 5 (-10))
+isValidTriangle   :: (Num r, Ord r, Point_ point 3 r)
+                  => Triangle point -> [point] -> Maybe point
+isValidTriangle t = find (\q -> not $ (q^.asPoint) `intersects` h)
   where
     h = upperHalfSpaceOf t
 
 
 -- | Computes the halfspace above the triangle.
 --
--- >>> upperHalfSpaceOf (Triangle (ext $ origin) (ext $ Point3 10 0 0) (ext $ Point3 0 10 0))
+-- >>> upperHalfSpaceOf (Triangle origin (Point3 10 0 0) (Point3 0 10 0))
 -- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 0 0 100}}
-upperHalfSpaceOf                  :: (Ord r, Num r) => Triangle 3 p r -> HalfSpace 3 r
-upperHalfSpaceOf (Triangle p q r) = HalfSpace h
+upperHalfSpaceOf                  :: (Ord r, Num r, Point_ point 3 r)
+                                  => Triangle point -> HalfSpace 3 r
+upperHalfSpaceOf (Triangle p q r) = HalfSpace s h
   where
-    h' = from3Points (p^.core) (q^.core) (r^.core)
-    c  = p&core.zCoord -~ 1
-    h  = if (c^.core) `liesBelow` h' then h' else h'&normalVec %~ ((-1) *^)
-    a `liesBelow` plane = (a `onSideUpDown` plane) == Below
+    h = hyperPlaneThrough $ Vector3 p q r
+    c = p&zCoord -~ 1
+    s  = if c `onSideTest` h /= LT then Positive else Negative

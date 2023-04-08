@@ -18,6 +18,8 @@ module HGeometry.Vector
   , isScalarMultipleOf
   , scalarMultiple
   , sameDirection
+  -- * Special vector operations
+  , cross
   ) where
 
 import           GHC.TypeNats(KnownNat, natVal)
@@ -176,3 +178,6 @@ instance ( GV.Vector UV.Vector r
 
 instance ( UV.Unbox r, Vector_ (Vector d r) d r
          ) => UV.Unbox (Vector d r) where
+
+
+--------------------------------------------------------------------------------

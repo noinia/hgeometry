@@ -30,7 +30,7 @@ module HGeometry.Point
   , coord
   , xCoord, yCoord, zCoord, wCoord
 
-  -- , projectPoint
+  , projectPoint
 
   , Affine_(..)
   , CCW(CCW, CW, CoLinear), ccw, isCoLinear
@@ -56,9 +56,10 @@ module HGeometry.Point
   , HasPoints(..), HasPoints'
   ) where
 
-import Control.Lens (Lens', Iso', coerced)
+import Control.Lens (Lens', Iso', coerced, (^.))
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
+import Data.Type.Ord
 -- import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
@@ -106,3 +107,8 @@ pattern Point4 x y z w = (Point (Vector4 x y z w))
 {-# COMPLETE Point4 #-}
 
 --------------------------------------------------------------------------------
+
+-- | Project a point into a lower dimension.
+projectPoint   :: forall i point d r.
+                  (Point_ point d r, i <= d, Has_ Vector_ i r) => point -> Point i r
+projectPoint p = Point . prefix $ p^.asPoint.vector

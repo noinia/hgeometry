@@ -69,6 +69,11 @@ instance ( Eq r
                   in HyperPlane $ Vector3 c a b
     | otherwise = HyperPlane $ Vector3 px (-1) 0
 
+instance (Num r) => HyperPlaneFromPoints (HyperPlane 3 r) where
+  hyperPlaneThrough (Vector3 p q r) = let u = q .-. p
+                                          v = r .-. p
+                                      in fromPointAndNormal p (u `cross` v)
+
 
 --  hyperPlaneTrough pts = fromPointAndNormal p0 n
 --    where
