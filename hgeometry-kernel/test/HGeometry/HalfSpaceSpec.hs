@@ -7,6 +7,7 @@ import HGeometry.Line
 import HGeometry.Point
 import HGeometry.Intersection
 import Test.Hspec
+import HGeometry.Kernel.Instances()
 
 --------------------------------------------------------------------------------
 

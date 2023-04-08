@@ -4,14 +4,17 @@ module HGeometry.HyperPlaneSpec
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
+import HGeometry.Kernel.Instances ()
 import HGeometry.Line
+import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Vector
 import Test.Hspec
+import Test.Hspec.QuickCheck
 
 --------------------------------------------------------------------------------
 
-type R = Double
+type R = RealNumber 10
 
 myHyp :: NonVerticalHyperPlane 2 R
 myHyp = NonVerticalHyperPlane $ Vector2 1 2
@@ -33,12 +36,25 @@ myPoints = [ (Point2 10 10, False)
            , (Point2 0 2, True)
            ]
 
+asHyp :: ( NonVerticalHyperPlane_ hyperPlane d r
+         , MkHyperPlaneConstraints d r, Num r
+         ) => hyperPlane -> HyperPlane d r
+asHyp = hyperPlaneFromEquation . hyperPlaneEquation
+
 spec :: Spec
 spec = describe "HyperPlane Tests" $ do
          it "same hyperplane" $ myHyp `shouldBe` myHyp2
          -- it "in halfspace" $ do
          --   mapM_ (\(q,ans) -> (q `intersects` myHalfspace) `shouldBe` ans) myPoints
 
+         prop "intersects nonvertical conistent" $
+           \(l :: LineEQ R) (m :: LineEQ R) ->
+             (l `intersects` m) `shouldBe` (asHyp l `intersects` asHyp m)
+
+
+         -- prop "intersect nonvertical conistent" $
+         --   \(l :: LineEQ R) (m :: LineEQ R) ->
+         --     (l `intersect` m) `shouldBe` (asHyp l `intersect` asHyp m)
 
          -- it "intersect tests" $ do
          --   let h = HalfSpace Positive $ horizontalLine (4 % 1 :: Rational)

@@ -3,13 +3,14 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.Combinatorial.Instances where
 
-import HGeometry.Number.Ratio.Generalized
-import HGeometry.Number.Real.Rational
-import HGeometry.Ext
+import           HGeometry.Ext
+import           HGeometry.Number.Ratio.Generalized
+import           HGeometry.Number.Real.Rational
+import qualified HGeometry.Sign as Sign
 -- import HGeometry.Number.Real.Symbolic
-import Test.QuickCheck
-import Test.QuickCheck.Instances ()
-import GHC.TypeLits
+import           Test.QuickCheck
+import           Test.QuickCheck.Instances ()
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -29,6 +30,9 @@ instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
+
+instance Arbitrary Sign.Sign where
+  arbitrary = (\b -> if b then Sign.Positive else Sign.Negative) <$> arbitrary
 
 --------------------------------------------------------------------------------
 -- * Symbolic instances

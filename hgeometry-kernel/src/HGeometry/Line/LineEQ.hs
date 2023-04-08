@@ -154,11 +154,19 @@ instance (Eq r, Fractional r)
       point x = Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
 
 
-
-
 ----------------------------------------
 
+type instance Intersection (HyperPlane 2 r) (HyperPlane 2 r) =
+  Maybe (LineLineIntersection (HyperPlane 2 r))
 
+
+instance ( Num r, Eq r
+         ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
+  l `intersects` h = not $ isParallelTo l h
+
+-- instance ( Eq r, Fractional r
+--          ) => IsIntersectableWith (HyperPlane 2 r) (HyperPlane 2 r) where
+--   l `intersect` h =
 
 --------------------------------------------------------------------------------
 

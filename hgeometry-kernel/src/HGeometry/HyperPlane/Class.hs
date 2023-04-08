@@ -40,9 +40,9 @@ import Prelude hiding (head,last)
 -- >>> import HGeometry.HyperPlane
 -- >>> import HGeometry.Line.LineEQ
 --
--- >>> let myLine = LineEQ 1 2
--- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1)
--- >>> let myNVHyperPlane2 = NonVerticalHyperPlane $ Vector2 1 2
+-- >>> let myLine = LineEQ 1 (2 :: Double)
+-- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1 :: Dobule)
+-- >>> let myNVHyperPlane2 = NonVerticalHyperPlane $ Vector2 1 (2 :: Double)
 
 
 
@@ -66,11 +66,11 @@ class ( NumType hyperPlane ~ r
   -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\)
   --
   -- >>> hyperPlaneEquation myLine
-  -- Vector3 2 1 (-1)
+  -- Vector3 2.0 1.0 (-1.0)
   -- >>> hyperPlaneEquation myHyperPlane2
-  -- Vector3 2 1 (-1)
+  -- Vector3 2.0 1.0 (-1.0)
   -- >>> hyperPlaneEquation myNVHyperPlane2
-  -- Vector3 2 1 (-1)
+  -- Vector3 2.0 1.0 (-1.0)
   hyperPlaneEquation :: ( Num r
                         ) => hyperPlane -> Vector (d+1) r
   default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
@@ -190,9 +190,9 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
   --
   -- >>> evalAt (Point1 1) myNVHyperPlane2
-  -- 3
+  -- 3.0
   -- >>> evalAt (Point1 10) myNVHyperPlane2
-  -- 12
+  -- 12.0
   evalAt     :: ( Num r
                 , 1 <= d
                 , Point_ point (d-1) r
@@ -203,7 +203,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
                     , 1 + (d-1) ~ d -- silly silly agian :(
                     , Has_ Metric_ d r
                     ) => point -> hyperPlane -> r
-  evalAt p h = hyperPlaneCoefficients h `dot` cons 1 (p^.vector)
+  evalAt p h = hyperPlaneCoefficients h `dot` snoc (p^.vector) 1
   {-# INLINE evalAt #-}
 
 
@@ -213,6 +213,12 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   --  \( a_d + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
+  -- >>> hyperPlaneCoefficients myNVHyperPlane2
+  -- Vector2 1.0 2.0
+  -- >>> hyperPlaneCoefficients myLine
+  -- Vector2 1.0 2.0
+  -- >>> hyperPlaneCoefficients $ Plane 1 2 3
+  -- Vector3 1 2 3
   hyperPlaneCoefficients :: hyperPlane -> Vector d r
 
 

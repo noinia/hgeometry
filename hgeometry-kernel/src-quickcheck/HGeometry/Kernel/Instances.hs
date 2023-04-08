@@ -6,6 +6,10 @@ import Control.Lens
 import GHC.TypeLits
 import HGeometry.Ball
 import HGeometry.Box
+import HGeometry.Combinatorial.Instances ()
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane (HyperPlane(..))
+import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
@@ -13,7 +17,6 @@ import HGeometry.LineSegment
 import HGeometry.Matrix
 import HGeometry.Point
 import HGeometry.Point.Instances ()
-import HGeometry.Combinatorial.Instances ()
 import HGeometry.Properties
 import HGeometry.Triangle
 import HGeometry.Vector
@@ -96,3 +99,15 @@ instance ( Has_ Additive_ m r
   Arbitrary (Matrix n m r) where
   arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
            <$> arbitrary
+
+instance ( Arbitrary r, Has_ Additive_ (d+1) r
+         , Num r, Eq (Vector (d+1) r)) => Arbitrary (HyperPlane d r) where
+  arbitrary = HyperPlane <$> arbitrary `suchThat` (/= zero)
+
+instance (Arbitrary r, Has_ Additive_ d r
+         , Num r, Eq (Vector d r)) => Arbitrary (NonVerticalHyperPlane d r) where
+  arbitrary = NonVerticalHyperPlane <$> arbitrary `suchThat` (/= zero)
+
+
+instance Arbitrary boundingHyperPlane => Arbitrary (HalfSpaceF boundingHyperPlane) where
+  arbitrary = HalfSpace <$> arbitrary <*> arbitrary
