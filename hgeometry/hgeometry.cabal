@@ -127,6 +127,10 @@ library
 
         HGeometry.BezierSpline
 
+        HGeometry.ClosestPair
+        HGeometry.ClosestPair.Naive
+        HGeometry.ClosestPair.DivideAndConquer
+
     other-modules:
        HGeometry.Polygon.Simple.Implementation
        HGeometry.Polygon.Convex.Implementation
@@ -157,6 +161,7 @@ test-suite hgeometry-hspec
   other-modules:
       Spec
       ConvexHull.ConvexHullSpec
+      ClosestPair.ClosestPairSpec
   hs-source-dirs:   test
   build-depends:
       hgeometry:quickcheck
