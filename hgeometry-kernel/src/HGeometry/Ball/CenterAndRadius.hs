@@ -105,7 +105,7 @@ type Disk = Ball
 -- | Construct a disk
 pattern Disk     :: point -> NumType point -> Disk point
 pattern Disk c r = Ball c r
-
+{-# COMPLETE Disk #-}
 
 --------------------------------------------------------------------------------
 

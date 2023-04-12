@@ -60,7 +60,8 @@ instance Ixed (Corners a) where
     SouthEast -> southEast
     SouthWest -> southWest
 
-instance Foldable1 Corners
+instance Foldable1 Corners where
+  foldMap1 f (Corners a b c d) = f a <> f b <> f c <> f d
 instance Traversable1 Corners where
   traverse1 f (Corners a b c d) = Corners <$> f a <.> f b <.> f c <.> f d
 
@@ -76,7 +77,6 @@ instance Monoid a => Monoid (Corners a) where
 --------------------------------------------------------------------------------
 
 -- | Get the corners of a rectangle, the order is:
--- (TopLeft, TopRight, BottomRight, BottomLeft).
 --
 -- Any additional information from in the top points is taken from the Top point,
 -- Any additional information from in the bottom points is taken from the Bottom point,
@@ -87,8 +87,7 @@ corners   :: ( Num r, Rectangle_ rectangle point, Point_ point 2 r
 corners r = let w = width r
                 p = r^.minPoint
                 q = r^.maxPoint
-             in Corners (p&xCoord %~ subtract w) p
-                        (q&xCoord %~ (+ w))      q
+             in Corners (q&xCoord %~ subtract w) q (p&xCoord %~ (+ w)) p
 
 --------------------------------------------------------------------------------
 

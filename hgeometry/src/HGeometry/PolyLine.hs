@@ -61,7 +61,7 @@ instance Traversable f => Traversable (PolyLineF f) where
 instance Traversable1 f => Traversable1 (PolyLineF f) where
   traverse1 f (PolyLine vs) = PolyLine <$> traverse1 f vs
 
-instance (TraversableWithIndex Int f
+instance ( TraversableWithIndex Int f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)

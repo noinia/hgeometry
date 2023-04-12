@@ -56,7 +56,8 @@ instance Applicative Sides where
   pure x = Sides x x x x
   (Sides f g h i) <*> (Sides a b c d) = Sides (f a) (g b) (h c) (i d)
 
-instance Foldable1 Sides
+instance Foldable1 Sides where
+  foldMap1 f (Sides a b c d) = f a <> f b <> f c <> f d
 instance Traversable1 Sides where
   traverse1 f (Sides a b c d) = Sides <$> f a <.> f b <.> f c <.> f d
 

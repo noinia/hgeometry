@@ -3,7 +3,7 @@ module HGeometry.Viewport
   ( Viewport(Viewport), mkViewport
   , viewPort, worldToHost, hostToWorld
   , toWorldIn, toHostFrom
-  , flipY
+  , fromSize, flipY
   , centeredOrigin
   , alignedOrigin
   , wrtCenter
@@ -82,6 +82,12 @@ toHostFrom vp = transformBy (vp^.worldToHost)
 
 
 --------------------------------------------------------------------------------
+
+-- | Given a vector with widht w and height h, crates a viewport with
+  -- focussing on [0,w] x [0,h]
+fromSize   :: ( Num r, Vector_ vector 2 r
+              ) => vector -> Viewport r
+fromSize v = Viewport (Box origin (Point $ v^._Vector)) identity
 
 -- | Flips the y-coordinate so that the origin is in the bottom left.
 flipY    :: ( Num r, Vector_ vector 2 r
