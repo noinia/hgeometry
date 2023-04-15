@@ -9,9 +9,7 @@ import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Simple
--- import HGeometry.Polygon.Monotone
 import HGeometry.Transformation
--- import HGeometry.Triangle
 import Paths_hgeometry_test
 import Ipe
 import Test.Hspec
@@ -25,6 +23,7 @@ type R = RealNumber 5
 spec :: Spec
 spec = do
   runIO (getDataFileName "Polygon/Simple/pointInPolygon.ipe") >>= testCases
+  numericalSpec
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
