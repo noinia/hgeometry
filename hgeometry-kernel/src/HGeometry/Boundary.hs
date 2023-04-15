@@ -5,7 +5,13 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module HGeometry.Boundary where
+module HGeometry.Boundary
+  ( Boundary(..)
+  , _Boundary
+  , PointLocationResult(..)
+  , PointLocationResultWith(..)
+  , asPointLocationResult
+  ) where
 
 import Control.Lens (iso,Iso)
 import HGeometry.Properties
@@ -40,3 +46,11 @@ data PointLocationResultWith edge = StrictlyInside
                                   | OnBoundaryEdge !edge
                                   | StrictlyOutside
                                   deriving (Show,Read,Eq)
+
+
+-- | Forget on which edge the point was.
+asPointLocationResult :: PointLocationResultWith edge -> PointLocationResult
+asPointLocationResult = \case
+  StrictlyInside   -> Inside
+  OnBoundaryEdge _ -> OnBoundary
+  StrictlyOutside  -> Outside

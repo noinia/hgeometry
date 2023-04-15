@@ -17,6 +17,7 @@ module HGeometry.Polygon.Simple
   , SimplePolygonF
   , toCyclic
   , VertexContainer
+  , inPolygon
   ) where
 
 import           Control.DeepSeq (NFData)
