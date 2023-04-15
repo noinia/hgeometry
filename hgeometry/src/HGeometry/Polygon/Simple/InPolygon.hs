@@ -71,7 +71,7 @@ instance Monoid (AboveCount seg) where
 -- >>> Point2 0 0 `inPolygon` simplePoly
 -- OnBoundaryEdge 0
 -- >>> Point2 10 0 `inPolygon` simplePoly
--- StrictlyOnBoundary
+-- OnBoundaryEdge 1
 -- >>> Point2 5 13 `inPolygon` simplePoly
 -- StrictlyInside
 -- >>> Point2 5 10 `inPolygon` simplePoly
