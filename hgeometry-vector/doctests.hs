@@ -29,6 +29,7 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
+                -optF -package=hgeometry-combinatorial
                 -optF -package=hgeometry-vector
 
 #-}

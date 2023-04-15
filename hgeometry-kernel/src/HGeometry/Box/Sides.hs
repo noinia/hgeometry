@@ -16,15 +16,13 @@ module HGeometry.Box.Sides
 import Control.Lens hiding ((<.>))
 import Data.Functor.Apply
 import Data.Semigroup.Foldable.Class
-import Data.Semigroup.Traversable.Class
 import GHC.Generics (Generic)
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
 import HGeometry.Direction
-import HGeometry.Interval
+-- import HGeometry.Interval()
 import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
