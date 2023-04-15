@@ -82,7 +82,8 @@ instance Read r => Read (EndPoint Open r) where
                           p <- step readPrec
                           return (OpenE p))
 
-instance Foldable1 (EndPoint et)
+instance Foldable1 (EndPoint et) where
+  foldMap1 f (EndPoint x) = f x
 instance Traversable1 (EndPoint et) where
   traverse1 f (EndPoint x) = EndPoint <$> f x
 

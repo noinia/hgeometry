@@ -92,12 +92,15 @@ _asPoint = prism' (flip Symbol "mark/disk(sx)") (Just . view symbolPoint)
 -- segment or a polyline with more than two points.
 --
 --
-_asLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
+_asLineSegment :: Prism' (Path r) (LineSegment AnEndPoint (Point 2 r))
 _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
-  -- prism' seg2path path2seg
-  -- where
-  --   seg2path   = review _asPolyLine . PolyLine.lineSegmentToPolyLine
-  --   path2seg p = PolyLine.asLineSegment' =<< preview _asPolyLine p
+
+-- | Try to convert a path into a line segment, fails if the path is not a line
+-- segment or a polyline with more than two points.
+--
+--
+_asClosedLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
+_asClosedLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
@@ -235,6 +238,10 @@ instance HasDefaultFromIpe (Point 2 r) where
 
 instance HasDefaultFromIpe (ClosedLineSegment (Point 2 r)) where
   type DefaultFromIpe (ClosedLineSegment (Point 2 r)) = Path
+  defaultFromIpe = _withAttrs _IpePath _asClosedLineSegment
+
+instance HasDefaultFromIpe (LineSegment AnEndPoint (Point 2 r)) where
+  type DefaultFromIpe (LineSegment AnEndPoint (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asLineSegment
 
 instance HasDefaultFromIpe (Ellipse r) where
