@@ -27,19 +27,21 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           GHC.Generics
+import           HGeometry.Boundary
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
+import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
+import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
-
 
 --------------------------------------------------------------------------------
 
@@ -164,3 +166,17 @@ _testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------
+
+instance ( SimplePolygon_ (SimplePolygonF f point) point r
+         , Num r, Ord r
+         ) => HasIntersectionWith (Point 2 r) (SimplePolygonF f point) where
+  q `intersects` pg = q `inPolygon` pg /= StrictlyOutside
+
+type instance Intersection (Point 2 r) (SimplePolygonF f point) = Maybe (Point 2 r)
+
+instance ( SimplePolygon_ (SimplePolygonF f point) point r
+         , Num r, Ord r
+         ) => IsIntersectableWith (Point 2 r) (SimplePolygonF f point) where
+  q `intersect` pg | q `intersects` pg = Just q
+                   | otherwise         = Nothing
+  -- this implementation is a bit silly but ok
