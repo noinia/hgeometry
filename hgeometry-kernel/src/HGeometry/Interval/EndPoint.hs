@@ -131,7 +131,8 @@ pattern AnOpenE x = AnEndPoint Open x
 
 -- type instance VectorFamily d (AnEndPoint r) = Boxed.Vector d (AnEndPoint r)
 
-instance Foldable1 AnEndPoint
+instance Foldable1 AnEndPoint where
+  foldMap1 f (AnEndPoint _ x) = f x
 instance Traversable1 AnEndPoint where
   traverse1 f (AnEndPoint et x) = AnEndPoint et <$> f x
 
