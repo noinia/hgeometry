@@ -28,4 +28,15 @@ _Boundary = iso Boundary (\(Boundary b) -> b)
 
 -- | Result of a query that asks if something is Inside a g, *on* the boundary
 -- of the g, or outside.
-data PointLocationResult = Inside | OnBoundary | Outside deriving (Show,Read,Eq)
+data PointLocationResult = Inside
+                         | OnBoundary
+                         | Outside
+                         deriving (Show,Read,Eq)
+
+-- | Result of a query that asks if something is Inside a g, *on* the
+-- boundary of the g, or outside. This type allows us to provide some
+-- sort of proof for the claim.
+data PointLocationResultWith edge = StrictlyInside
+                                  | OnBoundaryEdge !edge
+                                  | StrictlyOutside
+                                  deriving (Show,Read,Eq)

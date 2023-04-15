@@ -100,6 +100,18 @@ class ( HasStart interval point, HasStartPoint interval (EndPointOf interval)
   -- pre: start < end
   mkInterval :: EndPointOf interval -> EndPointOf interval -> interval
 
+  -- | Construct an interval given two points. This makes sure
+  -- the start-point comes before the endpoint.
+  --
+  -- pre: it is possible to construct a valid, non-empty interval this way.
+  --      so if either endpoint is open the endpoints should not coincide.
+  buildInterval :: Ord point => EndPointOf interval -> EndPointOf interval -> interval
+  buildInterval a b
+    | (a^._endPoint) <= (b^._endPoint) = mkInterval a b
+    | otherwise                        = mkInterval b a
+  {-# INLINE buildInterval #-}
+
+
 --------------------------------------------------------------------------------
 
 -- | A class for types representing Intervals
@@ -121,6 +133,13 @@ class (Interval_ interval r
   mkClosedInterval     :: r -> r -> interval
   mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
   {-# MINIMAL #-}
+
+  -- | Construct an interval given two points. This makes sure
+  -- the start-point comes before the endpoint.
+  buildClosedInterval     :: Ord r => r -> r -> interval
+  buildClosedInterval a b = buildInterval (ClosedE a) (ClosedE b)
+  {-# INLINE buildClosedInterval #-}
+
 
 -- | Pattern matching on an arbitrary closed interval
 pattern ClosedInterval_     :: ClosedInterval_ interval r => r -> r -> interval

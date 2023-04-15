@@ -16,7 +16,7 @@ module HGeometry.Interval.EndPoint
 
   , EndPointType(..)
   , EndPoint(EndPoint, OpenE, ClosedE)
-  , AnEndPoint(..)
+  , AnEndPoint(..,OpenE',ClosedE')
   ) where
 
 import Control.Lens
@@ -106,11 +106,12 @@ instance EndPoint_ (EndPoint Open r) where
 -- | Constructs a closed endpoint
 pattern ClosedE   :: r -> EndPoint Closed r
 pattern ClosedE x = EndPoint x
+{-# COMPLETE ClosedE #-}
 
 -- | Constructs an Open endpoint
 pattern OpenE   :: r -> EndPoint Open r
 pattern OpenE x = EndPoint x
-
+{-# COMPLETE OpenE #-}
 
 -- | Data type modelling an endpoint that can both be open and closed.
 data AnEndPoint r = AnEndPoint {-# UNPACK #-} !EndPointType !r
@@ -118,6 +119,15 @@ data AnEndPoint r = AnEndPoint {-# UNPACK #-} !EndPointType !r
 
 type instance NumType (AnEndPoint r) = r
 type instance IxValue (AnEndPoint r) = r
+
+
+-- | Constructs a closed endpoint
+pattern ClosedE'   :: r -> AnEndPoint r
+pattern ClosedE' x = AnEndPoint Closed x
+
+-- | Constructs an Open endpoint
+pattern OpenE'   :: r -> AnEndPoint r
+pattern OpenE' x = AnEndPoint Open x
 
 -- type instance VectorFamily d (AnEndPoint r) = Boxed.Vector d (AnEndPoint r)
 
