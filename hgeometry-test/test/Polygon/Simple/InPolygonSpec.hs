@@ -3,22 +3,19 @@ module Polygon.Simple.InPolygonSpec (spec) where
 
 import Control.Lens
 import Data.Proxy
-import Debug.Trace
 import HGeometry.Boundary
 import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Simple
-import HGeometry.Transformation
 import Paths_hgeometry_test
 import Ipe
 import Test.Hspec
-import Test.QuickCheck
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
+-- type R = RealNumber 5
 
 spec :: Spec
 spec = do
