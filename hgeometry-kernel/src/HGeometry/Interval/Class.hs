@@ -28,7 +28,7 @@ module HGeometry.Interval.Class
   , startAndEndPoint
 
 
-  , inInterval
+  , inInterval, stabsInterval
   , compareInterval
 
   , shiftLeft, shiftRight
@@ -211,6 +211,17 @@ x `inInterval` i =
               EQ -> OnBoundary
               GT -> Outside
 
+-- | Test if the point lies inside in,or on the boundary of, the
+-- interval.
+--
+-- Note that even if the boundary of the interval is open we may
+-- return "OnBoundary".
+stabsInterval       :: forall interval r.
+                       ( Ord r
+                       , Interval_ interval r
+                       )
+                    => r -> interval -> Bool
+q `stabsInterval` i = q `inInterval` i /= Outside
 
 -- | test if te point appears before (=LT), in (=EQ), or after (=GT) te interval.
 --
