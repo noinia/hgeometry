@@ -66,9 +66,12 @@ instance Measured v a => Measured v (BinLeafTree v a) where
 
 instance Foldable (BinLeafTree v) where
   foldMap f (Leaf a)     = f a
-  foldMap f (Node l _ r) = foldMap f l `mappend` foldMap f r
+  foldMap f (Node l _ r) = foldMap f l <> foldMap f r
 
-instance Foldable1 (BinLeafTree v)
+instance Foldable1 (BinLeafTree v) where
+  foldMap1 f = \case
+    Leaf x     -> f x
+    Node l _ r -> foldMap1 f l <> foldMap1 f r
 
 instance Traversable (BinLeafTree v) where
   traverse f (Leaf a)     = Leaf <$> f a
