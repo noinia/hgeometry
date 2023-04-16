@@ -11,6 +11,7 @@ import qualified HGeometry.Sign as Sign
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 import           GHC.TypeLits
+import           HGeometry.Tree.Binary.Static
 
 --------------------------------------------------------------------------------
 
@@ -48,3 +49,20 @@ instance Arbitrary Sign.Sign where
 
 -- instance (Arbitrary a, Ord a) => Arbitrary (Bag a) where
 --   arbitrary = foldMap singleton <$> listOf arbitrary
+
+--------------------------------------------------------------------------------
+-- * Binary tree instances
+
+instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
+  arbitrary = sized f
+    where f n | n <= 0    = Leaf <$> arbitrary
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Node <$> f l <*> arbitrary <*> f (n-l-1)
+
+instance Arbitrary a => Arbitrary (BinaryTree a) where
+  arbitrary = sized f
+    where f n | n <= 0    = pure Nil
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Internal <$> f l <*> arbitrary <*> f (n-l-1)
