@@ -54,6 +54,9 @@ instance ( TraversableWithIndex i f, Ixed (f (Vertex r))
          ) => Graph.HasVertices (LowerEnvelope f g r) (LowerEnvelope f g r) where
   vertices = verticesLens .> itraversed
 
+
+-- todo; report faces somehow
+
 --------------------------------------------------------------------------------
 
 -- | A vertex in the lower envelope
@@ -130,7 +133,6 @@ aroundOrigins e1 e2 = comparing    (^.origin.location) e1 e2
                    <> ccwCmpAround (e1^.origin.location2)
                                    (e1^.destination.location2) (e2^.destination.location2)
                    <> comparing (^.leftPlane) e1 e2
-
 
 --------------------------------------------------------------------------------
 

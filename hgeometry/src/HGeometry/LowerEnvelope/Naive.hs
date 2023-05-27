@@ -59,15 +59,7 @@ notAbove (Point3 x y z) h = not $ z > evalAt (Point2 x y) h
 
 
 
-horizontalPlane c = Plane 0 0 c
-
--- | verify that the intersection point indeed lis on all three planes
-test          :: (Fractional r, Eq r)
-              => Plane r -> Plane r -> Plane r -> Maybe (Point 3 r, Three Bool)
-test h1 h2 h3 = f <$> intersectionPoint h1 h2 h3
-  where
-    f p = (p, g p <$> Three h1 h2 h3)
-    g (Point3 x y z) h = evalAt (Point2 x y) h == z
+-- horizontalPlane c = Plane 0 0 c
 
 
 
