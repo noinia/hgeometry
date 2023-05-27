@@ -89,3 +89,4 @@ instance ( MkHyperPlaneConstraints d r
 -- | Constructs a Plane in R^3 for the equation z = ax + by + c
 pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
+{-# COMPLETE Plane #-}

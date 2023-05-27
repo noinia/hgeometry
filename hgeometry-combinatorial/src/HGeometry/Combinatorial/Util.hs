@@ -12,6 +12,7 @@ module HGeometry.Combinatorial.Util where
 
 import           Control.DeepSeq
 import           Control.Lens
+import qualified Data.Foldable as F
 import qualified Data.List as List
 import           GHC.Generics (Generic)
 import           Linear.V2 (V2(..))
@@ -55,8 +56,9 @@ pattern Three a b c = V3 a b c
 
 -- | Generate All unique unordered triplets.
 --
-uniqueTriplets    :: [a] -> [Three a]
-uniqueTriplets xs = [ Three x y z | (x:ys) <- nonEmptyTails xs, Two y z <- uniquePairs ys]
+uniqueTriplets                  :: Foldable f => f a -> [Three a]
+uniqueTriplets (F.toList -> xs) =
+  [ Three x y z | (x:ys) <- nonEmptyTails xs, Two y z <- uniquePairs ys]
 
 --------------------------------------------------------------------------------
 -- * Strict Pairs
@@ -98,8 +100,8 @@ pattern Two a b = V2 a b
 -- | Given a list xs, generate all unique (unordered) pairs.
 --
 --
-uniquePairs    :: [a] -> [Two a]
-uniquePairs xs = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
+uniquePairs                  :: Foldable f => f a -> [Two a]
+uniquePairs (F.toList -> xs) = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
 
 --------------------------------------------------------------------------------
 
