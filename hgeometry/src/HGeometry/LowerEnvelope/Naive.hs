@@ -1,22 +1,19 @@
 module HGeometry.LowerEnvelope.Naive
   ( lowerEnvelope
   , triangulatedLowerEnvelope
+  , belowAll
   ) where
 
 import           Control.Applicative
 import           Control.Lens
-import           Control.Monad ((<=<), when)
-import qualified Data.List as List
-import           Data.Ord
+import           Control.Monad ((<=<))
 import qualified Data.Vector as Boxed
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.LowerEnvelope.Triangulate
 import           HGeometry.LowerEnvelope.Type
 import           HGeometry.Point
-import           HGeometry.Vector
 import           Witherable
 
 --------------------------------------------------------------------------------
@@ -26,13 +23,17 @@ import           Witherable
 -- running time: \(O(n^4)\)
 lowerEnvelope    :: (Foldable f, Ord r, Fractional r)
                  => f (Plane r) -> LowerEnvelope [] Boxed.Vector r
-lowerEnvelope hs = LowerEnvelope vertices halfEdges
+lowerEnvelope hs = LowerEnvelope vertices' halfEdges'
   where
-    vertices = mapMaybe (guarded (`belowAll` hs) <=< asVertex)
-             $ uniqueTriplets hs
+    vertices' = mapMaybe (guarded (`belowAll` hs) <=< asVertex)
+              $ uniqueTriplets hs
 
-    halfEdges = sortBy aroundOrigins . mapMaybe asHalfEdge
-              $ uniquePairs vertices
+    halfEdges' = sortBy aroundOrigins . mapMaybe asHalfEdge
+               $ uniquePairs vertices'
+
+    -- TODO: how do we represent the unbounded edges; I guess we
+    -- should have one half-edge pointing to the unbounded vertex
+
 
 -- | Triangulated version of a lower envelope
 --
@@ -65,7 +66,8 @@ notAbove (Point3 x y z) h = not $ z > evalAt (Point2 x y) h
 
 --------------------------------------------------------------------------------
 
---
+-- | Given an element and a predicate, return the element only if the
+-- predicate is true.
 guarded                 :: Alternative f => (a -> Bool) -> a -> f a
-guarded p v | p v       = empty
-            | otherwise = pure v
+guarded p v | p v       = pure v
+            | otherwise = empty

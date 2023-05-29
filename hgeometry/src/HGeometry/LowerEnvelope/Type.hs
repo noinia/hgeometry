@@ -8,9 +8,12 @@ module HGeometry.LowerEnvelope.Type
   , LowerEnvelope(LowerEnvelope), halfEdges
 
   , intersectionPoint
+
+  , (^^^)
   ) where
 
 import           Control.Lens
+import           Data.Functor.Classes
 import           Data.Kind (Type)
 import           Data.Ord (comparing)
 import qualified Data.Vector as Boxed
@@ -30,17 +33,27 @@ type Plane = NonVerticalHyperPlane 3
 
 -- | The Lower envelope whose vertices are stored in a structure of
 -- type f, and whose half-edges are stored in a structure of type g.
+--
+--
 type LowerEnvelope :: (Type -> Type) -> (Type -> Type) -> Type -> Type
 data LowerEnvelope f g r =
   LowerEnvelope { _vertices  :: f (Vertex r)
                 , _halfEdges :: g (HalfEdge r) -- ^ sorted in CCW order around their origins
                 }
+-- TODO: this is still just an intermediate type; in the end we will need to convert to a proper
+-- planar subdivision anyway
+
 
 verticesLens :: Lens (LowerEnvelope f g r) (LowerEnvelope f' g r) (f (Vertex r)) (f' (Vertex r))
 verticesLens = lens _vertices (\env vs -> env { _vertices = vs })
 
 halfEdges :: Lens (LowerEnvelope f g r) (LowerEnvelope f g' r) (g (HalfEdge r)) (g' (HalfEdge r))
 halfEdges = lens _halfEdges (\env es -> env { _halfEdges = es })
+
+deriving instance (Show r, Show1 f, Show1 g) => Show (LowerEnvelope f g r)
+deriving instance (Read r, Read1 f, Read1 g) => Read (LowerEnvelope f g r)
+deriving instance (Ord r, Eq1 f, Eq1 g)      => Eq   (LowerEnvelope f g r)
+
 
 instance ( TraversableWithIndex i f, Ixed (f (Vertex r))
          , i ~ Index (f  (Vertex r)), IxValue (f (Vertex r)) ~ Vertex r
@@ -55,14 +68,15 @@ instance ( TraversableWithIndex i f, Ixed (f (Vertex r))
   vertices = verticesLens .> itraversed
 
 
--- todo; report faces somehow
+-- todo; report faces somehow I guess that before re-sorting the
+-- half-edges after triangulation we know have the edges per face.
 
 --------------------------------------------------------------------------------
 
 -- | A vertex in the lower envelope
 data Vertex r = Vertex { _location :: Point 3 r
                        , _definers :: Vector 3 (Plane r)
-                       } deriving (Show)
+                       } deriving (Show,Read)
 
 instance Ord r => Eq (Vertex r) where
   u == v = u `compare` v == EQ
@@ -95,7 +109,7 @@ asVertex (Three h1 h2 h3) = (\l -> Vertex l (Vector3 h1 h2 h3)) <$> intersection
 data HalfEdge r = HalfEdge { _origin      :: !(Vertex r)
                            , _destination :: !(Vertex r)
                            , _leftPlane   :: !(Plane r)
-                           } deriving (Show,Eq)
+                           } deriving (Show,Read,Eq)
 
 -- instance Ord r => Ord (HalfEdge r) where
 --   compare = aroundOrigins
@@ -111,7 +125,7 @@ leftPlane = lens _leftPlane (\he lp -> he { _leftPlane = lp })
 
 --------------------------------------------------------------------------------
 
--- | Given two vertices, try to construct a half-edge from them; this
+-- | Given two vertices, try to construct a half-edge fr<om them; this
 -- requires that two of the three defining planes are shared.
 asHalfEdge           :: (Ord r, Num r) => Two (Vertex r) -> Maybe (HalfEdge r)
 asHalfEdge (Two u v) = case AtMostThree.commonElems (u^.definers) (v^.definers) of
@@ -163,3 +177,9 @@ infixl 0 ///
 num /// denom = if denom /= 0 then Just (num / denom) else Nothing
 
 --------------------------------------------------------------------------------
+
+
+-- | Raise to some fractional power
+(^^^)   :: Int -> Rational -> Int
+n ^^^ p = floor $ fromIntegral n ** realToFrac @Rational @Double p
+{-# INLINE (^^^) #-}

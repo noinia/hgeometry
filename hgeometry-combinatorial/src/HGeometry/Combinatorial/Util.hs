@@ -56,6 +56,11 @@ pattern Three a b c = V3 a b c
 
 -- | Generate All unique unordered triplets.
 --
+-- >>> mapM_ print $ uniqueTriplets "abcd"
+-- V3 'a' 'b' 'c'
+-- V3 'a' 'b' 'd'
+-- V3 'a' 'c' 'd'
+-- V3 'b' 'c' 'd'
 uniqueTriplets                  :: Foldable f => f a -> [Three a]
 uniqueTriplets (F.toList -> xs) =
   [ Three x y z | (x:ys) <- nonEmptyTails xs, Two y z <- uniquePairs ys]
@@ -99,7 +104,17 @@ pattern Two a b = V2 a b
 
 -- | Given a list xs, generate all unique (unordered) pairs.
 --
---
+-- >>> mapM_ print $ uniquePairs "abcde"
+-- V2 'a' 'b'
+-- V2 'a' 'c'
+-- V2 'a' 'd'
+-- V2 'a' 'e'
+-- V2 'b' 'c'
+-- V2 'b' 'd'
+-- V2 'b' 'e'
+-- V2 'c' 'd'
+-- V2 'c' 'e'
+-- V2 'd' 'e'
 uniquePairs                  :: Foldable f => f a -> [Two a]
 uniquePairs (F.toList -> xs) = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
 

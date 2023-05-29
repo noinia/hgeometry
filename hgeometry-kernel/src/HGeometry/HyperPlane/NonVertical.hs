@@ -47,6 +47,7 @@ type instance Dimension (NonVerticalHyperPlane d r) = d
 deriving instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
 deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 
+deriving instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
 deriving instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
 
 instance ( MkHyperPlaneConstraints d r
