@@ -21,7 +21,6 @@ import           HGeometry.Ext
 --import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LineSegment
 import           HGeometry.Point hiding (origin)
 import           Witherable
 
@@ -171,7 +170,8 @@ data SubLine r = HalfLine !(RelativeHalfLine r)
 
 
 data SubLine' r = UnboundedSubLine !(RelativeHalfLine r)
-                | Segment !(ClosedLineSegment (Point 2 r :+ Plane r))
+                | Segment !(Point 2 r :+ Plane r) -- startpoint
+                          !(Point 2 r :+ Plane r) -- endpoint
                 deriving (Show,Eq)
 
 -- | given two planes h1 and h2, let l be the the line in which h1 and h2 intersect.
@@ -253,9 +253,8 @@ commonIntersection l subLines = case commonIntersection' l subLines of
   Two Nothing  (Just q) -> Just $ UnboundedSubLine q
   Two (Just p) (Just q)
     | cmpAlong l p q == LT -> Nothing
-    | otherwise            -> Just $ Segment $
-                              ClosedLineSegment (hlEndPoint q :+ hlDefiner q)
-                                                (hlEndPoint p :+ hlDefiner p)
+    | otherwise            -> Just $ Segment (hlEndPoint q :+ hlDefiner q)
+                                             (hlEndPoint p :+ hlDefiner p)
 
 
 
@@ -294,12 +293,10 @@ asHalfEdge          :: (Ord r, Fractional r, Traversable f)
                     => Plane r -> Plane r -> f (Plane r)
                     -> Maybe (GHalfEdge (Point 3 r :+ Set.Set (Plane r)) r)
 asHalfEdge h1 h2 hs = asEdgeInterval h1 h2 hs <&> \case
-                        UnboundedSubLine sl -> let q = hlEndPoint sl
-                                                   h3 = hlDefiner sl
-                                               in HalfEdge (mkVertex q h3) UnboundedVertex h1
-                        Segment seg         -> let (p :+ h3) = seg^.start
-                                                   (q :+ h4) = seg^.end
-                                               in HalfEdge (mkVertex p h3) (mkVertex q h4) h1
+                        UnboundedSubLine sl         -> let q  = hlEndPoint sl
+                                                           u  = mkVertex q (hlDefiner sl)
+                                                       in HalfEdge u UnboundedVertex h1
+                        Segment (p :+ h3) (q :+ h4) -> HalfEdge (mkVertex p h3) (mkVertex q h4) h1
   where
     mkVertex p@(Point2 x y) h3 = let z    = evalAt p h1
                                      defs = Set.fromList [h1,h2,h3]
