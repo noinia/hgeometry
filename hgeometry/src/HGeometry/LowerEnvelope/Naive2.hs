@@ -77,26 +77,46 @@ data LowerEnvelope g r =
 
 -- | Brute force implementation of the lower envelope.
 --
+-- pre: we are given at least 3 planes that define at least one vertex
+--
 -- running time: \(O(n^3)\)
 lowerEnvelope    :: (Traversable f, Ord r, Fractional r)
                  => f (Plane r) -> LowerEnvelope [] r
 lowerEnvelope hs = LowerEnvelope vertices' halfEdges''
   where
-    hs' = F.toList hs
-    halfEdges' = catMaybes [ asHalfEdge h1 h2 hs
-                           | h1 <- hs', h2 <- hs'
-                           ]
+    -- FIXME: This does not report the half-edges in any particular order (yet)
 
+    -- we first compute all half edges. Each half edge still has a somewhat course
+    -- idea of what its vertices are though; in particular. These vertices don't know
+    -- the full set of definers yet (in particular in case of degeneracies)
+    --
+    -- note that we generate both (h1,h2) and (h2,h1) since we want each halfedge in
+    -- both directions.
+    --
+    -- note: this is the dominating step in the running time, taking O(n^2*n) = O(n^3 )time
+    --
+    -- TODO: it is probably slightly faster to generate unique pairs and simply flip
+    -- the edges.
+    halfEdges' = catMaybes [ asHalfEdge h1 h2 hs
+                           | h1 <- F.toList hs, h2 <- F.toList hs
+                           ]
+    -- once we have the vertices we can annotate every bounded vertex with its complete
+    -- set of definers
+    halfEdges'' = halfEdges' <&> \(HalfEdge o d h) -> HalfEdge (vtx <$> o) (vtx <$> d) h
+
+    -- we collect the vertex locations, and the corresponding definers by going over all
+    -- half edges (and collecting the bounded vertices.)
     vertices' = foldr (\(v :+ defs) -> Map.insertWith (<>) v defs) mempty
               $ foldMap boundedVertices halfEdges'
 
-
-    halfEdges'' = halfEdges' <&> \(HalfEdge o d h) -> HalfEdge (vtx <$> o) (vtx <$> d) h
+    -- We use a lookup to find the set of definers. Note that this is safe, since we
+    -- constructed the set of vertices from the set of half-edges just before.
 
     -- vtx          :: Point 3 r :+ a -> BoundedVertex r
     vtx (p :+ _) = BoundedVertex p (vertices' Map.! p)
 
 
+-- | Collect all bounded vertices of a  halfedge
 boundedVertices    :: GHalfEdge vertex r -> [vertex]
 boundedVertices he = mapMaybe (\case
                                   UnboundedVertex -> Nothing
@@ -117,6 +137,7 @@ boundedVertices he = mapMaybe (\case
 
 --------------------------------------------------------------------------------
 
+-- | A line in R^2, specified by its equation
 data MyLine r = VerticalLine !r
               | ALine !r -- a       y = ax+ b
                       !r -- b
@@ -131,6 +152,7 @@ intersectingLine (Plane a1 b1 c1) (Plane a2 b2 c2)
                     lB = (c2 - c1) / (b1 - b2)
                 in Just $ ALine lA lB
 
+-- | Side of a halfline
 data Direction = Lower | Upper deriving (Show,Eq,Ord)
 
 -- | A half-line with respect to some (not specified line)
@@ -141,9 +163,11 @@ data RelativeHalfLine r = RelHalfLine { hlDirection :: {-# UNPACK #-}!Direction
                                       }
                         deriving (Show,Eq)
 
+
 data SubLine r = HalfLine !(RelativeHalfLine r)
                | EntireLine                     (Plane r) -- the plane defining this subline
                deriving (Show,Eq)
+-- fixme: We are currently not really using the plane passed to entireline.
 
 
 data SubLine' r = UnboundedSubLine !(RelativeHalfLine r)
@@ -232,6 +256,8 @@ commonIntersection l subLines = case commonIntersection' l subLines of
     | otherwise            -> Just $ Segment $
                               ClosedLineSegment (hlEndPoint q :+ hlDefiner q)
                                                 (hlEndPoint p :+ hlDefiner p)
+
+
 
 -- | compare two points along the given line.
 cmpAlong   :: Ord r => MyLine a -> RelativeHalfLine r -> RelativeHalfLine r -> Ordering
