@@ -42,10 +42,12 @@ triangulateFace      :: ( Foldable f
                         )
                      => f (HalfEdge r) -- ^ the edges in CCW order along the face
                      -> f (HalfEdge r)
-triangulateFace face = foldMap mkEdge rest' <> face
+triangulateFace face = foldMap mkEdge rest'' <> face
   where
-    Just (e0,rest)  = uncons face --
-    Just (_ ,rest') = uncons rest -- the face has at least 2 vertices, so this should be safe
+    Just (e0,rest)   = uncons face --
+    Just (_ ,rest')  = uncons rest -- the face has at least 2 vertices, so this should be safe
+    rest'' = rest' -- FIXME
+    -- Just (_, rest'') = unsnoc rest' -- TODO: if rest does not exist we area lready a triangle
     u = e0^.origin
     h = e0^.leftPlane
     mkEdge e = pure (HalfEdge u (e^.origin) h) <> pure (HalfEdge (e^.origin) u h)

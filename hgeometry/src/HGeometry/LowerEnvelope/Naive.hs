@@ -34,6 +34,18 @@ lowerEnvelope hs = LowerEnvelope vertices' halfEdges'
     -- TODO: how do we represent the unbounded edges; I guess we
     -- should have one half-edge pointing to the unbounded vertex
 
+    halfEdges'' = foldMap (\u -> let Vector h1 h2 h3 = u^.definers
+                                 in
+                             [ PartialEdge u h1 h2 -- how do we nknow the order?
+                             , PartialEdge u h2 h3
+                             , PartialEdge u h3 h1
+                             ]
+                          ) vertices'
+
+data PartialEdge r = PartialEdge (Vertex r) -- origin
+                                 (Plane r) -- leftPlane
+                                 (Plane r) -- rightPlane
+
 
 -- | Triangulated version of a lower envelope
 --

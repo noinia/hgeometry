@@ -1,21 +1,27 @@
 module HGeometry.LowerEnvelope.Naive2
   ( Plane
 
-  , LowerEnvelope
+  , LowerEnvelope, _boundedVertices, _halfEdges
   , lowerEnvelope
 
-  , Vertex'(..), Vertex, location, location2
+  , BoundedVertex(BoundedVertex), location, location2
+  , belowAll
+  , intersectionPoint, asBoundedVertex
+
+  , Vertex'(..), Vertex
   , GHalfEdge(HalfEdge), HalfEdge, origin, destination
   , asHalfEdge
+
+  , asLowerInterval, SubLine(..), hlEndPoint
   ) where
 
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Function (on)
+import           Data.Functor.Classes
 import           Data.Kind (Type)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
---import qualified Data.Vector as Boxed
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 --import           HGeometry.Foldable.Sort
@@ -30,9 +36,9 @@ import           Witherable
 type Plane = NonVerticalHyperPlane 3
 
 -- | A vertex in the lower envelope
-data BoundedVertex r = BoundedVertex { _location :: Point 3 r
-                                     , _definers :: Set.Set (Plane r)
-                                     } deriving (Show,Read,Eq)
+data BoundedVertex r = BoundedVertex (Point 3 r)         -- ^ the location
+                                     (Set.Set (Plane r)) -- ^ the definers
+                     deriving (Show,Read,Eq)
 
 data Vertex' vertex = UnboundedVertex
                     | Vertex vertex
@@ -41,11 +47,41 @@ type Vertex r = Vertex' (BoundedVertex r)
 
 -- | The location of the vertex
 location :: Lens' (BoundedVertex r) (Point 3 r)
-location = lens _location (\v l -> v { _location = l })
+location = lens (\(BoundedVertex p _) -> p) (\(BoundedVertex _ defs) p -> BoundedVertex p defs)
 
 -- | Projected 2d location of the point
 location2 :: Getter (BoundedVertex r) (Point 2 r)
 location2 = location . to projectPoint
+
+--------------------------------------------------------------------------------
+
+-- | Test if the given vertex lies on or below all the given planes
+--
+-- \(O(n)\)
+belowAll   :: (Foldable f, Num r, Ord r) => BoundedVertex r -> f (Plane r) -> Bool
+belowAll v = all ((v^.location) `notAbove`)
+
+-- | Returns True when the point is not above the plane, in otherwords
+-- when the plane actually passes above (or through) the point.
+notAbove                  :: (Ord r, Num r) => Point 3 r -> Plane r -> Bool
+notAbove (Point3 x y z) h = not $ z > evalAt (Point2 x y) h
+
+-- | Construct the vertex representing the intersection of the three
+-- given planes (if such an intersection point exists).
+asBoundedVertex                  :: (Fractional r, Ord r)
+                                 => Three (Plane r) -> Maybe (BoundedVertex r)
+asBoundedVertex (Three h1 h2 h3) = (\l -> BoundedVertex l (Set.fromList [h1, h2, h3]))
+                                <$> intersectionPoint h1 h2 h3
+
+-- | Compute the common intersection point of three non-vertical
+-- hyperplanes in R^3 (if such a point exists).
+intersectionPoint          :: (Fractional r, Ord r)
+                           => Plane r -> Plane r -> Plane r -> Maybe (Point 3 r)
+intersectionPoint h1 h2 h3 = asLowerInterval h1 h2 h3 >>= \case
+  EntireLine  -> Nothing
+  HalfLine hl -> let q@(Point2 x y) = hlEndPoint hl
+                     z              = evalAt q h1
+                 in Just $ Point3 x y z
 
 --------------------------------------------------------------------------------
 
@@ -65,6 +101,13 @@ destination = lens _destination (\he d -> he { _destination = d })
 
 --------------------------------------------------------------------------------
 
+-- | Given the left plane, and a halfegdge create the corresponding
+-- halfedge i.e. by flipping origin and destination.
+twinWith                    :: Plane r -> GHalfEdge vertex r -> GHalfEdge vertex r
+twinWith h (HalfEdge o d _) = HalfEdge d o h
+
+--------------------------------------------------------------------------------
+
 -- | Intermediate type to use during computation
 type LowerEnvelope :: (Type -> Type) -> Type -> Type
 data LowerEnvelope g r =
@@ -74,7 +117,14 @@ data LowerEnvelope g r =
                 }
 
 
--- | Brute force implementation of the lower envelope.
+
+deriving instance (Show r, Show1 g)        => Show (LowerEnvelope g r)
+deriving instance (Read r, Ord r, Read1 g) => Read (LowerEnvelope g r)
+deriving instance (Ord r, Eq1 g)           => Eq   (LowerEnvelope g r)
+
+--------------------------------------------------------------------------------
+
+-- | Somewhat brute force implementation of the lower envelope.
 --
 -- pre: we are given at least 3 planes that define at least one vertex
 --
@@ -93,12 +143,12 @@ lowerEnvelope hs = LowerEnvelope vertices' halfEdges''
     -- both directions.
     --
     -- note: this is the dominating step in the running time, taking O(n^2*n) = O(n^3 )time
-    --
-    -- TODO: it is probably slightly faster to generate unique pairs and simply flip
-    -- the edges.
-    halfEdges' = catMaybes [ asHalfEdge h1 h2 hs
-                           | h1 <- F.toList hs, h2 <- F.toList hs
-                           ]
+    halfEdges' = foldMap (\(Two h1 h2) -> case asHalfEdge h1 h2 hs of
+                              Nothing -> mempty
+                              Just hl -> [hl, twinWith (other (_leftPlane hl) h1 h2) hl]
+                         )
+               $ uniquePairs hs
+
     -- once we have the vertices we can annotate every bounded vertex with its complete
     -- set of definers
     halfEdges'' = halfEdges' <&> \(HalfEdge o d h) -> HalfEdge (vtx <$> o) (vtx <$> d) h
@@ -121,18 +171,6 @@ boundedVertices he = mapMaybe (\case
                                   UnboundedVertex -> Nothing
                                   Vertex v        -> Just v
                               ) [ he^.origin, he^.destination ]
-
-
-
-
--- deriving instance (Show r, Show1 g) => Show (LowerEnvelope g r)
--- deriving instance (Read r, Read1 g) => Read (LowerEnvelope g r)
--- deriving instance (Ord r, Eq1 g)    => Eq   (LowerEnvelope g r)
-
--- data Interval r = UpTo r
---                 | From r
---                 | Interval r r
---                 deriving (Show,Eq)
 
 --------------------------------------------------------------------------------
 
@@ -164,14 +202,16 @@ data RelativeHalfLine r = RelHalfLine { hlDirection :: {-# UNPACK #-}!Direction
 
 
 data SubLine r = HalfLine !(RelativeHalfLine r)
-               | EntireLine                     (Plane r) -- the plane defining this subline
+               | EntireLine
                deriving (Show,Eq)
--- fixme: We are currently not really using the plane passed to entireline.
 
 
-data SubLine' r = UnboundedSubLine !(RelativeHalfLine r)
+
+data SubLine' r = UnboundedSubLine !(RelativeHalfLine r) !(MyLine r) -- the line
+
                 | Segment !(Point 2 r :+ Plane r) -- startpoint
                           !(Point 2 r :+ Plane r) -- endpoint
+                          !(MyLine r) -- the line
                 deriving (Show,Eq)
 
 -- | given two planes h1 and h2, let l be the the line in which h1 and h2 intersect.
@@ -192,7 +232,7 @@ asLowerInterval' :: (Ord r, Fractional r)
 asLowerInterval' h1@(Plane a1 b1 c1) _ l
                  h3@(Plane a3 b3 c3) = case l of
   VerticalLine x -> case b3 `compare` b1 of
-                      EQ | belowAt (Point2 x 0) h1 h3 -> Just $ EntireLine h3
+                      EQ | belowAt (Point2 x 0) h1 h3 -> Just EntireLine
                          | otherwise                  -> Nothing
                       LT -> verticalHalfLine x Lower -- sign flips
                       GT -> verticalHalfLine x Upper
@@ -210,7 +250,7 @@ asLowerInterval' h1@(Plane a1 b1 c1) _ l
                         x     = num / denom
                     in
                     case denom `compare` 0 of
-                      EQ | belowAt (Point2 0 lB) h1 h3 -> Just $ EntireLine h3
+                      EQ | belowAt (Point2 0 lB) h1 h3 -> Just EntireLine
                          | otherwise                   -> Nothing
                       LT -> halfLine lA lB x Lower -- sign flips
                       GT -> halfLine lA lB x Upper
@@ -249,12 +289,13 @@ commonIntersection            :: (Foldable f, Ord r)
                               => MyLine r -> f (SubLine r) -> Maybe (SubLine' r)
 commonIntersection l subLines = case commonIntersection' l subLines of
   Two Nothing  Nothing  -> Nothing -- FIXME: I guess if all are EntireLine's this would be wrong
-  Two (Just p) Nothing  -> Just $ UnboundedSubLine p
-  Two Nothing  (Just q) -> Just $ UnboundedSubLine q
+  Two (Just p) Nothing  -> Just $ UnboundedSubLine p l
+  Two Nothing  (Just q) -> Just $ UnboundedSubLine q l
   Two (Just p) (Just q)
     | cmpAlong l p q == LT -> Nothing
     | otherwise            -> Just $ Segment (hlEndPoint q :+ hlDefiner q)
                                              (hlEndPoint p :+ hlDefiner p)
+                                             l
 
 
 
@@ -264,15 +305,16 @@ cmpAlong l = case l of
                VerticalLine _ -> compare `on` (^.to hlEndPoint.yCoord)
                ALine _ _      -> compare `on` (^.to hlEndPoint.xCoord)
 
--- compute the intersection of all lower halflines and all upper halfines
--- returns a (strict) pair (l,h) where l is the endpoint of the intersection of all lower halfines
--- and b is the endpoint of the intersection of all upper halflines.
+-- | compute the intersection of all lower halflines and all upper
+-- halfines returns a (strict) pair (l,h) where l is the endpoint of
+-- the intersection of all lower halfines and b is the endpoint of the
+-- intersection of all upper halflines.
 commonIntersection'   :: (Foldable f, Ord r)
                       => MyLine r -> f (SubLine r) -> Two (Maybe (RelativeHalfLine r))
 commonIntersection' l = foldr (flip f) (Two Nothing Nothing)
   where
     f acc@(Two low high) = \case
-      EntireLine _  -> acc
+      EntireLine    -> acc
       HalfLine hl   -> case hlDirection hl of
                          Lower -> Two (minBy (cmpAlong l) low hl) high
                          Upper -> Two low (maxBy (cmpAlong l) high hl)
@@ -293,12 +335,32 @@ asHalfEdge          :: (Ord r, Fractional r, Traversable f)
                     => Plane r -> Plane r -> f (Plane r)
                     -> Maybe (GHalfEdge (Point 3 r :+ Set.Set (Plane r)) r)
 asHalfEdge h1 h2 hs = asEdgeInterval h1 h2 hs <&> \case
-                        UnboundedSubLine sl         -> let q  = hlEndPoint sl
-                                                           u  = mkVertex q (hlDefiner sl)
-                                                       in HalfEdge u UnboundedVertex h1
-                        Segment (p :+ h3) (q :+ h4) -> HalfEdge (mkVertex p h3) (mkVertex q h4) h1
+                        UnboundedSubLine sl l         ->
+                            let q  = hlEndPoint sl
+                                u  = mkVertex q (hlDefiner sl)
+                                h  = planeAbove l
+                            in HalfEdge u UnboundedVertex h
+                        Segment (p :+ h3) (q :+ h4) l ->
+                            HalfEdge (mkVertex p h3) (mkVertex q h4) (planeAbove l)
   where
     mkVertex p@(Point2 x y) h3 = let z    = evalAt p h1
                                      defs = Set.fromList [h1,h2,h3]
                                  in Vertex (Point3 x y z :+ defs)
--- FIXME: not sure the h1 is guaranteed to be correct; pick either h1 or h2, depending who is left of the oriented line l.
+
+    -- figure out which plane is the lower plane just above l, simply by evaluating
+    -- h1 and h2 at some point in the left halfspace of l
+    --
+    -- we interpret vertical lines as upward, this is consistent with cmpAlong
+    planeAbove = minAt . \case
+      VerticalLine x -> Point2 (x-1) 0
+      ALine _ b      -> Point2 0     (b+1)
+
+    minAt q = if evalAt q h1 <= evalAt q h2 then h1 else h2
+
+
+--------------------------------------------------------------------------------
+
+-- | given a b c, returns the value from b or c that is not a.
+other                     :: Eq p => p -> p -> p -> p
+other h h1 h2 | h == h1   = h2
+              | otherwise = h1

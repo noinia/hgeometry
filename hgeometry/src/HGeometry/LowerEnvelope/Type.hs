@@ -3,7 +3,9 @@ module HGeometry.LowerEnvelope.Type
   ( Plane
   , Vertex(Vertex), location, definers
   , asVertex
-  , HalfEdge(HalfEdge), origin, destination, leftPlane
+  , HalfEdge(HalfEdge)
+  , HasOrigin(..), HasLeftPlane(..), destination
+  , UnboundedHalfEdge(UnboundedHalfEdge)
   , asHalfEdge, aroundOrigins
   , LowerEnvelope(LowerEnvelope), halfEdges
 
@@ -23,6 +25,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import qualified HGeometry.LowerEnvelope.AtMostThree as AtMostThree
 import           HGeometry.Point hiding (origin)
+import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified Hiraffe.Graph as Graph
 
@@ -37,8 +40,9 @@ type Plane = NonVerticalHyperPlane 3
 --
 type LowerEnvelope :: (Type -> Type) -> (Type -> Type) -> Type -> Type
 data LowerEnvelope f g r =
-  LowerEnvelope { _vertices  :: f (Vertex r)
-                , _halfEdges :: g (HalfEdge r) -- ^ sorted in CCW order around their origins
+  LowerEnvelope { _vertices           :: f (Vertex r)
+                , _halfEdges          :: g (HalfEdge r)
+                  -- ^ sorted in CCW order around their origins
                 }
 -- TODO: this is still just an intermediate type; in the end we will need to convert to a proper
 -- planar subdivision anyway
@@ -111,17 +115,39 @@ data HalfEdge r = HalfEdge { _origin      :: !(Vertex r)
                            , _leftPlane   :: !(Plane r)
                            } deriving (Show,Read,Eq)
 
+type instance NumType (HalfEdge r) = r
+
+-- | Unbounded half edges
+data UnboundedHalfEdge r = UnboundedHalfEdge { _uOrigin    :: !(Vertex r)
+                                             , _uLeftPlane :: !(Plane r)
+                                             } deriving (Show,Read,Eq)
+
+type instance NumType (UnboundedHalfEdge r) = r
+
 -- instance Ord r => Ord (HalfEdge r) where
 --   compare = aroundOrigins
 
-origin :: Lens' (HalfEdge r) (Vertex r)
-origin = lens _origin (\he o -> he { _origin = o })
+class HasOrigin t where
+  origin :: Lens' t (Vertex (NumType t))
+
+class HasLeftPlane t where
+  leftPlane :: Lens' t (Plane (NumType t))
 
 destination :: Lens' (HalfEdge r) (Vertex r)
 destination = lens _destination (\he d -> he { _destination = d })
 
-leftPlane :: Lens' (HalfEdge r) (Plane r)
-leftPlane = lens _leftPlane (\he lp -> he { _leftPlane = lp })
+
+instance HasOrigin (HalfEdge r) where
+  origin = lens _origin (\he o -> he { _origin = o })
+instance HasOrigin (UnboundedHalfEdge r) where
+  origin = lens _uOrigin (\he o -> he { _uOrigin = o })
+
+instance HasLeftPlane (HalfEdge r) where
+  leftPlane = lens _leftPlane (\he lp -> he { _leftPlane = lp })
+instance HasLeftPlane (UnboundedHalfEdge r) where
+  leftPlane = lens _uLeftPlane (\he lp -> he { _uLeftPlane = lp })
+
+
 
 --------------------------------------------------------------------------------
 
@@ -156,7 +182,7 @@ intersectionPoint :: (Fractional r, Eq r) => Plane r -> Plane r -> Plane r -> Ma
 intersectionPoint h1@(Plane a1 b1 c1)
                      (Plane a2 b2 c2)
                      (Plane a3 b3 c3)
-  | a1 == a2  = Nothing
+  | a1 == a2  = Nothing -- FIXME: this can't be right
   | otherwise = do y <- my
                    x <- xf y
                    pure $ Point3 x y (z x y)

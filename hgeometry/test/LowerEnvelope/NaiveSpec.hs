@@ -1,5 +1,8 @@
 module LowerEnvelope.NaiveSpec where
 
+import           Control.Lens
+import qualified Data.Map as Map
+import qualified Data.Set as Set
 import qualified Data.Vector as Boxed
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
@@ -21,36 +24,52 @@ type R = RealNumber 5
 spec :: Spec
 spec = describe "lowerEnvelope tests" $ do
          prop "intersection on plane" $ \h1 h2 (h3 :: Plane R) ->
-           case verifyOnPlane h1 h2 h3 of
-             Nothing     -> True
-             Just (_,bs) -> and bs
-         it "asVertex" $
+           verifyOnPlane h1 h2 h3
+         it "asBoundedVertex" $
            let [h1,h2,h3] = inputs in
-           asVertex (Three h1 h2 h3) `shouldBe` Just (Vertex (Point3 10 10 10) (Vector3 h1 h2 h3))
+           asBoundedVertex (Three h1 h2 h3) `shouldBe`
+             Just (BoundedVertex (Point3 10 10 10) (Set.fromList inputs))
          prop "belowall" $ \h1 h2 h3 ->
-           case asVertex (Three h1 h2 (h3 :: Plane R)) of
+           case asBoundedVertex (Three h1 h2 (h3 :: Plane R)) of
              Nothing -> True
              Just v  -> v `belowAll` [h1,h2,h3]
          it "vertices inputs" $
            let [h1,h2,h3] = inputs
-               v          = Vertex (Point3 10 10 10) (Vector3 h1 h2 h3)
+               p          = Point3 10 10 10
+               v          = Vertex $ BoundedVertex p (Set.fromList inputs)
            in
-           lowerEnvelope inputs
+             _boundedVertices (lowerEnvelope inputs)
            `shouldBe`
-           LowerEnvelope [v] (Boxed.fromList [])
+             (Map.fromList [(p, Set.fromList inputs)])
+         it "halfEdges inputs" $
+           let [h1,h2,h3] = inputs
+               v          = Vertex $ BoundedVertex (Point3 10 10 10) (Set.fromList inputs)
+           in
+             _halfEdges (lowerEnvelope inputs)
+           `shouldBe`
+             [ HalfEdge v               UnboundedVertex h1
+             , HalfEdge UnboundedVertex v               h2
+             , HalfEdge v               UnboundedVertex h3
+             , HalfEdge UnboundedVertex               v h1
+             , HalfEdge v               UnboundedVertex h2
+             , HalfEdge UnboundedVertex               v h3
+             ]
+             -- there still seems to be s.t. wrong with the order of the leftplanes
 
 
 -- | verify that the intersection point indeed lis on all three planes
-verifyOnPlane          :: (Fractional r, Eq r)
-                       => Plane r -> Plane r -> Plane r -> Maybe (Point 3 r, Three Bool)
-verifyOnPlane h1 h2 h3 = f <$> intersectionPoint h1 h2 h3
+verifyOnPlane          :: (Fractional r, Ord r)
+                       => Plane r -> Plane r -> Plane r -> Bool
+verifyOnPlane h1 h2 h3 = case intersectionPoint h1 h2 h3 of
+                           Nothing -> True
+                           Just (Point3 x y _)  -> allEqual $
+                                                   (evalAt $ Point2 x y) <$> Three h1 h2 h3
   where
-    f p = (p, g p <$> Three h1 h2 h3)
-    g (Point3 x y z) h = evalAt (Point2 x y) h == z
+    allEqual (Three a b c) = a == b && b == c
 
 
 myEnv = lowerEnvelope inputs
-myTriEnv = triangulatedLowerEnvelope inputs
+-- myTriEnv = triangulatedLowerEnvelope inputs
 
 inputs :: [Plane R]
 inputs = [ Plane 1 0 0

@@ -6,6 +6,7 @@ import           Control.Lens
 import qualified Data.Vector as Boxed
 import           HGeometry.Interval
 import           HGeometry.Line
+import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.Type
 import           HGeometry.Point
 
@@ -22,7 +23,7 @@ batchedPointLocation           :: f (Point 3 r) -> g (Plane r) -> ( Boxed.Vector
                                                                   )
 batchedPointLocation qs planes = undefined
   where
-    allVertices =
+    allVertices = undefined
 
 
 
@@ -32,7 +33,7 @@ batchedPointLocation qs planes = undefined
 --
 --
 -- running time: O((r^2 + n) log (r+n) + k) where k = O(nr) is the output size
-batchedPointLocation2 :: f (Point 2 r) -> g (Line r) -> ( Boxed.Vector (Line r)
+batchedPointLocation2 :: f (Point 2 r) -> g (LineEQ r) -> ( Boxed.Vector (LineEQ r)
                                                         , f (Point 2 r, ClosedInterval Int)
                                                         )
 batchedPointLocation2 = undefined
