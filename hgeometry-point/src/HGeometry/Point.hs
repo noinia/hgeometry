@@ -49,6 +49,7 @@ module HGeometry.Point
  , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
   , cmpByDistanceTo
+  , cmpInDirection
 
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
@@ -60,7 +61,7 @@ import Control.Lens (Lens', Iso', coerced, (^.))
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import Data.Type.Ord
--- import HGeometry.Point.Orientation
+import HGeometry.Point.Orientation
 import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
 import HGeometry.Vector

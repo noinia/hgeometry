@@ -19,19 +19,19 @@ module HGeometry.Polygon.Class
   , Polygon_(..)
   ) where
 
-import           Control.Lens
-import           Control.Lens.Internal.Fold (NonEmptyDList(..))
-import           Data.Function (on)
-import           Data.Functor.Apply (Apply)
+import Control.Lens
+import Control.Lens.Internal.Fold (NonEmptyDList(..))
+import Data.Function (on)
+import Data.Functor.Apply (Apply)
 -- import qualified Data.Functor.Apply as Apply
-import           Data.Functor.Contravariant (phantom)
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Semigroup (First(..))
-import           Data.Semigroup.Foldable
-import           HGeometry.LineSegment
-import           HGeometry.Point.Class
-import           HGeometry.Vector
-import           Hiraffe.Graph
+import Data.Functor.Contravariant (phantom)
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Semigroup (First(..))
+import Data.Semigroup.Foldable
+import HGeometry.LineSegment
+import HGeometry.Point
+import HGeometry.Vector
+import Hiraffe.Graph
 
 
 --------------------------------------------------------------------------------
@@ -233,22 +233,13 @@ class ( HasOuterBoundary polygon
   -- running time: \(O(n)\)
   extremes      :: (Num r, Ord r, Point_ point 2 r)
                 => Vector 2 r -> polygon -> (point, point)
-  extremes u pg = ( first1Of (minimumVertexBy (cmpExtreme u)) pg
-                  , first1Of (maximumVertexBy (cmpExtreme u)) pg
+  extremes u pg = ( first1Of (minimumVertexBy (cmpInDirection u)) pg
+                  , first1Of (maximumVertexBy (cmpInDirection u)) pg
                   )
 
 --------------------------------------------------------------------------------
 -- end of te Polygon_ class
 --------------------------------------------------------------------------------
-
--- | Comparison that compares which point is 'larger' in the direction given by
--- the vector u.
-cmpExtreme       :: (Num r, Ord r, Point_ point 2 r)
-                 => Vector 2 r -> point -> point -> Ordering
-cmpExtreme u p q = u `dot` (p .-. q) `compare` 0
-
---------------------------------------------------------------------------------
-
 
 --------------------------------------------------------------------------------
 

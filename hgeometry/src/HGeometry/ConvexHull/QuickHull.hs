@@ -20,12 +20,9 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Triangle
 import           HGeometry.Intersection
-
-
 import           HGeometry.Number.Real.Rational
 
 -- import Data.Ratio
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified HGeometry.ConvexHull.GrahamScan as GC
 import Debug.Trace
 --------------------------------------------------------------------------------
@@ -39,11 +36,11 @@ import Debug.Trace
 convexHull            :: (Ord r, Fractional r, Show r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
 convexHull ps        = uncheckedFromCCWPoints
-                     $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
+                     $ [l] <> hull l r above <> [r] <> reverse (hull l r below')
   where
     Extremes l r mids = findExtremes ps
     m                 = lineThrough l r
-    (above,below)     = List.partition (`liesAbove` m) mids
+    (above,below')    = List.partition (`liesAbove` m) mids
 
 data Extremes p = Extremes !p !p [p] deriving (Show)
 

@@ -7,6 +7,7 @@ module HGeometry.Polygon.Convex
   , isStrictlyConvex, isConvex
   , verifyConvex
   , minkowskiSum
+  , maxInDirection
   ) where
 
 import HGeometry.Polygon.Convex.Class

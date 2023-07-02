@@ -68,7 +68,7 @@ spec = describe "Convex Polygon tests" $ do
 --       quadrance u > 0 ==>
 --       let fastMax = snd (extremes u convex)
 --           slowMax = snd (extremesLinear u (convex^.simplePolygon))
---       in cmpExtreme u fastMax slowMax === EQ
+--       in cmpInDirection u fastMax slowMax === EQ
 --   specify "∀ poly. extremes (convexHull poly) == extremesLinear poly" $
 --     property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
 --       quadrance u > 0 ==>
@@ -76,7 +76,7 @@ spec = describe "Convex Polygon tests" $ do
 --             convexHull (CV.toNonEmpty (p^.outerBoundaryVector))
 --           fastMax = snd (extremes u hull)
 --           slowMax = snd (extremesLinear u p)
---       in cmpExtreme u fastMax slowMax === EQ
+--       in cmpInDirection u fastMax slowMax === EQ
 
 --   -- Check that vertices are always considered to be OnBoundary.
 --   specify "inConvex boundary convex == OnBoundary" $

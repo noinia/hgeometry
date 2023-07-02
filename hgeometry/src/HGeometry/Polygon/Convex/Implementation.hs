@@ -16,6 +16,7 @@ module HGeometry.Polygon.Convex.Implementation
   , _ConvexPolygon
   , isStrictlyConvex, isConvex
   , verifyConvex
+  , maxInDirection
   ) where
 
 import Control.DeepSeq (NFData)
@@ -28,6 +29,7 @@ import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Simple.Implementation
 import HGeometry.Properties
+import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
 
@@ -85,6 +87,7 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Point_ point 2 r
          ) => Polygon_ (ConvexPolygonF f point) point r where
   area = areaSimplePolygon
+  extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 
 instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Point_ point 2 r
@@ -153,3 +156,43 @@ isConvex   :: (Ord r, Num r, Point_ point 2 r, VertexContainer f point)
 isConvex = allOf outerBoundaryWithNeighbours isConvexVertex
   where
     isConvexVertex (v,(u,w)) = ccw u v w /= CW
+
+
+--------------------------------------------------------------------------------
+
+-- | Finds the extreme maximum point in the given direction. Based on
+-- http://geomalgorithms.com/a14-_extreme_pts.html
+--
+--
+-- pre: The input polygon is strictly convex.
+--
+-- running time: \(O(\log n)\)
+maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
+                 => Vector 2 r -> convexPolygon -> point
+maxInDirection u = findMaxWith (cmpInDirection u)
+
+-- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
+--        Use unsafe indexing.
+-- \( O(\log n) \)
+findMaxWith        :: (ConvexPolygon_ convexPolygon point r)
+                   => (point -> point -> Ordering)
+                   -> convexPolygon -> point
+findMaxWith cmp pg = pg^.outerBoundaryVertexAt (worker 0 n)
+  where
+    n = numVertices pg
+    a `icmp` b = (pg^.outerBoundaryVertexAt a) `cmp` (pg^.outerBoundaryVertexAt b)
+    worker a b
+      | localMaximum c = c
+      | a+1==b         = b
+      | otherwise      =
+        case  (isUpwards a, isUpwards c, c `icmp` a /= LT) of
+          (True, False, _)      -> worker a c -- A is up, C is down, pick [a,c]
+          (True, True, True)    -> worker c b -- A is up, C is up, C is GTE A, pick [c,b]
+          (True, True, False)   -> worker a c -- A is up, C is LT A, pick [a,c]
+          (False, True, _)      -> worker c b -- A is down, C is up, pick [c,b]
+          (False, False, False) -> worker c b -- A is down, C is down, C is LT A, pick [c,b]
+          (False, _, True)      -> worker a c -- A is down, C is GTE A, pick [a,c]
+      where
+        c = (a+b) `div` 2
+        localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
+    isUpwards idx = idx `icmp` (idx+1) /= GT

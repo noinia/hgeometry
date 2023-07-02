@@ -2,19 +2,17 @@ module Polygon.Convex.ConvexSpec
   (spec
   ) where
 
+import           Control.Arrow ((&&&))
 import           Control.Lens
--- import           Data.Coerce
 import           Data.Default.Class
--- import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
--- import           HGeometry.Boundary
--- import           HGeometry.Box (boundingBox)
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Vector
 import           Ipe
 import           Paths_hgeometry_test
 import           Test.Hspec
@@ -38,7 +36,7 @@ testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
                    expectationFailure . unwords $
                      [ "Failed to read ipe file", show fp, ":", show e]
     Right tcs -> do minkowskiTests "polygons in ipe file" $ map _polygon tcs
-                    -- mapM_ toSpec tcs
+                    mapM_ toSpec tcs
 
 data TestCase r = TestCase { _polygon    :: ConvexPolygon (Point 2 r)
                            }
@@ -52,26 +50,25 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
         polies = page^..content.traverse._withAttrs _IpePath _asConvexPolygon
 
 
--- toSingleSpec        :: (Num r, Ord r, Show r)
---                     => ConvexPolygon q r -> Vector 2 r -> Expectation
--- toSingleSpec poly u =
---   -- test that the reported extremes are equally far in direction u
---     F.all allEq (unzip [extremes u poly, extremesLinear u (poly^.simplePolygon)])
---     `shouldBe` True
---   where
---     allEq ~(p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
+toSingleSpec        :: (Num r, Ord r, Show r)
+                    => ConvexPolygon (Point 2 r) -> Vector 2 r -> Expectation
+toSingleSpec poly u = eq a c && eq b d `shouldBe` True
+  where
+    (a,b) = extremes u poly
+    (c,d) = extremes u (review _ConvexPolygon poly)
+    eq p q = cmpInDirection u p q == EQ
 
--- -- | generates 360 vectors "equally" spaced/angled
--- directions :: Num r => [Vector 2 r]
--- directions = map (fmap toRat . uncurry Vector2 . (cos &&& sin) . toRad) ([0..359] :: [Double])
---   where
---     toRad i = i * (pi / 180)
---     toRat x = fromIntegral . round $ 100000 * x
+-- | generates 360 vectors "equally" spaced/angled
+directions :: Num r => [Vector 2 r]
+directions = map (fmap toRat . uncurry Vector2 . (cos &&& sin) . toRad) ([0..359] :: [Double])
+  where
+    toRad i = i * (pi / 180)
+    toRat x = fromIntegral . round $ 100000 * x
 
--- toSpec                 :: (Num r, Ord r, Show r) => TestCase r -> SpecWith ()
--- toSpec (TestCase poly) = do
---                            it "Extreme points; binsearch same as linear" $
---                              mapM_ (toSingleSpec poly) directions
+toSpec                 :: (Num r, Ord r, Show r) => TestCase r -> SpecWith ()
+toSpec (TestCase poly) = do
+                           it "Extreme points; binsearch same as linear" $
+                             mapM_ (toSingleSpec poly) directions
 
 --------------------------------------------------------------------------------
 
