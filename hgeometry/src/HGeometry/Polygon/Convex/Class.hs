@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex.Class
-  ( ConvexPolygon_
+  ( ConvexPolygon_(..)
   ) where
 
 import HGeometry.Polygon.Simple.Class

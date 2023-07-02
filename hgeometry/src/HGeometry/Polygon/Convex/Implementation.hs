@@ -20,14 +20,15 @@ module HGeometry.Polygon.Convex.Implementation
 
 import Control.DeepSeq (NFData)
 import Control.Lens
-import HGeometry.Cyclic
 import Data.Vector.NonEmpty (NonEmptyVector)
-import HGeometry.Vector.NonEmpty.Util ()
+import HGeometry.Cyclic
 import HGeometry.Point
 import HGeometry.Polygon.Class
+import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Simple.Implementation
 import HGeometry.Properties
+import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
@@ -97,7 +98,12 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
   uncheckedFromCCWPoints = ConvexPolygon . uncheckedFromCCWPoints
   fromPoints pts = fromPoints pts >>= fromSimplePolygon
 
--- | Smart constructor to construct a striclty convex polygon from a
+instance ( SimplePolygon_ (SimplePolygonF f point) point r
+         , Point_ point 2 r
+         ) => ConvexPolygon_ (ConvexPolygonF f point) point r where
+
+
+-- | Smart constructor to construct a strictly convex polygon from a
 -- simple polygon.
 fromSimplePolygon :: (Ord r, Num r, Point_ point 2 r, VertexContainer f point)
                   => SimplePolygonF f point -> Maybe (ConvexPolygonF f point)

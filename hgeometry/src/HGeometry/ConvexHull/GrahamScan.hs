@@ -25,8 +25,7 @@ import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 
--- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is
--- given in clockwise order.
+-- | \(O(n \log n)\) time ConvexHull using Graham-Scan.
 --
 -- pre: input contains at least three points
 convexHull            :: (Ord r, Num r, Point_ point 2 r)
