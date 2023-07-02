@@ -17,6 +17,8 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
+
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
