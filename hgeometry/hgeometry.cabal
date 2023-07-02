@@ -57,6 +57,7 @@ common setup
       , aeson                   ^>= 2.1
       , nonempty-vector         ^>= 0.2
       , mtl                     >= 2.3
+      , data-default-class      ^>= 0.1
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -142,8 +143,8 @@ library
        HGeometry.Polygon.Simple.Implementation
        HGeometry.Polygon.Simple.InPolygon
 
-
        HGeometry.Polygon.Convex.Implementation
+       HGeometry.Polygon.Convex.MinkowskiSum
 
        -- HGeometry.LowerEnvelope.Type
        -- HGeometry.LowerEnvelope.AtMostThree
