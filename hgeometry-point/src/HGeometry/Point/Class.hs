@@ -74,9 +74,10 @@ type instance NumType (Linear.Point v r)   = r
 instance ( Vector_ (v r) d r
          , Vector_ (v s) d s
          ) => HasVector (Linear.Point v r) (Linear.Point v s) where
-  vector = undefined -- Linear._Point._Vector
+  vector = lens (\(Linear.P v) -> v^._Vector')
+                (\_ v -> Linear.P $ v^.from _Vector')
   {-# INLINE vector #-}
-  -- FIXME
+
 
 class ( Has_ Vector_ (Dimension point) (NumType point)
       , Has_ Vector_ (Dimension point') (NumType point')
@@ -99,9 +100,6 @@ class ( Has_ Vector_ (Dimension point) (NumType point)
   -- Point2 11 21
   coordinates :: IndexedTraversal1 Int point point' (NumType point) (NumType point')
   coordinates = vector  . reindexed (+1) components
-    -- where
-      -- tr :: IndexedTraversal Int (Vector d ) (VectorFor point') r s
-      -- tr =
   {-# INLINE coordinates #-}
 
 
