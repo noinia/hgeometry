@@ -19,7 +19,7 @@ import Test.QuickCheck.Instances ()
 
 spec :: Spec
 spec = do
-  runIO (getDataFileName "Polygon/Simple/pointInPolygon.ipe") >>= testCases
+  testCases "Polygon/Simple/pointInPolygon.ipe"
   numericalSpec
 
 testCases    :: FilePath -> Spec

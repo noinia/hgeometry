@@ -1,3 +1,15 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Convex.MinkowskiSum
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Computes the Minkowski Sum of two convex polygons. Based on the
+-- implementation in "Computational Geometry" by de Berg, van Kreveld,
+-- Overmars, and Schwartskopf.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex.MinkowskiSum
   ( minkowskiSum
   ) where
@@ -18,8 +30,8 @@ import Data.Default.Class
 --------------------------------------------------------------------------------
 
 
--- | Computes the Minkowski sum of the two input polygons with $n$ and $m$
--- vertices respectively.
+-- | Computes the Minkowski sum of the two input polygons with \(n\)
+-- and \(m\) vertices respectively.
 --
 -- running time: \(O(n+m)\).
 minkowskiSum     :: ( Ord r, Num r

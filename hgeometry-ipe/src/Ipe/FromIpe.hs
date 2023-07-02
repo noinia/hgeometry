@@ -19,6 +19,7 @@ module Ipe.FromIpe(
 
   , _asPolyLine
   , _asSimplePolygon
+  , _asConvexPolygon
   -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
 
   -- * Dealing with Attributes
@@ -44,6 +45,7 @@ import           HGeometry.Number.Radical
 import           HGeometry.Point
 import qualified HGeometry.PolyLine as PolyLine
 import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Triangle
@@ -118,6 +120,9 @@ _asPolyLine = prism' poly2path path2poly
 _asSimplePolygon :: Prism' (Path r) (SimplePolygon (Point 2 r))
 _asSimplePolygon = prism' polygonToPath pathToPolygon
 
+-- | Convert to a convex polygon
+_asConvexPolygon :: (Num r, Ord r) => Prism' (Path r) (ConvexPolygon (Point 2 r))
+_asConvexPolygon = _asSimplePolygon._ConvexPolygon
 
 -- | Tries to convert a path into a rectangle.
 _asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle (Point 2 r))

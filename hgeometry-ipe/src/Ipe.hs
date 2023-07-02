@@ -69,6 +69,7 @@ module Ipe(
   , _asTriangle
   , _asPolyLine
   , _asSimplePolygon
+  , _asConvexPolygon
   -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
   -- *** Dealing with Attributes
   , _withAttrs

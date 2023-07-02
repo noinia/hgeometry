@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Convex.Random
+-- Copyright   :  (C) Frank Staals, David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Constructs a random convex polygon, based on the initial
+-- implementation of David Himmelstrup.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex.Random
   ( randomConvex
   ) where

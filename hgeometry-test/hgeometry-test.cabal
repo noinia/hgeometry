@@ -19,7 +19,8 @@ category:           Geometry
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
-data-files: data/**/*.ipe
+data-dir: data
+data-files: **/*.ipe
 
 tested-with:
     GHC == 9.2.5
@@ -59,6 +60,7 @@ common setup
       , linear                  >= 1.21
       , data-clist              >= 0.2
       , vinyl                   >= 0.14
+      , data-default-class      ^>= 0.1
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -107,6 +109,7 @@ test-suite hgeometry-test-hspec
   other-modules:
       Spec
       Polygon.Simple.InPolygonSpec
+      Polygon.Convex.ConvexSpec
       -- LineSegmentSpec
       Paths_hgeometry_test
   hs-source-dirs:   test
