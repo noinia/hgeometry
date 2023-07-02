@@ -4,7 +4,6 @@ module HGeometry.Polygon.Convex.MinkowskiSum
 
 import           Control.Lens
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           HGeometry.Ext
 import           HGeometry.Point
@@ -23,35 +22,32 @@ import Data.Default.Class
 -- vertices respectively.
 --
 -- running time: \(O(n+m)\).
-minkowskiSum     :: forall convexPolygon convexPolygon' point point' r.
-                    ( Ord r, Num r
+minkowskiSum     :: ( Ord r, Num r
                     , ConvexPolygon_ convexPolygon  point r
                     , ConvexPolygon_ convexPolygon' point' r
                     , Default point'
                     )
                  => convexPolygon -> convexPolygon'
                  -> ConvexPolygon (point :+ point')
-minkowskiSum p q = uncheckedFromCCWPoints $ merge' (f p) (f q)
+minkowskiSum p q = uncheckedFromCCWPoints $ merge' (theVertices p) (theVertices q)
   where
-    -- f    :: (Polygon_ polygon myPoint r) => polygon -> [myPoint]
-    f p' = let (v:|xs) = toNonEmptyOf (ccwOuterBoundaryFrom $ bottomMost p') p'
-           in v: xs++[v]
+    theVertices p' = case toNonEmptyOf (ccwOuterBoundaryFrom $ bottomMost p') p' of
+                       v :| xs -> v:| (xs++[v])
 
     v .+. w = v .+^ (w^.vector) :+ w
 
     cmpAngle v v' w w' =
       ccwCmpAround origin (Point $ v' .-. v) (Point $ w' .-. w)
 
-    merge' [_]       [_]       = []
-    merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
-    merge' (v:vs)    ws@[w]    = v .+. w : merge' vs ws
-    merge' (v:v':vs) (w:w':ws) = v .+. w :
-      case cmpAngle v v' w w' of
-        LT -> merge' (v':vs)   (w:w':ws)
-        GT -> merge' (v:v':vs) (w':ws)
-        EQ -> merge' (v':vs)   (w':ws)
-    merge' _         _         = error "minkowskiSum: Should not happen"
-
+    merge' vs0@(v:|vs1) ws0@(w:|ws1) = go vs1 ws1
+      where
+        go []      []      = []
+        go []      (w':ws) = v .+. w : merge' vs0      (w':|ws)
+        go (v':vs) []      = v .+. w : merge' (v':|vs) ws0
+        go (v':vs) (w':ws) = v .+. w : case cmpAngle v v' w w' of
+          LT -> merge' (v':|vs) ws0
+          GT -> merge' vs0      (w':|ws)
+          EQ -> merge' (v':|vs) (w':|ws)
 
 bottomMost :: (Polygon_ polygon point r, Ord r) => polygon -> VertexIx polygon
 bottomMost = fst . first1Of (minimumVertexBy cmp . withIndex)
