@@ -37,6 +37,24 @@ boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
                        (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
 
 
+
+--------------------------------------------------------------------------------
+
+instance Semigroup (LowerEnvelope plane) where
+  (LowerEnvelope u vs) <> (LowerEnvelope u' vs') = LowerEnvelope undefined undefined
+  -- main idea would be to insert the vertices of vs' into vs this
+  -- requires testing if a vertex already exists, and shifting it if
+  -- not.  this should run in O(log n) time per edge.
+  --
+  -- and therefore in O(l log l + r log l) = O(n log n) time.  hmm, I
+  -- guess for iterative merging we cannot afford the "l" term.  I
+  -- guess we need it only to maintain some Map from location -> id.
+  -- so maybe we can maintain that separately.
+
+
+--------------------------------------------------------------------------------
+
+
 ----------------------------------------
 
 -- | The unbounded vertex, which by definition will have index 0
@@ -135,6 +153,8 @@ triangulatedLowerEnvelope hs = undefined
 --------------------------------------------------------------------------------
 
 {-
+
+-- TODO: attach the two defining halfplanes to the result
 
 -- | Given two halfplanes h and h' computes the halfplane where h lies
 -- vertically below h'.
