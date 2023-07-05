@@ -31,9 +31,6 @@ import qualified Hiraffe.Graph as Graph
 
 --------------------------------------------------------------------------------
 
--- | Shorthand for non-vertical hyperplanes in R^3
-type Plane = NonVerticalHyperPlane 3
-
 -- | The Lower envelope whose vertices are stored in a structure of
 -- type f, and whose half-edges are stored in a structure of type g.
 --

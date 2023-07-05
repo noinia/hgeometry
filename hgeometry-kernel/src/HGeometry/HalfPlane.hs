@@ -11,13 +11,13 @@ import HGeometry.Properties
 --------------------------------------------------------------------------------
 
 -- | Two dimensional Halfplane bounded by a line.
-data HalfPlane r = LeftOf !r
-                 | RightOf !r
-                 | Above !(LineEQ r)
-                 | Below !(LineEQ r)
-                 deriving (Show,Read,Eq)
-
-type NumType (HalfPlane r) = r
+data GHalfPlane line r = LeftOf  !r
+                       | RightOf !r
+                       | Above !line
+                       | Below !line
+                       deriving (Show,Read,Eq)
+type HalfPlane r = GHalfPlane (LineEQ r) r
+type instance NumType (HalfPlane r) = r
 
 -- type HalfPlane r = HalfSpace 2 r
 

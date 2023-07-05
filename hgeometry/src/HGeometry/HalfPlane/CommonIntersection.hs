@@ -55,8 +55,11 @@ bimap' f g (LowerChain hs h) = LowerChain (fmap (bimap f g) hs) (f h)
 
 --------------------------------------------------------------------------------
 
+-- | Computes the common intersection of a \(n\) halfplanes.
+--
+-- running time: \(O(n\log n)\)
 commonIntersection     :: ( Foldable f, Functor f
-                          , HyperPlane_ halfPlane 2 r  -- this is not quite right
+                          , HyperPlane_ halfPlane 2 r  -- this is not quite right yet
                           , Fractional r, Ord r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
