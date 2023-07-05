@@ -41,6 +41,16 @@ data LowerChain boundingLine r =
              boundingLine  -- ^ the unbounded halfplane defining the rightmost edge
   deriving (Show,Eq)
 
+instance Functor (LowerChain boundingLine) where
+  fmap f = bimap id f
+instance Bifunctor LowerChain where
+  bimap f g = bimap' f (over coordinates g)
+
+-- | slightly more general version of bimap so we can easily flip the plane.
+bimap'                       :: (boundingLine -> boundingLine')
+                             -> (Point 2 r -> Point 2 s)
+                             -> LowerChain boundingLine r -> LowerChain boundingLine' s
+bimap' f g (LowerChain hs h) = LowerChain (fmap (bimap f g) hs) (f h)
 
 commonIntersection :: (Fractional r, Ord r)
                    => f halfPlane -> CommonIntersection halfPlane r
@@ -49,12 +59,14 @@ commonIntersection = undefined
 
 --------------------------------------------------------------------------------
 
-upperBoundary
-
-
 data LowerBoundary boundingLine r = EntirePlane
-                                  | BoundedFromBelow (LowerChain boundingLine r)
+                                  | BoundedBy (LowerChain boundingLine r)
                                   deriving (Show,Eq)
+
+withChain f = \case
+  EntirePlane -> EntirePlane
+  BoundedBy c -> BoundedBy $ f c
+
 
 -- | Given the bounding lines of a bunch of halfplanes that are all
 -- bounded from below, computes their common intersection.
@@ -71,7 +83,7 @@ lowerBoundary = initialize . dropParallel . sortOnCheap @V.Vector dualPoint
   where
     initialize = \case
       []   -> EntirePlane
-      h:hs -> BoundedFromBelow $ go (LowerChain mempty h) hs
+      h:hs -> BoundedBy $ go (LowerChain mempty h) hs
 
     go lowerChain = \case
       []      -> lowerChain
@@ -105,7 +117,23 @@ append                      :: (Fractional r, Ord r, NonVerticalHyperPlane_ boun
                             -> LowerChain boundingLine r
 append (LowerChain hs h) h' = case toLineEQ h `intersect` toLineEQ h' of
     Just (Line_x_Line_Point p) -> LowerChain (hs Seq.|> (h,p)) h'
-    Nothing                    ->
+    _                          ->
       error "absurd: CommonIntersection, lower chain: parallel bounding lines!?"
   where
     toLineEQ = MkLineEQ . NonVerticalHyperPlane . view hyperPlaneCoefficients
+
+--------------------------------------------------------------------------------
+
+-- | Given the bounding lines of a bunch of halfplanes that are all
+-- bounded from above, computes their common intersection.
+--
+-- running time: O(n\log n)
+upperBoundary :: ( Foldable f, Functor f
+                 , NonVerticalHyperPlane_ boundingLine 2 r
+                 , Fractional r, Ord r
+                 )
+              => f boundingLine -> LowerBoundary boundingLine r
+upperBoundary = withChain (bimap' flipY (over yCoord negate)) . lowerBoundary . fmap flipY
+                -- by flipping the plane
+  where
+    flipY = over (hyperPlaneCoefficients.traverse) negate
