@@ -33,7 +33,7 @@ import HGeometry.Vector
 -- Point2 10 (-20)
 dualPoint :: forall hyperPlane d r. (NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 <= d)
           => hyperPlane -> Point d r
-dualPoint = Point . over (component @(d-1)) negate . hyperPlaneCoefficients
+dualPoint = Point . over (component @(d-1)) negate . view hyperPlaneCoefficients
 
 -- | Compute the dual of a hyperplane
 --

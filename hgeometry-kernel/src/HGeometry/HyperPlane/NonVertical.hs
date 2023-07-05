@@ -82,9 +82,9 @@ instance ( MkHyperPlaneConstraints d r
          , 1 + (d-1) ~ d
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
-  -- >>> hyperPlaneCoefficients myHyperPlane
+  -- >>> myHyperPlane^.hyperPlaneCoefficients
   -- Vector2 1 2
-  hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
+  hyperPlaneCoefficients = coerced
 
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
@@ -103,5 +103,5 @@ type Plane_ plane = NonVerticalHyperPlane_ plane 3
 
 -- | Destructs a Plane in R^3 into the equation z = ax + by + c
 pattern Plane_       :: Plane_ plane r => r -> r -> r -> plane
-pattern Plane_ a b c <- (hyperPlaneCoefficients -> (Vector3 a b c))
+pattern Plane_ a b c <- (view hyperPlaneCoefficients -> (Vector3 a b c))
 {-# COMPLETE Plane #-}

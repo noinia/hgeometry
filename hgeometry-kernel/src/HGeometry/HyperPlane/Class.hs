@@ -80,7 +80,7 @@ class ( NumType hyperPlane ~ r
                              => hyperPlane -> Vector (d+1) r
   hyperPlaneEquation h = cons a0 a
     where
-      a' = hyperPlaneCoefficients h
+      a' = h^.hyperPlaneCoefficients
       a  = a'&last .~ -1
       a0 = a'^.last
 
@@ -181,6 +181,7 @@ class HyperPlane_ hyperPlane d r
   hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
 
 
+
 --------------------------------------------------------------------------------
 
 -- | Non-vertical hyperplanes.
@@ -203,7 +204,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
                     , 1 + (d-1) ~ d -- silly silly agian :(
                     , Has_ Metric_ d r
                     ) => point -> hyperPlane -> r
-  evalAt p h = hyperPlaneCoefficients h `dot` snoc (p^.vector) 1
+  evalAt p h = (h^.hyperPlaneCoefficients) `dot` snoc (p^.vector) 1
   {-# INLINE evalAt #-}
 
 
@@ -213,13 +214,13 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   --  \( a_d + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
-  -- >>> hyperPlaneCoefficients myNVHyperPlane2
+  -- >>> view hyperPlaneCoefficients myNVHyperPlane2
   -- Vector2 1.0 2.0
-  -- >>> hyperPlaneCoefficients myLine
+  -- >>> view hyperPlaneCoefficients myLine
   -- Vector2 1.0 2.0
-  -- >>> hyperPlaneCoefficients $ Plane 1 2 3
+  -- >>> view hyperPlaneCoefficients $ Plane 1 2 3
   -- Vector3 1 2 3
-  hyperPlaneCoefficients :: hyperPlane -> Vector d r
+  hyperPlaneCoefficients :: Lens' hyperPlane (Vector d r)
 
 
 --------------------------------------------------------------------------------
