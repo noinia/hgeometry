@@ -23,8 +23,10 @@ module HGeometry.HyperPlane.Class
   ) where
 
 import Control.Lens hiding (snoc, cons, uncons, unsnoc)
+import Data.Default.Class
 import Data.Type.Ord
 import GHC.TypeNats
+import HGeometry.Ext
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
@@ -180,8 +182,6 @@ class HyperPlane_ hyperPlane d r
   --
   hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
 
-
-
 --------------------------------------------------------------------------------
 
 -- | Non-vertical hyperplanes.
@@ -241,3 +241,29 @@ class HyperPlaneFromPoints hyperPlane where
                            , HyperPlane_ hyperPlane d r
                            , Num r
                            ) => Vector d point -> hyperPlane
+
+
+instance (HyperPlane_ hyperPlane d r, Default extra)
+         => HyperPlane_ (hyperPlane :+ extra) d r where
+  hyperPlaneEquation = hyperPlaneEquation . view core
+  {-# INLINE hyperPlaneEquation #-}
+  fromPointAndNormal p v = fromPointAndNormal p v :+ def
+  {-# INLINE fromPointAndNormal #-}
+  normalVector = normalVector . view core
+  {-# INLINE normalVector #-}
+  onHyperPlane q = onHyperPlane q . view core
+  {-# INLINE onHyperPlane #-}
+  onSideTest q = onSideTest q . view core
+  {-# INLINE onSideTest #-}
+
+instance (ConstructableHyperPlane_ hyperPlane d r, Default extra)
+          => ConstructableHyperPlane_ (hyperPlane :+ extra) d r where
+  hyperPlaneFromEquation v = hyperPlaneFromEquation v :+ def
+  {-# INLINE hyperPlaneFromEquation #-}
+
+instance (NonVerticalHyperPlane_  hyperPlane d r, Default extra)
+         => NonVerticalHyperPlane_ (hyperPlane :+ extra) d r where
+  evalAt p = evalAt p . view core
+  {-# INLINE evalAt #-}
+  hyperPlaneCoefficients = core.hyperPlaneCoefficients
+  {-# INLINE hyperPlaneCoefficients #-}
