@@ -19,7 +19,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           HGeometry.Ext
 import           HGeometry.Point
-import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex.Class
 import           HGeometry.Polygon.Convex.Implementation

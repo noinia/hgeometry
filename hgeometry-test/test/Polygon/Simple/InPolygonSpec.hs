@@ -1,29 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Polygon.Simple.InPolygonSpec (spec) where
 
 import Control.Lens
+import Control.Monad ((>=>))
 import Data.Proxy
 import HGeometry.Boundary
 import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Simple
-import Paths_hgeometry_test
 import Ipe
+import Paths_hgeometry_test
+import System.OsPath
 import Test.Hspec
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
+getDataFileName' :: OsPath -> IO OsPath
+getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
+
+
 -- type R = RealNumber 5
 
 spec :: Spec
 spec = do
-  testCases "Polygon/Simple/pointInPolygon.ipe"
+  testCases [osp|Polygon/Simple/pointInPolygon.ipe|]
   numericalSpec
 
-testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
+testCases    :: OsPath -> Spec
+testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs
@@ -46,7 +53,7 @@ toSpec (TestCase poly is bs os) = do
                                     specify "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly

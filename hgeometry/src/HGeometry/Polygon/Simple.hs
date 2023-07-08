@@ -40,7 +40,6 @@ import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Properties
 import           HGeometry.Transformation
-import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE QuasiQuotes #-}
 module Polygon.Convex.ConvexSpec
   (spec
   ) where
@@ -15,7 +16,10 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
 import           Ipe
 import           Paths_hgeometry_test
+import           System.OsPath
 import           Test.Hspec
+-- import           Test.Hspec.Golden
+import           Control.Monad ((>=>))
 
 --------------------------------------------------------------------------------
 
@@ -28,10 +32,16 @@ instance Default (Point 2 R) where
 
 spec :: Spec
 spec = do
-  testCases "Polygon/Convex/convexTests.ipe"
+  testCases [osp|Polygon/Convex/convexTests.ipe|]
 
-testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
+
+--------------------------------------------------------------------------------
+
+getDataFileName' :: OsPath -> IO OsPath
+getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
+
+testCases    :: OsPath -> Spec
+testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
     Left e    -> it "reading ConvexTests file" $
                    expectationFailure . unwords $
                      [ "Failed to read ipe file", show fp, ":", show e]
@@ -42,7 +52,7 @@ data TestCase r = TestCase { _polygon    :: ConvexPolygon (Point 2 r)
                            }
                   deriving (Show)
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase R])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase R])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly | (poly :+ _) <- polies ]

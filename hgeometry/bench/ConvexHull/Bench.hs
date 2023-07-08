@@ -4,35 +4,11 @@ module ConvexHull.Bench (
   -- , runProfile
   ) where
 
-import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
-import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
-import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
-import qualified HGeometry.ConvexHull.QuickHull as QuickHull
-import qualified ConvexHull.GrahamV2 as GrahamV2
-import qualified ConvexHull.GrahamInt as GrahamInt
-import qualified ConvexHull.GrahamFastest as GrahamFastest
-  -- hand written implementation for Int, this should be the fastest possible somehow.
-  -- FIXME: currently still uses merge-sort, switch to quicksort/introsort
-
-import           Control.DeepSeq
--- import qualified ConvexHull.GrahamClassy as GrahamClassy
-import           HGeometry.Foldable.Sort
-import qualified Data.Vector.Unboxed as UV
 import           System.Random
--- import           Data.Double.Approximate
-import           HGeometry.Ext
-import           Control.Lens
 import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
-import           HGeometry.Vector
 import           Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Number.Real.Rational
 import           Test.Tasty.Bench
-import           Data.Hashable
-import qualified Data.List as List
-import           System.Random.Stateful (Uniform(..), UniformRange(..))
 import           Util
 
 --------------------------------------------------------------------------------

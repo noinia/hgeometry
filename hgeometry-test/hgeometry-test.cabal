@@ -61,6 +61,8 @@ common setup
       , data-clist              >= 0.2
       , vinyl                   >= 0.14
       , data-default-class      ^>= 0.1
+      , bytestring              >= 0.11
+      , filepath                >= 1.4.100
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -113,3 +115,5 @@ test-suite hgeometry-test-hspec
       -- LineSegmentSpec
       Paths_hgeometry_test
   hs-source-dirs:   test
+  build-depends:
+         hspec-with-tempfile >= 0.1

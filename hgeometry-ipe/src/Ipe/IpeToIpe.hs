@@ -1,3 +1,4 @@
+{-# LANGUAGE QuasiQuotes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.IpeToIpe
@@ -16,8 +17,8 @@ module Ipe.IpeToIpe where
 import           HGeometry.Interval
 import           Ipe.Types (IpeFile)
 import           Ipe.Writer (writeIpeFile, IpeWriteText)
-import           System.Directory (getTemporaryDirectory, removeFile)
-import           System.FilePath
+import           System.Directory.OsPath (getTemporaryDirectory, removeFile)
+import           System.OsPath
 import qualified System.Process.Typed as Process
 import           System.Random
 
@@ -26,28 +27,32 @@ import           System.Random
 -- | Call 'ipetoipe' to produce an image of the specified type.
 ipeToIpeWith                          :: Options -- ^ the options to use
                                       -> FileType -- ^ output file type
-                                      -> FilePath -- ^ input file path
-                                      -> FilePath -- ^ output file path
+                                      -> OsPath -- ^ input file path
+                                      -> OsPath -- ^ output file path
                                       -> IO ()
 ipeToIpeWith options fType inFp outFp =
-    Process.withProcessWait processCfg $ \_iperenderProc -> pure ()
+    do
+      inFp'  <- decodeFS inFp
+      outFp' <- decodeFS outFp
+      Process.withProcessWait (Process.proc "ipetoipe" $ args inFp' outFp') $ \_iperenderProc ->
+        pure ()
   where
-    processCfg = Process.proc "ipetoipe" args
-    args = [ "-" <> show fType ] <>
+    args inFp' outFp' =
+           [ "-" <> show fType ] <>
            concat [ [ "-pages", pageRange r ] | PageRange r <- [pages options] ] <>
            concat [ [ "-view", pageView p v ] | Just (p,v) <- [singleView options] ] <>
            [ "-export" | Export == export options ] <>
            [ "-runlatex" | runLatex options] <>
-           [ "-nozip"      | NoZip == nozip options ] <>
-           [ inFp
-           , outFp
+           [ "-nozip"    | NoZip == nozip options ] <>
+           [ inFp'
+           , outFp'
            ]
     pageRange (ClosedInterval l u) = show l <> "-" <> show u
     pageView p v = show p <> "-" <> show v
 
 
 -- | Call 'ipetoipe' with the default options.
-ipeToIpe :: FileType -> FilePath -> FilePath -> IO ()
+ipeToIpe :: FileType -> OsPath -> OsPath -> IO ()
 ipeToIpe = ipeToIpeWith defaultOptions
 
 -- | Write an ipe file to disk as an ipe readable pdf file.
@@ -57,10 +62,11 @@ ipeToIpe = ipeToIpeWith defaultOptions
 -- on the path.
 --
 -- Note this will write soem intermediate file to your system temp dir.
-writeIpeFileAsPdf      :: IpeWriteText r => FilePath -> IpeFile r -> IO ()
+writeIpeFileAsPdf      :: IpeWriteText r => OsPath -> IpeFile r -> IO ()
 writeIpeFileAsPdf fp f = do num    <- randomIO @Int
                             tempDir <- getTemporaryDirectory
-                            let xmlFp = tempDir </> "writeipepdf" <> show num <.> "ipe"
+                            num' <- encodeUtf $ show num
+                            let xmlFp = tempDir </> [osp|writeipepdf|] <> num' <.> [osp|ipe|]
                             writeIpeFile xmlFp f
                             ipeToIpe PDF xmlFp fp
                             removeFile xmlFp
