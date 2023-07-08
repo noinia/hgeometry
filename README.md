@@ -143,7 +143,7 @@ executable/library stanza in your cabal file:
 
 
 ```cabal
-    ghc-options: -O -fspecialise-aggressively -fexpose-all-unfoldings
+    ghc-options: -fspecialise-aggressively -fexpose-all-unfoldings
 ```
 
 Not doing so may significantly impact the performance of your compiled
