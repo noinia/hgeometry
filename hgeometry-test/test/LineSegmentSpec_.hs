@@ -1,6 +1,8 @@
+{-# LANGUAGE QuasiQuotes #-}
 module LineSegmentSpec where
 
 import Control.Lens
+import Control.Monad ((>=>))
 import Data.Bifunctor
 import Data.Vinyl
 import HGeometry.Boundary
@@ -10,29 +12,32 @@ import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational
--- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
 import HGeometry.Vector
 import Ipe
 import Ipe.Color
+import Paths_hgeometry_test
+import System.OsPath
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
-import Paths_hgeometry_test
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
+getDataFileName' :: OsPath -> IO OsPath
+getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
+
 
 spec :: Spec
 spec =
   describe "linesegment x box intersection tests" $ do
-    fp <- runIO $ getDataFileName "LineSegment/linesegmentBoxIntersections.ipe"
+    fp <- runIO $ getDataFileName' [osp|LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
 
 
-ipeIntersectionTests    :: FilePath -> Spec
+ipeIntersectionTests    :: OsPath -> Spec
 ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> readAllFrom fp
                              sequence_ $ [ mkTestCase (arrowAsOpen seg) box'
                                          | seg <- segs, box' <- boxes ]

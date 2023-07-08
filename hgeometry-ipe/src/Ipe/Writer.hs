@@ -67,14 +67,6 @@ import           Text.XML.Expat.Tree
 
 --------------------------------------------------------------------------------
 
--- | Given a prism to convert something of type g into an ipe file, a file path,
--- and a g. Convert the geometry and write it to file.
-
--- writeIpe        :: ( RecAll (Page r) gs IpeWrite
---                    , IpeWriteText r
---                    ) => Prism' (IpeFile gs r) g -> FilePath -> g -> IO ()
--- writeIpe p fp g = writeIpeFile (p # g) fp
-
 -- | Write an IpeFiele to file.
 writeIpeFile :: IpeWriteText r => OsPath -> IpeFile r -> IO ()
 writeIpeFile = flip writeIpeFile'

@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeRender where
 
+import           System.OsPath
 import qualified System.Process.Typed as Process
 
 --------------------------------------------------------------------------------
@@ -22,28 +23,32 @@ import qualified System.Process.Typed as Process
 -- note that pdf files produces with iperender cannot be opened with ipe.
 ipeRenderWith                          :: Options -- ^ the options to use
                                        -> FileType -- ^ output file type
-                                       -> FilePath -- ^ input file path
-                                       -> FilePath -- ^ output file path
+                                       -> OsPath -- ^ input file path
+                                       -> OsPath -- ^ output file path
                                        -> IO ()
 ipeRenderWith options fType inFp outFp =
-    Process.withProcessWait processCfg $ \_iperenderProc -> pure ()
+    do
+      inFp'  <- decodeFS inFp
+      outFp' <- decodeFS outFp
+      Process.withProcessWait (Process.proc "iperender" $ args inFp' outFp') $ \_iperenderProc ->
+        pure ()
   where
-    processCfg = Process.proc "iperender" args
-    args = [ "-" <> show fType
+    args inFp' outFp' =
+           [ "-" <> show fType
            , "-page", show (pageNumber options)
            , "-view", show (viewNumber options)
            , "-resolution", show (resolution options)
            ] <>
            [ "-transparent" | TransparentBackground == transparent options ] <>
            [ "-nocrop"      | NoCrop == crop options ] <>
-           [ inFp
-           , outFp
+           [ inFp'
+           , outFp'
            ]
 
 -- | Call 'iperender' with the default options.
 --
 -- note that pdf files produces with iperender cannot be opened with ipe.
-ipeRender :: FileType -> FilePath -> FilePath -> IO ()
+ipeRender :: FileType -> OsPath -> OsPath -> IO ()
 ipeRender = ipeRenderWith defaultOptions
 
 --------------------------------------------------------------------------------
