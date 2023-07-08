@@ -5,8 +5,10 @@ module Polygon.Convex.ConvexSpec
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
+import           Control.Monad ((>=>))
 import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
+import           Golden
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
@@ -14,12 +16,12 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
+import           Hiraffe.Graph
 import           Ipe
 import           Paths_hgeometry_test
 import           System.OsPath
 import           Test.Hspec
--- import           Test.Hspec.Golden
-import           Control.Monad ((>=>))
+import           Test.Hspec.WithTempFile
 
 --------------------------------------------------------------------------------
 
@@ -82,15 +84,32 @@ toSpec (TestCase poly) = do
 
 --------------------------------------------------------------------------------
 
-minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r))
+minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
+                         , IpeWriteText r
+                         )
                      => String -> [ConvexPolygon (Point 2 r)] -> Spec
 minkowskiTests s pgs = describe ("Minkowskisums on " ++ s) $
     mapM_ (uncurry minkowskiTest) [ (p,q) | p <- pgs, q <- pgs ]
 
-minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r))
+minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
+                      , IpeWriteText r
+                      )
                   => ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
-minkowskiTest p q = it "minkowskisum" $
-  F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
+minkowskiTest p q = describe "minkowskiTest" $ do
+    it "minkowskisum" $
+      F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
+    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowski|] })
+               [toIO $ minkowskiSum p q]
+    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowskiNaive|] })
+               [toIO $ naiveMinkowski p q]
+
+toIO :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> IpeObject r
+toIO = iO' . convert
+  where
+    convert :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> ConvexPolygon (Point 2 r)
+    convert = over vertices (view (core.asPoint))
+
+  -- view (core.asPoint))
 
 data F a b = F a b deriving (Show)
 
