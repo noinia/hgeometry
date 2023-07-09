@@ -7,7 +7,6 @@ import Control.Monad ((>=>))
 import Data.Proxy
 import HGeometry.Boundary
 import HGeometry.Ext
-import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Simple
 import Ipe
