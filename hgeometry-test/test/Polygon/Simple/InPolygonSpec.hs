@@ -43,14 +43,21 @@ data TestCase r = TestCase { _polygon    :: SimplePolygon (Point 2 r)
                   deriving (Show)
 
 
-toSingleSpec poly r q = (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+toSingleSpec          :: (Fractional r, Ord r, Show r)
+                      => SimplePolygon (Point 2 r)
+                      -> PointLocationResult
+                      -> Point 2 r
+                      -> Spec
+toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+  where
+    name = unwords ["query:", show q, "in", take 70 $ show poly ]
 
 toSpec (TestCase poly is bs os) = do
-                                    specify "inside tests" $
+                                    describe "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
-                                    specify "on boundary tests" $
+                                    describe "on boundary tests" $
                                       mapM_ (toSingleSpec poly OnBoundary) bs
-                                    specify "outside tests" $
+                                    describe "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
 readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase Rational])
