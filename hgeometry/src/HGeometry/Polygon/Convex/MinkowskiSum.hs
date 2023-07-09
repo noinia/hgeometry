@@ -14,24 +14,27 @@ module HGeometry.Polygon.Convex.MinkowskiSum
   ( minkowskiSum
   ) where
 
-import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Ord (comparing)
-import           HGeometry.Ext
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex.Class
-import           HGeometry.Polygon.Convex.Implementation
-import           HGeometry.Polygon.Simple.Class
-import           Hiraffe.Graph
-
+import Control.Lens
 import Data.Default.Class
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Ord (comparing)
+import HGeometry.Ext
+import HGeometry.Point
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Convex.Class
+import HGeometry.Polygon.Convex.Implementation
+import HGeometry.Polygon.Simple.Class
+import Hiraffe.Graph
+
 --------------------------------------------------------------------------------
 
 
 -- | Computes the Minkowski sum of the two input polygons with \(n\)
 -- and \(m\) vertices respectively.
 --
+-- Note: it takes te position of te second polyon as is; you may want to translate it to
+-- te oriin first.
+  --
 -- running time: \(O(n+m)\).
 minkowskiSum     :: ( Ord r, Num r
                     , ConvexPolygon_ convexPolygon  point r

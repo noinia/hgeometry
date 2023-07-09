@@ -14,10 +14,13 @@ import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
+import           HGeometry.Transformation
 import           Hiraffe.Graph
 import           Ipe
+import           Ipe.Color
 import           Paths_hgeometry_test
 import           System.OsPath
 import           Test.Hspec
@@ -84,12 +87,21 @@ toSpec (TestCase poly) = do
 
 --------------------------------------------------------------------------------
 
+-- | Center the given polygon at the origin. I.e. places the centroid at the origin.
+centerAtOrigin    :: ( SimplePolygon_ polygon  point r
+                     , Fractional r
+                     , IsTransformable polygon
+                     ) => polygon -> polygon
+centerAtOrigin pg = translateBy (origin .-. centroid pg) pg
+
+--------------------------------------------------------------------------------
+
 minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
                          , IpeWriteText r
                          )
                      => String -> [ConvexPolygon (Point 2 r)] -> Spec
 minkowskiTests s pgs = describe ("Minkowskisums on " ++ s) $
-    mapM_ (uncurry minkowskiTest) [ (p,q) | p <- pgs, q <- pgs ]
+    mapM_ (uncurry minkowskiTest) [ (p,centerAtOrigin q) | p <- pgs, q <- pgs ]
 
 minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
                       , IpeWriteText r
@@ -98,13 +110,18 @@ minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
 minkowskiTest p q = describe "minkowskiTest" $ do
     it "minkowskisum" $
       F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
-    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowski|] })
-               [toIO $ minkowskiSum p q]
-    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowskiNaive|] })
-               [toIO $ naiveMinkowski p q]
+    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowski-vs-naive|] })
+               [ toIO (minkowskiSum p q)   $ attr SStroke red
+               , toIO (naiveMinkowski p q) $ attr SStroke blue
+               , iO'' p                    $ attr SStroke black
+               , iO'' q                    $ attr SStroke black
+               ]
 
-toIO :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> IpeObject r
-toIO = iO' . convert
+toIO    :: (Point_ point 2 r)
+        => ConvexPolygon (point :+ extra)
+        -> IpeAttributes Path r
+        -> IpeObject r
+toIO pg = iO'' (convert pg)
   where
     convert :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> ConvexPolygon (Point 2 r)
     convert = over vertices (view (core.asPoint))

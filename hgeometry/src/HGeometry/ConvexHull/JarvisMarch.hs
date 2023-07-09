@@ -14,7 +14,6 @@ module HGeometry.ConvexHull.JarvisMarch(
   ) where
 
 import           Control.Lens ((^.), view)
-import           Data.Foldable
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -29,19 +28,15 @@ import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | Compute the convexhull using JarvisMarch. The resulting polygon
--- is given in clockwise order.
+-- | Compute the convexhull using JarvisMarch.
 --
 -- running time: \(O(nh)\), where \(n\) is the number of input points
 -- and \(h\) is the complexity of the hull.
 convexHull     :: (Ord r, Num r, Point_ point 2 r)
                => NonEmpty point -> ConvexPolygon point
-convexHull pts = uncheckedFromCCWPoints $ uh <> reverse lh
+convexHull pts = combine (upperHull pts) (lowerHull pts)
   where
-    lh = case NonEmpty.nonEmpty (NonEmpty.init $ lowerHull pts) of
-           Nothing       -> []
-           Just (_:|lh') -> lh'
-    uh = toList $ upperHull pts
+    combine (_:|uh) (l:|lh) = uncheckedFromCCWPoints $ l :| lh <> reverse uh
 
          -- note that fromList is afe since ps contains at least two elements
   -- where

@@ -34,7 +34,7 @@ convexHull            :: (Ord r, Num r, Point_ point 2 r)
 convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in uncheckedFromCCWPoints . reverse $ lh ++ uh
+                       in uncheckedFromCCWPoints $ lh ++ uh
 -- {-# INLINABLE convexHull #-}
 
 -- {-# SPECIALIZE convexHull :: NonEmpty (Point 2 Int) -> ConvexPolygon (Point 2 Int) #-}

@@ -30,6 +30,7 @@ import Data.Semigroup (First(..))
 import Data.Semigroup.Foldable
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Properties
 import HGeometry.Vector
 import Hiraffe.Graph
 
@@ -220,6 +221,7 @@ outerBoundaryWithNeighbours = ifolding1 $
 class ( HasOuterBoundary polygon
       , Vertex      polygon ~ point
       , Point_ point 2 r
+      , NumType polygon ~ r, Dimension polygon ~ 2
       ) => Polygon_ polygon point r where
 
   -- | The area of a polygon

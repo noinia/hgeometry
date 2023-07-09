@@ -35,7 +35,7 @@ convexHull            :: (Ord r, Num r, Point_ point 2 r)
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts
   where
-    combine (l:|uh,_:|lh) = uncheckedFromCCWPoints $ l : uh <> reverse (init lh)
+    combine (_:|uh,l:|lh) = uncheckedFromCCWPoints $ l :| lh <> reverse uh
 
 ----------------------------------------
 -- * Computing a lower hull

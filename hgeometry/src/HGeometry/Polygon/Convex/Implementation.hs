@@ -29,6 +29,7 @@ import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Simple.Implementation
 import HGeometry.Properties
+import HGeometry.Transformation
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
@@ -67,6 +68,10 @@ type instance NumType   (ConvexPolygonF f point) = NumType point
 instance ( HasVertices (SimplePolygonF f point) (SimplePolygonF f point')
          ) => HasVertices (ConvexPolygonF f point) (ConvexPolygonF f point') where
   vertices = _UncheckedConvexPolygon . vertices
+
+instance ( VertexContainer f point
+         ) => HasPoints (ConvexPolygonF f point) (ConvexPolygonF f point') point point' where
+  allPoints = _UncheckedConvexPolygon . allPoints
 
 instance HasVertices' (SimplePolygonF f point) => HasVertices' (ConvexPolygonF f point) where
   type Vertex   (ConvexPolygonF f point) = Vertex   (SimplePolygonF f point)
@@ -133,6 +138,14 @@ instance ( SimplePolygon_ (ConvexPolygonF f point) point r
   pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
   -- FIXME: we should be able to implement this in O(log n) time instead!!
 -}
+
+instance ( VertexContainer f point
+         , DefaultTransformByConstraints (ConvexPolygonF f point) 2 r
+         , Point_ point 2 r
+         ) => IsTransformable (ConvexPolygonF f point)
+
+
+
 --------------------------------------------------------------------------------
 
 
