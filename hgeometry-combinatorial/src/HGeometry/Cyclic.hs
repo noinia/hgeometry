@@ -5,7 +5,7 @@ module HGeometry.Cyclic
   ( Cyclic(..)
   , toCircularVector
   , HasDirectedTraversals(..)
-  , isShiftOf
+  , ShiftedEq(..)
   ) where
 
 --------------------------------------------------------------------------------
@@ -113,9 +113,25 @@ traverseByOrder indices' paFa v = build <$> xs
 --
 -- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of
 -- the lists.
-isShiftOf         :: (Eq a, Foldable1 v) => Cyclic v a -> Cyclic v a -> Bool
-xs `isShiftOf` ys = let twice zs     = let zs' = leftElements zs in zs' <> zs'
-                        once         = leftElements
-                        leftElements = NV.fromNonEmpty . toNonEmpty
-                        check as bs  = isJust $ once as `isSubStringOf` twice bs
-                    in length xs == length ys && check xs ys
+isShiftOfI         :: (Eq a, Foldable1 v) => Cyclic v a -> Cyclic v a -> Bool
+xs `isShiftOfI` ys = let twice zs     = let zs' = leftElements zs in zs' <> zs'
+                         once         = leftElements
+                         leftElements = NV.fromNonEmpty . toNonEmpty
+                         check as bs  = isJust $ once as `isSubStringOf` twice bs
+                     in length xs == length ys && check xs ys
+
+--------------------------------------------------------------------------------
+
+-- | Class for types that have an Equality test up to cyclic shifts
+class ShiftedEq t where
+  type ElemCyclic t
+  -- | Given a and b, test if a is a shifted version of the other.
+  isShiftOf :: Eq (ElemCyclic t) => t -> t -> Bool
+
+  -- TODO: It may be nice to have a version that actually returns the index, if it is a
+  -- shift.
+
+instance Foldable1 v => ShiftedEq (Cyclic v a) where
+  type ElemCyclic (Cyclic v a) = a
+  -- ^ runs in linear time in the inputs.
+  isShiftOf = isShiftOfI

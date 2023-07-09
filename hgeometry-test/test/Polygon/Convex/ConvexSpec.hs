@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Polygon.Convex.ConvexSpec
   (spec
   ) where
@@ -10,14 +11,15 @@ import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
 import           Golden
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
+import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Convex
-import           HGeometry.Vector
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Transformation
+import           HGeometry.Vector
 import           Hiraffe.Graph
 import           Ipe
 import           Ipe.Color
@@ -130,8 +132,8 @@ toIO pg = iO'' (convert pg)
 
 data F a b = F a b deriving (Show)
 
-instance Eq b => Eq (F a b) where
-  (F _ b1) == (F _ b2) = b1 == b2
+instance (ShiftedEq b, Eq (ElemCyclic b)) => Eq (F a b) where
+  (F _ b1) == (F _ b2) = b1 `isShiftOf` b2
 
 naiveMinkowski     :: ( Ord r, Num r
                       , ConvexPolygon_ convexPolygon  point r

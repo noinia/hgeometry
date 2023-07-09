@@ -65,6 +65,11 @@ _ConvexPolygon = prism' toSimplePolygon fromSimplePolygon
 type instance Dimension (ConvexPolygonF f point) = 2
 type instance NumType   (ConvexPolygonF f point) = NumType point
 
+instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
+         ) => ShiftedEq (ConvexPolygonF f point) where
+  type ElemCyclic (ConvexPolygonF f point) = point
+  isShiftOf p q = isShiftOf (p^._UncheckedConvexPolygon) (q^._UncheckedConvexPolygon)
+
 instance ( HasVertices (SimplePolygonF f point) (SimplePolygonF f point')
          ) => HasVertices (ConvexPolygonF f point) (ConvexPolygonF f point') where
   vertices = _UncheckedConvexPolygon . vertices

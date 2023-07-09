@@ -61,7 +61,6 @@ type instance NumType   (SimplePolygonF f point) = NumType point
 -- deriving instance Ord (f point) => Ord (SimplePolygonF f point)
 
 
-
 -- | Access the container
 _SimplePolygonF :: Iso (SimplePolygonF f point) (SimplePolygonF f' point')
                        (f point)                (f' point' )
@@ -72,6 +71,10 @@ instance Traversable f => Traversable (SimplePolygonF f) where
 instance Traversable1 f => Traversable1 (SimplePolygonF f) where
   traverse1 f (MkSimplePolygon vs) = MkSimplePolygon <$> traverse1 f vs
 
+instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
+         ) => ShiftedEq (SimplePolygonF f point) where
+  type ElemCyclic (SimplePolygonF f point) = point
+  isShiftOf p q = isShiftOf (p^._SimplePolygonF) (q^._SimplePolygonF)
 
 -- | shortcut for all default properties of f we need to store the vertices.
 type VertexContainer f point = ( IxValue (f point) ~ point
