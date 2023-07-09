@@ -103,21 +103,29 @@ minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
                          )
                      => String -> [ConvexPolygon (Point 2 r)] -> Spec
 minkowskiTests s pgs = describe ("Minkowskisums on " ++ s) $
-    mapM_ (uncurry minkowskiTest) [ (p,centerAtOrigin q) | p <- pgs, q <- pgs ]
+    mapM_ (\(i,(p,q)) -> minkowskiTest i p q) $
+      zip [0..]
+          [ (p,centerAtOrigin q) | p <- pgs, q <- pgs ]
 
-minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
-                      , IpeWriteText r
-                      )
-                  => ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
-minkowskiTest p q = describe "minkowskiTest" $ do
+minkowskiTest       ::  ( Fractional r, Ord r, Show r, Default (Point 2 r)
+                        , IpeWriteText r
+                        )
+                    => Int -> ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
+minkowskiTest i p q = describe "minkowskiTest" $ do
+    is <- runIO $ encodeFS (show i)
     it "minkowskisum" $
       F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
-    goldenWith [osp|data/golden|] (ipeContentGolden { name = [osp|minkowski-vs-naive|] })
+    goldenWith [osp|data/golden/Polygon/Convex|]
+               (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
+                                 }
+               )
                [ toIO (minkowskiSum p q)   $ attr SStroke red
                , toIO (naiveMinkowski p q) $ attr SStroke blue
                , iO'' p                    $ attr SStroke black
                , iO'' q                    $ attr SStroke black
                ]
+
+
 
 toIO    :: (Point_ point 2 r)
         => ConvexPolygon (point :+ extra)

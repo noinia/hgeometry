@@ -16,9 +16,7 @@ extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
 tested-with:
-    GHC == 9.2.5
-  , GHC == 9.4.4
-  , GHC == 9.6.1
+    GHC == 9.6.1
 
 source-repository head
   type:     git
@@ -34,7 +32,7 @@ common setup
                 -fspecialise-aggressively -fexpose-all-unfoldings
 
     build-depends:
-        base                    >= 4.16.1.0      &&  < 5
+        base                    >= 4.18       &&  < 5
       , hgeometry-combinatorial >= 1.0.0.0
       , hgeometry-vector        >= 1.0.0.0
       , hgeometry-point         >= 1.0.0.0

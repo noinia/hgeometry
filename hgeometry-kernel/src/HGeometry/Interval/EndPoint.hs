@@ -20,7 +20,7 @@ module HGeometry.Interval.EndPoint
   ) where
 
 import Control.Lens
-import Data.Semigroup.Foldable.Class
+import Data.Foldable1
 import HGeometry.Properties
 import Text.Read
 
