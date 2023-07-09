@@ -13,10 +13,14 @@ packages:
   -- ../hiraffe
 
 allow-newer:
-    vector-circular:vector,base,template-haskell,
+    vector-circular:vector,base,template-haskell,semigroupoids,
     hexpat:text,
     deepseq-generics:base,ghc-prim,
 
 source-repository-package
     type: git
     location: https://github.com/noinia/hiraffe
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hspec-with-tempfile
