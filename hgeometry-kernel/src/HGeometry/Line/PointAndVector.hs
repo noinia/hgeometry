@@ -80,13 +80,18 @@ instance ( Has_ Metric_ d r ) => Line_ (LinePV d r) d r where
 -- instance CTraversable (LinePV d) where
 --   ctraverse f (LinePV p v) = LinePV <$> traverse (ctraverse f) p <*> ctraverse f v
 
-instance ( Eq r, Fractional r
+instance ( Eq r, Num r
          ) => ConstructableHyperPlane_ (LinePV 2 r) 2 r where
+
+  type HyperPlaneFromEquationConstraint (LinePV 2 r) 2 r = Fractional r
+
   -- equation: line equation is: c + ax + by = 0
   -- pre: not all of a b and c are zero
   hyperPlaneFromEquation (Vector3 c a b)
     | b == 0    = LinePV (Point2 (-c/a) 0)      (Vector2 0 1) -- if b=0 we are vertical
     | otherwise = LinePV (Point2 0      (-c/b)) (Vector2 c (-a))
+
+  fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
 
 instance Num r => HyperPlaneFromPoints (LinePV 2 r) where
@@ -99,7 +104,6 @@ instance ( Eq r, Num r
     where
       a0 = if vx == 0 then -px else -vx*px - vy*py
 
-  fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
 
 {- HLINT ignore toLinearFunction -}

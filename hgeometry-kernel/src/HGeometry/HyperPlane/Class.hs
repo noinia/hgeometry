@@ -23,6 +23,7 @@ module HGeometry.HyperPlane.Class
   ) where
 
 import Control.Lens hiding (snoc, cons, uncons, unsnoc)
+import Data.Kind (Constraint)
 import Data.Type.Ord
 import GHC.TypeNats
 import HGeometry.Point
@@ -85,19 +86,6 @@ class ( NumType hyperPlane ~ r
       a0 = a'^.last
 
   {-# INLINE hyperPlaneEquation #-}
-
-  -- | Construct a Hyperplane from a point and a normal.
-  fromPointAndNormal     :: ( Point_ point d r, Num r)
-                         => point -> Vector d r -> hyperPlane
-  default fromPointAndNormal :: ( Point_ point d r, Num r
-                                , ConstructableHyperPlane_ hyperPlane d r
-                                , Has_ Metric_ d r
-                                )
-                             => point -> Vector d r -> hyperPlane
-  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
-    where
-      a0 = negate $ (q^.vector) `dot` n
-  {-# INLINE fromPointAndNormal #-}
 
   -- | Get the normal vector of the hyperplane.
   --
@@ -170,6 +158,10 @@ class ( NumType hyperPlane ~ r
 class HyperPlane_ hyperPlane d r
      => ConstructableHyperPlane_ hyperPlane d r where
 
+  -- | Additional constraints for constructing a hyperplane from its equation.
+  type HyperPlaneFromEquationConstraint hyperPlane d r :: Constraint
+  type HyperPlaneFromEquationConstraint hyperPlane d r = ()
+
   -- | Given the coefficients \(a_0,..,a_d\) of the equation, i.e.
   -- so that
   --
@@ -178,7 +170,23 @@ class HyperPlane_ hyperPlane d r
   -- construct the hyperplane form it.
   --
   --
-  hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
+  hyperPlaneFromEquation :: HyperPlaneFromEquationConstraint hyperPlane d r
+                         => Vector (d+1) r -> hyperPlane
+
+
+  -- | Construct a Hyperplane from a point and a normal.
+  fromPointAndNormal     :: ( Point_ point d r, Num r)
+                         => point -> Vector d r -> hyperPlane
+  default fromPointAndNormal :: ( Point_ point d r, Num r
+                                , ConstructableHyperPlane_ hyperPlane d r
+                                , HyperPlaneFromEquationConstraint hyperPlane d r
+                                , Has_ Metric_ d r
+                                )
+                             => point -> Vector d r -> hyperPlane
+  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
+    where
+      a0 = negate $ (q^.vector) `dot` n
+  {-# INLINE fromPointAndNormal #-}
 
 
 --------------------------------------------------------------------------------

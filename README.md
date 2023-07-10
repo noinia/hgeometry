@@ -93,6 +93,7 @@ HGeometry. Refer to the haddocks for more details.
 HGeometry also contains an implementation of some geometric data
 structures. In particular,
 
+* A one dimensional Interval Tree. The base tree is static.
 * A one dimensional Segment Tree. The base tree is static.
 
 

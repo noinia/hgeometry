@@ -54,15 +54,12 @@ instance ( MkHyperPlaneConstraints d r
          , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
-  fromPointAndNormal _ n = NonVerticalHyperPlane n
-  -- see https://en.wikipedia.org/wiki/Normal_(geometry)
-  -- FIXME: this seems fishy; don't we need the point?
-
-
 instance ( MkHyperPlaneConstraints d r
-         , Fractional r
          , 2 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
+
+  type HyperPlaneFromEquationConstraint (NonVerticalHyperPlane d r) d r = Fractional r
+
   -- | pre: the last component is not zero
   --
   --
@@ -75,9 +72,20 @@ instance ( MkHyperPlaneConstraints d r
       a  = as&last .~ a0
   {-# INLINE hyperPlaneFromEquation #-}
 
-instance ( MkHyperPlaneConstraints d r
+  fromPointAndNormal _ n = NonVerticalHyperPlane n
+  -- see https://en.wikipedia.org/wiki/Normal_(geometry)
+  --
+  -- i.e. Alternatively, if the hyperplane is defined as the solution set of a single
+  -- linear equation a_1 x_1 + ⋯ + a_n x_n = c , then the vector n = ( a_1 , .. , a_n ) is
+  -- a normal.
+  --
+  -- FIXME: this seems fishy; don't we need the point?
+
+  --
+
+
+instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
          , Num r
-         , 1 + (d-1) ~ d
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
   -- >>> hyperPlaneCoefficients myHyperPlane
