@@ -33,6 +33,7 @@ type instance Intersection (LinePV 2 r) (LineSegment (EndPoint t) point) =
 type instance Intersection (LineEQ r) (LineSegment (EndPoint t) point) =
   Maybe (LineLineSegmentIntersection (LineEQ r) (LineSegment (EndPoint t) point))
 
+
 instance ( Point_ point 2 r, Num r, Ord r
          ) => LinePV 2 r `HasIntersectionWith` ClosedLineSegment point where
   intersects = intersectsImpl
@@ -69,6 +70,10 @@ instance ( Point_ point 2 r
   intersect = intersectImpl
   {-# INLINE intersect #-}
 
+-- | Implementation for intersects between lines and line segments.
+--
+-- the type is is sufficiently general that for various line or closed line segment types
+-- we can appeal to it.
 intersectImpl       :: ( HyperPlane_ line 2 r
                        , Point_ point 2 r
                        , Fractional r, Ord r
@@ -98,12 +103,28 @@ deriving instance (Show (Point 2 (NumType lineSegment)), Show lineSegment
 deriving instance (Eq (Point 2 (NumType lineSegment)), Eq lineSegment
                   ) => Eq (LineSegmentLineSegmentIntersection lineSegment)
 
-type instance Intersection (LinePV 2 r) (LineSegment (EndPoint t) point) =
-  Maybe (LineLineSegmentIntersection (LinePV 2 r) (LineSegment (EndPoint t) point))
+type instance Intersection (LineSegment (EndPoint t) point)
+                           (LineSegment (EndPoint t) point) =
+  Maybe (LineSegmentLineSegmentIntersection (LineSegment (EndPoint t) point))
 
-instance ( Point_ point 2 r
-         , Num r, Ord r
+{-
+
+instance ( Point_ point 2 r, Num r, Ord r
          ) => ClosedLineSegment point `HasIntersectionWith` ClosedLineSegment point where
   sa `intersects` sb = supportingLine sa `intersects` sb &&
                        supportingLine sb `intersects` sa
   {-# INLINE intersects #-}
+  -- FIXME: this is not correct yet; i.e. if sa and sb are colinear both supportinging
+  -- lines intersect the segment, but the segments may stil lbe disjoint.
+
+
+instance ( Point_ point 2 r
+         , Fractional r,  Ord r
+         ) => ClosedLineSegment point `IsIntersectableWith` ClosedLineSegment point where
+  sa `intersect` sb
+    | sa `intersects` sb = Just undefined
+      -- FIXME!! continue here
+    | otherwise          = Nothing
+  {-# INLINE intersect #-}
+
+-}

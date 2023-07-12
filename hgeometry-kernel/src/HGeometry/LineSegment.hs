@@ -19,5 +19,6 @@ module HGeometry.LineSegment
   , EndPoint_(..)
   ) where
 
-import HGeometry.LineSegment.Internal
 import HGeometry.LineSegment.Class
+import HGeometry.LineSegment.Internal
+import HGeometry.LineSegment.Intersection ()
