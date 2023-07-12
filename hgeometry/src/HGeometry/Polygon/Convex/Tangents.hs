@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Convex.Tangents
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Computing tangents of convex polygons.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex.Tangents
   ( leftTangent, rightTangent
   , lowerTangent, lowerTangent'

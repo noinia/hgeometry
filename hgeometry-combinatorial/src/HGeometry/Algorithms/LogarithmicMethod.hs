@@ -50,6 +50,8 @@ instance LogarithmicMethodDS static a => Monoid (InsertionOnly static a) where
   mempty = empty
 
 
+-- | Class representing data structures that can be constructed using
+-- the Logarithmic method.
 class LogarithmicMethodDS static a where
   {-# MINIMAL build #-}
   -- | Create a new static data structure storing only one value.

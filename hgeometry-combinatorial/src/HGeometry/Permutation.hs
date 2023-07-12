@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Permutation
@@ -11,7 +10,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.Permutation
   ( Permutation(Permutation)
-  , orbits, indices
+  , orbits
+  , indices
 
   , Orbit
   , elems
@@ -51,7 +51,18 @@ data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
                                                -- item in the i^th orbit
                                  }
                    deriving (Show,Eq,Generic)
-makeLenses ''Permutation
+
+-- | Lens to access the orbits of the permutation
+orbits :: Lens (Permutation a) (Permutation b) (V.Vector (Orbit a)) (V.Vector (Orbit b))
+orbits = lens _orbits (\p os -> p { _orbits = os })
+
+-- | Lens to access the indexes of the permutation.
+--
+-- idxes (fromEnum a) = (i,j) implies that a is the j^th item in the
+-- i^th orbit
+indexes :: Lens' (Permutation a) (UV.Vector (Int,Int))
+indexes = lens _indexes (\p ixs -> p { _indexes = ixs })
+
 
 instance NFData a => NFData (Permutation a)
 

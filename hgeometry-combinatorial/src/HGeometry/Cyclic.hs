@@ -1,6 +1,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Cyclic
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Representing Cyclic Sequences
+--
+--------------------------------------------------------------------------------
 module HGeometry.Cyclic
   ( Cyclic(..)
   , toCircularVector
@@ -67,6 +77,8 @@ toCircularVector            :: Cyclic NV.NonEmptyVector a -> CircularVector a
 toCircularVector (Cyclic v) = CircularVector v 0
 
 
+-- | Class that models that some type has a cyclic traversal starting
+-- from a particular index.
 class HasDirectedTraversals v where
   -- | A rightward-traversal over all elements starting from the given one.
   --
@@ -124,6 +136,7 @@ xs `isShiftOfI` ys = let twice zs     = let zs' = leftElements zs in zs' <> zs'
 
 -- | Class for types that have an Equality test up to cyclic shifts
 class ShiftedEq t where
+  -- | The type of the elements stored in this cyclic container.
   type ElemCyclic t
   -- | Given a and b, test if a is a shifted version of the other.
   isShiftOf :: Eq (ElemCyclic t) => t -> t -> Bool

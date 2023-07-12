@@ -36,6 +36,7 @@ import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 
+-- | Data type representing d-dimensional vectors storing elements of type r.
 data family Vector (d :: Nat) (r :: Type)
 
 type instance Dimension (Vector d r) = d

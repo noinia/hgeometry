@@ -38,7 +38,9 @@ import Hiraffe.Graph
 
 -- | Convex polygons
 newtype ConvexPolygonF f point =
-  ConvexPolygon { toSimplePolygon :: SimplePolygonF f point }
+  ConvexPolygon { toSimplePolygon :: SimplePolygonF f point
+                -- ^ Convert to a simple polygon, i.e. forget the polygon is convex.
+                }
   deriving newtype (NFData, Eq)
 
 -- | By default we use a cyclic non-empty vector to represent convex polygons.

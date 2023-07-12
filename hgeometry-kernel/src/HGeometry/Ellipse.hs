@@ -30,6 +30,8 @@ import           HGeometry.Vector
 newtype Ellipse r = Ellipse { _affineTransformation :: Transformation 2 r }
                    deriving (Show,Eq) -- ,Functor,Foldable,Traversable)
 
+-- | Iso to access the transformation (applied on the unit circle)
+-- that we use to actually represent the ellipse
 affineTransformation :: Iso (Ellipse r) (Ellipse s) (Transformation 2 r) (Transformation 2 s)
 affineTransformation = iso _affineTransformation Ellipse
 

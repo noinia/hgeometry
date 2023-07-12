@@ -91,6 +91,7 @@ scalarMultiple u v
     allZero = allOf components (== 0)
 {-# INLINE scalarMultiple #-}
 
+-- | Helper type for implementing scalarMultiple
 data ScalarMultiple r = No | Maybe | Yes r deriving (Eq,Show)
 
 instance Eq r => Semigroup (ScalarMultiple r) where
@@ -128,6 +129,7 @@ scalarMultiple' u v = g $ foldMapZip f u v
 newtype instance UMV.MVector s (Vector d r) = MV_VectorD (UMV.MVector s r)
 newtype instance UV.Vector     (Vector d r) = V_VectorD  (UV.Vector     r)
 
+-- | get the dimension as an Int
 natVal' :: forall d. KnownNat d => Int
 natVal' = fromIntegral $ natVal (Proxy @d)
 

@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HalfSpace
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Representing halfspaces
+--
+--------------------------------------------------------------------------------
 module HGeometry.HalfSpace
   ( HalfSpaceF(..)
   , halfspaceSign, boundingHyperPlane

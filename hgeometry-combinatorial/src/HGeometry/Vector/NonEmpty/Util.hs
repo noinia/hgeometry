@@ -2,6 +2,16 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.NonEmpty.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Instances for non-empty vectors
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.NonEmpty.Util
   (
   ) where

@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.LowerEnvelope
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Computing the lower envelope of a set of planes
+--
+--------------------------------------------------------------------------------
 module HGeometry.LowerEnvelope
   (  module HGeometry.LowerEnvelope.Naive2
   --   module HGeometry.LowerEnvelope.Type

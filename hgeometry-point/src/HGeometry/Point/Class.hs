@@ -52,6 +52,8 @@ import qualified Linear.Affine as Linear
 
 --------------------------------------------------------------------------------
 
+-- | Type class for types, usually points, that have a Lens to interpret the
+-- point as a vector.
 class HasVector point point' where
   -- | Lens to access the vector corresponding to this point.
   --
@@ -78,7 +80,8 @@ instance ( Vector_ (v r) d r
                 (\_ v -> Linear.P $ v^.from _Vector')
   {-# INLINE vector #-}
 
-
+-- | Class for point types that have a type changing traversal over
+-- all coordinates.
 class ( Has_ Vector_ (Dimension point) (NumType point)
       , Has_ Vector_ (Dimension point') (NumType point')
       , HasComponents (Vector (Dimension point') (NumType point))

@@ -155,6 +155,8 @@ class ( NumType hyperPlane ~ r
       (a0,a) = uncons $ hyperPlaneEquation h
   {-# INLINE onSideTest #-}
 
+-- | Class representing hyperplanes with methods to construct the
+-- hyperplane.
 class HyperPlane_ hyperPlane d r
      => ConstructableHyperPlane_ hyperPlane d r where
 
@@ -241,7 +243,8 @@ isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = isScalarMultipleOf (normalVector h1) (normalVector h2)
 
-
+-- | Class that tells us we can construct a hyperplane from a vector
+-- of points.
 class HyperPlaneFromPoints hyperPlane where
   -- | Construct a hyperplane through the given d points.
   hyperPlaneThrough     :: ( Point_ point d r

@@ -1,5 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Kernel.Instances
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Arbitrary instances for the types in hgeometry-kernel
+--
+--------------------------------------------------------------------------------
 module HGeometry.Kernel.Instances where
 
 import Control.Lens

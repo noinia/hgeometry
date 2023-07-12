@@ -43,6 +43,9 @@ convexHull pts = combine (upperHull pts) (lowerHull pts)
   --   SP p@(c :+ _) pts = minViewBy incXdecY ps
   --   takeWhile' pf (x :| xs) = x : takeWhile pf xs
 
+-- | Computes the upper hull. The points are reported in left-to-right order.
+--
+-- running time: \(O(nh)\), where \(h\) is the complexity of the upper hull.
 upperHull     ::  (Num r, Ord r, Point_ point 2 r) =>  NonEmpty point -> NonEmpty point
 upperHull pts = repeatedly cmp steepestCwFrom s rest
   where
