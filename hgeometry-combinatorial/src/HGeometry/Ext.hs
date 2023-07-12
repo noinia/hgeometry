@@ -23,12 +23,10 @@ import Data.Biapplicative
 import Data.Bifoldable
 import Data.Bifunctor.Apply
 import Data.Bitraversable
--- import Data.Default
 import Data.Functor.Apply (liftF2)
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
 import GHC.Generics (Generic)
--- import Test.QuickCheck
 import System.Random.Stateful (Uniform(..), UniformRange(..))
 
 --------------------------------------------------------------------------------

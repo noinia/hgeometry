@@ -14,8 +14,8 @@ module HGeometry.Foldable.Util
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Semigroup.Foldable
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
 import qualified Data.Vector.NonEmpty as NonEmptyVector

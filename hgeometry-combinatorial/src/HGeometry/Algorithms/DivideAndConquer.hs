@@ -16,9 +16,12 @@ module HGeometry.Algorithms.DivideAndConquer(
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable
+-- import           Data.Semigroup.Foldable
+
+--------------------------------------------------------------------------------
 
 -- | Divide and conquer strategy
 --

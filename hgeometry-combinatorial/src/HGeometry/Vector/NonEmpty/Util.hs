@@ -19,7 +19,7 @@ module HGeometry.Vector.NonEmpty.Util
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable
+import           Data.Foldable1
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import qualified Data.Vector.NonEmpty as NV
