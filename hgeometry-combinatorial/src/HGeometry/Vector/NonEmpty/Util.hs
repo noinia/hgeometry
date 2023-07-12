@@ -31,10 +31,12 @@ type instance IxValue (NonEmptyVector a) = a
 
 instance Ixed (NonEmptyVector a) where
   ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
+  {-# INLINE ix #-}
 
 instance Foldable1 NonEmptyVector where
   foldMap1 f v = let (v',x) = NV.unsnoc v
                  in Vector.foldr (\x' a -> f x' <> a) (f x) v'
+  {-# INLINE foldMap1 #-}
 
 instance Traversable1 NonEmptyVector where
   traverse1 f (NonEmptyVector v) =
@@ -49,7 +51,10 @@ instance Traversable1 NonEmptyVector where
 
 instance FunctorWithIndex Int NonEmptyVector where
   imap f (NonEmptyVector v) = NonEmptyVector $ imap f v
+  {-# INLINE imap #-}
 instance FoldableWithIndex Int NonEmptyVector where
   ifoldMap f (NonEmptyVector v) = ifoldMap f v
+  {-# INLINE ifoldMap #-}
 instance TraversableWithIndex Int NonEmptyVector where
   itraverse f (NonEmptyVector v) = NonEmptyVector <$> itraverse f v
+  {-# INLINE itraverse #-}

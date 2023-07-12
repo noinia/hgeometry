@@ -38,38 +38,49 @@ infixr 1 :+
 
 instance Functor ((:+) c) where
   fmap f (c :+ e) = c :+ f e
+  {-# INLINE fmap #-}
 
 instance Foldable ((:+) c) where
   foldMap f (_ :+ e) = f e
+  {-# INLINE foldMap #-}
 
 instance Traversable ((:+) c) where
   traverse f (c :+ e) = (:+) c <$> f e
+  {-# INLINE traverse #-}
 
 instance Bifunctor (:+) where
   bimap f g (c :+ e) = f c :+ g e
+  {-# INLINE bimap #-}
 
 instance Biapply (:+) where
   (f :+ g) <<.>> (c :+ e) = f c :+ g e
+  {-# INLINE (<<.>>) #-}
 
 instance Biapplicative (:+) where
   bipure = (:+)
+  {-# INLINE bipure #-}
   (f :+ g) <<*>> (c :+ e) = f c :+ g e
+  {-# INLINE (<<*>>) #-}
 
 instance Bifoldable (:+) where
   bifoldMap f g (c :+ e) = f c `mappend` g e
+  {-# INLINE bifoldMap #-}
 
 instance Bitraversable (:+) where
   bitraverse f g (c :+ e) = (:+) <$> f c <*> g e
+  {-# INLINE bitraverse #-}
 
 instance Bifoldable1 (:+) where
   bifoldMap1 f g (c :+ e) = f c <> g e
+  {-# INLINE bifoldMap1 #-}
 
 instance Bitraversable1 (:+) where
   bitraverse1 f g (c :+ e) = liftF2 (:+) (f c) (g e)
+  {-# INLINE bitraverse1 #-}
 
 instance (Semigroup core, Semigroup extra) => Semigroup (core :+ extra) where
   (c :+ e) <> (c' :+ e') = c <> c' :+ e <> e'
-
+  {-# INLINE (<>) #-}
 
 instance (ToJSON core, ToJSON extra) => ToJSON (core :+ extra) where
   -- toJSON     (c :+ e) = toJSON     (c,e)
@@ -93,27 +104,27 @@ instance (UniformRange core, UniformRange extra) => UniformRange (core :+ extra)
 -- | Access the core of an extended value.
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c
-{-# INLINABLE _core #-}
+{-# INLINE _core #-}
 
 -- | Access the extra part of an extended value.
 _extra :: (core :+ extra) -> extra
 _extra (_ :+ e) = e
-{-# INLINABLE _extra #-}
+{-# INLINE _extra #-}
 
 -- | Lens access to the core of an extended value.
 core :: Lens (core :+ extra) (core' :+ extra) core core'
 core = lens _core (\(_ :+ e) c -> c :+ e)
-{-# INLINABLE core #-}
+{-# INLINE core #-}
 
 -- | Lens access to the extra part of an extended value.
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
 extra = lens _extra (\(c :+ _) e -> c :+ e)
-{-# INLINABLE extra #-}
+{-# INLINE extra #-}
 
 -- | Tag a value with the unit type.
 ext   :: a -> a :+ ()
 ext x = x :+ ()
-{-# INLINABLE ext #-}
+{-# INLINE ext #-}
 
 
 --------------------------------------------------------------------------------
@@ -130,16 +141,17 @@ type t :~ c = t `AsA` c
 -- | Pattern to get the core.
 pattern AsA  :: t :~ c => c -> t
 pattern AsA c <- (asCore -> c)
+{-# INLINE AsA #-}
 
 -- | Everything can act as itself
 instance (t ~ c)          => AsA t        c where
   asCore = id
-  {-# INLINABLE asCore #-}
+  {-# INLINE asCore #-}
 
 -- | An Ext can act as its core.
 instance {-# OVERLAPPING #-} AsA (c :+ e) c where
   asCore = view core
-  {-# INLINABLE asCore #-}
+  {-# INLINE asCore #-}
 
 --------------------------------------------------------------------------------
 
