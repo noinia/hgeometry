@@ -1,7 +1,16 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
 module HGeometry.Miso.Svg.Writer
-  (
+  ( withAts, withAts'
+  , Drawable(..)
+
+  , dPoint
+  , dLineSegment
+  , dRectangle
+  , dCircle
+  , dDisk
+  , dPolyLine
+  , dSimplePolygon
   ) where
 
 import           Control.Lens hiding (Const,rmap)
@@ -93,18 +102,20 @@ instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point)
 --------------------------------------------------------------------------------
 -- * Functions to draw geometric objects
 
-
+-- | Draw a point
 dPoint   :: (Point_ point 2 r, ToMisoString r) => point -> [Attribute action] -> View action
 dPoint p = withAts ellipse_ [ cx_ (ms $ p^.xCoord), cy_ (ms $ p^.yCoord)
                             , rx_ "5", ry_ "5"
                             ]
 
+-- | Draw a rectangle
 dRectangle   :: ( Rectangle_ rectangle point, Point_ point 2 r, ToMisoString r, Num r)
              => rectangle -> [Attribute action] -> View action
 dRectangle b = let Point2 x y  = over coordinates ms $ b^.minPoint.asPoint
                    Vector2 w h = ms <$> b^.to size
                in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"]
 
+-- | Draw a simple polygon
 dSimplePolygon    :: (SimplePolygon_ simplePolygon point r, ToMisoString r)
                   => simplePolygon -> [Attribute action] -> View action
 dSimplePolygon pg = withAts polygon_ [points_ $ toPointsString $ pg^..vertices ]
@@ -127,10 +138,12 @@ dSimplePolygon pg = withAts polygon_ [points_ $ toPointsString $ pg^..vertices ]
   --   toOp (Point2 x y :+ _) = ms x <> " " <> ms y <> " "
 
 
+-- | Draw a polyline
 dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
              => polyLine -> [Attribute action] -> View action
 dPolyLine pl = withAts polyline_ [points_ . toPointsString $ pl^..vertices ]
 
+-- | Draw a line segment
 dLineSegment   :: ( LineSegment_ lineSegment point, Point_ point 2 r, ToMisoString r)
                => lineSegment -> [Attribute action] -> View action
 dLineSegment s = withAts polyline_ [ points_ $ toPointsString [s^.start, s^.end] ]
@@ -141,6 +154,7 @@ toPointsString =
   MisoString.unwords . map (\(Point2_ x y) -> mconcat [ms x, ",", ms y]) . F.toList
 
 
+-- | Draw a circle
 dCircle              :: (Point_ point 2 r, ToMisoString r)
                      => Circle point -> [Attribute action] -> View action
 dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
@@ -150,6 +164,7 @@ dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
                                          , fill_ "none"
                                          ]
 
+-- | Draw a disk
 dDisk             :: (Disk_ disk point, Point_ point 2 r, ToMisoString r, Floating r)
                   => disk -> [Attribute action] -> View action
 dDisk (Disk_ c r) = dCircle (Circle c r)

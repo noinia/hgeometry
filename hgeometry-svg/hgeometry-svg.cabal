@@ -60,9 +60,14 @@ common setup
       , data-clist                >= 0.2
       , miso                      >= 1.8
       , lucid                     >= 2
-      , colour                  >= 2.3.6
-      , singletons              >= 3.0
-      , vinyl                   >= 0.14
+      , colour                    >= 2.3.6
+      , singletons                >= 3.0
+      , vinyl                     >= 0.14
+      , text                      >= 2.0
+      , bytestring                >= 0.11
+      , file-io                   >= 0.1
+      , filepath                  >= 1.4.100
+
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -98,7 +103,8 @@ common quickcheck-setup
         hspec                   >= 2.9
       , QuickCheck              >= 2.10
       , quickcheck-instances
-      , hgeometry
+      , hgeometry-svg
+
 --------------------------------------------------------------------------------
 -- * Main Library
 
@@ -108,6 +114,7 @@ library
     exposed-modules:
         HGeometry.Svg
 
+        HGeometry.Miso.Svg
         HGeometry.Miso.OrphanInstances
 --        HGeometry
 
@@ -151,11 +158,11 @@ library
 --------------------------------------------------------------------------------
 -- * Tests stup
 
---test-suite hgeometry-hspec
---   import:           setup, quickcheck-setup
---    build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   other-modules:
---       Spec
---   hs-source-dirs:   test
+test-suite hgeometry-svg-hspec
+  import:           setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+  hs-source-dirs:   test

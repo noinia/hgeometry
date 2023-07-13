@@ -1,28 +1,28 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module Geometry.Web.StaticCanvas(
-    Canvas(..)
-    , center, dimensions, zoomLevel, createCanvas
-    , staticCanvas_, textAt
-    , realWorldCoordinates
-    , ToSvgCoordinate
-    ) where
+module HGeometry.Miso.Svg.StaticCanvas
+  ( Canvas(..)
+  , center, dimensions, zoomLevel, createCanvas
+  , staticCanvas_, textAt
+  , realWorldCoordinates
+  , ToSvgCoordinate
+  ) where
 
 import           Control.Lens
-import           Geometry.Point
-import           Geometry.Svg.MathCoordinateSystem ( Canvas(..)
-                                                        , center
-                                                        , dimensions
-                                                        , zoomLevel
-                                                        , createCanvas
-                                                        , realWorldCoordinates
-                                                        )
-import           Geometry.Vector
 import qualified Data.Map as Map
+import           HGeometry.Point
+import           HGeometry.Svg.MathCoordinateSystem ( Canvas(..)
+                                                    , center
+                                                    , dimensions
+                                                    , zoomLevel
+                                                    , createCanvas
+                                                    , realWorldCoordinates
+                                                    )
+import           HGeometry.Vector
 import           Miso
-import qualified Miso.Svg as Miso
 import           Miso.String (MisoString, ToMisoString, ms)
 import qualified Miso.String.Util as MisoString
-import           Miso.Svg(svg_, g_, transform_, viewBox_)
+import qualified Miso.Svg as Miso
+import           Miso.Svg (svg_, g_, transform_, viewBox_)
 
 --------------------------------------------------------------------------------
 
