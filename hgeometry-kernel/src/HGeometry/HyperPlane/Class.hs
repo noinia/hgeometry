@@ -24,6 +24,7 @@ module HGeometry.HyperPlane.Class
 
 import Control.Lens hiding (snoc, cons, uncons, unsnoc)
 import Data.Default.Class
+import Data.Kind (Constraint)
 import Data.Type.Ord
 import GHC.TypeNats
 import HGeometry.Ext
@@ -87,19 +88,6 @@ class ( NumType hyperPlane ~ r
       a0 = a'^.last
 
   {-# INLINE hyperPlaneEquation #-}
-
-  -- | Construct a Hyperplane from a point and a normal.
-  fromPointAndNormal     :: ( Point_ point d r, Num r)
-                         => point -> Vector d r -> hyperPlane
-  default fromPointAndNormal :: ( Point_ point d r, Num r
-                                , ConstructableHyperPlane_ hyperPlane d r
-                                , Has_ Metric_ d r
-                                )
-                             => point -> Vector d r -> hyperPlane
-  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
-    where
-      a0 = negate $ (q^.vector) `dot` n
-  {-# INLINE fromPointAndNormal #-}
 
   -- | Get the normal vector of the hyperplane.
   --
@@ -169,8 +157,14 @@ class ( NumType hyperPlane ~ r
       (a0,a) = uncons $ hyperPlaneEquation h
   {-# INLINE onSideTest #-}
 
+-- | Class representing hyperplanes with methods to construct the
+-- hyperplane.
 class HyperPlane_ hyperPlane d r
      => ConstructableHyperPlane_ hyperPlane d r where
+
+  -- | Additional constraints for constructing a hyperplane from its equation.
+  type HyperPlaneFromEquationConstraint hyperPlane d r :: Constraint
+  type HyperPlaneFromEquationConstraint hyperPlane d r = ()
 
   -- | Given the coefficients \(a_0,..,a_d\) of the equation, i.e.
   -- so that
@@ -180,7 +174,23 @@ class HyperPlane_ hyperPlane d r
   -- construct the hyperplane form it.
   --
   --
-  hyperPlaneFromEquation :: Vector (d+1) r -> hyperPlane
+  hyperPlaneFromEquation :: HyperPlaneFromEquationConstraint hyperPlane d r
+                         => Vector (d+1) r -> hyperPlane
+
+
+  -- | Construct a Hyperplane from a point and a normal.
+  fromPointAndNormal     :: ( Point_ point d r, Num r)
+                         => point -> Vector d r -> hyperPlane
+  default fromPointAndNormal :: ( Point_ point d r, Num r
+                                , ConstructableHyperPlane_ hyperPlane d r
+                                , HyperPlaneFromEquationConstraint hyperPlane d r
+                                , Has_ Metric_ d r
+                                )
+                             => point -> Vector d r -> hyperPlane
+  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
+    where
+      a0 = negate $ (q^.vector) `dot` n
+  {-# INLINE fromPointAndNormal #-}
 
 --------------------------------------------------------------------------------
 
@@ -234,7 +244,8 @@ isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = isScalarMultipleOf (normalVector h1) (normalVector h2)
 
-
+-- | Class that tells us we can construct a hyperplane from a vector
+-- of points.
 class HyperPlaneFromPoints hyperPlane where
   -- | Construct a hyperplane through the given d points.
   hyperPlaneThrough     :: ( Point_ point d r
@@ -247,8 +258,6 @@ instance (HyperPlane_ hyperPlane d r, Default extra)
          => HyperPlane_ (hyperPlane :+ extra) d r where
   hyperPlaneEquation = hyperPlaneEquation . view core
   {-# INLINE hyperPlaneEquation #-}
-  fromPointAndNormal p v = fromPointAndNormal p v :+ def
-  {-# INLINE fromPointAndNormal #-}
   normalVector = normalVector . view core
   {-# INLINE normalVector #-}
   onHyperPlane q = onHyperPlane q . view core
@@ -258,8 +267,12 @@ instance (HyperPlane_ hyperPlane d r, Default extra)
 
 instance (ConstructableHyperPlane_ hyperPlane d r, Default extra)
           => ConstructableHyperPlane_ (hyperPlane :+ extra) d r where
+  type HyperPlaneFromEquationConstraint (hyperPlane :+ extra) d r =
+         HyperPlaneFromEquationConstraint hyperPlane d r
   hyperPlaneFromEquation v = hyperPlaneFromEquation v :+ def
   {-# INLINE hyperPlaneFromEquation #-}
+  fromPointAndNormal p v = fromPointAndNormal p v :+ def
+  {-# INLINE fromPointAndNormal #-}
 
 instance (NonVerticalHyperPlane_  hyperPlane d r, Default extra)
          => NonVerticalHyperPlane_ (hyperPlane :+ extra) d r where

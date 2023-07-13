@@ -2,6 +2,16 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.NonEmpty.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Instances for non-empty vectors
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.NonEmpty.Util
   (
   ) where
@@ -9,7 +19,7 @@ module HGeometry.Vector.NonEmpty.Util
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable
+import           Data.Foldable1
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import qualified Data.Vector.NonEmpty as NV
@@ -21,10 +31,12 @@ type instance IxValue (NonEmptyVector a) = a
 
 instance Ixed (NonEmptyVector a) where
   ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
+  {-# INLINE ix #-}
 
 instance Foldable1 NonEmptyVector where
   foldMap1 f v = let (v',x) = NV.unsnoc v
                  in Vector.foldr (\x' a -> f x' <> a) (f x) v'
+  {-# INLINE foldMap1 #-}
 
 instance Traversable1 NonEmptyVector where
   traverse1 f (NonEmptyVector v) =
@@ -39,7 +51,10 @@ instance Traversable1 NonEmptyVector where
 
 instance FunctorWithIndex Int NonEmptyVector where
   imap f (NonEmptyVector v) = NonEmptyVector $ imap f v
+  {-# INLINE imap #-}
 instance FoldableWithIndex Int NonEmptyVector where
   ifoldMap f (NonEmptyVector v) = ifoldMap f v
+  {-# INLINE ifoldMap #-}
 instance TraversableWithIndex Int NonEmptyVector where
   itraverse f (NonEmptyVector v) = NonEmptyVector <$> itraverse f v
+  {-# INLINE itraverse #-}

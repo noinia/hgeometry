@@ -1,4 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Viewport
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Geometric viewport; i.e. some way of "viewing" only one
+-- particular rectangular region of a larger 2d space.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Viewport
   ( Viewport(Viewport), mkViewport
   , viewPort, worldToHost, hostToWorld
@@ -19,8 +30,6 @@ import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Transformation
 import HGeometry.Vector
--- import Data.Range
--- import Data.Default
 
 --------------------------------------------------------------------------------
 
@@ -35,11 +44,6 @@ data Viewport r = Viewport { _viewPort    :: Rectangle (Point 2 r)
                            -- _hostToWorld :: Transformation 2 r
                            }
                   deriving stock (Eq)
-
--- deriving st oinstance ( Eq r
---                   ) => Eq (Viewport r)
--- deriving instance (Show (VectorFamily 2 r)) => Show (Viewport r)
-
 
 -- | Lens to access the viewport rectangle
 viewPort :: Lens' (Viewport r) (Rectangle (Point 2 r))
@@ -133,8 +137,8 @@ wrtCenter vp trans' = let v = centerPoint (vp^.viewPort) .-. origin
 
 --------------------------------------------------------------------------------
 
-
-
+-- | Data type representing possibilities for zooming in and out in a
+-- viewport.
 data ZoomConfig r = ZoomConfig { _range        :: ClosedInterval r
                                , _currentLevel :: r
                                }

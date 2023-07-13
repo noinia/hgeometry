@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.16
+# version: 0.16.5
 #
-# REGENDATA ("0.16",["github","cabal.project"])
+# REGENDATA ("0.16.5",["github","cabal.project"])
 #
 name: Haskell-CI
 on:
@@ -138,6 +138,8 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-kernel" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-ipe" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-test" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-examples" >> cabal.project
           cat cabal.project
       - name: sdist
         run: |
@@ -161,6 +163,10 @@ jobs:
           echo "PKGDIR_hgeometry=${PKGDIR_hgeometry}" >> "$GITHUB_ENV"
           PKGDIR_hgeometry_ipe="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-ipe-[0-9.]*')"
           echo "PKGDIR_hgeometry_ipe=${PKGDIR_hgeometry_ipe}" >> "$GITHUB_ENV"
+          PKGDIR_hgeometry_test="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-test-[0-9.]*')"
+          echo "PKGDIR_hgeometry_test=${PKGDIR_hgeometry_test}" >> "$GITHUB_ENV"
+          PKGDIR_hgeometry_examples="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-examples-[0-9.]*')"
+          echo "PKGDIR_hgeometry_examples=${PKGDIR_hgeometry_examples}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
@@ -170,6 +176,8 @@ jobs:
           echo "packages: ${PKGDIR_hgeometry_kernel}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry_ipe}" >> cabal.project
+          echo "packages: ${PKGDIR_hgeometry_test}" >> cabal.project
+          echo "packages: ${PKGDIR_hgeometry_examples}" >> cabal.project
           echo "package hgeometry-combinatorial" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry-vector" >> cabal.project
@@ -182,19 +190,25 @@ jobs:
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry-ipe" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package hgeometry-test" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package hgeometry-examples" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
           allow-newer: vector-circular:vector
-          allow-newer: base
-          allow-newer: template-haskell
-          allow-newer: hexpat:text
-          allow-newer: deepseq-generics:base
-          allow-newer: ghc-prim
+          allow-newer: vector-circular:base
+          allow-newer: vector-circular:template-haskell
+          allow-newer: vector-circular:semigroupoids
 
           source-repository-package
             type:     git
             location: https://github.com/noinia/hiraffe
+
+          source-repository-package
+            type:     git
+            location: https://github.com/noinia/hspec-with-tempfile
           EOF
-          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry|hgeometry-combinatorial|hgeometry-ipe|hgeometry-kernel|hgeometry-point|hgeometry-vector)$/; }' >> cabal.project.local
+          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry|hgeometry-combinatorial|hgeometry-examples|hgeometry-ipe|hgeometry-kernel|hgeometry-point|hgeometry-test|hgeometry-vector)$/; }' >> cabal.project.local
           cat cabal.project
           cat cabal.project.local
       - name: dump install plan
@@ -207,10 +221,10 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.compiler }}-${{ github.sha }}
           path: ~/.cabal/store
           restore-keys: ${{ runner.os }}-${{ matrix.compiler }}-
-      # - name: install dependencies
-      #   run: |
-      #     $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --dependencies-only -j2 all
-      #     $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH --dependencies-only -j2 all
+      - name: install dependencies
+        run: |
+          $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --dependencies-only -j2 all
+          $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH --dependencies-only -j2 all
       - name: build w/o tests
         run: |
           $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks all
@@ -233,6 +247,10 @@ jobs:
           cd ${PKGDIR_hgeometry} || false
           ${CABAL} -vnormal check
           cd ${PKGDIR_hgeometry_ipe} || false
+          ${CABAL} -vnormal check
+          cd ${PKGDIR_hgeometry_test} || false
+          ${CABAL} -vnormal check
+          cd ${PKGDIR_hgeometry_examples} || false
           ${CABAL} -vnormal check
       - name: haddock
         run: |

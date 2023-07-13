@@ -19,8 +19,6 @@ module HGeometry.Properties(
 
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty)
--- import HGeometry.Intersection
--- import Data.Range
 import GHC.TypeNats
 import HGeometry.Ext
 -------------------------------------------------------------------------------

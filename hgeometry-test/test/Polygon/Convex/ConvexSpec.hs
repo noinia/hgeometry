@@ -1,21 +1,32 @@
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Polygon.Convex.ConvexSpec
   (spec
   ) where
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
+import           Control.Monad ((>=>))
 import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
+import           Golden
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
+import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Transformation
 import           HGeometry.Vector
+import           Hiraffe.Graph
 import           Ipe
+import           Ipe.Color
 import           Paths_hgeometry_test
+import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.WithTempFile
 
 --------------------------------------------------------------------------------
 
@@ -28,10 +39,16 @@ instance Default (Point 2 R) where
 
 spec :: Spec
 spec = do
-  testCases "Polygon/Convex/convexTests.ipe"
+  testCases [osp|Polygon/Convex/convexTests.ipe|]
 
-testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
+
+--------------------------------------------------------------------------------
+
+getDataFileName' :: OsPath -> IO OsPath
+getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
+
+testCases    :: OsPath -> Spec
+testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
     Left e    -> it "reading ConvexTests file" $
                    expectationFailure . unwords $
                      [ "Failed to read ipe file", show fp, ":", show e]
@@ -42,7 +59,7 @@ data TestCase r = TestCase { _polygon    :: ConvexPolygon (Point 2 r)
                            }
                   deriving (Show)
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase R])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase R])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly | (poly :+ _) <- polies ]
@@ -72,20 +89,59 @@ toSpec (TestCase poly) = do
 
 --------------------------------------------------------------------------------
 
-minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r))
+-- | Center the given polygon at the origin. I.e. places the centroid at the origin.
+centerAtOrigin    :: ( SimplePolygon_ polygon  point r
+                     , Fractional r
+                     , IsTransformable polygon
+                     ) => polygon -> polygon
+centerAtOrigin pg = translateBy (origin .-. centroid pg) pg
+
+--------------------------------------------------------------------------------
+
+minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
+                         , IpeWriteText r
+                         )
                      => String -> [ConvexPolygon (Point 2 r)] -> Spec
 minkowskiTests s pgs = describe ("Minkowskisums on " ++ s) $
-    mapM_ (uncurry minkowskiTest) [ (p,q) | p <- pgs, q <- pgs ]
+    mapM_ (\(i,(p,q)) -> minkowskiTest i p q) $
+      zip [0..]
+          [ (p,centerAtOrigin q) | p <- pgs, q <- pgs ]
 
-minkowskiTest     ::  (Fractional r, Ord r, Show r, Default (Point 2 r))
-                  => ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
-minkowskiTest p q = it "minkowskisum" $
-  F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
+minkowskiTest       ::  ( Fractional r, Ord r, Show r, Default (Point 2 r)
+                        , IpeWriteText r
+                        )
+                    => Int -> ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
+minkowskiTest i p q = describe "minkowskiTest" $ do
+    is <- runIO $ encodeFS (show i)
+    it "minkowskisum" $
+      F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
+    goldenWith [osp|data/golden/Polygon/Convex|]
+               (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
+                                 }
+               )
+               [ toIO (minkowskiSum p q)   $ attr SStroke red
+               , toIO (naiveMinkowski p q) $ attr SStroke blue
+               , iO'' p                    $ attr SStroke black
+               , iO'' q                    $ attr SStroke black
+               ]
+
+
+
+toIO    :: (Point_ point 2 r)
+        => ConvexPolygon (point :+ extra)
+        -> IpeAttributes Path r
+        -> IpeObject r
+toIO pg = iO'' (convert pg)
+  where
+    convert :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> ConvexPolygon (Point 2 r)
+    convert = over vertices (view (core.asPoint))
+
+  -- view (core.asPoint))
 
 data F a b = F a b deriving (Show)
 
-instance Eq b => Eq (F a b) where
-  (F _ b1) == (F _ b2) = b1 == b2
+instance (ShiftedEq b, Eq (ElemCyclic b)) => Eq (F a b) where
+  (F _ b1) == (F _ b2) = b1 `isShiftOf` b2
 
 naiveMinkowski     :: ( Ord r, Num r
                       , ConvexPolygon_ convexPolygon  point r

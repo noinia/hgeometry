@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Measured.Count
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Newtype for counting items
+--
+--------------------------------------------------------------------------------
 module HGeometry.Measured.Count
   ( Count(..)
   ) where

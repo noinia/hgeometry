@@ -47,6 +47,7 @@ lineThrough     :: forall line point d r.
 lineThrough p q = fromPointAndVec p (q .-. p)
 
 
+-- | Synonym for a line-like class.
 type Line2_ line r = (Line_ line 2 r, HyperPlane_ line 2 r)
 
 

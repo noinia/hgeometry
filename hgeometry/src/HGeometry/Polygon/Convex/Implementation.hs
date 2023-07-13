@@ -29,6 +29,7 @@ import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Simple.Implementation
 import HGeometry.Properties
+import HGeometry.Transformation
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
@@ -37,7 +38,9 @@ import Hiraffe.Graph
 
 -- | Convex polygons
 newtype ConvexPolygonF f point =
-  ConvexPolygon { toSimplePolygon :: SimplePolygonF f point }
+  ConvexPolygon { toSimplePolygon :: SimplePolygonF f point
+                -- ^ Convert to a simple polygon, i.e. forget the polygon is convex.
+                }
   deriving newtype (NFData, Eq)
 
 -- | By default we use a cyclic non-empty vector to represent convex polygons.
@@ -64,9 +67,18 @@ _ConvexPolygon = prism' toSimplePolygon fromSimplePolygon
 type instance Dimension (ConvexPolygonF f point) = 2
 type instance NumType   (ConvexPolygonF f point) = NumType point
 
+instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
+         ) => ShiftedEq (ConvexPolygonF f point) where
+  type ElemCyclic (ConvexPolygonF f point) = point
+  isShiftOf p q = isShiftOf (p^._UncheckedConvexPolygon) (q^._UncheckedConvexPolygon)
+
 instance ( HasVertices (SimplePolygonF f point) (SimplePolygonF f point')
          ) => HasVertices (ConvexPolygonF f point) (ConvexPolygonF f point') where
   vertices = _UncheckedConvexPolygon . vertices
+
+instance ( VertexContainer f point
+         ) => HasPoints (ConvexPolygonF f point) (ConvexPolygonF f point') point point' where
+  allPoints = _UncheckedConvexPolygon . allPoints
 
 instance HasVertices' (SimplePolygonF f point) => HasVertices' (ConvexPolygonF f point) where
   type Vertex   (ConvexPolygonF f point) = Vertex   (SimplePolygonF f point)
@@ -133,6 +145,14 @@ instance ( SimplePolygon_ (ConvexPolygonF f point) point r
   pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
   -- FIXME: we should be able to implement this in O(log n) time instead!!
 -}
+
+instance ( VertexContainer f point
+         , DefaultTransformByConstraints (ConvexPolygonF f point) 2 r
+         , Point_ point 2 r
+         ) => IsTransformable (ConvexPolygonF f point)
+
+
+
 --------------------------------------------------------------------------------
 
 

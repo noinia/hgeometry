@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Foldable.Sort
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Sorting foldable collections by using fast sorting functions from
+-- vector-algorithms.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Foldable.Sort
   ( sortBy
   , sort

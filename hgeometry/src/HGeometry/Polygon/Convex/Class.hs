@@ -14,6 +14,6 @@ module HGeometry.Polygon.Convex.Class
 
 import HGeometry.Polygon.Simple.Class
 
-
+-- | Class modelling convex polygons.
 class ( SimplePolygon_ convexPolygon point r
       ) => ConvexPolygon_ convexPolygon point r where

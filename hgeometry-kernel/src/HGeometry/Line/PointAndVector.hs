@@ -28,11 +28,8 @@ module HGeometry.Line.PointAndVector
 
 import           Control.DeepSeq
 import           Control.Lens
--- import           Control.Subcategory.Foldable
--- import           Control.Subcategory.Functor
 import qualified Data.Foldable as F
 import           Data.Ord (comparing)
--- import           Data.Type.Ord
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
@@ -43,7 +40,6 @@ import           HGeometry.Point
 -- import           HGeometry.Point.EuclideanDistance
 -- import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties (NumType, Dimension)
--- import           HGeometry.Transformation
 import           HGeometry.Vector
 import           Text.Read
 
@@ -62,31 +58,19 @@ type instance NumType   (LinePV d r) = r
 instance ( Has_ Metric_ d r ) => Line_ (LinePV d r) d r where
   fromPointAndVec p v = LinePV (p^.asPoint) (v^._Vector)
 
--- instance (forall a b. HasComponents (Vector d a) (Vector d b))
---         => Functor (LinePV d) where
---   fmap f (LinePV p v) = LinePV (p&_Vector.) -- TODO: this seems to require a more general
---                                                coordinates as well.
---                               (v&components %~ f)
 
--- instance Constrained (LinePV d) where
---   type Dom (LinePV d) r = (OptVector_ d r, OptMetric_ d r)
-
--- instance CFunctor (LinePV d) where
---   cmap f (LinePV p v) = LinePV (cmap f <$> p) (f <$:> v)
-
--- instance CFoldable (LinePV d) where
---   cfoldMap f (LinePV p v) = foldMapOf coordinates f p <> foldMapOf components f v
-
--- instance CTraversable (LinePV d) where
---   ctraverse f (LinePV p v) = LinePV <$> traverse (ctraverse f) p <*> ctraverse f v
-
-instance ( Eq r, Fractional r
+instance ( Eq r, Num r
          ) => ConstructableHyperPlane_ (LinePV 2 r) 2 r where
+
+  type HyperPlaneFromEquationConstraint (LinePV 2 r) 2 r = Fractional r
+
   -- equation: line equation is: c + ax + by = 0
   -- pre: not all of a b and c are zero
   hyperPlaneFromEquation (Vector3 c a b)
     | b == 0    = LinePV (Point2 (-c/a) 0)      (Vector2 0 1) -- if b=0 we are vertical
     | otherwise = LinePV (Point2 0      (-c/b)) (Vector2 c (-a))
+
+  fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
 
 instance Num r => HyperPlaneFromPoints (LinePV 2 r) where
@@ -99,7 +83,6 @@ instance ( Eq r, Num r
     where
       a0 = if vx == 0 then -px else -vx*px - vy*py
 
-  fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
 
 {- HLINT ignore toLinearFunction -}
@@ -252,13 +235,7 @@ instance HasSupportingLine (LinePV d r) where
 fromLinearFunction     :: (Num r) => r -> r -> LinePV 2 r
 fromLinearFunction a b = LinePV (Point2 0 b) (Vector2 1 a)
 
-
-
-
-instance (Fractional r
-         , Has_ Metric_ d r
-         -- , OptVector_ d r, OptVector_ (d+1) r
-         -- , Has_ Metric_ d r
+instance (Fractional r, Has_ Metric_ d r
          ) => HasSquaredEuclideanDistance (LinePV d r) where
   pointClosestTo (view asPoint -> p) (LinePV a m) = a .+^ (t0 *^ m)
     where
@@ -271,6 +248,8 @@ instance (Fractional r
 -- | Result of a side test
 data SideTestUpDown = Below | On | Above deriving (Show,Read,Eq,Ord)
 
+-- | Class for types that support testing on which side (above, on,
+-- below) a particular point is.
 class OnSideUpDownTest t where
   -- | Given a point q and a hyperplane h, compute to which side of h q lies. For
   -- vertical hyperplanes the left side of the hyperplane is interpeted as below.

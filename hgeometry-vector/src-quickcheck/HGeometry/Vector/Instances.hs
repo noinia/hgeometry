@@ -1,6 +1,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Vector.Instances
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Arbitrary instances for the types in hgeometry-vector
+--
+--------------------------------------------------------------------------------
 module HGeometry.Vector.Instances where
 
 -- import Control.Lens

@@ -1,4 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Point.EuclideanDistance
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Points that have to do with Euclidean distances between
+-- \(d\)-dimensional points.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Point.EuclideanDistance
   ( cmpByDistanceTo
   , squaredEuclideanDist, euclideanDist

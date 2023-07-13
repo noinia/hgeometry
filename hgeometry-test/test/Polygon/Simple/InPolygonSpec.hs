@@ -1,29 +1,35 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Polygon.Simple.InPolygonSpec (spec) where
 
 import Control.Lens
+import Control.Monad ((>=>))
 import Data.Proxy
 import HGeometry.Boundary
 import HGeometry.Ext
-import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Simple
-import Paths_hgeometry_test
 import Ipe
+import Paths_hgeometry_test
+import System.OsPath
 import Test.Hspec
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
+getDataFileName' :: OsPath -> IO OsPath
+getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
+
+
 -- type R = RealNumber 5
 
 spec :: Spec
 spec = do
-  testCases "Polygon/Simple/pointInPolygon.ipe"
+  testCases [osp|Polygon/Simple/pointInPolygon.ipe|]
   numericalSpec
 
-testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
+testCases    :: OsPath -> Spec
+testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs
@@ -36,17 +42,24 @@ data TestCase r = TestCase { _polygon    :: SimplePolygon (Point 2 r)
                   deriving (Show)
 
 
-toSingleSpec poly r q = (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+toSingleSpec          :: (Fractional r, Ord r, Show r)
+                      => SimplePolygon (Point 2 r)
+                      -> PointLocationResult
+                      -> Point 2 r
+                      -> Spec
+toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+  where
+    name = unwords ["query:", show q, "in", take 70 $ show poly ]
 
 toSpec (TestCase poly is bs os) = do
-                                    specify "inside tests" $
+                                    describe "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
-                                    specify "on boundary tests" $
+                                    describe "on boundary tests" $
                                       mapM_ (toSingleSpec poly OnBoundary) bs
-                                    specify "outside tests" $
+                                    describe "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly

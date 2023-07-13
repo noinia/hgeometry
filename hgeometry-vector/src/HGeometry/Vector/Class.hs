@@ -79,6 +79,7 @@ import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
 
+-- | A class for types that are isomorphic to d-dimensional vectors
 class ( r ~ IxValue vector
       , d ~ Dimension vector
       ) => AsVector_ vector d r | vector -> d
@@ -91,6 +92,8 @@ class ( r ~ IxValue vector
   _Vector' = _Vector
   {-# INLINE _Vector' #-}
 
+-- | An iso to convert between an arbitrary vector type, and the
+-- specific vector type implemented in HGeometry.Vector
 _Vector :: ( Vector_ (Vector d r) d r
            , Vector_ vector       d r
            , Vector_ vector'      d s
@@ -105,6 +108,7 @@ instance AsVector_ (Vector d r) d r where
   _Vector' = id
   {-# INLINE _Vector' #-}
 
+-- | Class for representing d dimensional vectors.
 class ( HasComponents vector vector
       , AsVector_ vector d r
       , KnownNat d
@@ -261,6 +265,7 @@ suffix v = let d = fromIntegral . natVal $ Proxy @d
 
 --------------------------------------------------------------------------------
 
+-- | Class that supports additive opreations on vectors
 class Vector_ vector d r => Additive_ vector d r where
   -- | Apply a function to merge the 'non-zero' components of two
   -- vectors, unioning the rest of the values.

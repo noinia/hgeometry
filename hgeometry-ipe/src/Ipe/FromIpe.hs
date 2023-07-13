@@ -53,6 +53,7 @@ import           Hiraffe.Graph
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
+import           System.OsPath
 
 -- import qualified Data.List.NonEmpty as NonEmpty
 -- import Ipe.Attributes
@@ -287,7 +288,7 @@ readAll p = p^..content.traverse.defaultFromIpe
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".
 readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
-               => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
+               => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
 
 fromSingleton :: a -> Seq.Seq a

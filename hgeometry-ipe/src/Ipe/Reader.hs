@@ -57,9 +57,9 @@ import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import qualified HGeometry.Matrix as Matrix
 import           HGeometry.Point
-import           HGeometry.Vector
 import           HGeometry.PolyLine (polylineFromPoints)
 import qualified HGeometry.Polygon.Simple as Polygon
+import           HGeometry.Vector
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Matrix
@@ -68,6 +68,8 @@ import           Ipe.Path
 import           Ipe.PathParser
 import           Ipe.Types
 import           Ipe.Value
+import qualified System.File.OsPath as File
+import           System.OsPath
 import           Text.XML.Expat.Tree
 
 
@@ -78,15 +80,15 @@ type ConversionError = Text
 
 -- | Given a file path, tries to read an ipe file
 readRawIpeFile :: (Coordinate r, Eq r)
-               => FilePath -> IO (Either ConversionError (IpeFile r))
-readRawIpeFile = fmap fromIpeXML . B.readFile
+               => OsPath -> IO (Either ConversionError (IpeFile r))
+readRawIpeFile = fmap fromIpeXML . File.readFile'
 
 
 -- | Given a file path, tries to read an ipe file.
 --
 -- This function applies all matrices to objects.
 readIpeFile :: (Coordinate r, Eq r)
-            => FilePath -> IO (Either ConversionError (IpeFile r))
+            => OsPath -> IO (Either ConversionError (IpeFile r))
 readIpeFile = fmap (second applyMatrices) . readRawIpeFile
 
 
@@ -97,7 +99,7 @@ readIpeFile = fmap (second applyMatrices) . readRawIpeFile
 -- least one layer and view in the page.
 --
 readSinglePageFile :: (Coordinate r, Eq r)
-                   => FilePath -> IO (Either ConversionError (IpePage r))
+                   => OsPath -> IO (Either ConversionError (IpePage r))
 readSinglePageFile = fmap (fmap f) . readIpeFile
   where
     f   :: IpeFile r -> IpePage r
@@ -105,7 +107,7 @@ readSinglePageFile = fmap (fmap f) . readIpeFile
 
 -- | Tries to read a single page file, throws an error when this
 -- fails. See 'readSinglePageFile' for further details.
-readSinglePageFileThrow    :: (Coordinate r, Eq r) => FilePath -> IO (IpePage r)
+readSinglePageFileThrow    :: (Coordinate r, Eq r) => OsPath -> IO (IpePage r)
 readSinglePageFileThrow fp = readSinglePageFile fp >>= \case
   Left err -> fail (show err)
   Right p  -> pure p
@@ -484,12 +486,12 @@ instance IpeRead IpeStyle where
 
 
 -- | Reads an Ipe stylesheet from Disk.
-readIpeStylesheet :: FilePath -> IO (Either ConversionError IpeStyle)
-readIpeStylesheet = fmap (ipeRead <=< readXML) . B.readFile
+readIpeStylesheet :: OsPath -> IO (Either ConversionError IpeStyle)
+readIpeStylesheet = fmap (ipeRead <=< readXML) . File.readFile'
 
 -- | Given a path to a stylesheet, add it to the ipe file with the
 -- highest priority. Throws an error when this fails.
-addStyleSheetFrom      :: FilePath -> IpeFile r -> IO (IpeFile r)
+addStyleSheetFrom      :: OsPath -> IpeFile r -> IO (IpeFile r)
 addStyleSheetFrom fp f = readIpeStylesheet fp >>= \case
   Left err -> fail (show err)
   Right s  -> pure $ addStyleSheet s f

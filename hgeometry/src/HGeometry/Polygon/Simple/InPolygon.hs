@@ -100,16 +100,20 @@ q `inPolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
     countAbove i (u,v) = case (u^.xCoord) `compare` (v^.xCoord) of
                            EQ | onVerticalEdge u v -> OnEdge i
                               | otherwise          -> mempty
-                           LT                      -> countAbove' i u v
-                           GT                      -> countAbove' i v u
+                           LT                      -> countAbove' i (AnClosedE u) (AnOpenE v)
+                           GT                      -> countAbove' i (AnOpenE v)   (AnClosedE u)
     -- count the edge if q
     countAbove' i l r
-      | (Point1 $ q^.xCoord) `intersects` (Interval (AnClosedE $ l^.xCoord) (AnOpenE $ r^.xCoord))
-                  = case ccw (l^.asPoint) (q^.asPoint) (r^.asPoint) of
+      | (Point1 $ q^.xCoord) `intersects` (view xCoord <$> Interval l r)
+                  = case ccw (l^._endPoint.asPoint) (q^.asPoint) (r^._endPoint.asPoint) of
                       CW       -> NumStrictlyAbove 1  -- q lies strictly below the segment lr
                       CoLinear -> OnEdge i
                       CCW      -> mempty -- q lies strictly above the segment lr
       | otherwise = mempty
+
+    --- fixme, assign open and closed before; the issue seems to be that a rightmost vertex (local max) is assigned the open endpoint on both times. That essentialy treats is as lying outsie the pg.
+
+
     -- test if q lies on the vertical edge defined by u and v
     onVerticalEdge u v = let yr = buildClosedInterval @(ClosedInterval r) (u^.yCoord) (v^.yCoord)
                          in q^.xCoord == u^.xCoord && (Point1 $ q^.yCoord) `intersects` yr

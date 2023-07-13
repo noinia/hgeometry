@@ -27,25 +27,26 @@ common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
                  -fspecialise-aggressively -fexpose-all-unfoldings
     build-depends:
-        base                    >= 4.16.1.0    &&  < 5
-      , containers              >= 0.6
-      , lens                    >= 5.2
-      , bifunctors              >= 4.1
-      , deepseq                 >= 1.1
-      , semigroupoids           >= 6.0.0.1
-      , semigroups              >= 0.18
-      , random                  >= 1.2
-      , mtl                     >= 2.2
-      , data-clist              >= 0.2
-      , vector                  >= 0.13
-      , vector-builder          >= 0.3.7
-      , vector-algorithms       >= 0.8
-      , nonempty-vector         >= 0.2.0.0
-      , vector-circular         >= 0.1.4
-      , linear                  >= 1.20
+        base                     >= 4.16.1.0    &&  < 5
+      , containers               >= 0.6
+      , lens                     >= 5.2
+      , bifunctors               >= 4.1
+      , deepseq                  >= 1.1
+      , foldable1-classes-compat >= 0.1
+      , semigroupoids            >= 6.0.0.1
+      , semigroups               >= 0.18
+      , random                   >= 1.2
+      , mtl                      >= 2.2
+      , data-clist               >= 0.2
+      , vector                   >= 0.13
+      , vector-builder           >= 0.3.7
+      , vector-algorithms        >= 0.8
+      , nonempty-vector          >= 0.2.0.0
+      , vector-circular          >= 0.1.4
+      , linear                   >= 1.20
 
-      , aeson                   >= 2.0
-      , MonadRandom             >= 0.5
+      , aeson                    >= 2.0
+      , MonadRandom              >= 0.5
 
       -- , witherable              >= 0.4
       -- , linear                  >= 1.21

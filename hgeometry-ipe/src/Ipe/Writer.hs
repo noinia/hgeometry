@@ -22,8 +22,8 @@ module Ipe.Writer(
   ) where
 
 import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue)
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as C
+import qualified Data.ByteString.Lazy as B
+import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
 import           Data.Fixed
 import qualified Data.Foldable as F
@@ -59,25 +59,20 @@ import           Ipe.Color (IpeColor (..))
 import           Ipe.Path
 import           Ipe.Types
 import           Ipe.Value
+import qualified System.File.OsPath as File
 import           System.IO (hPutStrLn, stderr)
-import           Text.XML.Expat.Format (format')
+import           System.OsPath
+import           Text.XML.Expat.Format (format)
 import           Text.XML.Expat.Tree
+
 --------------------------------------------------------------------------------
 
--- | Given a prism to convert something of type g into an ipe file, a file path,
--- and a g. Convert the geometry and write it to file.
-
--- writeIpe        :: ( RecAll (Page r) gs IpeWrite
---                    , IpeWriteText r
---                    ) => Prism' (IpeFile gs r) g -> FilePath -> g -> IO ()
--- writeIpe p fp g = writeIpeFile (p # g) fp
-
 -- | Write an IpeFiele to file.
-writeIpeFile :: IpeWriteText r => FilePath -> IpeFile r -> IO ()
+writeIpeFile :: IpeWriteText r => OsPath -> IpeFile r -> IO ()
 writeIpeFile = flip writeIpeFile'
 
 -- | Creates a single page ipe file with the given page
-writeIpePage    :: IpeWriteText r => FilePath -> IpePage r -> IO ()
+writeIpePage    :: IpeWriteText r => OsPath -> IpePage r -> IO ()
 writeIpePage fp = writeIpeFile fp . singlePageFile
 
 
@@ -88,22 +83,22 @@ printAsIpeSelection = C.putStrLn . fromMaybe "" . toIpeSelectionXML
 
 -- | Convert input into an ipe selection.
 toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
-toIpeSelectionXML = fmap (format' . ipeSelection) . ipeWrite
+toIpeSelectionXML = fmap (format . ipeSelection) . ipeWrite
   where
     ipeSelection x = Element "ipeselection" [] [x]
 
 
 -- | Convert to Ipe xml
 toIpeXML :: IpeWrite t => t -> Maybe B.ByteString
-toIpeXML = fmap format' . ipeWrite
+toIpeXML = fmap format . ipeWrite
 
 
 -- | Convert to ipe XML and write the output to a file.
-writeIpeFile'      :: IpeWrite t => t -> FilePath -> IO ()
-writeIpeFile' i fp = maybe err (B.writeFile fp) . toIpeXML $ i
+writeIpeFile'      :: IpeWrite t => t -> OsPath -> IO ()
+writeIpeFile' i fp = maybe err (File.writeFile fp) . toIpeXML $ i
   where
     err = hPutStrLn stderr $
-          "writeIpeFile: error converting to xml. File '" <> fp <> "'not written"
+          "writeIpeFile: error converting to xml. File '" <> show fp <> "'not written"
 
 --------------------------------------------------------------------------------
 

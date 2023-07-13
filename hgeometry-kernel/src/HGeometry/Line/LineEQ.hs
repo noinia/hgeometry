@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Line.LineEQ
@@ -26,7 +27,6 @@ import HGeometry.Line.Intersection
 import HGeometry.Line.NonVertical.Class
 import HGeometry.Point
 import HGeometry.Properties(NumType, Dimension)
--- import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
 
@@ -76,25 +76,25 @@ instance (Read r) => Read (LineEQ r) where
                           return (LineEQ a b))
 
 instance ( MkHyperPlaneConstraints 2 r
-         , Fractional r
          ) => HyperPlane_ (LineEQ r) 2 r where
 
 instance ( MkHyperPlaneConstraints 2 r
-         , Fractional r
          ) => ConstructableHyperPlane_ (LineEQ r) 2 r where
-
+  type HyperPlaneFromEquationConstraint (LineEQ r) 2 r =
+       HyperPlaneFromEquationConstraint (NonVerticalHyperPlane 2 r) 2 r
   -- | pre: the last component is not zero
   hyperPlaneFromEquation = MkLineEQ
                          . hyperPlaneFromEquation @(NonVerticalHyperPlane 2 r)
+  {-# INLINE hyperPlaneFromEquation #-}
+  fromPointAndNormal p = MkLineEQ . fromPointAndNormal p
+  {-# INLINE fromPointAndNormal #-}
 
-instance ( MkHyperPlaneConstraints 2 r
-         , Fractional r
+instance ( MkHyperPlaneConstraints 2 r, Num r
          ) => NonVerticalHyperPlane_ (LineEQ r) 2 r where
   evalAt p = evalAt' $ p^.xCoord
   hyperPlaneCoefficients = coerced
 
-instance ( Fractional r
-         ) => Line_ (LineEQ r) 2 r where
+instance Line_ (LineEQ r) 2 r where
   fromPointAndVec p (Vector2 vx vy) =
     fromPointAndNormal p (Vector2 (-vy) vx)
 
@@ -106,7 +106,9 @@ type instance Intersection (LineEQ r) (LineEQ r) =
 
 
 instance (Eq r) => HasIntersectionWith (LineEQ r) (LineEQ r) where
-  (LineEQ a _) `intersects` (LineEQ a' _) = a /= a'
+  (LineEQ a b) `intersects` (LineEQ a' b') = a /= a' || b == b'
+  -- in case the slope are different, we certainly intersect. If the slopes are equal
+  -- ( and thus  a /= b == False ) the lines only intersect if their intercepts are also equal.
 
 instance (Eq r, Fractional r)
          => IsIntersectableWith (LineEQ r) (LineEQ r) where
@@ -161,8 +163,8 @@ evalAt'                :: Num r => r -> LineEQ r -> r
 evalAt' x (LineEQ a b) = a*x + b
 -- TODO: it would be nice if this was actually just evalAt from the typeclass ....
 
-evalAt''   :: Fractional r => r -> LineEQ r -> r
-evalAt'' p = evalAt (Point1 p)
+-- evalAt''   :: Fractional r => r -> LineEQ r -> r
+-- evalAt'' p = evalAt (Point1 p)
 
 -- evalAt''   :: ( Fractional r, OptCVector_ 2 r
 --               , OptCVector_ 3 r, OptMetric_ 2 r
