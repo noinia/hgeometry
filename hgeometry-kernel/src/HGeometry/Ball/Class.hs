@@ -60,6 +60,7 @@ pattern Ball_     :: Ball_ ball point => point -> NumType ball -> ball
 pattern Ball_ c r <- ((view center &&& view squaredRadius) -> (c,r))
   where
     Ball_ c r = fromCenterAndSquaredRadius c r
+{-# COMPLETE Ball_ #-}
 
 --------------------------------------------------------------------------------
 
@@ -87,6 +88,14 @@ fromCenterAndPoint c p = fromCenterAndSquaredRadius c (squaredEuclideanDist c p)
 class (Ball_ disk point, Dimension disk ~ 2) => Disk_ disk point where
 
 
+-- class (Sphere_ disk point, Dimension disk ~ 2) => Circle_ disk point where
+
+
 -- | Constructs a Disk by its center and squared radius.
 pattern Disk_     :: Disk_ ball point => point -> NumType ball -> ball
 pattern Disk_ c r = Ball_ c r
+{-# COMPLETE Disk_ #-}
+
+-- -- | Constructs a Circle by its center and squared radius.
+-- pattern Circle_     :: Circle_ ball point => point -> NumType ball -> ball
+-- pattern Circle_ c r = Sphere_ c r

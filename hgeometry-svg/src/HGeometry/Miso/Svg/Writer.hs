@@ -6,10 +6,8 @@ module HGeometry.Miso.Svg.Writer
 
 import           Control.Lens hiding (Const,rmap)
 import qualified Data.Foldable as F
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (catMaybes, mapMaybe)
+import           Data.Maybe (catMaybes)
 import           Data.Proxy
-import qualified Data.Semigroup.Foldable as F1
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
@@ -23,10 +21,11 @@ import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
+import           HGeometry.Foldable.Util
 import           HGeometry.Vector
 import qualified Ipe as Ipe
 import qualified Ipe.Attributes as IA
-import           Miso hiding (width_,height_)
+import           Miso hiding (width_,height_,view)
 import           Miso.String (MisoString, ToMisoString(..), ms)
 import qualified Miso.String.Util as MisoString
 import           Miso.Svg
@@ -67,89 +66,93 @@ instance (Drawable l, Drawable r) => Drawable (Either l r) where
 instance ToMisoString r => Drawable (Point 2 r) where
   draw = dPoint
 
--- instance (ToMisoString r, Num r) => Drawable (Rectangle point) where
---   draw = dRectangle
+instance (Point_ point 2 r, ToMisoString r, Num r) => Drawable (Rectangle point) where
+  draw = dRectangle
 
--- instance ToMisoString r => Drawable (LineSegment point) where
---   draw = dLineSegment
+instance ( Point_ point 2 r, EndPoint_ (endPoint point), IxValue (endPoint point) ~ point
+         , ToMisoString r) => Drawable (LineSegment endPoint point) where
+  draw = dLineSegment
 
--- instance ToMisoString r => Drawable (PolyLine point) where
---   draw = dPolyLine
+instance (Point_ point 2 r, ToMisoString r) => Drawable (PolyLine point) where
+  draw = dPolyLine
 
--- instance ToMisoString r => Drawable (SimplePolygonF f point) where
---  draw = dPolygon
+instance ( Point_ point 2 r, VertexContainer f point, HasFromFoldable1 f
+         , ToMisoString r) => Drawable (SimplePolygonF f point) where
+ draw = dSimplePolygon
 
--- instance ToMisoString r => Drawable (ConvexPolygonF f point) where
---   draw = dPolygon . toSimplePolygon
+instance ( Point_ point 2 r, VertexContainer f point, HasFromFoldable1 f
+         , ToMisoString r) => Drawable (ConvexPolygonF f point) where
+  draw = dSimplePolygon . toSimplePolygon
 
--- instance (ToMisoString r, Floating r) => Drawable (Circle point) where
---   draw = dCircle
+instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Circle point) where
+  draw = dCircle
 
--- instance (ToMisoString r, Floating r) => Drawable (Disk point) where
---   draw = dDisk
-
+instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point) where
+  draw = dDisk
 
 --------------------------------------------------------------------------------
 -- * Functions to draw geometric objects
 
 
-dPoint              :: ToMisoString r => Point 2 r -> [Attribute action] -> View action
-dPoint (Point2 x y) = withAts ellipse_ [ cx_ $ ms x, cy_ $ ms y
-                                       , rx_ "5", ry_ "5"
-                                       ]
+dPoint   :: (Point_ point 2 r, ToMisoString r) => point -> [Attribute action] -> View action
+dPoint p = withAts ellipse_ [ cx_ (ms $ p^.xCoord), cy_ (ms $ p^.yCoord)
+                            , rx_ "5", ry_ "5"
+                            ]
 
-{-
-dRectangle   :: (ToMisoString r, Num r) => Rectangle p r -> [Attribute action] -> View action
-dRectangle b = let Point2 x y  = ms <$> b^.to minPoint.core
+dRectangle   :: ( Rectangle_ rectangle point, Point_ point 2 r, ToMisoString r, Num r)
+             => rectangle -> [Attribute action] -> View action
+dRectangle b = let Point2 x y  = over coordinates ms $ b^.minPoint.asPoint
                    Vector2 w h = ms <$> b^.to size
                in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"]
 
-dPolygon :: ToMisoString r
-         => Polygon t p r -> [Attribute action] -> View action
-dPolygon = \case
-    SimplePolygon vs   -> withAts polygon_ [points_ $ toPointsString vs ]
-    MultiPolygon vs hs -> withAts path_ [d_ s]
-      where
-        s = mconcat . map toSimplePolygonPathString $ vs : hs
-
-toSimplePolygonPathString                    :: ToMisoString r => SimplePolygon p r -> MisoString
-toSimplePolygonPathString (SimplePolygon vs) = mconcat [ "M", toOp p
-                                                       , mconcat $ map (\q -> "L" <> toOp q) ps
-                                                       , "Z"
-                                                       ]
-  where
-    p :| ps = F1.toNonEmpty vs
-    toOp (Point2 x y :+ _) = ms x <> " " <> ms y <> " "
+dSimplePolygon    :: (SimplePolygon_ simplePolygon point r, ToMisoString r)
+                  => simplePolygon -> [Attribute action] -> View action
+dSimplePolygon pg = withAts polygon_ [points_ $ toPointsString $ pg^..vertices ]
 
 
-dPolyLine    :: ToMisoString r => PolyLine 2 p r -> [Attribute action] -> View action
-dPolyLine pl = withAts polyline_ [points_ . toPointsString $ pl^.points ]
+  -- \case
+  --   SimplePolygon vs   ->
+  --   MultiPolygon vs hs -> withAts path_ [d_ s]
+  --     where
+  --       s = mconcat . map toSimplePolygonPathString $ vs : hs
 
-dLineSegment   :: ToMisoString r => LineSegment 2 p r -> [Attribute action] -> View action
-dLineSegment s = dPolyLine (fromLineSegment s)
 
+-- toSimplePolygonPathString                    :: ToMisoString r => SimplePolygon p r -> MisoString
+-- toSimplePolygonPathString (SimplePolygon vs) = mconcat [ "M", toOp p
+--                                                        , mconcat $ map (\q -> "L" <> toOp q) ps
+--                                                        , "Z"
+--                                                        ]
+  -- where
+  --   p :| ps = F1.toNonEmpty vs
+  --   toOp (Point2 x y :+ _) = ms x <> " " <> ms y <> " "
+
+
+dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
+             => polyLine -> [Attribute action] -> View action
+dPolyLine pl = withAts polyline_ [points_ . toPointsString $ pl^..vertices ]
+
+dLineSegment   :: ( LineSegment_ lineSegment point, Point_ point 2 r, ToMisoString r)
+               => lineSegment -> [Attribute action] -> View action
+dLineSegment s = withAts polyline_ [ points_ $ toPointsString [s^.start, s^.end] ]
 
 -- | constructs a list of points to be used in the 'points' svg attribute.
-toPointsString :: (ToMisoString r, Foldable f) => f (Point 2 r :+ p) -> MisoString
+toPointsString :: (Point_ point 2 r, ToMisoString r, Foldable f) => f point -> MisoString
 toPointsString =
-  MisoString.unwords . map (\(Point2 x y :+ _) -> mconcat [ms x, ",", ms y]) . F.toList
+  MisoString.unwords . map (\(Point2_ x y) -> mconcat [ms x, ",", ms y]) . F.toList
 
 
-
-dCircle              :: ToMisoString r
-                     => Circle p r -> [Attribute action] -> View action
+dCircle              :: (Point_ point 2 r, ToMisoString r)
+                     => Circle point -> [Attribute action] -> View action
 dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
-                                        , ry_ . ms $ r
-                                        , cx_ . ms $ c^.core.xCoord
-                                        , cy_ . ms $ c^.core.yCoord
-                                        , fill_ "none"
-                                        ]
+                                         , ry_ . ms $ r
+                                         , cx_ . ms $ c^.xCoord
+                                         , cy_ . ms $ c^.yCoord
+                                         , fill_ "none"
+                                         ]
 
-dDisk            :: (ToMisoString r, Floating r)
-                 => Disk p r -> [Attribute action] -> View action
-dDisk (Disk c r) = dCircle (Circle c r)
-
--}
+dDisk             :: (Disk_ disk point, Point_ point 2 r, ToMisoString r, Floating r)
+                  => disk -> [Attribute action] -> View action
+dDisk (Disk_ c r) = dCircle (Circle c r)
 
 -- instance (ToMisoString r, Drawable v, Drawable  => Drawable (PlanarSubdivision s v e f r)
 
@@ -233,8 +236,8 @@ instance ToMisoString r => Drawable (Ipe.Path r) where
 
 instance ToMisoString r => Drawable (Ipe.PathSegment r) where
   draw = \case
-    -- Ipe.PolyLineSegment pl -> dPolyLine pl
-    -- Ipe.PolygonPath  pg    -> dPolygon pg
+    Ipe.PolyLineSegment pl -> dPolyLine pl
+    Ipe.PolygonPath  pg    -> dSimplePolygon pg
     _                      -> error "toValue: not implemented yet"
 
 --------------------------------------------------------------------------------
