@@ -1,7 +1,16 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.Svg
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Render geometric objects to Svg files through miso
+--
+--------------------------------------------------------------------------------
 module HGeometry.Miso.Svg
   ( renderSvgToFile
   , renderAsSvgText, renderAsSvgByteString
-
 
   , withAts, withAts'
   , Drawable(..)

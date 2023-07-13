@@ -1,6 +1,17 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.OrphanInstances
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Orpthan instances for To/From MisoString instances for several
+-- geometric types.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Miso.OrphanInstances
   () where
 

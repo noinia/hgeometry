@@ -1,5 +1,15 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.Svg.Writer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Render geometric objects to Svg files through miso
+--
+--------------------------------------------------------------------------------
 module HGeometry.Miso.Svg.Writer
   ( withAts, withAts'
   , Drawable(..)
@@ -32,13 +42,13 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Foldable.Util
 import           HGeometry.Vector
+-- import           HGeometry.Viewport
 import qualified Ipe as Ipe
 import qualified Ipe.Attributes as IA
 import           Miso hiding (width_,height_,view)
 import           Miso.String (MisoString, ToMisoString(..), ms)
 import qualified Miso.String.Util as MisoString
 import           Miso.Svg
-
 
 --------------------------------------------------------------------------------
 
@@ -63,9 +73,12 @@ withAts' f ats1 ats2 body = f (ats1 <> ats2) body
 
 -- | Default implementation for drawing geometric objects
 class Drawable t where
+  {-# MINIMAL draw | drawWith #-}
+  -- | Draws the given object with the given attributes
   draw       :: t -> [Attribute action] -> View action
   draw x ats = drawWith x ats []
 
+  -- | draw the given object, as well as the given "children"
   drawWith          :: t -> [Attribute action] -> [View action] -> View action
   drawWith x ats _b = draw x ats
 
@@ -98,6 +111,30 @@ instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Circle poin
 
 instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point) where
   draw = dDisk
+
+-- instance ToMisoString r => Drawable (Viewport r) where
+--   draw = error
+--   drawWith vp ats content = withAts' svg_ [ height_ $ ms h <> "px"
+--                                           , viewbox_ outerVB
+--                                           ] ats
+--                                           [ g_ [] -- do the transorm here
+--                                                [ svg_ [ width_ "100%"
+--                                                       , height "100%"
+--                                                       , viewbox innerVB
+--                                                       ]
+--                                                       content
+--                                                ]
+--                                           ]
+--     where
+--       toVB = MisoString.unwords . map ms
+--       outerVB = toVB [0, (-1) * h, w, h]
+--             -- the role of the outer viewBox is to flip the coordinate
+--             -- system s.t. the origin is in the bottom left rather
+--             -- than the top-left
+--       innerVB = toVB [lx, ly, vw, vh]
+
+
+
 
 --------------------------------------------------------------------------------
 -- * Functions to draw geometric objects
