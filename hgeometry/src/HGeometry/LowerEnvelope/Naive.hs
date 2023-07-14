@@ -1,144 +1,104 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.Naive
-  ( lowerEnvelope
-  , triangulatedLowerEnvelope
+  ( lowerEnvelopeVertexForm
+  -- , lowerEnvelope
+  -- , triangulatedLowerEnvelope
+
+  , asVertex
+  , belowAll
+  , intersectionPoint
   ) where
 
 --------------------------------------------------------------------------------
 
 import           Control.Lens
+import           Control.Monad (guard)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
+import           HGeometry.Combinatorial.Util
 import           HGeometry.Foldable.Sort
--- import           HGeometry.HalfPlane
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
+import           HGeometry.LowerEnvelope.VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
--- * Data type defining a lower envelope
+-- * Computing a lower envelope in vertex form
 
-data LowerEnvelope plane =
-  LowerEnvelope !(UnboundedVertex plane) (Seq.Seq (BoundedVertex plane))
+-- | Brute force implementation that computes the vertex form of the
+-- lower envelope, by explicitly considering every triple of planes.
+--
+-- running time: \(O(n^4 )\)
+lowerEnvelopeVertexForm    :: ( Plane_ plane r
+                              , Ord r, Fractional r, Foldable f, Ord plane
+                              ) => f plane -> VertexForm plane
+lowerEnvelopeVertexForm hs = foldMap (\t -> case asVertex hs t of
+                                              Nothing -> mempty
+                                              Just v  -> singleton v
+                                     ) $ uniqueTriplets hs
 
-deriving instance (Show plane, Show (NumType plane)) => Show (LowerEnvelope plane)
-deriving instance (Eq plane, Eq (NumType plane))     => Eq   (LowerEnvelope plane)
-
-theUnboundedVertex :: Lens' (LowerEnvelope plane) (UnboundedVertex plane)
-theUnboundedVertex = lens (\(LowerEnvelope v _) -> v)
-                          (\(LowerEnvelope _ vs) v -> LowerEnvelope v vs)
-
-boundedVertices :: Lens' (LowerEnvelope plane) (Seq.Seq (BoundedVertex plane))
-boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
-                       (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
-
-
-
---------------------------------------------------------------------------------
-
-instance Semigroup (LowerEnvelope plane) where
-  (LowerEnvelope u vs) <> (LowerEnvelope u' vs') = LowerEnvelope undefined undefined
-  -- main idea would be to insert the vertices of vs' into vs this
-  -- requires testing if a vertex already exists, and shifting it if
-  -- not.  this should run in O(log n) time per edge.
-  --
-  -- and therefore in O(l log l + r log l) = O(n log n) time.  hmm, I
-  -- guess for iterative merging we cannot afford the "l" term.  I
-  -- guess we need it only to maintain some Map from location -> id.
-  -- so maybe we can maintain that separately.
+-- | Given all planes, and a triple, computes if the triple defines a
+-- vertex of the lower envelope, and if so returns it.
+asVertex                       :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
+                               => f plane -> Three plane -> Maybe (LEVertex plane)
+asVertex hs t@(Three h1 h2 h3) = do v <- intersectionPoint t
+                                    guard (v `belowAll` hs)
+                                    pure $ LEVertex v (Set.fromList [h1,h2,h3])
 
 
---------------------------------------------------------------------------------
+-- | test if v lies below (or on) all the planes in hs
+belowAll      :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
+belowAll v hs = all (\h -> onSideTest v h /= GT) hs
+{-# INLINE belowAll #-}
+
+-- | Computes there the three planes intersect
+intersectionPoint :: ( Plane_ plane r, Ord r, Fractional r) => Three plane -> Maybe (Point 3 r)
+intersectionPoint (Three h1@(Plane_ a1 b1 c1)
+                         (Plane_ a2 b2 c2)
+                         (Plane_ a3 b3 c3))
+  | a1 == a2  = Nothing -- FIXME: this can't be right
+  | otherwise = do y <- my
+                   x <- xf y
+                   pure $ Point3 x y (z x y)
+  where
+    xf y' = (b2-b1)*y' + c2 - c1
+            ///
+            a1 - a2
+
+    my = c3 - c1 - (a1-a3)*(c2-c1)/(a1-a2)
+         ///
+         (a1-a3)*(b2-b1)/(a1-a2) + b1 - b3
+
+    z x' y' = evalAt (Point2 x' y') h1
+
+infixl 0 ///
+-- | safe division testing for zero
+(///)         :: (Eq a, Fractional a) => a -> a -> Maybe a
+num /// denom = if denom /= 0 then Just (num / denom) else Nothing
 
 
-----------------------------------------
-
--- | The unbounded vertex, which by definition will have index 0
-newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (Edge' plane) }
-                              deriving (Show,Eq)
-
-data BoundedVertex plane = Vertex { _location       :: !(Point 3 (NumType plane))
-                                  , _definers       :: Set.Set plane
-                                  , _incidentEdgesB :: Seq.Seq (Edge' plane)
-                                  -- ^ incident edges, in CCW order.
-                                  }
-
-deriving instance (Show plane, Show (NumType plane)) => Show (BoundedVertex plane)
-deriving instance (Eq plane, Eq (NumType plane))     => Eq   (BoundedVertex plane)
-
--- | The location of the vertex
-location :: (NumType plane ~ r) => Lens' (BoundedVertex plane) (Point 3 r)
-location = lens _location (\v l -> v { _location = l })
-
--- | Projected 2d location of the point
-location2 :: (NumType plane ~ r) => Getter (BoundedVertex plane) (Point 2 r)
-location2 = location . to projectPoint
-
--- | The three planes defining the vertex
-definers :: Lens' (BoundedVertex plane) (Set.Set plane)
-definers = lens _definers (\v ds -> v { _definers = ds })
 
 
-class HasIncidentEdges t plane | t -> plane where
-  incidentEdges' :: Lens' t (Seq.Seq (Edge' plane))
-
-instance HasIncidentEdges (UnboundedVertex plane) plane where
-  incidentEdges' = coerced
-
-instance HasIncidentEdges (BoundedVertex plane) plane where
-  incidentEdges' = lens _incidentEdgesB (\(Vertex p d _) es -> Vertex p d es)
-
--- instance HasIncidentEdges (Vertex (LowerEnvelope plane)) plane where
---   incidentEdges' = undefined -- pick either incidentEdges on the left or on the right thing.
-
-type VertexID = Int
-instance HasVertices' (LowerEnvelope plane) where
-  type Vertex   (LowerEnvelope plane) = Either (UnboundedVertex plane) (BoundedVertex plane)
-  type VertexIx (LowerEnvelope plane) = VertexID
-
-  -- | note, trying to assign the unbounded vertex to something with index >0 is an error
-  vertexAt = \case
-    0 -> undefined
-    i -> undefined -- boundedVertices.ix (i+1)
-
-instance HasVertices (LowerEnvelope plane) (LowerEnvelope plane') where
-  vertices = undefined
-
-----------------------------------------
-
-data Edge' plane = Edge { _destination :: {-# UNPACK #-}!VertexID
-                        , _leftPlane   :: plane
-                        , _rightPlane  :: plane
-                        } deriving (Show,Eq,Ord)
-
-instance HasEdges' (LowerEnvelope plane) where
-  type Edge   (LowerEnvelope plane) = Edge' plane
-  type EdgeIx (LowerEnvelope plane) = ( VertexIx (LowerEnvelope plane)
-                                      , VertexIx (LowerEnvelope plane)
-                                      )
-  edgeAt (u,v) = undefined -- vertexAt u.incidentEdges'.first v
-
-instance HasEdges (LowerEnvelope plane) (LowerEnvelope plane) where
-  edges = undefined
-
-----------------------------------------
-
--- FIXME: I guess strictly speaking the lower envelope is a multigraph: in case
--- the lower envelope is a bunch of parallel edges connecting v_infty to v_infty
--- for example.
-
--- instance Graph_ (LowerEnvelope plane) where
 
 
---------------------------------------------------------------------------------
+  -- asVertex
+  -- catMaybes [ (\v -> Vertex v (definers h1 h2 h))) <$> intersectionPoint h1 h2 h3
+  --           | Three h1 h2 h3 <- uniqueTriplets hs
+  --           ]
 
+
+
+
+
+
+{-
 -- | simple implementation of the lower envelope.
 --
--- running time: \(O(n^2\log n)\)
+-- running time: \(O(n^4 )\)
 lowerEnvelope    :: ( Plane_ plane r
                     , Ord r, Fractional r, Foldable f, Ord plane
                     ) => f plane -> LowerEnvelope r
@@ -149,7 +109,7 @@ triangulatedLowerEnvelope    :: ( Plane_ plane r
                                 ) => f plane -> LowerEnvelope r
 triangulatedLowerEnvelope hs = undefined
 
-
+-}
 --------------------------------------------------------------------------------
 
 {-
