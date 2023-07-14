@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Miso.Svg
@@ -28,20 +29,37 @@ import qualified Data.ByteString.Lazy as ByteString
 import qualified Data.Text.Lazy as Text
 import           HGeometry.Miso.Svg.Writer
 import qualified Lucid
+import qualified Lucid.Base as Lucid
+import qualified Lucid.Svg as Svg
 import qualified Miso
 import qualified System.File.OsPath as File
 import           System.OsPath
 
 --------------------------------------------------------------------------------
 
--- | Render the output to the given file.
+-- | Given an file path, and a view whose root is an svg element,
+-- render the output to the given file.
 renderSvgToFile    :: OsPath -> Miso.View action -> IO ()
 renderSvgToFile fp = File.writeFile fp . renderAsSvgByteString
 
--- | Render the output to a lazy text
-renderAsSvgText :: Miso.View action -> Text.Text
-renderAsSvgText = Lucid.renderText . Lucid.toHtml
+-- | Add the doctype
+withDocType         :: Svg.Svg a -> Svg.Svg a
+withDocType content = do
+                        Svg.doctype_
+                        Svg.with content
+                             [ Lucid.makeAttribute "xmlns" "http://www.w3.org/2000/svg"
+                             , Lucid.makeAttribute "xmlns:xlink" "http://www.w3.org/1999/xlink"
+                             , Svg.version_ "1.1"
+                             ]
 
--- | Render the otuput of a view to a lazy bytestring
+-- | Given an View whose root is an svg element, renders the view to a
+-- lazy Text
+--
+renderAsSvgText :: Miso.View action -> Text.Text
+renderAsSvgText = Lucid.renderText . withDocType . Lucid.toHtml
+
+-- | Given an View whose root is an svg element, renders the view to a
+-- lazy ByteString.
+--
 renderAsSvgByteString :: Miso.View action -> ByteString.ByteString
-renderAsSvgByteString = Lucid.renderBS . Lucid.toHtml
+renderAsSvgByteString = Lucid.renderBS . withDocType . Lucid.toHtml
