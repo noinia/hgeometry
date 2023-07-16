@@ -15,6 +15,8 @@ module HGeometry.Duality
   ( dualPoint
   , dualHyperPlane
   , dualLine
+
+  , liftPointToPlane
   ) where
 
 import Control.Lens
@@ -49,3 +51,11 @@ dualHyperPlane = NonVerticalHyperPlane . over (component @(d-1)) negate . view v
 -- LineEQ 10 20
 dualLine :: (Point_ point 2 r, Num r) => point -> LineEQ r
 dualLine = MkLineEQ . dualHyperPlane
+
+
+--------------------------------------------------------------------------------
+
+-- | The standard lifting transform, that lifts a point to the plane
+-- tangent to the unit hyperboloid.
+liftPointToPlane   :: (Point_ point 2 r, Num r) => point -> NonVerticalHyperPlane 3 r
+liftPointToPlane p = Plane (2*p^.xCoord) (2*p^.yCoord) (negate $ p^.xCoord + p^.yCoord)

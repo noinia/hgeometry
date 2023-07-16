@@ -41,6 +41,13 @@ newtype VertexForm plane =
                       (Definers plane)
              )
 
+-- | Iso to access the underlying Map.
+_VertexFormMap :: Iso (VertexForm plane) (VertexForm plane')
+                      (Map.Map (Point 3 (NumType plane))  (Definers plane))
+                      (Map.Map (Point 3 (NumType plane')) (Definers plane'))
+_VertexFormMap = coerced
+
+
 deriving instance ( Show plane, Show (NumType plane)
                   ) => Show (VertexForm plane)
 deriving instance ( Eq plane
@@ -55,3 +62,11 @@ instance (Ord (NumType plane), Ord plane) => Semigroup (VertexForm plane) where
   (VertexForm m) <> (VertexForm m') = VertexForm $ Map.unionWith (<>) m m'
 instance (Ord (NumType plane), Ord plane) => Monoid (VertexForm plane) where
   mempty = VertexForm mempty
+
+instance Ord (NumType plane) => HasVertices' (VertexForm plane) where
+  type Vertex   (VertexForm plane) = Definers plane
+  type VertexIx (VertexForm plane) = Point 3 (NumType plane)
+  vertexAt i = _VertexFormMap . iix i
+
+instance Ord (NumType plane) => HasVertices (VertexForm plane) (VertexForm plane) where
+  vertices = _VertexFormMap . itraversed

@@ -16,6 +16,7 @@ module HGeometry.LowerEnvelope.AdjListForm
 import           Control.Lens
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
+import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -70,8 +71,8 @@ type BoundedVertex = BoundedVertexF Seq.Seq
 
 
 
-fromLEVertex                   :: VertexForm.LEVertex plane -> BoundedVertex plane
-fromLEVertex (LEVertex v defs) = Vertex v defs es
+fromLEVertex                              :: VertexForm.LEVertex plane -> BoundedVertex plane
+fromLEVertex (VertexForm.LEVertex v defs) = Vertex v defs es
   where
     es = undefined
 
@@ -91,7 +92,7 @@ outgoingUnboundedEdge v (h1, h2) h3 = Just $ hl :+ defs
   -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
   -- planes either.
   where
-    (hl :+ defs) = toHalfLineFrom (v^.location2) h3 $ intersectionLine h1 h2
+    (hl :+ defs) = toHalfLineFrom (projectPoint v) h3 $ intersectionLine h1 h2
 
 -- | convert into a halfline
 toHalfLineFrom     :: Point 2 r -> plane -> LinePV 2 r :+ EdgeDefiners plane
