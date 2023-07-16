@@ -21,14 +21,15 @@ import Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
-
 spec :: Spec
 spec = describe "Voronoi diagram tests" $ do
   -- prop "voronoi vertex is center disk" $ \c ->
   --   voronoiVertices inputs
   it "trivial voronoi diagram" $
     voronoiVertices inputs `shouldBe` [Point2 5 5]
-  runIO $ do out <- testIpe [osp|data/VoronoiDiagram/voronoi.ipe|]
+  runIO $ do out <- testIpe [osp|data/VoronoiDiagram/trivial.ipe|]
+             writeIpePage [osp|/tmp/trivial.ipe|] (fromContent out)
+  runIO $ do out <- testIpe [osp|data/VoronoiDiagram/simple.ipe|]
              writeIpePage [osp|/tmp/voronoi.ipe|] (fromContent out)
 
   -- goldenWith [osp|data/golden/VoronoiDiagram/|]
