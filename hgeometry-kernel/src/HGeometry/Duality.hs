@@ -57,5 +57,5 @@ dualLine = MkLineEQ . dualHyperPlane
 
 -- | The standard lifting transform, that lifts a point to the plane
 -- tangent to the unit hyperboloid.
-liftPointToPlane   :: (Point_ point 2 r, Num r) => point -> NonVerticalHyperPlane 3 r
-liftPointToPlane p = Plane (2*p^.xCoord) (2*p^.yCoord) (negate $ p^.xCoord + p^.yCoord)
+liftPointToPlane               :: (Point_ point 2 r, Num r) => point -> NonVerticalHyperPlane 3 r
+liftPointToPlane (Point2_ x y) = Plane (2*x) (2*y) (negate $ x*x + y*y)

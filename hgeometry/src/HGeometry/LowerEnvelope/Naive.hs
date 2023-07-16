@@ -19,6 +19,7 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.VertexForm
@@ -55,44 +56,42 @@ belowAll      :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f pl
 belowAll v hs = all (\h -> onSideTest v h /= GT) hs
 {-# INLINE belowAll #-}
 
--- | Computes there the three planes intersect
-intersectionPoint :: ( Plane_ plane r, Ord r, Fractional r) => Three plane -> Maybe (Point 3 r)
-intersectionPoint (Three h1@(Plane_ a1 b1 c1)
-                         (Plane_ a2 b2 c2)
-                         (Plane_ a3 b3 c3))
-  | a1 == a2  = Nothing -- FIXME: this can't be right
-  | otherwise = do y <- my
-                   x <- xf y
-                   pure $ Point3 x y (z x y)
+-- | the intersecting line may be vertical or non-vertical
+data IntersectingLine r = Vertical r
+                        | NonVertical (LineEQ r)
+                        deriving (Show,Eq)
+
+-- | Given two planes, computes the line in which they intersect.
+intersectingLine :: (Plane_ plane r, Fractional r, Eq r)
+                 => plane -> plane -> Maybe (IntersectingLine r)
+intersectingLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
+    | b1 /= b2  = Just $ NonVertical $ LineEQ ((a2 - a1) / diffB) ((c2 - c1) / diffB)
+                  -- the two planes intersect in some normal line
+    | a1 /= a2  = Just $ Vertical ((c2 -c1) / (a1 - a2))
+                  -- the planes intersect in a vertical line
+    | otherwise = Nothing
+                  -- the planes don't intersect at all
   where
-    xf y' = (b2-b1)*y' + c2 - c1
-            ///
-            a1 - a2
+    diffB = b1 - b2
 
-    my = c3 - c1 - (a1-a3)*(c2-c1)/(a1-a2)
-         ///
-         (a1-a3)*(b2-b1)/(a1-a2) + b1 - b3
-
-    z x' y' = evalAt (Point2 x' y') h1
-
-infixl 0 ///
--- | safe division testing for zero
-(///)         :: (Eq a, Fractional a) => a -> a -> Maybe a
-num /// denom = if denom /= 0 then Just (num / denom) else Nothing
-
-
-
-
-
-
-  -- asVertex
-  -- catMaybes [ (\v -> Vertex v (definers h1 h2 h))) <$> intersectionPoint h1 h2 h3
-  --           | Three h1 h2 h3 <- uniqueTriplets hs
-  --           ]
-
-
-
-
+-- | Computes there the three planes intersect
+intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)
+                                                     => Three plane -> Maybe (Point 3 r)
+intersectionPoint (Three h1@(Plane_ a1 b1 c1) h2 h3) =
+    do l12 <- intersectingLine h1 h2
+       l13 <- intersectingLine h1 h3
+       case (l12,l13) of
+         (Vertical _x12, Vertical _x13) -> Nothing
+           -- if the xes are the same they would be the same plane even
+         (Vertical x, NonVertical l)    -> vertNonVertIntersect x l
+         (NonVertical l, Vertical x)    -> vertNonVertIntersect x l
+         (NonVertical l, NonVertical m) -> l `intersect` m >>= \case
+           Line_x_Line_Point (Point2 x y) -> Just $ Point3 x y (a1 * x + b1* y + c1)
+           Line_x_Line_Line _             -> Nothing
+   where
+     vertNonVertIntersect x l = let y = evalAt' x l
+                                    z = a1 * x + b1* y + c1
+                                in Just $ Point3 x y z
 
 
 {-
