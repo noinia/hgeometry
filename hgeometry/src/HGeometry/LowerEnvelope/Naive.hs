@@ -101,12 +101,12 @@ num /// denom = if denom /= 0 then Just (num / denom) else Nothing
 -- running time: \(O(n^4 )\)
 lowerEnvelope    :: ( Plane_ plane r
                     , Ord r, Fractional r, Foldable f, Ord plane
-                    ) => f plane -> LowerEnvelope r
+                    ) => f plane -> LowerEnvelope plane
 lowerEnvelope hs = undefined
 
 triangulatedLowerEnvelope    :: ( Plane_ plane r
                                 , Ord r, Fractional r, Foldable f
-                                ) => f plane -> LowerEnvelope r
+                                ) => f plane -> LowerEnvelope plane
 triangulatedLowerEnvelope hs = undefined
 
 -}

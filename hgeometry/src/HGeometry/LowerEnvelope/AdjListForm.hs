@@ -1,6 +1,13 @@
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.AdjListForm
   ( LowerEnvelope(LowerEnvelope)
   , theUnboundedVertex, boundedVertices
+
+  , BoundedVertexF(Vertex)
+  , location, definers, location2
+
+  , LEEdge(Edge)
+
   ) where
 
 
@@ -15,6 +22,7 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.Type
+import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph
@@ -38,16 +46,70 @@ boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
                        (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
 
 
+
+
+singleton   :: VertexForm.LEVertex plane -> LowerEnvelope plane
+singleton v = undefined
+
+
+fromVertexForm :: VertexForm.VertexForm plane -> LowerEnvelope plane
+fromVertexForm = undefined
+
+
+--------------------------------------------------------------------------------
+
+
 -- | The unbounded vertex, which by definition will have index 0
-newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (Edge' plane) }
+newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LEEdge plane) }
                               deriving (Show,Eq)
+
+--------------------------------------------------------------------------------
 
 -- | Vertices in of the lower envelope in adjacencylist form.
 type BoundedVertex = BoundedVertexF Seq.Seq
 
 
+
+fromLEVertex                   :: VertexForm.LEVertex plane -> BoundedVertex plane
+fromLEVertex (LEVertex v defs) = Vertex v defs es
+  where
+    es = undefined
+
+orderPlanesAround      :: Point 3 r -> Set.Set plane -> Seq.Seq plane
+orderPlanesAround v hs = undefined
+
+
+newtype HalfLine r = HalfLine (LinePV 2 r)
+                   deriving (Show,Eq)
+
+outgoingUnboundedEdge               :: Point 3 r -- ^ the location of the vertex v
+                                    -> (plane, plane) -- ^ the pair of planes for which to compute
+                                    -- the halfine
+                                    -> plane -- ^ a third half plane intersecting at v
+                                    -> Maybe (HalfLine r :+ EdgeDefiners plane)
+outgoingUnboundedEdge v (h1, h2) h3 = Just $ hl :+ defs
+  -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
+  -- planes either.
+  where
+    (hl :+ defs) = toHalfLineFrom (v^.location2) h3 $ intersectionLine h1 h2
+
+-- | convert into a halfline
+toHalfLineFrom     :: Point 2 r -> plane -> LinePV 2 r :+ EdgeDefiners plane
+                   -> HalfLine r :+ EdgeDefiners plane
+toHalfLineFrom v l = undefined
+
+data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- above plane
+                                       , _rightPlane :: plane -- below plane
+                                       }
+
+-- | Computes the line in which the two planes intersect
+intersectionLine      :: plane -> plane -> LinePV 2 r :+ EdgeDefiners plane
+intersectionLine h h' = undefined
+
+--------------------------------------------------------------------------------
+
 class HasIncidentEdges t plane | t -> plane where
-  incidentEdges' :: Lens' t (Seq.Seq (Edge' plane))
+  incidentEdges' :: Lens' t (Seq.Seq (LEEdge plane))
 
 instance HasIncidentEdges (UnboundedVertex plane) plane where
   incidentEdges' = coerced
@@ -73,7 +135,7 @@ instance HasVertices (LowerEnvelope plane) (LowerEnvelope plane') where
 ----------------------------------------
 
 instance HasEdges' (LowerEnvelope plane) where
-  type Edge   (LowerEnvelope plane) = Edge' plane
+  type Edge   (LowerEnvelope plane) = LEEdge plane
   type EdgeIx (LowerEnvelope plane) = ( VertexIx (LowerEnvelope plane)
                                       , VertexIx (LowerEnvelope plane)
                                       )
