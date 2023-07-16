@@ -110,11 +110,14 @@ test-suite hgeometry-test-hspec
   main-is:          Main.hs
   other-modules:
       Spec
+      Paths_hgeometry_test
       Golden
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
+      Polygon.Convex.ConvexSpec
+      VoronoiDiagram.VoronoiSpec
+
       -- LineSegmentSpec
-      Paths_hgeometry_test
   hs-source-dirs:   test
   build-depends:
          hspec-with-tempfile >= 0.1

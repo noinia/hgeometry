@@ -1,9 +1,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Golden where
 
+import           Control.Monad ((>=>))
 import qualified Data.ByteString.Lazy as ByteString
 import           Data.Functor.Contravariant
 import           Ipe
+import qualified Paths_hgeometry_test as Paths
 import           System.OsPath
 import           Test.Hspec.WithTempFile
 
@@ -22,3 +24,7 @@ ipePageGolden = contramap singlePageFile ipeFileGolden
 -- | Construct a golden test from a bunch of ipe objects
 ipeContentGolden :: (Show r, IpeWriteText r) => Golden ByteString.ByteString [IpeObject r]
 ipeContentGolden = contramap fromContent ipePageGolden
+
+-- | Get the data file as an OsPath
+getDataFileName :: OsPath -> IO OsPath
+getDataFileName = decodeFS >=> Paths.getDataFileName >=> encodeFS
