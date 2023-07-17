@@ -52,6 +52,13 @@ deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 deriving instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
 deriving instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
 
+deriving instance Functor (Vector d) => Functor (NonVerticalHyperPlane d)
+deriving instance Foldable (Vector d) => Foldable (NonVerticalHyperPlane d)
+deriving instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
+
+
+
+
 instance ( MkHyperPlaneConstraints d r
          , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where

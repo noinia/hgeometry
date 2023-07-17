@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.Naive
   ( lowerEnvelopeVertexForm
+  , VertexForm
   -- , lowerEnvelope
   -- , triangulatedLowerEnvelope
 

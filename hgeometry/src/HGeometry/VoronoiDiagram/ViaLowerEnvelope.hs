@@ -20,10 +20,12 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.LowerEnvelope
 import           HGeometry.LowerEnvelope.AdjListForm
 import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Vector
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
@@ -38,6 +40,15 @@ voronoiVertices :: ( Point_ point 2 r, Functor f, Default point, Ord point
                    ) => f point -> [Point 2 r]
 voronoiVertices = map (projectPoint . fst)
                 . itoListOf vertices
-                . lowerEnvelopeVertexForm
+                . upperEnvelopeVertexForm
                 . fmap (\p -> liftPointToPlane p :+ p)
 -- FIXME: get rid of the default point constraint
+  where
+
+
+upperEnvelopeVertexForm :: ( Plane_ plane r
+                           , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                           ) => f plane -> VertexForm plane
+upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
+  where
+    flipZ = over (hyperPlaneCoefficients.traverse) negate
