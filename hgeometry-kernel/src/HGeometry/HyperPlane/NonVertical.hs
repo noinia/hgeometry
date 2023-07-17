@@ -46,18 +46,15 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 
-deriving instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
-deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
+deriving stock instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
+deriving stock instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 
-deriving instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
-deriving instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
+deriving stock instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
+deriving stock instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
 
-deriving instance Functor (Vector d) => Functor (NonVerticalHyperPlane d)
-deriving instance Foldable (Vector d) => Foldable (NonVerticalHyperPlane d)
-deriving instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
-
-
-
+deriving stock instance Functor     (Vector d) => Functor     (NonVerticalHyperPlane d)
+deriving stock instance Foldable    (Vector d) => Foldable    (NonVerticalHyperPlane d)
+deriving stock instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
 
 instance ( MkHyperPlaneConstraints d r
          , 2 <= d

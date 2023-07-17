@@ -5,15 +5,22 @@ module HGeometry.LowerEnvelope.VertexForm
   , LEVertex, pattern LEVertex, Definers
   , BoundedVertexF(Vertex)
   , location, definers, location2
+
+
+  , IntersectionLine(..)
+  , intersectionLine
+  , intersectionPoint
   ) where
 
 import           Control.Lens
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
+import           HGeometry.Combinatorial.Util
 import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.Type
@@ -70,3 +77,42 @@ instance Ord (NumType plane) => HasVertices' (VertexForm plane) where
 
 instance Ord (NumType plane) => HasVertices (VertexForm plane) (VertexForm plane) where
   vertices = _VertexFormMap . itraversed
+
+--------------------------------------------------------------------------------
+
+-- | the intersection line may be vertical or non-vertical
+data IntersectionLine r = Vertical r
+                        | NonVertical (LineEQ r)
+                        deriving (Show,Eq)
+
+-- | Given two planes, computes the line in which they intersect.
+intersectionLine :: (Plane_ plane r, Fractional r, Eq r)
+                 => plane -> plane -> Maybe (IntersectionLine r)
+intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
+    | b1 /= b2  = Just $ NonVertical $ LineEQ ((a2 - a1) / diffB) ((c2 - c1) / diffB)
+                  -- the two planes intersect in some normal line
+    | a1 /= a2  = Just $ Vertical ((c2 -c1) / (a1 - a2))
+                  -- the planes intersect in a vertical line
+    | otherwise = Nothing
+                  -- the planes don't intersect at all
+  where
+    diffB = b1 - b2
+
+-- | Computes there the three planes intersect
+intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)
+                                                     => Three plane -> Maybe (Point 3 r)
+intersectionPoint (Three h1@(Plane_ a1 b1 c1) h2 h3) =
+    do l12 <- intersectionLine h1 h2
+       l13 <- intersectionLine h1 h3
+       case (l12,l13) of
+         (Vertical _x12, Vertical _x13) -> Nothing
+           -- if the xes are the same they would be the same plane even
+         (Vertical x, NonVertical l)    -> vertNonVertIntersect x l
+         (NonVertical l, Vertical x)    -> vertNonVertIntersect x l
+         (NonVertical l, NonVertical m) -> l `intersect` m >>= \case
+           Line_x_Line_Point (Point2 x y) -> Just $ Point3 x y (a1 * x + b1* y + c1)
+           Line_x_Line_Line _             -> Nothing
+   where
+     vertNonVertIntersect x l = let y = evalAt' x l
+                                    z = a1 * x + b1* y + c1
+                                in Just $ Point3 x y z

@@ -20,9 +20,9 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope
 import           HGeometry.LowerEnvelope.AdjListForm
 import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
+import           HGeometry.LowerEnvelope.VertexForm (VertexForm)
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -43,7 +43,7 @@ voronoiVertices = map (projectPoint . fst)
                 . upperEnvelopeVertexForm
                 . fmap (\p -> liftPointToPlane p :+ p)
 -- FIXME: get rid of the default point constraint
-  where
+-- FIXME: get rid of the ord point constraint
 
 
 upperEnvelopeVertexForm :: ( Plane_ plane r
@@ -52,3 +52,5 @@ upperEnvelopeVertexForm :: ( Plane_ plane r
 upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
   where
     flipZ = over (hyperPlaneCoefficients.traverse) negate
+
+-- FIXME: define this in some individual module

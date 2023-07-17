@@ -23,9 +23,11 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.Type
+import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Vector
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
@@ -83,20 +85,23 @@ orderPlanesAround v hs = undefined
 newtype HalfLine r = HalfLine (LinePV 2 r)
                    deriving (Show,Eq)
 
-outgoingUnboundedEdge               :: Point 3 r -- ^ the location of the vertex v
+outgoingUnboundedEdge               :: ( Plane_ plane r, Ord r, Fractional r
+                                       )
+                                    => Point 3 r -- ^ the location of the vertex v
                                     -> (plane, plane) -- ^ the pair of planes for which to compute
                                     -- the halfine
                                     -> plane -- ^ a third half plane intersecting at v
                                     -> Maybe (HalfLine r :+ EdgeDefiners plane)
-outgoingUnboundedEdge v (h1, h2) h3 = Just $ hl :+ defs
+outgoingUnboundedEdge v (h1, h2) h3 =
+  intersectionLine' h1 h2 >>= toHalfLineFrom (projectPoint v) h3
   -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
   -- planes either.
-  where
-    (hl :+ defs) = toHalfLineFrom (projectPoint v) h3 $ intersectionLine h1 h2
 
 -- | convert into a halfline
-toHalfLineFrom     :: Point 2 r -> plane -> LinePV 2 r :+ EdgeDefiners plane
-                   -> HalfLine r :+ EdgeDefiners plane
+toHalfLineFrom     :: (Plane_ plane r
+                      )
+                   => Point 2 r -> plane -> LinePV 2 r :+ EdgeDefiners plane
+                   -> Maybe (HalfLine r :+ EdgeDefiners plane)
 toHalfLineFrom v l = undefined
 
 data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- above plane
@@ -104,8 +109,16 @@ data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- above plane
                                        }
 
 -- | Computes the line in which the two planes intersect
-intersectionLine      :: plane -> plane -> LinePV 2 r :+ EdgeDefiners plane
-intersectionLine h h' = undefined
+intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
+                       => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
+intersectionLine' h h' = intersectionLine h h' <&> \case
+    Vertical x    -> LinePV (Point2 x 0) (Vector2 0 1) :+ definers' (Point2 (x-1) 0)
+    NonVertical l -> let l'@(LinePV p _) = fromLineEQ l
+                     in l' :+ definers' (p&yCoord %~ (+1))
+  where
+    definers' q = let f = evalAt q
+                  in if f h <= f h' then EdgeDefiners h h' else EdgeDefiners h' h
+    fromLineEQ (LineEQ a b) = fromLinearFunction a b
 
 --------------------------------------------------------------------------------
 
