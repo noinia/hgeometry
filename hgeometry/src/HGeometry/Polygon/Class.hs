@@ -23,6 +23,7 @@ import Control.Lens
 import Control.Lens.Internal.Fold (NonEmptyDList(..))
 import Data.Function (on)
 import Data.Functor.Apply (Apply)
+import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
 import Data.Functor.Contravariant (phantom)
 import Data.List.NonEmpty (NonEmpty(..))
@@ -108,24 +109,6 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
 -- end of te HasOuterBoundary class
 --------------------------------------------------------------------------------
 
--- TODO: upstream these to lens
--- taken and modified directly from lens
-
--- | construct a Fold1 from a function that produces a Foldable1
-folding1         :: Foldable1 f => (s -> f a) -> Fold1 s a
-folding1 sfa agb = phantom . traverse1_ agb . sfa
-{-# INLINE folding1 #-}
-
--- | Version of ifolding to build an 'IndexedFold1'
-ifolding1       :: (Foldable1 f, Indexable i p, Contravariant g, Apply g)
-                => (s -> f (i, a)) -> Over p g s t a b
-ifolding1 sfa f = phantom . traverse1_ (phantom . uncurry (indexed f)) . sfa
-{-# INLINE ifolding1 #-}
-
--- | indexed version of 'toNonEmptyOf'
-itoNonEmptyOf   :: IndexedGetting i (NonEmptyDList (i,a)) s a -> s -> NonEmpty (i,a)
-itoNonEmptyOf l = flip getNonEmptyDList [] . ifoldMapOf l (\i a -> NonEmptyDList ((i,a) :|))
-{-# INLINE itoNonEmptyOf #-}
 
 --------------------------------------------------------------------------------
 -- * HasOuterBoundary Helpers
