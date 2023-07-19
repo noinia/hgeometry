@@ -111,10 +111,14 @@ test-suite hgeometry-test-hspec
   other-modules:
       Spec
       Golden
+      Test.Util
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
       -- LineSegmentSpec
       Paths_hgeometry_test
+
+      Polygon.Triangulation.TriangulateMonotoneSpec
+
   hs-source-dirs:   test
   build-depends:
          hspec-with-tempfile >= 0.1

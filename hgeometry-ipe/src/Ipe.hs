@@ -65,6 +65,7 @@ module Ipe(
   -- ** Converting *from* IpeObjects
   , _asPoint
   , _asLineSegment
+  , _asClosedLineSegment
   , _asRectangle
   , _asTriangle
   , _asPolyLine

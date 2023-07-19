@@ -14,6 +14,7 @@ module Ipe.FromIpe(
   -- * Individual readers
     _asPoint
   , _asLineSegment
+  , _asClosedLineSegment
   , _asRectangle
   , _asTriangle
 
