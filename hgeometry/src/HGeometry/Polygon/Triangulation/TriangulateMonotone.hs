@@ -45,11 +45,6 @@ import           Hiraffe.Graph.Class
 --   no more than twice.
 type YMonotonePolygon_ = SimplePolygon_
 
-
-
-
-
-
 data LR = L | R deriving (Show,Eq)
 {-
 
@@ -105,52 +100,32 @@ computeDiagonals pg = case unsnoc vs of
         -- add vertices from the last guy w to all 'middle' guys of the final stack
         diags'' = map (seg w) $ init stack'
 
-
-
-  {-
-  diags'' <> diags'
-  where
-    -- run the stack computation
-    SP (_:|stack') diags' = List.foldl' (\(SP stack acc) v' -> (<> acc) <$> process v' stack)
-                                        (SP (v :| [u]) []) vs'
-    -- add vertices from the last guy w to all 'middle' guys of the final stack
-    diags'' = map (seg w) $ init stack'
-    -- extract the last vertex
-    Just (vs',w) = unsnoc vs
-    -- merge the two lists into one list for procerssing
-    (u:v:vs) = uncurry (mergeSortedListsBy $ comparing (\((Point2_ x y) :+ _) -> (Down y, x)))
-             $ splitPolygon pg
--}
-
-
 type P i point r = point :+ (i,LR)
 
-type Stack a = NonEmpty a
-
--- type Scan p r = State (Stack (P i pointr))
-
+-- | Get the chain of a particular point
 chainOf :: P i point r -> LR
 chainOf = view (extra._2)
 
--- toVtx              :: P i point r -> point :+ VertexIx yMonotonePolygon
-
+-- | Produce a diagional
 seg     :: P i point r -> P i point r -> ClosedLineSegment (point :+ i)
 seg u v = ClosedLineSegment (toVtx u) (toVtx v)
   where
     toVtx = over extra fst
 
+type Stack a = NonEmpty a
+
+-- | The real triangulation procedure
 process                    :: (Point_ point 2 r, Ord r, Num r)
                            => P i point r
                            -> Stack (P i point r)
-                           -> SP (Stack (P i point r))
-                                 [ClosedLineSegment (point :+ i)]
+                           -> SP (Stack (P i point r)) [ClosedLineSegment (point :+ i)]
 process v stack@(u:|ws)
   | chainOf v /= chainOf u = SP (v:|[u])    (map (seg v) . NonEmpty.init $ stack)
   | otherwise              = SP (v:|w:rest) (map (seg v) popped)
       where
-        (popped,rest) = bimap (map fst) (map fst) . List.span (isInside v)
+        (popped,rest) = over both (map fst) . List.span (isInside v)
                       $ zip ws (NonEmpty.toList stack)
-        w             = last $ u:popped
+        w             = NonEmpty.last $ u:|popped
 
 -- | test if m does not block the line segment from v to u
 isInside          :: (Point_ point 2 r, Ord r, Num r)
@@ -160,7 +135,6 @@ isInside v (u, m) = case ccw (v^.core) (m^.core) (u^.core) of
                      CoLinear -> False
                      CCW      -> chainOf v == R
                      CW       -> chainOf v == L
-
 
 -- | When the polygon is in counter clockwise order we return (leftChain,rightChain)
 -- ordered from the top-down.
