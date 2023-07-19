@@ -88,9 +88,29 @@ triangulate' pg' = constructGraph e es (computeDiagonals pg)
 -- running time: \(O(n)\)
 computeDiagonals    :: (YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r)
                     => yMonotonePolygon -> [ClosedLineSegment (point :+ VertexIx yMonotonePolygon)]
-computeDiagonals pg = diags'' <> diags'
+computeDiagonals pg = case unsnoc vs of
+    Just (u:v:vs',w) -> go u v vs' w
+    _                -> error "computeDiagonals. polygon should contain at least 3 vertices"
   where
-    -- | run the stack computation
+    -- split the polygon into two chains of vertices (with the vertices in decreasing order)
+    -- tag them with left and right, and merge the resulting list into one big decreasing list
+    vs  = uncurry (mergeSortedListsBy $ comparing (\((Point2_ x y) :+ _) -> (Down y, x)))
+        $ splitPolygon pg
+
+    -- run the stack computation that actually triangulates the polygon.
+    go u v vs' w = diags'' <> diags'
+      where
+        SP (_:|stack') diags' = List.foldl' (\(SP stack acc) v' -> (<> acc) <$> process v' stack)
+                                            (SP (v :| [u]) []) vs'
+        -- add vertices from the last guy w to all 'middle' guys of the final stack
+        diags'' = map (seg w) $ init stack'
+
+
+
+  {-
+  diags'' <> diags'
+  where
+    -- run the stack computation
     SP (_:|stack') diags' = List.foldl' (\(SP stack acc) v' -> (<> acc) <$> process v' stack)
                                         (SP (v :| [u]) []) vs'
     -- add vertices from the last guy w to all 'middle' guys of the final stack
@@ -100,6 +120,8 @@ computeDiagonals pg = diags'' <> diags'
     -- merge the two lists into one list for procerssing
     (u:v:vs) = uncurry (mergeSortedListsBy $ comparing (\((Point2_ x y) :+ _) -> (Down y, x)))
              $ splitPolygon pg
+-}
+
 
 type P i point r = point :+ (i,LR)
 
