@@ -118,6 +118,9 @@ ordAtY   :: (Fractional r, Ord r, LineSegment_ lineSegment point, Point_ point 2
          => r
          -> lineSegment -> lineSegment -> Ordering
 ordAtY y = comparing (xCoordAt y)
+-- TODO: seems we should be able to implement this with just an Num r constraint
+-- in xCoordAt we divide some term by qy - py, we can just multiply the px term by that quantity and compare the non-divided values.
+
 
 -- | Given an x-coordinate, compare the segments based on the
 -- y-coordinate of the intersection with the horizontal line through y
