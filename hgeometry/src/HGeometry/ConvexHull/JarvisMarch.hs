@@ -36,9 +36,7 @@ convexHull     :: (Ord r, Num r, Point_ point 2 r)
                => NonEmpty point -> ConvexPolygon point
 convexHull pts = combine (upperHull pts) (lowerHull pts)
   where
-    combine (_:|uh) (l:|lh) = uncheckedFromCCWPoints $ l :| lh <> reverse uh
-
-         -- note that fromList is afe since ps contains at least two elements
+    combine (NonEmpty.reverse -> _:|uh) (_:|lh) = uncheckedFromCCWPoints $ lh <> uh
   -- where
   --   SP p@(c :+ _) pts = minViewBy incXdecY ps
   --   takeWhile' pf (x :| xs) = x : takeWhile pf xs
