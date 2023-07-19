@@ -3,13 +3,8 @@ module Polygon.Convex.ConvexSpec
   ) where
 
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
--- import qualified Algorithms.Geometry.Diameter.Naive        as Naive
-
--- import           Control.Arrow                ((&&&))
 import           Control.Lens
--- import           Control.Monad.Random
 import           HGeometry.Ext
--- import           HGeometry.BoxSpec (arbitraryPointInBoundingBox)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
 import           HGeometry.Polygon.Simple.Class
@@ -18,10 +13,7 @@ import           HGeometry.Transformation
 import           System.Random.Stateful
 import           Control.Monad.State
 import           HGeometry.Point
--- import           HGeometry.PolygonSpec    ()
 import qualified Data.List.NonEmpty as NonEmpty
--- import qualified Data.Vector.Circular as CV
--- import           Paths_hgeometry
 import           Test.Hspec
 import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose )
 import           Test.QuickCheck.Instances ()
@@ -29,7 +21,6 @@ import           Test.Hspec.QuickCheck
 import           Data.Default.Class
 import           Hiraffe.Graph
 import           HGeometry.Instances ()
--- import           Test.Util (ZeroToOne (..))
 
 --------------------------------------------------------------------------------
 
