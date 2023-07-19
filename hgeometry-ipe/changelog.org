@@ -1,0 +1,63 @@
+#+title: Revision history for HGeometry-ipe
+#+STARTUP: showeverything
+
+* 1.0 [Unreleased]
+
+- Updated for compatibility with HGeometry 1.0
+
+* 0.14 [unreleased] Only on github
+
+- ~DefaultFromIpe~ instance for rectangles
+- Support for Text attributes
+- Update to use hgeometry 0.15.
+
+* 0.13
+
+- Newer BezierSpline parsing.
+- Renamed the modules from ~Data.Geometry.Ipe~ to simply ~Ipe~. The
+  following find and sed command should be able to help you migrate
+  (but use it at your own risk)
+
+  #+begin_src sh
+  find src -name "*.hs" -exec sed -i -e 's/Data.Geometry.Ipe/Ipe/g' {} \;
+  #+end_src
+- Better Documentation; i.e. specific reexports from the Ipe module.
+- Added functionality to load and add a stylesheet to a file.
+- Added support for the stroke-opacity attribute.
+- IpeRender and IpeToIpe modules that allows to us to easily call
+  'iperender' and 'ipetoipe'. The IpeToIpe module now also defines a
+  'wirteIpeFileAsPdf' function that allows us to write to an ipe pdf
+  file (by calling ipetoipe to create this pdf.)
+
+* 0.12
+
+- Compatibility with HGeometry 0.12
+
+* 0.11
+- Split the Types module into smaller sub modules, and restricting
+  what is exported.
+- Traversable, Foldable, and Functor instances for the ipe types.
+- Reading and Writing of Ellipses :)
+- Added Coordinate Float and IpeWriteText Float instances.
+- readAll now accepts only one IpePage rather than a Foldable f => f
+  (IpePage r)
+- Renamed attrLens to ixAttr, and added a prism _Attr to access an
+  attribute._
+- added convenience functions (well, Getter's) for getting all Ipe
+  objects on a particular layer, or in a particular view.
+- readSinglePageFile now makes sure there is at least one layer / view
+  in the file, and if not creates it. This matches the behaviour of
+  ipe itself. See the new 'withDefaults' function in the Types module
+  for the details.
+- fromContent now creates these layers and views as well.
+
+* 0.10
+
+- Added a 'labeled' IpeOut that supports labeling geometric objects
+  with some textual label
+- IpeWrite instance for NonEmpty Lists, and IpeWriteText and
+  Coordinate instances for Data.RealNumber.Rational
+
+* 0.9
+
+- First release in which hgeometry-ipe was split off from hgeometry.

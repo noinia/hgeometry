@@ -1,0 +1,77 @@
+#+STARTUP: showeverything
+
+* Changelog
+
+** 0.15 [unreleased]
+
+- Added ~AsA~ class so that we can write functions that accept bot a
+  core-only value of type ~c~ and an ~Ext~.
+- Added an ~AsExt~ class that to capture types that can be decomposed
+  (and recomposed) into an ~Ext~.
+- Added ~HGeometry.Number.Ratio.Generalized~ that implements Ratio but supports
+  types that are not ~Integral~.
+- A ~HGeometry.Number.Real.Symbolic~ type that represents numbers with a
+  symbolic pertubation. Useful for Simulation of Simplicity.
+- Dropped the ~CanAquire~ module.
+- Explicit export list for ~Data.Permutation~.
+- Added the ~HGeometry.Sign~ and ~HGeometry.Indexed~ modules.
+- Support mtl 2.3
+- Added ~HGeometry.Number.Radical~ for types that support computing square roots.
+- Added ~HGeometry.Foldable.Sort~ which has a faster sort implementation
+  (that will take any Foldable and return an Vector.)
+- Added ~HGeometry.Cyclic~ and ~HGeometry.Vector.NonEmpty~ modules.
+- Added Uniform and UniformRange instances for ~Ext~.
+- Removed ~Data.PlanarGraph.Mutable~, ~Data.PlanarGraph.Persistent~,
+  and ~Data.PlanarGraph.Immutable~, since they were note used anyway.
+
+** 0.14
+
+- Got rid of proxies to build planar graphs, use TypeApplication
+  instead. Also slightly changed some of the types to better reflect
+  what they need; in particular 'buildGraph' now takes only the
+  adjacency lists (no face information). And 'fromAdjRep' which
+  computes a PlanarGraph from its adjacencylists (including vertex and
+  edge info.)
+- Cleaning up the public API by hiding several internal modules.
+
+** 0.13
+
+- Moved 'intersects' from the HasIntersectionWith class into a new
+  class IsIntersectableWith. This allows separate (weaker) constraints
+  for checking *if* geometries intersect rather than computing exact
+  intersections.
+- Bug fixes in the orientations of boundaries in PlanarGraph.
+- Implementation of Logaritmic Method, wich allows us to transform a
+  static data structure into an insertion only data structure
+
+** 0.12
+
+- Add Data.Double.Approximate: Floating point numbers take take
+  imprecision into account when ordering.
+- Add Data.Double.Shaman: Floating point numbers that keep track of
+  error bounds while not being more than an order of magnitude slower
+  than native floating point numbers.
+- Add Data.PlanarGraph.Immutable and Data.PlanarGraph.Mutable: New
+  planargraph implementation that supports efficient updates and queries.
+
+** 0.11
+
+- Changed the implementation of Two and Three in Data.Util
+  (hgeometry-combinatorial). Now they have proper Functor, Foldable,
+  and Traversable instances.
+- Added Data.RealNumber.Rational wrapping the Rational type giving
+  some more readable show/read instances
+- Added function to compute levels in a Rose-Tree
+- Moved the binary searching functions from Data.Sequence.Util into
+  Algorithms.BinarySearch, also added a version for fractional types
+  that stops at a given threshold.
+- Removed Data.BalBST and Data.SlowSeq
+- Moved Measured from Data.BinaryTree into a separate module.
+
+** 0.10
+
+- More Instances
+
+** 0.9
+
+- First release in which hgeometry-combinatorial was split off from hgeometry.
