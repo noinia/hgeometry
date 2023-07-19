@@ -16,7 +16,7 @@ module HGeometry.LowerEnvelope.Naive2
   ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
+-- import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Functor.Classes
 import           Data.Kind (Type)

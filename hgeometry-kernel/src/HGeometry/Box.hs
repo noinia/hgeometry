@@ -36,6 +36,12 @@ import HGeometry.Point
 import HGeometry.Transformation
 
 --------------------------------------------------------------------------------
+-- $setup
+-- >>> myRect = Rectangle origin (Point2 10 20.0) :: Rectangle (Point 2 Rational)
+--
+--
+
+--------------------------------------------------------------------------------
 
 -- | Data type representing the intersection of a Box and a line
 data LineBoxIntersection d r = Line_x_Box_Point (Point d r)
@@ -105,8 +111,6 @@ instance (Fractional r, Ord r
   {-# INLINE intersect #-}
 
 
-myRect :: Rectangle (Point 2 Rational)
-myRect = Rectangle origin (Point2 10 20.0)
 
 instance (Point_ point d r, IsTransformable point) => IsTransformable (Box point) where
   -- ^ this instance is slighly misleading, as for arbitrary affine

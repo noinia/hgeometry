@@ -1,4 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Simple.Implementation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- default implementations for simple polygons
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.Implementation
   (
   -- * Polygon
@@ -20,15 +30,9 @@ import           Control.Lens
 import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import           Data.Aeson.Types (Parser)
-import           Data.Foldable (minimumBy)
 import qualified Data.List as List
-import           Data.Ord (comparing)
-import           HGeometry.Point
--- import           HGeometry.LineSegment.Boxed
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
-
--- default implementations for simple polygons
 
 --------------------------------------------------------------------------------
 -- * Polygon_

@@ -14,18 +14,19 @@ module HGeometry.Ball.Class
 
   , fromDiametralPair, fromCenterAndPoint
 
-  , Disk_(..), pattern Disk_
+  , Disk_ -- (..)
+  , fromBoundaryPoints
+  , pattern Disk_
   ) where
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
--- import           Data.Ord (comparing)
-import           GHC.TypeLits
--- import           HGeometry.Interval.Class
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
+import           Linear.Matrix (det33)
+import           Linear.V3 (V3(..))
 
 --------------------------------------------------------------------------------
 
@@ -64,9 +65,10 @@ pattern Ball_ c r <- ((view center &&& view squaredRadius) -> (c,r))
 
 --------------------------------------------------------------------------------
 
--- | Constructs a ball from d+1 points on the boundary
-fromBoundaryPoints :: Vector (d+1) point -> ball
-fromBoundaryPoints = undefined
+-- -- | Constructs a ball from d+1 points on the boundary
+-- fromBoundaryPoints :: Vector (d+1) point -> ball
+-- fromBoundaryPoints = undefined
+
 
 
 -- | Given two points on the diameter of the ball, construct a ball.
@@ -99,3 +101,20 @@ pattern Disk_ c r = Ball_ c r
 -- -- | Constructs a Circle by its center and squared radius.
 -- pattern Circle_     :: Circle_ ball point => point -> NumType ball -> ball
 -- pattern Circle_ c r = Sphere_ c r
+
+-- | Creates a circle from three points on the boundary
+fromBoundaryPoints :: ( Disk_ disk (Point 2 r)
+                      , Point_ point 2 r
+                      , Fractional r) => Vector 3 point -> disk
+fromBoundaryPoints (Vector3 (Point2_ px py) (Point2_ qx qy) (Point2_ sx sy)
+                   ) = Disk_ c (squaredEuclideanDist c (Point2 px py))
+  where
+    f  x y = x^2 + y^2
+    fx x y = V3 (f x y) y       1
+    fy x y = V3 x       (f x y) 1
+
+    xnom   = det33 $ V3 (fx px py) (fx qx qy) (fx sx sy)
+    ynom   = det33 $ V3 (fy px py) (fy qx qy) (fy sx sy)
+
+    denom  = (2 *) . det33 $ V3 (V3 px py 1) (V3 qx qy 1) (V3 sx sy 1)
+    c      = Point2 (xnom / denom) (ynom / denom)

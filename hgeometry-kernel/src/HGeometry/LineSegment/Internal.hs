@@ -21,12 +21,8 @@ module HGeometry.LineSegment.Internal
 
 
 import Control.Lens
--- import Control.Subcategory.Foldable
--- import Control.Subcategory.Functor
 import Data.Functor.Apply
 import Data.Kind (Type)
-import Data.Type.Ord
-import GHC.TypeLits
 import HGeometry.Box.Boxable
 import HGeometry.Intersection
 import HGeometry.Interval.Class
@@ -43,6 +39,24 @@ import Text.Read
 -- import HGeometry.Number.Real.Rational
 
 --------------------------------------------------------------------------------
+
+-- >>> :{
+-- testseg :: ClosedLineSegment (Point 2 Double)
+-- testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
+--
+-- myPoint :: Point 2 Double
+-- myPoint = interpolate 0.5 testseg
+-- :}
+
+
+
+-- testI :: ClosedInterval (Point 2 Double)
+-- testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
+
+
+
+
+
 
 -- | Data type representing intervals
 type LineSegment :: (Type -> Type) -> Type -> Type
@@ -250,6 +264,8 @@ instance ( OnSegment (LineSegment endPoint point)
          , Fractional r, Ord r
          -- , OptVector_ d r, OptMetric_ d r
          ) => Point d r `HasIntersectionWith` LineSegment endPoint point where
+  -- >>> test `intersects` testseg
+  -- True
   intersects = onSegment
 
 instance ( -- OptCVector_ 2 point
@@ -294,17 +310,6 @@ instance ( -- OptCVector_ 2 (AnEndPoint point)
 --          ) => IsTransformable (LineSegment endPoint point)
 
 
-testseg :: ClosedLineSegment (Point 2 Double)
-testseg = ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)
-
--- testI :: ClosedInterval (Point 2 Double)
--- testI = ClosedInterval (Point2 5.0 6.0) (Point2 10.0 10.0)
-
-test :: Point 2 Double
-test = interpolate 0.5 testseg
-
-
-testOn = test `intersects` testseg
 
 
 

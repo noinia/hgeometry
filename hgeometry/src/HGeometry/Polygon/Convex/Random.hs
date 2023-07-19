@@ -13,34 +13,16 @@ module HGeometry.Polygon.Convex.Random
   ( randomConvex
   ) where
 
-import           Control.DeepSeq (NFData)
 import           Control.Lens
-import           Control.Monad.ST
 import           Control.Monad.State
-import           Data.Coerce
-import qualified Data.Foldable as F
-import           Data.Function (on)
 import qualified Data.IntSet as IS
-import           Data.List.NonEmpty (NonEmpty (..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
-import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable (Foldable1 (..))
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as Mut
-import qualified Data.Vector.NonEmpty as NE
 import qualified Data.Vector.Unboxed as VU
-import           HGeometry.Ext
-import           HGeometry.Number.Radical
 import           HGeometry.Point
-import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex.Class
 import           HGeometry.Polygon.Convex.Implementation
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Vector
-import           Hiraffe.Graph
 import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
@@ -83,8 +65,8 @@ randomBetween                     :: (MonadState g m, RandomGen g)
 randomBetween n vMax | vMax < n+1 = pure $ VU.replicate vMax 1
 randomBetween n vMax              = worker (n-1) IS.empty
   where
-    gen from []     = [vMax-from]
-    gen from (x:xs) = (x-from) : gen x xs
+    gen from' []     = [vMax-from']
+    gen from' (x:xs) = (x-from') : gen x xs
     worker 0 seen = pure (VU.fromList (gen 0 $ IS.elems seen))
     worker i seen = do
       v <- uniformRM (1, vMax-1) StateGenM
@@ -109,7 +91,7 @@ randomConvex                 :: (MonadState g m, RandomGen g)
 randomConvex n _vMax | n < 3 =
   error "HGeometry.Polygon.Convex.randomConvex: At least 3 edges are required."
 randomConvex n vMax         = do
-  ~(v:vs) <- sortAround origin <$> randomEdges n vMax
+  (v:|vs) <- NonEmpty.fromList . sortAround origin <$> randomEdges n vMax
   let theVertices = over coordinates ((/ realToFrac vMax) . realToFrac)
                  <$> NonEmpty.scanl (\p u -> p .+^ (u^.vector)) v vs
       pRational = uncheckedFromCCWPoints theVertices

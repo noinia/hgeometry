@@ -62,7 +62,6 @@ import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import Data.Type.Ord
 import HGeometry.Point.Orientation
-import HGeometry.Point.Orientation.Degenerate
 import HGeometry.Point.Quadrants
 import HGeometry.Vector
 import HGeometry.Point.PointF

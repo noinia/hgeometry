@@ -41,6 +41,8 @@ type Rectangle = Box
 -- TODO this type is slightly misleading
 
 -- | Construct a Rectangle
+--
+--
 pattern Rectangle           :: Dimension point ~ 2
                             => point -> point -> Box point
 pattern Rectangle minP maxP = Box minP maxP

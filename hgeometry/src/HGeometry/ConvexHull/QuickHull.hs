@@ -20,11 +20,7 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Triangle
 import           HGeometry.Intersection
-import           HGeometry.Number.Real.Rational
 
--- import Data.Ratio
-import qualified HGeometry.ConvexHull.GrahamScan as GC
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | ConvexHull using Quickhull.
@@ -91,42 +87,3 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
 
     (ls,rs) = List.partition (\p -> p `onSide` splitL /= rightSide)
             . filter (\p -> not $ (p^.asPoint) `intersects` t) $ pts
-
-
--- mPoint2 [x,y] = Point2 x y
-
--- -- testPoints = NonEmpty.fromList
--- --   [ mPoint2 [22536303956634 % 7570647828779,(-5816376064439) % 1228319866920] :+ 1
--- --   , mPoint2 [(-3136920648983) % 824638230353,(-14583744643665) % 9604445576558] :+ 2
--- --   , mPoint2 [(-11653462784667) % 6525086575987,(-598434515815) % 1364557986096] :+ 3
--- --   , mPoint2 [(-7841595901661) % 3282967141364,(-207167076115) % 482378191549] :+ 4
--- --   ]
-
-
--- testPoints :: NonEmpty (Point 2 Rational :+ Int)
--- testPoints = read "(Point2 [(-11199966464450) % 1365514034959,4065659138075 % 2296468530516] :+ 1) :| [Point2 [86686001553073 % 2736621704548,(-63774454571048) % 1880665081093] :+ 2,Point2 [(-77322324895231) % 8260610289790,(-41165682123514) % 2291705829063] :+ 3,Point2 [2292642905947 % 2659329735076,87045289726355 % 2752214350419] :+ 4]"
-
-
--- toDouble          :: Point 2 Rational :+ a -> Point 2 Double :+ a
--- toDouble (p :+ x) = (realToFrac <$> p) :+ x
-
-
---        -- Falsified (after 36 tests and 4 shrinks):
-
-
-
--- testPoints2 :: NonEmpty (Point 2 Rational :+ Int)
--- testPoints2 = read "(Point2 [(-9876468593885) % 9254762894818,(-34982972348716) % 7450362538495] :+ 1) :| [Point2 [(-11974177119403) % 7705693443554,(-37634868551543) % 9311528788922] :+ 2,Point2 [(-32383659855458) % 9565531378857,20253950785876 % 8268868939819] :+ 3,Point2 [42425655100996 % 8786996213535,(-7972873491283) % 1604043452399] :+ 4]"
-
-type R = RealNumber 5
-
-testPts :: NonEmpty (Point 2 R)
-testPts = Point2 0 0 :| [Point2 0.16719 (-0.50324),Point2 0.59524 0.09425]
-
-test = convexHull testPts
-gHull = GC.convexHull testPts
-
-
--- let t = Triangle l m r
--- (m^.asPoint) `intersects` t
--- the corners of a triangle should certainly intersect the triangle ..

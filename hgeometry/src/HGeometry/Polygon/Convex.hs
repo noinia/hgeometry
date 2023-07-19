@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex
-  ( ConvexPolygon_(..)
+  ( ConvexPolygon_ -- (..)
   , ConvexPolygon
   , ConvexPolygonF
   , fromSimplePolygon, toSimplePolygon

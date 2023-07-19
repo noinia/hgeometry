@@ -13,14 +13,13 @@ module HGeometry.Box.Corners
   ) where
 
 import Control.Lens hiding ((<.>))
+import Data.Foldable1
 import Data.Functor.Apply
-import Data.Semigroup.Foldable.Class
 import GHC.Generics (Generic)
 import HGeometry.Box.Class
 import HGeometry.Direction
 import HGeometry.Point
 import HGeometry.Vector
-import HGeometry.Interval
 
 --------------------------------------------------------------------------------
 
