@@ -27,23 +27,23 @@ common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
                  -fspecialise-aggressively -fexpose-all-unfoldings
     build-depends:
-        base                    >= 4.16.1.0    &&  < 5
-      , hgeometry-combinatorial ^>= 1.0.0.0
-      , containers              ^>= 0.6
-      , vector                  ^>= 0.13
-      , lens                    >= 5.2
-      , deepseq                 >= 1.1
-      , semigroupoids           >= 5
-      , semigroups              >= 0.18
-      , random                  >= 1.2
-      , mtl                     >= 2.2
-      -- , witherable              >= 0.4
-      , linear                  >= 1.21
-      , semialign               >= 1.2
-      , these                   >= 1.1
+        base                    >= 4.16.1.0    && < 5
+      , hgeometry-combinatorial >= 1.0.0.0     && < 2
+      , containers              >= 0.6         && < 1
+      , vector                  >= 0.13        && < 1
+      , lens                    >= 5.2         && < 6
+      , deepseq                 >= 1.1         && < 2
+      , semigroupoids           >= 5           && < 7
+      , semigroups              >= 0.18        && < 1
+      , random                  >= 1.2         && < 2
+      , mtl                     >= 2.2         && < 3
+      -- , witherable              >= 0.4      && <
+      , linear                  >= 1.21        && < 2
+      , semialign               >= 1.2         && < 2
+      , these                   >= 1.1         && < 2
 
-      , ghc-typelits-natnormalise >= 0.7.7
-      , ghc-typelits-knownnat     >= 0.7.6
+      , ghc-typelits-natnormalise >= 0.7.7     && < 1
+      , ghc-typelits-knownnat     >= 0.7.6     && < 1
 
     default-language: GHC2021
 
