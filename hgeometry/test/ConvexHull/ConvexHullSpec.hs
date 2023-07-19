@@ -63,18 +63,20 @@ spec = do
             (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
         it "JarvisMarch Manual test1" $
-          JarvisMarch.convexHull testPoints
+          (PG $ JarvisMarch.convexHull testPoints)
           `shouldBe`
-          uncheckedFromCCWPoints [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
+          (PG $ uncheckedFromCCWPoints (reverse
+                                 [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
                                  ,mPoint2 [8,11],mPoint2 [8,6],mPoint2 [7,4]
-                                 ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]
+                                 ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]))
 
         it "JarvisMarch Manual test2" $
-          JarvisMarch.convexHull testPoints2
+          (PG $ JarvisMarch.convexHull testPoints2)
           `shouldBe`
-          uncheckedFromCCWPoints [ mPoint2 [0,10], mPoint2 [2,20]
+          (PG $ uncheckedFromCCWPoints (reverse
+                                 [ mPoint2 [0,10], mPoint2 [2,20]
                                  , mPoint2 [6,20], mPoint2 [8,11]
-                                 , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]
+                                 , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]))
 
         it "GrahamScan and JarvisMarch are the same" $
           property $ \(PS pts) ->

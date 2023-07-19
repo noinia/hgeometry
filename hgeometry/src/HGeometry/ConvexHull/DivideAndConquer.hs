@@ -28,14 +28,15 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Vector
 --------------------------------------------------------------------------------
 
--- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
--- given in clockwise order.
+-- | \(O(n \log n)\) time ConvexHull using divide and conquer.
 convexHull            :: (Ord r, Num r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts
   where
-    combine (_:|uh,l:|lh) = uncheckedFromCCWPoints $ l :| lh <> reverse uh
+    combine (NonEmpty.reverse -> _:|uh, _:|lh) = uncheckedFromCCWPoints $ lh <> uh
+
+
 
 ----------------------------------------
 -- * Computing a lower hull
