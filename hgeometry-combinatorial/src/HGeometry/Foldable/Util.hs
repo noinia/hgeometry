@@ -15,6 +15,7 @@ module HGeometry.Foldable.Util
 
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import           Data.Functor.Const
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
@@ -44,6 +45,19 @@ class HasFromFoldable1 f where
   fromNonEmpty :: NonEmpty a -> f a
   {-# MINIMAL fromNonEmpty #-}
 
+
+--------------------------------------------------------------------------------
+-- * Instances
+
+instance HasFromFoldable [] where
+  fromList = id
+
+instance HasFromFoldable Seq.Seq where
+  fromList = Seq.fromList
+
+instance Monoid c => HasFromFoldable (Const c) where
+  fromList _ = Const mempty
+
 instance HasFromFoldable1 NonEmpty where
   fromNonEmpty = id
 
@@ -53,6 +67,3 @@ instance HasFromFoldable Vector.Vector  where
 
 instance HasFromFoldable1 NonEmptyVector  where
   fromNonEmpty = NonEmptyVector.fromNonEmpty
-
-instance HasFromFoldable Seq.Seq where
-  fromList = Seq.fromList

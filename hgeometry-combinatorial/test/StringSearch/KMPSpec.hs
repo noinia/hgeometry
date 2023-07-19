@@ -1,12 +1,10 @@
 module StringSearch.KMPSpec where
 
-import qualified Data.Foldable as F
 import qualified Data.List as List
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as UV
 import           HGeometry.StringSearch.KMP
 import           Test.Hspec
-import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
