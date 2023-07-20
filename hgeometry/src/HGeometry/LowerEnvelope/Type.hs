@@ -5,6 +5,7 @@ module HGeometry.LowerEnvelope.Type
   , location, definers, location2
 
   , LEEdge(Edge)
+  , flipEdge
   ) where
 
 import           Control.Lens
@@ -77,3 +78,8 @@ data LEEdge plane = Edge { _destination :: {-# UNPACK #-}!VertexID
                          , _leftPlane   :: plane
                          , _rightPlane  :: plane
                          } deriving (Show,Eq,Ord)
+
+-- | Given some vertex u and an edge e from u towards some other
+-- vertex v, flip the edge e, s othat it is the edge from v to u.
+flipEdge                  :: VertexID -> LEEdge plane -> LEEdge plane
+flipEdge u (Edge _ hl hr) = Edge u hr hl

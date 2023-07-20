@@ -1,4 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.LowerEnvelope.AdjListForm
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Representation of the Lower envelope of planes in Adjacency-list
+-- form.
+--
+--------------------------------------------------------------------------------
 module HGeometry.LowerEnvelope.AdjListForm
   ( LowerEnvelope(LowerEnvelope)
   , theUnboundedVertex, boundedVertices
@@ -13,11 +24,17 @@ module HGeometry.LowerEnvelope.AdjListForm
 
 --------------------------------------------------------------------------------
 
+import           Control.Applicative
 import           Control.Lens
+import           Data.Foldable1
+import           Data.Maybe (mapMaybe)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
+import qualified Data.Vector as V
+import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
@@ -48,19 +65,20 @@ boundedVertices :: Lens' (LowerEnvelope plane) (Seq.Seq (BoundedVertex plane))
 boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
                        (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
 
-
-
-
-singleton   :: VertexForm.LEVertex plane -> LowerEnvelope plane
-singleton v = undefined
-
+singleton   :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+            => VertexForm.LEVertex plane -> LowerEnvelope plane
+singleton v = LowerEnvelope v0 (Seq.singleton v')
+  where
+    i  = 1 -- the vertexID we are using for this vertex.
+    v' = fromLEVertex v
+    v0 = UnboundedVertex $ flipEdge i <$> _incidentEdgesB v'
+    -- do we need to reverse the sequenceo f edges?
 
 fromVertexForm :: VertexForm.VertexForm plane -> LowerEnvelope plane
 fromVertexForm = undefined
 
 
 --------------------------------------------------------------------------------
-
 
 -- | The unbounded vertex, which by definition will have index 0
 newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LEEdge plane) }
@@ -71,44 +89,90 @@ newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LE
 -- | Vertices in of the lower envelope in adjacencylist form.
 type BoundedVertex = BoundedVertexF Seq.Seq
 
-
-
-fromLEVertex                              :: VertexForm.LEVertex plane -> BoundedVertex plane
+-- | Given a vertex in vertex form, construct A BoundedVertex from
+-- it. Note that this essentially assumes the vertex is connected to
+-- the unbounded vertex with all its outgoing edgse.
+fromLEVertex                              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                                          => VertexForm.LEVertex plane
+                                          -> BoundedVertex plane
 fromLEVertex (VertexForm.LEVertex v defs) = Vertex v defs es
   where
-    es = undefined
+    es  = (\(_ :+ EdgeDefiners hl hr) -> Edge 0 hl hr) <$> sortAroundStart es'
+    es' = mapMaybe (\t@(Two h1 h2) -> let defs' = Set.delete h1 $ Set.delete h2 defs
+                                      in outgoingUnboundedEdge v t defs'
+                   ) $ uniquePairs defs
 
-orderPlanesAround      :: Point 3 r -> Set.Set plane -> Seq.Seq plane
-orderPlanesAround v hs = undefined
+-- | Given a bunch of halflines that all share their starting point v,
+-- sort them cyclically around the starting point v.
+sortAroundStart :: (Foldable f, Ord r, Num r) => f (HalfLine r :+ e) -> Seq.Seq (HalfLine r :+ e)
+sortAroundStart = fromFoldable . sortBy @V.Vector compareAroundStart
+  where
+    compareAroundStart (HalfLine v d  :+ _)
+                       (HalfLine _ d' :+ _) = ccwCmpAround v (v .+^ d) (v .+^ d')
 
 
-newtype HalfLine r = HalfLine (LinePV 2 r)
+-- | A Halfline in R^2
+newtype HalfLine r = MkHalfLine (LinePV 2 r)
                    deriving (Show,Eq)
 
-outgoingUnboundedEdge               :: ( Plane_ plane r, Ord r, Fractional r
-                                       )
-                                    => Point 3 r -- ^ the location of the vertex v
-                                    -> (plane, plane) -- ^ the pair of planes for which to compute
-                                    -- the halfine
-                                    -> plane -- ^ a third half plane intersecting at v
-                                    -> Maybe (HalfLine r :+ EdgeDefiners plane)
-outgoingUnboundedEdge v (h1, h2) h3 =
-  intersectionLine' h1 h2 >>= toHalfLineFrom (projectPoint v) h3
+pattern HalfLine p v = MkHalfLine (LinePV p v)
+{-# COMPLETE HalfLine #-}
+
+-- | Given a location of a vertex v, a pair of planes h1,h2 and the
+-- remaining defining planes of v, computes the outgoing half-line
+-- from v on which h1,h2 are the lowest (if such an halfline exists).
+outgoingUnboundedEdge                   :: ( Plane_ plane r, Ord r, Fractional r
+                                           , Foldable1 f
+                                           )
+                                        => Point 3 r -- ^ the location of the vertex v
+                                        -> Two plane -- ^ the pair of planes for which to compute
+                                        -- the halfine
+                                        -> f plane -- ^ the other planes intersecting at v
+                                        -> Maybe (HalfLine r :+ EdgeDefiners plane)
+outgoingUnboundedEdge v (Two h1 h2) h3s =
+  intersectionLine' h1 h2 >>= toHalfLineFrom (projectPoint v) h3s
   -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
   -- planes either.
 
--- | convert into a halfline
-toHalfLineFrom     :: (Plane_ plane r
-                      )
-                   => Point 2 r -> plane -> LinePV 2 r :+ EdgeDefiners plane
-                   -> Maybe (HalfLine r :+ EdgeDefiners plane)
-toHalfLineFrom v l = undefined
+-- | Given :
+--
+-- v : the projected location of the vertex
+-- hs : the remaining planes defining v (typically just one plane h3)
+-- l   : the (projection of the) line l in which planes h1 and h2 intersect (containing v)
+--
+-- we compute the half-line eminating from v in which h1 and h2 define
+-- an edge incident to v.
+toHalfLineFrom                  :: (Plane_ plane r, Foldable1 f, Fractional r, Ord r)
+                                => Point 2 r -- ^ vertex v
+                                -> f plane     -- ^ the remaining plane(s) hs
+                                -> LinePV 2 r :+ EdgeDefiners plane -- ^ the line l
+                                -> Maybe (HalfLine r :+ EdgeDefiners plane)
+toHalfLineFrom v hs ((LinePV _ w) :+ defs@(EdgeDefiners h1 h2)) =
+    validate w defs <|> validate ((-1) *^ w) (EdgeDefiners h2 h1)
+    -- We try both directions. Note that if we reverse the direction
+    -- of the line, what the left/right plane is changes.
+    --
+    -- If neither direction works, then h1,h2 do not define a good
+    -- direction. This should happen only when there are more than 3
+    -- planes intersecting in v, i.e. in degernate sitatuions
+  where
+    -- | test if direction d is a good direction, i.e. if towards direction d
+    -- h1 (and thus also h2) is actually lower than all remaining defining planes.
+    validate d defs' = let zVal = evalAt (v .+^ d)
+                       in if all (\h3 -> zVal h1 < zVal h3) hs
+                          then Just (HalfLine v d :+ defs') else Nothing
 
-data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- above plane
-                                       , _rightPlane :: plane -- below plane
+
+
+
+-- | The planes left (above) and right (below) their intersection
+-- line.
+data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- ^ above plane
+                                       , _rightPlane :: plane -- ^ below plane
                                        }
 
--- | Computes the line in which the two planes intersect
+-- | Computes the line in which the two planes intersect, and labels
+-- the halfplanes with the lowest plane.
 intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
                        => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
 intersectionLine' h h' = intersectionLine h h' <&> \case

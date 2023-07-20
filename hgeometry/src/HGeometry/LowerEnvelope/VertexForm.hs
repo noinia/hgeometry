@@ -1,4 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.LowerEnvelope.VertexForm
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Representation of the Lower envelope of planes in vertex form;
+-- i.e. storing only the vertices.
+--
+--------------------------------------------------------------------------------
 module HGeometry.LowerEnvelope.VertexForm
   ( VertexForm(VertexForm)
   , singleton
