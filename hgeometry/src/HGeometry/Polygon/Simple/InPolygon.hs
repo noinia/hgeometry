@@ -21,7 +21,6 @@ import HGeometry.Point
 import HGeometry.Polygon.Simple.Class
 import HGeometry.Polygon.Class
 import HGeometry.Intersection
-import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 

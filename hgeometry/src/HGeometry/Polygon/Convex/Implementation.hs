@@ -21,6 +21,7 @@ module HGeometry.Polygon.Convex.Implementation
 
 import Control.DeepSeq (NFData)
 import Control.Lens
+import Data.Kind (Type)
 import Data.Vector.NonEmpty (NonEmptyVector)
 import HGeometry.Box
 import HGeometry.Cyclic
@@ -33,7 +34,6 @@ import HGeometry.Properties
 import HGeometry.Transformation
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
-import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -45,6 +45,7 @@ newtype ConvexPolygonF f point =
   deriving newtype (NFData, Eq)
 
 -- | By default we use a cyclic non-empty vector to represent convex polygons.
+type ConvexPolygon :: Type -> Type
 type ConvexPolygon = ConvexPolygonF (Cyclic NonEmptyVector)
 
 -- | ConvexPolygons are isomorphic to SimplePolygons with the added

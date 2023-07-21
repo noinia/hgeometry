@@ -17,18 +17,16 @@ module HGeometry.Polygon.Class
   , outerBoundaryWithNeighbours
 
   , Polygon_(..)
+
+  , HasVertices(..), HasVertices'(..)
+  , HasEdges(..), HasEdges'(..)
   ) where
 
 import Control.Lens
-import Control.Lens.Internal.Fold (NonEmptyDList(..))
 import Data.Function (on)
-import Data.Functor.Apply (Apply)
 import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
-import Data.Functor.Contravariant (phantom)
-import Data.List.NonEmpty (NonEmpty(..))
 import Data.Semigroup (First(..))
-import Data.Semigroup.Foldable
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Properties

@@ -20,7 +20,6 @@ import           Data.Kind (Constraint)
 import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
 import           HGeometry.Vector
-import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 

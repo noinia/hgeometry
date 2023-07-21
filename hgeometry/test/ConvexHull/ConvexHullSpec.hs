@@ -1,25 +1,24 @@
 module ConvexHull.ConvexHullSpec where
 
+import           Control.Lens
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
--- import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
 import qualified HGeometry.ConvexHull.QuickHull as QuickHull
-import           Control.Lens
-import           HGeometry.Ext
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Point
 import           HGeometry.Cyclic
-import           Hiraffe.Graph
-import           HGeometry.Polygon.Simple
+import           HGeometry.Ext
+import           HGeometry.Instances ()
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Point
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple
+import           Hiraffe.Graph
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
-import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
 
 --------------------------------------------------------------------------------
 
@@ -31,7 +30,8 @@ newtype PointSet = PS (NonEmpty (Point 2 R))
 instance Arbitrary PointSet where
   arbitrary = do p <- arbitrary
                  q <- arbitrary `suchThat` (/= p)
-                 r <- arbitrary `suchThat` (\r' -> r' /= p && r' /= q)
+                 r <- arbitrary `suchThat` (\r' -> r' /= p && r' /= q && ccw p q r' /= CoLinear
+                                           )
                  (\pts' -> PS $ NonEmpty.fromList $ [p,q,r] <> pts') <$> arbitrary
 
 spec :: Spec

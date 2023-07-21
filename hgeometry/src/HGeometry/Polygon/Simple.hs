@@ -41,7 +41,7 @@ import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
-import           Hiraffe.Graph
+
 --------------------------------------------------------------------------------
 
 -- | Simple polygons just store their vertices in CCCW order

@@ -20,6 +20,10 @@ extra-source-files:  README.md
                      changelog
                      changelog.org
 -- extra-source-files:
+data-dir: data
+data-files:
+    polygons.simple
+    polygons.multi
 
 tested-with:
     GHC == 9.2.5
@@ -47,6 +51,7 @@ common setup
       , hgeometry-kernel          >= 1.0.0.0       && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
+      , bytestring                >= 0.11          && < 1
       , vector                    >= 0.13          && < 1
       , lens                      >= 5.2           && < 6
       , deepseq                   >= 1.1           && < 2
@@ -61,6 +66,7 @@ common setup
       , nonempty-vector           >= 0.2           && < 1
       , mtl                       >= 2.3           && < 3
       , data-default-class        >= 0.1           && < 1
+      , MonadRandom               >= 0.5           && < 1
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
@@ -118,6 +124,9 @@ library
         HGeometry.Polygon.Convex.Class
         HGeometry.Polygon.Convex.Tangents
         HGeometry.Polygon.Convex.Random
+
+        HGeometry.Polygon.Monotone
+
 
         HGeometry.PolyLine
         HGeometry.PolyLine.Class
@@ -180,8 +189,12 @@ library quickcheck
     hs-source-dirs: src-quickcheck
     exposed-modules:
       HGeometry.Instances
+      HGeometry.Polygon.Instances
+    other-modules:
+      Paths_hgeometry
     build-depends:
          hgeometry
+       , cereal   >= 0.5
 
 --------------------------------------------------------------------------------
 -- * Tests stup

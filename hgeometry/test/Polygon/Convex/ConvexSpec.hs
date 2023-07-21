@@ -18,11 +18,14 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
 import           HGeometry.Polygon.Simple
 import           HGeometry.Transformation
+import           HGeometry.Vector
 import           Hiraffe.Graph
 import           System.Random.Stateful
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===) )
+import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===)
+                                 , (==>)
+                                 )
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -51,20 +54,21 @@ spec = describe "Convex Polygon tests" $ do
 --   specify "∀ convex. verifyConvex convex == True" $
 --     property $ \(convex :: ConvexPolygon () Rational) ->
 --       verifyConvex convex
---   specify "∀ convex. extremes convex == extremesLinear convex" $
---     property $ \(convex :: ConvexPolygon () Rational, u :: Vector 2 Rational) ->
---       quadrance u > 0 ==>
---       let fastMax = snd (extremes u convex)
---           slowMax = snd (extremesLinear u (convex^.simplePolygon))
---       in cmpInDirection u fastMax slowMax === EQ
---   specify "∀ poly. extremes (convexHull poly) == extremesLinear poly" $
---     property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
---       quadrance u > 0 ==>
---       let hull = over simplePolygon toCounterClockWiseOrder $
---             convexHull (CV.toNonEmpty (p^.outerBoundaryVector))
---           fastMax = snd (extremes u hull)
---           slowMax = snd (extremesLinear u p)
---       in cmpInDirection u fastMax slowMax === EQ
+        prop "∀ convex. extremes convex == extremesLinear convex" $
+          \(convex :: ConvexPolygon (Point 2  Rational), u :: Vector 2 Rational) ->
+            quadrance u > 0 ==>
+            let fastMax = snd (extremes u convex)
+                slowMax = snd (extremes u (toSimplePolygon convex))
+            in cmpInDirection u fastMax slowMax === EQ
+
+        -- TODO: we need a way of generating random polygons for this
+        prop "∀ poly. extremes (convexHull poly) == extremesLinear poly" $
+          \(p :: SimplePolygon (Point 2 Rational), u :: Vector 2 Rational) ->
+            quadrance u > 0 ==>
+            let hull    = convexHull (toNonEmptyOf outerBoundary p)
+                fastMax = snd (extremes u hull)
+                slowMax = snd (extremes u p)
+            in cmpInDirection u fastMax slowMax === EQ
 
 --   -- Check that vertices are always considered to be OnBoundary.
 --   specify "inConvex boundary convex == OnBoundary" $
