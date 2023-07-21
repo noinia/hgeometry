@@ -22,6 +22,7 @@ module HGeometry.Polygon.Convex.Implementation
 import Control.DeepSeq (NFData)
 import Control.Lens
 import Data.Vector.NonEmpty (NonEmptyVector)
+import HGeometry.Box
 import HGeometry.Cyclic
 import HGeometry.Point
 import HGeometry.Polygon.Class
@@ -155,7 +156,10 @@ instance ( VertexContainer f point
          , Point_ point 2 r
          ) => IsTransformable (ConvexPolygonF f point)
 
-
+instance ( VertexContainer f point
+         , Point_ point 2 r
+         ) => IsBoxable (ConvexPolygonF f point)
+  -- TODO: We could implement this in O(log n) time instead.
 
 --------------------------------------------------------------------------------
 

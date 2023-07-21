@@ -7,6 +7,7 @@ import HGeometry.Box
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Kernel.Instances ()
+import HGeometry.Kernel.Test.Box
 import HGeometry.Line.LineEQ
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational (RealNumber)
@@ -20,14 +21,6 @@ import Test.QuickCheck
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
-
--- arbitraryPointInBoundingBox   :: Box (Point 2 Rational) -> Gen (Point 2 Rational)
--- arbitraryPointInBoundingBox b = do
---   ZeroToOne rX <- arbitrary
---   ZeroToOne rY <- arbitrary
---   let minPt        = b^.minPoint
---       offsetVector = Vector2 (width b * rX) (height b * rY)
---   pure $ minPt .+^ offsetVector
 
 myRect :: Rectangle (Point 2 Double)
 myRect = Rectangle (Point2 1 1) (Point2 10 20.0)
@@ -65,19 +58,3 @@ spec = do
 --        `intersects`
 --        (boundingBoxList' $ [Point2 (-5) 1, Point2 (-4) (0 :: Int)]))
 --       `shouldBe` True
-
-
-newtype ZeroToOne = ZeroToOne Rational
-
-instance Show ZeroToOne where
-  show (ZeroToOne r) = show r
-
-instance Arbitrary ZeroToOne where
-  arbitrary = do
-    k <- chooseInteger (0, granularity)
-    pure $ ZeroToOne $ k % granularity
-    where
-      granularity = 1000000
-  shrink (ZeroToOne 1) = []
-  shrink (ZeroToOne 0) = []
-  shrink (ZeroToOne r) = [ ZeroToOne $ div (numerator r) 2 % div (denominator r) 2]

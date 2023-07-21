@@ -6,21 +6,23 @@ import           Control.Lens
 import           Control.Monad.State
 import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
+import           HGeometry.Box
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Instances ()
+import           HGeometry.Kernel.Test.Box (arbitraryPointInBoundingBox)
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
-import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Polygon.Simple
 import           HGeometry.Transformation
 import           Hiraffe.Graph
 import           System.Random.Stateful
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose )
+import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===) )
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -79,13 +81,13 @@ spec = describe "Convex Polygon tests" $ do
 --         let pt = Point $ lerp r (coerce $ a^.core) (coerce $ b^.core) in
 --         inConvex pt convex === OnBoundary
 
---   -- Check that inConvex matches inPolygon inside the bounding box.
---   specify "inConvex pt convex == inPolygon pt convex" $
---     property $ \(convex :: ConvexPolygon () Rational) ->
---       let s = convex^.simplePolygon in
---       let bb = boundingBox convex in
---       forAll (arbitraryPointInBoundingBox bb) $ \pt ->
---         inConvex pt convex === inPolygon pt s
+        -- Check that inConvex matches inPolygon inside the bounding box.
+        prop "inConvex pt convex == inPolygon pt convex" $
+          \(convex :: ConvexPolygon (Point 2  Rational)) ->
+            let s = toSimplePolygon convex in
+            let bb = boundingBox convex in
+            forAll (arbitraryPointInBoundingBox bb) $ \pt ->
+              inPolygon pt convex === inPolygon pt s
 
 --   -- Points that lie on straight lines between vertices are a corner case.
 --   -- Make sure that they work as expected.
