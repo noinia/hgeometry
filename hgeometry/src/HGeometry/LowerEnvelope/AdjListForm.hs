@@ -26,7 +26,9 @@ module HGeometry.LowerEnvelope.AdjListForm
 
 import           Control.Applicative
 import           Control.Lens
+import qualified Data.Foldable as F
 import           Data.Foldable1
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
@@ -98,9 +100,13 @@ fromLEVertex                              :: (Plane_ plane r, Ord r, Fractional 
 fromLEVertex (VertexForm.LEVertex v defs) = Vertex v defs es
   where
     es  = (\(_ :+ EdgeDefiners hl hr) -> Edge 0 hl hr) <$> sortAroundStart es'
-    es' = mapMaybe (\t@(Two h1 h2) -> let defs' = Set.delete h1 $ Set.delete h2 defs
+    es' = mapMaybe (\t@(Two h1 h2) -> let defs' = toNonEmpty $ Set.delete h1 $ Set.delete h2 defs
                                       in outgoingUnboundedEdge v t defs'
                    ) $ uniquePairs defs
+    toNonEmpty s = case NonEmpty.nonEmpty $ F.toList s of
+                     Just xs -> xs
+                     _       -> error "fromLEVertex: absurd, there should be at least 3 definers"
+
 
 -- | Given a bunch of halflines that all share their starting point v,
 -- sort them cyclically around the starting point v.
