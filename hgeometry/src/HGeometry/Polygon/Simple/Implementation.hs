@@ -71,24 +71,30 @@ toCounterClockwiseOrder pg
 --------------------------------------------------------------------------------
 -- * Show
 
--- | default implementation for show
-showSimplePolygon    :: ( SimplePolygon_ simplePolygon point r
-                        , Show point
-                        )
-                     => simplePolygon -> String
-showSimplePolygon pg = "SimplePolygon " <> show (pg^..outerBoundary)
+-- | helper implementation for show
+showSimplePolygon           :: ( SimplePolygon_ simplePolygon point r
+                               , Show point
+                               )
+                          => String -- ^ Polygon type name
+                          -> simplePolygon -> String
+showSimplePolygon name pg = name <> " " <> show (pg^..outerBoundary)
 
 --------------------------------------------------------------------------------
 -- * Read
 
 -- | default implementation for readsPrec
-readsPrecSimplePolygon   :: forall simplePolygon point r.
-                            ( Read point
-                            , SimplePolygon_ simplePolygon point r
-                            ) => Int -> ReadS simplePolygon
-readsPrecSimplePolygon d = readParen (d > app_prec) $ \r ->
+readsPrecSimplePolygon        :: forall simplePolygon point r.
+                                 ( Read point
+                                 , SimplePolygon_ simplePolygon point r
+                                 )
+                              => String -- ^ constructor name
+                              -> Int -> ReadS simplePolygon
+readsPrecSimplePolygon name d = readParen (d > app_prec) $ \r ->
       [ (uncheckedFromCCWPoints @simplePolygon @point @r @[] vs, t)
-      | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
+      | (name', s) <- lex r
+      , name == name'
+      , (vs, t) <- reads s
+      ]
     where app_prec = 10
 
 

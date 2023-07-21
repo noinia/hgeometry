@@ -3,7 +3,6 @@
 module Polygon.Triangulation.TriangulateMonotoneSpec (spec) where
 
 import Control.Lens
-import Control.Monad
 import Data.Maybe
 import Golden
 import HGeometry
@@ -12,7 +11,6 @@ import HGeometry.Number.Real.Rational
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Triangulation.TriangulateMonotone
 import Ipe
-import Paths_hgeometry_test
 import System.OsPath
 import Test.Hspec
 import Test.Util
@@ -21,15 +19,13 @@ import Test.Util
 
 type R = RealNumber 5
 
-getDataFileName' :: OsPath -> IO OsPath
-getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 spec :: Spec
 spec = do testCases [osp|Polygon/Triangulation/monotone.ipe|]
           testCases [osp|Polygon/Triangulation/simplepolygon6.ipe|]
 
 testCases    :: OsPath -> Spec
-testCases fp = (runIO $ readInput =<< getDataFileName' fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading TriangulateMonotone file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

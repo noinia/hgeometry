@@ -147,7 +147,13 @@ requireThree label _ = error $
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r
          ) => Show (SimplePolygonF f point) where
-  show = showSimplePolygon
+  show = showSimplePolygon "SimplePolygon"
+
+instance ( Read point
+         , SimplePolygon_ (SimplePolygonF f point) point r
+         ) => Read (SimplePolygonF f point) where
+  readsPrec = readsPrecSimplePolygon "SimplePolygon"
+
 
 {-
 instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)

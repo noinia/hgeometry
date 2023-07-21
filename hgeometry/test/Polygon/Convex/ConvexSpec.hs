@@ -2,25 +2,26 @@ module Polygon.Convex.ConvexSpec
   (spec
   ) where
 
-import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           Control.Lens
+import           Control.Monad.State
+import           Data.Default.Class
+import qualified Data.List.NonEmpty as NonEmpty
+import           HGeometry.ConvexHull.GrahamScan (convexHull)
+import           HGeometry.Cyclic
 import           HGeometry.Ext
+import           HGeometry.Instances ()
+import           HGeometry.Point
+import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Class
 import           HGeometry.Transformation
+import           Hiraffe.Graph
 import           System.Random.Stateful
-import           Control.Monad.State
-import           HGeometry.Point
-import qualified Data.List.NonEmpty as NonEmpty
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose )
 import           Test.QuickCheck.Instances ()
-import           Test.Hspec.QuickCheck
-import           Data.Default.Class
-import           Hiraffe.Graph
-import           HGeometry.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -44,7 +45,7 @@ instance Arbitrary (ConvexPolygon (Point 2 Rational)) where
 spec :: Spec
 spec = describe "Convex Polygon tests" $ do
         prop "quickcheck minkowskisum same as naive" $ \(CP p :: CP Rational) (CP q) ->
-          minkowskiSum p (centerAtOrigin q) == naiveMinkowski p (centerAtOrigin q)
+          minkowskiSum p (centerAtOrigin q) `isShiftOf` naiveMinkowski p (centerAtOrigin q)
 --   specify "∀ convex. verifyConvex convex == True" $
 --     property $ \(convex :: ConvexPolygon () Rational) ->
 --       verifyConvex convex

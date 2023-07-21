@@ -33,11 +33,31 @@ type R = RealNumber 10
 instance Default (Point 2 R) where
   def = origin
 
+instance Default (Point 2 Rational) where
+  def = origin
+
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = do
   testCases [osp|Polygon/Convex/convexTests.ipe|]
+  it "same minkowskisum manual"  $
+    ( minkowskiSum polyP polyQ
+    , naiveMinkowski polyP polyQ
+    ) `shouldSatisfy` (uncurry isShiftOf)
+
+  -- runIO foo
+
+_foo = writeIpePage [osp|/tmp/out.ipe|] $ fromContent
+                     [ toIO (minkowskiSum polyP polyQ)   $ attr SStroke red
+                     , toIO (naiveMinkowski polyP polyQ) $ attr SStroke blue
+                     , iO'' polyP                        $ attr SStroke black
+                     , iO'' polyQ                        $ attr SStroke black
+                     ]
+
+polyP, polyQ :: ConvexPolygon (Point 2 Rational)
+polyP = read "ConvexPolygon [Point2 ((-1) % 1) ((-3) % 2),Point2 (0 % 1) ((-2) % 1),Point2 (0 % 1) ((-1) % 1),Point2 ((-1) % 1) (1 % 2)]"
+polyQ = read "ConvexPolygon [Point2 (0 % 1) (1 % 1),Point2 (1 % 1) ((-1) % 1),Point2 (3 % 2) ((-1) % 1),Point2 (0 % 1) (2 % 1)]"
 
 --------------------------------------------------------------------------------
 

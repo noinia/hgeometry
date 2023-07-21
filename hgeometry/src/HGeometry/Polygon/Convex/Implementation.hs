@@ -130,8 +130,12 @@ fromSimplePolygon pg
 instance ( Show point
          , SimplePolygon_ (ConvexPolygonF f point) point r
          ) => Show (ConvexPolygonF f point) where
-  show = showSimplePolygon
+  show = showSimplePolygon "ConvexPolygon"
 
+instance ( Read point
+         , SimplePolygon_ (ConvexPolygonF f point) point r
+         ) => Read (ConvexPolygonF f point) where
+  readsPrec = readsPrecSimplePolygon "ConvexPolygon"
 
 
 
