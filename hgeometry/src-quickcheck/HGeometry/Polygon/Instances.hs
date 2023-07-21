@@ -9,24 +9,16 @@ import           System.Random.Stateful
 import           Control.Monad.State
 -- import           Control.Monad.Random (Random, evalRand, mkStdGen)
 import qualified Data.ByteString as BS
-import           Data.Coerce
-import           HGeometry.Ext
-import qualified Data.Foldable as F
 import           Data.Maybe
 import           Data.Ord
-import           Data.Proxy
 import           Data.Ratio
 import           HGeometry.Number.Real.Rational
 import           Data.Serialize
-import           HGeometry.Combinatorial.Util
-import qualified Data.Vector as V
 import           HGeometry
 import           HGeometry.Boundary
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone
-import           HGeometry.Transformation
-import           HGeometry.Triangle
 import           Hiraffe.Graph
 import           Paths_hgeometry
 import           System.IO.Unsafe
@@ -48,7 +40,7 @@ allSimplePolygons' = allSimplePolygonsWith realToFrac
 {-# NOINLINE allSimplePolygonsWith #-}
 allSimplePolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon (Point 2 r)]
 allSimplePolygonsWith f = unsafePerformIO $ do
-  inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
+  inp <- BS.readFile =<< getDataFileName "polygons.simple"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure . catMaybes $
@@ -67,7 +59,7 @@ allMultiPolygons' = allMultiPolygonsWith realToFrac
 {-# NOINLINE allMultiPolygonsWith #-}
 allMultiPolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [MultiPolygon () r]
 allMultiPolygonsWith f = unsafePerformIO $ do
-  inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
+  inp <- BS.readFile =<< getDataFileName "polygons.multi"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $

@@ -2,29 +2,31 @@ module Polygon.Convex.ConvexSpec
   (spec
   ) where
 
-import           Control.Lens
+import           Control.Lens hiding (elements)
 import           Control.Monad.State
 import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
+import           HGeometry.Boundary
 import           HGeometry.Box
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Instances ()
-import           HGeometry.Kernel.Test.Box (arbitraryPointInBoundingBox)
+import           HGeometry.Kernel.Test.Box
+import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
+import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           HGeometry.Transformation
 import           HGeometry.Vector
-import           Hiraffe.Graph
 import           System.Random.Stateful
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===)
-                                 , (==>)
+                                 , (==>), counterexample, (.||.), elements
                                  )
 import           Test.QuickCheck.Instances ()
 
@@ -51,17 +53,15 @@ spec :: Spec
 spec = describe "Convex Polygon tests" $ do
         prop "quickcheck minkowskisum same as naive" $ \(CP p :: CP Rational) (CP q) ->
           minkowskiSum p (centerAtOrigin q) `isShiftOf` naiveMinkowski p (centerAtOrigin q)
---   specify "∀ convex. verifyConvex convex == True" $
---     property $ \(convex :: ConvexPolygon () Rational) ->
---       verifyConvex convex
+        prop "∀ convex. verifyConvex convex == True" $
+          \(convex :: ConvexPolygon (Point 2 Rational)) ->
+            verifyConvex convex
         prop "∀ convex. extremes convex == extremesLinear convex" $
           \(convex :: ConvexPolygon (Point 2  Rational), u :: Vector 2 Rational) ->
             quadrance u > 0 ==>
             let fastMax = snd (extremes u convex)
                 slowMax = snd (extremes u (toSimplePolygon convex))
             in cmpInDirection u fastMax slowMax === EQ
-
-        -- TODO: we need a way of generating random polygons for this
         prop "∀ poly. extremes (convexHull poly) == extremesLinear poly" $
           \(p :: SimplePolygon (Point 2 Rational), u :: Vector 2 Rational) ->
             quadrance u > 0 ==>
@@ -70,20 +70,21 @@ spec = describe "Convex Polygon tests" $ do
                 slowMax = snd (extremes u p)
             in cmpInDirection u fastMax slowMax === EQ
 
---   -- Check that vertices are always considered to be OnBoundary.
---   specify "inConvex boundary convex == OnBoundary" $
---     property $ \(convex :: ConvexPolygon () Rational) ->
---       let s = convex^.simplePolygon in
---       forAll (choose (0, size s-1)) $ \n ->
---         inConvex (s^.outerVertex n.core) convex === OnBoundary
+        -- Check that vertices are always considered to be OnBoundary.
+        prop "inConvex boundary convex == OnBoundary" $
+          \(convex :: ConvexPolygon (Point 2 Rational)) ->
+            let n = numVertices convex
+            in forAll (choose (0, n-1)) $ \i ->
+              case inPolygon (convex^.outerBoundaryVertexAt i) convex of
+                OnBoundaryEdge j -> j === i .||. j == ((i+1) `mod` n)
+                res              -> counterexample (show res) False
 
---   -- Check that all edge points are considered to be OnBoundary.
---   specify "inConvex edge_point convex == OnBoundary" $
---     property $ \(convex :: ConvexPolygon () Rational, ZeroToOne r) ->
---       let s = convex^.simplePolygon in
---       forAll (elements (listEdges s)) $ \(LineSegment' a b) ->
---         let pt = Point $ lerp r (coerce $ a^.core) (coerce $ b^.core) in
---         inConvex pt convex === OnBoundary
+        -- Check that all edge points are considered to be OnBoundary.
+        prop "inConvex edge_point convex == OnBoundary" $
+          \(convex :: ConvexPolygon (Point 2 Rational), ZeroToOne r) ->
+            forAll (elements $ itoListOf outerBoundaryEdgeSegments convex) $ \(i,e) ->
+              let pt = interpolate r e
+              in inPolygon pt convex === OnBoundaryEdge i
 
         -- Check that inConvex matches inPolygon inside the bounding box.
         prop "inConvex pt convex == inPolygon pt convex" $
@@ -116,16 +117,6 @@ spec = describe "Convex Polygon tests" $ do
 --     property $ \(p :: SimplePolygon () R) ->
 --       forAll (choose (0, size p-1)) $ \n ->
 --         inConvex (p^.outerVertex n.core) (convexPolygon p) =/= Outside
-
---   specify "convexPolygon convex == convex" $
---     property $ \(p :: ConvexPolygon () Rational) ->
---       size (convexPolygon (p^.simplePolygon)^.simplePolygon)
---       ===
---       size (p^.simplePolygon)
-
---   specify "area (convexPolygon p) >= area p" $
---     property $ \(p :: SimplePolygon () R) ->
---       area (convexPolygon p ^. simplePolygon) >= area p
 
 --   specify "size (convexPolygon p) <= size p" $
 --     property $ \(p :: SimplePolygon () R) ->
