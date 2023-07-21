@@ -19,7 +19,6 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Transformation
 import           HGeometry.Vector
-import           Hiraffe.Graph
 import           Ipe
 import           Ipe.Color
 import           System.OsPath

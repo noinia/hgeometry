@@ -29,4 +29,5 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
+                -optF -package=hiraffe
 #-}

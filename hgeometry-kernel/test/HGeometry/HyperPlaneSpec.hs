@@ -43,9 +43,48 @@ asHyp = hyperPlaneFromEquation . hyperPlaneEquation
 
 spec :: Spec
 spec = describe "HyperPlane Tests" $ do
+         it "show myHyp3" $
+           show myHyp3 `shouldBe` "HyperPlane [2,1,-1]"
+         it "read myHyp3" $
+           read "HyperPlane [2,1,-1]" `shouldBe` myHyp3
+         showReadTests
          it "same hyperplane" $ myHyp `shouldBe` myHyp2
          -- it "in halfspace" $ do
          --   mapM_ (\(q,ans) -> (q `intersects` myHalfspace) `shouldBe` ans) myPoints
+
+         it "vertical hyperPlane through y-axis" $
+           hyperPlaneThrough (Vector2 (Point2 0 (-1)) (origin :: Point 2 Int))
+           `shouldBe` HyperPlane2 0 (-1) 0
+
+         it "as nonvertical 1" $
+           asNonVerticalHyperPlane (HyperPlane2 0 0 1) `shouldBe`
+             Just (NonVerticalHyperPlane (Vector2 0 0))
+         it "as nonvertical 2" $
+           asNonVerticalHyperPlane (HyperPlane2 (-1) (-1) (-1)) `shouldBe`
+             Just (NonVerticalHyperPlane (Vector2 (-1) (-1)))
+         it "as nonvertical 3" $
+           asNonVerticalHyperPlane (HyperPlane2 0 (-1) 0) `shouldBe`
+             Nothing
+
+         it "on side of vertical line / hyperplane" $
+           (Point2 0 1 `onSideTest` HyperPlane2 3 (-1) 0)
+           `shouldBe` LT
+         it "on side of non-vertical line / hyperplane" $
+           (Point2 0 110 `onSideTest` HyperPlane2 3 (-1) (-1))
+           `shouldBe` GT
+         it "on side of non-vertical line / hyperplane 2" $
+           (Point2 0 (-1) `onSideTest` HyperPlane2 (-1) (-1) (-1))
+           `shouldBe` EQ
+         it "on side of non-vertical line / hyperplane 3" $
+           (Point2 0 1 `onSideTest` HyperPlane2 (-1) (-1) (-1))
+           `shouldBe` GT
+         it "on side of non-vertical line / hyperplane 4" $
+           (Point2 0 0 `onSideTest` HyperPlane2 (-1) (-1) (-1))
+           `shouldBe` GT
+         it "on side of non-vertical line / hyperplane 5" $
+           (Point2 0 0 `onSideTest` HyperPlane2 (-1) (-1) (-1))
+           `shouldBe` GT
+
 
          prop "intersects nonvertical conistent" $
            \(l :: LineEQ R) (m :: LineEQ R) ->
@@ -61,6 +100,32 @@ spec = describe "HyperPlane Tests" $ do
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
+
+
+showReadTests :: Spec
+showReadTests = describe "show/read tests for" $ do
+  describe "HyperPlane1" $ do
+    prop "Double"       $ \(v :: HyperPlane 1 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: HyperPlane 1 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: HyperPlane 1 Rational)       -> (read . show) v == v
+
+  describe "HyperPlane2" $ do
+    prop "Double"       $ \(v :: HyperPlane 2 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: HyperPlane 2 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: HyperPlane 2 Rational)       -> (read . show) v == v
+
+  describe "HyperPlane3" $ do
+    prop "Double"       $ \(v :: HyperPlane 3 Double)         -> (read . show) v == v
+    prop "Int"          $ \(v :: HyperPlane 3 Int)            -> (read . show) v == v
+    prop "Rational"     $ \(v :: HyperPlane 3 Rational)       -> (read . show) v == v
+
+  -- describe "HyperPlane4" $ do
+  --   prop "Double"       $ \(v :: HyperPlane 4 Double)         -> (read . show) v == v
+  --   prop "Int"          $ \(v :: HyperPlane 4 Int)            -> (read . show) v == v
+  --   prop "Rational"     $ \(v :: HyperPlane 4 Rational)       -> (read . show) v == v
+
+
+
 
 lineA, lineB :: LineEQ R
 lineA = LineEQ 1.1352896048 (-1.0479630631)

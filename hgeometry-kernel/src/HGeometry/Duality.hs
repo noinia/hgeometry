@@ -39,7 +39,7 @@ dualPoint = Point . over (component @(d-1)) negate . view hyperPlaneCoefficients
 
 -- | Compute the dual of a hyperplane
 --
--- >>> dualHyperPlane (Point20 10 (-20))
+-- >>> dualHyperPlane (Point2 10 (-20))
 -- NonVerticalHyperPlane (Vector2 10 20)
 dualHyperPlane :: forall point d r. (Point_ point d r, Num r, 1 <= d)
                => point -> NonVerticalHyperPlane d r
@@ -47,7 +47,7 @@ dualHyperPlane = NonVerticalHyperPlane . over (component @(d-1)) negate . view v
 
 -- | Compute the line dual to a point
 --
--- >>> dualLine (Point20 10 (-20))
+-- >>> dualLine (Point2 10 (-20))
 -- LineEQ 10 20
 dualLine :: (Point_ point 2 r, Num r) => point -> LineEQ r
 dualLine = MkLineEQ . dualHyperPlane

@@ -1,6 +1,5 @@
 module PointSpec (spec) where
 
-import           Control.Exception
 import qualified Data.CircularList as C
 -- import           Data.Coerce
 import           HGeometry.Ext

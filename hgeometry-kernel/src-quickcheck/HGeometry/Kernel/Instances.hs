@@ -71,13 +71,13 @@ instance ( Arbitrary point
                    <*> (arbitrary `suchThat` (> 0))
 
 instance ( Arbitrary point
+         , Point_ point 2 r, Num r, Ord r
          , Eq point
          ) => Arbitrary (Triangle point) where
   arbitrary = do a <- arbitrary
                  b <- arbitrary `suchThat` (/= a)
-                 c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b)
+                 c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b && ccw a b c' /= CoLinear)
                  pure $ Triangle a b c
-    -- TODO: probably we don't awant to allow degenerate triangles?
 
 instance Arbitrary r => Arbitrary (LineEQ r) where
   arbitrary = LineEQ <$> arbitrary <*> arbitrary

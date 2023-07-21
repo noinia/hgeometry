@@ -17,10 +17,9 @@ module HGeometry.Triangle.Class
   ) where
 
 import Control.Lens
--- import qualified Data.Foldable as F
+import Data.Ord
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane
--- import           HGeometry.Intersection
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
@@ -67,6 +66,10 @@ triangleSignedArea2X (Triangle_ a b c) = sum [ p^.xCoord * q^.yCoord - q^.xCoord
 {-# INLINE triangleSignedArea2X #-}
 
 -- | Make sure that the triangles vertices are given in counter clockwise order
+--
+-- >>> let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
+-- >>> toCounterClockwiseTriangle t
+-- Triangle (Point2 0 0) (Point2 (-1) 0) (Point2 0 (-1))
 toCounterClockwiseTriangle :: ( Num r, Eq r
                               , Point_ point 2 r
                               , Triangle_ triangle point
@@ -79,16 +82,25 @@ toCounterClockwiseTriangle t@(Triangle_ a b c)
 
 -- | Get the three halfplanes such that the triangle is the intersection of those
 -- halfspaces.
+--
+-- >>> let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
+-- >>> mapM_ print $ intersectingHalfPlanes t
+-- "HalfSpace Negative (HyperPlane [0,0,1])"
+-- "HalfSpace Positive (HyperPlane [-1,-1,-1])"
+-- "HalfSpace Negative (HyperPlane [0,-1,0])"
 intersectingHalfPlanes :: ( Triangle_ triangle point
                           , Point_ point 2 r
-                          , Num r, Eq r
+                          , Num r, Ord r
                           )
                        => triangle
                        -> Vector 3 (HalfSpace 2 r)
 intersectingHalfPlanes (toCounterClockwiseTriangle -> Triangle_ u v w) =
-    Vector3 (above u v) (above v w) (above w u)
+    Vector3 (leftPlane u v) (leftPlane v w) (leftPlane w u)
   where
-    above p q = HalfSpace Positive . hyperPlaneThrough $ Vector2 p q
+    leftPlane p q = let dir = if (p^.xCoord, Down $ p^.yCoord) <= (q^.xCoord, Down $ q^.yCoord)
+                                 -- for verical planes, the left side counts as below
+                              then Positive else Negative
+                    in HalfSpace dir . hyperPlaneThrough $ Vector2 p q
 
 
 -- | Given a point q and a triangle, q inside the triangle, get the baricentric

@@ -52,7 +52,6 @@ import           HGeometry.PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
-import           Hiraffe.Graph
 import           Ipe.Attributes
 import qualified Ipe.Attributes as IA
 import           Ipe.Color (IpeColor (..))

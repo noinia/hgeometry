@@ -2,19 +2,21 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlane.Internal
-  ( HyperPlane(..)
+  ( HyperPlane(..,HyperPlane2, HyperPlane3)
   , MkHyperPlaneConstraints
   , cmpInDirection
   ) where
 
-import Control.Lens hiding (cons)
-import Data.Type.Ord
-import GHC.TypeNats
-import HGeometry.HyperPlane.Class
--- import HGeometry.Line.Class
-import HGeometry.Point.Class
-import HGeometry.Properties
-import HGeometry.Vector
+import           Control.Lens hiding (cons)
+import qualified Data.Foldable as F
+import           Data.Functor.Classes
+import           Data.Type.Ord
+import           GHC.TypeNats
+import           HGeometry.HyperPlane.Class
+import           HGeometry.Point.Class
+import           HGeometry.Properties
+import           HGeometry.Vector
+import           Text.Read (Read (..), readListPrecDefault)
 
 --------------------------------------------------------------------------------
 
@@ -24,21 +26,48 @@ import HGeometry.Vector
 -- $setup
 -- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1)
 
--- | A Hyperplane in d-dimensions, described by
+-- | A Hyperplane h in d-dimensions, described by a vector of
+-- coefficients (a_0,..,a_d).
 --
 -- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
 -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
 newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
+
+-- | Construct a Hyperplane, i.e. a line in R^2
+--
+-- HyperPlane2 c a b represents the line ax + by + c = 0
+pattern HyperPlane2       :: r -> r -> r -> HyperPlane 2 r
+pattern HyperPlane2 c a b = HyperPlane (Vector3 c a b)
+{-# COMPLETE HyperPlane2 #-}
+
+-- | Construct a plane in R^3
+--
+-- HyperPlane3 d a b c represnest the plane ax + by + cz + d = 0
+pattern HyperPlane3         :: r -> r -> r -> r -> HyperPlane 3 r
+pattern HyperPlane3 d a b c = HyperPlane (Vector4 d a b c)
+{-# COMPLETE HyperPlane3 #-}
 
 type instance NumType   (HyperPlane d r) = r
 type instance Dimension (HyperPlane d r) = d
 
 
 deriving newtype instance Eq (Vector (d+1) r) => Eq (HyperPlane d r)
-deriving stock instance Show (Vector (d+1) r) => Show (HyperPlane d r)
 
---------------------------------------------------------------------------------
+instance (Show r, Foldable (Vector (d+1))) => Show (HyperPlane d r) where
+  showsPrec k (HyperPlane v) = showParen (k > app_prec) $
+                               showString "HyperPlane " .
+                               showsPrec 11 (F.toList v)
+    where
+      app_prec = 10
 
+instance ( Read r, Has_ Vector_ (d+1) r) => Read (HyperPlane d r) where
+  readPrec = readData $ readUnaryWith parseVec "HyperPlane" HyperPlane
+    where
+      parseVec = do lst <- readPrec
+                    case vectorFromList @(Vector (d+1) r) lst of
+                      Just v -> pure v
+                      _      -> fail "HyperPlane.read expected d+1 reals"
+  readListPrec = readListPrecDefault
 
 --------------------------------------------------------------------------------
 

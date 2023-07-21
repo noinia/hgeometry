@@ -72,12 +72,18 @@ toCounterClockwiseOrder pg
 -- * Show
 
 -- | helper implementation for show
-showSimplePolygon           :: ( SimplePolygon_ simplePolygon point r
-                               , Show point
-                               )
-                          => String -- ^ Polygon type name
-                          -> simplePolygon -> String
-showSimplePolygon name pg = name <> " " <> show (pg^..outerBoundary)
+showsPrecSimplePolygon           :: ( SimplePolygon_ simplePolygon point r
+                                    , Show point
+                                    )
+                                 => String -- ^ Polygon type name
+                                 -> Int
+                                 -> simplePolygon -> String
+showsPrecSimplePolygon name k pg = showParen (k > app_prec) $
+                                   showString name . showChar ' ' .
+                                   showsPrec 11 (pg^..outerBoundary)
+  where
+    app_prec = 10
+
 
 --------------------------------------------------------------------------------
 -- * Read

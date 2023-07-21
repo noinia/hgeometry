@@ -17,7 +17,7 @@ import qualified Linear.V3 as V3
 import qualified Linear.V4 as V4
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck (Arbitrary(..), suchThat)
+import           Test.QuickCheck (Arbitrary(..), suchThat, (==>), (===))
 import           Test.QuickCheck.Instances ()
 --------------------------------------------------------------------------------
 
@@ -43,18 +43,20 @@ instance ( Arbitrary m
 spec = describe "Matrix tests" $ do
          describe "determinant the same as linear" $ do
            prop "2d" $
-             \(NonZeroM (m :: Matrix 2 2 R)) -> det m == Linear.Matrix.det22 (toLinear2 m)
+             \(NonZeroM (m :: Matrix 2 2 R)) -> det m === Linear.Matrix.det22 (toLinear2 m)
            prop "3d" $
-             \(NonZeroM (m :: Matrix 3 3 R)) -> det m == Linear.Matrix.det33 (toLinear3 m)
+             \(NonZeroM (m :: Matrix 3 3 R)) -> det m === Linear.Matrix.det33 (toLinear3 m)
            prop "4d" $
-             \(NonZeroM (m :: Matrix 4 4 R)) -> det m == Linear.Matrix.det44 (toLinear4 m)
+             \(NonZeroM (m :: Matrix 4 4 R)) -> det m === Linear.Matrix.det44 (toLinear4 m)
          describe "inverse the same as linear" $ do
            prop "2d" $
              \(NonZeroM (m :: Matrix 2 2 R)) ->
-               toLinear2 (inverseMatrix m) == Linear.Matrix.inv22 (toLinear2 m)
+               det m /= 0 ==>
+                 toLinear2 (inverseMatrix m) === Linear.Matrix.inv22 (toLinear2 m)
            prop "3d" $
              \(NonZeroM (m :: Matrix 3 3 R)) ->
-               toLinear3 (inverseMatrix m) == Linear.Matrix.inv33 (toLinear3 m)
+               det m /= 0 ==>
+                 toLinear3 (inverseMatrix m) === Linear.Matrix.inv33 (toLinear3 m)
            -- prop "4" $
            --   \(NonZeroM (m :: Matrix 4 4 R)) ->
            --     toLinear4 (inverseMatrix m) == Linear.Matrix.inv44 (toLinear4 m)

@@ -31,6 +31,12 @@ spec = describe "halfspace Tests" $ do
          describe "in halfspace" $ do
            mapM_ (\(q,ans) -> it (show q) $ do
                      (q `intersects` myHalfspace) `shouldBe` ans) myPoints
+         it "on boundary of non-vertical Positive hyperplane 2" $
+           (Point2 0 (-1) `intersects` HalfSpace Positive (HyperPlane2 (-1) (-1) (-1)))
+           `shouldBe` True
+         it "on boundary of non-vertical Negative hyperplane 2" $
+           (Point2 0 (-1) `intersects` HalfSpace Negative (HyperPlane2 (-1) (-1) (-1)))
+           `shouldBe` True
 
 
          -- it "intersect tests" $ do

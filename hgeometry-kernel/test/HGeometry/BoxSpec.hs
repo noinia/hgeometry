@@ -2,12 +2,11 @@ module HGeometry.BoxSpec where
 
 import Control.Lens
 import Data.Maybe
-import Data.Ratio
 import HGeometry.Box
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Kernel.Instances ()
-import HGeometry.Kernel.Test.Box
+import HGeometry.Kernel.Test.Box()
 import HGeometry.Line.LineEQ
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational (RealNumber)

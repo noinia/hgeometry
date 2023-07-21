@@ -128,7 +128,8 @@ class ( NumType hyperPlane ~ r
 
   -- | Test if a point lies on a hyperplane. For non-vertical
   -- hyperplanes, returns whether the point is *above* the hyperplane
-  -- or not.
+  -- or not. For vertical hyperplanes, we return 'LT' when the point
+  -- is on the left.
   --
   -- >>> Point2 0 2 `onSideTest` myHyperPlane2
   -- EQ
@@ -137,6 +138,8 @@ class ( NumType hyperPlane ~ r
   -- >>> Point2 1 5 `onSideTest` myHyperPlane2
   -- GT
   -- >>> Point2 4 5 `onSideTest` myHyperPlane2
+  -- LT
+  -- >>> Point2 0 0 `onSideTest` HyperPlane 1 (-1) 0
   -- LT
   --
   -- >>> Point2 0 2 `onSideTest` myNVHyperPlane2
@@ -173,7 +176,12 @@ class HyperPlane_ hyperPlane d r
   --
   -- construct the hyperplane form it.
   --
-  --
+  -- >>> Vector3 "c" "a" "b" -- the line a*x + b*y + c = 0
+  -- HyperPlane ["c","a","b"]
+  -- >>> Vector3 10 2 1 -- the line 2*x + 1*y + 10 = 0
+  -- HyperPlane [10,2,1]
+  -- >>> Vector4 "d" "a" "b" "c" -- the plane a*x + b*y + c*z + d = 0
+  -- HyperPlane ["d","a","b","c"]
   hyperPlaneFromEquation :: HyperPlaneFromEquationConstraint hyperPlane d r
                          => Vector (d+1) r -> hyperPlane
 
@@ -191,6 +199,11 @@ class HyperPlane_ hyperPlane d r
     where
       a0 = negate $ (q^.vector) `dot` n
   {-# INLINE fromPointAndNormal #-}
+
+
+-- -- | returns a point that lies on the hyperpalne
+-- pointOn :: hyperPlane -> Point d r
+
 
 --------------------------------------------------------------------------------
 

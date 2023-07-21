@@ -50,7 +50,6 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Triangle
-import           Hiraffe.Graph
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types

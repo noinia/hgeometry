@@ -257,8 +257,9 @@ instance HasDeterminant 4 where
 
 -- | Class of matrices that are invertible.
 class Invertible n where
-  -- | given a square \(n \times n\) matrix A, computes the \(n \times n\) matrix B such that
-  -- A !*! B = identityMatrix
+  -- | given an invertable square \(n \times n\) matrix A, computes
+  -- the \(n \times n\) matrix B such that A !*! B = identityMatrix
+  --
   inverseMatrix :: ( Fractional r
                    , Matrix_ matrix n n r
                    , Has_ Vector_ n r
