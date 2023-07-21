@@ -1,5 +1,13 @@
--- | Line segment intersections in \(O(n^2)\) by checking
---   all pairs.
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.LineSegment.Intersection.Naive
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Line segment intersections in \(O(n^2)\) by checking all pairs.
+--
+--------------------------------------------------------------------------------
 module HGeometry.LineSegment.Intersection.Naive
   ( intersections
   ) where
@@ -28,7 +36,7 @@ intersections :: ( Ord r, Fractional r
               => [lineSegment] -> Intersections lineSegment
 intersections = foldMap collect . uniquePairs
 
-collect (Two s s') = case s `intersect`
+-- collect (Two s s') = case s `intersect`
 
 
 -- -- | Test if the two segments intersect, and if so add the segment to the map
