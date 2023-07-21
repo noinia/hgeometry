@@ -71,3 +71,6 @@ instance ( HyperPlane_ boudingHyperPlane d r, Ord r, Num r
     | otherwise        = Nothing
 
 -- type IntersectionOf (LinePV d r) (HalfSpaceF boudingHyperPlane) = Maybe (Point d r)
+
+
+--------------------------------------------------------------------------------

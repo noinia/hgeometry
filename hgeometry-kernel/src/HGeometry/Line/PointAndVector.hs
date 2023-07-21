@@ -132,9 +132,11 @@ instance (NFData (Vector d r)) => NFData (LinePV d r)
 -- deriving instance (Arity d, Eq r)     => Eq (LinePV d r)
 
 
+instance {-# OVERLAPPING #-} (Ord r, Num r) => Eq (LinePV 2 r) where
+  l@(LinePV p _) == l' = l `isParallelTo2` l' && p `onLine2` l'
 
---instance (Arity d, Eq r, Fractional r) => Eq (LinePV d r) where
---  l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
+-- instance (Eq r, Fractional r) => Eq (LinePV d r) where
+--  l@(LinePV p _) == m = l `isParallelTo` m && p `onLine` m
 
 
 -- | Test if point q lies on line l
@@ -160,6 +162,8 @@ onLine q (LinePV p v) = let q' = q^.asPoint
 
 -- ** Functions on lines
 
+
+
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
 isIdenticalTo                             :: Eq (Vector d r)
@@ -172,27 +176,25 @@ isIdenticalTo                             :: Eq (Vector d r)
 --      forall (l1 :: forall r. LinePV 2 r) l2. isParallelTo l1 l2 = isParallelTo2 l1 l2
 -- #-}
 
--- -- | Check whether two lines are parallel
--- isParallelTo2 :: (Eq r, Num r) => LinePV 2 r -> LinePV 2 r -> Bool
--- isParallelTo2 (Line _ (Vector2 ux uy)) (Line _ (Vector2 vx vy)) = denom == 0
---     where
---       denom       = vy * ux - vx * uy
+-- | Check whether two lines are parallel
+isParallelTo2                            :: (Eq r, Num r) => LinePV 2 r -> LinePV 2 r -> Bool
+isParallelTo2 (LinePV _ (Vector2 ux uy))
+              (LinePV _ (Vector2 vx vy)) = denom == 0
+    where
+      denom = vy * ux - vx * uy
 
--- -- | Specific 2d version of testing if apoint lies on a line.
--- onLine2 :: (Ord r, Num r, Point_ point 2 r) => point -> LinePV 2 r -> Bool
--- p `onLine2` (Line q v) = ccw (pointFromPoint p) q (q .+^ v) == CoLinear
+-- | Specific 2d version of testing if apoint lies on a line.
+onLine2                  :: (Ord r, Num r, Point_ point 2 r) => point -> LinePV 2 r -> Bool
+q `onLine2` (LinePV p v) = ccw (q^.asPoint) p (p .+^ v) == CoLinear
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
 type instance Intersection (LinePV 2 r) (LinePV 2 r) =
   Maybe (LineLineIntersection (LinePV 2 r))
 
-instance ( Ord r
-         , Fractional r, Eq r -- (VectorFamily 2 r)
-         -- , OptCVector_ 2 r, OptCVector_ 3 r
-         -- , OptMetric_ 2 r
+instance ( Ord r, Num r
          ) => LinePV 2 r `HasIntersectionWith` LinePV 2 r where
   l1 `intersects` l2@(LinePV q _) =
-    not (l1 `isParallelTo` l2) || q `onLine` l1
+    not (l1 `isParallelTo2` l2) || q `onLine2` l1
 
 
 instance ( Ord r
@@ -201,8 +203,8 @@ instance ( Ord r
          -- , OptMetric_ 2 r, Eq (VectorFamily 2 r)
          ) => LinePV 2 r `IsIntersectableWith` LinePV 2 r where
   l@(LinePV p ~(Vector2 ux uy)) `intersect` (LinePV q ~v@(Vector2 vx vy))
-      | areParallel = if q `onLine` l then Just $ Line_x_Line_Line l
-                                      else Nothing
+      | areParallel = if q `onLine2` l then Just $ Line_x_Line_Line l
+                                       else Nothing
       | otherwise   = Just $ Line_x_Line_Point r
     where
       r = q .+^ (alpha *^ v)

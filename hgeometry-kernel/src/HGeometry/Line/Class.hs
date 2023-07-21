@@ -15,7 +15,6 @@ module HGeometry.Line.Class
   , verticalLine, horizontalLine
   ) where
 
-
 import HGeometry.HyperPlane.Class
 import HGeometry.Point.Class
 import HGeometry.Point.PointF
@@ -50,6 +49,8 @@ lineThrough p q = fromPointAndVec p (q .-. p)
 
 -- | Synonym for a line-like class.
 type Line2_ line r = (Line_ line 2 r, HyperPlane_ line 2 r)
+
+
 
 -- | Vertical line with a given X-coordinate.
 verticalLine   :: forall r line.

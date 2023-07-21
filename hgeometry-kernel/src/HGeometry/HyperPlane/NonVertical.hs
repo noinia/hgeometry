@@ -13,6 +13,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.HyperPlane.NonVertical
   ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
+  , Plane
+  , Plane_, pattern Plane_
   ) where
 
 import Control.Lens hiding (snoc, uncons)
@@ -44,11 +46,15 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 
-deriving instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
-deriving instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
+deriving stock instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
+deriving stock instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
 
-deriving instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
-deriving instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
+deriving stock instance Read (Vector d r) => Read (NonVerticalHyperPlane d r)
+deriving stock instance Show (Vector d r) => Show (NonVerticalHyperPlane d r)
+
+deriving stock instance Functor     (Vector d) => Functor     (NonVerticalHyperPlane d)
+deriving stock instance Foldable    (Vector d) => Foldable    (NonVerticalHyperPlane d)
+deriving stock instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
 
 instance ( MkHyperPlaneConstraints d r
          , 2 <= d
@@ -88,14 +94,26 @@ instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
          , Num r
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
-  -- >>> hyperPlaneCoefficients myHyperPlane
+  -- >>> myHyperPlane^.hyperPlaneCoefficients
   -- Vector2 1 2
-  hyperPlaneCoefficients (NonVerticalHyperPlane v) = v
+  hyperPlaneCoefficients = coerced
 
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
 
+
+-- | Shorthand for non-vertical hyperplanes in R^3
+type Plane = NonVerticalHyperPlane 3
+
 -- | Constructs a Plane in R^3 for the equation z = ax + by + c
-pattern Plane       :: r -> r -> r -> NonVerticalHyperPlane 3 r
+pattern Plane       :: r -> r -> r -> Plane r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
 {-# COMPLETE Plane #-}
+
+-- | Shorthand for Non-vertical hyperplanes in R^3
+type Plane_ plane = NonVerticalHyperPlane_ plane 3
+
+-- | Destructs a Plane in R^3 into the equation z = ax + by + c
+pattern Plane_       :: Plane_ plane r => r -> r -> r -> plane
+pattern Plane_ a b c <- (view hyperPlaneCoefficients -> (Vector3 a b c))
+{-# COMPLETE Plane_ #-}

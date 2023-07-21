@@ -53,6 +53,7 @@ common setup
       , linear                     >= 1.21       && < 2
       , data-clist                 >= 0.2        && < 1
       , semialign                  >= 1.2        && < 2
+      , data-default-class         >= 0.1        && < 1
 
       , ghc-typelits-natnormalise  >= 0.7.7      && < 1
       , ghc-typelits-knownnat      >= 0.7.6      && < 1
@@ -109,13 +110,19 @@ library
         HGeometry.Line
         HGeometry.Line.Class
         HGeometry.Line.PointAndVector
+
         HGeometry.Line.LineEQ
+        HGeometry.Line.NonVertical.Class
 
         HGeometry.HyperPlane
         HGeometry.HyperPlane.Class
         HGeometry.HyperPlane.NonVertical
 
+        HGeometry.Duality
+
         HGeometry.HalfSpace
+
+        -- HGeometry.HalfPlane
 
         HGeometry.Box
         HGeometry.Box.Class

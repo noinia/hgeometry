@@ -14,18 +14,17 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.LineEQ
   ( LineEQ(LineEQ, MkLineEQ)
-  , slope, intercept
-
-
   , evalAt'
+  , module HGeometry.Line.NonVertical.Class
   ) where
 
-import Control.Lens((^.), Lens', lens)
+import Control.Lens((^.), Lens', coerced)
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
 import HGeometry.Line.Class
 import HGeometry.Line.Intersection
+import HGeometry.Line.NonVertical.Class
 import HGeometry.Point
 import HGeometry.Properties(NumType, Dimension)
 import HGeometry.Vector
@@ -45,20 +44,6 @@ pattern LineEQ a b = MkLineEQ (NonVerticalHyperPlane (Vector2 a b))
 type instance NumType   (LineEQ r) = r
 type instance Dimension (LineEQ r) = 2
 
--- | Lens to access the slope of a line
---
--- >>> (LineEQ 10 20) ^. slope
--- 10
-slope :: Lens' (LineEQ r) r
-slope = lens (\(LineEQ a _) -> a) (\(LineEQ _ b) a -> LineEQ a b)
-
--- | Lens to access the intercept (i.e. the value at which it
--- intersects the y-axis) of a line.
---
--- >>> (LineEQ 10 20) ^. intercept
--- 20
-intercept :: Lens' (LineEQ r) r
-intercept = lens (\(LineEQ _ b) -> b) (\(LineEQ a _) b -> LineEQ a b)
 
 -- deriving instance Eq  (VectorFamily' 2 r) => Eq  (LineEQ r)
 -- deriving instance Ord (VectorFamily' 2 r) => Ord (LineEQ r)
@@ -107,7 +92,7 @@ instance ( MkHyperPlaneConstraints 2 r
 instance ( MkHyperPlaneConstraints 2 r, Num r
          ) => NonVerticalHyperPlane_ (LineEQ r) 2 r where
   evalAt p = evalAt' $ p^.xCoord
-  hyperPlaneCoefficients (MkLineEQ h) = hyperPlaneCoefficients h
+  hyperPlaneCoefficients = coerced
 
 instance Line_ (LineEQ r) 2 r where
   fromPointAndVec p (Vector2 vx vy) =

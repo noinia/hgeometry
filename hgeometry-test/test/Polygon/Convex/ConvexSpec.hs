@@ -6,7 +6,6 @@ module Polygon.Convex.ConvexSpec
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
-import           Control.Monad ((>=>))
 import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
 import           Golden
@@ -23,7 +22,6 @@ import           HGeometry.Vector
 import           Hiraffe.Graph
 import           Ipe
 import           Ipe.Color
-import           Paths_hgeometry_test
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
@@ -41,14 +39,11 @@ spec :: Spec
 spec = do
   testCases [osp|Polygon/Convex/convexTests.ipe|]
 
-
 --------------------------------------------------------------------------------
 
-getDataFileName' :: OsPath -> IO OsPath
-getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 testCases    :: OsPath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading ConvexTests file" $
                    expectationFailure . unwords $
                      [ "Failed to read ipe file", show fp, ":", show e]

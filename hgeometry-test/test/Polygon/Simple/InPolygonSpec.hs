@@ -3,23 +3,18 @@
 module Polygon.Simple.InPolygonSpec (spec) where
 
 import Control.Lens
-import Control.Monad ((>=>))
 import Data.Proxy
+import Golden
 import HGeometry.Boundary
 import HGeometry.Ext
 import HGeometry.Point
 import HGeometry.Polygon.Simple
 import Ipe
-import Paths_hgeometry_test
 import System.OsPath
 import Test.Hspec
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-getDataFileName' :: OsPath -> IO OsPath
-getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
-
 
 -- type R = RealNumber 5
 
@@ -29,7 +24,7 @@ spec = do
   numericalSpec
 
 testCases    :: OsPath -> Spec
-testCases fp = runIO (readInputFromFile =<< getDataFileName' fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

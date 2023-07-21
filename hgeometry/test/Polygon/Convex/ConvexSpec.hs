@@ -3,39 +3,24 @@ module Polygon.Convex.ConvexSpec
   ) where
 
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
--- import qualified Algorithms.Geometry.Diameter.Naive        as Naive
-
--- import           Control.Arrow                ((&&&))
 import           Control.Lens
--- import           Control.Monad.Random
-import           Data.Coerce
 import           HGeometry.Ext
-import qualified Data.Foldable as F
-import           HGeometry.Boundary
-import           HGeometry.Box (boundingBox)
--- import           HGeometry.BoxSpec (arbitraryPointInBoundingBox)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Random
-import           HGeometry.Polygon.Convex.Class
-import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Class
+import           HGeometry.Transformation
 import           System.Random.Stateful
 import           Control.Monad.State
 import           HGeometry.Point
--- import           HGeometry.PolygonSpec    ()
 import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Number.Real.Rational
--- import qualified Data.Vector.Circular as CV
--- import           Paths_hgeometry
 import           Test.Hspec
-import           Test.QuickCheck(Arbitrary (..), choose, elements, forAll, property,
-                                  sized, suchThat, (=/=), (===), (==>), (.&&.))
+import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose )
 import           Test.QuickCheck.Instances ()
 import           Test.Hspec.QuickCheck
 import           Data.Default.Class
 import           Hiraffe.Graph
 import           HGeometry.Instances ()
--- import           Test.Util (ZeroToOne (..))
 
 --------------------------------------------------------------------------------
 
@@ -59,7 +44,7 @@ instance Arbitrary (ConvexPolygon (Point 2 Rational)) where
 spec :: Spec
 spec = describe "Convex Polygon tests" $ do
         prop "quickcheck minkowskisum same as naive" $ \(CP p :: CP Rational) (CP q) ->
-          minkowskiSum p q == naiveMinkowski p q
+          minkowskiSum p (centerAtOrigin q) == naiveMinkowski p (centerAtOrigin q)
 --   specify "∀ convex. verifyConvex convex == True" $
 --     property $ \(convex :: ConvexPolygon () Rational) ->
 --       verifyConvex convex
@@ -150,6 +135,14 @@ spec = describe "Convex Polygon tests" $ do
 
 
 --------------------------------------------------------------------------------
+
+-- | Center the given polygon at the origin. I.e. places the centroid at the origin.
+centerAtOrigin    :: ( SimplePolygon_ polygon  point r
+                     , Fractional r
+                     , IsTransformable polygon
+                     ) => polygon -> polygon
+centerAtOrigin pg = translateBy (origin .-. centroid pg) pg
+
 
 naiveMinkowski     :: ( Ord r, Num r
                       , ConvexPolygon_ convexPolygon  point r

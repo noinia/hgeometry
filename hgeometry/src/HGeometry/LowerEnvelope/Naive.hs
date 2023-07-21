@@ -1,85 +1,105 @@
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.Naive
-  ( lowerEnvelope
-  , triangulatedLowerEnvelope
+  ( lowerEnvelopeVertexForm
+  -- , lowerEnvelope
+  -- , triangulatedLowerEnvelope
+
+  , asVertex
   , belowAll
   ) where
 
-import           Control.Applicative
+--------------------------------------------------------------------------------
+
 import           Control.Lens
-import           Control.Monad ((<=<))
-import qualified Data.Vector as Boxed
+import           Control.Monad (guard)
+import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
-import           HGeometry.LowerEnvelope.Triangulate
-import           HGeometry.LowerEnvelope.Type
+import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
+import           HGeometry.Line
+import           HGeometry.Line.LineEQ
+import           HGeometry.LowerEnvelope.VertexForm
 import           HGeometry.Point
-import           Witherable
+import           HGeometry.Properties
+import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
+-- * Computing a lower envelope in vertex form
 
--- | Brute force implementation of the lower envelope.
+-- | Brute force implementation that computes the vertex form of the
+-- lower envelope, by explicitly considering every triple of planes.
 --
--- running time: \(O(n^4)\)
-lowerEnvelope    :: (Foldable f, Ord r, Fractional r)
-                 => f (Plane r) -> LowerEnvelope [] Boxed.Vector r
-lowerEnvelope hs = LowerEnvelope vertices' halfEdges'
+-- pre: the input forms a *set* of planes, i.e. no duplicates
+--
+--
+-- general position assumptions: None. Though keep in mind that
+-- e.g. if all planes are parallel there are no vertices.
+--
+--
+--
+-- running time: \(O(n^4 )\)
+lowerEnvelopeVertexForm    :: ( Plane_ plane r
+                              , Ord r, Fractional r, Foldable f, Ord plane
+                              ) => f plane -> VertexForm plane
+lowerEnvelopeVertexForm hs = foldMap (\t -> case asVertex hs t of
+                                              Nothing -> mempty
+                                              Just v  -> singleton v
+                                     ) $ uniqueTriplets hs
+
+-- | Given all planes, and a triple, computes if the triple defines a
+-- vertex of the lower envelope, and if so returns it.
+asVertex                       :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
+                               => f plane -> Three plane -> Maybe (LEVertex plane)
+asVertex hs t@(Three h1 h2 h3) = do v <- intersectionPoint t
+                                    guard (v `belowAll` hs)
+                                    pure $ LEVertex v (Set.fromList [h1,h2,h3])
+
+-- | test if v lies below (or on) all the planes in hs
+belowAll      :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
+belowAll v hs = all (\h -> onSideTest v h /= GT) hs
+{-# INLINE belowAll #-}
+
+
+
+
+{-
+-- | simple implementation of the lower envelope.
+--
+-- running time: \(O(n^4 )\)
+lowerEnvelope    :: ( Plane_ plane r
+                    , Ord r, Fractional r, Foldable f, Ord plane
+                    ) => f plane -> LowerEnvelope plane
+lowerEnvelope hs = undefined
+
+triangulatedLowerEnvelope    :: ( Plane_ plane r
+                                , Ord r, Fractional r, Foldable f
+                                ) => f plane -> LowerEnvelope plane
+triangulatedLowerEnvelope hs = undefined
+
+-}
+--------------------------------------------------------------------------------
+
+{-
+
+-- TODO: attach the two defining halfplanes to the result
+
+-- | Given two halfplanes h and h' computes the halfplane where h lies
+-- vertically below h'.
+liesBelowIn                                :: (Plane_ plane r, Ord r, Fractional r)
+                                           => plane -> plane -> Maybe (HalfPlane r)
+liesBelowIn (Plane_ a b c) (Plane_ a' b' c') = case b `compare` b' of
+                                                 LT -> Just $ Above (LineEQ d e)
+                                                 GT -> Just $ Below (LineEQ d e)
+                                                 EQ -> case a `compare` a' of
+                                                         LT -> Just $ RightOf f
+                                                         GT -> Just $ LeftOf f
+                                                         EQ -> Nothing
   where
-    vertices' = mapMaybe (guarded (`belowAll` hs) <=< asVertex)
-              $ uniqueTriplets hs
+    d = (a-a') / (b - b')
+    e = (c-c') / (b - b')
+    f = (c-c') / (a - a')
 
-    halfEdges' = sortBy aroundOrigins . mapMaybe asHalfEdge
-               $ uniquePairs vertices'
-
-    -- TODO: how do we represent the unbounded edges; I guess we
-    -- should have one half-edge pointing to the unbounded vertex
-
-    halfEdges'' = foldMap (\u -> let Vector h1 h2 h3 = u^.definers
-                                 in
-                             [ PartialEdge u h1 h2 -- how do we nknow the order?
-                             , PartialEdge u h2 h3
-                             , PartialEdge u h3 h1
-                             ]
-                          ) vertices'
-
-data PartialEdge r = PartialEdge (Vertex r) -- origin
-                                 (Plane r) -- leftPlane
-                                 (Plane r) -- rightPlane
-
-
--- | Triangulated version of a lower envelope
---
--- running time: \(O(n^4)\)
-triangulatedLowerEnvelope :: (Foldable f, Ord r, Fractional r)
-                          => f (Plane r) -> LowerEnvelope [] Boxed.Vector r
-triangulatedLowerEnvelope = triangulate . lowerEnvelope
-
-
---------------------------------------------------------------------------------
-
--- | Test if the given vertex lies on or below all the given planes
---
--- \(O(n)\)
-belowAll   :: (Foldable f, Num r, Ord r) => Vertex r -> f (Plane r) -> Bool
-belowAll v = all ((v^.location) `notAbove`)
-
--- | Returns True when the point is not above the plane, in otherwords
--- when the plane actually passes above (or through) the point.
-notAbove                  :: (Ord r, Num r) => Point 3 r -> Plane r -> Bool
-notAbove (Point3 x y z) h = not $ z > evalAt (Point2 x y) h
-
---------------------------------------------------------------------------------
-
-
-
--- horizontalPlane c = Plane 0 0 c
-
-
-
---------------------------------------------------------------------------------
-
--- | Given an element and a predicate, return the element only if the
--- predicate is true.
-guarded                 :: Alternative f => (a -> Bool) -> a -> f a
-guarded p v | p v       = pure v
-            | otherwise = empty
+-}
