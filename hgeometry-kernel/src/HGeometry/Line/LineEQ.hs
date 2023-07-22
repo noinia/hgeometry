@@ -148,18 +148,16 @@ type instance Intersection (HyperPlane 2 r) (HyperPlane 2 r) =
 
 instance ( Num r, Eq r
          ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
-  l@(HyperPlane2 c a b) `intersects` h@(HyperPlane2 c' a' b') =
-    not $ a
-
-
-  l `intersects` h = not (isParallelTo l h) || parallelSame l h
+  -- l@(HyperPlane2 c a b) `intersects` h@(HyperPlane2 c' a' b') =
+  --   not $ a
+  l `intersects` h = not (isParallelTo l h)  -- || parallelSame l h
     -- if they are not parallel the hyperplanes (= lines) are
     -- guaranteed to intersect.  if they are parallel (i.e. on the
     -- righthand side), the lines intersect only if they have a point
     -- in common; i.e. l and h actually describe the same line
 
-parallelSame
-  | b /= 0 =
+-- parallelSame
+--   | b /= 0 =
 
 -- instance ( Eq r, Fractional r
 --          ) => IsIntersectableWith (HyperPlane 2 r) (HyperPlane 2 r) where

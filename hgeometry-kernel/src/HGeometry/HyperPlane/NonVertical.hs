@@ -18,7 +18,7 @@ module HGeometry.HyperPlane.NonVertical
   , Plane_, pattern Plane_
   ) where
 
-import           Control.Lens hiding (snoc, uncons)
+import           Control.Lens hiding (snoc, uncons, unsnoc)
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import           Data.Type.Ord
@@ -33,15 +33,17 @@ import           Text.Read (Read (..), readListPrecDefault)
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> let myHyperPlane = NonVerticalHyperPlane $ Vector2 1 2
---
+-- >>> let myLineAsNV  = NonVerticalHyperPlane (Vector2 1 2) :: NonVerticalHyperPlane 2 Double
+-- >>> let myOtherLine = HyperPlane2 4 3 2                   :: HyperPlane 2 Double
+-- >>> let myPlane     = HyperPlane3 10 2 3 (-1)             :: HyperPlane 3 Double
 
 -- | A non-vertical Hyperplane described by \( x_d = a_d + \sum_{i=1}^{d-1}
 -- a_i * x_i \) where \(\langle a_1,..,a_d \rangle \) are the
 -- coefficients of te hyperplane.
 --
 --
--- e.g. the 'myHyperPlane' defines the hyperplane described by
+-- e.g. the 'myLineAsNV' defines the hyperplane (i.e. the line)
+-- described by
 --
 -- y = 2 + 1*x
 --
@@ -81,6 +83,10 @@ instance ( Read r, Has_ Vector_ d r) => Read (NonVerticalHyperPlane d r) where
 -- Just (NonVerticalHyperPlane [10,1,2])
 -- >>> asNonVerticalHyperPlane $ HyperPlane 10 1 0
 -- Nothing
+-- >>> asNonVerticalHyperPlane myOtherLine
+-- Just (NonVerticalHyperPlane [-1.5,-2.0])
+-- >>> asNonVerticalHyperPlane myPlane
+-- Just (NonVerticalHyperPlane [2.0,3.0,10.0])
 asNonVerticalHyperPlane :: ( HyperPlane_ hyperPlane d r
                            , Fractional r, Eq r, 1 <= d
                            )
@@ -94,16 +100,19 @@ asNonVerticalHyperPlane'   :: forall d r. ( Has_ Vector_ d r, Has_ Vector_ (d+1)
                            => Vector (d+1) r -> Maybe (NonVerticalHyperPlane d r)
 asNonVerticalHyperPlane' e
     | ad == 0   = Nothing
-    | otherwise = Just $ NonVerticalHyperPlane $ a ^/ (-ad)
+    | otherwise = Just $ NonVerticalHyperPlane $ a ^/ (negate ad)
   where
     (a0 :: r, as :: Vector d r) = uncons e
     ad = as^.last
     a  = as&last .~ a0
 {-# INLINE asNonVerticalHyperPlane' #-}
 
+
+
 instance ( MkHyperPlaneConstraints d r
          , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
+
 
 instance ( MkHyperPlaneConstraints d r
          , 2 <= d
@@ -137,7 +146,7 @@ instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
          , Num r
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
-  -- >>> myHyperPlane^.hyperPlaneCoefficients
+  -- >>> myLineAsNV^.hyperPlaneCoefficients
   -- Vector2 1 2
   hyperPlaneCoefficients = coerced
 
@@ -145,7 +154,13 @@ instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
 
 
 
+--------------------------------------------------------------------------------
+-- * Specific 2D Functions
 
+-- -- | Constructs a Line in R^2 for the equation y = ax + b
+-- pattern Line2     :: r -> r -> NonVerticalHyperPlane 2 r
+-- pattern Line2 a b = NonVerticalHyperPlane (Vector2 a b)
+-- {-# COMPLETE Line2 #-}
 
 --------------------------------------------------------------------------------
 -- * Specific 3D Functions
@@ -153,7 +168,6 @@ instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
 
 -- | Shorthand for non-vertical hyperplanes in R^3
 type Plane = NonVerticalHyperPlane 3
-
 
 -- | Constructs a Plane in R^3 for the equation z = ax + by + c
 pattern Plane       :: r -> r -> r -> Plane r

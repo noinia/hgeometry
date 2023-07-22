@@ -74,7 +74,9 @@ instance ( Read r, Has_ Vector_ (d+1) r) => Read (HyperPlane d r) where
 -- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
 -- these are satisfied by default, it is just that the typechecker does not realize that.
 type MkHyperPlaneConstraints d r =
-  ( d < d+1, KnownNat d, Has_ Metric_ d r, Has_ Vector_ d r, Has_ Vector_ (d+1) r
+  ( d < d+1, KnownNat d
+  , Has_ Metric_ d r, Has_ Metric_ (d+1) r
+  , Has_ Vector_ d r, Has_ Vector_ (d+1) r
   )
 
 instance ( MkHyperPlaneConstraints d r

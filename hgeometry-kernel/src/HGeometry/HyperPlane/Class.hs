@@ -18,6 +18,7 @@ module HGeometry.HyperPlane.Class
   , ConstructableHyperPlane_(..)
   , NonVerticalHyperPlane_(..)
   , isParallelTo
+  , pointOn
 
   , HyperPlaneFromPoints(..)
   ) where
@@ -43,10 +44,23 @@ import Prelude hiding (head,last)
 -- >>> import HGeometry.HyperPlane
 -- >>> import HGeometry.Line.LineEQ
 --
--- >>> let myLine = LineEQ 1 (2 :: Double)
--- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1 :: Double)
--- >>> let myNVHyperPlane2 = NonVerticalHyperPlane $ Vector2 1 (2 :: Double)
-
+-- >>> let myLine      = LineEQ 1 2                          :: LineEQ Double
+-- >>> let myLineAgain = HyperPlane (Vector3 2 1 (-1))       :: HyperPlane 2 Double
+-- >>> let myLineAsNV  = NonVerticalHyperPlane (Vector2 1 2) :: NonVerticalHyperPlane 2 Double
+-- >>> let myVerticalLine = HyperPlane (Vector3 5 (-1) 0)    :: HyperPlane 2 Double
+--
+-- >>> let myOtherLine = HyperPlane2 4 3 2                   :: HyperPlane 2 Double
+-- >>> let myPlane     = HyperPlane3 10 2 3 (-1)             :: HyperPlane 3 Double
+--
+--
+-- 'myLine', 'myLineAgain', and 'myLineAsNV' all represent the line y = 1*x + 2
+--
+-- 'myVerticalLine' represents the vertical line x=5
+--
+--
+-- 'myOtherLine' represents the line 4 + 3*x + 2*y = 0, in other words y = -(3/2)*x - 2
+--
+-- 'myPlane' represents the plane z = 2*x + 3*y + 10
 
 
 -- | A class to represent hyperplanes in d-dimensional space.
@@ -59,6 +73,18 @@ class ( NumType hyperPlane ~ r
                                       , hyperPlane -> r where
 --  {-# MINIMAL hyperPlaneTrough #-}
 
+  -- | Evalute the expression \(a_0 + \sum_i=1^d a_i*p_i \) at the given point.
+  --
+  --
+  -- >>> evalHyperPlaneEquation myLine (Point2 5 10)
+  -- -3
+  evalHyperPlaneEquation     :: (Num r, Point_ point d r) => hyperPlane -> point -> r
+  default evalHyperPlaneEquation :: (Num r, Point_ point d r, Has_ Metric_ (d+1) r)
+                                 => hyperPlane -> point -> r
+  evalHyperPlaneEquation h p = hyperPlaneEquation h `dot` (cons 1 $ p^.vector)
+  {-# INLINE evalHyperPlaneEquation #-}
+
+
   -- -- | Constructs the hyperplane through d points
   -- hyperPlaneTrough :: Num r => Point_ point d r => Vector d point -> hyperPlane
 
@@ -66,14 +92,18 @@ class ( NumType hyperPlane ~ r
   -- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
   -- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
   --
-  -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\)
+  -- this fuction returns the vector of these coefficients \(\langle a_0,..,a_d \rangle\).
   --
   -- >>> hyperPlaneEquation myLine
   -- Vector3 2.0 1.0 (-1.0)
-  -- >>> hyperPlaneEquation myHyperPlane2
+  -- >>> hyperPlaneEquation myLineAgain
   -- Vector3 2.0 1.0 (-1.0)
-  -- >>> hyperPlaneEquation myNVHyperPlane2
+  -- >>> hyperPlaneEquation myLineAsNV
   -- Vector3 2.0 1.0 (-1.0)
+  --
+  --
+  -- so for example myLineAsNV actually a line with slope 1 through the point (0,2)
+  --
   hyperPlaneEquation :: ( Num r
                         ) => hyperPlane -> Vector (d+1) r
   default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
@@ -89,9 +119,13 @@ class ( NumType hyperPlane ~ r
 
   {-# INLINE hyperPlaneEquation #-}
 
-  -- | Get the normal vector of the hyperplane.
+  -- | Get the normal vector of the hyperplane. The vector points into
+  -- the negative halfspace.
   --
-  --
+  -- >>> normalVector myVerticalLine
+  -- Vector2 (-1) 0
+  -- >>> normalVector myLine
+  -- Vector2
   normalVector :: Num r => hyperPlane -> Vector d r
   default normalVector :: ( KnownNat d
                           , Num r
@@ -100,65 +134,89 @@ class ( NumType hyperPlane ~ r
   normalVector = suffix . hyperPlaneEquation
   {-# INLINE normalVector #-}
 
-
   -- | Test if a point lies on a hyperplane.
   --
-  -- >>> Point2 0 2 `onHyperPlane` myHyperPlane2
+  -- >>> Point2 0 2 `onHyperPlane` myLineAgain
   -- True
-  -- >>> Point2 1 3 `onHyperPlane` myHyperPlane2
+  -- >>> Point2 1 3 `onHyperPlane` myLineAgain
   -- True
-  -- >>> Point2 1 5 `onHyperPlane` myHyperPlane2
+  -- >>> Point2 1 5 `onHyperPlane` myLineAgain
   -- False
   --
-  -- >>> Point2 0 2 `onHyperPlane` myNVHyperPlane2
+  -- >>> Point2 0 2 `onHyperPlane` myLineAsNV
   -- True
-  -- >>> Point2 1 3 `onHyperPlane` myNVHyperPlane2
+  -- >>> Point2 1 3 `onHyperPlane` myLineAsNV
   -- True
-  -- >>> Point2 1 5 `onHyperPlane` myNVHyperPlane2
+  -- >>> Point2 1 5 `onHyperPlane` myLineAsNV
   -- False
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
   default onHyperPlane :: ( Point_ point d r, Eq r, Num r
-                          , Has_ Metric_ d r
-                          , d < d+1
                           ) => point -> hyperPlane -> Bool
-  q `onHyperPlane` h = a0 + (a `dot` (q^.vector)) == 0
-    where
-      (a0,a) = uncons $ hyperPlaneEquation h
+  q `onHyperPlane` h = (== 0) $ evalHyperPlaneEquation h q
   {-# INLINE onHyperPlane #-}
 
   -- | Test if a point lies on a hyperplane. For non-vertical
   -- hyperplanes, returns whether the point is *above* the hyperplane
   -- or not. For vertical hyperplanes, we return 'LT' when the point
-  -- is on the left.
+  -- is on the "left".
   --
-  -- >>> Point2 0 2 `onSideTest` myHyperPlane2
+  -- >>> Point2 0 2 `onSideTest` myLineAgain
   -- EQ
-  -- >>> Point2 1 3 `onSideTest` myHyperPlane2
+  -- >>> Point2 1 3 `onSideTest` myLineAgain
   -- EQ
-  -- >>> Point2 1 5 `onSideTest` myHyperPlane2
+  -- >>> Point2 1 5 `onSideTest` myLineAgain
   -- GT
-  -- >>> Point2 4 5 `onSideTest` myHyperPlane2
+  -- >>> Point2 4 5 `onSideTest` myLineAgain
   -- LT
   -- >>> Point2 0 0 `onSideTest` HyperPlane 1 (-1) 0
   -- LT
   --
-  -- >>> Point2 0 2 `onSideTest` myNVHyperPlane2
-  -- EQ
-  -- >>> Point2 1 3 `onSideTest` myNVHyperPlane2
-  -- EQ
-  -- >>> Point2 1 5 `onSideTest` myNVHyperPlane2
+  -- >>> Point2 1 1 `onSideTest` myVerticalLine
+  -- LT
+  -- >>> Point2 10 1 `onSideTest` myVerticalLine
   -- GT
-  -- >>> Point2 4 5 `onSideTest` myNVHyperPlane2
+  -- >>> Point2 5 20 `onSideTest` myVerticalLine
+  -- EQ
+  --
+  -- >>> Point2 0 1 `onSideTest` myOtherLine
+  -- GT
+  -- >>> Point2 0 (-2) `onSideTest` myOtherLine
+  -- EQ
+  -- >>> Point2 1 (-3.5) `onSideTest` myOtherLine
+  -- EQ
+  -- >>> Point2 1 (-4) `onSideTest` myOtherLine
   -- LT
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
-  default onSideTest :: ( Point_ point d r, Ord r, Num r
-                        , Has_ Metric_ d r
-                        , d < d+1 -- silly constraints
-                        ) => point -> hyperPlane -> Ordering
-  q `onSideTest` h = 0 `compare` (a0 + (a `dot` (q^.vector)))
-    where
-      (a0,a) = uncons $ hyperPlaneEquation h
+  onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
   {-# INLINE onSideTest #-}
+
+
+-- | Produce a point that lies on the hyperplane. No gurantees are given abot which point
+--
+-- >>> pointOn myLine
+-- Point2 0 2
+pointOn   :: forall hyperPlane d r.
+             ( HyperPlane_ hyperPlane d r, Eq r, Fractional r, Has_ Additive_ d r
+             , FoldableWithIndex Int (Vector d)
+             )
+          => hyperPlane -> Point d r
+pointOn h = case uncons $ hyperPlaneEquation h of
+              (0, _)  -> origin
+              (a0, a) -> case ifind (const (/= 0)) (a :: Vector d r) of
+                           Nothing     -> error "pointOn: Invalid hyperplane"
+                           Just (i,ai) ->
+                             (origin :: Point d r)&vector.component' i .~ ((negate a0) / ai)
+  -- We are trying to find a point p so that a0 + sum_{i=1}^d ai*pi = 0,
+  -- in other words, so that
+  --
+  --    sum_{i=1}^d ai*pi = -a0                          (1)
+  --
+  -- so if a0 is actually zero, we can simply choose all the pi's in Eq 1 to be zero anyway.
+  -- if a0 is not zero, then there must be at least one ai that is non-zero; otherwise
+  -- we would have the equation 0 = <notzero>. Hence, we find this ai. We then rewrite Eq (1)
+  -- to: ai*pi + sum_{j /= i} aj*pj = -a0. Hence, we pick all the pj's to be zero, and
+  -- set pi to -a0/ai.
+
 
 -- | Class representing hyperplanes with methods to construct the
 -- hyperplane.
@@ -182,11 +240,17 @@ class HyperPlane_ hyperPlane d r
   -- HyperPlane [10,2,1]
   -- >>> Vector4 "d" "a" "b" "c" -- the plane a*x + b*y + c*z + d = 0
   -- HyperPlane ["d","a","b","c"]
+  --
+  -- >>> myOtherLine == hyperPlaneFromEquation (Vector3 4 3 2)
+  -- True
   hyperPlaneFromEquation :: HyperPlaneFromEquationConstraint hyperPlane d r
                          => Vector (d+1) r -> hyperPlane
 
 
   -- | Construct a Hyperplane from a point and a normal.
+  --
+  -- >>> myVerticalLine == fromPointAndNormal (Point2 5 30) (Vector2 (-1) 0)
+  -- True
   fromPointAndNormal     :: ( Point_ point d r, Num r)
                          => point -> Vector d r -> hyperPlane
   default fromPointAndNormal :: ( Point_ point d r, Num r
@@ -211,12 +275,14 @@ class HyperPlane_ hyperPlane d r
 class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   {-# MINIMAL hyperPlaneCoefficients #-}
 
-  -- | Get the coordinate in dimesnion $d$ of the hyperplane at the given position.
+  -- | Get the coordinate in dimension \(d\) of the hyperplane at the given position.
   --
-  -- >>> evalAt (Point1 1) myNVHyperPlane2
+  -- >>> evalAt (Point1 1) myLineAsNV
   -- 3.0
-  -- >>> evalAt (Point1 10) myNVHyperPlane2
+  -- >>> evalAt (Point1 10) myLineAsNV
   -- 12.0
+  -- >>> evalAt (Point1 5) <$> asNonVerticalHyperPlane myOtherLine
+  -- Just (-9.5)
   evalAt     :: ( Num r
                 , 1 <= d
                 , Point_ point (d-1) r
@@ -237,12 +303,14 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   --
   --  \( a_d + \sum_i=1^{d-1} a_i*p_i = p_d \)
   --
-  -- >>> view hyperPlaneCoefficients myNVHyperPlane2
+  -- >>> view hyperPlaneCoefficients myLineAsNV
   -- Vector2 1.0 2.0
   -- >>> view hyperPlaneCoefficients myLine
   -- Vector2 1.0 2.0
   -- >>> view hyperPlaneCoefficients $ Plane 1 2 3
   -- Vector3 1 2 3
+  -- >>> asNonVerticalHyperPlane myOtherLine ^?_Just.hyperPlaneCoefficients
+  -- Just (Vector2 (-1.5) (-2.0))
   hyperPlaneCoefficients :: Lens' hyperPlane (Vector d r)
 
 
@@ -269,6 +337,8 @@ class HyperPlaneFromPoints hyperPlane where
 
 instance (HyperPlane_ hyperPlane d r, Default extra)
          => HyperPlane_ (hyperPlane :+ extra) d r where
+  evalHyperPlaneEquation h = evalHyperPlaneEquation (h^.core)
+  {-# INLINE evalHyperPlaneEquation #-}
   hyperPlaneEquation = hyperPlaneEquation . view core
   {-# INLINE hyperPlaneEquation #-}
   normalVector = normalVector . view core

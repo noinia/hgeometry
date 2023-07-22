@@ -3,11 +3,13 @@ module HGeometry.HalfSpaceSpec
 
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane
+import HGeometry.Intersection
+import HGeometry.Kernel.Instances ()
 import HGeometry.Line
 import HGeometry.Point
-import HGeometry.Intersection
+import HGeometry.Vector hiding (head)
 import Test.Hspec
-import HGeometry.Kernel.Instances()
+import Test.Hspec.QuickCheck
 
 --------------------------------------------------------------------------------
 
@@ -37,8 +39,11 @@ spec = describe "halfspace Tests" $ do
          it "on boundary of non-vertical Negative hyperplane 2" $
            (Point2 0 (-1) `intersects` HalfSpace Negative (HyperPlane2 (-1) (-1) (-1)))
            `shouldBe` True
-
-
+         prop "normal vector points into negative halfspace" $
+           \(h :: HyperPlane 2 R) ->
+             let n = normalVector h
+                 p = pointOn h
+             in (p .+^ n) `intersects` HalfSpace Negative h
          -- it "intersect tests" $ do
          --   let h = HalfSpace Positive $ horizontalLine (4 % 1 :: Rational)
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
