@@ -29,5 +29,7 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
+                -optF -package=hgeometry-vector
+                -optF -package=hgeometry-point
                 -optF -package=hiraffe
 #-}

@@ -87,9 +87,9 @@ toCounterClockwiseTriangle t@(Triangle_ a b c)
 --
 -- >>> let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
 -- >>> mapM_ print $ intersectingHalfPlanes t
--- "HalfSpace Negative (HyperPlane [0,0,1])"
--- "HalfSpace Positive (HyperPlane [-1,-1,-1])"
--- "HalfSpace Negative (HyperPlane [0,-1,0])"
+-- HalfSpace Negative (HyperPlane [0,0,1])
+-- HalfSpace Positive (HyperPlane [-1,-1,-1])
+-- HalfSpace Negative (HyperPlane [0,-1,0])
 intersectingHalfPlanes :: ( Triangle_ triangle point
                           , Point_ point 2 r
                           , Num r, Ord r

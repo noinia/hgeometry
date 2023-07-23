@@ -33,6 +33,7 @@ import           Text.Read (Read (..), readListPrecDefault)
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import HGeometry.HyperPlane
 -- >>> let myLineAsNV  = NonVerticalHyperPlane (Vector2 1 2) :: NonVerticalHyperPlane 2 Double
 -- >>> let myOtherLine = HyperPlane2 4 3 2                   :: HyperPlane 2 Double
 -- >>> let myPlane     = HyperPlane3 10 2 3 (-1)             :: HyperPlane 3 Double

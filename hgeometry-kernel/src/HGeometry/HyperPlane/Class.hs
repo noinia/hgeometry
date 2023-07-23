@@ -242,12 +242,10 @@ class HyperPlane_ hyperPlane d r
   --
   -- construct the hyperplane form it.
   --
-  -- >>> hyperPlaneFromEquation $ Vector3 "c" "a" "b" -- the line a*x + b*y + c = 0
-  -- HyperPlane ["c","a","b"]
-  -- >>> hyperPlaneFromEquation $ Vector3 10 2 1 -- the line 2*x + 1*y + 10 = 0
+  -- >>> hyperPlaneFromEquation (Vector3 10 2 1) :: HyperPlane 2 Int -- the line 2*x + 1*y + 10 = 0
   -- HyperPlane [10,2,1]
-  -- >>> hyperPlaneFromEquation $ Vector4 "d" "a" "b" "c" -- the plane a*x + b*y + c*z + d = 0
-  -- HyperPlane ["d","a","b","c"]
+  -- >>> hyperPlaneFromEquation $ Vector4 100 5 3 (-1)  :: HyperPlane 3 Int -- the plane 5*x + 3*y + (-1)*z + 100= 0
+  -- HyperPlane [100,5,3,-1]
   --
   -- >>> myOtherLine == hyperPlaneFromEquation (Vector3 4 3 2)
   -- True
