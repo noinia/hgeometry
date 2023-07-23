@@ -81,7 +81,7 @@ instance ( Read r, Has_ Vector_ d r) => Read (NonVerticalHyperPlane d r) where
 -- | Try to construct a Non-vertical hyperplane out of some generic hyperplane.
 --
 -- >>> asNonVerticalHyperPlane $ (HyperPlane2 10 1 2 :: HyperPlane 2 Double)
--- Just (NonVerticalHyperPlane [10.0,1.0,2.0])
+-- Just (NonVerticalHyperPlane [-0.5,-5.0])
 -- >>> asNonVerticalHyperPlane $ (HyperPlane2 10 1 0 :: HyperPlane 2 Double)
 -- Nothing
 -- >>> asNonVerticalHyperPlane myOtherLine

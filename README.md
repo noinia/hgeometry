@@ -1,5 +1,9 @@
 # HGeometry
 
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/noinia/hgeometry/haskell-ci.yml?branch=hgeom1_again)
+[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg?color=success)](https://hackage.haskell.org/package/hgeometry)
+[![API docs coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fnoinia.github.io%2Fhgeometry%2Fhaddock_badge.json)](https://noinia.github.io/hgeometry/doc/)
+
 HGeometry is a library for computing with geometric objects such as
 points, line segments, and polygons, in Haskell. It defines basic
 geometric types and primitive operations on these types (for example
