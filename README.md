@@ -141,7 +141,7 @@ from `Heometry.Ext` in such cases.
 
 HGeometry heavily relies on typeclasses to support polymorphic
 inputs. Therefore, if you are using this package, it is recommended to
-compile your package with GHC options `-O -fspecialise-aggressively
+compile your package with GHC options `-fspecialise-aggressively
 -fexpose-all-unfoldings` to make sure GHC sufficiently specializes the
 calls. You can do so by adding the following to your
 executable/library stanza in your cabal file:

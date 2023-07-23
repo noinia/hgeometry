@@ -29,9 +29,12 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
+                -optF -package=semigroupoids
+                -optF -package=hgeometry-combinatorial
                 -optF -package=hgeometry-vector
                 -optF -package=hgeometry-point
                 -optF -package=hgeometry-kernel
+                -optF -package=hiraffe
                 -optF -package=hgeometry
 
 #-}
