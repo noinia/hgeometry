@@ -26,6 +26,8 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import HGeometry.Triangle
 
 
 -- | Class representing triangles

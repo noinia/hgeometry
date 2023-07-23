@@ -11,6 +11,10 @@ import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import HGeometry.Line.LineEQ
+
+
 -- | Typeclass modelling Non-vertical lines
 type NVLine2_ line r = (Line_ line 2 r, NonVerticalHyperPlane_ line 2 r)
 

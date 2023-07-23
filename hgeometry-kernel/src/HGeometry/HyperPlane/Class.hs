@@ -77,7 +77,7 @@ class ( NumType hyperPlane ~ r
   --
   --
   -- >>> evalHyperPlaneEquation myLine (Point2 5 10)
-  -- -3
+  -- -3.0
   evalHyperPlaneEquation     :: (Num r, Point_ point d r) => hyperPlane -> point -> r
   default evalHyperPlaneEquation :: (Num r, Point_ point d r, Has_ Metric_ (d+1) r)
                                  => hyperPlane -> point -> r
@@ -123,9 +123,9 @@ class ( NumType hyperPlane ~ r
   -- the negative halfspace.
   --
   -- >>> normalVector myVerticalLine
-  -- Vector2 (-1) 0
+  -- Vector2 (-1.0) 0.0
   -- >>> normalVector myLine
-  -- Vector2 1 (-1)
+  -- Vector2 1.0 (-1.0)
   normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
   default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
                        => hyperPlane -> Vector d r
@@ -172,7 +172,7 @@ class ( NumType hyperPlane ~ r
   -- GT
   -- >>> Point2 4 5 `onSideTest` myLineAgain
   -- LT
-  -- >>> Point2 0 0 `onSideTest` HyperPlane 1 (-1) 0
+  -- >>> Point2 0 0 `onSideTest` HyperPlane2 1 (-1) 0
   -- LT
   --
   -- >>> Point2 1 1 `onSideTest` myVerticalLine
@@ -202,7 +202,7 @@ class ( NumType hyperPlane ~ r
 -- | Produce a point that lies on the hyperplane. No gurantees are given abot which point
 --
 -- >>> pointOn myLine
--- Point2 0 2
+-- Point2 (-2.0) 0.0
 pointOn   :: forall hyperPlane d r.
              ( HyperPlane_ hyperPlane d r, Eq r, Fractional r, Has_ Additive_ d r
              , FoldableWithIndex Int (Vector d)
@@ -242,11 +242,11 @@ class HyperPlane_ hyperPlane d r
   --
   -- construct the hyperplane form it.
   --
-  -- >>> Vector3 "c" "a" "b" -- the line a*x + b*y + c = 0
+  -- >>> hyperPlaneFromEquation $ Vector3 "c" "a" "b" -- the line a*x + b*y + c = 0
   -- HyperPlane ["c","a","b"]
-  -- >>> Vector3 10 2 1 -- the line 2*x + 1*y + 10 = 0
+  -- >>> hyperPlaneFromEquation $ Vector3 10 2 1 -- the line 2*x + 1*y + 10 = 0
   -- HyperPlane [10,2,1]
-  -- >>> Vector4 "d" "a" "b" "c" -- the plane a*x + b*y + c*z + d = 0
+  -- >>> hyperPlaneFromEquation $ Vector4 "d" "a" "b" "c" -- the plane a*x + b*y + c*z + d = 0
   -- HyperPlane ["d","a","b","c"]
   --
   -- >>> myOtherLine == hyperPlaneFromEquation (Vector3 4 3 2)
