@@ -20,7 +20,6 @@ import Test.Hspec.QuickCheck
 -- import Test.QuickCheck
 import Test.QuickCheck.Instances ()
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 10
@@ -59,14 +58,13 @@ spec = describe "intersection tests" $ do
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
                 Vector3 a b c = intersectingHalfPlanes t
             in ( Point2 (-1) 0 `intersects` a
-               , traceShow (Point2 (-1) 0, b, Point2 (-1) 0 `intersects` b) $ Point2 (-1) 0 `intersects` b
+               , Point2 (-1) 0 `intersects` b
                , Point2 (-1) 0 `intersects` c
                ) `shouldBe` (True,True,True)
           it "intersecting halfspaces" $
-            let [p,q,r] = [origin, Point2 0 (-1), Point2 (-1) 0]
-                t       = Triangle p q r :: Triangle (Point 2 Int)
+            let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
             in (show <$> intersectingHalfPlanes t) `shouldBe`
-               (Vector3 "HalfSpace Negative (HyperPlane [0,0,-1])"
+               (Vector3 "HalfSpace Negative (HyperPlane [0,0,1])"
                         "HalfSpace Positive (HyperPlane [-1,-1,-1])"
                         "HalfSpace Negative (HyperPlane [0,-1,0])"
                )

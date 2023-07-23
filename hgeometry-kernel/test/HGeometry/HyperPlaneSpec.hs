@@ -60,8 +60,8 @@ onSideTestNonVertical     :: forall point nonVerticalHyperPlane d r.
                              , Has_ Additive_ (d-1) r
                              , d-1 <= d, 1 <= d
                              ) => point -> nonVerticalHyperPlane -> Ordering
-onSideTestNonVertical q h = let (v, y) = unsnoc (q^.vector) :: (Vector (d-1) r, r)
-                            in y `compare` evalAt (Point v) h
+onSideTestNonVertical p h = let (v, pd) = unsnoc (p^.vector) :: (Vector (d-1) r, r)
+                            in pd `compare` evalAt (Point v) h
 
 spec :: Spec
 spec = describe "HyperPlane Tests" $ do

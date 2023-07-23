@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Kernel.Instances where
 
-import Control.Lens
+import Control.Lens hiding (cons)
 import GHC.TypeLits
 import HGeometry.Ball
 import HGeometry.Box
@@ -110,9 +110,11 @@ instance ( Has_ Additive_ m r
   arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
            <$> arbitrary
 
-instance ( Arbitrary r, Has_ Additive_ (d+1) r
-         , Num r, Eq (Vector (d+1) r)) => Arbitrary (HyperPlane d r) where
-  arbitrary = HyperPlane <$> arbitrary `suchThat` (/= zero)
+instance ( Arbitrary r, Has_ Vector_ (d+1) r, Has_ Additive_ d r
+         , Num r, Eq (Vector d r)) => Arbitrary (HyperPlane d r) where
+  arbitrary = do a0                <- arbitrary
+                 (a :: Vector d r) <- arbitrary `suchThat` (/= zero)
+                 pure $ HyperPlane $ cons a0 a
 
 instance (Arbitrary r, Has_ Additive_ d r
          , Num r, Eq (Vector d r)) => Arbitrary (NonVerticalHyperPlane d r) where

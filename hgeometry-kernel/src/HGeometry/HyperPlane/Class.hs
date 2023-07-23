@@ -125,14 +125,18 @@ class ( NumType hyperPlane ~ r
   -- >>> normalVector myVerticalLine
   -- Vector2 (-1) 0
   -- >>> normalVector myLine
-  -- Vector2
-  normalVector :: Num r => hyperPlane -> Vector d r
-  default normalVector :: ( KnownNat d
-                          , Num r
-                          )
-                       => HyperPlane_ hyperPlane d r => hyperPlane -> Vector d r
-  normalVector = suffix . hyperPlaneEquation
+  -- Vector2 1 (-1)
+  normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
+  default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
+                       => hyperPlane -> Vector d r
+  normalVector h = let a = suffix $ hyperPlaneEquation h
+                   in if signum (a^.last) == 1 then negated a else a
   {-# INLINE normalVector #-}
+  -- https://en.wikipedia.org/wiki/Normal_(geometry)#Hypersurfaces_in_n-dimensional_space
+  -- states that: if the hyperplane is defined as the solution set of a single linear equation
+  -- a1*x1 + .. + an*xn = c
+  -- then the vector n = [a1,.., an] is a normal.
+
 
   -- | Test if a point lies on a hyperplane.
   --
@@ -187,9 +191,13 @@ class ( NumType hyperPlane ~ r
   -- >>> Point2 1 (-4) `onSideTest` myOtherLine
   -- LT
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
-  onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
+  onSideTest q h
+    | (hyperPlaneEquation h)^.last <= 0 = 0 `compare` evalHyperPlaneEquation h q
+    | otherwise                         = evalHyperPlaneEquation h q `compare` 0
   {-# INLINE onSideTest #-}
-
+  -- if ad is positive, it seems the sign of the comparison should
+  -- flip i.e. so that we should have evalHyperPlaneEquation h q
+  -- `compare` 0 instead. This still seems very werid to me.
 
 -- | Produce a point that lies on the hyperplane. No gurantees are given abot which point
 --
@@ -321,7 +329,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 isParallelTo       :: ( HyperPlane_ hyperPlane  d r
                       , HyperPlane_ hyperPlane' d r
                       , Has_ Metric_ d r
-                      , Num r, Eq r
+                      , Num r, Eq r, 1 <= d
                       ) => hyperPlane -> hyperPlane' -> Bool
 isParallelTo h1 h2 = isScalarMultipleOf (normalVector h1) (normalVector h2)
 

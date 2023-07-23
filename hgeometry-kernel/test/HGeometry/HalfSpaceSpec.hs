@@ -40,7 +40,7 @@ spec = describe "halfspace Tests" $ do
            (Point2 0 (-1) `intersects` HalfSpace Negative (HyperPlane2 (-1) (-1) (-1)))
            `shouldBe` True
          prop "normal vector points into negative halfspace" $
-           \(h :: HyperPlane 2 R) ->
+           \(h :: HyperPlane 2 Rational) ->
              let n = normalVector h
                  p = pointOn h
              in (p .+^ n) `intersects` HalfSpace Negative h
