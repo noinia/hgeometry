@@ -24,7 +24,6 @@ import HGeometry.Polygon.Class
 import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Convex.Implementation
 import HGeometry.Polygon.Simple.Class
-import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 

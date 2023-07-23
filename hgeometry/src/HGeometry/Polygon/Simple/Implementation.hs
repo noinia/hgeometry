@@ -17,7 +17,7 @@ module HGeometry.Polygon.Simple.Implementation
   , isCounterClockwise
   , toCounterClockwiseOrder
   -- * Show
-  , showSimplePolygon
+  , showsPrecSimplePolygon
   -- * Read
   , readsPrecSimplePolygon
   -- * Aeson
@@ -77,10 +77,10 @@ showsPrecSimplePolygon           :: ( SimplePolygon_ simplePolygon point r
                                     )
                                  => String -- ^ Polygon type name
                                  -> Int
-                                 -> simplePolygon -> String
+                                 -> simplePolygon -> ShowS
 showsPrecSimplePolygon name k pg = showParen (k > app_prec) $
-                                   showString name . showChar ' ' .
-                                   showsPrec 11 (pg^..outerBoundary)
+                                     showString name . showChar ' ' .
+                                     showsPrec 11 (pg^..outerBoundary)
   where
     app_prec = 10
 
