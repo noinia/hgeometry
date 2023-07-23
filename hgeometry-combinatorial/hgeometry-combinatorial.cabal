@@ -13,9 +13,10 @@ maintainer:         frank@fstaals.net
 -- copyright:
 category:           Geometry
 build-type:         Simple
-extra-source-files:  README.md
-                     changelog
-                     changelog.org
+extra-doc-files:
+    README.md
+    changelog
+    changelog.org
 -- extra-source-files:
 
 tested-with:
@@ -77,8 +78,9 @@ common setup
 
 common quickcheck-setup
     build-depends:
-        QuickCheck              >= 2.10
-      , quickcheck-instances
+        QuickCheck                      >= 2.10    && < 3
+      , quickcheck-instances            >= 0.3     && < 1
+
 
 common test-setup
     import: quickcheck-setup
@@ -90,7 +92,7 @@ common test-setup
          -fno-warn-type-defaults
          -fno-warn-orphans
     build-depends:
-        hspec                 >= 2.9
+        hspec                 >= 2.9      && < 3
 
 --------------------------------------------------------------------------------
 -- * Main Library

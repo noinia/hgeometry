@@ -12,9 +12,10 @@ maintainer:         frank@fstaals.net
 -- copyright:
 category:           Geometry
 build-type:         Simple
-extra-source-files:  README.md
-                     changelog
-                     changelog.org
+extra-doc-files:
+    README.md
+    changelog
+    changelog.org
 -- extra-source-files:
 
 tested-with:
@@ -68,8 +69,8 @@ common setup
 
 common quickcheck-setup
     build-depends:
-        QuickCheck              >= 2.10
-      , quickcheck-instances
+        QuickCheck                      >= 2.10    && < 3
+      , quickcheck-instances            >= 0.3     && < 1
 
 common test-setup
     import: quickcheck-setup
@@ -82,7 +83,7 @@ common test-setup
          -fno-warn-type-defaults
          -fno-warn-orphans
     build-depends:
-        hspec                   >= 2.9
+        hspec                   >= 2.9      && < 3
       , hgeometry-vector
       , hgeometry-vector:quickcheck
 
@@ -135,7 +136,7 @@ test-suite hgeometry-vector-doctest
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
     build-depends:
-       doctest             >= 0.8
+       doctest             >= 0.8   && < 1
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
@@ -147,5 +148,5 @@ benchmark hgeometry-vector-bench
     type: exitcode-stdio-1.0
     build-depends:
        , hgeometry-vector
-       , tasty-bench              >= 0.3
-       , tasty                    >= 1.4
+       , tasty-bench              >= 0.3   && < 1
+       , tasty                    >= 1.4   && < 2

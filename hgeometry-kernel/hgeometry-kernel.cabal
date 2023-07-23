@@ -12,9 +12,11 @@ maintainer:         frank@fstaals.net
 -- copyright:
 category:           Geometry
 build-type:         Simple
-extra-source-files:  README.md
-                     changelog
-                     changelog.org
+extra-doc-files:
+    README.md
+    changelog
+    changelog.org
+
 -- extra-source-files:
 
 tested-with:
@@ -87,9 +89,9 @@ common quickcheck-setup
          -fno-warn-type-defaults
          -fno-warn-orphans
     build-depends:
-        hspec                   >= 2.9
-      , QuickCheck              >= 2.10
-      , quickcheck-instances
+        hspec                   >= 2.9     && < 3
+      , QuickCheck              >= 2.10    && < 3
+      , quickcheck-instances    >= 0.3     && < 1
       , hgeometry-kernel
       , hgeometry-combinatorial:quickcheck
       , hgeometry-vector:quickcheck
@@ -215,4 +217,4 @@ test-suite hgeometry-kernel-doctest
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
     build-depends:
-       doctest             >= 0.8
+       doctest             >= 0.8  && < 1
