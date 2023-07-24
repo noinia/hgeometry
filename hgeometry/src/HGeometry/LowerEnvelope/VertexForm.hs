@@ -25,15 +25,11 @@ module HGeometry.LowerEnvelope.VertexForm
 
 import           Control.Lens
 import qualified Data.Map as Map
-import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
-import           HGeometry.Foldable.Sort
-import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.Type
 import           HGeometry.Point
 import           HGeometry.Properties

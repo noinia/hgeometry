@@ -90,10 +90,11 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
 -- ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
 -- ccw' = ccw -- p q r = ccw (p^.core) (q^.core) (r^.core)
 
--- | \( O(n log n) \)
--- Sort the points arround the given point p in counter clockwise order with
--- respect to the rightward horizontal ray starting from p.  If two points q
--- and r are colinear with p, the closest one to p is reported first.
+-- | Sort the points arround the given point p in counter clockwise order with respect to
+-- the rightward horizontal ray starting from p.  If two points q and r are colinear with
+-- p, the closest one to p is reported first.
+--
+-- \( O(n log n) \)
 sortAround   :: (Point_ point 2 r, Num r, Ord r)
              => point -> [point] -> [point]
 sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)

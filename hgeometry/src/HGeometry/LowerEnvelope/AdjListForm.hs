@@ -14,6 +14,8 @@ module HGeometry.LowerEnvelope.AdjListForm
   ( LowerEnvelope(LowerEnvelope)
   , theUnboundedVertex, boundedVertices
 
+  , singleton
+
   , BoundedVertexF(Vertex)
   , location, definers, location2
 
@@ -28,19 +30,21 @@ import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
+import qualified Data.Vector.NonEmpty as NonEmptyV
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.Foldable.Util
+import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
-import           HGeometry.HalfLine
 import           HGeometry.LowerEnvelope.Type
 import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
@@ -81,6 +85,7 @@ boundedVertices :: Lens' (LowerEnvelope plane) (Seq.Seq (BoundedVertex plane))
 boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
                        (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
 
+-- | Given a single Vertex, construct a LowerEnvelope ot of it.
 singleton   :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
             => VertexForm.LEVertex plane -> LowerEnvelope plane
 singleton v = LowerEnvelope v0 (Seq.singleton v')
@@ -90,8 +95,61 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
     v0 = UnboundedVertex $ flipEdge i <$> view incidentEdgesB v'
     -- do we need to reverse the sequenceo f edges?
 
-fromVertexForm :: VertexForm.VertexForm plane -> LowerEnvelope plane
-fromVertexForm = undefined
+-- | Given a Lower envelope in vertex form, construct the AdjacencyList representation out
+-- of it.
+--
+-- \(O(n\log n)\)
+fromVertexForm      :: (Plane_ plane r, Ord plane, Ord r)
+                    => VertexForm.VertexForm plane -> LowerEnvelope plane
+fromVertexForm lEnv = LowerEnvelope v0 undefined -- vs
+  where
+    mkTuples i (v,defs) = [ (h,i,v,defs) | h <- F.toList defs ]
+    definingPlane (h,_,_,_) = h
+
+    v0 = UnboundedVertex mempty -- FIXME !!
+    -- vs = fromList
+    --    . fmap toVertex
+    --    . groupOnCheap (\(_,i,_,_) -> i)
+
+    -- es = foldMap fromFoldable
+    --    . fmap sortAlongBoundary
+    --    . groupOnCheap definingPlane
+    --    $ ifoldMapOf (indexing (vertices.withIndex)) mkTuples lEnv
+
+-- fromEdges ::
+-- fromEdges =
+
+toVertex    :: NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+            -> BoundedVertexF f plane
+toVertex xs = Vertex v defs undefined -- TODO: we are missing info here.
+  where
+    (_, _, v, defs) = NonEmptyV.head xs
+
+groupOnCheap  :: (Foldable f, Ord b)
+              => (a -> b) -> f a -> [NonEmptyV.NonEmptyVector a]
+groupOnCheap f = fmap NonEmptyV.unsafeFromVector . V.groupBy ((==) `on` f) . sortOnCheap f
+
+
+type IntermediateVertex plane =
+  (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
+
+
+-- | sort the vertices of a face around its boundary
+sortAlongBoundary      :: (Plane_ plane r, Ord r, Num r
+                          ) =>NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+                       -> NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+sortAlongBoundary face = undefined -- sortBy cmpAroundV1 face
+  where
+    -- (_, _, v1, _) = NonEmptyV.head face
+    -- v1' = projectPoint v1
+
+    -- -- TODO: think about whether this is really right; i.e. if we should somehow start
+    -- -- from an appropriate initial vector (i.e. to its neighbour) or that we can start
+    -- -- with something arbitrary like we do here.
+    -- cmpAroundV1 (_, _, u, _) (_, _, v, _) = ccwCmpAround v1' u' v' <> cmpByDistanceTo v1' u' v'
+    --   where
+    --     u' = projectPoint u
+    --     v' = projectPoint v
 
 --------------------------------------------------------------------------------
 
