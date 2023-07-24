@@ -59,6 +59,20 @@ data LowerEnvelope plane =
 deriving instance (Show plane, Show (NumType plane)) => Show (LowerEnvelope plane)
 deriving instance (Eq plane, Eq (NumType plane))     => Eq   (LowerEnvelope plane)
 
+-- instance Functor LowerEnvelope where
+-- instance Foldable LowerEnvelope where
+-- instance Traversable LowerEnvelope where
+
+-- | Traversal of the planes in the lower envelope
+traverseLowerEnvelope                         :: ( Applicative f, NumType plane ~ NumType plane'
+                                                 , Ord plane'
+                                                 )
+                                              => (plane -> f plane')
+                                              -> LowerEnvelope plane -> f (LowerEnvelope plane')
+traverseLowerEnvelope f (LowerEnvelope v0 vs) =
+    LowerEnvelope <$> traverse f v0 <*> traverse (traverseBoundedV f) vs
+
+
 theUnboundedVertex :: Lens' (LowerEnvelope plane) (UnboundedVertex plane)
 theUnboundedVertex = lens (\(LowerEnvelope v _) -> v)
                           (\(LowerEnvelope _ vs) v -> LowerEnvelope v vs)
@@ -73,18 +87,22 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
   where
     i  = 1 -- the vertexID we are using for this vertex.
     v' = fromLEVertex v
-    v0 = UnboundedVertex $ flipEdge i <$> _incidentEdgesB v'
+    v0 = UnboundedVertex $ flipEdge i <$> view incidentEdgesB v'
     -- do we need to reverse the sequenceo f edges?
 
 fromVertexForm :: VertexForm.VertexForm plane -> LowerEnvelope plane
 fromVertexForm = undefined
 
-
 --------------------------------------------------------------------------------
 
 -- | The unbounded vertex, which by definition will have index 0
 newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LEEdge plane) }
-                              deriving (Show,Eq)
+                              deriving (Show,Eq,Functor,Foldable,Traversable)
+
+-- | access the incidentEdges of an unbounded vertex
+incidentEdgesU :: Iso (UnboundedVertex plane) (UnboundedVertex plane')
+                      (Seq.Seq (LEEdge plane)) (Seq.Seq (LEEdge plane'))
+incidentEdgesU = coerced
 
 --------------------------------------------------------------------------------
 
@@ -121,6 +139,7 @@ sortAroundStart = fromFoldable . sortBy @V.Vector compareAroundStart
 newtype HalfLine r = MkHalfLine (LinePV 2 r)
                    deriving (Show,Eq)
 
+pattern HalfLine     :: Point 2 r -> Vector 2 r -> HalfLine r
 pattern HalfLine p v = MkHalfLine (LinePV p v)
 {-# COMPLETE HalfLine #-}
 
@@ -192,14 +211,14 @@ intersectionLine' h h' = intersectionLine h h' <&> \case
 
 --------------------------------------------------------------------------------
 
-class HasIncidentEdges t plane | t -> plane where
-  incidentEdges' :: Lens' t (Seq.Seq (LEEdge plane))
+class HasIncidentEdges t  where
+  incidentEdges' :: Lens' (t plane) (Seq.Seq (LEEdge plane))
 
-instance HasIncidentEdges (UnboundedVertex plane) plane where
-  incidentEdges' = coerced
+instance HasIncidentEdges UnboundedVertex where
+  incidentEdges' = incidentEdgesU
 
-instance HasIncidentEdges (BoundedVertex plane) plane where
-  incidentEdges' = lens _incidentEdgesB (\(Vertex p d _) es -> Vertex p d es)
+instance HasIncidentEdges BoundedVertex where
+  incidentEdges' = lens (view incidentEdgesB) (\(Vertex p d _) es -> Vertex p d es)
 
 -- instance HasIncidentEdges (Vertex (LowerEnvelope plane)) plane where
 --   incidentEdges' = undefined -- pick either incidentEdges on the left or on the right thing.
@@ -209,24 +228,111 @@ instance HasVertices' (LowerEnvelope plane) where
   type VertexIx (LowerEnvelope plane) = VertexID
 
   -- | note, trying to assign the unbounded vertex to something with index >0 is an error
-  vertexAt = \case
-    0 -> undefined
-    i -> undefined -- boundedVertices.ix (i+1)
+  vertexAt        :: VertexID
+                  -> IndexedTraversal' VertexID (LowerEnvelope plane)
+                                                (Vertex (LowerEnvelope plane))
+  vertexAt i
+      | i == 0    = conjoined trav0  (itrav0 .indexed)
+      | otherwise = conjoined travVs (itravVs.indexed)
+    where
+      trav0  f (LowerEnvelope v0 vs)  = flip LowerEnvelope vs . unLeft <$> f   (Left v0)
+
+      itrav0                          :: Applicative f
+                                      => (VertexID -> Vertex   (LowerEnvelope plane)
+                                         -> f (Vertex   (LowerEnvelope plane)))
+                                      -> LowerEnvelope plane -> f (LowerEnvelope plane)
+      itrav0 f (LowerEnvelope v0 vs)  = flip LowerEnvelope vs . unLeft <$> f 0 (Left v0)
+
+      travVs                          :: Applicative f
+                                      => (Vertex   (LowerEnvelope plane)
+                                         -> f (Vertex   (LowerEnvelope plane)))
+                                      -> LowerEnvelope plane -> f (LowerEnvelope plane)
+      travVs f (LowerEnvelope v0 vs)  =
+        LowerEnvelope v0 <$> (vs&ix (i+1) %%~ fmap unRight . f . Right)
+      itravVs f (LowerEnvelope v0 vs) =
+        LowerEnvelope v0 <$> (vs&ix (i+1) %%~ fmap unRight . f i . Right)
+
+      unLeft  = either id (error "LowerEnvelope.vertexAt: trying to convert v_infty into a normal vertex is not allowed")
+      unRight = either (error "LowerEnvelope.vertexAt: trying to convert a regular bounded vertex into v_infty is not allowed") id
+  {-# INLINE vertexAt #-}
+
 
 instance HasVertices (LowerEnvelope plane) (LowerEnvelope plane') where
-  vertices = undefined
+
+  vertices = conjoined traverse' (itraverse' . indexed)
+    where
+      traverse' :: (Applicative f)
+                => (Vertex (LowerEnvelope plane) -> f (Vertex (LowerEnvelope plane')))
+                -> LowerEnvelope plane -> f (LowerEnvelope plane')
+      traverse'  f (LowerEnvelope v0 vs) =
+        LowerEnvelope <$> (fmap unLeft . f .Left) v0 <*> traverse (fmap unRight . f . Right) vs
+
+      unLeft  = either id (error "LowerEnvelope.vertices: trying to convert v_infty into a normal vertex is not allowed")
+      unRight = either (error "LowerEnvelope.vertices: trying to convert a regular bounded vertex into v_infty is not allowed") id
+
+      itraverse' :: (Applicative f)
+                 => (VertexID -> Vertex (LowerEnvelope plane) -> f (Vertex (LowerEnvelope plane')))
+                -> LowerEnvelope plane -> f (LowerEnvelope plane')
+      itraverse' f (LowerEnvelope v0 vs) =
+        LowerEnvelope <$> (fmap unLeft . f 0 .Left) v0
+                      <*> itraverse (\i -> fmap unRight . f (i+1) . Right) vs
+  {-# INLINE vertices #-}
 
 ----------------------------------------
+
+instance HasDarts' (LowerEnvelope plane) where
+  type Dart   (LowerEnvelope plane) = LEEdge plane
+  type DartIx (LowerEnvelope plane) = ( VertexIx (LowerEnvelope plane)
+                                      , VertexIx (LowerEnvelope plane)
+                                      )
+  dartAt (u,v) = vertexAt u <.> beside l l
+    where
+      l :: HasIncidentEdges t => IndexedTraversal' VertexID (t plane) (LEEdge plane)
+      l = incidentEdges' .> first' v (view destination)
+  {-# INLINE dartAt #-}
+
+-- | Helper function to access the an edge
+first'              :: Eq i => i -> (a -> i)
+                    -> IndexedTraversal' i (Seq.Seq a) a
+first' i getIdx f s = case Seq.findIndexL ((== i) . getIdx) s of
+                        Nothing -> pure s
+                        Just j  -> s&ix j %%~ indexed f i
+
+
+instance HasDarts (LowerEnvelope plane) (LowerEnvelope plane) where
+  darts = itraverse' . indexed
+    -- the traverse' variant that does not use the indices does not really look all that
+    -- useful. So I didn't bother writing the faster version.
+    where
+      itraverse' :: (Applicative f)
+                 => (DartIx (LowerEnvelope plane) -> LEEdge plane -> f (LEEdge plane))
+                 -> LowerEnvelope plane -> f (LowerEnvelope plane)
+      itraverse' f (LowerEnvelope v0 vs) =
+        LowerEnvelope <$> (v0&incidentEdgesU.traverse %%~ liftF f 0)
+                      <*> itraverse (\i vtx -> vtx&incidentEdgesB.traverse %%~ liftF f (i+1)) vs
+
+      liftF       :: (DartIx (LowerEnvelope plane) -> LEEdge plane -> f (LEEdge plane))
+                  -> VertexIx (LowerEnvelope plane)
+                  -> LEEdge plane -> f (LEEdge plane)
+      liftF f u e = f (u,e^.destination) e
+  {-# INLINE darts #-}
+
+--------------------------------------------------------------------------------
+
 
 instance HasEdges' (LowerEnvelope plane) where
   type Edge   (LowerEnvelope plane) = LEEdge plane
   type EdgeIx (LowerEnvelope plane) = ( VertexIx (LowerEnvelope plane)
                                       , VertexIx (LowerEnvelope plane)
                                       )
-  edgeAt (u,v) = undefined -- vertexAt u.incidentEdges'.first v
+  edgeAt = dartAt
+  {-# INLINE edgeAt #-}
 
 instance HasEdges (LowerEnvelope plane) (LowerEnvelope plane) where
-  edges = undefined
+  -- | Traversal of all edges in the graph; i.e. we traverse the edges only in the
+  -- direction from lower vertex id to higher vertexId.
+  edges = darts . ifiltered (\(u,v) _ -> u < v)
+  {-# INLINE edges #-}
 
 -- FIXME: I guess strictly speaking the lower envelope is a multigraph: in case
 -- the lower envelope is a bunch of parallel edges connecting v_infty to v_infty

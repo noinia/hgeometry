@@ -1,24 +1,19 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.Type
   ( VertexID
-  , BoundedVertexF(Vertex), _incidentEdgesB
-  , location, definers, location2
+  , BoundedVertexF(Vertex)
+  , location, definers, location2, incidentEdgesB
+  , traverseBoundedV
 
   , LEEdge(Edge)
+  , destination
   , flipEdge
   ) where
 
 import           Control.Lens
-import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
-import           HGeometry.Foldable.Sort
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line
-import           HGeometry.Line.LineEQ
 import           HGeometry.Point
 import           HGeometry.Properties
-import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -27,7 +22,7 @@ type VertexID = Int
 
 -- | Orders the plane around their intersection point.
 newtype AroundVertex plane = AroundVertex plane
-                           deriving (Show,Eq)
+                           deriving stock (Show,Eq,Functor,Foldable,Traversable)
 
 -- instance Ord (AroundVertex plane) where
 --   (AroundVertex h) `compare` (AroundVertex h') = undefined
@@ -59,6 +54,25 @@ deriving instance ( Eq plane
                   , Eq (f (LEEdge plane))
                   ) => Eq   (BoundedVertexF f plane)
 
+-- instance Functor (BoundedVertex )
+
+
+
+-- | Traverse the bounded vertex.
+--
+-- \(O(k\log k)\), where \(k\) is the number of definers of v.
+traverseBoundedV   :: (Traversable f, Applicative g, NumType plane ~ NumType plane', Ord plane')
+                   => (plane -> g plane') -> BoundedVertexF f plane -> g (BoundedVertexF f plane')
+traverseBoundedV f = \case
+  Vertex l defs es -> Vertex l <$> traverseSet f defs <*> traverse (traverse f) es
+
+-- | Traverse on a Set.
+traverseSet   :: (Ord b, Applicative f) => (a -> f b) -> Set.Set a -> f (Set.Set b)
+traverseSet f = fmap Set.fromList . traverse f . Set.toAscList
+
+
+
+
 -- | The location of the vertex
 location :: (NumType plane ~ r) => Lens' (BoundedVertexF f plane) (Point 3 r)
 location = lens _location (\v l -> v { _location = l })
@@ -71,15 +85,24 @@ location2 = location . to projectPoint
 definers :: Lens' (BoundedVertexF f plane) (Set.Set plane)
 definers = lens _definers (\v ds -> v { _definers = ds })
 
+-- | Lens to access the incident edges of a vertex
+incidentEdgesB :: Lens (BoundedVertexF f plane)
+                       (BoundedVertexF g plane) (f (LEEdge plane)) (g (LEEdge plane))
+incidentEdgesB = lens _incidentEdgesB (\v es -> v { _incidentEdgesB = es })
+
 --------------------------------------------------------------------------------
 
 -- | An Edge in the Lower envelope
 data LEEdge plane = Edge { _destination :: {-# UNPACK #-}!VertexID
                          , _leftPlane   :: plane
                          , _rightPlane  :: plane
-                         } deriving (Show,Eq,Ord)
+                         } deriving stock (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 -- | Given some vertex u and an edge e from u towards some other
 -- vertex v, flip the edge e, s othat it is the edge from v to u.
 flipEdge                  :: VertexID -> LEEdge plane -> LEEdge plane
 flipEdge u (Edge _ hl hr) = Edge u hr hl
+
+-- | Getter to access the destination field of an edge.
+destination :: Getter (LEEdge plane) VertexID
+destination = to _destination
