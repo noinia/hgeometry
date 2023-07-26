@@ -47,9 +47,13 @@ common setup
       , nonempty-vector          >= 0.2.0.0     && < 1
       , vector-circular          >= 0.1.4       && < 1
       , linear                   >= 1.20        && < 2
-
+      , HsYAML                   >= 0.2         &&  < 1
       , aeson                    >= 2.0         && < 3
       , MonadRandom              >= 0.5         && < 1
+      , filepath                 >= 1.4.100       && < 2
+      , file-io                  >= 0.1         && < 1
+      , text                     >= 2           &&  < 3
+      , bytestring               >= 0.10        &&  < 1
 
       -- , witherable              >= 0.4
       -- , linear                  >= 1.21
@@ -142,6 +146,8 @@ library
         HGeometry.Tree.Binary.Static
         HGeometry.Tree.Util
 
+        HGeometry.YAML
+
     -- other-modules:
     -- other-extensions:
 
@@ -181,31 +187,14 @@ test-suite hgeometry-combinatorial-hspec
     build-depends:
          hgeometry-combinatorial
 
---- --------------------------------------------------------------------------------
----
---- -- test-suite hgeometry-combinatorial-doctest
---- --     import:           setup, test-setup
---- --     type:             exitcode-stdio-1.0
---- --     hs-source-dirs:   doctest
---- --     main-is:          Main.hs
---- --     build-tool-depends: doctest-codegen-driver:doctest-codegen-driver
---- --     code-generators: doctest-codegen-driver
----
---- --     build-depends:
---- --          hgeometry-combinatorial:combinatorial2
---- --        , hgeometry-combinatorial:numtypes
---- --        , hgeometry-combinatorial:sig-combinatorial
---- --        , doctest
----
---- --     mixins:
---- --          hgeometry-combinatorial:numtypes (Int as R)
---- --        , hgeometry-combinatorial:sig-combinatorial
---- --            requires
---- --            ( Combinatorial          as HGeometry.Combinatorial.Combinatorial2
---- --            , Combinatorial.Additive as HGeometry.Combinatorial.Combinatorial2
---- --            , D               as HGeometry.Combinatorial.Combinatorial2
---- --            )
 
+-- test-suite hgeometry-combinatorial-doctest
+--     import:           setup, quickcheck-setup
+--     type:             exitcode-stdio-1.0
+--     main-is:          doctests.hs
+--     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+--     build-depends:
+--        doctest             >= 0.8  && < 1
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
