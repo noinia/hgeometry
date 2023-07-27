@@ -18,7 +18,6 @@ category:           Geometry
 build-type:         Simple
 extra-doc-files:
     README.md
-    changelog
     changelog.org
 -- extra-source-files:
 data-dir: data
@@ -194,6 +193,8 @@ library quickcheck
       HGeometry.Instances
       HGeometry.Polygon.Instances
     other-modules:
+      Paths_hgeometry
+    autogen-modules:
       Paths_hgeometry
     build-depends:
          hgeometry

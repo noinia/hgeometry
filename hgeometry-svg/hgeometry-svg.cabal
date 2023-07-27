@@ -18,7 +18,6 @@ category:           Geometry
 build-type:         Simple
 extra-doc-files:
     README.md
-    changelog
     changelog.org
 -- extra-source-files:
 
@@ -103,9 +102,9 @@ common quickcheck-setup
          -fno-warn-type-defaults
          -fno-warn-orphans
     build-depends:
-        hspec                   >= 2.9
-      , QuickCheck              >= 2.10
-      , quickcheck-instances
+        hspec                   >= 2.9      && < 3
+      , QuickCheck              >= 2.10     && < 3
+      , quickcheck-instances    >= 0.2      && < 1
       , hgeometry-svg
 
 --------------------------------------------------------------------------------
