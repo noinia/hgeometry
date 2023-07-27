@@ -20,7 +20,7 @@ import           HGeometry.Ext
 -- in the order in which they occur in the input.
 --
 -- >>> extractMinimaBy compare $ NonEmpty.fromList [1,2,3,0,1,2,3,0,1,2,0,2]
--- (0 :| [0,0]) :+ [2,3,1,2,3,1,2,1,2]
+-- 0 :| [0,0] :+ [2,3,1,2,3,1,2,1,2]
 extractMinimaBy             :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a :+ [a]
 extractMinimaBy cmp (x:|xs) = foldr (\y (mins@(m:|_) :+ rest) -> case m `cmp` y of
                                         LT -> mins :+ y:rest

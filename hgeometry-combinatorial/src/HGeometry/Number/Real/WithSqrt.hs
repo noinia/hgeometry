@@ -1,11 +1,21 @@
 {-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE TypeApplications #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Number.Real.WithSqrt
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Extend a rational type with a Square root of a fixed value. e.g. sqrt(2).
+--
+--------------------------------------------------------------------------------
 module Data.RealNumber.WithSqrt where
 
 import Data.Kind (Constraint)
 import Data.Functor.Identity
 import Data.Proxy
 import Data.Reflection
+import Data.Kind(Type)
 
 --------------------------------------------------------------------------------
 
@@ -98,7 +108,7 @@ instance (Ord r, Fractional r, Reifies root r) => Floating (WithSqrt root r) whe
 -- | Run a computation using our WithRoot type.
 --
 -- pre: the computation that we run does not return a value still involving sqrt terms
-runWithRoot          :: forall proxy (constr :: * -> Constraint) r computation.
+runWithRoot          :: forall proxy (constr :: Type -> Constraint) r computation.
                         ( Functor computation, Ord r, Real r, Fractional r
                         , (forall root. constr (WithSqrt root r))
                         )

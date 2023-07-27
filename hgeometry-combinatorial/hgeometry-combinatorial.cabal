@@ -187,14 +187,13 @@ test-suite hgeometry-combinatorial-hspec
     build-depends:
          hgeometry-combinatorial
 
-
--- test-suite hgeometry-combinatorial-doctest
---     import:           setup, quickcheck-setup
---     type:             exitcode-stdio-1.0
---     main-is:          doctests.hs
---     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
---     build-depends:
---        doctest             >= 0.8  && < 1
+test-suite hgeometry-combinatorial-doctest
+    import:           setup, quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8  && < 1
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
