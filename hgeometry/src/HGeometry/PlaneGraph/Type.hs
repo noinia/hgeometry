@@ -23,9 +23,9 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph.Class
 import qualified Hiraffe.PlanarGraph as PG
-import           Hiraffe.PlanarGraph(Arc (..), Direction (..), FaceId (..),
-                                      FaceId', HasDataOf (..), PlanarGraph, VertexId (..),
-                                      VertexId', World (..), dual, planarGraph, twin)
+import           Hiraffe.PlanarGraph(FaceId, PlanarGraph, VertexId, DartId
+                                    , World (..), dual, planarGraph, twin
+                                    )
 
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
@@ -48,7 +48,7 @@ _PlanarGraph = coerced
 
 instance HasVertices' (PlaneGraph s v e f) where
   type Vertex   (PlaneGraph s v e f) = v
-  type VertexIx (PlaneGraph s v e f) = VertexId' s
+  type VertexIx (PlaneGraph s v e f) = VertexId s
   vertexAt i = _PlanarGraph.vertexAt i
 
 instance HasVertices (PlaneGraph s v e f) (PlaneGraph s v' e f) where
@@ -58,7 +58,7 @@ instance HasVertices (PlaneGraph s v e f) (PlaneGraph s v' e f) where
 
 instance HasDarts' (PlaneGraph s v e f) where
   type Dart   (PlaneGraph s v e f) = e
-  type DartIx (PlaneGraph s v e f) = PG.Dart s
+  type DartIx (PlaneGraph s v e f) = DartId s
   dartAt i = _PlanarGraph.dartAt i
 
 instance HasDarts (PlaneGraph s v e f) (PlaneGraph s v e' f) where
@@ -68,7 +68,7 @@ instance HasDarts (PlaneGraph s v e f) (PlaneGraph s v e' f) where
 
 instance HasEdges' (PlaneGraph s v e f) where
   type Edge   (PlaneGraph s v e f) = e
-  type EdgeIx (PlaneGraph s v e f) = PG.Dart s
+  type EdgeIx (PlaneGraph s v e f) = DartId s
   edgeAt d = _PlanarGraph.edgeAt d
 
 instance HasEdges (PlaneGraph s v e f) (PlanarGraph s w v e f) where
@@ -78,7 +78,7 @@ instance HasEdges (PlaneGraph s v e f) (PlanarGraph s w v e f) where
 
 instance HasFaces' (PlaneGraph s v e f) where
   type Face   (PlaneGraph s v e f) = f
-  type FaceIx (PlaneGraph s v e f) = FaceId' s
+  type FaceIx (PlaneGraph s v e f) = FaceId s
   faceAt fi = _PlanarGraph.faceAt fi
 
 
