@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.SegmentTree
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Segment Tree implementation
+--
+--------------------------------------------------------------------------------
 module HGeometry.SegmentTree
   ( SegmentTree
   , buildSegmentTree
@@ -12,13 +22,17 @@ module HGeometry.SegmentTree
   , MeasureF(..)
   , Report(..)
   , Count(..)
+
+  , HasCanonicalSubSet(..)
+  , atomicIntervals
+  , AtomicInterval(..)
   ) where
 
 import           Control.Lens
 import           Data.Foldable1
 import           HGeometry.Foldable.Sort
 import           HGeometry.Interval
-import           HGeometry.Interval.EndPoint
+import           HGeometry.Point
 import           HGeometry.Vector.NonEmpty.Util ()
 -- import HGeometry.Measured.Class
 import           HGeometry.Measured.Size
@@ -26,34 +40,46 @@ import           HGeometry.Properties
 import           HGeometry.Intersection
 import           HGeometry.Tree.Binary.Static
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Vector as Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           Data.Monoid (Sum(..))
 
 --------------------------------------------------------------------------------
 
+data ElementaryInterval r set = EndPoint     !r                 !set
+                              | ElemInterval !(OpenInterval r)  !set
+                              deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+type instance NumType (ElementaryInterval r set) = r
+
+
+
+--------------------------------------------------------------------------------
+
+
 -- | An atomic interval just stores a canonical subset, nothing else.
 data AtomicInterval f interval r =
-  AtomicInterval { _left   :: !r
-                 -- ^ left endpoint is open
-                 , _right  :: !r
-                 -- ^ right endpoint is closed
-                 , _subset :: !(f interval)
+  AtomicInterval { _theInterval :: !(HalfOpenInterval r)
+                 , _subset      :: !(f interval)
                  } deriving stock (Show,Eq)
 
 type instance NumType (AtomicInterval f interval r) = r
 
+theInterval :: Lens' (AtomicInterval f interval r) (HalfOpenInterval r)
+theInterval = lens _theInterval (\ai i -> ai { _theInterval = i })
+
 instance HasStart (AtomicInterval f interval r) r where
-  start = lens _left (\ai x -> ai { _left = x})
+  start = theInterval.start
 
 instance HasEnd (AtomicInterval f interval r) r where
-  end = lens _right (\ai x -> ai { _right = x})
+  end = theInterval.end
 
 instance HasStartPoint (AtomicInterval f interval r) (EndPoint Open r)  where
-  startPoint = lens (OpenE . _left) (\ai (OpenE x) -> ai { _left = x})
+  startPoint = theInterval.startPoint
 
 instance HasEndPoint (AtomicInterval f interval r) (EndPoint Closed r) where
-  endPoint = lens (ClosedE . _right) (\ai (ClosedE x) -> ai { _right = x})
+  endPoint = theInterval.endPoint
 
 -- instance Monoid (f interval) => IntervalLike_ (AtomicInterval f interval r) r where
 --   mkInterval (OpenE l) (ClosedE r) = AtomicInterval l r mempty
@@ -73,7 +99,7 @@ instance HasCanonicalSubSet (AtomicInterval f interval r)
 -- | The data that we store at each node
 data NodeData f interval =
   NodeData { _split           :: !(NumType interval)
-           , _nodeInterval    :: !(Interval AnEndPoint (NumType interval))
+           , _nodeInterval    :: !(HalfOpenInterval (NumType interval))
            , _canonicalSubSet :: !(f interval)
            }
 
@@ -88,7 +114,7 @@ split :: Lens' (NodeData f interval) (NumType interval)
 split = lens _split (\nd x -> nd { _split = x })
 
 -- | Lens to access the node interval
-nodeInterval :: Lens' (NodeData f interval) (Interval AnEndPoint (NumType interval))
+nodeInterval :: Lens' (NodeData f interval) (HalfOpenInterval (NumType interval))
 nodeInterval = lens _nodeInterval (\nd x -> nd { _nodeInterval = x })
 
 
@@ -111,9 +137,9 @@ deriving stock instance ( Eq (NumType interval), Eq (f interval)
 
 interval :: Getter (BinLeafTree (NodeData f interval)
                                 (AtomicInterval f interval (NumType interval))
-                   ) (Interval AnEndPoint (NumType interval))
+                   ) (HalfOpenInterval (NumType interval))
 interval = to $ \case
-  Leaf atomic -> Interval (AnOpenE $ atomic^.start) (AnClosedE $ atomic^.end)
+  Leaf atomic -> atomic^.theInterval
   Node _ nd _ -> nd^.nodeInterval
 
 --------------------------------------------------------------------------------
@@ -128,7 +154,7 @@ buildSegmentTree      :: forall f interval r g.
                       => g interval -> SegmentTree f interval
 buildSegmentTree ints = foldr insert t ints
   where
-    t = buildSkeleton . NonEmptyVector . sort
+    t = buildSkeleton . NonEmptyVector . Vector.uniq . sort
       . foldMap1 (\i -> (i^.start) :| [i^.end]) $ ints
 
 -- | Given te endpoints in ascending order, build an empty segment-tree
@@ -144,7 +170,8 @@ buildSkeleton = SegmentTree
               . asBalancedBinLeafTree . toAtomicIntervals
   where
     leaf' (Elem atomic) = Leaf atomic
-    node' l _ r         = let int = Interval (l^.interval.startPoint) (r^.interval.endPoint)
+    node' l _ r         = let int = HalfOpenInterval (l^.interval.startPoint)
+                                                     (r^.interval.endPoint)
                           in Node l (NodeData (l^.interval.end) int mempty) r
 
 
@@ -156,7 +183,7 @@ toAtomicIntervals :: ( Foldable1 g
 toAtomicIntervals (toNonEmpty -> endPts@(x0 :| _)) =
     NonEmpty.zipWith mkInterval' (x0 NonEmpty.<| endPts) endPts
   where
-    mkInterval' l r = AtomicInterval l r mempty
+    mkInterval' l r = AtomicInterval (HalfOpenInterval (OpenE l) (ClosedE r)) mempty
 
 --------------------------------------------------------------------------------
 
@@ -170,6 +197,7 @@ insert                   :: ( ClosedInterval_ interval r, Ord r, MeasureF f inte
 insert i (SegmentTree t) = SegmentTree $ go t
   where
     mi = measure i
+    ic = ClosedInterval (i^.start) (i^.end)
 
     go (Leaf atomic) = Leaf $ atomic&canonicalSubSet %~ (mi <>)
     go (Node l nd r)
@@ -178,15 +206,16 @@ insert i (SegmentTree t) = SegmentTree $ go t
                                             r' = if intersectsRight l nd then go r else r
                                         in Node l' nd r'
 
+
     -- intersectsLeft  l nd = i^.end <= nd^.split
     -- intersectsRight r nd = i^.end >  nd^.split
-    intersectsLeft  l _nd = i `intersects` (l^.interval)
-    intersectsRight r _nd = i `intersects` (r^.interval)
+    intersectsLeft  l _nd = ic `intersects` (l^.interval)
+    intersectsRight r _nd = ic `intersects` (r^.interval)
 
 
 -- | Test if the first interval covers the second interval.
 covers       :: (ClosedInterval_ interval r, Ord r)
-             => interval -> Interval AnEndPoint r -> Bool
+             => interval -> HalfOpenInterval r -> Bool
 i `covers` j = i^.start <= j^.start && j^.end <= i^.end
 
 
@@ -225,13 +254,14 @@ stab                   :: ( Ord r
                           ) => r -> SegmentTree f interval -> [f interval]
 stab q (SegmentTree t) = go0 t
   where
-    go0 n@(Leaf _)                           = go n
+    go0 n@(Leaf _)                                      = go n
     go0 n@(Node _ nd _)
-      | q `stabsInterval` (nd^.nodeInterval) = go n
+      | q `stabsInterval` (toClosed $ nd^.nodeInterval) = go n
       | otherwise                            = []
+    toClosed (HalfOpenInterval (OpenE s) (ClosedE e)) = ClosedInterval s e
 
     go (Leaf atomic) = [atomic^.canonicalSubSet]
-    go (Node l nd r) = let ch = if q <= nd^.split then l else r
+    go (Node l nd r) = let ch = if Point1 q `intersects` (l^.interval) then l else r
                        in nd^.canonicalSubSet : go ch
 
 -- | Query the segment tree
@@ -244,6 +274,12 @@ query q = mconcat . stab q
 
 --------------------------------------------------------------------------------
 
+-- | Report the atomic intervals in left-to-right order
+atomicIntervals                 :: SegmentTree f interval
+                                -> NonEmpty (AtomicInterval f interval (NumType interval))
+atomicIntervals (SegmentTree t) = toNonEmpty t
+
+--------------------------------------------------------------------------------
 
 class MeasureF f a where
   -- | Given a single a, measure it into someting of type 'f a'.

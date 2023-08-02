@@ -20,12 +20,21 @@ spec = describe "segmentTree tests" $ do
            query 5 testTree `shouldBe` (Report [ClosedInterval 0 15])
          it "manual count" $
            query 15 testTree `shouldBe` (Count 2)
+         it "manual bug" $
+           let Report res = query 0 bugTree
+           in Set.fromList res `shouldBe` naiveQuery 0 bugIntervals
          prop "same as naive" $
            \(qs :: [Int]) (ints :: NonEmpty (ClosedInterval Int)) ->
              let t = buildSegmentTree ints
              in all (\q -> let Report res = query q t
                            in Set.fromList res == naiveQuery q ints
                     ) qs
+         runIO $ do
+           print bugTree
+           print "============================"
+           mapM_ print $ atomicIntervals bugTree
+           print "============================"
+           print $ query 0 bugTree
 
          -- prop: at most an int in at most 2 canonical subsets per level
 
@@ -44,3 +53,8 @@ myIntervals = NonEmpty.fromList
               , ClosedInterval 23 30
               , ClosedInterval 0  15
               ]
+
+
+bugTree :: SegmentTree Report (ClosedInterval Int)
+bugTree = buildSegmentTree bugIntervals
+bugIntervals = Interval (ClosedE 0) (ClosedE 4) :| [Interval (ClosedE (-1)) (ClosedE 2)]
