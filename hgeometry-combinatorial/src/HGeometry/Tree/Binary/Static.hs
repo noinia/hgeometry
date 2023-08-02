@@ -50,8 +50,9 @@ data BinLeafTree v a = Leaf !a
 instance (NFData v, NFData a) => NFData (BinLeafTree v a)
 
 -- | smart constructor
-node     :: Measured v a => BinLeafTree v a -> BinLeafTree v a -> BinLeafTree v a
-node l r = Node l (measure l <> measure r) r
+node     :: ( Measured f a, Semigroup (f a)
+            ) => BinLeafTree (f a) a -> BinLeafTree (f a) a -> BinLeafTree (f a) a
+node l r = Node l (getMeasure l <> getMeasure r) r
 
 
 instance Bifunctor BinLeafTree where
@@ -59,10 +60,11 @@ instance Bifunctor BinLeafTree where
     Leaf x     -> Leaf $ g x
     Node l k r -> Node (bimap f g l) (f k) (bimap f g r)
 
-instance Measured v a => Measured v (BinLeafTree v a) where
-  measure (Leaf x)     = measure x
-  measure (Node _ v _) = v
-
+-- | Get the measure of a subtree
+getMeasure :: Measured f a => BinLeafTree (f a) a -> f a
+getMeasure = \case
+  Leaf x     -> measure x
+  Node _ v _ -> v
 
 instance Foldable (BinLeafTree v) where
   foldMap f (Leaf a)     = f a
@@ -77,15 +79,15 @@ instance Traversable (BinLeafTree v) where
   traverse f (Leaf a)     = Leaf <$> f a
   traverse f (Node l v r) = Node <$> traverse f l <*> pure v <*> traverse f r
 
-instance Measured v a => Semigroup (BinLeafTree v a) where
+instance (Measured f a, Semigroup (f a)) => Semigroup (BinLeafTree (f a) a) where
   l <> r = node l r
 
 -- | Create a balanced tree, i.e. a tree of height \(O(\log n)\) with the
 -- elements in the leaves.
 --
 -- \(O(n)\) time.
-asBalancedBinLeafTree :: Foldable1 f => f a -> BinLeafTree Size (Elem a)
-asBalancedBinLeafTree = divideAndConquer1 (Leaf . Elem)
+asBalancedBinLeafTree :: Foldable1 f => f a -> BinLeafTree (Count a) a
+asBalancedBinLeafTree = divideAndConquer1 Leaf
 -- -- the implementation below produces slightly less high trees, but runs in
 -- -- \(O(n \log n)\) time, as on every level it traverses the list passed down.
 -- asBalancedBinLeafTree ys = asBLT (length ys') ys' where ys' = toList ys

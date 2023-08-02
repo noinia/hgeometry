@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.RangeTree.Base
@@ -22,10 +23,10 @@ module HGeometry.RangeTree.Base
 import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid (Sum(..))
 import           Data.Type.Ord
 import qualified Data.Vector as Vector
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
 import           HGeometry.Interval
@@ -40,12 +41,15 @@ import           HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
 -- | Type Representing a generic (1D) range-tree.
-newtype RangeTree f point = RangeTree (SubTree f point)
-  deriving (Show,Eq,Functor,Foldable,Traversable)
+newtype RangeTree f point = RangeTree (SubTree f point (NumType point))
+
+
+deriving instance (Show (f point), Show (NumType point)) => Show (RangeTree f point)
+deriving instance (Eq (f point), Eq (NumType point))     => Eq   (RangeTree f point)
 
 -- | The actual tree type
-type SubTree f point = BinLeafTree (NodeData f point (NumType point))
-                                   (LeafData f point (NumType point) )
+type SubTree f point r = BinLeafTree (NodeData f point r)
+                                     (LeafData f point r)
 
 
 -- | Data stored at a leaf
@@ -57,49 +61,71 @@ data LeafData f point r = LeafData { _thePoint      :: !r
 thePoint :: Lens (LeafData f point r) (LeafData f point s) r s
 thePoint = lens _thePoint (\ld p -> ld { _thePoint = p})
 
-instance HasCanonicalSubset (LeafData f point r) (LeafData g point r) point f g where
-  canonicalSubset = lens _leafCanonical (\(LeafData p _) cs -> LeafData p cs)
+instance HasCanonicalSubSet (LeafData f point r) (LeafData g point r) point f g where
+  canonicalSubSet = lens _leafCanonical (\(LeafData p _) cs -> LeafData p cs)
 
+-- | The data stored at an internal node.
 data NodeData f point r = NodeData { _split           :: !r
                                    , _canonicalSubSet :: !(f point)
                                    } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
-instance HasCanonicalSubset (NodeData f point r) (NodeData g point r) point f g where
-  canonicalSubset = lens _canonicalSubSet (\(NodeData x _) cs -> NodeData x cs)
+-- | Access the split value of a NodeData
+split :: Lens (NodeData f point r) (NodeData f point s) r s
+split = lens _split (\nd x -> nd { _split = x })
+
+instance HasCanonicalSubSet (NodeData f point r) (NodeData g point r) point f g where
+  canonicalSubSet = lens _canonicalSubSet (\(NodeData x _) cs -> NodeData x cs)
+
+instance HasCanonicalSubSet (SubTree f point r) (SubTree f point r) point f f where
+  -- | Sets the node data of the root
+  canonicalSubSet = lens get'' (flip set'')
+    where
+      get'' = \case
+        Leaf ld     -> ld^.canonicalSubSet
+        Node _ nd _ -> nd^.canonicalSubSet
+      set'' cs = \case
+        Leaf ld     -> Leaf $ ld&canonicalSubSet .~ cs
+        Node l nd r -> Node l (nd&canonicalSubSet .~ cs) r
 
 
+-- | Construct a rangetree on n points.
+--
+-- \(O(n\log n)\)
 buildRangeTree :: ( Foldable1 g, Point_ point d r, Ord r, 1 <= d
-                  , Semigroup (f a), Measured f a
+                  , Semigroup (f point), Measured f point
                   ) => g point -> RangeTree f point
-buildRangeTree = fromAscList . NonEmptyVector . sortOnCheap (^.asPoint)
+buildRangeTree = fromGroupedAscList
+               . NonEmpty.groupWith1 (^.xCoord)
+               . NonEmpty.fromList . Vector.toList
+               . sortOnCheap (^.xCoord)
 
 -- | Given the points in sorted order, builds the range tree.
 --
 -- The running time and space depends on the monoid used. In particlar, we use (<>) at
 -- every internal node.
-fromAscList :: ( Foldable1 g, Functor g, Point_ point 1 r
-               , Semigroup (f a), Measured f a
+fromAscList :: ( Foldable1 g, Functor g, Point_ point d r, 1 <= d
+               , Semigroup (f point), Measured f point
                ) => g point -> RangeTree f point
 fromAscList = fromGroupedAscList . fmap (:| [])
 
 -- | Given the points in groups per x-coordinate, in increasing order of x-coordinate
-fromGroupedAscList :: ( Foldable1 g, Foldable1 h, Point_ point 1 r
-                      , Semigroup (f a), Measured f a
+fromGroupedAscList :: ( Foldable1 g, Foldable1 h, Point_ point d r, 1 <= d
+                      , Semigroup (f point), Measured f point
                       ) => g (h point) -> RangeTree f point
 fromGroupedAscList = RangeTree . fst . foldUp node' leaf' . asBalancedBinLeafTree
   where
-    leaf' pts            = let p = first1Of folded pts
+    leaf' pts            = let p = NonEmpty.head $ toNonEmpty pts
                                x = p^.xCoord
-                               m = foldMap measure pts
-                           in (LeafData x m, x)
-    node' (l,m) _ (r,m') = ( Node l (NodeData m $ l^.canonicalSubset <> r^.canonicalSubset) r
+                               m = foldMap1 measure pts
+                           in (Leaf $ LeafData x m, x)
+    node' (l,m) _ (r,m') = ( Node l (NodeData m $ l^.canonicalSubSet <> r^.canonicalSubSet) r
                            , m'
                            )
 
 -- | Report the canonical subsets of the nodes that together represent the query interval.
 --
 -- \(O(\log n)\)
-rangeQuery                  :: (Interval_ interval r, Ord r)
+rangeQuery                  :: (Interval_ interval r, Point_ point d r, 1 <= d, Ord r)
                             => interval -> RangeTree f point -> [f point]
 rangeQuery q (RangeTree t0) = findSplitNode t0
   where
@@ -113,8 +139,8 @@ rangeQuery q (RangeTree t0) = findSplitNode t0
 
     -- | Report a leaf (if needed)
     goReport ld
-        | Point1 (ld^.thePoint) `intersects` q = [ld^.canonicalSubset]
-        | otherwise                            = []
+        | (ld^.thePoint) `stabsInterval` q = [ld^.canonicalSubSet]
+        | otherwise                        = []
 
     -- | walk the left-path reporting the right subtrees
     goReportR = \case
@@ -142,6 +168,6 @@ rangeQuery q (RangeTree t0) = findSplitNode t0
 --
 -- \(O(\log n + k)\), where \(k\) is somehow depends on the output size (and the monoid
 -- used).
-query   :: (Interval_ interval r, Ord r, Monoid (f interval))
+query   :: (Interval_ interval r, Point_ point d r, 1 <= d, Ord r, Monoid (f point))
         => interval -> RangeTree f point -> f point
-query q = mconcat . queryNodes q
+query q = mconcat . rangeQuery q

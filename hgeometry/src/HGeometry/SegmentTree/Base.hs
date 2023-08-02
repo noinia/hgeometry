@@ -19,11 +19,6 @@ module HGeometry.SegmentTree.Base
 
   , insert
 
-  , MeasureF(..)
-  , Report(..)
-  , Count(..)
-
-  -- , HasCanonicalSubSet(..)
   , ascEndPoints
   -- , elementaryIntervals
   -- , ElementaryInterval(..)
@@ -33,18 +28,17 @@ module HGeometry.SegmentTree.Base
 import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Monoid (Sum(..))
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
 import           HGeometry.Interval
-import           HGeometry.Measured.Size
+import           HGeometry.Measured
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.SegmentTree.CanonicalSubSet
 import           HGeometry.Tree.Binary.Static
 import           HGeometry.Vector.NonEmpty.Util ()
-
 --------------------------------------------------------------------------------
 
 
@@ -96,12 +90,6 @@ instance HasEndPoint (ElementaryInterval r set) (AnEndPoint r)  where
         ElemInterval i _ -> AnOpenE $ i^.end
       set'' = error "ElementaryInterva.endPoint set not implemented"
 
-
--- | Our Leaves and Nodes both store canonical subsets
-class HasCanonicalSubSet s t interval f g | s -> f
-                                          , t -> g where
-  -- | Lens to access the canonical subset of a node or leaf
-  canonicalSubSet :: Lens s t (f interval) (g interval)
 
 instance HasCanonicalSubSet (ElementaryInterval r (f interval))
                             (ElementaryInterval r (g interval)) interval f g where
@@ -167,7 +155,7 @@ interval = to $ \case
 -- \(O(n\log n)\)
 buildSegmentTree      :: forall f interval r g.
                          ( ClosedInterval_ interval r, Ord r
-                         , Monoid (f interval), MeasureF f interval, Foldable1 g
+                         , Monoid (f interval), CanInsert f interval, Foldable1 g
                          )
                       => g interval -> SegmentTree f interval
 buildSegmentTree ints = foldr insert t ints
@@ -187,9 +175,9 @@ buildSkeleton = SegmentTree
               . foldUp node' leaf'
               . asBalancedBinLeafTree . toAtomicIntervals
   where
-    leaf' (Elem elemInt) = Leaf elemInt
-    node' l _ r          = let int = Interval (l^.interval.startPoint) (r^.interval.endPoint)
-                           in Node l (NodeData int mempty) r
+    leaf' elemInt = Leaf elemInt
+    node' l _ r   = let int = Interval (l^.interval.startPoint) (r^.interval.endPoint)
+                    in Node l (NodeData int mempty) r
 
 
 -- | Given a set of endpoints, in ascendin order, construct the atomic intervals defined
@@ -207,18 +195,16 @@ toAtomicIntervals (toNonEmpty -> (x0 :| endPts)) =
 -- | Insert a segment into the segment tree, whose endpoints are already in the tree
 --
 -- \(O(\log n)\)
-insert                   :: ( ClosedInterval_ interval r, Ord r, MeasureF f interval
-                            , Semigroup (f interval)
+insert                   :: ( ClosedInterval_ interval r, Ord r, CanInsert f interval
                             )
                          => interval -> SegmentTree f interval -> SegmentTree f interval
 insert i (SegmentTree t) = SegmentTree $ go t
   where
-    mi = measure i
     ic = ClosedInterval (i^.start) (i^.end)
 
-    go (Leaf atomic) = Leaf $ atomic&canonicalSubSet %~ (mi <>)
+    go (Leaf atomic) = Leaf $ atomic&canonicalSubSet %~ insertMeasure i
     go (Node l nd r)
-      | i `covers` (nd^.nodeInterval) = Node l (nd&canonicalSubSet %~ (mi <>)) r
+      | i `covers` (nd^.nodeInterval) = Node l (nd&canonicalSubSet %~ insertMeasure i) r
       | otherwise                     = let l' = if intersectsLeft  l nd then go l else l
                                             r' = if intersectsRight r nd then go r else r
                                         in Node l' nd r'
@@ -237,7 +223,7 @@ i `covers` j = i^.start <= j^.start && j^.end <= i^.end
 
 {-
 
-delete                   :: ( ClosedInterval_ interval r, Ord r, MeasureF f interval
+delete                   :: ( ClosedInterval_ interval r, Ord r, Measured f interval
                             , Semigroup (f interval)
                             )
                          => interval -> SegmentTree f interval -> SegmentTree f interval
@@ -301,22 +287,3 @@ elementaryIntervals                 :: SegmentTree f interval
 elementaryIntervals (SegmentTree t) = toNonEmpty t
 
 --------------------------------------------------------------------------------
-
-class MeasureF f a where
-  -- | Given a single a, measure it into someting of type 'f a'.
-  measure :: a -> f a
-
--- | Type to represent reporting
-newtype Report interval = Report [interval]
-  deriving (Show,Eq,Ord,Semigroup,Monoid)
-
-instance MeasureF Report interval where
-  measure = Report . (:[])
-
--- | Counting queries
-newtype Count interval = Count Int
-  deriving (Show,Eq,Ord)
-  deriving (Semigroup,Monoid) via Sum Int
-
-instance MeasureF Count interval where
-  measure = const $ Count 1

@@ -163,6 +163,12 @@ library
 
 
         HGeometry.SegmentTree
+        HGeometry.SegmentTree.Base
+        HGeometry.SegmentTree.CanonicalSubSet
+
+        HGeometry.RangeTree
+        HGeometry.RangeTree.Base
+
 
     other-modules:
        HGeometry.Polygon.Simple.Implementation
@@ -219,7 +225,7 @@ test-suite hgeometry-hspec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
       SegmentTreeSpec
-
+      RangeTreeSpec
 
   hs-source-dirs:   test
   build-depends:

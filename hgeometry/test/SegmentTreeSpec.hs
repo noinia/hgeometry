@@ -7,6 +7,9 @@ import qualified Data.Set as Set
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Interval
+import           HGeometry.Measured
+import           HGeometry.Measured.Report
+import           HGeometry.Measured.Size
 import           HGeometry.SegmentTree
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -58,7 +61,7 @@ naiveQuery        :: (Ord r, ClosedInterval_ interval r, Ord interval, Foldable 
 naiveQuery q ints = Set.fromList $ filter (q `stabsInterval`) $ F.toList ints
 
 
-testTree :: ( Monoid (f (ClosedInterval Int)), MeasureF f (ClosedInterval Int)
+testTree :: ( Monoid (f (ClosedInterval Int)), CanInsert f (ClosedInterval Int)
             ) => SegmentTree f (ClosedInterval Int)
 testTree = buildSegmentTree myIntervals
 
