@@ -43,12 +43,12 @@ spec = describe "segmentTree tests" $ do
            intA `intersects` intB
 
 
-         runIO $ do
-           print bugTree
-           print "============================"
-           mapM_ print $ elementaryIntervals bugTree
-           print "============================"
-           print $ query 0 bugTree
+         -- runIO $ do
+         --   print bugTree
+         --   print "============================"
+         --   mapM_ print $ elementaryIntervals bugTree
+         --   print "============================"
+         --   print $ query 0 bugTree
 
          -- prop: at most an int in at most 2 canonical subsets per level
 

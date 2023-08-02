@@ -23,9 +23,10 @@ module HGeometry.SegmentTree
   , Report(..)
   , Count(..)
 
-  , HasCanonicalSubSet(..)
-  , elementaryIntervals
-  , ElementaryInterval(..)
+  -- , HasCanonicalSubSet(..)
+  , ascEndPoints
+  -- , elementaryIntervals
+  -- , ElementaryInterval(..)
   ) where
 
 
@@ -46,6 +47,9 @@ import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 
+
+
+-- | An Elementary interval is either a singleton closed interval, or an open interval.
 data ElementaryInterval r set = EndPoint'    !r                 !set
                               | ElemInterval !(OpenInterval r)  !set
                               deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
@@ -93,6 +97,7 @@ instance HasEndPoint (ElementaryInterval r set) (AnEndPoint r)  where
       set'' = error "ElementaryInterva.endPoint set not implemented"
 
 
+-- | Our Leaves and Nodes both store canonical subsets
 class HasCanonicalSubSet s t interval f g | s -> f
                                           , t -> g where
   -- | Lens to access the canonical subset of a node or leaf
@@ -110,7 +115,7 @@ instance HasCanonicalSubSet (ElementaryInterval r (f interval))
         ElemInterval i _ -> ElemInterval i cs
 
 
--- | The data that we store at each node
+-- | The data that we store at each node; essentially the interval and a canonical subset.
 data NodeData f interval =
   NodeData { _nodeInterval    :: !(Interval AnEndPoint (NumType interval))
            , _canonicalSubSet :: !(f interval)
@@ -126,17 +131,21 @@ deriving stock instance ( Eq (NumType interval), Eq (f interval)
 nodeInterval :: Lens' (NodeData f interval) (Interval AnEndPoint (NumType interval))
 nodeInterval = lens _nodeInterval (\nd x -> nd { _nodeInterval = x })
 
-
 instance HasCanonicalSubSet (NodeData f interval) (NodeData g interval) interval f g where
   canonicalSubSet = lens _canonicalSubSet (\nd x -> nd { _canonicalSubSet = x })
 
 
 
 -- | A Segment tree
-newtype SegmentTree f interval =
-  SegmentTree (BinLeafTree (NodeData f interval)
-                           (ElementaryInterval (NumType interval) (f interval))
-              )
+newtype SegmentTree f interval = SegmentTree (SubTree f interval)
+
+type instance NumType   (SegmentTree f interval) = NumType interval
+type instance Dimension (SegmentTree f interval) = 1
+
+
+-- | The actual segment tree immplementation
+type SubTree f interval = BinLeafTree (NodeData f interval)
+                                      (ElementaryInterval (NumType interval) (f interval))
 
 deriving stock instance ( Show (NumType interval), Show (f interval)
                         ) => Show (SegmentTree f interval)
@@ -144,9 +153,9 @@ deriving stock instance ( Show (NumType interval), Show (f interval)
 deriving stock instance ( Eq (NumType interval), Eq (f interval)
                         ) => Eq (SegmentTree f interval)
 
-interval :: Getter (BinLeafTree (NodeData f interval)
-                                (ElementaryInterval (NumType interval) (f interval))
-                   ) (Interval AnEndPoint (NumType interval))
+
+-- | Get the interval of a subtree
+interval :: Getter (SubTree f interval) (Interval AnEndPoint (NumType interval))
 interval = to $ \case
   Leaf atomic -> Interval (atomic^.startPoint) (atomic^.endPoint)
   Node _ nd _ -> nd^.nodeInterval
@@ -277,6 +286,14 @@ query   :: (Ord r, ClosedInterval_ interval r, Monoid (f interval))
 query q = mconcat . stab q
 
 --------------------------------------------------------------------------------
+
+-- | Report te list of endpoints that the segment tree is built on in left to right order.
+ascEndPoints :: SegmentTree f interval -> [NumType interval]
+ascEndPoints = foldMap (\case
+                           EndPoint' x _ -> [x]
+                           _             -> []
+                       ) . elementaryIntervals
+
 
 -- | Report the atomic intervals in left-to-right order
 elementaryIntervals                 :: SegmentTree f interval
