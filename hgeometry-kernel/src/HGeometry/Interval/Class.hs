@@ -22,6 +22,7 @@ module HGeometry.Interval.Class
   , HasEnd(..)
   , startAndEnd
 
+  , StartPointOf
   , EndPointOf
   , HasStartPoint(..)
   , HasEndPoint(..)
@@ -79,8 +80,12 @@ class HasEndPoint seg p | seg -> p where
   endPoint :: Lens' seg p
 
 -- | Get both the start and end of something that has a start and end.
-startAndEndPoint   :: (HasStartPoint seg p, HasEndPoint seg p) => seg -> (p,p)
+startAndEndPoint   :: (HasStartPoint seg s, HasEndPoint seg e) => seg -> (s,e)
 startAndEndPoint i = (i^.startPoint, i^.endPoint)
+
+-- | type family to declare the type of startpoint for an interval, the
+-- idea is to define this as one of the endpoinst form the Endpoints module
+type family StartPointOf interval
 
 -- | type family to declare the type of endpoint for an interval, the
 -- idea is to define this as one of the endpoinst form the Endpoints module
@@ -90,22 +95,25 @@ type family EndPointOf interval
 
 -- | A class for types representing interval like objects
 type IntervalLike_ :: Type -> Type -> Constraint
-class ( HasStart interval point, HasStartPoint interval (EndPointOf interval)
+class ( HasStart interval point, HasStartPoint interval (StartPointOf interval)
       , HasEnd   interval point, HasEndPoint   interval (EndPointOf interval)
       , EndPoint_ (EndPointOf interval), IxValue (EndPointOf interval) ~ point
+      , EndPoint_ (StartPointOf interval), IxValue (StartPointOf interval) ~ point
       ) => IntervalLike_ interval point | interval -> point where
 
   -- | Construct an interval given its start and end point.
   --
   -- pre: start < end
-  mkInterval :: EndPointOf interval -> EndPointOf interval -> interval
+  mkInterval :: StartPointOf interval -> EndPointOf interval -> interval
 
   -- | Construct an interval given two points. This makes sure
   -- the start-point comes before the endpoint.
   --
   -- pre: it is possible to construct a valid, non-empty interval this way.
   --      so if either endpoint is open the endpoints should not coincide.
-  buildInterval :: Ord point => EndPointOf interval -> EndPointOf interval -> interval
+  buildInterval :: ( Ord point
+                   , StartPointOf interval ~ EndPointOf interval
+                   ) => StartPointOf interval -> EndPointOf interval -> interval
   buildInterval a b
     | (a^._endPoint) <= (b^._endPoint) = mkInterval a b
     | otherwise                        = mkInterval b a
@@ -127,6 +135,7 @@ class ( IntervalLike_ interval r
 -- | A class representing closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval_ :: Type -> Type -> Constraint
 class (Interval_ interval r
+      , StartPointOf interval ~ EndPoint Closed r
       , EndPointOf interval ~ EndPoint Closed r
       ) => ClosedInterval_ interval r where
   -- | Construct an interval given its start and end point.
@@ -166,6 +175,7 @@ clampTo (ClosedInterval_ l u) x = (x `max` l) `min` u
 
 -- | A class representing open intervals, i.e. intervals that exclude their endpoints
 class ( Interval_ interval r
+      , StartPointOf interval ~ EndPoint Open r
       , EndPointOf interval ~ EndPoint Open r
       ) => OpenInterval_ interval r | interval -> r where
   -- | Construct an interval given its start s and end point t.
@@ -186,7 +196,7 @@ pattern OpenInterval_ l u <- (startAndEnd -> (l,u))
 
 -- | Pattern to match on intervals or construct them.
 pattern Interval_     :: Interval_ interval r
-                      => EndPointOf interval -> EndPointOf interval -> interval
+                      => StartPointOf interval -> EndPointOf interval -> interval
 pattern Interval_ s t <- (startAndEndPoint -> (s,t))
   where
     Interval_ s t = mkInterval s t
@@ -276,6 +286,7 @@ instance HasStartPoint seg p => HasStartPoint (seg :+ extra) p where
 instance HasEndPoint seg p => HasEndPoint (seg :+ extra) p where
   endPoint = core.endPoint
 
+type instance StartPointOf (interval :+ extra) = StartPointOf interval
 type instance EndPointOf (interval :+ extra) = EndPointOf interval
 
 instance ( IntervalLike_ interval point

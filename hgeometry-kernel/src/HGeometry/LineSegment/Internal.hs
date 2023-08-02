@@ -130,7 +130,8 @@ instance ( IxValue (endPoint point) ~ point
          ) => HasEndPoint (LineSegment endPoint point) (endPoint point) where
   endPoint = _LineSegmentInterval.endPoint
 
-type instance EndPointOf (LineSegment endPoint point) = endPoint point
+type instance StartPointOf (LineSegment endPoint point) = endPoint point
+type instance EndPointOf   (LineSegment endPoint point) = endPoint point
 
 instance ( IxValue (endPoint point) ~ point
          -- , OptCVector_ 2 (endPoint point)
