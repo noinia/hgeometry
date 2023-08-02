@@ -5,11 +5,11 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import           HGeometry.Instances ()
+import           HGeometry.Intersection
 import           HGeometry.Interval
 import           HGeometry.SegmentTree
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-
 --------------------------------------------------------------------------------
 
 type R = Int
@@ -29,10 +29,24 @@ spec = describe "segmentTree tests" $ do
              in all (\q -> let Report res = query q t
                            in Set.fromList res == naiveQuery q ints
                     ) qs
+         it "intersection tests 1" $ do
+           let intA = ClosedInterval 0 4 :: ClosedInterval Int
+               intB = Interval (AnEndPoint Closed (-1)) (AnEndPoint Open (2 :: Int))
+           intA `intersects` intB
+         it "intersection tests 2" $ do
+           let intA = ClosedInterval 0 4 :: ClosedInterval Int
+               intB = Interval (AnEndPoint Closed 0) (AnEndPoint Open (2 :: Int))
+           intA `intersects` intB
+         it "intersection tests 3" $ do
+           let intA = ClosedInterval 0 4 :: ClosedInterval Int
+               intB = Interval (AnEndPoint Closed 0) (AnEndPoint Closed (0 :: Int))
+           intA `intersects` intB
+
+
          runIO $ do
            print bugTree
            print "============================"
-           mapM_ print $ atomicIntervals bugTree
+           mapM_ print $ elementaryIntervals bugTree
            print "============================"
            print $ query 0 bugTree
 

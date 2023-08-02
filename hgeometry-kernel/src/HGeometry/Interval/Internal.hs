@@ -215,7 +215,7 @@ instance (Ord r) => ClosedInterval r `HasIntersectionWith` ClosedInterval r wher
             EQ -> True
             GT -> True
     EQ -> True
-    GT -> False -- by invariant, intA^.end > intA.start, so they don't intersect
+    GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
 
 instance ( Ord r
          ) => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
@@ -236,3 +236,13 @@ instance ( Ord r
       mkInterval' l r
         | l == r    = ClosedInterval_x_ClosedInterval_Point l
         | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
+
+
+instance (Ord r) => ClosedInterval r `HasIntersectionWith` Interval AnEndPoint r where
+  intA `intersects` intB = case (intA^.start) `compareInterval` intB of
+    LT -> case (intA^.end) `compareInterval` intB of
+            LT -> False
+            EQ -> True
+            GT -> True
+    EQ -> True
+    GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
