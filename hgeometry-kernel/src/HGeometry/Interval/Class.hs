@@ -100,6 +100,7 @@ class ( HasStart interval point, HasStartPoint interval (StartPointOf interval)
       , EndPoint_ (EndPointOf interval), IxValue (EndPointOf interval) ~ point
       , EndPoint_ (StartPointOf interval), IxValue (StartPointOf interval) ~ point
       ) => IntervalLike_ interval point | interval -> point where
+  {-# MINIMAL mkInterval #-}
 
   -- | Construct an interval given its start and end point.
   --
@@ -134,7 +135,7 @@ class ( IntervalLike_ interval r
 
 -- | A class representing closed intervals, i.e. intervals that include their endpoints
 type ClosedInterval_ :: Type -> Type -> Constraint
-class (Interval_ interval r
+class ( Interval_ interval r
       , StartPointOf interval ~ EndPoint Closed r
       , EndPointOf interval ~ EndPoint Closed r
       ) => ClosedInterval_ interval r where

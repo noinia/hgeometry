@@ -15,8 +15,10 @@ module HGeometry.Measured.Report
 
 import           Data.Coerce
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.Functor.Const
 import qualified Data.List as List
+import           Data.Semigroup.Traversable
 import           HGeometry.Measured.Class
 import           HGeometry.Tree.Binary.Static
 
@@ -68,8 +70,15 @@ instance Functor Report1 where
 instance Foldable Report1 where
   foldMap f (Report1 t) = foldMap f t
 
+instance Foldable1 Report1 where
+  foldMap1 f (Report1 t) = foldMap1 f t
+
 instance Traversable Report1 where
   traverse f (Report1 t) = Report1 . coerce <$> traverse f t
+
+instance Traversable1 Report1 where
+  traverse1 f (Report1 t) = Report1 . coerce <$> traverse1 f t
+
 
 instance Measured Report1 a where
   measure = Report1 . Leaf

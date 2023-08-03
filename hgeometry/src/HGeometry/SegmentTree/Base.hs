@@ -41,6 +41,37 @@ import           HGeometry.Tree.Binary.Static
 import           HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
+-- | A Segment tree
+newtype SegmentTree f interval = SegmentTree (SubTree f interval)
+
+type instance NumType   (SegmentTree f interval) = NumType interval
+type instance Dimension (SegmentTree f interval) = 1
+
+
+-- | The actual segment tree immplementation
+type SubTree f interval = BinLeafTree (NodeData f interval)
+                                      (ElementaryInterval (NumType interval) (f interval))
+
+deriving stock instance ( Show (NumType interval), Show (f interval)
+                        ) => Show (SegmentTree f interval)
+
+deriving stock instance ( Eq (NumType interval), Eq (f interval)
+                        ) => Eq (SegmentTree f interval)
+
+
+-- | Get the interval of a subtree
+interval :: Getter (SubTree f interval) (Interval AnEndPoint (NumType interval))
+interval = to $ \case
+  Leaf atomic -> Interval (atomic^.startPoint) (atomic^.endPoint)
+  Node _ nd _ -> nd^.nodeInterval
+
+
+bmap :: (f interval -> g interval) -> SegmentTree f interval -> SegmentTree g interval
+bmap f = undefined
+
+
+--------------------------------------------------------------------------------
+
 
 
 -- | An Elementary interval is either a singleton closed interval, or an open interval.
@@ -124,29 +155,6 @@ instance HasCanonicalSubSet (NodeData f interval) (NodeData g interval) interval
 
 
 
--- | A Segment tree
-newtype SegmentTree f interval = SegmentTree (SubTree f interval)
-
-type instance NumType   (SegmentTree f interval) = NumType interval
-type instance Dimension (SegmentTree f interval) = 1
-
-
--- | The actual segment tree immplementation
-type SubTree f interval = BinLeafTree (NodeData f interval)
-                                      (ElementaryInterval (NumType interval) (f interval))
-
-deriving stock instance ( Show (NumType interval), Show (f interval)
-                        ) => Show (SegmentTree f interval)
-
-deriving stock instance ( Eq (NumType interval), Eq (f interval)
-                        ) => Eq (SegmentTree f interval)
-
-
--- | Get the interval of a subtree
-interval :: Getter (SubTree f interval) (Interval AnEndPoint (NumType interval))
-interval = to $ \case
-  Leaf atomic -> Interval (atomic^.startPoint) (atomic^.endPoint)
-  Node _ nd _ -> nd^.nodeInterval
 
 --------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 module HGeometry.LineSegmentSpec where
 
 -- import Control.Lens
+import Data.Ord (comparing)
 import HGeometry.Ext
 import HGeometry.Intersection
 import HGeometry.Number.Real.Rational
@@ -13,10 +14,12 @@ import HGeometry.LineSegment
 -- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
 import HGeometry.Interval
-import HGeometry.Vector
--- import Test.Hspec.QuickCheck
+import HGeometry.Vector ()
+import Test.Hspec.QuickCheck
 import Test.Hspec
+import Test.QuickCheck ((===), Arbitrary(..), suchThat)
 import Test.QuickCheck.Instances ()
+import HGeometry.Kernel.Instances ()
 
 --------------------------------------------------------------------------------
 -- main :: IO ()
@@ -30,6 +33,41 @@ pt = Point2 5 6
 testInt :: ClosedInterval (Point 2 Double)
 testInt = ClosedInterval pt (Point2 10 10)
 
+data OrdAtXTest r = OrdAtXTest r (ClosedLineSegment (Point 2 r))
+                                 (ClosedLineSegment (Point 2 r))
+                  deriving (Show,Eq)
+data OrdAtYTest r = OrdAtYTest r (ClosedLineSegment (Point 2 r))
+                                 (ClosedLineSegment (Point 2 r))
+                  deriving (Show,Eq)
+
+instance (Arbitrary r, Ord r) => Arbitrary (OrdAtXTest r) where
+  arbitrary = do x    <- arbitrary
+                 seg1 <- intersectingSeg x
+                 seg2 <- intersectingSeg x
+                 pure $ OrdAtXTest x seg1 seg2
+    where
+      intersectingSeg x = do px      <- arbitrary `suchThat` (<= x)
+                             qx      <- arbitrary `suchThat` (>= x)
+                             (py,qy) <- arbitrary
+                             b       <- arbitrary
+                             let p = Point2 px py
+                                 q = Point2 qx qy
+                             pure $ if b then ClosedLineSegment p q else ClosedLineSegment q p
+
+instance (Arbitrary r, Ord r) => Arbitrary (OrdAtYTest r) where
+  arbitrary = do y    <- arbitrary
+                 seg1 <- intersectingSeg y
+                 seg2 <- intersectingSeg y
+                 pure $ OrdAtYTest y seg1 seg2
+    where
+      intersectingSeg y = do py      <- arbitrary `suchThat` (<= y)
+                             qy      <- arbitrary `suchThat` (>= y)
+                             (px,qx) <- arbitrary
+                             b       <- arbitrary
+                             let p = Point2 px py
+                                 q = Point2 qx qy
+                             pure $ if b then ClosedLineSegment p q else ClosedLineSegment q p
+
 spec :: Spec
 spec =
   describe "line segment tests" $ do
@@ -40,6 +78,13 @@ spec =
       (show $ ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 (10.0 :: Double)))
       `shouldBe`
       "ClosedLineSegment (Point2 5.0 6.0) (Point2 10.0 10.0)"
+
+    prop "ordAtX same as ordAtX Fractional" $
+      \(OrdAtXTest (x :: R) seg1 seg2) ->
+        ordAtX x seg1 seg2 === ordAtXFractional x seg1 seg2
+    prop "ordAtY same as ordAtY Fractional" $
+      \(OrdAtYTest (y :: R) seg1 seg2) ->
+        ordAtY y seg1 seg2 === ordAtYFractional y seg1 seg2
 
     describe "onSegment" $ do
       let intersects3 :: Point 3 R -> ClosedLineSegment (Point 3 R :+ ()) -> Bool
@@ -99,3 +144,20 @@ testI = describe "some manual intersection tests" $ do
 --          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
 --           it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
 --           it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
+
+
+
+
+-- | Given an x-coordinate, compare the segments based on the
+-- y-coordinate of the intersection with the horizontal line through y
+ordAtXFractional   :: ( Fractional r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
+                   => r
+                   -> lineSegment -> lineSegment -> Ordering
+ordAtXFractional x = comparing (yCoordAt x)
+
+-- | Given an x-coordinate, compare the segments based on the
+-- y-coordinate of the intersection with the horizontal line through y
+ordAtYFractional   :: ( Fractional r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
+                   => r
+                   -> lineSegment -> lineSegment -> Ordering
+ordAtYFractional y = comparing (xCoordAt y)

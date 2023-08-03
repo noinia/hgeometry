@@ -28,8 +28,10 @@ module HGeometry.Tree.Binary.Static
 
 import           Control.DeepSeq
 import           Data.Bifunctor.Apply
+import qualified Data.Functor.Apply as Apply
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup.Foldable
+import           Data.Semigroup.Traversable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
@@ -45,7 +47,7 @@ import           HGeometry.Tree.Util (TreeNode(..))
 -- nodes store something of type v.
 data BinLeafTree v a = Leaf !a
                      | Node (BinLeafTree v a) !v (BinLeafTree v a)
-                     deriving (Show,Read,Eq,Ord,Functor,Generic)
+                     deriving (Show,Read,Eq,Ord,Generic,Functor,Foldable,Traversable)
 
 instance (NFData v, NFData a) => NFData (BinLeafTree v a)
 
@@ -66,18 +68,17 @@ getMeasure = \case
   Leaf x     -> measure x
   Node _ v _ -> v
 
-instance Foldable (BinLeafTree v) where
-  foldMap f (Leaf a)     = f a
-  foldMap f (Node l _ r) = foldMap f l <> foldMap f r
-
 instance Foldable1 (BinLeafTree v) where
   foldMap1 f = \case
     Leaf x     -> f x
     Node l _ r -> foldMap1 f l <> foldMap1 f r
 
-instance Traversable (BinLeafTree v) where
-  traverse f (Leaf a)     = Leaf <$> f a
-  traverse f (Node l v r) = Node <$> traverse f l <*> pure v <*> traverse f r
+instance Traversable1 (BinLeafTree v) where
+  traverse1 f = go
+    where
+      go = \case
+        Leaf x     -> Leaf <$> f x
+        Node l v r -> (\l' r' -> Node l' v r') <$> go l Apply.<.> go r
 
 instance (Measured f a, Semigroup (f a)) => Semigroup (BinLeafTree (f a) a) where
   l <> r = node l r

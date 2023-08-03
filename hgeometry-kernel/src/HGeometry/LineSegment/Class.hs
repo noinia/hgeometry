@@ -26,7 +26,7 @@ module HGeometry.LineSegment.Class
   ) where
 
 import Control.Lens
-import Data.Ord (comparing)
+import Data.Type.Ord
 import HGeometry.Ext
 import HGeometry.Interval.Class
 import HGeometry.Point.Class
@@ -73,12 +73,14 @@ class ( IntervalLike_ lineSegment point
 
 -- | A class representing Closed Linesegments
 class ( LineSegment_ lineSegment point
-      , EndPointOf lineSegment ~ EndPoint Closed point
+      , StartPointOf lineSegment ~ EndPoint Closed point
+      , EndPointOf   lineSegment ~ EndPoint Closed point
       ) => ClosedLineSegment_ lineSegment point where
 
 -- | A Class representing Open ended linesegments
 class ( LineSegment_ lineSegment point
-      , EndPointOf lineSegment ~ EndPoint Open point
+      , StartPointOf lineSegment ~ EndPoint Open point
+      , EndPointOf   lineSegment ~ EndPoint Open point
       ) => OpenLineSegment_ lineSegment point where
 
 
@@ -114,20 +116,14 @@ interpolate lam (LineSegment_ s t) =
 
 -- | Given a y-coordinate, compare the segments based on the
 -- x-coordinate of the intersection with the horizontal line through y
-ordAtY   :: (Fractional r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
+ordAtY   :: (Num r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
          => r
          -> lineSegment -> lineSegment -> Ordering
-ordAtY y = comparing (xCoordAt y)
--- TODO: seems we should be able to implement this with just an Num r constraint
--- in xCoordAt we divide some term by qy - py, we can just multiply the px term by that quantity and compare the non-divided values.
-
-
--- | Given an x-coordinate, compare the segments based on the
--- y-coordinate of the intersection with the horizontal line through y
-ordAtX   :: ( Fractional r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
-         => r
-         -> lineSegment -> lineSegment -> Ordering
-ordAtX x = comparing (yCoordAt x)
+ordAtY y seg1 seg2 = ordAtX (-y) (flipPlane seg1) (flipPlane seg2)
+  where
+    rot90 (Vector2 x' y') = Vector2 (-y') x'
+    flipPlane seg = seg&start.vector %~ rot90
+                       &end.vector   %~ rot90
 
 -- | Given a y coord and a line segment that intersects the horizontal line
 -- through y, compute the x-coordinate of this intersection point.
@@ -144,6 +140,55 @@ xCoordAt y (LineSegment_ (Point2_ px py) (Point2_ qx qy))
   where
     alpha = (y - py) / (qy - py)
 
+
+-- | Given an x-coordinate, compare the segments based on the
+-- y-coordinate of the intersection with the horizontal line through y
+ordAtX   :: ( Num r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
+         => r
+         -> lineSegment -> lineSegment -> Ordering
+ordAtX x (orientLR -> LineSegment_ (Point2_ px py) (Point2_ qx qy))
+         (orientLR -> LineSegment_ (Point2_ ax ay) (Point2_ bx by)) =
+    case (pqVertical,abVertical) of
+      (True,True)   -> pqTop           `compare` abTop
+      (True,False)  -> (pqTop*(bx-ax)) `compare` abTerm
+      (False,True)  -> pqTerm          `compare` (abTop*(qx-px))
+      (False,False) -> term1           `compare` term2
+  where
+    -- For ease of argument we orient the segment from left to right.
+    --
+    -- The main idea is to essentially take te yCoordAt implementation, and multiply out te
+    -- divisor in te alpha term. More specifically:
+    --
+    -- for segment pq, the intersection y-coordinate is:
+    --
+    -- y = py + ( (x-px) / (qx-px) )*(qy-py)
+    --
+    -- similarly for the ab segment we have y' = ay + ( (x-ax) / (bx-ax) )*(by-ay)
+    --
+    -- and we wish to : y `compare` y'
+    -- hence we multiply both sides by (bx-ax)*(qx-px) to get rid of the factions.
+    --
+    pqVertical = px == qx
+    abVertical = ax == bx
+    pqTop = py `max` qy
+    abTop = ay `max` by
+
+    -- the py + alpha*(qy-py) term multiplied by (qx-px) so that there are no
+    -- more fractions
+    pqTerm = py*(qx-px) + (x-px)*(qy-py)
+    abTerm = ay*(bx-ax) + (x-ax)*(by-ay) --
+
+    term1 = (bx-ax) * pqTerm
+    term2 = (qx-px) * abTerm
+
+-- | Orient the segment from left to right
+orientLR     :: (LineSegment_ lineSegment point, Point_ point d r, 1 <= d, Ord r)
+             => lineSegment -> lineSegment
+orientLR seg
+  | seg^.start.xCoord <= seg^.end.xCoord = seg
+  | otherwise                            = seg&start .~ (seg^.end)
+                                              &end   .~ (seg^.start)
+
 -- | Given an x-coordinate and a line segment that intersects the vertical line
 -- through x, compute the y-coordinate of this intersection point.
 --
@@ -157,6 +202,7 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
     | otherwise = py + alpha * (qy - py)
   where
     alpha = (x - px) / (qx - px)
+
 
 --------------------------------------------------------------------------------
 
