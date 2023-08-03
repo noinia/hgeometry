@@ -24,14 +24,11 @@ import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Monoid (Sum(..))
 import           Data.Type.Ord
 import qualified Data.Vector as Vector
 import           HGeometry.Foldable.Sort
-import           HGeometry.Intersection
 import           HGeometry.Interval
 import           HGeometry.Measured
-import           HGeometry.Measured.Size
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.SegmentTree.CanonicalSubSet
@@ -133,9 +130,9 @@ rangeQuery q (RangeTree t0) = findSplitNode t0
     findSplitNode t = case t of
       Leaf ld     -> goReport ld
       Node l nd r -> case (nd^.split) `compareInterval` q of
-                       LT -> findSplitNode l
-                       EQ -> goReportR l <> goReportL r
-                       GT -> findSplitNode r
+                       LT -> findSplitNode r
+                       EQ -> reportRightSubtrees l <> reportLeftSubtrees r
+                       GT -> findSplitNode l
 
     -- | Report a leaf (if needed)
     goReport ld
@@ -143,20 +140,20 @@ rangeQuery q (RangeTree t0) = findSplitNode t0
         | otherwise                        = []
 
     -- | walk the left-path reporting the right subtrees
-    goReportR = \case
+    reportRightSubtrees = \case
       Leaf ld     -> goReport ld
       Node l nd r -> case (nd^.split) `compareInterval` q of
-                       LT -> reportSubTree r : goReportR l
-                       EQ -> reportSubTree r : goReportR l
-                       GT -> goReportR r
+                       LT -> reportRightSubtrees r
+                       EQ -> reportSubTree r : reportRightSubtrees l
+                       GT -> error "RangeTree.rangeQuery, reportRightSubtrees absurd"
 
     -- | walk the right-path reporting left subtrees
-    goReportL = \case
+    reportLeftSubtrees = \case
       Leaf ld     -> goReport ld
       Node l nd r -> case (nd^.split) `compareInterval` q of
-                       LT -> goReportR l
-                       EQ -> reportSubTree l : goReportL r
-                       GT -> reportSubTree l : goReportL r
+                       LT -> error "RangeTree.rangeQuery, reportLeftSubtrees absurd"
+                       EQ -> reportSubTree l : reportLeftSubtrees r
+                       GT -> reportLeftSubtrees l
 
     -- | report the canonical subset of the node
     reportSubTree = \case
