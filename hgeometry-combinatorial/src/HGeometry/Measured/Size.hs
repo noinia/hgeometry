@@ -18,7 +18,7 @@ import HGeometry.Measured.Class
 
 --------------------------------------------------------------------------------
 
--- | Measured size. Always non-negative.
+-- | Measured size or count. The result is always non-negative.
 newtype Count a = Count Word
   deriving stock (Show,Read,Eq,Ord,Generic)
   deriving newtype (NFData)

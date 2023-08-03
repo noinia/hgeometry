@@ -19,8 +19,9 @@ type R = Int
 
 spec :: Spec
 spec = describe "segmentTree tests" $ do
-         it "manual report" $
-           query 5 testTree `shouldBe` (Report [ClosedInterval 0 15])
+         it "manual report" $ do
+           let Report res = query 5 testTree
+           res `shouldBe` [ClosedInterval 0 15]
          it "manual count" $
            query 15 testTree `shouldBe` (Count 2)
          it "manual bug" $

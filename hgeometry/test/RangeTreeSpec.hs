@@ -36,8 +36,8 @@ spec = describe "RangeTree tests" $ do
          it "bugfix2" $
            let Report res = query bugQuery2 bugTree2
            in Set.fromList res `shouldBe` Set.fromList (naive bugQuery2 bugPts2)
-         runIO $ do
-           print bugTree2
+         -- runIO $ do
+         --   print bugTree2
 
 bugQuery :: ClosedInterval Int
 bugQuery = Interval (ClosedE 3) (ClosedE 4)
