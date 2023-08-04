@@ -13,6 +13,9 @@
 module HGeometry.SegmentTree.R2
   ( SegmentTree2
 
+
+  , buildAssoc
+  , queryAssoc
   ) where
 
 
@@ -29,6 +32,7 @@ import           HGeometry.Intersection
 import           HGeometry.Interval
 import           HGeometry.LineSegment
 import           HGeometry.Measured.Report
+import           HGeometry.Measured
 import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.Properties
@@ -64,22 +68,20 @@ instance Point_ (OnY s r segment) 1 (OnY s r segment) where
 -- instance Reifies s r => Point_ (OnY s r segment) 1 r where
 
 
-instance (Ord r
-         , LineSegment_ lineSegment point, Point_ point 2 r
-         , Reifies s r) => Eq (OnY s r segment) where
-  (OnY s) == (OnY s') = s `compare` s' == EQ
+instance ( LineSegment_ segment point, Point_ point 2 r, Ord r, Num r, Reifies s r
+         ) => Eq (OnY s r segment) where
+  s == s' = s `compare` s' == EQ
 
-instance ( Ord r, Reifies s r
-         , LineSegment_ lineSegment point, Point_ point 2 r
+instance ( LineSegment_ segment point, Point_ point 2 r, Ord r, Num r, Reifies s r
          ) => Ord (OnY s r segment) where
   (OnY s) `compare` (OnY s') = ordAtX x s s'
     where
-      x = reflect (Proxy @r)
+      x = reflect (Proxy @s)
 
 
 data VerticallyOrdered s r f segment =
     VEmpty
-  | VerticallyOrdered (RangeTree.RangeTree f segment)
+  | VerticallyOrdered (RangeTree.RangeTree f (OnY s r segment))
 
 instance Reifies s r => Semigroup (VerticallyOrdered s r f sement) where
   VEmpty                <> r                     = r
@@ -90,25 +92,31 @@ instance Reifies s r => Monoid (VerticallyOrdered s r f sement) where
   mempty = VEmpty
 
 
-buildAssoc                :: forall f segment r s.
-                             Report (XInterval r segment) -> VerticallyOrdered s r f segment
+buildAssoc                :: forall f segment point r s. (Reifies s r
+                           , LineSegment_ segment point, Point_ point 2 r, Ord r, Num r
+                           , Measured f (OnY s r segment), Semigroup (f (OnY s r segment))
+                           )
+                          => Report (XInterval r segment) -> VerticallyOrdered s r f segment
 buildAssoc (MkReport mxs) = case mxs of
     Nothing   -> VEmpty
-    Just ints -> VerticallyOrdered . RangeTree.buildRangeTree $ coerce ints
+    Just ints -> VerticallyOrdered . RangeTree.buildRangeTree
+               $ fmap (\(XInterval s) -> OnY s :: OnY s r segment) ints
 
 
-  -- deriving (Show,Eq)
-
-
--- rangeTreeAtX :: VerticallyOrdered f segment r -> RangeTree.RangeTree f (OnY s segment)
-
-
-
-queryAssoc                           :: forall f segment yInterval r s.
+queryAssoc                           :: forall f segment point yInterval r s.
                                         (Interval_ yInterval r, Ord r)
                                      => yInterval -> VerticallyOrdered s r f segment
                                      -> [f segment]
-queryAssoc q (VerticallyOrdered t) = undefined -- (coerce . runQuery)
+queryAssoc q = \case
+  VEmpty              -> []
+  VerticallyOrdered t ->
+
+    <$>
+
+    RangeTree.rangeQuery q t
+
+
+    ) = undefined -- (coerce . runQuery)
   where
     runQuery    :: Proxy s -> [f (OnY s r segment)]
     runQuery px = undefined -- RangeTree.rangeQuery q t'
