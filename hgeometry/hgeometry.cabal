@@ -67,6 +67,7 @@ common setup
       , mtl                       >= 2.2           && < 3
       , data-default-class        >= 0.1           && < 1
       , MonadRandom               >= 0.5           && < 1
+      , reflection                >= 2.1.7         && < 3
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
@@ -164,6 +165,7 @@ library
 
         HGeometry.SegmentTree
         HGeometry.SegmentTree.Base
+        -- HGeometry.SegmentTree.R2
         HGeometry.SegmentTree.CanonicalSubSet
 
         HGeometry.RangeTree
@@ -225,6 +227,7 @@ test-suite hgeometry-hspec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
       SegmentTreeSpec
+      SegmentTree.R2Spec
       RangeTreeSpec
 
   hs-source-dirs:   test
@@ -258,6 +261,7 @@ benchmark benchmarks
     ConvexHull.GrahamV2
     ConvexHull.GrahamInt
     ConvexHull.GrahamFastest
+
     -- ConvexHull.GrahamClassy
 
     Util

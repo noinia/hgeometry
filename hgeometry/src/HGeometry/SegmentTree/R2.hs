@@ -48,11 +48,13 @@ import           Data.Type.Ord
 
 --------------------------------------------------------------------------------
 
+newtype OnY s r segment = OnY segment deriving (Show)
 
-newtype OnY s r segment = OnY segment
+data OnYR s r segment = Fixed !r
+                      | Dependent !segment
                         deriving (Show)
 
-type instance NumType (OnY s r segment) = OnY s r segment
+type instance NumType (OnY s r segment) = OnYR s r segment
 type instance Dimension (OnY s r segment) = 1
 
 -- instance Reifies s r => Point_ (OnY s r segment) 1 r where
@@ -61,22 +63,40 @@ instance HasVector (OnY s r segment) (OnY s r segment) where
   vector = iso Vector1 (\(Vector1 v) -> v)
 
 instance HasCoordinates (OnY s r segment) (OnY s r segment)
-instance Affine_ (OnY s r segment) 1 (OnY s r segment) where
-instance Point_ (OnY s r segment) 1 (OnY s r segment) where
+instance Affine_ (OnY s r segment) 1 (OnYR s r segment) where
+instance Point_  (OnY s r segment) 1 (OnYR s r segment) where
   fromVector = error "OnY.fromVector not implemented"
 
 -- instance Reifies s r => Point_ (OnY s r segment) 1 r where
 
 
 instance ( LineSegment_ segment point, Point_ point 2 r, Ord r, Num r, Reifies s r
-         ) => Eq (OnY s r segment) where
+         ) => Eq (OnYR s r segment) where
   s == s' = s `compare` s' == EQ
 
 instance ( LineSegment_ segment point, Point_ point 2 r, Ord r, Num r, Reifies s r
-         ) => Ord (OnY s r segment) where
-  (OnY s) `compare` (OnY s') = ordAtX x s s'
-    where
-      x = reflect (Proxy @s)
+         ) => Ord (OnYR s r segment) where
+  (Fixed l)     `compare` (Fixed r)      = l `compare` r
+  (Fixed y)     `compare` (Dependent s)  = let x = reflect (Proxy @s) in compareAtX x y s
+  (Dependent s) `compare` (Fixed y)      = let x = reflect (Proxy @s)
+                                           in flipO $ compareAtX x y s
+  (Dependent s) `compare` (Dependent s') = let x = reflect (Proxy @s) in ordAtX x s s'
+
+-- | Reverses an ordering
+flipO :: Ordering -> Ordering
+flipO = \case
+  LT -> GT
+  EQ -> EQ
+  GT -> LT
+
+-- | Compare at x coordinate
+compareAtX :: ( Num r, Ord r, LineSegment_ lineSegment point, Point_ point 2 r)
+           => r
+           -> r -> lineSegment -> Ordering
+compareAtX x y (orientLR -> LineSegment_ (Point2_ ax ay) (Point2_ bx by)) =
+    (y*(bx-ax)) `compare` abTerm
+  where
+    abTerm = ay*(bx-ax) + (x-ax)*(by-ay) --
 
 
 data VerticallyOrdered s r f segment =
@@ -94,35 +114,31 @@ instance Reifies s r => Monoid (VerticallyOrdered s r f sement) where
 
 buildAssoc                :: forall f segment point r s. (Reifies s r
                            , LineSegment_ segment point, Point_ point 2 r, Ord r, Num r
-                           , Measured f (OnY s r segment), Semigroup (f (OnY s r segment))
+                           , Measured f segment, Semigroup (f segment)
+                           -- , Coercible
+                           --   (OnY s r segment), Semigroup (f (OnY s r segment))
                            )
                           => Report (XInterval r segment) -> VerticallyOrdered s r f segment
 buildAssoc (MkReport mxs) = case mxs of
     Nothing   -> VEmpty
     Just ints -> VerticallyOrdered . RangeTree.buildRangeTree
-               $ fmap (\(XInterval s) -> OnY s :: OnY s r segment) ints
-
+               $ coerce @(Report1 (XInterval r segment)) @(Report1 (OnY s r segment)) ints
+--               . fmap (\(XInterval s) -> OnY s :: OnY s r segment) ints
 
 queryAssoc                           :: forall f segment point yInterval r s.
-                                        (Interval_ yInterval r, Ord r)
+                                        ( Reifies s r
+                                        , LineSegment_ segment point
+                                        , Point_ point 2 r, Ord r, Num r
+                                        , Interval_ yInterval r
+                                        )
                                      => yInterval -> VerticallyOrdered s r f segment
                                      -> [f segment]
-queryAssoc q = \case
-  VEmpty              -> []
-  VerticallyOrdered t ->
-
-    <$>
-
-    RangeTree.rangeQuery q t
-
-
-    ) = undefined -- (coerce . runQuery)
+queryAssoc (startAndEndPoint -> (qs,qe)) = \case
+    VEmpty              -> []
+    VerticallyOrdered t -> coerce @[f (OnY s r segment)] @[f segment]
+                           $ RangeTree.rangeQuery q' t
   where
-    runQuery    :: Proxy s -> [f (OnY s r segment)]
-    runQuery px = undefined -- RangeTree.rangeQuery q t'
-      where
-        t' = undefined -- coerce t
-
+    q' = mkInterval (qs&_endPoint %~ Fixed) (qe&_endPoint %~ Fixed)
 
 newtype SegmentTree2 f segment =
   SegmentTree2 (Base.SegmentTree (VerticallyOrdered () (NumType segment) f)
