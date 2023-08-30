@@ -49,7 +49,8 @@ common setup
       , HsYAML                   >= 0.2         &&  < 1
       , aeson                    >= 2.0         && < 3
       , MonadRandom              >= 0.5         && < 1
-      , filepath                 >= 1.4.100       && < 2
+      , reflection               >= 2.1.7       && < 3
+      , filepath                 >= 1.4.100     && < 2
       , file-io                  >= 0.1         && < 1
       , text                     >= 2           &&  < 3
       , bytestring               >= 0.10        &&  < 1
@@ -103,47 +104,50 @@ common test-setup
 library
     import:           setup
     exposed-modules:
-        HGeometry.Number.Real.Rational
-        HGeometry.Number.Real.Symbolic
-        HGeometry.Number.Ratio.Generalized
-        HGeometry.Number.Radical
-        HGeometry.Sign
-        HGeometry.Indexed
-        HGeometry.Foldable.Sort
-        HGeometry.Foldable.Util
-
-        HGeometry.List.Zipper
-        HGeometry.List.Util
-
-        HGeometry.NonEmpty.Util
-
-        HGeometry.Vector.NonEmpty.Util
-
-        HGeometry.Lens.Util
-
-        HGeometry.Ext
-
-        HGeometry.Unbounded
-        HGeometry.Cyclic
-        HGeometry.Permutation
-
-        HGeometry.CircularList.Util
-
         HGeometry.Algorithms.DivideAndConquer
         HGeometry.Algorithms.BinarySearch
         HGeometry.Algorithms.LogarithmicMethod
 
-        HGeometry.StringSearch.KMP
-
+        HGeometry.CircularList.Util
         HGeometry.Combinatorial.Util
+        HGeometry.Cyclic
+        HGeometry.Ext
+
+        HGeometry.Foldable.Sort
+        HGeometry.Foldable.Util
+        HGeometry.Indexed
+
+        HGeometry.Lens.Util
+
+        HGeometry.List.Zipper
+        HGeometry.List.Util
+
 
         HGeometry.Measured
         HGeometry.Measured.Class
         HGeometry.Measured.Size
         HGeometry.Measured.Report
 
+        HGeometry.NonEmpty.Util
+
+        HGeometry.Number.Real.Rational
+        HGeometry.Number.Real.Symbolic
+        HGeometry.Number.Ratio.Generalized
+        HGeometry.Number.Radical
+
+        HGeometry.Ord.Dynamic
+
+        HGeometry.Permutation
+
+        HGeometry.Set.Util
+        HGeometry.Sign
+        HGeometry.StringSearch.KMP
+
         HGeometry.Tree.Binary.Static
         HGeometry.Tree.Util
+
+        HGeometry.Unbounded
+        HGeometry.Vector.NonEmpty.Util
 
         HGeometry.YAML
 
