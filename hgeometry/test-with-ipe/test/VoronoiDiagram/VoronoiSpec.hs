@@ -22,6 +22,7 @@ import Ipe.Color
 import System.OsPath
 import Test.Hspec
 import Test.QuickCheck.Instances ()
+import Test.Util
 
 --------------------------------------------------------------------------------
 
@@ -33,9 +34,9 @@ spec = describe "Voronoi diagram tests" $ do
   --   voronoiVertices inputs
   it "trivial voronoi diagram" $
     voronoiVertices inputs `shouldBe` [Point2 5 5]
-  runIO $ do out <- testIpe [osp|data/VoronoiDiagram/trivial.ipe|]
+  runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/trivial.ipe|]
              writeIpePage [osp|/tmp/trivial.ipe|] (fromContent out)
-  runIO $ do out <- testIpe [osp|data/VoronoiDiagram/simple.ipe|]
+  runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/simple.ipe|]
              writeIpePage [osp|/tmp/voronoi.ipe|] (fromContent out)
 
   -- goldenWith [osp|data/golden/VoronoiDiagram/|]
@@ -51,7 +52,8 @@ inputs = [origin, Point2 10 10, Point2 10 0]
 
 
 testIpe      :: OsPath -> IO [IpeObject R]
-testIpe inFp = do (points :: [Point 2 R :+ _]) <- readAllFrom inFp
+testIpe inFp = do inFp' <- getDataFileName inFp
+                  (points :: [Point 2 R :+ _]) <- readAllFrom inFp'
 
                   print $ (Point3 183.02716 93.61106 8869.99979 :: Point 3 R)
                           `onSideTest`

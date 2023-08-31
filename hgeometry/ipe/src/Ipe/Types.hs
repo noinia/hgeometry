@@ -88,7 +88,7 @@ makeLenses ''IpeStyle
 
 
 basicIpeStyle :: IpeStyle
-basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|resources/basic.isy|])
+basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|data/ipe/basic.isy|])
 
 
 

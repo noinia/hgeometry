@@ -5,7 +5,7 @@ import           Control.Monad ((>=>))
 import qualified Data.ByteString.Lazy as ByteString
 import           Data.Functor.Contravariant
 import           Ipe
-import qualified Paths_hgeometry_test as Paths
+import qualified Paths_hgeometry as Paths
 import           System.OsPath
 import           Test.Hspec.WithTempFile
 

@@ -39,7 +39,7 @@ instance Default (Point 2 Rational) where
 
 spec :: Spec
 spec = do
-  testCases [osp|Polygon/Convex/convexTests.ipe|]
+  testCases [osp|test-with-ipe/Polygon/Convex/convexTests.ipe|]
   it "same minkowskisum manual"  $
     ( minkowskiSum polyP polyQ
     , naiveMinkowski polyP polyQ
@@ -129,7 +129,7 @@ minkowskiTest i p q = describe "minkowskiTest" $ do
     is <- runIO $ encodeFS (show i)
     it "minkowskisum" $
       F (p,q) (minkowskiSum p q) `shouldBe` F (p,q) (naiveMinkowski p q)
-    goldenWith [osp|data/golden/Polygon/Convex|]
+    goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
                (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
                                  }
                )

@@ -24,6 +24,8 @@ data-dir: data
 data-files:
     polygons.simple
     polygons.multi
+    ipe/basic.isy
+    test-with-ipe/**/*.ipe
 
 tested-with:
     GHC == 9.2.5
@@ -39,7 +41,7 @@ source-repository head
 --     build-depends:
 --         aeson                   >= 2.1
 
-common setup
+common all-setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
                 -fspecialise-aggressively -fexpose-all-unfoldings
 
@@ -69,6 +71,8 @@ common setup
       , data-default-class        >= 0.1           && < 1
       , MonadRandom               >= 0.5           && < 1
       , reflection                >= 2.1.7         && < 3
+      , filepath                  >= 1.4.100       && < 2
+      , file-io                   >= 0.1           && < 1
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
@@ -108,11 +112,46 @@ common quickcheck-setup
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
       , hgeometry
+
+common ipe-setup
+    build-depends:
+        hgeometry
+      , hexpat                  >= 0.20.9        && < 1
+      , parsec                  >= 3             && < 4
+      , text                    >= 2             && < 3
+      , typed-process           >= 0.2.6         && < 1
+      , colour                  >= 2.3.6         && < 3
+      , vinyl                   >= 0.14          && < 1
+      , singletons              >= 3.0           && < 4
+      , singletons-th           >= 3.0           && < 4
+      , template-haskell        >= 2.10          && < 3
+      , directory               >= 1.3.8         && < 2
+
+common ipe-test-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                   >= 2.9
+      -- , QuickCheck              >= 2.10
+      -- , quickcheck-instances
+      , hgeometry:ipe
+
 --------------------------------------------------------------------------------
--- * Main Library
+-- * Libraries
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-- * HGeometry Library
+
 
 library
-    import:           setup
+    import:           all-setup
     hs-source-dirs:   src
     exposed-modules:
         HGeometry
@@ -173,7 +212,6 @@ library
         HGeometry.RangeTree
         HGeometry.RangeTree.Base
 
-
     other-modules:
        HGeometry.Polygon.Simple.Implementation
        HGeometry.Polygon.Simple.InPolygon
@@ -195,10 +233,41 @@ library
     -- other-extensions:
 
 --------------------------------------------------------------------------------
--- * Helper Libraries
+-- * HGeometry-Ipe Library
+
+library ipe
+    import:           all-setup, ipe-setup
+    visibility:       public
+    hs-source-dirs:   ipe/src
+    exposed-modules:
+          Ipe
+          Ipe.Literal
+          Ipe.Value
+          Ipe.Color
+          Ipe.Attributes
+          Ipe.Types
+          Ipe.Writer
+          Ipe.Reader
+          Ipe.PathParser
+          Ipe.IpeOut
+          Ipe.FromIpe
+          Ipe.Path
+          Ipe.Matrix
+          Ipe.Layer
+          Ipe.Content
+
+          Ipe.IpeRender
+          Ipe.IpeToIpe
+
+
+    other-modules:
+          Ipe.ParserPrimitives
+
+--------------------------------------------------------------------------------
+-- * HGeometry-quickcheck
 
 library quickcheck
-    import: setup, quickcheck-setup
+    import: all-setup, quickcheck-setup
     visibility: public
     hs-source-dirs: src-quickcheck
     exposed-modules:
@@ -213,10 +282,12 @@ library quickcheck
        , cereal   >= 0.5    && < 1
 
 --------------------------------------------------------------------------------
--- * Tests stup
+-- * Test Suites
+
+-- ** HSpec Test Suites
 
 test-suite hgeometry-hspec
-  import:           setup, quickcheck-setup
+  import:           all-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
@@ -236,21 +307,61 @@ test-suite hgeometry-hspec
   build-depends:
       hgeometry:quickcheck
 
-
 test-suite hgeometry-doctest
-    import:           setup, quickcheck-setup
+    import:           all-setup, quickcheck-setup
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
     build-depends:
        doctest             >= 0.8      && < 1
 
+-- tests with ipe dependency<
+test-suite hgeometry-with-ipe-hspec
+  import:           all-setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+      Paths_hgeometry
+      Golden
+      Test.Util
+      Polygon.Simple.InPolygonSpec
+      Polygon.Convex.ConvexSpec
+      Polygon.Convex.ConvexSpec
+      VoronoiDiagram.VoronoiSpec
+      -- LineSegmentSpec
+      Polygon.Triangulation.TriangulateMonotoneSpec
+
+  hs-source-dirs:   test-with-ipe/test
+  build-depends:
+        hspec-with-tempfile >= 0.1
+      , hgeometry:ipe
+
+test-suite hgeometry-ipe-hspec
+  import:           all-setup, ipe-test-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+      Ipe.ReaderSpec
+  hs-source-dirs:   ipe/test
+
+test-suite hgeometry-ipe-doctest
+    import:           all-setup, ipe-test-setup
+    type:             exitcode-stdio-1.0
+    main-is:          ipe/doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
+--------------------------------------------------------------------------------
 
-benchmark benchmarks
-  import: setup
+benchmark hgeometry-benchmarks
+  import: all-setup
   hs-source-dirs: bench
 
   main-is: Benchmarks.hs

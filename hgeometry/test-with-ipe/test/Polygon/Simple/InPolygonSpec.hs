@@ -20,7 +20,7 @@ import Test.QuickCheck.Instances ()
 
 spec :: Spec
 spec = do
-  testCases [osp|Polygon/Simple/pointInPolygon.ipe|]
+  testCases [osp|test-with-ipe/Polygon/Simple/pointInPolygon.ipe|]
   numericalSpec
 
 testCases    :: OsPath -> Spec

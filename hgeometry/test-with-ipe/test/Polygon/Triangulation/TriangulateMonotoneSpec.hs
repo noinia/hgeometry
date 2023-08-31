@@ -21,8 +21,8 @@ type R = RealNumber 5
 
 
 spec :: Spec
-spec = do testCases [osp|Polygon/Triangulation/monotone.ipe|]
-          testCases [osp|Polygon/Triangulation/simplepolygon6.ipe|]
+spec = do testCases [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
+          testCases [osp|test-with-ipe/Polygon/Triangulation/simplepolygon6.ipe|]
 
 testCases    :: OsPath -> Spec
 testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
