@@ -78,13 +78,13 @@ type IpeOut' f g i r = g -> f (IpeObject' i r)
 --                        ! attr SLayer "alpha"
 --                        ! attr SLayer "beta"
 -- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200]]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpePath (Path {_pathSegments = fromList [PolygonPath (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 --
 -- >>> :{
 --   iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
 --                 ] ! attr SLayer "alpha"
 -- :}
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200]]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 --
 iO :: ToObject i => IpeObject' i r -> IpeObject r
 iO = mkIpeObject
@@ -97,10 +97,10 @@ iO = mkIpeObject
 --                  <> attr SLayer "alpha"
 --                  <> attr SLayer "beta"
 -- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200]]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpePath (Path {_pathSegments = fromList [PolygonPath (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 --
 -- >>> iO'' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200]]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = fromList [PolygonPath SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200]]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = fromList [PolygonPath (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 iO''       :: ( HasDefaultIpeOut g, NumType g ~ r
              , DefaultIpeOut g ~ i, ToObject i
              ) => g -> IpeAttributes i r
