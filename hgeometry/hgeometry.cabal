@@ -92,19 +92,28 @@ common all-setup
 
 common point-setup
     build-depends:
-        hgeometry-vector
+        hgeometry:vector
+
+common vector-setup
+    build-depends:
+       semialign                  >= 1.2        && < 2
+     , these                      >= 1.1        && < 2
 
 common kernel-setup
     build-depends:
-        hgeometry-vector
+        hgeometry:vector
       , hgeometry:point
-      , semialign                  >= 1.2        && < 2
+      , semialign
 
 common hgeometry-setup
     build-depends:
-        hgeometry-vector
+        hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
+
+common doctest
+    build-depends:
+      , doctest                    >= 0.8      && < 1
 
 common all-quickcheck-setup
     ghc-options:
@@ -119,31 +128,36 @@ common all-quickcheck-setup
       , QuickCheck                      >= 2.10    && < 3
       , quickcheck-instances            >= 0.3     && < 1
 
+
+common vector-quickcheck-setup
+   build-depends:
+        hgeometry:vector
+
 common point-quickcheck-setup
    build-depends:
         hgeometry:point
-      , hgeometry-vector:quickcheck
+      , hgeometry:vector-quickcheck
 
 common quickcheck-setup
     build-depends:
         hgeometry:kernel-quickcheck
-      , hgeometry-vector:quickcheck
+      , hgeometry:vector-quickcheck
       , hgeometry:point-quickcheck
       , hgeometry
 
 common kernel-quickcheck-setup
     build-depends:
-      , hgeometry-vector
+      , hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry-combinatorial:quickcheck
-      , hgeometry-vector:quickcheck
+      , hgeometry:vector-quickcheck
       , hgeometry:point-quickcheck
 
 common ipe-setup
     build-depends:
         hgeometry
-      , hgeometry-vector
+      , hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
       , hexpat                  >= 0.20.9        && < 1
@@ -160,7 +174,7 @@ common ipe-setup
 common svg-setup
     build-depends:
         hgeometry
-      , hgeometry-vector
+      , hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:ipe
@@ -192,6 +206,18 @@ common ipe-test-setup
 
 --------------------------------------------------------------------------------
 -- * HGeometry Vector
+
+library vector
+    import: all-setup, vector-setup
+    visibility: public
+    hs-source-dirs: vector/src
+    exposed-modules:
+        HGeometry.Vector
+      , HGeometry.Properties
+      , HGeometry.Vector.Class
+
+    other-modules:
+        HGeometry.Vector.Type
 
 --------------------------------------------------------------------------------
 -- * HGeometry Point
@@ -468,9 +494,39 @@ library point-quickcheck
     build-depends:
          hgeometry:point
 
+library vector-quickcheck
+    import: all-setup, all-quickcheck-setup, vector-quickcheck-setup
+    visibility: public
+    hs-source-dirs: vector/src-quickcheck
+    exposed-modules:
+      HGeometry.Vector.Instances
+    build-depends:
+         hgeometry:vector
+
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
+
+
+test-suite hgeometry-vector-hspec
+   import:           all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
+   build-tool-depends: hspec-discover:hspec-discover
+   type:             exitcode-stdio-1.0
+   main-is:          Main.hs
+   other-modules:
+       Spec
+       VectorSpec
+   hs-source-dirs: vector/test
+   build-depends:
+       hgeometry:vector-quickcheck
+
+--------------------------------------------------------------------------------
+
+test-suite hgeometry-vector-doctest
+    import:           all-setup, all-quickcheck-setup, vector-quickcheck-setup, doctest
+    type:             exitcode-stdio-1.0
+    main-is:          vector/doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 --------------------------------------------------------------------------------
 -- ** HGeometry-Point
@@ -492,12 +548,10 @@ test-suite hgeometry-point-hspec
       hgeometry:point-quickcheck
 
 test-suite hgeometry-point-doctest
-    import:           all-setup, point-setup, all-quickcheck-setup
+    import:           all-setup, point-setup, all-quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-    build-depends:
-       doctest             >= 0.8 && < 1
 
 
 --------------------------------------------------------------------------------
@@ -524,12 +578,10 @@ test-suite hgeometry-kernel-hspec
       hgeometry:kernel-quickcheck
 
 test-suite hgeometry-kernel-doctest
-    import:           all-setup, kernel-setup, kernel-quickcheck-setup
+    import:           all-setup, kernel-setup, kernel-quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          kernel/doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-    build-depends:
-       doctest             >= 0.8  && < 1
 
 --------------------------------------------------------------------------------
 -- ** HGeometry
@@ -556,12 +608,10 @@ test-suite hgeometry-hspec
       hgeometry:quickcheck
 
 test-suite hgeometry-doctest
-    import:           all-setup, all-quickcheck-setup, quickcheck-setup
+    import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-    build-depends:
-       doctest             >= 0.8      && < 1
 
 -- tests with ipe dependency
 test-suite hgeometry-with-ipe-hspec
@@ -600,12 +650,10 @@ test-suite hgeometry-ipe-hspec
   hs-source-dirs:   ipe/test
 
 test-suite hgeometry-ipe-doctest
-    import:           all-setup, ipe-test-setup
+    import:           all-setup, ipe-test-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          ipe/doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-    build-depends:
-       doctest             >= 0.8
 
 --------------------------------------------------------------------------------
 -- ** Svg Tests
@@ -648,3 +696,13 @@ benchmark hgeometry-benchmarks
                , hgeometry
                , deepseq-generics      >= 0.2  && < 1
                , hashable              >= 1.4  && < 2
+
+
+benchmark hgeometry-vector-bench
+    import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
+    hs-source-dirs: vector/bench
+    main-is: Benchmarks.hs
+    type: exitcode-stdio-1.0
+    build-depends:
+         tasty-bench              >= 0.3   && < 1
+       , tasty                    >= 1.4   && < 2
