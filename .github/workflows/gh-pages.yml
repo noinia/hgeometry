@@ -171,6 +171,8 @@ jobs:
       - name: haddock
         run: |
           $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all > haddock.raw.txt
+      - name: haddock-badge
+        run: |
           grep ") in " haddock.raw.txt | sort -hr > haddock.txt
           COVERAGE=$(awk '{good += $3; total += $5} END {printf "%.0f", good/total*100}' haddock.txt)
           echo "\
@@ -180,9 +182,22 @@ jobs:
               \"color\": \"success\" \
             }" > haddock_badge.json
           cat haddock.txt
+      - name: copy-to-pages
+        run: |
+          mkdir --parents ../pages/docs/
+          # cp -r `stack path --local-doc-root`/ ../pages/docs/
+          cp haddock.txt ../pages/docs/
+          cp haddock_badge.json ../pages/docs/
+
       - name: save cache
         uses: actions/cache/save@v3
         if: always()
         with:
           key: ${{ runner.os }}-${{ matrix.compiler }}-${{ github.sha }}
           path: ~/.cabal/store
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: docs # The branch the action should deploy to.
+          folder: pages # The folder the action should deploy.
