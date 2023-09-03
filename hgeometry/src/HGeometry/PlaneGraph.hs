@@ -9,9 +9,16 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph
-  (
-
+  ( module Hiraffe.Graph.Class
+    , PlaneGraph
   ) where
 
 
--- import Hiraffe.Graph.Class
+import HGeometry.PlaneGraph.Class
+import Hiraffe.Graph.Class
+import Hiraffe.PlanarGraph
+
+--------------------------------------------------------------------------------
+
+-- | A Plane graph
+type PlaneGraph s v e f = PlanarGraph s v e f

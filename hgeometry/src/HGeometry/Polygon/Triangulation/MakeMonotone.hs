@@ -129,8 +129,8 @@ ix' i = singular (ix i)
 -- the polygon into y-monotone pieces.
 --
 -- running time: \(O(n\log n)\)
-computeDiagonals    :: (Polygon_ polygon point r, Ord r, Num r)
-                    => polygon -> [ClosedLineSegment (point :+ VertexIx yMonotonePolygon)]
+computeDiagonals    :: (SimplePolygon_ polygon point r, Ord r, Num r)
+                    => polygon -> [ClosedLineSegment (point :+ VertexIx polygon)]
 computeDiagonals p' = map f . sweep
                     . NonEmpty.sortBy (flip cmpSweep)
                     . polygonVertices . withIncidentEdges
@@ -139,16 +139,16 @@ computeDiagonals p' = map f . sweep
     -- remaps to get the p value rather than the vertexId
     f = first (\i -> vertexInfo^.ix' i._2)
 
-    pg :: Polygon t (SP Int (p :+ VertexType)) r
-    pg = numberVertices . holesToCW . classifyVertices . toCCW $ p'
+    -- pg :: Polygon t (SP Int (p :+ VertexType)) r
+    -- pg = numberVertices . holesToCW . classifyVertices . toCCW $ p'
 
+    pg = classifyVertices' $ p'
 
-    vertexInfo :: V.Vector (STR (Point 2 r) p VertexType)
-    vertexInfo = let vs = polygonVertices pg
-                     n  = F.length vs
+    vertexInfo :: V.Vector (point :+ VertexType)
+    vertexInfo = let n  = numVertices pg
                  in V.create $ do
                    v <- MV.new n
-                   forM_ vs $ \(pt :+ SP i (p :+ vt)) ->
+                   forM_ vertices pg $ \(pt :+ SP i (p :+ vt)) ->
                      MV.write v i (STR pt p vt)
                    return v
 
@@ -160,10 +160,7 @@ computeDiagonals p' = map f . sweep
     sweep'' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
     sweep'' = mapM_ handle
 
-    -- make everything counterclockwise
-    toCCW p = (toCounterClockWiseOrder' p)&polygonHoles'.traverse %~ toCounterClockWiseOrder'
-    -- make the holes clockwise:
-    holesToCW p = p&polygonHoles'.traverse %~ toClockwiseOrder'
+    -- holesToCW p = p&polygonHoles'.traverse %~ toClockwiseOrder'
 
 {-
 
@@ -181,14 +178,17 @@ makeMonotone pg = let (e:es) = listEdges pg
 
 -}
 
-type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
-                   (StateT (StatusStruct r)
-                     (Reader (V.Vector (VertexInfo p r))))
+type Sweep polygon point r =
+  WriterT (DList.DList (LineSegment 2 (point :+ VertexIx polygon)))
+          (StateT (StatusStruct r)
+                  (Reader (V.Vector (VertexInfo point)))
 
-type VertexInfo p r = STR (Point 2 r) p VertexType
+type VertexInfo point = point :+ VertexType
+
+  -- STR (Point 2 r) p VertexType
 
 
-tell' :: LineSegment 2 Int r -> Sweep p r ()
+tell' :: LineSegment 2 (point :+ VertexIx polygon) -> Sweep polygon point r ()
 tell' = tell . DList.singleton
 
 getIdx :: Event r -> Int

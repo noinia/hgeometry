@@ -133,13 +133,7 @@ jobs:
         run: |
           touch cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry-combinatorial" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-vector" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-point" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-kernel" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/hgeometry" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-ipe" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-test" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/hgeometry-examples" >> cabal.project
           cat cabal.project
       - name: sdist
         run: |
@@ -153,52 +147,25 @@ jobs:
         run: |
           PKGDIR_hgeometry_combinatorial="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-combinatorial-[0-9.]*')"
           echo "PKGDIR_hgeometry_combinatorial=${PKGDIR_hgeometry_combinatorial}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_vector="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-vector-[0-9.]*')"
-          echo "PKGDIR_hgeometry_vector=${PKGDIR_hgeometry_vector}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_point="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-point-[0-9.]*')"
-          echo "PKGDIR_hgeometry_point=${PKGDIR_hgeometry_point}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_kernel="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-kernel-[0-9.]*')"
-          echo "PKGDIR_hgeometry_kernel=${PKGDIR_hgeometry_kernel}" >> "$GITHUB_ENV"
           PKGDIR_hgeometry="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-[0-9.]*')"
           echo "PKGDIR_hgeometry=${PKGDIR_hgeometry}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_ipe="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-ipe-[0-9.]*')"
-          echo "PKGDIR_hgeometry_ipe=${PKGDIR_hgeometry_ipe}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_test="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-test-[0-9.]*')"
-          echo "PKGDIR_hgeometry_test=${PKGDIR_hgeometry_test}" >> "$GITHUB_ENV"
-          PKGDIR_hgeometry_examples="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/hgeometry-examples-[0-9.]*')"
-          echo "PKGDIR_hgeometry_examples=${PKGDIR_hgeometry_examples}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
           echo "packages: ${PKGDIR_hgeometry_combinatorial}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_vector}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_point}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_kernel}" >> cabal.project
           echo "packages: ${PKGDIR_hgeometry}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_ipe}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_test}" >> cabal.project
-          echo "packages: ${PKGDIR_hgeometry_examples}" >> cabal.project
           echo "package hgeometry-combinatorial" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-vector" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-point" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-kernel" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package hgeometry" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-ipe" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-test" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package hgeometry-examples" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
           allow-newer: vector-circular:vector
           allow-newer: vector-circular:base
           allow-newer: vector-circular:template-haskell
           allow-newer: vector-circular:semigroupoids
+          allow-newer: miso:servant
+          allow-newer: servant-lucid:servant
+          allow-newer: lucid-svg:transformers
 
           source-repository-package
             type:     git
@@ -207,8 +174,13 @@ jobs:
           source-repository-package
             type:     git
             location: https://github.com/noinia/hspec-with-tempfile
+
+          source-repository-package
+            type:     git
+            location: https://github.com/ghcjs/jsaddle
+            subdir:   jsaddle
           EOF
-          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry|hgeometry-combinatorial|hgeometry-examples|hgeometry-ipe|hgeometry-kernel|hgeometry-point|hgeometry-test|hgeometry-vector)$/; }' >> cabal.project.local
+          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(hgeometry|hgeometry-combinatorial)$/; }' >> cabal.project.local
           cat cabal.project
           cat cabal.project.local
       - name: dump install plan
@@ -223,8 +195,8 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ matrix.compiler }}-
       - name: install dependencies
         run: |
-          $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks  -j2 all
-          $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH -j2 all
+          $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --dependencies-only -j2 all
+          $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH --dependencies-only -j2 all
       - name: build w/o tests
         run: |
           $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks all
@@ -238,19 +210,7 @@ jobs:
         run: |
           cd ${PKGDIR_hgeometry_combinatorial} || false
           ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_vector} || false
-          ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_point} || false
-          ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_kernel} || false
-          ${CABAL} -vnormal check
           cd ${PKGDIR_hgeometry} || false
-          ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_ipe} || false
-          ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_test} || false
-          ${CABAL} -vnormal check
-          cd ${PKGDIR_hgeometry_examples} || false
           ${CABAL} -vnormal check
       - name: haddock
         run: |
