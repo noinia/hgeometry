@@ -22,49 +22,59 @@ been implemented, and most likely they can use some improvements.
 
 # HGeometry Packages
 
-In addition to the main hgeometry package, which defines the actual
-geometric algorithms and data structures, there are the following
-packages that make up hegometry:
+HGeometry currently consists of three packages:
 
-* hgeometry-combinatorial
+* hgeometry-combinatorial,
 
-  Defines the non-geometric (i.e. combinatorial) data types, data
-  structures, and algorithms.
+  which defines the non-geometric (i.e. combinatorial) data types,
+  data structures, and algorithms.
 
-* hgeometry-vector
+* hgeometry,
+
+  which defines the actual geometric algorithms and data structures,
+  and
+
+* hgeometry-examples
+
+  which defines some examples that showcase using hgeometry.
+
+The hgeometry package itself actually consists of several libraries:
+
+* hgeometry
+
+  The main library that defines the actual algorithms and data
+  structures.
+
+* hgeometry:vector
 
   Defines length annotated Vector types and typeclasses. The
   hgeometry-point library depends on this.
 
-* hgeometry-point
+* hgeometry:point
 
   Defines types and typeclasses representing points in space, and
   basic operations on points.
 
-* hgeometry-kernel
+* hgeometry:kernel
 
   Defines other geometric "constant complexity" geometric types and
   primitives. For example lines, halfspaces, line segments, balls,
   circles, rectangles etc.
 
-
-###  Helper libraries
-
-In addition there are some "helper" libraries that you may want to be
-aware of:
-
-- hgeometry-ipe
+* hgeometry:ipe
 
   Defines functions for reading, writing, and manipulating
   [ipe](http://ipe.otfried.org) files and the geometric objects
   therein.
 
-### Examples and Test-suite
+* hgeometry:svg
+
+  Defines functions for writing the geometry types to svg files.
+
+### Examples
 
 The [hgeometry-examples](hgeometry-examples) provides some examples of
-using the library, whereas the [hgeometry-test](hgeometry-test)
-package that contains some additional test-suites that involve
-external (ipe) files. This is to work around a bug in cabal.
+using the library.
 
 # Available Geometric Algorithms and Data Structures
 

@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF doctest-driver-gen
-                -optF src
+                -optF point/src
 
                 -optF -XTypeFamilies
                 -optF -XGADTs
@@ -28,8 +28,5 @@
                 -optF -XFlexibleContexts
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
-
-                -optF -package=hgeometry-vector
-                -optF -package=hgeometry-point
 
 #-}
