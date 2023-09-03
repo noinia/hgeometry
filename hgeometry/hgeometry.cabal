@@ -50,7 +50,6 @@ common all-setup
       , hgeometry-combinatorial   >= 1.0.0.0       && < 2
       , hgeometry-vector          >= 1.0.0.0       && < 2
       , hgeometry-point           >= 1.0.0.0       && < 2
-      , hgeometry-kernel          >= 1.0.0.0       && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , dlist                     >= 0.7           && < 1
@@ -96,7 +95,16 @@ common all-setup
       , ViewPatterns
       , FunctionalDependencies
 
-common quickcheck-setup
+common kernel-setup
+    build-depends:
+        hgeometry-point
+      , semialign                  >= 1.2        && < 2
+
+common hgeometry-setup
+    build-depends:
+        hgeometry:kernel
+
+common all-quickcheck-setup
     ghc-options:
          -Wall
          -fno-warn-unticked-promoted-constructors
@@ -108,14 +116,26 @@ common quickcheck-setup
         hspec                           >= 2.9     && < 3
       , QuickCheck                      >= 2.10    && < 3
       , quickcheck-instances            >= 0.3     && < 1
-      , hgeometry-kernel:quickcheck
+
+common quickcheck-setup
+    build-depends:
+        hgeometry:kernel-quickcheck
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
       , hgeometry
 
+common kernel-quickcheck-setup
+    build-depends:
+        hgeometry:kernel
+      , hgeometry-combinatorial:quickcheck
+      , hgeometry-vector:quickcheck
+      , hgeometry-point:quickcheck
+
+
 common ipe-setup
     build-depends:
         hgeometry
+      , hgeometry:kernel
       , hexpat                  >= 0.20.9        && < 1
       , parsec                  >= 3             && < 4
       , text                    >= 2             && < 3
@@ -130,6 +150,7 @@ common ipe-setup
 common svg-setup
     build-depends:
         hgeometry
+      , hgeometry:kernel
       , hgeometry:ipe
       , miso                      >= 1.8           && < 2
       , lucid                     >= 2             && < 3
@@ -166,13 +187,91 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * HGeometry Kernel
 
+library kernel
+    import: all-setup, kernel-setup
+    visibility: public
+    hs-source-dirs: kernel/src
+    exposed-modules:
+        HGeometry.Kernel
+
+        HGeometry.Matrix
+        HGeometry.Matrix.Class
+
+        HGeometry.Line
+        HGeometry.Line.Class
+        HGeometry.Line.PointAndVector
+
+        HGeometry.Line.LineEQ
+        HGeometry.Line.NonVertical.Class
+
+        HGeometry.HyperPlane
+        HGeometry.HyperPlane.Class
+        HGeometry.HyperPlane.NonVertical
+
+        HGeometry.Duality
+
+        HGeometry.HalfSpace
+        HGeometry.HalfLine
+
+        -- HGeometry.HalfPlane
+
+        HGeometry.Box
+        HGeometry.Box.Class
+    -- --
+    -- --    HGeometry.SoS.Point
+    -- --    HGeometry.SoS.Orientation
+    -- --    HGeometry.SoS.Determinant
+    -- --
+        HGeometry.Interval
+        HGeometry.Interval.Class
+        HGeometry.Interval.EndPoint
+
+        HGeometry.Boundary
+
+        HGeometry.LineSegment
+        HGeometry.LineSegment.Class
+
+        HGeometry.Intersection
+
+        HGeometry.Triangle
+        HGeometry.Triangle.Class
+
+        HGeometry.Ball
+        HGeometry.Ball.Class
+        HGeometry.Ball.CenterAndRadius
+
+        HGeometry.Transformation
+
+        HGeometry.Direction
+
+        HGeometry.Viewport
+
+        HGeometry.Ellipse
+
+
+    other-modules:
+        HGeometry.Line.Intersection
+        HGeometry.Box.Internal
+        HGeometry.Box.Boxable
+        HGeometry.Box.Corners
+        HGeometry.Box.Sides
+        HGeometry.HyperPlane.Internal
+        HGeometry.Matrix.Internal
+        HGeometry.Matrix.ByRows
+        HGeometry.Transformation.Internal
+
+        HGeometry.LineSegment.Internal
+        HGeometry.LineSegment.Intersection
+
+        HGeometry.Interval.HalfOpen
+        HGeometry.Interval.Internal
 
 --------------------------------------------------------------------------------
 -- * HGeometry Library
 
 
 library
-    import:           all-setup
+    import:           all-setup,hgeometry-setup
     hs-source-dirs:   src
     exposed-modules:
         HGeometry
@@ -304,7 +403,7 @@ library svg
 -- * HGeometry-quickcheck
 
 library quickcheck
-    import: all-setup, quickcheck-setup
+    import: all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
     visibility: public
     hs-source-dirs: src-quickcheck
     exposed-modules:
@@ -318,13 +417,55 @@ library quickcheck
          hgeometry
        , cereal   >= 0.5    && < 1
 
+library kernel-quickcheck
+    import: all-setup, all-quickcheck-setup, kernel-quickcheck-setup
+    visibility: public
+    hs-source-dirs: kernel/src-quickcheck
+    exposed-modules:
+      HGeometry.Kernel.Instances
+      HGeometry.Kernel.Test.Box
+
 --------------------------------------------------------------------------------
 -- * Test Suites
+--------------------------------------------------------------------------------
 
--- ** HSpec Test Suites
+
+--------------------------------------------------------------------------------
+-- ** HGeometry-Kernel
+
+test-suite hgeometry-kernel-hspec
+  import:           all-setup, kernel-setup, all-quickcheck-setup, kernel-quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+      Point2Spec
+      HGeometry.LineSegmentSpec
+      HGeometry.BallSpec
+      HGeometry.BoxSpec
+      HGeometry.MatrixSpec
+      HGeometry.HalfSpaceSpec
+      HGeometry.HyperPlaneSpec
+      HGeometry.IntervalSpec
+      HGeometry.TriangleSpec
+  hs-source-dirs: kernel/test
+  build-depends:
+      hgeometry:kernel-quickcheck
+
+test-suite hgeometry-kernel-doctest
+    import:           all-setup, kernel-setup, kernel-quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          kernel/doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8  && < 1
+
+--------------------------------------------------------------------------------
+-- ** HGeometry
 
 test-suite hgeometry-hspec
-  import:           all-setup, quickcheck-setup
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
@@ -340,21 +481,21 @@ test-suite hgeometry-hspec
       SegmentTree.R2Spec
       RangeTreeSpec
 
-  hs-source-dirs:   test
+  hs-source-dirs: test
   build-depends:
       hgeometry:quickcheck
 
 test-suite hgeometry-doctest
-    import:           all-setup, quickcheck-setup
+    import:           all-setup, all-quickcheck-setup, quickcheck-setup
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
     build-depends:
        doctest             >= 0.8      && < 1
 
--- tests with ipe dependency<
+-- tests with ipe dependency
 test-suite hgeometry-with-ipe-hspec
-  import:           all-setup, quickcheck-setup
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
@@ -375,6 +516,9 @@ test-suite hgeometry-with-ipe-hspec
         hspec-with-tempfile >= 0.1
       , hgeometry:ipe
 
+--------------------------------------------------------------------------------
+-- ** Ipe Tests
+
 test-suite hgeometry-ipe-hspec
   import:           all-setup, ipe-test-setup
   build-tool-depends: hspec-discover:hspec-discover
@@ -393,8 +537,11 @@ test-suite hgeometry-ipe-doctest
     build-depends:
        doctest             >= 0.8
 
+--------------------------------------------------------------------------------
+-- ** Svg Tests
+
 -- test-suite hgeometry-svg-hspec
---   import:           all-setup, quickcheck-setup
+--   import:           all-setup, all-quickcheck-setup, quickcheck-setup
 --   build-tool-depends: hspec-discover:hspec-discover
 --   type:             exitcode-stdio-1.0
 --   main-is:          Main.hs
@@ -405,6 +552,9 @@ test-suite hgeometry-ipe-doctest
 --------------------------------------------------------------------------------
 -- * Benchmarks
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- ** HGeometry Benchmarks
 
 benchmark hgeometry-benchmarks
   import: all-setup
