@@ -127,6 +127,18 @@ common ipe-setup
       , template-haskell        >= 2.10          && < 3
       , directory               >= 1.3.8         && < 2
 
+common svg-setup
+    build-depends:
+        hgeometry
+      , hgeometry:ipe
+      , miso                      >= 1.8           && < 2
+      , lucid                     >= 2             && < 3
+      , lucid-svg                 >= 0.7           && < 1
+      , vinyl
+      , colour
+      , singletons
+      , text
+
 common ipe-test-setup
     ghc-options:
          -Wall
@@ -144,6 +156,15 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- * HGeometry Vector
+
+--------------------------------------------------------------------------------
+-- * HGeometry Point
+
+--------------------------------------------------------------------------------
+-- * HGeometry Kernel
 
 
 --------------------------------------------------------------------------------
@@ -264,6 +285,22 @@ library ipe
           Ipe.ParserPrimitives
 
 --------------------------------------------------------------------------------
+-- * svg
+
+library svg
+    import: all-setup, svg-setup
+    visibility: public
+    hs-source-dirs: svg/src
+    exposed-modules:
+        HGeometry.Miso.Svg
+        HGeometry.Miso.OrphanInstances
+        HGeometry.Svg
+
+    other-modules:
+        HGeometry.Miso.Svg.Writer
+        Miso.String.Util
+
+--------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
 
 library quickcheck
@@ -355,6 +392,15 @@ test-suite hgeometry-ipe-doctest
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
     build-depends:
        doctest             >= 0.8
+
+-- test-suite hgeometry-svg-hspec
+--   import:           all-setup, quickcheck-setup
+--   build-tool-depends: hspec-discover:hspec-discover
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   other-modules:
+--       Spec
+--   hs-source-dirs:   test
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
