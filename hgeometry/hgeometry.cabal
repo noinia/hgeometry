@@ -37,9 +37,6 @@ source-repository head
   location: https://github.com/noinia/hgeometry
 
 --------------------------------------------------------------------------------
--- common setup-extras
---     build-depends:
---         aeson                   >= 2.1
 
 common all-setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
@@ -48,8 +45,6 @@ common all-setup
     build-depends:
         base                      >= 4.16.1.0      && < 5
       , hgeometry-combinatorial   >= 1.0.0.0       && < 2
-      , hgeometry-vector          >= 1.0.0.0       && < 2
-      , hgeometry-point           >= 1.0.0.0       && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , dlist                     >= 0.7           && < 1
@@ -95,14 +90,21 @@ common all-setup
       , ViewPatterns
       , FunctionalDependencies
 
+common point-setup
+    build-depends:
+        hgeometry-vector
+
 common kernel-setup
     build-depends:
-        hgeometry-point
+        hgeometry-vector
+      , hgeometry:point
       , semialign                  >= 1.2        && < 2
 
 common hgeometry-setup
     build-depends:
-        hgeometry:kernel
+        hgeometry-vector
+      , hgeometry:point
+      , hgeometry:kernel
 
 common all-quickcheck-setup
     ghc-options:
@@ -117,24 +119,32 @@ common all-quickcheck-setup
       , QuickCheck                      >= 2.10    && < 3
       , quickcheck-instances            >= 0.3     && < 1
 
+common point-quickcheck-setup
+   build-depends:
+        hgeometry:point
+      , hgeometry-vector:quickcheck
+
 common quickcheck-setup
     build-depends:
         hgeometry:kernel-quickcheck
       , hgeometry-vector:quickcheck
-      , hgeometry-point:quickcheck
+      , hgeometry:point-quickcheck
       , hgeometry
 
 common kernel-quickcheck-setup
     build-depends:
-        hgeometry:kernel
+      , hgeometry-vector
+      , hgeometry:point
+      , hgeometry:kernel
       , hgeometry-combinatorial:quickcheck
       , hgeometry-vector:quickcheck
-      , hgeometry-point:quickcheck
-
+      , hgeometry:point-quickcheck
 
 common ipe-setup
     build-depends:
         hgeometry
+      , hgeometry-vector
+      , hgeometry:point
       , hgeometry:kernel
       , hexpat                  >= 0.20.9        && < 1
       , parsec                  >= 3             && < 4
@@ -150,6 +160,8 @@ common ipe-setup
 common svg-setup
     build-depends:
         hgeometry
+      , hgeometry-vector
+      , hgeometry:point
       , hgeometry:kernel
       , hgeometry:ipe
       , miso                      >= 1.8           && < 2
@@ -183,6 +195,28 @@ common ipe-test-setup
 
 --------------------------------------------------------------------------------
 -- * HGeometry Point
+
+library point
+    import: all-setup, point-setup
+    visibility: public
+    hs-source-dirs: point/src
+    exposed-modules:
+       HGeometry.Point
+       HGeometry.Point.Class
+       HGeometry.Point.PointF
+       HGeometry.Point.EuclideanDistance
+       HGeometry.Point.Orientation
+      -- HGeometry.Point.Affine
+
+    -- reexported-modules:
+    --     HGeometry.Point.Unpacked
+    --   , HGeometry.Point.Class
+    --   , HGeometry.Point.PointF
+
+    other-modules:
+        HGeometry.Point.Type
+        HGeometry.Point.Orientation.Degenerate
+        HGeometry.Point.Quadrants
 
 --------------------------------------------------------------------------------
 -- * HGeometry Kernel
@@ -425,9 +459,45 @@ library kernel-quickcheck
       HGeometry.Kernel.Instances
       HGeometry.Kernel.Test.Box
 
+library point-quickcheck
+    import: all-setup, point-setup, all-quickcheck-setup, point-quickcheck-setup
+    visibility: public
+    hs-source-dirs: point/src-quickcheck
+    exposed-modules:
+      HGeometry.Point.Instances
+    build-depends:
+         hgeometry:point
+
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- ** HGeometry-Point
+
+
+test-suite hgeometry-point-hspec
+  import:           all-setup, point-setup, all-quickcheck-setup, point-quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs: point/test
+  other-modules:
+      Spec
+      Point2Spec
+      PointSpec
+      PointSpec
+      Point.CmpAround
+  build-depends:
+      hgeometry:point-quickcheck
+
+test-suite hgeometry-point-doctest
+    import:           all-setup, point-setup, all-quickcheck-setup
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    build-depends:
+       doctest             >= 0.8 && < 1
 
 
 --------------------------------------------------------------------------------
@@ -495,7 +565,7 @@ test-suite hgeometry-doctest
 
 -- tests with ipe dependency
 test-suite hgeometry-with-ipe-hspec
-  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
+  import:           all-setup, ipe-setup, all-quickcheck-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
@@ -520,7 +590,7 @@ test-suite hgeometry-with-ipe-hspec
 -- ** Ipe Tests
 
 test-suite hgeometry-ipe-hspec
-  import:           all-setup, ipe-test-setup
+  import:           all-setup, ipe-setup, ipe-test-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
@@ -557,7 +627,7 @@ test-suite hgeometry-ipe-doctest
 -- ** HGeometry Benchmarks
 
 benchmark hgeometry-benchmarks
-  import: all-setup
+  import: all-setup, hgeometry-setup
   hs-source-dirs: bench
 
   main-is: Benchmarks.hs
