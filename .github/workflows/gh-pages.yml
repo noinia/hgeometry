@@ -171,6 +171,7 @@ jobs:
       - name: haddock
         run: |
           $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all > haddock.raw.txt
+          $CABAL haddock-project
       - name: haddock-badge
         run: |
           grep ") in " haddock.raw.txt | sort -hr > haddock.txt
@@ -185,7 +186,7 @@ jobs:
       - name: copy-to-pages
         run: |
           mkdir --parents ../pages/docs/
-          # cp -r `stack path --local-doc-root`/ ../pages/docs/
+          cp -r haddocks ../pages/docs/
           cp haddock.txt ../pages/docs/
           cp haddock_badge.json ../pages/docs/
 
