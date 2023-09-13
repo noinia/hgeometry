@@ -1,0 +1,150 @@
+** DONE make everything public sublibraries of hgeometry
+hopefully this will also make the CI story easier
+
+* TODO build clean with werror
+
+** DONE hgeometry-combinatorial
+** DONE hgeometry-vector
+** DONE hgeometry-point
+** TODO hgeometry-kernel
+** TODO hgeometry
+** DONE hgeometry-ipe
+** TODO hgeometry-svg
+* DONE update the readme
+* TODO haddock builder
+
+* TODO hgeometry-examples
+** TODO bapc stuff as tests
+** TODO floorpainting BAPC example with the segment tree :)
+
+** TODO move LINEQ to HGeometry.Line.NonVertical
+
+* TODO fromPointAndNormal of NonVertical hyperplane
+
+this can't be right:
+
+  fromPointAndNormal _ n = NonVerticalHyperPlane n
+
+we should really use the in plane point p
+
+* TODO write some tests for testing line x line intersections of the various forms
+
+basically test that converting to a diff line type results in
+consistent results
+
+* DONE polymorphic cooordinates
+* DONE Doctests
+** DONE vector
+** DONE point
+** DONE kernel
+** TODO hgeometry
+** DONE hgeometry-ipe
+** DONE hgeometry-combinatorial
+* DONE setup hspec tests
+** DONE vector
+** DONE point
+** DONE kernel
+** DONE hgeometry
+
+
+* TODO additional quickcheck tests
+
+** TODO all vertices of a simple polygon lie on the boundary of the polygon (pointInPoly)
+*** TODO generate random simple polygons
+
+* TODO ipe tests
+** TODO point
+** TODO kernel
+*** CANCELED IntersectionSpec
+*** DONE BoxSpec
+*** TODO trianglespec
+*** TODO LineSegmentSpec
+** TODO hgeometry
+*** DONE convex polygon spec
+
+* TODO renderer
+* TODO ipe-renderer
+* TODO test import
+** TODO ipe-reader
+* DONE point in polygon
+** DONE for simple polygon
+
+* TODO Line segment intersection ; i.e Benthey Otham
+
+* TODO polygon triangulation
+** DONE triangulate monotone
+** TODO triangiulate non-monotone
+*** TODO split into non-monotone parts
+
+* TODO arrangement
+** TODO line-segment-intersection sweep
+** TODO planar subdivision
+*** TODO plane graph
+
+* TODO 3d-lower-envelope/convex hull
+** DONE naive
+** TODO point-location by sweeping scheme
+
+* TODO Convex polygons
+** DONE binary search extremal direction
+** TODO point in polygon
+
+* TODO data structures
+** TODO kd-tree
+** TODO range-tree
+*** DONE base tree
+** TODO segment-tree
+*** DONE base tree
+** TODO quad-tree
+** DONE interval-tree
+
+* TODO 2d-convex hull algos
+** DONE divide and conquer
+** DONE quickhull
+** DONE jarvis march
+** DONE convex hull of polygon
+
+
+* TODO smallest enclosing ball
+** TODO linear programming (RIC)
+
+* TODO delaunay triangulation
+* TODO voronoi diagram
+* DONE closest pair
+* DONE minkowski-sum
+** DONE fix testcases
+probably requires testing if two polygons are cyclic shifts
+
+
+* TODO clean up the benchmarks
+
+* TODO visual debugger
+maybe make s.t. like prettychart; i.e have some webserver running that
+can show geometries as svg, and use ghci to start the server and send
+input to the server.
+
+
+* index state
+    cabal v2-update 'hackage.haskell.org,2022-12-29T17:16:17Z'
+
+
+
+* performance
+
+I compared the BAPC armybase tests. It's a bit of an apples vs oranges
+comparison, since I only had an old 8.10.7 build of the bapc examples
+around, and I've built the new stuff using 9.6.1
+
+anyway, the old bapc armybase testsuite took
+
+13.65s user 0.03s system 99% cpu 13.687 total
+
+whereas the new run took roughly
+
+8.28s user 0.02s system 99% cpu 8.305 total
+
+not sure what's the mian gain. Maybe most of it is simply switching to
+a faster sorting algo; since we are now using vector-algorithms's
+introsort rather than mergesort.
+>
+Still, it's nice that we are faster :).
