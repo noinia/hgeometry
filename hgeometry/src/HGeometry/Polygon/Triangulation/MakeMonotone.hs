@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell     #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Triangulation.MakeMonotone
@@ -19,6 +18,7 @@ module HGeometry.Polygon.Triangulation.MakeMonotone
   ) where
 
 import           Control.Lens
+import           Control.Monad (forM_, when)
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
 import           Control.Monad.Writer (WriterT, execWriterT, tell)
@@ -42,8 +42,6 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation.Types
 
-
--- import Debug.Trace
 ----------------------------------------------------------------------------------
 
 data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
@@ -86,7 +84,7 @@ classifyVertices'      :: ( SimplePolygon_ simplePolygon point r
                           )
                        => simplePolygon -> simplePolygon'
 classifyVertices' poly =
-  uncheckedFromCCWPoints . map f $ poly^..outerBoundaryWithNeighbours
+    uncheckedFromCCWPoints . map f $ poly^..outerBoundaryWithNeighbours
     -- unsafeFromCircularVector $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
     -- vs = poly ^. outerBoundaryVector
@@ -106,21 +104,31 @@ classifyVertices' poly =
                _               -> Regular
 
 -- | p < q = p.y < q.y || p.y == q.y && p.x > q.y
-cmpSweep :: Ord r => Point 2 r :+ e -> Point 2 r :+ e -> Ordering
-p `cmpSweep` q =
-  comparing (^.core.yCoord) p q <> comparing (Down . (^.core.xCoord)) p q
+cmpSweep :: (Point_ point 2 r, Ord r) => point :+ e -> point :+ e -> Ordering
+p `cmpSweep` q = comparing (^.core.yCoord) p q <> comparing (Down . (^.core.xCoord)) p q
 
 
 --------------------------------------------------------------------------------
 
-type Event r = Point 2 r :+ Two (ClosedLineSegment (Point 2 r :+ Int))
+type Event point = point :+ Two (ClosedLineSegment (point :+ Int))
 
-data StatusStruct r = SS { _statusStruct :: !(SS.Set (ClosedLineSegment (Point 2 r :+ Int)))
-                         , _helper       :: !(IntMap.IntMap Int)
-                         -- ^ for every e_i, the id of the helper vertex
-                         } deriving (Show)
-makeLenses ''StatusStruct
+data StatusStruct point =
+  SS { _statusStruct :: !(SS.Set (ClosedLineSegment (point :+ Int)))
+     , _helper       :: !(IntMap.IntMap Int)
+                        -- ^ for every e_i, the id of the helper vertex
+     } deriving (Show)
 
+-- | Lens to access te statusStructure
+statusStruct :: Lens (StatusStruct point) (StatusStruct point')
+                     (SS.Set (ClosedLineSegment (point :+ Int)))
+                     (SS.Set (ClosedLineSegment (point' :+ Int)))
+statusStruct = lens _statusStruct (\ss s -> ss { _statusStruct = s})
+
+-- | Lens to access the helper
+helper :: Lens' (StatusStruct point) (IntMap.IntMap Int)
+helper = lens _helper (\ss h -> ss { _helper = h })
+
+-- | helper to access the i^th element of a vector.
 ix'   :: Int -> Lens' (V.Vector a) a
 ix' i = singular (ix i)
 
@@ -129,8 +137,8 @@ ix' i = singular (ix i)
 -- the polygon into y-monotone pieces.
 --
 -- running time: \(O(n\log n)\)
-computeDiagonals    :: (SimplePolygon_ polygon point r, Ord r, Num r)
-                    => polygon -> [ClosedLineSegment (point :+ VertexIx polygon)]
+computeDiagonals    :: (SimplePolygon_ polygon point r, VertexIx polygon ~ Int, Ord r, Num r)
+                    => polygon -> [ClosedLineSegment (point :+ Int)]
 computeDiagonals p' = map f . sweep
                     . NonEmpty.sortBy (flip cmpSweep)
                     . polygonVertices . withIncidentEdges
@@ -145,19 +153,20 @@ computeDiagonals p' = map f . sweep
     pg = classifyVertices' $ p'
 
     vertexInfo :: V.Vector (point :+ VertexType)
-    vertexInfo = let n  = numVertices pg
-                 in V.create $ do
-                   v <- MV.new n
-                   forM_ vertices pg $ \(pt :+ SP i (p :+ vt)) ->
-                     MV.write v i (STR pt p vt)
-                   return v
+    vertexInfo = vertices pg
+      -- let n  = numVertices pg
+      --            in V.create $ do
+      --              v <- MV.new n
+      --              iforM_ vertices pg $ \i (pt :+ SP i (p :+ vt)) ->
+      --                MV.write v i (pt :+ vt)
+      --              return v
 
     initialSS = SS SS.empty mempty
 
     sweep  es = flip runReader vertexInfo $ evalStateT (sweep' es) initialSS
     sweep' es = DList.toList <$> execWriterT (sweep'' es)
 
-    sweep'' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
+--    sweep'' :: NonEmpty.NonEmpty (Event point) -> Sweep point ()
     sweep'' = mapM_ handle
 
     -- holesToCW p = p&polygonHoles'.traverse %~ toClockwiseOrder'
@@ -178,29 +187,29 @@ makeMonotone pg = let (e:es) = listEdges pg
 
 -}
 
-type Sweep polygon point r =
-  WriterT (DList.DList (LineSegment 2 (point :+ VertexIx polygon)))
-          (StateT (StatusStruct r)
-                  (Reader (V.Vector (VertexInfo point)))
+type Sweep point =
+  WriterT (DList.DList (ClosedLineSegment (point :+ Int)))
+  (StateT (StatusStruct point)
+                  (Reader (V.Vector (VertexInfo point))))
 
 type VertexInfo point = point :+ VertexType
 
   -- STR (Point 2 r) p VertexType
 
 
-tell' :: LineSegment 2 (point :+ VertexIx polygon) -> Sweep polygon point r ()
+tell' :: ClosedLineSegment (point :+ Int) -> Sweep point ()
 tell' = tell . DList.singleton
 
-getIdx :: Event r -> Int
+getIdx :: Event point -> Int
 getIdx = view (extra._1.end.extra)
 
-getVertexType   :: Int -> Sweep p r VertexType
-getVertexType v = asks (^.ix' v._3)
+getVertexType   :: Int -> Sweep point VertexType
+getVertexType v = asks (^.ix' v.extra)
 
-getEventType :: Event r -> Sweep p r VertexType
+getEventType :: Event point -> Sweep point VertexType
 getEventType = getVertexType . getIdx
 
-handle   :: (Num r, Ord r) => Event r -> Sweep p r ()
+handle   :: (Point_ point 2 r, Num r, Ord r) => Event point -> Sweep point ()
 handle e = let i = getIdx e in getEventType e >>= \case
     Start   -> handleStart   i e
     End     -> handleEnd     i e
@@ -210,23 +219,23 @@ handle e = let i = getIdx e in getEventType e >>= \case
             | otherwise        -> handleRegularR i e
 
 --FIXME: I think we can drop the fractional constraints :), and replace them by Num instead, since ordAtY now only uses a Num constraint :)
-insertAt   :: (Ord r, Num r) => Point 2 r -> LineSegment 2 q r
-           -> SS.Set (LineSegment 2 q r) -> SS.Set (LineSegment 2 q r)
+insertAt   :: (Point_ point 2 r, Ord r, Num r) => point -> ClosedLineSegment point
+           -> SS.Set (ClosedLineSegment point) -> SS.Set (ClosedLineSegment point)
 insertAt v = SS.insertBy (ordAtY $ v^.yCoord)
 
-deleteAt   :: (Num r, Ord r) => Point 2 r -> LineSegment 2 p r
-           -> SS.Set (LineSegment 2 p r) -> SS.Set (LineSegment 2 p r)
+deleteAt   :: (Point_ point 2 r, Num r, Ord r) => point -> ClosedLineSegment point
+           -> SS.Set (ClosedLineSegment point) -> SS.Set (ClosedLineSegment point)
 deleteAt v = SS.deleteAllBy (ordAtY $ v^.yCoord)
 
 
-handleStart              :: (Num r, Ord r)
-                         => Int -> Event r -> Sweep p r ()
+handleStart              :: (Point_ point 2 r, Num r, Ord r)
+                         => Int -> Event point -> Sweep point ()
 handleStart i (v :+ adj) = modify $ \(SS t h) ->
                                 SS (insertAt v (adj^._2) t)
                                    (IntMap.insert i i h)
 
-handleEnd              :: (Num r, Ord r)
-                       => Int -> Event r -> Sweep p r ()
+handleEnd              :: (Point_ point 2 r, Num r, Ord r)
+                       => Int -> Event point -> Sweep point ()
 handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             -- lookup p's helper; if it is a merge vertex
                             -- we insert a new segment
@@ -236,25 +245,25 @@ handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                               ss&statusStruct %~ deleteAt v (adj^._1)
 
 -- | Adds edge (i,j) if e_j's helper is a merge vertex
-tellIfMerge       :: Int -> Point 2 r -> Int -> Sweep p r ()
+tellIfMerge       :: (Point_ point 2 r) => Int -> point -> Int -> Sweep point ()
 tellIfMerge i v j = do SP u ut <- getHelper j
                        when (ut == Merge) (tell' $ ClosedLineSegment (v :+ i) u)
 
 -- | Get the helper of edge i, and its vertex type
-getHelper   :: Int -> Sweep p r (SP (Point 2 r :+ Int) VertexType)
-getHelper i = do ui         <- gets (^?!helper.ix i)
-                 STR u _ ut <- asks (^.ix' ui)
+getHelper   :: (Point_ point 2 r) => Int -> Sweep point (SP (point  :+ Int) VertexType)
+getHelper i = do ui      <- gets (^?!helper.ix i)
+                 u :+ ut <- asks (^.ix' ui)
                  pure $ SP (u :+ ui) ut
 
 
-lookupLE     :: (Ord r, Num r)
-             => Point 2 r -> SS.Set (LineSegment 2 Int r)
-             -> Maybe (LineSegment 2 Int r)
+lookupLE     :: (Point_ point 2 r, Ord r, Num r)
+             => point -> SS.Set (ClosedLineSegment (point :+ Int))
+             -> Maybe (ClosedLineSegment (point :+ Int))
 lookupLE v s = let (l,m,_) = SS.splitOn (xCoordAt $ v^.yCoord) (v^.xCoord) s
                in SS.lookupMax (l `SS.join` m)
 
 
-handleSplit              :: (Num r, Ord r) => Int -> Event r -> Sweep p r ()
+handleSplit              :: (Point_ point 2 r, Num r, Ord r) => Int -> Event point -> Sweep point ()
 handleSplit i (v :+ adj) = do ej <- gets $ \ss -> ss^?!statusStruct.to (lookupLE v)._Just
                               let j = ej^.start.extra
                               SP u _ <- getHelper j
@@ -267,7 +276,7 @@ handleSplit i (v :+ adj) = do ej <- gets $ \ss -> ss^?!statusStruct.to (lookupLE
                               -- return the diagonal
                               tell' $ ClosedLineSegment (v :+ i) u
 
-handleMerge              :: (Num r, Ord r) => Int -> Event r -> Sweep p r ()
+handleMerge              :: (Point_ point 2 r, Num r, Ord r) => Int -> Event point -> Sweep point ()
 handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                               tellIfMerge i v ePred
                               -- delete e_{i-1} from the status struct
@@ -276,20 +285,21 @@ handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
 
 -- | finds the edge j to the left of v_i, and connect v_i to it if the helper
 -- of j is a merge vertex
-connectToLeft     :: (Num r, Ord r) => Int -> Point 2 r -> Sweep p r ()
+connectToLeft     :: (Point_ point 2 r, Num r, Ord r) => Int -> point -> Sweep point ()
 connectToLeft i v = do ej <- gets $ \ss -> ss^?!statusStruct.to (lookupLE v)._Just
                        let j = ej^.start.extra
                        tellIfMerge i v j
                        modify $ \ss -> ss&helper %~ IntMap.insert j i
 
 -- | returns True if v the interior of the polygon is to the right of v
-isLeftVertex              :: Ord r => Int -> Event r -> Bool
+isLeftVertex              :: (Point_ point 2 r, Ord r) => Int -> Event point -> Bool
 isLeftVertex i (v :+ adj) = case (adj^._1.start) `cmpSweep` (v :+ i) of
                               GT -> True
                               _  -> False
   -- if the predecessor occurs before the sweep, this must be a left vertex
 
-handleRegularL              :: (Num r, Ord r) => Int -> Event r -> Sweep p r ()
+handleRegularL              :: (Point_ point 2 r, Num r, Ord r)
+                            => Int -> Event point -> Sweep point ()
 handleRegularL i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                                  tellIfMerge i v ePred
                                  -- delete e_{i-1} from the status struct
@@ -301,7 +311,8 @@ handleRegularL i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                                      SS (insertAt v (adj^._2) t)
                                         (IntMap.insert i i h)
 
-handleRegularR            :: (Num r, Ord r) => Int -> Event r -> Sweep p r ()
+handleRegularR            :: (Point_ point 2 r, Num r, Ord r)
+                          => Int -> Event point -> Sweep point ()
 handleRegularR i (v :+ _) = connectToLeft i v
 
 
@@ -347,5 +358,5 @@ handleRegularR i (v :+ _) = connectToLeft i v
 -- myPoly = MultiPolygon (CC.fromList $ read "[Point2 [16 % 1,80 % 1] :+ (),Point2 [16 % 1,16 % 1] :+ (),Point2 [144 % 1,16 % 1] :+ (),Point2 [144 % 1,80 % 1] :+ ()]"
 --                       )
 --   [ fromPoints $ read "[Point2 [88 % 1,48 % 1] :+ (),Point2 [112 % 1,40 % 1] :+ (),Point2 [112 % 1,48 % 1] :+ (),Point2 [80 % 1,56 % 1] :+ ()]"
---   , fromPoints $ read "[Point2 [32 % 1,64 % 1] :+ (),Point2 [32 % 1,32 % 1] :+ (),Point2 [64 % 1,32 % 1] :+ (),Point2 [64 % 1,64 % 1] :+ ()]"
+  --   , fromPoints $ read "[Point2 [32 % 1,64 % 1] :+ (),Point2 [32 % 1,32 % 1] :+ (),Point2 [64 % 1,32 % 1] :+ (),Point2 [64 % 1,64 %1] :+ ()]"
 --   ]
