@@ -11,7 +11,6 @@ import           HGeometry.ConvexHull.GrahamScan
 import           HGeometry.Ext
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
 
 {-
 
@@ -133,6 +132,7 @@ readInput (ls:hs:ns:rest) = let n            = read ns
                                      (readPoint hs)
                                      (map readPoint daltons)
                                : readInput ys
+readInput _                = error "readInput: wrong number of args"
 
 gunslinger :: String -> String
 gunslinger = unlines . map (show . escape) . readInput . tail . lines

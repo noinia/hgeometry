@@ -15,17 +15,14 @@ $O(n^2 \log n)$ solution.
 > module Main where
 
 
-> import Control.Lens((^.),(^..))
+> import Control.Lens((^..))
 > import Data.Ix
-> import HGeometry.Ext
 > import HGeometry.Triangle
 > import HGeometry.Point
 > import HGeometry.Polygon.Class
 > import HGeometry.Polygon.Convex
 > import HGeometry.ConvexHull.GrahamScan
-> import Hiraffe.Graph
 > import qualified Data.Array   as A
-> import qualified Data.Foldable as F
 > import qualified Data.List     as L
 > import qualified Data.List.NonEmpty as NonEmpty
 
@@ -126,12 +123,12 @@ To make sure `allChains` runs in $O(n^2)$ time we build an Array representing
 our convex hull vertices. All individiual chains are then views of this underlying array:
 
 > chains          :: Array Int a -> Int -> Int -> (Array Int a, Array Int a)
-> chains a pi qi = (ixSubMap (1,qi-pi-1) fu a, ixSubMap (1,r + pi - 1) fv a)
+> chains a ip iq = (ixSubMap (1,iq-ip-1) fu a, ixSubMap (1,r + ip - 1) fv a)
 >   where
 >     n    = rangeSize . bounds $ a
->     r    = n - qi
->     fu i = pi + i
->     fv i = if i <= r then qi + i
+>     r    = n - iq
+>     fu i = ip + i
+>     fv i = if i <= r then iq + i
 >                      else i - r
 
 We then use `maxAreaQuadrangleWith` to find the largest quadrangle given its
@@ -203,7 +200,7 @@ Ternary Search
 > ternarySearchArray f (Unimodal a)
 >   | rangeSize (bounds a) == 0 = error "empty array"
 >   | otherwise                 = let (l,u) = bounds a
->                                     i     = ternarySearch (\i -> f $ a ! i) (pred l) (succ u)
+>                                     i     = ternarySearch (\j -> f $ a ! j) (pred l) (succ u)
 >                                 in a ! i
 
 Given a function $f$, a lowerbound $\ell$, and a n upperbound $u$ find the
@@ -227,7 +224,9 @@ Input & Output
 > readPointSet :: [String] -> PointSet
 > readPointSet = map readPoint
 >   where
->     readPoint s = let [x,y] = map read . words $ s in Point2 x y
+>     readPoint s = case map read . words $ s of
+>                     [x,y] -> Point2 x y
+>                     _     -> error "readPoint: invalid input"
 
 > readInput           :: [String] -> [PointSet]
 > readInput []        = []
@@ -244,7 +243,7 @@ Input & Output
 > main = interact armybase
 
 
-> show' (p,q,(a,b)) = (p,q,elems a, elems b)
+-- > show' (p,q,(a,b)) = (p,q,elems a, elems b)
 
 Array Stuff
 -----------
@@ -258,7 +257,7 @@ Array Stuff
 >   fmap f (Array b g a) = Array b g (fmap f a)
 
 > instance (Show i, Show a, A.Ix i) => Show (Array i a) where
->   show a@(Array bs g _) = concat [ "Array "
+>   show a@(Array bs _ _) = concat [ "Array "
 >                                  , show bs
 >                                  , " "
 >                                  , show $ assocs a
@@ -278,7 +277,7 @@ Array Stuff
 > assocs (Array _ g a) = (\(k,v) -> (g k, v)) <$> A.assocs a
 
 > ixSubMap :: Ix i => (i,i) -> (i -> i) -> Array i a -> Array i a
-> ixSubMap bs f (Array obs g a) = Array bs (g . f) a
+> ixSubMap bs f (Array _ g a) = Array bs (g . f) a
 
 
 
