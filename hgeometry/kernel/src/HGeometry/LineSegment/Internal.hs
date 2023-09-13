@@ -304,6 +304,8 @@ instance ( -- OptCVector_ 2 (AnEndPoint point)
         Open   -> (<)
         Closed -> (<=)
 
+-- FIXME: In R^2 we can give an implementation that just uses Num
+
 
 -- instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r
 --          , Point_ point d r

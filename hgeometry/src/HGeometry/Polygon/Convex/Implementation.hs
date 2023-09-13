@@ -23,8 +23,11 @@ import Control.DeepSeq (NFData)
 import Control.Lens
 import Data.Kind (Type)
 import Data.Vector.NonEmpty (NonEmptyVector)
+import HGeometry.Boundary
 import HGeometry.Box
 import HGeometry.Cyclic
+import HGeometry.Intersection
+import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Polygon.Class
 import HGeometry.Polygon.Convex.Class
@@ -32,6 +35,7 @@ import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Simple.Implementation
 import HGeometry.Properties
 import HGeometry.Transformation
+import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 
@@ -225,3 +229,44 @@ findMaxWith cmp pg = pg^.outerBoundaryVertexAt (worker 0 n)
         c = (a+b) `div` 2
         localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
     isUpwards idx = idx `icmp` (idx+1) /= GT
+
+
+--------------------------------------------------------------------------------
+-- inConvex
+
+-- 1. Check if p is on left edge or right edge.
+-- 2. Do binary search:
+--       Find the largest n where p is on the right of 0 to n.
+-- 3. Check if p is on segment n,n+1
+-- 4. Check if p is in triangle 0,n,n+1
+
+-- | \( O(\log n) \)
+--   Check if a point lies inside a convex polygon, on the boundary, or outside of the
+--   convex polygon.
+inConvex :: ( ConvexPolygon_ convexPolygon point r
+            , Point_ queryPoint 2 r, Fractional r, Ord r)
+         => queryPoint -> convexPolygon
+         -> PointLocationResult
+inConvex (view asPoint -> q) poly
+  | q `intersects` leftEdge  = OnBoundary
+  | q `intersects` rightEdge = OnBoundary
+  | otherwise                = worker 1 n
+  where
+    n         = numVertices poly - 1
+    point0    = point 0
+    leftEdge  = ClosedLineSegment point0 (point n)
+    rightEdge = ClosedLineSegment point0 (point 1)
+    worker a b
+      | a+1 == b                        =
+        if q `onSegment` ClosedLineSegment (point a) (point b)
+          then OnBoundary
+          else
+            if q `intersects` Triangle point0 (point a) (point b)
+              then Inside
+              else Outside
+      | ccw point0 (point c) q == CCW = worker c b
+      | otherwise                     = worker a c
+      where c = (a+b) `div` 2
+
+    point x = poly^.outerBoundaryVertexAt x.asPoint
+-- FIXME: we sould need only Num here

@@ -8,7 +8,6 @@ import           HGeometry.Cyclic
 import           HGeometry.Instances ()
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           Test.Hspec
@@ -24,6 +23,7 @@ newtype Shift p = Shift p
 instance (ShiftedEq p, Eq (ElemCyclic p)) => Eq (Shift p) where
   (Shift a) == (Shift b) = isShiftOf a b
 
+spec :: Spec
 spec = do
   prop "Melkman, convexHull of simple polygon same as convex hull of its vertices" $
     \(pg :: SimplePolygon (Point 2 Rational)) ->
