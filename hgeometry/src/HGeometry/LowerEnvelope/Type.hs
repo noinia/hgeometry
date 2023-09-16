@@ -92,7 +92,7 @@ incidentEdgesB = lens _incidentEdgesB (\v es -> v { _incidentEdgesB = es })
 
 --------------------------------------------------------------------------------
 
--- | An Edge in the Lower envelope
+-- | An (half)Edge in the Lower envelope
 data LEEdge plane = Edge { _destination :: {-# UNPACK #-}!VertexID
                          , _leftPlane   :: plane
                          , _rightPlane  :: plane

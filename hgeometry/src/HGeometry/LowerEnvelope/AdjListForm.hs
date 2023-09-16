@@ -15,6 +15,7 @@ module HGeometry.LowerEnvelope.AdjListForm
   , theUnboundedVertex, boundedVertices
 
   , singleton
+  , fromVertexForm
 
   , BoundedVertexF(Vertex)
   , location, definers, location2
@@ -33,6 +34,7 @@ import           Data.Foldable1
 import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
+import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -51,6 +53,8 @@ import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
+import qualified HGeometry.Vector as Vec
+import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
@@ -76,16 +80,19 @@ traverseLowerEnvelope                         :: ( Applicative f, NumType plane 
 traverseLowerEnvelope f (LowerEnvelope v0 vs) =
     LowerEnvelope <$> traverse f v0 <*> traverse (traverseBoundedV f) vs
 
-
+-- | lens to access the unbounded vertex
 theUnboundedVertex :: Lens' (LowerEnvelope plane) (UnboundedVertex plane)
 theUnboundedVertex = lens (\(LowerEnvelope v _) -> v)
                           (\(LowerEnvelope _ vs) v -> LowerEnvelope v vs)
 
+-- | Lens to access the sequence of bounded vertices.
 boundedVertices :: Lens' (LowerEnvelope plane) (Seq.Seq (BoundedVertex plane))
 boundedVertices = lens (\(LowerEnvelope _ vs)    -> vs)
                        (\(LowerEnvelope u _ ) vs -> LowerEnvelope u vs)
 
--- | Given a single Vertex, construct a LowerEnvelope ot of it.
+--------------------------------------------------------------------------------
+
+-- | Given a single Vertex, construct a LowerEnvelope out of it.
 singleton   :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
             => VertexForm.LEVertex plane -> LowerEnvelope plane
 singleton v = LowerEnvelope v0 (Seq.singleton v')
@@ -99,22 +106,49 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
 -- of it.
 --
 -- \(O(n\log n)\)
-fromVertexForm      :: (Plane_ plane r, Ord plane, Ord r)
+fromVertexForm      :: forall plane r. (Plane_ plane r, Ord plane, Ord r, Num r)
                     => VertexForm.VertexForm plane -> LowerEnvelope plane
-fromVertexForm lEnv = LowerEnvelope v0 undefined -- vs
+fromVertexForm lEnv = LowerEnvelope v0 vs
   where
     mkTuples i (v,defs) = [ (h,i,v,defs) | h <- F.toList defs ]
     definingPlane (h,_,_,_) = h
 
     v0 = UnboundedVertex mempty -- FIXME !!
+    vs = mempty
     -- vs = fromList
     --    . fmap toVertex
     --    . groupOnCheap (\(_,i,_,_) -> i)
 
-    -- es = foldMap fromFoldable
-    --    . fmap sortAlongBoundary
-    --    . groupOnCheap definingPlane
-    --    $ ifoldMapOf (indexing (vertices.withIndex)) mkTuples lEnv
+    -- computes all edges;
+    es :: [LEEdge plane]
+    es = foldMap (faceToEdges . sortAlongBoundary)
+       . groupOnCheap definingPlane
+       $ ifoldMapOf (indexing (vertices.withIndex)) mkTuples lEnv
+
+
+
+type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+
+-- | Given a convex face h (represented by its bounded vertices in CCW order along the
+-- face; starting with the leftmost one), construct the edges from it.
+--
+-- So in particular, we have to find and add the at most two bounded vertices that are
+-- connected to the unbounded vertex, and construct bounded edges for the remaining
+-- vertices.
+--
+-- For each face, we produce only the half-edges so that the face lies to the left.
+--
+-- O(n)
+--
+-- TODO: return a non-empty
+faceToEdges      :: IntermediateFace plane -> [LEEdge plane]
+faceToEdges face
+  | length face == 1 = [] -- TODO: create two unbounded edges representing this vertex
+  | length face == 2 = [] -- test if the edge v0 v1 has h to its left or to its right. This determines if we have to create the unbounded edges (v0,v_infty) and (v_infty,v1)  or (v1,v_infty) and (v_infty,v0)
+
+  | otherwise        = [] -- zip up with the successor, and find/insert the unbounded edges if needed
+
+
 
 -- fromEdges ::
 -- fromEdges =
@@ -134,22 +168,55 @@ type IntermediateVertex plane =
   (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
 
 
--- | sort the vertices of a face around its boundary
-sortAlongBoundary      :: (Plane_ plane r, Ord r, Num r
-                          ) =>NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+-- | Sort the vertices of a (convex) face in counter clockwise order around its
+-- boundary. The first vertex in the output is the leftmost vertex of the face.
+--
+-- running time: \(O(n \log n)\)
+sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r)
+                       => NonEmptyV.NonEmptyVector (IntermediateVertex plane)
                        -> NonEmptyV.NonEmptyVector (IntermediateVertex plane)
-sortAlongBoundary face = undefined -- sortBy cmpAroundV1 face
+sortAlongBoundary face = case mv0 of
+    Nothing            -> face -- face only has one vertex, so it is already sorted
+    Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
   where
-    -- (_, _, v1, _) = NonEmptyV.head face
-    -- v1' = projectPoint v1
+    -- we find the leftmost vertex v1 of the face (pick lexicographically when there are
+    -- multiple), and then compute its predecessor v0 in the order along the boundary of
+    -- the face (i.e. we find the point v for which the line through v1 and v has maximum
+    -- slope). We can then sort the vertices CCW around v1, with respect to the line
+    -- through v1 and v0.
 
-    -- -- TODO: think about whether this is really right; i.e. if we should somehow start
-    -- -- from an appropriate initial vector (i.e. to its neighbour) or that we can start
-    -- -- with something arbitrary like we do here.
-    -- cmpAroundV1 (_, _, u, _) (_, _, v, _) = ccwCmpAround v1' u' v' <> cmpByDistanceTo v1' u' v'
-    --   where
-    --     u' = projectPoint u
-    --     v' = projectPoint v
+    -- the leftmost vertex v1
+
+    (_, iv1, v1, _) = minimumBy (comparing (^._3)) face
+    v1' = projectPoint v1
+
+    -- its predecessor v0, if it exists
+    mv0 :: Maybe (IntermediateVertex plane)
+    mv0 = foldr findPred Nothing face
+    findPred v@(_, iv, _, _) acc
+      | iv == iv1 = acc -- skip v1 itself
+      | otherwise = Just $ case acc of
+                             Nothing -> v -- anything is better than nothing
+                             Just u  -> maxBy cmpSlope' u v
+
+    cmpSlope' :: IntermediateVertex plane -> IntermediateVertex plane -> Ordering
+    cmpSlope' (_, _, u, _) (_, _, v, _) = case ccw v1' (projectPoint u) (projectPoint v) of
+                                            CCW      -> GT
+                                            CW       -> LT
+                                            CoLinear -> EQ
+
+    cmpAround :: Vector 3 r -> IntermediateVertex plane -> IntermediateVertex plane -> Ordering
+    cmpAround w (_, _, u, _) (_, _, v, _) =
+        ccwCmpAroundWith (Vec.prefix w) v1' u' v' <> cmpByDistanceTo v1' u' v'
+      where
+        u' = projectPoint u
+        v' = projectPoint v
+
+
+maxBy         :: (t -> t -> Ordering) -> t -> t -> t
+maxBy cmp a b = case cmp a b of
+                  LT -> b
+                  _  -> a
 
 --------------------------------------------------------------------------------
 
@@ -170,6 +237,8 @@ type BoundedVertex = BoundedVertexF Seq.Seq
 -- | Given a vertex in vertex form, construct A BoundedVertex from
 -- it. Note that this essentially assumes the vertex is connected to
 -- the unbounded vertex with all its outgoing edgse.
+--
+-- \(O(k \log k)\), where \(k\) is the number of definers.
 fromLEVertex                              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                                           => VertexForm.LEVertex plane
                                           -> BoundedVertex plane
