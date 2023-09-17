@@ -152,8 +152,8 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
 
     definingPlane (h,_,_,_) = h
 
-    collectUnbounded :: Foldable f => f (a, Maybe b) -> Seq.Seq b
-    collectUnbounded = foldMap (maybe mempty Seq.singleton . snd)
+    collectUnbounded :: Foldable f => f (a, First b) -> Seq.Seq b
+    collectUnbounded = foldMap (maybe mempty Seq.singleton . getFirst . snd)
 
 -- collectBounded :: Foldable f => f (g (VertexID, e)) ->
 -- ;
@@ -161,6 +161,11 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
 type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
 
 
+pattern First1   :: a -> First a
+pattern First1 x = First (Just x)
+
+pattern NoUnbounded :: First a
+pattern NoUnbounded = First Nothing
 
 -- |
 --
@@ -194,7 +199,7 @@ faceToEdges face = case toNonEmpty face of
     computEdge i u@(h,uIdx,up,uDefs) =
       let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n) in
         case F.toList $ Set.delete h (uDefs `Set.intersection` vDefs) of
-          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), Nothing )
+          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), NoUnbounded )
                   -- bounded edge from u to v with h' on the right
           []   -> let hu = undefined
                       hv = undefined
