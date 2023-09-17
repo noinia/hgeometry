@@ -20,6 +20,9 @@ module HGeometry.LowerEnvelope.AdjListForm
   , BoundedVertexF(Vertex)
   , location, definers, location2
 
+  , UnboundedVertex(UnboundedVertex)
+  , unboundedVertexId
+
   , LEEdge(Edge)
 
   ) where
@@ -32,11 +35,14 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Function (on)
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
+import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
+import           Data.Traversable (mapAccumL)
 import qualified Data.Vector as V
 import qualified Data.Vector.NonEmpty as NonEmptyV
 import           HGeometry.Combinatorial.Util
@@ -108,61 +114,155 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
 -- \(O(n\log n)\)
 fromVertexForm      :: forall plane r. (Plane_ plane r, Ord plane, Ord r, Num r)
                     => VertexForm.VertexForm plane -> LowerEnvelope plane
-fromVertexForm lEnv = LowerEnvelope v0 vs
+fromVertexForm lEnv = LowerEnvelope v0 boundedVs
   where
-    mkTuples i (v,defs) = [ (h,i,v,defs) | h <- F.toList defs ]
+    v0 = UnboundedVertex $ collectUnbounded allEdges
+
+    -- the bounded vertices.
+    boundedVs = Seq.zipWith ( \(_,v,_) outs -> v&incidentEdgesB .~ toSeq outs
+                            -- assert: all outs start have i as index
+                            ) boundedVs' boundedEsByOrigin
+
+    toSeq = foldMap (Seq.singleton . snd)
+
+    -- all edges leaving from bounded vertices, ordered by their VertexIds
+    boundedEsByOrigin = Seq.fromList . groupOnCheap fst . foldMap (F.toList . fst)
+                      $ allEdges
+
+    -- computes all edges, they are grouped by face
+    allEdges = fmap (faceToEdges . sortAlongBoundary)
+             . groupOnCheap definingPlane
+             $ foldMap (^._3) boundedVs'
+
+    -- | A sequence of bounded vertices, ordered by vertexID, together with a bunch of
+    -- copies; one for each face it will appear on
+    --
+    -- TODO: i guess that in degenerate sitations it could be that there are copies that
+    -- wont actually proudce an edge (i.e. if there is some definer/plane containing the
+    -- vertex, that does not appear on the lower envelope).
+    --
+    boundedVs' :: Seq.Seq ( VertexID, BoundedVertex plane, [IntermediateVertex plane])
+    boundedVs' = ifoldMapOf (indexing (vertices.withIndex)) mkVtx lEnv
+
+    mkVtx i (v,defs) = let j = i+1
+                       in Seq.singleton ( j
+                                        , Vertex v defs mempty
+                                        , [ (h,j,v,defs) | h <- F.toList defs ]
+                                        )
+
     definingPlane (h,_,_,_) = h
 
-    v0 = UnboundedVertex mempty -- FIXME !!
-    vs = mempty
-    -- vs = fromList
-    --    . fmap toVertex
-    --    . groupOnCheap (\(_,i,_,_) -> i)
+    collectUnbounded :: Foldable f => f (a, Maybe b) -> Seq.Seq b
+    collectUnbounded = foldMap (maybe mempty Seq.singleton . snd)
 
-    -- computes all edges;
-    es :: [LEEdge plane]
-    es = foldMap (faceToEdges . sortAlongBoundary)
-       . groupOnCheap definingPlane
-       $ ifoldMapOf (indexing (vertices.withIndex)) mkTuples lEnv
-
-
+-- collectBounded :: Foldable f => f (g (VertexID, e)) ->
+-- ;
 
 type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
 
--- | Given a convex face h (represented by its bounded vertices in CCW order along the
--- face; starting with the leftmost one), construct the edges from it.
+
+
+-- |
+--
+-- Given a convex face h (represented by its bounded vertices in CCW order along the face;
+-- starting with the leftmost one), compute the half-edges that bound the face (i.e. that
+-- have h to their left). The result is a vector with for each bounded vertex (represented
+-- by their ID) the outgoing halfedge, and the half-edge starting from the unbounded
+-- vertex (if it exists).
+--
+--
+-- O(n)
+--
+--
+-- computes for each vertex along the face the edge
+faceToEdges      :: Ord plane
+                 => IntermediateFace plane
+                 -> ( NonEmpty (VertexID, LEEdge plane)
+                    , First (LEEdge plane) -- TODO: there really should be only one
+                    )
+faceToEdges face = case toNonEmpty face of
+    v1 :| []   -> oneVertex v1
+    v1 :| [v2] -> twoVertices v1 v2
+    _  :| _    -> manyVertices
+  where
+    n = length face
+
+    -- defs =
+
+    manyVertices = ifoldMap1 computEdge face
+
+    computEdge i u@(h,uIdx,up,uDefs) =
+      let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n) in
+        case F.toList $ Set.delete h (uDefs `Set.intersection` vDefs) of
+          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), Nothing )
+                  -- bounded edge from u to v with h' on the right
+          []   -> let hu = undefined
+                      hv = undefined
+                  in ( NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
+                     , First . Just $ Edge vIdx h hv
+                     )
+                  -- unbounded edge from u to v_infty, and from v_infty to v
+          _    -> error "computEdge: degeneracy, u and v have more than two planes in common!"
+
+
+oneVertex (h,i,v,defs) =  ( NonEmpty.singleton $ mkEdge i unboundedVertexId h1
+                          , First . Just $ edgeTo i h2
+                          )
+  where
+    [h1,h2] = undefined -- extract h1 and h2 from defs somehow
+    mkEdge u v h' = (u, edgeTo v h')
+    edgeTo v h' = Edge v h h'
+
+
 --
 -- So in particular, we have to find and add the at most two bounded vertices that are
 -- connected to the unbounded vertex, and construct bounded edges for the remaining
 -- vertices.
 --
 -- For each face, we produce only the half-edges so that the face lies to the left.
---
--- O(n)
---
--- TODO: return a non-empty
-faceToEdges      :: IntermediateFace plane -> [LEEdge plane]
-faceToEdges face
-  | length face == 1 = [] -- TODO: create two unbounded edges representing this vertex
-  | length face == 2 = [] -- test if the edge v0 v1 has h to its left or to its right. This determines if we have to create the unbounded edges (v0,v_infty) and (v_infty,v1)  or (v1,v_infty) and (v_infty,v0)
 
-  | otherwise        = [] -- zip up with the successor, and find/insert the unbounded edges if needed
+    -- | create the edge from u to v with h on its left and h' to its right
+    --
+    -- oneVertex =
+    --   where
+    --     h1 = undefined
+    --     h2 = undefined
+      -- should be very similar to fromLEVertex
 
-
-
--- fromEdges ::
--- fromEdges =
-
-toVertex    :: NonEmptyV.NonEmptyVector (IntermediateVertex plane)
-            -> BoundedVertexF f plane
-toVertex xs = Vertex v defs undefined -- TODO: we are missing info here.
+twoVertices v1 v2 = undefined
   where
-    (_, _, v, defs) = NonEmptyV.head xs
 
-groupOnCheap  :: (Foldable f, Ord b)
-              => (a -> b) -> f a -> [NonEmptyV.NonEmptyVector a]
-groupOnCheap f = fmap NonEmptyV.unsafeFromVector . V.groupBy ((==) `on` f) . sortOnCheap f
+    -- -- test if the edge from v0 to v1 has h to its left or to its right. This determines
+    -- -- if we have to create the unbounded edges (v0,v_infty) and (v_infty,v1) or
+    -- -- (v1,v_infty) and (v_infty,v0)
+    -- twoVertices (_,j,u,udefs) = undefined
+    --   -- case computeHSide of
+    --   --   Left h3  -> ( [ mkEdge i unboundedVertexId h1
+    --   --                 , mkEdge j i                 h3 -- edge from v0 to v1
+    --   --                 ]
+    --   --               , Just $ edgeTo j           h2
+    --   --               )
+    --   --   Right h3 -> ( [ mkEdge i j                 h3 -- edge from v1 to v0
+    --   --                 , mkEdge j unboundedVertexId h2
+    --   --                 ]
+    --   --               , Just $ edgeTo i           h1
+    --   --               )
+    --   where
+    --     computeHSide = undefined
+    --     h1 = undefined
+    --     h2 = undefined
 
+
+--------------------------------------------------------------------------------
+
+-- TODO: move to the definition below
+data IntermediateVertex' plane =
+  IntermediateVertex' { ivPlane :: plane
+                      , ivId :: {-# UNPACK #-} !VertexID
+                      , ivLoc :: Point 3 (NumType plane)
+                      , ivDefs :: VertexForm.Definers plane
+                      , ivEdges :: Seq.Seq (LEEdge plane)
+                      }
 
 type IntermediateVertex plane =
   (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
@@ -212,15 +312,9 @@ sortAlongBoundary face = case mv0 of
         u' = projectPoint u
         v' = projectPoint v
 
-
-maxBy         :: (t -> t -> Ordering) -> t -> t -> t
-maxBy cmp a b = case cmp a b of
-                  LT -> b
-                  _  -> a
-
 --------------------------------------------------------------------------------
 
--- | The unbounded vertex, which by definition will have index 0
+-- | The unbounded vertex.
 newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LEEdge plane) }
                               deriving (Show,Eq,Functor,Foldable,Traversable)
 
@@ -228,6 +322,10 @@ newtype UnboundedVertex plane = UnboundedVertex { _incidentEdgesU :: Seq.Seq (LE
 incidentEdgesU :: Iso (UnboundedVertex plane) (UnboundedVertex plane')
                       (Seq.Seq (LEEdge plane)) (Seq.Seq (LEEdge plane'))
 incidentEdgesU = coerced
+
+-- | The vertexID of the unbounded vertex
+unboundedVertexId :: VertexID
+unboundedVertexId = 0
 
 --------------------------------------------------------------------------------
 
@@ -244,7 +342,7 @@ fromLEVertex                              :: (Plane_ plane r, Ord r, Fractional 
                                           -> BoundedVertex plane
 fromLEVertex (VertexForm.LEVertex v defs) = Vertex v defs es
   where
-    es  = (\(_ :+ EdgeDefiners hl hr) -> Edge 0 hl hr) <$> sortAroundStart es'
+    es  = (\(_ :+ EdgeDefiners hl hr) -> Edge unboundedVertexId hl hr) <$> sortAroundStart es'
     es' = mapMaybe (\t@(Two h1 h2) -> let defs' = toNonEmpty' $ Set.delete h1 $ Set.delete h2 defs
                                       in outgoingUnboundedEdge v t defs'
                    ) $ uniquePairs defs
@@ -332,6 +430,7 @@ intersectionLine' h h' = intersectionLine h h' <&> \case
 
 --------------------------------------------------------------------------------
 
+-- |
 class HasIncidentEdges t  where
   incidentEdges' :: Lens' (t plane) (Seq.Seq (LEEdge plane))
 
@@ -344,17 +443,22 @@ instance HasIncidentEdges BoundedVertex where
 -- instance HasIncidentEdges (Vertex (LowerEnvelope plane)) plane where
 --   incidentEdges' = undefined -- pick either incidentEdges on the left or on the right thing.
 
+
+--------------------------------------------------------------------------------
+-- * The Instances for HasVertices, HasDarts, HasFaces etc
+
 instance HasVertices' (LowerEnvelope plane) where
   type Vertex   (LowerEnvelope plane) = Either (UnboundedVertex plane) (BoundedVertex plane)
   type VertexIx (LowerEnvelope plane) = VertexID
 
-  -- | note, trying to assign the unbounded vertex to something with index >0 is an error
+  -- | note, trying to assign the unbounded vertex to something with index /=
+  -- unboundedVertexId is an error.
   vertexAt        :: VertexID
                   -> IndexedTraversal' VertexID (LowerEnvelope plane)
                                                 (Vertex (LowerEnvelope plane))
   vertexAt i
-      | i == 0    = conjoined trav0  (itrav0 .indexed)
-      | otherwise = conjoined travVs (itravVs.indexed)
+      | i == unboundedVertexId = conjoined trav0  (itrav0 .indexed)
+      | otherwise              = conjoined travVs (itravVs.indexed)
     where
       trav0  f (LowerEnvelope v0 vs)  = flip LowerEnvelope vs . unLeft <$> f   (Left v0)
 
@@ -395,7 +499,7 @@ instance HasVertices (LowerEnvelope plane) (LowerEnvelope plane') where
                  => (VertexID -> Vertex (LowerEnvelope plane) -> f (Vertex (LowerEnvelope plane')))
                 -> LowerEnvelope plane -> f (LowerEnvelope plane')
       itraverse' f (LowerEnvelope v0 vs) =
-        LowerEnvelope <$> (fmap unLeft . f 0 .Left) v0
+        LowerEnvelope <$> (fmap unLeft . f unboundedVertexId .Left) v0
                       <*> itraverse (\i -> fmap unRight . f (i+1) . Right) vs
   {-# INLINE vertices #-}
 
@@ -429,7 +533,7 @@ instance HasDarts (LowerEnvelope plane) (LowerEnvelope plane) where
                  => (DartIx (LowerEnvelope plane) -> LEEdge plane -> f (LEEdge plane))
                  -> LowerEnvelope plane -> f (LowerEnvelope plane)
       itraverse' f (LowerEnvelope v0 vs) =
-        LowerEnvelope <$> (v0&incidentEdgesU.traverse %%~ liftF f 0)
+        LowerEnvelope <$> (v0&incidentEdgesU.traverse %%~ liftF f unboundedVertexId)
                       <*> itraverse (\i vtx -> vtx&incidentEdgesB.traverse %%~ liftF f (i+1)) vs
 
       liftF       :: (DartIx (LowerEnvelope plane) -> LEEdge plane -> f (LEEdge plane))
@@ -476,3 +580,51 @@ instance HasEdges (LowerEnvelope plane) (LowerEnvelope plane) where
   -- guess for iterative merging we cannot afford the "l" term.  I
   -- guess we need it only to maintain some Map from location -> id.
   -- so maybe we can maintain that separately.
+
+
+--------------------------------------------------------------------------------
+-- * Convenience functions
+
+-- | Group consecutive elements into non-empty groups.
+--
+--
+-- running time: \(O(n\log n)\)
+--
+-- >>> groupOnCheap fst [ (1,"foo"), (2,"bar"), (2,"blaa"), (1,"boeez"), (1,"blap"), (4,"blax"), (4,"bleh"), (100,"floep")]
+--
+groupOnCheap  :: (Foldable f, Ord b)
+              => (a -> b) -> f a -> [NonEmptyV.NonEmptyVector a]
+groupOnCheap f = fmap NonEmptyV.unsafeFromVector . V.groupBy ((==) `on` f) . sortOnCheap f
+
+-- | returns the maximum using the given comparison function
+maxBy         :: (t -> t -> Ordering) -> t -> t -> t
+maxBy cmp a b = case cmp a b of
+                  LT -> b
+                  _  -> a
+
+
+--------------------------------------------------------------------------------
+
+-- | ifoldMap1, stolen from indexed traversal
+ifoldMap1   :: Semigroup m => (Int -> a -> m) -> NonEmptyV.NonEmptyVector a -> m
+ifoldMap1 f = undefined
+
+  -- NonEmptyV.ifoldr ()
+
+  -- ifoldrMap1 f (\i a m -> f i a <> m)
+
+-- -- | Generalized 'ifoldr1'.
+-- ifoldrMap1 :: (i -> a -> b) -> (i -> a -> b -> b) -> f a -> b
+-- ifoldrMap1 f g xs =
+--     appFromMaybe (ifoldMap1 (FromMaybe . h) xs) Nothing
+--   where
+--     h i a Nothing  = f i a
+--     h i a (Just b) = g i a b
+
+-- -- | Used for foldrMap1 and foldlMap1 definitions
+-- newtype FromMaybe b = FromMaybe { appFromMaybe :: Maybe b -> b }
+
+-- instance Semigroup (FromMaybe b) where
+--     FromMaybe f <> FromMaybe g = FromMaybe (f . Just . g)
+
+--------------------------------------------------------------------------------
