@@ -35,6 +35,7 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Function (on)
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe, maybeToList)
@@ -212,26 +213,26 @@ faceToEdges face = case toNonEmpty face of
 -- | compute the face edges of the face of h, when v is the only vertex incident to h.
 oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                        => IntermediateVertex plane -> FaceEdges plane
-oneVertex (h,i,v,defs) = case (findPred outgoingEdges, findSucc outgoingEdges) of
-    (First1 hPred, First1 hSucc) -> ( NonEmpty.singleton (i, Edge unboundedVertexId h hPred)
-                                    , First1 $ Edge i h hSucc
-                                    )
-    (None,_)                     -> error "oneVertex. Absurd, no predecessor"
-    (_,None)                     -> error "oneVertex. Absurd, no successor"
+oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
+    [ Left hPred, Right hSucc ] -> ( NonEmpty.singleton (i, Edge unboundedVertexId h hPred)
+                                   , First1 $ Edge i h hSucc
+                                   ) -- the sort makes sure we get the left before right
+    _ -> error "oneVertex. absurd. Other than a single Left, and Right"
   where
     otherPlanes = Set.delete h defs
-    outgoingEdges = sortAroundStart
-                  $ foldMap (\h' -> let rest = toNonEmpty' $ Set.delete h' otherPlanes
-                                    in maybeToList $ outgoingUnboundedEdge v (Two h h') rest
+    -- | Tries to compute all outgoing edges involving h. Since every plane h appears
+    -- exactly once in the order around v, this should produce exactly two edges; one
+    -- left and one right.
+    outgoingEdges = foldMap (\h' -> let rest = toNonEmpty' $ Set.delete h' otherPlanes
+                                    in case outgoingUnboundedEdge v (Two h h') rest of
+                                         Just e  -> [ tagOtherPlane $ e^.extra ]
+                                         Nothing -> []
                             ) otherPlanes
+    tagOtherPlane (EdgeDefiners hl hr) = if h == hl then Right hr else Left hl
     toNonEmpty' s = case NonEmpty.nonEmpty $ F.toList s of
                       Just xs -> xs
                       _       -> error "oneVertex. Absurd, there should be at least 3 definers"
 
-    -- Finds the predecessor plane of h in the CCW order around v
-    findPred = foldMap (\(_ :+ EdgeDefiners hl hr) -> if hl == h then First1 hr else None)
-    -- Finds the successor plane of h in the CCW order around v
-    findSucc = foldMap (\(_ :+ EdgeDefiners hl hr) -> if hr == h then First1 hl else None)
 
 -- | Compute the edges of the face incident to h, when there are only two vertices
 -- incident to that face.
