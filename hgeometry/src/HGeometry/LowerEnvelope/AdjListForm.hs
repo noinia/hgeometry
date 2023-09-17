@@ -37,7 +37,7 @@ import           Data.Foldable1
 import           Data.Function (on)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe)
+import           Data.Maybe (mapMaybe, maybeToList)
 import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
@@ -112,7 +112,7 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
 -- of it.
 --
 -- \(O(n\log n)\)
-fromVertexForm      :: forall plane r. (Plane_ plane r, Ord plane, Ord r, Num r)
+fromVertexForm      :: forall plane r. (Plane_ plane r, Ord plane, Ord r, Fractional r)
                     => VertexForm.VertexForm plane -> LowerEnvelope plane
 fromVertexForm lEnv = LowerEnvelope v0 boundedVs
   where
@@ -120,7 +120,6 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
 
     -- the bounded vertices.
     boundedVs = Seq.zipWith ( \(_,v,_) outs -> v&incidentEdgesB .~ toSeq outs
-                            -- assert: all outs start have i as index
                             ) boundedVs' boundedEsByOrigin
 
     toSeq = foldMap (Seq.singleton . snd)
@@ -164,8 +163,14 @@ type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane
 pattern First1   :: a -> First a
 pattern First1 x = First (Just x)
 
-pattern NoUnbounded :: First a
-pattern NoUnbounded = First Nothing
+pattern None :: First a
+pattern None = First Nothing
+
+-- | For each bounded vertex (represented by their ID) the outgoing halfedge, and the
+-- half-edge starting from the unbounded vertex (if it exists).
+type FaceEdges plane = ( NonEmpty (VertexID, LEEdge plane)
+                       , First (LEEdge plane)
+                       ) -- TODO: there really should be only one
 
 -- |
 --
@@ -180,61 +185,61 @@ pattern NoUnbounded = First Nothing
 --
 --
 -- computes for each vertex along the face the edge
-faceToEdges      :: Ord plane
-                 => IntermediateFace plane
-                 -> ( NonEmpty (VertexID, LEEdge plane)
-                    , First (LEEdge plane) -- TODO: there really should be only one
-                    )
+faceToEdges      :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                 => IntermediateFace plane -> FaceEdges plane
 faceToEdges face = case toNonEmpty face of
     v1 :| []   -> oneVertex v1
     v1 :| [v2] -> twoVertices v1 v2
     _  :| _    -> manyVertices
   where
     n = length face
-
-    -- defs =
-
+    -- | The main case
     manyVertices = ifoldMap1 computEdge face
-
+    -- | Compute the outgoing edge from u to
     computEdge i u@(h,uIdx,up,uDefs) =
       let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n) in
         case F.toList $ Set.delete h (uDefs `Set.intersection` vDefs) of
-          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), NoUnbounded )
+          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), None )
                   -- bounded edge from u to v with h' on the right
-          []   -> let hu = undefined
+          []   -> let hu = undefined -- TODO
                       hv = undefined
                   in ( NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
-                     , First . Just $ Edge vIdx h hv
+                     , First1 $ Edge vIdx h hv
                      )
                   -- unbounded edge from u to v_infty, and from v_infty to v
           _    -> error "computEdge: degeneracy, u and v have more than two planes in common!"
 
-
-oneVertex (h,i,v,defs) =  ( NonEmpty.singleton $ mkEdge i unboundedVertexId h1
-                          , First . Just $ edgeTo i h2
-                          )
+-- | compute the face edges of the face of h, when v is the only vertex incident to h.
+oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                       => IntermediateVertex plane -> FaceEdges plane
+oneVertex (h,i,v,defs) = case (findPred outgoingEdges, findSucc outgoingEdges) of
+    (First1 hPred, First1 hSucc) -> ( NonEmpty.singleton (i, Edge unboundedVertexId h hPred)
+                                    , First1 $ Edge i h hSucc
+                                    )
+    (None,_)                     -> error "oneVertex. Absurd, no predecessor"
+    (_,None)                     -> error "oneVertex. Absurd, no successor"
   where
-    [h1,h2] = undefined -- extract h1 and h2 from defs somehow
-    mkEdge u v h' = (u, edgeTo v h')
-    edgeTo v h' = Edge v h h'
+    otherPlanes = Set.delete h defs
+    outgoingEdges = sortAroundStart
+                  $ foldMap (\h' -> let rest = toNonEmpty' $ Set.delete h' otherPlanes
+                                    in maybeToList $ outgoingUnboundedEdge v (Two h h') rest
+                            ) otherPlanes
+    toNonEmpty' s = case NonEmpty.nonEmpty $ F.toList s of
+                      Just xs -> xs
+                      _       -> error "oneVertex. Absurd, there should be at least 3 definers"
 
+    -- Finds the predecessor plane of h in the CCW order around v
+    findPred = foldMap (\(_ :+ EdgeDefiners hl hr) -> if hl == h then First1 hr else None)
+    -- Finds the successor plane of h in the CCW order around v
+    findSucc = foldMap (\(_ :+ EdgeDefiners hl hr) -> if hr == h then First1 hl else None)
 
+-- | Compute the edges of the face incident to h, when there are only two vertices
+-- incident to that face.
 --
--- So in particular, we have to find and add the at most two bounded vertices that are
--- connected to the unbounded vertex, and construct bounded edges for the remaining
--- vertices.
---
--- For each face, we produce only the half-edges so that the face lies to the left.
-
-    -- | create the edge from u to v with h on its left and h' to its right
-    --
-    -- oneVertex =
-    --   where
-    --     h1 = undefined
-    --     h2 = undefined
-      -- should be very similar to fromLEVertex
-
-twoVertices v1 v2 = undefined
+-- more or less a special case of the manyFaces scenario, in which we don't know
+-- the if edge should be oriented from u to v or from v to u.
+twoVertices     :: IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
+twoVertices u v = undefined
   where
 
     -- -- test if the edge from v0 to v1 has h to its left or to its right. This determines
