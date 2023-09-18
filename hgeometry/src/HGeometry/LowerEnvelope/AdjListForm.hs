@@ -39,7 +39,6 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe, maybeToList)
-import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
@@ -152,26 +151,31 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
 
     definingPlane (h,_,_,_) = h
 
-    collectUnbounded :: Foldable f => f (a, First b) -> Seq.Seq b
-    collectUnbounded = foldMap (maybe mempty Seq.singleton . getFirst . snd)
-
--- collectBounded :: Foldable f => f (g (VertexID, e)) ->
--- ;
+    collectUnbounded :: Foldable f => f (a, First1 b) -> Seq.Seq b
+    collectUnbounded = foldMap (first1 mempty Seq.singleton . snd)
 
 type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
 
 
-pattern First1   :: a -> First a
-pattern First1 x = First (Just x)
+data First1 a = None | First1 a deriving (Show,Eq)
+-- todo, rename to UnboundedE or so
 
-pattern None :: First a
-pattern None = First Nothing
+-- | destructor akin to maybe
+first1                  :: b -> (a -> b) -> First1 a -> b
+first1 def _ None       = def
+first1 _   f (First1 x) = f x
+
+instance Semigroup (First1 a) where
+  None         <> r    = r
+  l@(First1 _) <> None = l
+  (First1 _)   <> (First1 _) = error "First1, two First1's this should not happen."
+
 
 -- | For each bounded vertex (represented by their ID) the outgoing halfedge, and the
 -- half-edge starting from the unbounded vertex (if it exists).
 type FaceEdges plane = ( NonEmpty (VertexID, LEEdge plane)
-                       , First (LEEdge plane)
-                       ) -- TODO: there really should be only one
+                       , First1 (LEEdge plane)
+                       )
 
 -- |
 --
@@ -198,17 +202,15 @@ faceToEdges face = case toNonEmpty face of
     manyVertices = ifoldMap1 computEdge face
     -- | Compute the outgoing edge from u to
     computEdge i u@(h,uIdx,up,uDefs) =
-      let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n) in
-        case F.toList $ Set.delete h (uDefs `Set.intersection` vDefs) of
-          [h'] -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), None )
-                  -- bounded edge from u to v with h' on the right
-          []   -> let hu = undefined -- TODO
-                      hv = undefined
-                  in ( NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
-                     , First1 $ Edge vIdx h hv
-                     )
+      let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n)
+          EdgeDefs mh' hu hv = extractEdgeDefs h up uDefs vp vDefs
+      in case mh' of
+        Just h' -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), None )
+                   -- bounded edge from u to v with h' on the right
+        Nothing -> ( NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
+                   , First1 $ Edge vIdx h hv
+                   )
                   -- unbounded edge from u to v_infty, and from v_infty to v
-          _    -> error "computEdge: degeneracy, u and v have more than two planes in common!"
 
 -- | compute the face edges of the face of h, when v is the only vertex incident to h.
 oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
@@ -233,15 +235,65 @@ oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
                       Just xs -> xs
                       _       -> error "oneVertex. Absurd, there should be at least 3 definers"
 
-
 -- | Compute the edges of the face incident to h, when there are only two vertices
 -- incident to that face.
 --
 -- more or less a special case of the manyFaces scenario, in which we don't know
 -- the if edge should be oriented from u to v or from v to u.
-twoVertices     :: IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
-twoVertices u v = undefined
+twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+             => IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
+twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) = case mh' >>= intersectionLine' h of
+    Nothing      -> error "twoVertices. absurd, h and h' don't define an edge!?"
+    Just (_ :+ EdgeDefiners hl hr)
+      | h == hl   -> ( NonEmpty.fromList [ (ui, Edge vi h hr)
+                                         , (vi, Edge unboundedVertexId h hv)
+                                         ]
+                     , First1 $ Edge ui h hu
+                     )
+      | otherwise -> ( NonEmpty.fromList [ (vi, Edge ui h hl)
+                                         , (ui, Edge unboundedVertexId h hu)
+                                         ]
+                     , First1 $ Edge vi h hv
+                     )
   where
+    EdgeDefs mh' hu hv = extractEdgeDefs h up uDefs vp vDefs
+
+
+data EdgeDefs plane = EdgeDefs { common :: Maybe plane
+                               , uNeigh :: plane
+                               , vNeigh :: plane
+                               } deriving (Show,Eq)
+
+-- | Given a plane h, and vertices u (with its definers), and v (with its definers) that
+-- define an edge of h, computes:
+--
+-- - plane h' that is on the other side of the edge from u to v,
+-- - the plane hu incident only to u that is adjacent to h, and
+-- - the plane hv incident only to v that is adjacent to h.
+extractEdgeDefs                   :: Ord plane
+                                  => plane
+                                  -> Point 3 r -> VertexForm.Definers plane
+                                  -> Point 3 r -> VertexForm.Definers plane
+                                  -> EdgeDefs plane
+extractEdgeDefs h u uDefs v vDefs = case commons of
+    []   -> EdgeDefs Nothing   hu hv
+    [h'] -> EdgeDefs (Just h') hu hv
+    _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
+  where
+    commons = F.toList $ Set.delete h (uDefs `Set.intersection` vDefs)
+    uOnlies = F.toList $ uDefs Set.\\ vDefs
+    vOnlies = F.toList $ vDefs Set.\\ uDefs
+
+    hu = from' u uOnlies
+    hv = from' v vOnlies
+
+    from' _ = \case
+      []   -> error "extractEdgeDefs: absurd, too few definers"
+      [h'] -> h'
+      _    -> error "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex."
+             -- TODO we should either the neighbor of h in the order around the given
+             -- vertex here.
+
 
     -- -- test if the edge from v0 to v1 has h to its left or to its right. This determines
     -- -- if we have to create the unbounded edges (v0,v_infty) and (v_infty,v1) or
@@ -616,26 +668,8 @@ maxBy cmp a b = case cmp a b of
 
 --------------------------------------------------------------------------------
 
--- | ifoldMap1, stolen from indexed traversal
+-- | ifoldMap1. This will appear in indexedtraversal as of next release
 ifoldMap1   :: Semigroup m => (Int -> a -> m) -> NonEmptyV.NonEmptyVector a -> m
-ifoldMap1 f = undefined
-
-  -- NonEmptyV.ifoldr ()
-
-  -- ifoldrMap1 f (\i a m -> f i a <> m)
-
--- -- | Generalized 'ifoldr1'.
--- ifoldrMap1 :: (i -> a -> b) -> (i -> a -> b -> b) -> f a -> b
--- ifoldrMap1 f g xs =
---     appFromMaybe (ifoldMap1 (FromMaybe . h) xs) Nothing
---   where
---     h i a Nothing  = f i a
---     h i a (Just b) = g i a b
-
--- -- | Used for foldrMap1 and foldlMap1 definitions
--- newtype FromMaybe b = FromMaybe { appFromMaybe :: Maybe b -> b }
-
--- instance Semigroup (FromMaybe b) where
---     FromMaybe f <> FromMaybe g = FromMaybe (f . Just . g)
+ifoldMap1 f = fold1 . NonEmptyV.imap f
 
 --------------------------------------------------------------------------------
