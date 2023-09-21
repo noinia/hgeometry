@@ -15,14 +15,16 @@ import           Data.Ratio
 import           HGeometry.Number.Real.Rational
 import           Data.Serialize
 import           HGeometry
-import           HGeometry.Boundary
+import           HGeometry.Intersection
+import           HGeometry.Triangle
+-- import           HGeometry.Boundary
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone
-import           Hiraffe.Graph
+-- import           Hiraffe.Graph
 import           Paths_hgeometry
 import           System.IO.Unsafe
-import           Test.Hspec
+-- import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
@@ -80,9 +82,19 @@ instance Arbitrary (SimplePolygon (Point 2 Rational)) where
     p <- elements allSimplePolygons'
     n <- chooseInt (0, numVertices p-1)
     pure $ rotateLeft n p
+  shrink p
+    | isTriangle p = simplifyP p
+    | otherwise = cutEars p ++ simplifyP p
+
+instance Arbitrary (SimplePolygon (Point 2 Double)) where
+  arbitrary = do
+    p <- elements allSimplePolygons
+    n <- chooseInt (0, numVertices p-1)
+    pure $ rotateLeft n p
   -- shrink p
   --   | isTriangle p = simplifyP p
   --   | otherwise = cutEars p ++ simplifyP p
+
 
 instance Arbitrary (SimplePolygon (Point 2 (RealNumber (p::Nat)))) where
   arbitrary = over (vertices.coordinates) realToFrac
@@ -149,30 +161,27 @@ gcdPoint p = realToFrac t
     lst = concatMap (\(Point2 x y) -> [denominator x, denominator y]) vs
     t = foldl1 gcd lst
 
-
-{-
-cutEarAt     :: SimplePolygon (Point 2 Rational) -> Int -> SimplePolygon (Point 2 Rational)
-cutEarAt p n = unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
+-- remove vertex i, thereby dropping a vertex
+cutEarAt      :: SimplePolygon (Point 2 Rational) -> Int -> SimplePolygon (Point 2 Rational)
+cutEarAt pg i = uncheckedFromCCWPoints vs
   where
-    vs = p^..outerBoundary
+    vs = ifoldrOf outerBoundary (\j v vs' -> if i == j then vs' else v:vs') [] pg
 
 cutEars :: SimplePolygon (Point 2 Rational) -> [SimplePolygon (Point 2 Rational)]
-cutEars p | isTriangle p = []
-cutEars p = map (cutEarAt p) ears
+cutEars pg | isTriangle pg = []
+           | otherwise     = [ cutEarAt pg i | i <- [0 .. (n -1)], isEar i ]
   where
-    ears =
-      [ n
-      | n <- [0 .. F.length vs-1]
-      , let prev = CV.index vs (n-1)
-            cur  = CV.index vs n
-            next = CV.index vs (n+1)
-            triangle = Triangle prev cur next
-      , ccw prev cur next == CCW -- left turn.
-      , CV.all (\pt -> pt `elem` [prev,cur,next] || not (onTriangle (_core pt) triangle)) vs
-      ]
-    vs = p^.outerBoundaryVector
+    n = numVertices pg
+    isEar i = let prev = pg^.outerBoundaryVertexAt ((i-1) `mod` n)
+                  cur  = pg^.outerBoundaryVertexAt i
+                  nxt  = pg^.outerBoundaryVertexAt ((i+1) `mod` n)
+                  triangle = Triangle prev cur nxt
+              in ccw prev cur nxt == CCW -- left turn.
+                 &&
+                 allOf outerBoundary
+                       (\pt -> pt `elem` [prev,cur,nxt] || not (pt `intersects` triangle)) pg
 
--}
+isTriangle pg = numVertices pg == 3
 
 instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) where
   arbitrary = do
