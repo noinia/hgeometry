@@ -26,7 +26,7 @@ import           System.Random.Stateful
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===)
-                                 , (==>), counterexample, (.||.), elements
+                                 , (==>), counterexample, elements
                                  )
 import           Test.QuickCheck.Instances ()
 
@@ -75,8 +75,10 @@ spec = describe "Convex Polygon tests" $ do
           \(convex :: ConvexPolygon (Point 2 Rational)) ->
             let n = numVertices convex
             in forAll (choose (0, n-1)) $ \i ->
-              case inPolygon (convex^.outerBoundaryVertexAt i) convex of
-                OnBoundaryEdge j -> j === i .||. j == ((i+1) `mod` n)
+              let v = (convex^.outerBoundaryVertexAt i) in
+              case inPolygon v convex of
+                OnBoundaryEdge j -> counterexample (show $ (j,v)) $
+                                    v `onSegment` (convex^.outerBoundaryEdgeSegmentAt j)
                 res              -> counterexample (show res) False
 
         -- Check that all edge points are considered to be OnBoundary.
@@ -84,7 +86,10 @@ spec = describe "Convex Polygon tests" $ do
           \(convex :: ConvexPolygon (Point 2 Rational), ZeroToOne r) ->
             forAll (elements $ itoListOf outerBoundaryEdgeSegments convex) $ \(i,e) ->
               let pt = interpolate r e
-              in inPolygon pt convex === OnBoundaryEdge i
+              in case inPolygon pt convex of
+                   OnBoundaryEdge j -> counterexample (show (i,j,pt)) $
+                                       pt `onSegment` (convex^.outerBoundaryEdgeSegmentAt j)
+                   res              -> counterexample (show res) False
 
         -- Check that inConvex matches inPolygon inside the bounding box.
         prop "inConvex pt convex == inPolygon pt convex" $

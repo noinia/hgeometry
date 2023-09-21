@@ -250,8 +250,8 @@ inConvex :: ( ConvexPolygon_ convexPolygon point r
          => queryPoint -> convexPolygon
          -> PointLocationResultWith (VertexIx convexPolygon)
 inConvex (view asPoint -> q) poly
-  | q `intersects` leftEdge  = OnBoundaryEdge 0
-  | q `intersects` rightEdge = OnBoundaryEdge n
+  | q `intersects` leftEdge  = OnBoundaryEdge n
+  | q `intersects` rightEdge = OnBoundaryEdge 0
   | otherwise                = worker 1 n
   where
     n         = numVertices poly - 1

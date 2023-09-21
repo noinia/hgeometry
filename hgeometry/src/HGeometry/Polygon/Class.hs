@@ -13,7 +13,7 @@ module HGeometry.Polygon.Class
   ( HasOuterBoundary(..)
   , signedArea2X
   , minimumVertexBy, maximumVertexBy
-  , outerBoundaryEdgeSegments
+  , outerBoundaryEdgeSegmentAt, outerBoundaryEdgeSegments
   , outerBoundaryWithNeighbours
 
   , Polygon_(..)
@@ -161,6 +161,18 @@ signedArea2X      :: (Num r, HasOuterBoundary simplePolygon
                      ) => simplePolygon -> r
 signedArea2X poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
                         | (p,q) <- poly ^..outerBoundaryEdges ]
+
+-- | Get the line segment representing the edge that has the given vertex as its starting edge
+--
+-- running time: \(O(1)\)
+outerBoundaryEdgeSegmentAt   :: ( HasOuterBoundary polygon
+                                , Vertex polygon ~ point
+                                , Point_ point 2 r
+                                )
+                             => VertexIx polygon
+                             -> IndexedGetter (VertexIx polygon) polygon
+                                                                 (ClosedLineSegment point)
+outerBoundaryEdgeSegmentAt i = outerBoundaryEdgeAt i. to (uncurry ClosedLineSegment)
 
 -- | Get the line segments representing the outer boundary of the polygon.
 outerBoundaryEdgeSegments :: forall polygon point r.
