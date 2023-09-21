@@ -22,6 +22,12 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
+-- see also the test-with-ipe/test/VoronoiDiagram/VornoiSpec tests
+--
+
+-- TODO: I think fromVertexForm should also work for singleton inputs; i.e. just three planes intersecting in a vertex . That would be a good first testcase I think.
+-- for the rest we may watn to use the VoronoiDiagram tests to generate the edges of the VD
+
 spec :: Spec
 spec = describe "lowerEnvelope tests" $ do
          prop "intersection on plane" $ \h1 h2 (h3 :: Plane R) ->

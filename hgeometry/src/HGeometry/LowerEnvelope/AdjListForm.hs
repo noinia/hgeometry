@@ -147,6 +147,9 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
                        in Seq.singleton ( j
                                         , Vertex v defs mempty
                                         , [ (h,j,v,defs) | h <- F.toList defs ]
+                                        -- TODO: conceivably, we could delete the h from the
+                                        -- defs here already? instead of in the various delete h
+                                        -- cases
                                         )
 
     definingPlane (h,_,_,_) = h
@@ -177,19 +180,13 @@ type FaceEdges plane = ( NonEmpty (VertexID, LEEdge plane)
                        , First1 (LEEdge plane)
                        )
 
--- |
+-- | Given a convex face h (represented by its bounded vertices in CCW order along the
+-- face; starting with the leftmost one), compute the half-edges that bound the face
+-- (i.e. that have h to their left). The result is a vector with for each bounded vertex
+-- (represented by their ID) the outgoing halfedge, and the half-edge starting from the
+-- unbounded vertex (if it exists).
 --
--- Given a convex face h (represented by its bounded vertices in CCW order along the face;
--- starting with the leftmost one), compute the half-edges that bound the face (i.e. that
--- have h to their left). The result is a vector with for each bounded vertex (represented
--- by their ID) the outgoing halfedge, and the half-edge starting from the unbounded
--- vertex (if it exists).
---
---
--- O(n)
---
---
--- computes for each vertex along the face the edge
+-- running time: \(O(n)\)   (assuming general position)
 faceToEdges      :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                  => IntermediateFace plane -> FaceEdges plane
 faceToEdges face = case toNonEmpty face of
@@ -294,36 +291,14 @@ extractEdgeDefs h u uDefs v vDefs = case commons of
              -- TODO we should either the neighbor of h in the order around the given
              -- vertex here.
 
-
-    -- -- test if the edge from v0 to v1 has h to its left or to its right. This determines
-    -- -- if we have to create the unbounded edges (v0,v_infty) and (v_infty,v1) or
-    -- -- (v1,v_infty) and (v_infty,v0)
-    -- twoVertices (_,j,u,udefs) = undefined
-    --   -- case computeHSide of
-    --   --   Left h3  -> ( [ mkEdge i unboundedVertexId h1
-    --   --                 , mkEdge j i                 h3 -- edge from v0 to v1
-    --   --                 ]
-    --   --               , Just $ edgeTo j           h2
-    --   --               )
-    --   --   Right h3 -> ( [ mkEdge i j                 h3 -- edge from v1 to v0
-    --   --                 , mkEdge j unboundedVertexId h2
-    --   --                 ]
-    --   --               , Just $ edgeTo i           h1
-    --   --               )
-    --   where
-    --     computeHSide = undefined
-    --     h1 = undefined
-    --     h2 = undefined
-
-
 --------------------------------------------------------------------------------
 
 -- TODO: move to the definition below
 data IntermediateVertex' plane =
   IntermediateVertex' { ivPlane :: plane
-                      , ivId :: {-# UNPACK #-} !VertexID
-                      , ivLoc :: Point 3 (NumType plane)
-                      , ivDefs :: VertexForm.Definers plane
+                      , ivId    :: {-# UNPACK #-} !VertexID
+                      , ivLoc   :: Point 3 (NumType plane)
+                      , ivDefs  :: VertexForm.Definers plane
                       , ivEdges :: Seq.Seq (LEEdge plane)
                       }
 
@@ -337,10 +312,12 @@ type IntermediateVertex plane =
 -- running time: \(O(n \log n)\)
 sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r)
                        => NonEmptyV.NonEmptyVector (IntermediateVertex plane)
-                       -> NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+                       -> IntermediateFace plane
 sortAlongBoundary face = case mv0 of
     Nothing            -> face -- face only has one vertex, so it is already sorted
     Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
+    -- TODO: I guess that in degenerate situations, there now may be consecutive
+    -- points (vertices) at the same location. We should group those and get rid of them?
   where
     -- we find the leftmost vertex v1 of the face (pick lexicographically when there are
     -- multiple), and then compute its predecessor v0 in the order along the boundary of

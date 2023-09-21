@@ -11,14 +11,14 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.PointAndVector
   ( LinePV(..)
-  , onLine
+  , onLine, onLine2
   , isIdenticalTo
   , HasSupportingLine(..)
   , fromLinearFunction
   , toLinearFunction
   , SideTestUpDown(..), OnSideUpDownTest(..)
   , liesAbove, liesBelow
-  , SideTest, onSide
+  , SideTest(..), onSide
 
   , bisector
   , perpendicularTo, isPerpendicularTo

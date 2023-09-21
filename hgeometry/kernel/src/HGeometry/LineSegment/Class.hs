@@ -43,7 +43,7 @@ import HGeometry.Vector
 -- not sure why I made this a separate class again...
 
 -- | Class that expresses that we can test if the segment contains a point
-class OnSegment lineSegment where
+class OnSegment lineSegment d | lineSegment -> d where
   -- | Test if a point lies on a line segment.
   --
   -- As a user, you should typically just use 'intersects' instead.
@@ -219,5 +219,5 @@ instance ( OpenLineSegment_ segment point
          , Monoid extra
          ) => OpenLineSegment_ (segment :+ extra) point where
 
-instance OnSegment lineSegment =>  OnSegment (lineSegment :+ extra) where
+instance OnSegment lineSegment d =>  OnSegment (lineSegment :+ extra) d where
   onSegment q (s :+ _) = q `onSegment` s

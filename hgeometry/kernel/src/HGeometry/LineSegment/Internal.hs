@@ -260,51 +260,108 @@ instance ( Fractional r, Ord r
 
 -- type Intersection (Point d r) (ClosedLineSegment point)
 
-instance ( OnSegment (LineSegment endPoint point)
+instance ( OnSegment (LineSegment endPoint point) d
          , Point_ point d r
          , Fractional r, Ord r
-         -- , OptVector_ d r, OptMetric_ d r
          ) => Point d r `HasIntersectionWith` LineSegment endPoint point where
   -- >>> test `intersects` testseg
   -- True
   intersects = onSegment
 
-instance ( -- OptCVector_ 2 point
-         -- ,
-           Point_ point d r
-         , Fractional r
-         ) => OnSegment (ClosedLineSegment point) where
-  onSegment (view asPoint -> q) seg =
-    case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
-      Nothing     -> False
-      Just lambda -> 0 <= lambda && lambda <= 1
+instance {-# OVERLAPPING #-}
+         ( OnSegment (LineSegment endPoint point) 2
+         , Point_ point 2 r
+         , Num r, Ord r
+         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         ) => Point 2 r `HasIntersectionWith` LineSegment endPoint point where
+  -- >>> test `intersects` testseg
+  -- True
+  intersects = onSegment2
 
-instance ( -- OptCVector_ 2 point
-         -- ,
-           Point_ point d r
-         , Fractional r
-         ) => OnSegment (OpenLineSegment point) where
-  onSegment (view asPoint -> q) seg =
-    case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
-      Nothing     -> False
-      Just lambda -> 0 < lambda && lambda < 1
 
-instance ( -- OptCVector_ 2 (AnEndPoint point)
-         -- ,
-           Point_ point d r
-         , Fractional r
-         ) => OnSegment (LineSegment AnEndPoint point) where
-  onSegment (view asPoint -> q) seg =
-      case (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start)) of
-        Nothing     -> False
-        Just lambda -> compare' (seg^.startPoint.to endPointType) 0      lambda
-                    && compare' (seg^.endPoint.to endPointType)   lambda 1
-    where
-      compare' = \case
-        Open   -> (<)
-        Closed -> (<=)
+propOnClosedSegment2Consistent       :: (Ord r, Fractional r)
+                                     => Point 2 r -> ClosedLineSegment (Point 2 r) -> Bool
+propOnClosedSegment2Consistent q seg = onSegment2 q seg == onClosedSegmentD q seg
 
--- FIXME: In R^2 we can give an implementation that just uses Num
+propOnOpenSegment2Consistent       :: (Ord r, Fractional r)
+                                   => Point 2 r -> OpenLineSegment (Point 2 r) -> Bool
+propOnOpenSegment2Consistent q seg = onSegment2 q seg == onOpenSegmentD q seg
+
+propOnSegment2Consistent       :: (Ord r, Fractional r)
+                               => Point 2 r -> LineSegment AnEndPoint (Point 2 r) -> Bool
+propOnSegment2Consistent q seg = onSegment2 q seg == onSegmentD q seg
+
+
+-- | Implementation of OnSegment for 2 dimensional segments that only uses Ord and Num r
+-- constraints.
+--
+onSegment2                          :: ( Point_ point 2 r, Point_ point' 2 r, Ord r, Num r
+                                       , LineSegment_ lineSegment point')
+                                    => point -> lineSegment -> Bool
+onSegment2 q seg@(LineSegment_ s t) =
+    onLine2 q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) RightSide
+                      && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) LeftSide
+  where
+    supLine = LinePV (s^.asPoint) (t .-. s)
+    l = perpendicularTo supLine
+    r = perpendicularTo $ LinePV (t^.asPoint) (t .-. s)
+
+    -- shouldBe t a side is essentially a == side, but in case the type is open
+    -- we alos allow to be on the line.
+    shouldBe et a side = case et of
+      Open   -> a == side
+      Closed -> a == side || a == OnLine
+
+instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
+         ) => OnSegment (ClosedLineSegment point) 2 where
+  onSegment = onSegment2
+instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
+         ) => OnSegment (OpenLineSegment point) 2 where
+  onSegment = onSegment2
+instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
+         ) => OnSegment (LineSegment AnEndPoint point) 2 where
+  onSegment = onSegment2
+
+instance ( Point_ point d r, Fractional r) => OnSegment (ClosedLineSegment point) d where
+  onSegment = onClosedSegmentD
+
+instance ( Point_ point d r, Fractional r) => OnSegment (OpenLineSegment point) d where
+  onSegment = onOpenSegmentD
+
+instance ( Point_ point d r, Fractional r) => OnSegment (LineSegment AnEndPoint point) d where
+  onSegment = onSegmentD
+
+-- | Implementation of onSegment for d-dimensional segments. The function should
+onSegmentDWith                           :: ( Point_ point d r
+                                            , Point_ point' d r
+                                            , LineSegment_ lineSegment point'
+                                            , Fractional r, Eq r
+                                            )
+                                         => (r -> Bool)
+                                         -> point -> lineSegment -> Bool
+onSegmentDWith f (view asPoint -> q) seg = maybe False f mLambda
+  where
+    mLambda = (q .-. (seg^.start.asPoint)) `scalarMultiple` ((seg^.end) .-. (seg^.start))
+
+onClosedSegmentD :: ( Point_ point d r, Point_ point' d r, Fractional r, Ord r
+                    , ClosedLineSegment_ lineSegment point'
+                    ) => point -> lineSegment -> Bool
+onClosedSegmentD = onSegmentDWith $ \lambda -> 0 <= lambda && lambda <= 1
+
+onOpenSegmentD :: ( Point_ point d r, Point_ point' d r, Fractional r, Ord r
+                  , OpenLineSegment_ lineSegment point'
+                  ) => point -> lineSegment -> Bool
+onOpenSegmentD = onSegmentDWith $ \lambda -> 0 <= lambda && lambda <= 1
+
+onSegmentD      :: ( Point_ point d r, Point_ point' d r, Fractional r, Ord r
+                   ) => point -> LineSegment AnEndPoint point' -> Bool
+onSegmentD q seg = onSegmentDWith f q seg
+  where
+    f lambda = compare' (seg^.startPoint.to endPointType) 0      lambda
+            && compare' (seg^.endPoint.to endPointType)   lambda 1
+    compare' = \case
+      Open   -> (<)
+      Closed -> (<=)
 
 
 -- instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r

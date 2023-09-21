@@ -85,11 +85,31 @@ consistent results
 
 * TODO 3d-lower-envelope/convex hull
 ** DONE naive
-** TODO point-location by sweeping scheme
+
+** TODO Set3 type to clean up and/or speed up the fromVertexForm code ?
+
+I wonder if we can clean up and/or speed up the fromVertexForm code by
+having a specific Set3 type that stores at least three elements. Since
+every vertex should have at least (and probably often also exactly)
+three definers, this could clean up some of the code. (We have a few
+"there should be at least three items here" cases).
+
+Still not entirely sure that will help stufficiently though. Since we
+are sometimes relying on sorting etc, to be efficient.
+
+e.g. if we have three definers, and we delete h from it (where h is
+guaranteed to appear: )
+
+
+** TODO planar separators
+
+** TODO batch point-location by sweeping scheme
+
 
 * TODO Convex polygons
 ** DONE binary search extremal direction
 ** TODO point in polygon
+*** TODO almost done; but needs some fractional -> num work in point on line segment
 
 * TODO data structures
 ** TODO kd-tree
