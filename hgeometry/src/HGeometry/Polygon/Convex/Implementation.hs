@@ -17,6 +17,7 @@ module HGeometry.Polygon.Convex.Implementation
   , isStrictlyConvex, isConvex
   , verifyConvex
   , maxInDirection
+  , inConvex
   ) where
 
 import Control.DeepSeq (NFData)
@@ -232,7 +233,7 @@ findMaxWith cmp pg = pg^.outerBoundaryVertexAt (worker 0 n)
 
 
 --------------------------------------------------------------------------------
--- inConvex
+-- * inConvex
 
 -- 1. Check if p is on left edge or right edge.
 -- 2. Do binary search:
@@ -240,16 +241,17 @@ findMaxWith cmp pg = pg^.outerBoundaryVertexAt (worker 0 n)
 -- 3. Check if p is on segment n,n+1
 -- 4. Check if p is in triangle 0,n,n+1
 
--- | \( O(\log n) \)
---   Check if a point lies inside a convex polygon, on the boundary, or outside of the
+-- | Check if a point lies inside a convex polygon, on the boundary, or outside of the
 --   convex polygon.
+--
+-- \( O(\log n) \)
 inConvex :: ( ConvexPolygon_ convexPolygon point r
-            , Point_ queryPoint 2 r, Fractional r, Ord r)
+            , Point_ queryPoint 2 r, Num r, Ord r)
          => queryPoint -> convexPolygon
-         -> PointLocationResult
+         -> PointLocationResultWith (VertexIx convexPolygon)
 inConvex (view asPoint -> q) poly
-  | q `intersects` leftEdge  = OnBoundary
-  | q `intersects` rightEdge = OnBoundary
+  | q `intersects` leftEdge  = OnBoundaryEdge 0
+  | q `intersects` rightEdge = OnBoundaryEdge n
   | otherwise                = worker 1 n
   where
     n         = numVertices poly - 1
@@ -259,14 +261,17 @@ inConvex (view asPoint -> q) poly
     worker a b
       | a+1 == b                        =
         if q `onSegment` ClosedLineSegment (point a) (point b)
-          then OnBoundary
+          then OnBoundaryEdge a
           else
             if q `intersects` Triangle point0 (point a) (point b)
-              then Inside
-              else Outside
+              then StrictlyInside
+              else StrictlyOutside
       | ccw point0 (point c) q == CCW = worker c b
       | otherwise                     = worker a c
       where c = (a+b) `div` 2
 
     point x = poly^.outerBoundaryVertexAt x.asPoint
--- FIXME: we sould need only Num here
+
+instance ConvexPolygon_ (ConvexPolygonF f point) point r
+         => HasInPolygon (ConvexPolygonF f point) point r where
+  inPolygon = inConvex

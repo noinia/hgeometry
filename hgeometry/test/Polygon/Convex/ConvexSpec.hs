@@ -94,18 +94,18 @@ spec = describe "Convex Polygon tests" $ do
             forAll (arbitraryPointInBoundingBox bb) $ \pt ->
               inPolygon pt convex === inPolygon pt s
 
---   -- Points that lie on straight lines between vertices are a corner case.
---   -- Make sure that they work as expected.
---   specify "inConvex inner edge convex == inPolygon pt convex" $
---     property $ \(convex :: ConvexPolygon () Rational) ->
---       let s = convex^.simplePolygon in
---       forAll (choose (0, size s-1)) $ \a ->
---       forAll (choose (0, size s-1)) $ \b ->
---       size s > 3 && abs (a-b) >= 2 && abs (a-b) /= size s-1 ==>
---       let aPt = s ^. outerVertex a.core
---           bPt = s ^. outerVertex b.core
---           cPt = Point $ lerp 0.5 (coerce aPt) (coerce bPt)
---       in inConvex cPt convex === Inside
+        -- Points that lie on straight lines between vertices are a corner case.
+        -- Make sure that they work as expected.
+        prop "inConvex inner edge convex == inPolygon pt convex" $
+          \(convex :: ConvexPolygon (Point 2 Rational)) ->
+              let s = toSimplePolygon convex in
+              forAll (choose (0, numVertices s-1)) $ \a ->
+              forAll (choose (0, numVertices s-1)) $ \b ->
+              numVertices s > 3 && abs (a-b) >= 2 && abs (a-b) /= numVertices s-1 ==>
+              let aPt = s ^. outerBoundaryVertexAt a
+                  bPt = s ^. outerBoundaryVertexAt b
+                  cPt = aPt .+^ (0.5 *^ (bPt .-. aPt))
+              in inPolygon cPt convex === StrictlyInside
 
 --   -- Verify that convexPolygon always returns convex polygons.
 --   specify "verifyConvex (convexPolygon p)" $

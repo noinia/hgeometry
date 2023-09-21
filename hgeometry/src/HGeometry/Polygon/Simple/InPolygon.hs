@@ -1,3 +1,4 @@
+{-# LANGUAGE DefaultSignatures #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Simple.InPolygon
@@ -9,7 +10,8 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.InPolygon
-  ( inPolygon
+  ( HasInPolygon(..)
+  , inSimplePolygon
   -- , insidePolygon
   -- , onBoundary
   ) where
@@ -54,6 +56,24 @@ instance Semigroup (AboveCount seg) where
 instance Monoid (AboveCount seg) where
   mempty = NumStrictlyAbove 0
 
+-- | Types that implement a point-in-polygon test.
+class HasInPolygon polygon point r | polygon -> point, point -> r where
+  -- | Check if a point lies inside a polygon, on the boundary, or outside of the
+  -- polygon. If the point lies on the boundary we also return an edge e containing the
+  -- point (identified by the vertex v so that e follows v in the CCW order along the
+  -- boundary). No guarantees are given about which edge is returned if the query point
+  -- lies on multiple edges (i.e. when it coincides with a vertex.)
+  inPolygon :: ( Num r, Ord r, Point_ queryPoint 2 r)
+            => queryPoint -> polygon -> PointLocationResultWith (VertexIx polygon)
+  default inPolygon :: ( Num r, Ord r, Point_ point 2 r, Point_ queryPoint 2 r
+                       , SimplePolygon_ polygon point r
+                       )
+                    => queryPoint -> polygon
+                    -> PointLocationResultWith (VertexIx polygon)
+  inPolygon = inSimplePolygon
+
+-- rename the thing below to InSimplePolygon?
+
 -- | Check if a point lies inside a polygon, on the boundary, or
 -- outside of the polygon. If the point lies on the boundary we also
 -- return an edge e containing the point (identified by the vertex v
@@ -79,13 +99,13 @@ instance Monoid (AboveCount seg) where
 -- OnBoundaryEdge 1
 -- >>> Point2 20 5 `inPolygon` simplePoly
 -- StrictlyOutside
-inPolygon        :: forall queryPoint simplePolygon point r.
-                    ( Num r, Ord r, Point_ point 2 r, Point_ queryPoint 2 r
-                    , SimplePolygon_ simplePolygon point r
-                    )
-                 => queryPoint -> simplePolygon
-                 -> PointLocationResultWith (VertexIx simplePolygon)
-q `inPolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
+inSimplePolygon        :: forall queryPoint simplePolygon point r.
+                          ( Num r, Ord r, Point_ point 2 r, Point_ queryPoint 2 r
+                          , SimplePolygon_ simplePolygon point r
+                          )
+                       => queryPoint -> simplePolygon
+                       -> PointLocationResultWith (VertexIx simplePolygon)
+q `inSimplePolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
                      OnEdge s                       -> OnBoundaryEdge s
                      NumStrictlyAbove m | odd m     -> StrictlyInside
                                         | otherwise -> StrictlyOutside

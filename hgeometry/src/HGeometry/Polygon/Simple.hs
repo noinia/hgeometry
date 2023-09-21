@@ -17,7 +17,8 @@ module HGeometry.Polygon.Simple
   , SimplePolygonF
   , toCyclic
   , VertexContainer
-  , inPolygon
+  , HasInPolygon(..)
+  , inSimplePolygon
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -175,10 +176,13 @@ _testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
 
 --------------------------------------------------------------------------------
 
+instance SimplePolygon_ (SimplePolygonF f point) point r
+         => HasInPolygon (SimplePolygonF f point) point r
+
 instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Num r, Ord r
          ) => HasIntersectionWith (Point 2 r) (SimplePolygonF f point) where
-  q `intersects` pg = q `inPolygon` pg /= StrictlyOutside
+  q `intersects` pg = q `inSimplePolygon` pg /= StrictlyOutside
 
 type instance Intersection (Point 2 r) (SimplePolygonF f point) = Maybe (Point 2 r)
 
