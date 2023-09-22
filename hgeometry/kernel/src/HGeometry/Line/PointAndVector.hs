@@ -11,7 +11,6 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.PointAndVector
   ( LinePV(..)
-  , onLine, onLine2
   , isIdenticalTo
   , HasSupportingLine(..)
   , fromLinearFunction
@@ -138,19 +137,14 @@ instance {-# OVERLAPPING #-} (Ord r, Num r) => Eq (LinePV 2 r) where
 -- instance (Eq r, Fractional r) => Eq (LinePV d r) where
 --  l@(LinePV p _) == m = l `isParallelTo` m && p `onLine` m
 
+instance (Has_ Metric_ d r, Fractional r, Eq (Vector d r)) => HasOnLine (LinePV d r) d where
+  onLine = onLineD
 
 -- | Test if point q lies on line l
---
--- >>> Point2 0 0 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 1 0)
--- True
--- >>> Point2 10 10 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
--- True
--- >>> Point2 10 5 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
--- False
-onLine :: ( Point_ point d r, Has_ Metric_ d r
-          , Fractional r, Eq r, Eq (Vector d r)
-          ) => point -> LinePV d r -> Bool
-onLine q (LinePV p v) = let q' = q^.asPoint
+onLineD :: ( Point_ point d r, Has_ Metric_ d r
+           , Fractional r, Eq r, Eq (Vector d r)
+           ) => point -> LinePV d r -> Bool
+onLineD q (LinePV p v) = let q' = q^.asPoint
                         in p == q' || (q' .-. p) `isScalarMultipleOf` v
 
 
@@ -182,6 +176,9 @@ isParallelTo2 (LinePV _ (Vector2 ux uy))
               (LinePV _ (Vector2 vx vy)) = denom == 0
     where
       denom = vy * ux - vx * uy
+
+instance {-# OVERLAPPING #-} Ord r => HasOnLine (LinePV 2 r) 2 where
+  onLine = onLine2
 
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2                  :: (Ord r, Num r, Point_ point 2 r) => point -> LinePV 2 r -> Bool

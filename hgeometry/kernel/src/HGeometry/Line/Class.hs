@@ -13,11 +13,13 @@ module HGeometry.Line.Class
   , Line2_
   , lineThrough
   , verticalLine, horizontalLine
+  , HasOnLine(..)
   ) where
 
 import HGeometry.HyperPlane.Class
 import HGeometry.Point.Class
 import HGeometry.Point.PointF
+import HGeometry.Properties
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -62,6 +64,22 @@ verticalLine x = fromPointAndVec (Point $ Vector2 x 0) (Vector2 0 1)
 horizontalLine   :: forall r line. (Line_ line 2 r, Num r)
                  => r -> line
 horizontalLine y = fromPointAndVec (Point $ Vector2 0 y) (Vector2 1 0)
+
+
+class HasOnLine line d | line -> d where
+  -- | Test if the point lies on the line
+  --
+  -- >>> Point2 0 0 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 1 0)
+  -- True
+  -- >>> Point2 10 10 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
+  -- True
+  -- >>> Point2 10 5 `onLine` lineThrough @(LinePV 2 Double) origin (Point2 2 2)
+  -- False
+  onLine :: ( Point_ point d r, Num r, Eq r
+            , r ~ NumType line, d ~ Dimension line
+            ) => point -> line -> Bool
+
+
 
 --}
 

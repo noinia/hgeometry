@@ -15,7 +15,7 @@ module HGeometry.LineSegment.Class
   , OpenLineSegment_
 
   , interpolate
-  , OnSegment(..)
+  , HasOnSegment(..)
 
   , HasStart(..), HasEnd(..)
   , HasStartPoint(..), HasEndPoint(..)
@@ -43,7 +43,7 @@ import HGeometry.Vector
 -- not sure why I made this a separate class again...
 
 -- | Class that expresses that we can test if the segment contains a point
-class OnSegment lineSegment d | lineSegment -> d where
+class HasOnSegment lineSegment d | lineSegment -> d where
   -- | Test if a point lies on a line segment.
   --
   -- As a user, you should typically just use 'intersects' instead.
@@ -219,5 +219,5 @@ instance ( OpenLineSegment_ segment point
          , Monoid extra
          ) => OpenLineSegment_ (segment :+ extra) point where
 
-instance OnSegment lineSegment d =>  OnSegment (lineSegment :+ extra) d where
+instance HasOnSegment lineSegment d =>  HasOnSegment (lineSegment :+ extra) d where
   onSegment q (s :+ _) = q `onSegment` s

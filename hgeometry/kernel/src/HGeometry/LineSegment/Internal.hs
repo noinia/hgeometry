@@ -37,6 +37,7 @@ import HGeometry.Vector
 import Text.Read
 
 -- import HGeometry.Number.Real.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -108,25 +109,21 @@ _LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' 
 _LineSegmentInterval = iso (\(MkLineSegment i) -> i) MkLineSegment
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => HasStart (LineSegment endPoint point) point where
   start = _LineSegmentInterval.start
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          ) => HasStartPoint (LineSegment endPoint point) (endPoint point) where
   startPoint = _LineSegmentInterval.startPoint
 
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => HasEnd (LineSegment endPoint point) point where
   end = _LineSegmentInterval.end
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          ) => HasEndPoint (LineSegment endPoint point) (endPoint point) where
   endPoint = _LineSegmentInterval.endPoint
 
@@ -134,32 +131,23 @@ type instance StartPointOf (LineSegment endPoint point) = endPoint point
 type instance EndPointOf   (LineSegment endPoint point) = endPoint point
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          ) => IntervalLike_ (LineSegment endPoint point) point where
   mkInterval = LineSegment
 
 instance ( IxValue (endPoint point) ~ point
-         -- , OptCVector_ 2 (endPoint point)
          , EndPoint_ (endPoint point)
          , Point_ point (Dimension point) (NumType point)
          ) => LineSegment_ (LineSegment endPoint point) point where
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
-instance ( --OptCVector_ 2 (EndPoint Closed point)
---         ,
-         Point_ point (Dimension point) (NumType point)
+instance ( Point_ point (Dimension point) (NumType point)
          ) => ClosedLineSegment_ (ClosedLineSegment point) point where
 
-instance ( -- OptCVector_ 2 (EndPoint Open point)
---         ,
-         Point_ point (Dimension point) (NumType point)
+instance ( Point_ point (Dimension point) (NumType point)
          ) => OpenLineSegment_ (OpenLineSegment point) point where
 
-instance ( -- OptCVector_ 2 (endPoint point)
---         , OptCVector_ 2 (endPoint point')
---         ,
-          Traversable1 endPoint
+instance ( Traversable1 endPoint
          , Dimension point ~ Dimension point'
          , Point_ point  (Dimension point) (NumType point)
          , Point_ point' (Dimension point) (NumType point')
@@ -260,7 +248,7 @@ instance ( Fractional r, Ord r
 
 -- type Intersection (Point d r) (ClosedLineSegment point)
 
-instance ( OnSegment (LineSegment endPoint point) d
+instance ( HasOnSegment (LineSegment endPoint point) d
          , Point_ point d r
          , Fractional r, Ord r
          ) => Point d r `HasIntersectionWith` LineSegment endPoint point where
@@ -269,7 +257,7 @@ instance ( OnSegment (LineSegment endPoint point) d
   intersects = onSegment
 
 instance {-# OVERLAPPING #-}
-         ( OnSegment (LineSegment endPoint point) 2
+         ( HasOnSegment (LineSegment endPoint point) 2
          , Point_ point 2 r
          , Num r, Ord r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
@@ -278,20 +266,6 @@ instance {-# OVERLAPPING #-}
   -- True
   intersects = onSegment2
 
-
-propOnClosedSegment2Consistent       :: (Ord r, Fractional r)
-                                     => Point 2 r -> ClosedLineSegment (Point 2 r) -> Bool
-propOnClosedSegment2Consistent q seg = onSegment2 q seg == onClosedSegmentD q seg
-
-propOnOpenSegment2Consistent       :: (Ord r, Fractional r)
-                                   => Point 2 r -> OpenLineSegment (Point 2 r) -> Bool
-propOnOpenSegment2Consistent q seg = onSegment2 q seg == onOpenSegmentD q seg
-
-propOnSegment2Consistent       :: (Ord r, Fractional r)
-                               => Point 2 r -> LineSegment AnEndPoint (Point 2 r) -> Bool
-propOnSegment2Consistent q seg = onSegment2 q seg == onSegmentD q seg
-
-
 -- | Implementation of OnSegment for 2 dimensional segments that only uses Ord and Num r
 -- constraints.
 --
@@ -299,8 +273,8 @@ onSegment2                          :: ( Point_ point 2 r, Point_ point' 2 r, Or
                                        , LineSegment_ lineSegment point')
                                     => point -> lineSegment -> Bool
 onSegment2 q seg@(LineSegment_ s t) =
-    onLine2 q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) RightSide
-                      && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) LeftSide
+    onLine q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) RightSide
+                     && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) LeftSide
   where
     supLine = LinePV (s^.asPoint) (t .-. s)
     l = perpendicularTo supLine
@@ -313,22 +287,22 @@ onSegment2 q seg@(LineSegment_ s t) =
       Closed -> a == side || a == OnLine
 
 instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
-         ) => OnSegment (ClosedLineSegment point) 2 where
+         ) => HasOnSegment (ClosedLineSegment point) 2 where
   onSegment = onSegment2
 instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
-         ) => OnSegment (OpenLineSegment point) 2 where
+         ) => HasOnSegment (OpenLineSegment point) 2 where
   onSegment = onSegment2
 instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
-         ) => OnSegment (LineSegment AnEndPoint point) 2 where
+         ) => HasOnSegment (LineSegment AnEndPoint point) 2 where
   onSegment = onSegment2
 
-instance ( Point_ point d r, Fractional r) => OnSegment (ClosedLineSegment point) d where
+instance ( Point_ point d r, Fractional r) => HasOnSegment (ClosedLineSegment point) d where
   onSegment = onClosedSegmentD
 
-instance ( Point_ point d r, Fractional r) => OnSegment (OpenLineSegment point) d where
+instance ( Point_ point d r, Fractional r) => HasOnSegment (OpenLineSegment point) d where
   onSegment = onOpenSegmentD
 
-instance ( Point_ point d r, Fractional r) => OnSegment (LineSegment AnEndPoint point) d where
+instance ( Point_ point d r, Fractional r) => HasOnSegment (LineSegment AnEndPoint point) d where
   onSegment = onSegmentD
 
 -- | Implementation of onSegment for d-dimensional segments. The function should
@@ -351,7 +325,7 @@ onClosedSegmentD = onSegmentDWith $ \lambda -> 0 <= lambda && lambda <= 1
 onOpenSegmentD :: ( Point_ point d r, Point_ point' d r, Fractional r, Ord r
                   , OpenLineSegment_ lineSegment point'
                   ) => point -> lineSegment -> Bool
-onOpenSegmentD = onSegmentDWith $ \lambda -> 0 <= lambda && lambda <= 1
+onOpenSegmentD = onSegmentDWith $ \lambda -> 0 < lambda && lambda < 1
 
 onSegmentD      :: ( Point_ point d r, Point_ point' d r, Fractional r, Ord r
                    ) => point -> LineSegment AnEndPoint point' -> Bool

@@ -42,7 +42,7 @@ instance Arbitrary r => Arbitrary (EndPoint ep r) where
   arbitrary = EndPoint <$> arbitrary
 
 instance Arbitrary EndPointType where
-  arbitrary = toEnum <$> arbitrary
+  arbitrary = (\b -> if b then Open else Closed) <$> arbitrary
 
 instance Arbitrary r => Arbitrary (AnEndPoint r) where
   arbitrary = AnEndPoint <$> arbitrary <*> arbitrary

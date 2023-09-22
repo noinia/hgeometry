@@ -1,7 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PartialTypeSignatures #-}
 module HGeometry.LineSegmentSpec where
 
--- import Control.Lens
+import Control.Lens ((^.), IxValue)
 import Data.Ord (comparing)
 import HGeometry.Ext
 import HGeometry.Intersection
@@ -9,15 +10,14 @@ import HGeometry.Number.Real.Rational
 -- import Data.Vinyl
 -- import HGeometry.Boundary
 -- import HGeometry.Box
--- import HGeometry.Line
 import HGeometry.LineSegment
 -- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
 import HGeometry.Interval
-import HGeometry.Vector ()
+import HGeometry.Vector ((*^))
 import Test.Hspec.QuickCheck
 import Test.Hspec
-import Test.QuickCheck ((===), Arbitrary(..), suchThat)
+import Test.QuickCheck ((===), Arbitrary(..), suchThat, Property, counterexample)
 import Test.QuickCheck.Instances ()
 import HGeometry.Kernel.Instances ()
 
@@ -106,17 +106,76 @@ spec =
         (Point3 1 1 1 `intersects3` seg) `shouldBe` True
         (Point3 1 2 1 `intersects3` seg) `shouldBe` False
 
-      -- prop "onSegment2 same result as generic onSegment (quickheck; (mostly) false points)" $
-      --   \(q :: Point 2 R) (seg :: ClosedLineSegment (Point 2 R)) ->
-      --     q `onSegment` seg == q `onSegment2` seg
-      --     -- note: most of the points above will likely not lie on the segment
-      -- prop "onSegment2 same result as generic onSegment (quickheck ; true points)" $
-      --   \(lambda :: R) (seg :: ClosedLineSegment (Point 2 R)) ->
-      --     let v = (seg^.end.core) .-. (seg^.start.core)
-      --         q = (seg^.start.core) .+^ (lambda *^ v)
-      --     in q `onSegment` seg == q `onSegment2` seg
+      describe "verifying that onSegment2 is the same asOnSegment" $ do
+        prop "closed segment (quickheck; (mostly) false points)" $
+          propOnClosedSegment2Consistent @R
+          -- note: most of the points above will likely not lie on the segment
+        prop "closed segments (quickheck ; true points)" $
+          \(lambda :: R) (seg :: ClosedLineSegment (Point 2 R)) ->
+          let v = (seg^.end) .-. (seg^.start)
+              q = (seg^.start) .+^ (lambda *^ v)
+          in propOnClosedSegment2Consistent @R q seg
+
+        prop "open segment (quickheck; (mostly) false points)" $
+          propOnOpenSegment2Consistent @R
+          -- note: most of the points above will likely not lie on the segment
+        prop "open segments (quickheck ; true points)" $
+          \(lambda :: R) (seg :: OpenLineSegment (Point 2 R)) ->
+          let v = (seg^.end) .-. (seg^.start)
+              q = (seg^.start) .+^ (lambda *^ v)
+          in counterexample (show q) $ propOnOpenSegment2Consistent @R q seg
+
+        prop "mixed segment (quickheck; (mostly) false points)" $
+          propOnSegment2Consistent @R
+          -- note: most of the points above will likely not lie on the segment
+        prop "mixded segments (quickheck ; true points)" $
+          \(lambda :: R) (seg :: LineSegment AnEndPoint (Point 2 R)) ->
+          let v = (seg^.end) .-. (seg^.start)
+              q = (seg^.start) .+^ (lambda *^ v)
+          in counterexample (show q) $ propOnSegment2Consistent @R q seg
 
     testI
+
+--------------------------------------------------------------------------------
+-- * Make sure our 2d specialized instance ist he same as the generic one.
+
+-- To test so, we lift the query point and the 2d semgent into 3d, by just setting the
+-- z-coordinate to zero so that we use the generic algorithm. The output should be
+-- consistent.
+
+-- just put the z coord on zero
+liftPt              :: Num r => Point 2 r -> Point 3 r
+liftPt (Point2 x y) =  Point3 x y 0
+
+liftSeg     :: (Num r
+               , IxValue (endPoint (Point 2 r)) ~ Point 2 r
+               , Functor endPoint
+               ) => LineSegment endPoint (Point 2 r) -> LineSegment endPoint (Point 3 r)
+liftSeg seg = LineSegment (liftPt <$> seg^.startPoint)
+                          (liftPt <$> seg^.endPoint)
+
+  -- seg&allPoints %~ liftPt
+
+propOnClosedSegment2Consistent       :: (Ord r, Fractional r)
+                                     => Point 2 r -> ClosedLineSegment (Point 2 r) -> Property
+propOnClosedSegment2Consistent q seg =
+  onSegment q seg === onSegment (liftPt q) (liftSeg seg :: ClosedLineSegment _)
+
+propOnOpenSegment2Consistent       :: (Ord r, Fractional r)
+                                   => Point 2 r -> OpenLineSegment (Point 2 r) -> Property
+propOnOpenSegment2Consistent q seg =
+  onSegment q seg === onSegment (liftPt q) (liftSeg seg :: OpenLineSegment _)
+  -- onSegment2 q seg == onOpenSegmentD q seg
+
+propOnSegment2Consistent       :: (Ord r, Fractional r, Show r)
+                               => Point 2 r -> LineSegment AnEndPoint (Point 2 r) -> Property
+propOnSegment2Consistent q seg =
+  onSegment q seg === onSegment (liftPt q) (liftSeg seg :: LineSegment AnEndPoint _)
+  -- onSegment2 q seg == onSegmentD q seg
+
+--------------------------------------------------------------------------------
+
+
 
 --     it "intersecting line segment and line" $ do
 --       let s = ClosedLineSegment (ext origin) (ext $ Point2 10 (0 :: R))
@@ -161,3 +220,15 @@ ordAtYFractional   :: ( Fractional r, Ord r, LineSegment_ lineSegment point, Poi
                    => r
                    -> lineSegment -> lineSegment -> Ordering
 ordAtYFractional y = comparing (xCoordAt y)
+
+
+
+mySeg :: LineSegment AnEndPoint (Point 2 R)
+mySeg = LineSegment (AnEndPoint Open (Point2 0 0)) (AnEndPoint Closed (Point2 (-1) 0))
+
+testQ = propOnSegment2Consistent' (Point2 0 (0 :: R)) mySeg
+
+propOnSegment2Consistent'       :: (Ord r, Fractional r, Show r)
+                               => Point 2 r -> LineSegment AnEndPoint (Point 2 r) -> (Bool, Bool)
+propOnSegment2Consistent' q seg =
+  (onSegment q seg, onSegment (liftPt q) (liftSeg seg :: LineSegment AnEndPoint _))
