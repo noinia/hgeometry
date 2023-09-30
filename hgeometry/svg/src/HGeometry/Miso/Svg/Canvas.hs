@@ -1,110 +1,112 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module HGeometry.Miso.Svg.StaticCanvas
-  ( StaticCanvas
-  , staticCanvas
+module HGeometry.Miso.Svg.Canvas
+  ( Canvas
+  , blankCanvas
   , HasDimensions(..)
-  -- , center, dimensions, zoomLevel
-  , staticCanvas_
-  -- , textAt
-  -- , realWorldCoordinates
-  , ToSvgCoordinate
 
+  , HasMousePosition(..)
+  , mouseCoordinates
 
-  , matrixToMisoString
+  , InternalCanvasAction
+  , handleInternalCanvasAction
+
+  , svgCanvas_
   ) where
 
 import           Control.Lens hiding (elements)
-import qualified Data.Map as Map
-import           HGeometry.Matrix
+import           HGeometry.Miso.Svg.StaticCanvas
 import           HGeometry.Point
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Viewport
-import           Miso (Attribute, View, height_, width_)
-import           Miso.String (MisoString, ToMisoString, ms)
-import qualified Miso.String.Util as MisoString
+import           Miso (Attribute, View, Effect, height_, width_, noEff, onMouseLeave)
+import           Miso.String (ms)
 import           Miso.Svg (svg_, g_, transform_)
 
 --------------------------------------------------------------------------------
 -- *A Canvas
 
 -- | Svg Canvas that has a "proper" Coordinate system whose origin is in the bottom left.
-data StaticCanvas r =
+data Canvas r =
   Canvas { _theViewport :: !(Viewport r)
          -- ^ the viewport
          , _dimensions  :: !(Vector 2 Int)
          -- ^ dimensions (width,height) in pixels, of the canvas
+         , _mousePosition     :: Maybe (Point 2 Int)
+         -- ^ the mouse position, in raw pixel coordinates
          }
   deriving stock (Eq)
 
-theViewport :: Lens (StaticCanvas r) (StaticCanvas s) (Viewport r) (Viewport s)
+-- | Lens to access the viewport
+theViewport :: Lens (Canvas r) (Canvas s) (Viewport r) (Viewport s)
 theViewport = lens _theViewport (\c vp -> c { _theViewport = vp })
 
-class HasDimensions s a | s -> a where
-  dimensions :: Lens' s a
-
-instance HasDimensions (StaticCanvas r) (Vector 2 Int) where
-  dimensions = lens _dimensions (\c d -> c { _dimensions = d})
+instance HasDimensions (Canvas r) (Vector 2 Int) where
+  dimensions = lens _dimensions (\c d -> c { _dimensions = d })
   {-# INLINE dimensions #-}
 
+-- | Class for types that have a mouse position
+class HasMousePosition s a | s -> a where
+  -- | Lens to access the raw mouse position
+  mousePosition :: Lens' s a
 
--- class HasTheViewport s a | s -> a where
---   theViewport :: Lens' s a
+instance HasMousePosition (Canvas r) (Maybe (Point 2 Int)) where
+  mousePosition = lens _mousePosition (\c m -> c { _mousePosition = m })
+  {-# INLINE mousePosition #-}
 
--- instance HasTheViewport (Canvas r) (Viewport r) where
---   {-# INLINE theViewport #-}
---   theViewport f (Canvas vp d) = fmap (\ vp' -> Canvas vp' d) (f vp)
+-- | Getter to access the mouse coordinates (in terms of the coordinate system as used by
+-- the canvas). Returns a Nothing if the mouse is not currently on/over the canvas.
+mouseCoordinates :: Fractional r => Getter (Canvas r) (Maybe (Point 2 r))
+mouseCoordinates = to $ \m -> toWorldIn' (m^.theViewport) <$> m^.mousePosition
+  where
+    toWorldIn' vp p = toWorldIn vp (p&coordinates %~ fromIntegral)
 
 -- center     :: Lens' (Canvas r) (Point 2 r)
 -- center     = lens _center     (\cv c -> cv { _center     = c } )
-
--- dimensions :: Lens' (Canvas r) (Vector 2 Int)
--- dimensions = lens _dimensions (\cv c -> cv { _dimensions = c } )
 
 -- zoomLevel  :: Lens' (Canvas r) r
 -- zoomLevel  = lens _zoomLevel      (\cv c -> cv { _zoomLevel      = c } )
 
 --------------------------------------------------------------------------------
--- | Create a canvas
-staticCanvas     :: Num r
-                 => Int -> Int -> StaticCanvas r
-staticCanvas w h = let v = Vector2 w h
-                   in Canvas (flipY (fromIntegral <$> v)) v
+
+-- | Crate a blank canvas, that has the origin in the bottom-left.
+blankCanvas     :: (Num r)
+                 => Int -> Int -> Canvas r
+blankCanvas w h = let v = Vector2 w h
+                  in Canvas (flipY (fromIntegral <$> v)) v Nothing
 
 --------------------------------------------------------------------------------
 -- * The Controller
 
+-- | Actions that CanvasAction will handle itself.
+data InternalCanvasAction = MouseMove (Int,Int)
+                          | MouseLeave
+                          deriving (Show,Eq)
+
+-- | Handles InternalCanvas Actions
+handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
+handleInternalCanvasAction canvas = noEff . \case
+  MouseMove (x,y) -> canvas&mousePosition ?~ Point2 x y
+  MouseLeave      -> canvas&mousePosition .~ Nothing
 
 --------------------------------------------------------------------------------
 -- * The View
 
-type ToSvgCoordinate = ToMisoString
-
-
 -- | Draws the actual canvas
-staticCanvas_               :: (RealFrac r, ToSvgCoordinate r)
-                            => StaticCanvas r
-                            -> [Attribute action] -> [View action] -> View action
-staticCanvas_ canvas ats vs =
-    svg_ ([ width_   . ms $ w
-          , height_  . ms $ h
-            -- , viewBox_      $ outerVB
-          ] <> ats)
-         [ g_ [ transform_ ts ] vs
-         ]
+svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
+                         => Canvas r
+                         -> [Attribute action] -> [View action]
+                         -> View (Either InternalCanvasAction action)
+svgCanvas_ canvas ats vs =
+  svg_ ([ width_   . ms $ w
+        , height_  . ms $ h
+        , onMouseLeave $ Left MouseLeave
+        ] <> (fmap Right <$> ats))
+        [ g_ [ transform_ ts ] (fmap Right <$> vs)
+        ]
   where
     (Vector2 w h) = canvas^.dimensions
     ts = matrixToMisoString $ canvas^.theViewport.worldToHost.transformationMatrix
-
-matrixToMisoString   :: ToSvgCoordinate r => Matrix 3 3 r -> MisoString
-matrixToMisoString m = "matrix(" <> MisoString.unwords [a,b,c,e,d,f] <> ")"
-  where
-    (Vector3 (Vector3 a b c)
-             (Vector3 d e f)
-             _              ) = (m&elements %~ ms :: Matrix 3 3 MisoString)^.rows
-                              -- this last vector has to be 0 0 1
-
-
 
 
 -- | To be used instead of the text_ combinator in Miso

@@ -39,7 +39,7 @@ data Viewport r = Viewport { _viewPort    :: Rectangle (Point 2 r)
                              -- ^ in host world
                            , _worldToHost :: Transformation 2 r
                              -- ^ Transformation that turns world
-                           -- coordinates into host coordinats.
+                           -- coordinates into host coordinates.
 
                            -- _hostToWorld :: Transformation 2 r
                            }
@@ -94,8 +94,10 @@ fromSize   :: ( Num r, Vector_ vector 2 r
 fromSize v = Viewport (Box origin (Point $ v^._Vector)) identity
 
 -- | Flips the y-coordinate so that the origin is in the bottom left.
-flipY    :: ( Num r, Vector_ vector 2 r
-            ) => vector -> Viewport r
+--
+flipY    :: ( Num r, Vector_ vector 2 r)
+         => vector -- ^ the dimensions of the viewport
+         -> Viewport r
 flipY v = Viewport (Box origin (Point $ v^._Vector))
                    (flipY' $ v^.yComponent)
 
