@@ -44,6 +44,7 @@ common setup
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:ipe
+      , hgeometry:svg
       , hiraffe                 >= 0.1
       , containers              >= 0.6
       , vector                  >= 0.13
@@ -80,6 +81,12 @@ common setup
       , ViewPatterns
       , FunctionalDependencies
 
+common miso-setup
+  build-depends:
+        miso
+      , jsaddle
+      , jsaddle-warp
+
 common quickcheck-setup
     ghc-options:
          -Wall
@@ -110,3 +117,11 @@ executable hgeometry-bapc2014-armybase
   import:         setup
   hs-source-dirs: bapc2014
   main-is:        Armybase.lhs
+
+--------------------------------------------------------------------------------
+-- * ConvexHull
+
+executable hgeometry-convexHull
+  import:         setup, miso-setup
+  hs-source-dirs: convexHull
+  main-is:        Main.hs
