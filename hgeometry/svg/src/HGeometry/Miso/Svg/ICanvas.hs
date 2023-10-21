@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
-module Geometry.Web.ICanvas(
-    module Geometry.Web.StaticCanvas
+module HGeometry.Miso.Svg.ICanvas(
+    module HGeometry.Miso.Svg.StaticCanvas
   , ICanvas(ICanvas), blankCanvas
   , canvas, mousePosition, panStatus
   , mouseCoordinates
@@ -20,12 +20,12 @@ module Geometry.Web.ICanvas(
 
 import           Control.Lens hiding (view, element, rmap, Zoom)
 import           Data.Aeson.Types
-import           Geometry.Web.StaticCanvas
-import           Geometry.Point
-import           Geometry.Vector
 import           Data.Range
-import qualified Data.Set as Set
 import           Data.Set (Set)
+import qualified Data.Set as Set
+import           HGeometry.Miso.Svg.StaticCanvas
+import           HGeometry.Point
+import           HGeometry.Vector
 import           Miso hiding (update, view)
 import           Miso.String (MisoString)
 import           Miso.Subscription.MouseExtra
@@ -52,6 +52,9 @@ data ICanvas r = ICanvas { _canvas           :: Canvas r
                          } deriving (Show,Eq)
 makeLenses ''ICanvas
 
+
+
+
 hasCapability   :: Capability -> ICanvas r -> Bool
 hasCapability c = Set.member c . _capabilities
 
@@ -66,17 +69,13 @@ blankCanvas w h = ICanvas (createCanvas w h) Nothing NoPan (Set.fromList [minBou
 --------------------------------------------------------------------------------
 -- * Controller
 
-
-
-
-
+-- | The various actions we can do with the cavnas
 data CanvasAction = MouseMove (Int,Int)
                   | MouseLeave
                   | ArrowPress Arrows
                   | Pan PanAction
                   | Zoom ZoomAction
                   deriving (Show,Eq)
-
 
 
 update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
