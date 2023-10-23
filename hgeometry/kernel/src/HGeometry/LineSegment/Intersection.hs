@@ -1,8 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.LineSegment.Intersection
-  (
-
+  ( LineLineSegmentIntersection(..)
+  , LineSegmentLineSegmentIntersection(..)
   ) where
 
 import Control.Applicative

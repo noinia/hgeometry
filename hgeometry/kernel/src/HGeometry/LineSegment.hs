@@ -17,8 +17,11 @@ module HGeometry.LineSegment
   , AnEndPoint(AnEndPoint,AnOpenE,AnClosedE)
   , module HGeometry.LineSegment.Class
   , EndPoint_(..)
+  --
+  , LineLineSegmentIntersection(..)
+  , LineSegmentLineSegmentIntersection(..)
   ) where
 
 import HGeometry.LineSegment.Class
 import HGeometry.LineSegment.Internal
-import HGeometry.LineSegment.Intersection ()
+import HGeometry.LineSegment.Intersection
