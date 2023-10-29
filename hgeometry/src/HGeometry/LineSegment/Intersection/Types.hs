@@ -11,28 +11,41 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Intersection.Types
-  (
+  ( Intersections
 
+  , Associated, startPointOf, endPointOf, interiorTo
+  , mkAssociated
+  , associatedSegments
+
+  , AroundEnd, AroundStart, AroundIntersection
+  , isInteriorIntersection
+
+
+  , IntersectionPoint
+  , intersectionPointOf
+
+  , intersectionPoint, associatedSegs
+  , mkIntersectionPoint
+
+  , OrdArounds
   ) where
 
--- import           Algorithms.DivideAndConquer
 import           Control.DeepSeq
 import           Control.Lens
-import           HGeometry.Ext
-import           Data.Bifunctor
+import qualified Data.List as List
+import qualified Data.Map as Map
+import           Data.Ord (comparing, Down(..))
+import qualified Data.Set as Set
+import           GHC.Generics
+import           HGeometry.Intersection
 import           HGeometry.Interval
 import           HGeometry.LineSegment
 import           HGeometry.Point
-import qualified Data.Map as Map
-import qualified Data.Set as Set
-import           Data.Ord (comparing, Down(..))
-import           GHC.Generics
-import           HGeometry.Intersection
 
 ----------------------------------------------------------------------------------
 
 
--- FIXME: What do we do when one segmnet lies *on* the other one. For
+-- FIXME: What do we do when one segment lies *on* the other one. For
 -- the short segment it should be an "around start", but then the
 -- startpoints do not match.
 --
@@ -101,7 +114,7 @@ instance ( LineSegment_ lineSegment point
         -- but that situation doese not satisfy the precondition
         -- of aroundIntersection anyway.
     where
-      squaredLength ss = squaredEuclideanDist (s^.start) (s^.end)
+      squaredLength ss = squaredEuclideanDist (ss^.start) (ss^.end)
 
 -- | compare around p
 cmpAroundP        :: ( LineSegment_ lineSegment point
@@ -152,12 +165,13 @@ type OrdArounds lineSegment = ( Ord (AroundStart lineSegment)
 
 makeLenses ''Associated
 
--- -- | Fold over the segments associated with the intersection.
--- associatedSegments :: Fold (Associated p r e) (LineSegment 2 p r :+ e)
--- associatedSegments = startPointOf . folded . _Wrapped <>
---                      endPointOf   . folded . _Wrapped <>
---                      interiorTo   . folded . _Wrapped
 
+-- | Fold over the segments associated with the intersection.
+associatedSegments     :: Fold (Associated lineSegment) lineSegment
+associatedSegments f a =  (startPointOf . folded . _Wrapped) f a *>
+                          (endPointOf   . folded . _Wrapped) f a *>
+                          (interiorTo   . folded . _Wrapped) f a
+  -- combine the folds
 
 -- instance Functor (Associated lineSegment) where
 --   fmap f (Associated ss es is) = Associated (Set.mapMonotonic (g f) ss)
@@ -181,31 +195,30 @@ isInteriorIntersection = not . null . _interiorTo
 -- pre: p intersects the segment
 mkAssociated      :: ( LineSegment_ lineSegment point
                      , Point_ point 2 r
-                     , Eq point
+                     , Point_ point' 2 r
+                     , Eq r
                      , OrdArounds lineSegment
                      )
-                  => point -> lineSegment -> Associated lineSegment
+                  => point' -> lineSegment -> Associated lineSegment
 mkAssociated p s
-  | p == s^.start = mempty&startPointOf .~  Set.singleton (AroundEnd s)
-  | p == s^.end   = mempty&endPointOf   .~  Set.singleton (AroundStart s)
-  | otherwise     = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
+  | p^.asPoint == s^.start.asPoint = mempty&startPointOf .~  Set.singleton (AroundEnd s)
+  | p^.asPoint == s^.end.asPoint   = mempty&endPointOf   .~  Set.singleton (AroundStart s)
+  | otherwise                      = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 
+---- | test if the given segment has p as its endpoint, an construct the
+---- appropriate associated representing that.
+----
+---- If p is not one of the endpoints we concstruct an empty Associated!
+----
+--mkAssociated'     :: ( LineSegment_ lineSegment point
+--                     , Point_ point 2 r
+--                     , Eq r
+--                     , OrdArounds lineSegment
+--                     )
+--                  => point -> lineSegment -> Associated lineSegment
+--mkAssociated' p s = (mkAssociated p s)&interiorTo .~ mempty
 
-
-
--- | test if the given segment has p as its endpoint, an construct the
--- appropriate associated representing that.
---
--- If p is not one of the endpoints we concstruct an empty Associated!
---
-mkAssociated'     :: ( LineSegment_ lineSegment point
-                     , Point_ point 2 r
-                     , Eq point
-                     , OrdArounds lineSegment
-                     )
-                  => point -> lineSegment -> Associated lineSegment
-mkAssociated' p s = (mkAssociated p s)&interiorTo .~ mempty
 
 instance OrdArounds lineSegment => Semigroup (Associated lineSegment) where
   (Associated ss es is) <> (Associated ss' es' is') =
@@ -218,6 +231,9 @@ instance (NFData lineSegment) => NFData (Associated lineSegment)
 
 -- | For each intersection point the segments intersecting there.
 type Intersections r lineSegment = Map.Map (Point 2 r) (Associated lineSegment)
+
+
+
 
 -- | An intersection point together with all segments intersecting at
 -- this point.
@@ -253,7 +269,7 @@ instance (NFData point, NFData lineSegment) => NFData (IntersectionPoint point l
 -- | Given a point p, and a bunch of segments that suposedly intersect
 -- at p, correctly categorize them.
 mkIntersectionPoint         :: ( LineSegment_ lineSegment point
-                               , Point_ point 2 r, Eq point
+                               , Point_ point 2 r, Eq r
                                -- , Ord r, Fractional r
                                , OrdArounds lineSegment
                                )
@@ -274,5 +290,24 @@ mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ a
 
 
 -- | An ordering that is decreasing on y, increasing on x
-ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
+ordPoints     :: (Point_ point 2 r, Ord r) => point -> point -> Ordering
 ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
+
+-- | Given two segments, compute an IntersectionPoint representing their intersection (if
+-- such an intersection exists).
+intersectionPointOf      :: ( LineSegment_ lineSegment point
+                            , Point_ point 2 r
+                            , Ord r, Fractional r
+                            , OrdArounds lineSegment
+                            , IsIntersectableWith lineSegment lineSegment
+                            , Intersection lineSegment lineSegment ~
+                              Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                            )
+                         => lineSegment -> lineSegment
+                         -> Maybe (IntersectionPoint (Point 2 r) lineSegment)
+intersectionPointOf s s' = s `intersect` s' <&> \case
+     LineSegment_x_LineSegment_Point p         -> intersectionPoint' p
+     LineSegment_x_LineSegment_LineSegment seg -> intersectionPoint' (topEndPoint seg)
+  where
+    intersectionPoint' p = IntersectionPoint p (mkAssociated p s <> mkAssociated p s')
+    topEndPoint seg = List.minimumBy ordPoints [seg^.start.asPoint, seg^.end.asPoint]

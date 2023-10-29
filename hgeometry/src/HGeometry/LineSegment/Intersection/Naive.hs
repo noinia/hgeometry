@@ -12,49 +12,34 @@ module HGeometry.LineSegment.Intersection.Naive
   ( intersections
   ) where
 
--- import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens ((^.))
-import           HGeometry.Ext
-import           HGeometry.LineSegment.Class
-import           HGeometry.Point
-import           HGeometry.Properties
 import qualified Data.Map as Map
 import           HGeometry.Combinatorial.Util
-import qualified Data.List as List
+import           HGeometry.Intersection
+import           HGeometry.LineSegment
+import           HGeometry.LineSegment.Intersection.Types
+import           HGeometry.Point
 
 --------------------------------------------------------------------------------
-
-type Intersections lineSegment = [Point 2 (NumType lineSegment)]
 
 -- | Compute all intersections (naively)
 --
 -- \(O(n^2)\)
 intersections :: ( Ord r, Fractional r
                  , LineSegment_ lineSegment point
+                 , Eq lineSegment
                  , Point_ point 2 r
+                 , IsIntersectableWith lineSegment lineSegment
+                 , OrdArounds lineSegment
+                 , Intersection lineSegment lineSegment ~
+                   Maybe (LineSegmentLineSegmentIntersection lineSegment)
                  )
-              => [lineSegment] -> Intersections lineSegment
+              => [lineSegment] -> Intersections r lineSegment
 intersections = foldMap collect . uniquePairs
-
--- collect (Two s s') = case s `intersect`
-
-
--- -- | Test if the two segments intersect, and if so add the segment to the map
--- collect              :: (Ord r, Fractional r
---                         , LineSegment_ lineSegment 2 r
---                         )
---                      => Two lineSegment
---                      -> Intersections p r e
--- collect (Two s s') m = match ((s^.core) `intersect` (s'^.core)) $
---      H (\NoIntersection -> m)
---   :& H (\p              -> handlePoint s s' p m)
---   :& H (\s''            -> handlePoint s s' (topEndPoint s'') m)
---   :& RNil
-
-
--- topEndPoint :: Ord r => LineSegment 2 p r -> Point 2 r
--- topEndPoint (LineSegment' (a :+ _) (b :+ _)) = List.minimumBy ordPoints [a,b]
-
+  where
+    collect (Two s s') = case intersectionPointOf s s' of
+                           Nothing -> mempty
+                           Just ip -> Map.singleton (ip^.intersectionPoint) (ip^.associatedSegs)
 
 -- -- | Add s and s' to the map with key p
 -- handlePoint        :: (Ord r, Fractional r)
