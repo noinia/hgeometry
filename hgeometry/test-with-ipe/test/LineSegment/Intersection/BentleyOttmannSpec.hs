@@ -13,7 +13,6 @@ import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           LineSegmentSpec_ (arrowAsOpen)
--- import           HGeometry.Polygon
 import           Data.List (intercalate)
 import qualified Data.Map as Map
 import           Data.Proxy
@@ -21,7 +20,6 @@ import           HGeometry.Number.Real.Rational
 import           Ipe
 import           System.OsPath
 import           Golden
--- import           Paths_hgeometry
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
@@ -36,7 +34,7 @@ spec = do
     -- toSpec (TestCase "myPoints'" myPoints')
     ipeSpec
 
-testPath = [osp|src/Algorithms/Geometry/LineSegmentIntersection/|]
+testPath = [osp|test-with-ipe//LineSegment/Intersection/|]
 
 ipeSpec :: Spec
 ipeSpec = do testCases (testPath <> [osp|manual.ipe|])
@@ -75,8 +73,8 @@ samePointsAsNaive      :: ( LineSegment_ lineSegment point
                           , Ord r, Fractional r
                           , HasOnSegment lineSegment 2
                           , IntersectConstraints lineSegment
-                          , IntersectConstraints (lineSegment :+ Flipped)
-                          , Show lineSegment
+                          -- , IntersectConstraints (lineSegment :+ Flipped)
+                          , Show lineSegment, Show r
                           )
                        => [lineSegment] -> Spec
 samePointsAsNaive segs = it "Same points as Naive" $ do
@@ -89,8 +87,8 @@ sameAsNaive      :: ( LineSegment_ lineSegment point
                     , Ord r, Fractional r
                     , HasOnSegment lineSegment 2
                     , IntersectConstraints lineSegment
-                    , IntersectConstraints (lineSegment :+ Flipped)
-                    , Show lineSegment
+                    -- , IntersectConstraints (lineSegment :+ Flipped)
+                    , Show lineSegment, Show r
                     )
                  => [lineSegment] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do

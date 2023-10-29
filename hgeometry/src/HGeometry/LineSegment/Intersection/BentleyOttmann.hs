@@ -59,20 +59,40 @@ import qualified HGeometry.Set.Util as SS -- status struct
 -- | Compute all intersections
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
-intersections      :: ( LineSegment_ lineSegment point
+intersections      :: forall lineSegment point r f.
+                      ( LineSegment_ lineSegment point
                       , Point_ point 2 r
                       , Eq lineSegment
                       , Ord r, Fractional r
                       , HasOnSegment lineSegment 2
                       , IntersectConstraints lineSegment
-                      , IntersectConstraints (lineSegment :+ Flipped)
+                      -- , IntersectConstraints (lineSegment :+ Flipped)
+                      , Foldable f, Functor f
+                      )
+                   => f lineSegment -> Intersections r lineSegment
+intersections = fmap unflipSegs . intersections'' . fmap tagFlipped
+  where
+    intersections'' :: f (lineSegment :+ Flipped) -> Intersections r (lineSegment :+ Flipped)
+    intersections'' = undefined -- intersections'
+
+
+-- intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
+--   where
+--     pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . tagFlipped) $ segs
+
+
+intersections'      :: ( LineSegment_ lineSegment point
+                      , Point_ point 2 r
+                      , Eq lineSegment
+                      , Ord r, Fractional r
+                      , HasOnSegment lineSegment 2
+                      , IntersectConstraints lineSegment
                       , Foldable f
                       )
                    => f lineSegment -> Intersections r lineSegment
-intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
+intersections' segs = merge $ sweep pts SS.empty
   where
-    pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . tagFlipped) $ segs
-
+    pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . id) $ segs
 
 
 -- | Computes all intersection points p s.t. p lies in the interior of at least
@@ -86,7 +106,7 @@ interiorIntersections :: ( LineSegment_ lineSegment point
                          , IntersectConstraints lineSegment
                          , IntersectConstraints (lineSegment :+ Flipped)
                          , HasOnSegment lineSegment 2
-                         , Foldable f
+                         , Foldable f, Functor f
                          )
                       => f lineSegment -> Intersections r lineSegment
 interiorIntersections = Map.filter isInteriorIntersection . intersections
