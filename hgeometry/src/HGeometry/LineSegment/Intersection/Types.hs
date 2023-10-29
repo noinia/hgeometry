@@ -28,6 +28,9 @@ module HGeometry.LineSegment.Intersection.Types
   , mkIntersectionPoint
 
   , OrdArounds
+
+
+  , ordPoints
   ) where
 
 import           Control.DeepSeq
@@ -286,7 +289,6 @@ mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ a
   --   cs' = map AroundIntersection . List.sortBy (cmpAroundP p) $ cs
   -- -- TODO: In the bentley ottman algo we already know the sorted order of the segments
   -- -- so we can likely save the additional sort
-
 
 
 -- | An ordering that is decreasing on y, increasing on x
