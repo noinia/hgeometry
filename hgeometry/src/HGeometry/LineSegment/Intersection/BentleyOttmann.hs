@@ -12,6 +12,22 @@
 module HGeometry.LineSegment.Intersection.BentleyOttmann
   ( intersections
   , interiorIntersections
+
+  , Intersections
+  , Associated, startPointOf, endPointOf, interiorTo
+  , associatedSegments
+
+  , AroundEnd, AroundStart, AroundIntersection
+  , isInteriorIntersection
+
+  , IntersectionPoint
+  , intersectionPointOf
+
+  , intersectionPoint, associatedSegs
+
+  , IntersectConstraints
+  , OrdArounds
+  , Flipped
   ) where
 
 import           Control.Lens hiding (contains)

@@ -10,6 +10,20 @@
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Intersection.Naive
   ( intersections
+  , Intersections
+  , Associated, startPointOf, endPointOf, interiorTo
+  , associatedSegments
+
+  , AroundEnd, AroundStart, AroundIntersection
+  , isInteriorIntersection
+
+  , IntersectionPoint
+  , intersectionPointOf
+
+  , intersectionPoint, associatedSegs
+
+  , IntersectConstraints
+  , OrdArounds
   ) where
 
 import           Control.Lens ((^.))

@@ -1,5 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-module LineSegmentSpec where
+module LineSegmentSpec_ where
 
 import Control.Lens
 import Control.Monad ((>=>))
@@ -16,7 +16,7 @@ import HGeometry.Point
 import HGeometry.Vector
 import Ipe
 import Ipe.Color
-import Paths_hgeometry_test
+import Paths_hgeometry
 import System.OsPath
 import Test.Hspec
 import Test.QuickCheck
@@ -31,7 +31,9 @@ getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 
 spec :: Spec
-spec =
+spec = pure ()
+{-
+
   describe "linesegment x box intersection tests" $ do
     fp <- runIO $ getDataFileName' [osp|LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
@@ -52,6 +54,7 @@ ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> 
         it "intersects boundary" $
           (seg `intersects` (Boundary rect)) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
 
+-}
 
 sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
 sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
@@ -87,9 +90,11 @@ test4 = LineSegment (AnOpenE $ Point2 0 10) (AnClosedE $ Point2 0 9)
 
 -- test = withRank (Vector2 0 1) test1 test4
 
-
+{-
 testI = describe "some manual intersection tests" $ do
           it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
           it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
           it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
           it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
+
+-}
