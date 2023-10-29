@@ -39,6 +39,7 @@ module HGeometry.Interval.Class
   ) where
 
 import Control.Lens
+import Data.Default.Class
 import Data.Kind (Type,Constraint)
 import HGeometry.Boundary
 import HGeometry.Ext
@@ -291,20 +292,20 @@ type instance StartPointOf (interval :+ extra) = StartPointOf interval
 type instance EndPointOf (interval :+ extra) = EndPointOf interval
 
 instance ( IntervalLike_ interval point
-         , Monoid extra
+         , Default extra
          ) => IntervalLike_ (interval :+ extra) point where
-  mkInterval s t = mkInterval s t :+ mempty
+  mkInterval s t = mkInterval s t :+ def
 
 instance ( Interval_ interval r
-         , Monoid extra
+         , Default extra
          ) => Interval_ (interval :+ extra) r
 
 instance ( ClosedInterval_ interval r
-         , Monoid extra
+         , Default extra
          ) => ClosedInterval_ (interval :+ extra) r where
-  mkClosedInterval s t = mkClosedInterval s t :+ mempty
+  mkClosedInterval s t = mkClosedInterval s t :+ def
 
 instance ( OpenInterval_ interval r
-         , Monoid extra
+         , Default extra
          ) => OpenInterval_ (interval :+ extra) r where
-  mkOpenInterval s t = mkOpenInterval s t :+ mempty
+  mkOpenInterval s t = mkOpenInterval s t :+ def

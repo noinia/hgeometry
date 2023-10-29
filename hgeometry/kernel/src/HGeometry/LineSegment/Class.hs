@@ -26,13 +26,13 @@ module HGeometry.LineSegment.Class
   ) where
 
 import Control.Lens
+import Data.Default.Class
 import Data.Type.Ord
 import HGeometry.Ext
 import HGeometry.Interval.Class
 import HGeometry.Point.Class
 import HGeometry.Properties
 import HGeometry.Vector
-
 
 --------------------------------------------------------------------------------
 
@@ -207,16 +207,16 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
 --------------------------------------------------------------------------------
 
 instance ( LineSegment_ segment point
-         , Monoid extra
+         , Default extra
          ) => LineSegment_ (segment :+ extra) point where
-  uncheckedLineSegment p q = uncheckedLineSegment p q :+ mempty
+  uncheckedLineSegment p q = uncheckedLineSegment p q :+ def
 
 instance ( ClosedLineSegment_ segment point
-         , Monoid extra
+         , Default extra
          ) => ClosedLineSegment_ (segment :+ extra) point where
 
 instance ( OpenLineSegment_ segment point
-         , Monoid extra
+         , Default extra
          ) => OpenLineSegment_ (segment :+ extra) point where
 
 instance HasOnSegment lineSegment d =>  HasOnSegment (lineSegment :+ extra) d where

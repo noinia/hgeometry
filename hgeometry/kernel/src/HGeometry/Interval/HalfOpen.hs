@@ -14,16 +14,16 @@ module HGeometry.Interval.HalfOpen
 
 
 import           Control.Lens
-import           Data.Foldable1
+-- import           Data.Foldable1
 import           HGeometry.Interval.Class
-import           HGeometry.Interval.EndPoint
+-- import           HGeometry.Interval.EndPoint
 import           HGeometry.Interval.Internal
 import           HGeometry.Point
 -- import HGeometry.Measured.Class
 import           HGeometry.Properties
 import           HGeometry.Intersection
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.List.NonEmpty (NonEmpty(..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import           Data.List.NonEmpty (NonEmpty(..))
 
 
 --------------------------------------------------------------------------------

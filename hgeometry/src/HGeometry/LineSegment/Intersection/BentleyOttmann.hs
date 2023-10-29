@@ -16,6 +16,7 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
 
 import           Control.Lens hiding (contains)
 import           Data.Coerce
+import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import qualified Data.List as List
@@ -23,16 +24,18 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe
-import           Data.Ord (Down(..), comparing)
+import           Data.Ord (comparing)
 import qualified Data.Set as EQ -- event queue
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set as Set
+import qualified Data.Vector as Vector
 import           HGeometry.Ext
+import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
+import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
 import           HGeometry.LineSegment.Intersection.Types
 import           HGeometry.Point
-import           HGeometry.Properties
 import qualified HGeometry.Set.Util as SS -- status struct
 
 --------------------------------------------------------------------------------
@@ -40,19 +43,21 @@ import qualified HGeometry.Set.Util as SS -- status struct
 -- | Compute all intersections
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
-intersections    ::  ( LineSegment_ lineSegment point
-                     , Point_ point 2 r
-                     , Eq lineSegment
-                     , Ord r, Fractional r
-                     , IsIntersectableWith lineSegment lineSegment
-                     , OrdArounds lineSegment
-                     , Intersection lineSegment lineSegment ~
-                       Maybe (LineSegmentLineSegmentIntersection lineSegment)
-                     )
-                 => [lineSegment] -> Intersections r lineSegment
-intersections ss = fmap unflipSegs . merge $ sweep pts SS.empty
+intersections      :: ( LineSegment_ lineSegment point
+                      , Point_ point 2 r
+                      , Eq lineSegment
+                      , Ord r, Fractional r
+                      , HasOnSegment lineSegment 2
+                      , IntersectConstraints lineSegment
+                      , IntersectConstraints (lineSegment :+ Flipped)
+                      , Foldable f
+                      )
+                   => f lineSegment -> Intersections r lineSegment
+intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
   where
-    pts = EQ.fromAscList . groupStarts . List.sort . concatMap (asEventPts . tagFlipped) $ ss
+    pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . tagFlipped) $ segs
+
+
 
 -- | Computes all intersection points p s.t. p lies in the interior of at least
 -- one of the segments.
@@ -62,73 +67,80 @@ interiorIntersections :: ( LineSegment_ lineSegment point
                          , Point_ point 2 r
                          , Eq lineSegment
                          , Ord r, Fractional r
-                         , IsIntersectableWith lineSegment lineSegment
-                         , OrdArounds lineSegment
-                         , Intersection lineSegment lineSegment ~
-                           Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                         , IntersectConstraints lineSegment
+                         , IntersectConstraints (lineSegment :+ Flipped)
+                         , HasOnSegment lineSegment 2
+                         , Foldable f
                          )
-                      => [lineSegment] -> Intersections r lineSegment
+                      => f lineSegment -> Intersections r lineSegment
 interiorIntersections = Map.filter isInteriorIntersection . intersections
+
 
 --------------------------------------------------------------------------------
 -- * Flipping and unflipping
 
 data Flipped = NotFlipped | Flipped deriving (Show,Eq)
 
+instance Default Flipped where
+  def = NotFlipped
+
 -- | Make sure the 'start' endpoint occurs before the end-endpoints in
 -- terms of the sweep order.
-tagFlipped   :: Ord r => lineSegment -> lineSegment :+ Flipped
+tagFlipped   :: (LineSegment_ lineSegment point, Point_ point 2 r, Ord r)
+             => lineSegment -> lineSegment :+ Flipped
 tagFlipped s = case (s^.start) `ordPoints` (s^.end) of
-                 GT -> s %~ flipSeg :+ Flipped
-                 _  -> s            :+ NotFlipped
+                 GT -> flipSeg s :+ Flipped
+                 _  -> s         :+ NotFlipped
 
 -- | Flips the segment
 flipSeg     :: LineSegment_ lineSegment point => lineSegment -> lineSegment
 flipSeg seg = seg&start .~ (seg^.end)
                  &end   .~ (seg^.start)
 
+
+isFlipped :: forall f lineSegment.
+             Coercible (f (lineSegment :+ Flipped)) (lineSegment :+ Flipped)
+          => f (lineSegment :+ Flipped) -> Bool
+
+isFlipped = (== Flipped) . view extra . coerce @_ @(lineSegment :+ Flipped)
+
 -- | Unflips the segments in an associated.
-unflipSegs                       :: (Fractional r, Ord r)
+unflipSegs                       :: ( LineSegment_ lineSegment point
+                                    , Point_ point 2 r
+                                    , Fractional r, Ord r
+                                    , IntersectConstraints lineSegment
+                                    )
                                  => Associated (lineSegment :+ Flipped)
                                  -> Associated lineSegment
-unflipSegs = undefined
-{-
-(Associated ss es is) =
-    Associated (dropFlipped ss1 <> unflipSegs' es')
-               (dropFlipped es1 <> unflipSegs' ss')
-               (dropFlipped is1 <> unflipSegs' is')
+unflipSegs assocs = Associated (dropFlipped ss1 <> unflipSegs' es)
+                               (dropFlipped es1 <> unflipSegs' ss)
+                               (dropFlipped is1 <> unflipSegs' is)
   where
-    (ss',ss1) = Set.partition (\(AroundEnd          s) -> isFlipped s) ss
-    (es',es1) = Set.partition (\(AroundStart        s) -> isFlipped s) es
-    (is',is1) = Set.partition (\(AroundIntersection s) -> isFlipped s) is
-
-    isFlipped s = Flipped == s^.extra.extra
+    (ss,ss1) = Set.partition isFlipped $ assocs^.startPointOf
+    (es,es1) = Set.partition isFlipped $ assocs^.endPointOf
+    (is,is1) = Set.partition isFlipped $ assocs^.interiorTo
 
     -- | For segments that are not acutally flipped, we can just drop the flipped bit
     dropFlipped :: Functor f
-                => Set.Set (f (lineSegment :+ Flipped))
-                -> Set.Set (f (lineSegment))
-    dropFlipped = Set.mapMonotonic (fmap dropFlip)
+                => Set.Set (f (lineSegment :+ Flipped)) -> Set.Set (f lineSegment)
+    dropFlipped = Set.mapMonotonic (fmap $ view core)
 
-    -- For flipped segs we unflip them (and appropriately coerce the
-    -- so that they remain in the same order. I.e. if they were sorted
-    -- around the start point they are now sorted around the endpoint.
-    unflipSegs' :: ( Functor f
-                   , Coercible (f (lineSegment)) (g (lineSegment))
-                   )
-                => Set.Set (f (lineSegment :+ Flipped))
-                -> Set.Set (g (lineSegment))
-    unflipSegs' = Set.mapMonotonic (coerce . fmap unflip)
+-- For flipped segs we unflip them (and appropriately coerce the
+-- so that they remain in the same order. I.e. if they were sorted
+-- around the start point they are now sorted around the endpoint.
+unflipSegs' :: ( Functor f, Coercible (f lineSegment) (g lineSegment)
+               , LineSegment_ lineSegment point
+               )
+            => Set.Set (f (lineSegment :+ Flipped)) -> Set.Set (g lineSegment)
+unflipSegs' = Set.mapMonotonic (coerce . fmap (flipSeg . view core))
 
-    unflip   (s :+ (e :+ _)) = flipSeg s :+ e
-    dropFlip (s :+ (e :+ _)) = s :+ e
--}
 --------------------------------------------------------------------------------
 
 -- | Computes the event points for a given line segment
-asEventPts   :: lineSegment -> [Event r lineSegment]
-asEventPts s = [ Event (s^.core.start.core) (Start $ s :| [])
-               , Event (s^.core.end.core)   (End s)
+asEventPts   :: (LineSegment_ lineSegment point, Point_ point 2 r)
+             => lineSegment -> [Event r lineSegment]
+asEventPts s = [ Event (s^.start.asPoint) (Start $ s :| [])
+               , Event (s^.end.asPoint)   (End s)
                ]
 
 -- | Group the segments with the intersection points
@@ -136,11 +148,14 @@ merge :: (Ord r, Fractional r)
       => [IntersectionPoint (Point 2 r) lineSegment] -> Intersections r lineSegment
 merge = foldMap (\ip -> Map.singleton (ip^.intersectionPoint) (ip^.associatedSegs))
 
+groupStarts :: Eq r => Vector.Vector (Event r lineSegment) -> [Event r lineSegment]
+groupStarts = groupStarts' . Vector.toList
+
 -- | Group the startpoints such that segments with the same start point
 -- correspond to one event.
-groupStarts                          :: Eq r => [Event r lineSegment] -> [Event r lineSegment]
-groupStarts []                       = []
-groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
+groupStarts'                          :: Eq r => [Event r lineSegment] -> [Event r lineSegment]
+groupStarts' []                       = []
+groupStarts' (Event p (Start s) : es) = Event p (Start ss) : groupStarts' rest
   where
     (ss',rest) = List.span sameStart es
     -- FIXME: this seems to keep the segments on decreasing y, increasing x. shouldn't we
@@ -150,7 +165,7 @@ groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
 
     sameStart (Event q (Start _)) = p == q
     sameStart _                   = False
-groupStarts (e : es)                 = e : groupStarts es
+groupStarts' (e : es)                 = e : groupStarts' es
 
 --------------------------------------------------------------------------------
 -- * Data type for Events
@@ -194,12 +209,17 @@ type EventQueue      r lineSegment = EQ.Set (Event r lineSegment)
 type StatusStructure r lineSegment = SS.Set lineSegment
 
 -- | Run the sweep handling all events
-sweep       :: (Ord r, Fractional r)
+sweep       :: ( LineSegment_ lineSegment point
+               , Point_ point 2 r
+               , Ord r, Fractional r
+               , IntersectConstraints lineSegment
+               , HasOnSegment lineSegment 2
+               )
             => EventQueue r lineSegment -> StatusStructure r lineSegment
             -> [IntersectionPoint (Point 2 r) lineSegment]
 sweep eq ss = case EQ.minView eq of
-    Nothing      -> []
-    Just (e,eq') -> handle e eq' ss
+                Nothing      -> []
+                Just (e,eq') -> handle e eq' ss
 
 isOpen :: EndPoint_ endPoint => endPoint -> Bool
 isOpen = (== Open) . endPointType
@@ -211,6 +231,8 @@ isClosed = (== Open) . endPointType
 handle                           :: ( LineSegment_ lineSegment point
                                     , Point_ point 2 r
                                     , Ord r, Fractional r
+                                    , IntersectConstraints lineSegment
+                                    , HasOnSegment lineSegment 2
                                     )
                                  => Event r lineSegment
                                  -> EventQueue r lineSegment -> StatusStructure r lineSegment
@@ -227,7 +249,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     -- If we just inserted open-ended segments that start here, then
     -- don't consider them to be "contained" segments.
     pureContains =
-      filter (\seg -> not $ isOpen (seg^.startPoint) && p == s^.start.asPoint) contains
+      filter (\seg -> not $ isOpen (seg^.startPoint) && p == seg^.start.asPoint) contains
 
     -- any (closed) ending segments at this event point.
     closedEnds = filter (isClosed . view endPoint) ends
@@ -267,24 +289,31 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 shouldReport   :: ( LineSegment_ lineSegment point
                   , Point_ point 2 r
                   , Ord r, Num r
+                  , HasIntersectionWith lineSegment lineSegment
                   ) => a -> [lineSegment] -> [lineSegment]
 shouldReport _ = overlapsOr (isClosed . view startPoint) intersects
 
 -- | split the status structure, extracting the segments that contain p.
 -- the result is (before,contains,after)
-extractContains      :: (Fractional r, Ord r)
+extractContains      :: ( LineSegment_ lineSegment point
+                        , HasOnSegment lineSegment 2
+                        , Point_ point 2 r
+                        , Ord r, Fractional r
+                        )
                      => Point 2 r -> StatusStructure r lineSegment
                      -> (StatusStructure r lineSegment, [lineSegment], StatusStructure r lineSegment)
 extractContains p ss = (before, F.toList mid1 <> F.toList mid2, after)
   where
-    (before, mid1, after') = SS.splitOn (xCoordAt' $ p^.yCoord) (p^.xCoord) ss
+    (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
     -- Make sure to also select the horizontal segments containing p
-    (mid2, after) = SS.spanAntitone (intersects p . view core) after'
-    xCoordAt' y sa = xCoordAt y (sa^.core)
+    (mid2, after) = SS.spanAntitone (onSegment p) after'
 
 -- | Given a point and the linesegements that contain it. Create a piece of
 -- status structure for it.
-toStatusStruct      :: (Fractional r, Ord r)
+toStatusStruct      :: ( LineSegment_ lineSegment point
+                       , Point_ point 2 r
+                       , Ord r, Fractional r
+                       )
                     => Point 2 r -> [lineSegment] -> StatusStructure r lineSegment
 toStatusStruct p xs = ss `SS.join` hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
@@ -322,6 +351,7 @@ endsAt p seg = seg^.end.asPoint == p
 -- | Find all events
 findNewEvent       :: ( LineSegment_ lineSegment point
                       , Point_ point 2 r, Ord r, Fractional r
+                      , IsIntersectableWith lineSegment lineSegment
                       , Intersection lineSegment lineSegment ~
                               Maybe (LineSegmentLineSegmentIntersection lineSegment)
                       )

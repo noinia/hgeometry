@@ -13,11 +13,11 @@
 module HGeometry.LineSegment.Intersection.Types
   ( Intersections
 
-  , Associated, startPointOf, endPointOf, interiorTo
+  , Associated(Associated), startPointOf, endPointOf, interiorTo
   , mkAssociated
   , associatedSegments
 
-  , AroundEnd, AroundStart, AroundIntersection
+  , AroundEnd(..), AroundStart(..), AroundIntersection(..)
   , isInteriorIntersection
 
 
@@ -27,8 +27,9 @@ module HGeometry.LineSegment.Intersection.Types
   , intersectionPoint, associatedSegs
   , mkIntersectionPoint
 
-  , OrdArounds
 
+  , IntersectConstraints
+  , OrdArounds
 
   , ordPoints
   ) where
@@ -271,9 +272,9 @@ instance (NFData point, NFData lineSegment) => NFData (IntersectionPoint point l
 
 -- | Given a point p, and a bunch of segments that suposedly intersect
 -- at p, correctly categorize them.
-mkIntersectionPoint         :: ( LineSegment_ lineSegment point
+mkIntersectionPoint         :: ( LineSegment_ lineSegment endPoint
+                               , Point_ endPoint 2 r
                                , Point_ point 2 r, Eq r
-                               -- , Ord r, Fractional r
                                , OrdArounds lineSegment
                                )
                             => point
@@ -300,10 +301,7 @@ ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 intersectionPointOf      :: ( LineSegment_ lineSegment point
                             , Point_ point 2 r
                             , Ord r, Fractional r
-                            , OrdArounds lineSegment
-                            , IsIntersectableWith lineSegment lineSegment
-                            , Intersection lineSegment lineSegment ~
-                              Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                            , IntersectConstraints lineSegment
                             )
                          => lineSegment -> lineSegment
                          -> Maybe (IntersectionPoint (Point 2 r) lineSegment)
@@ -313,3 +311,10 @@ intersectionPointOf s s' = s `intersect` s' <&> \case
   where
     intersectionPoint' p = IntersectionPoint p (mkAssociated p s <> mkAssociated p s')
     topEndPoint seg = List.minimumBy ordPoints [seg^.start.asPoint, seg^.end.asPoint]
+
+-- | Shorthand for the more-or-less standard constraints that we need on LineSegments
+type IntersectConstraints lineSegment =
+  ( OrdArounds lineSegment
+  , IsIntersectableWith lineSegment lineSegment
+  , Intersection lineSegment lineSegment ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+  )

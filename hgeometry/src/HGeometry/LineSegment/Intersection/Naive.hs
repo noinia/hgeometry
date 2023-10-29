@@ -15,7 +15,6 @@ module HGeometry.LineSegment.Intersection.Naive
 import           Control.Lens ((^.))
 import qualified Data.Map as Map
 import           HGeometry.Combinatorial.Util
-import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.LineSegment.Intersection.Types
 import           HGeometry.Point
@@ -29,26 +28,15 @@ intersections :: ( Ord r, Fractional r
                  , LineSegment_ lineSegment point
                  , Eq lineSegment
                  , Point_ point 2 r
-                 , IsIntersectableWith lineSegment lineSegment
-                 , OrdArounds lineSegment
-                 , Intersection lineSegment lineSegment ~
-                   Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                 , IntersectConstraints lineSegment
+                 , Foldable f
                  )
-              => [lineSegment] -> Intersections r lineSegment
+              => f lineSegment -> Intersections r lineSegment
 intersections = foldMap collect . uniquePairs
   where
     collect (Two s s') = case intersectionPointOf s s' of
                            Nothing -> mempty
                            Just ip -> Map.singleton (ip^.intersectionPoint) (ip^.associatedSegs)
-
--- -- | Add s and s' to the map with key p
--- handlePoint        :: (Ord r, Fractional r)
---                    => LineSegment 2 p r :+ e
---                    -> LineSegment 2 p r :+ e
---                    -> Point 2 r
---                    -> Intersections p r e -> Intersections p r e
--- handlePoint s s' p = M.insertWith (<>) p (mkAssociated p s <> mkAssociated p s')
-
 
 -- type R = Rational
 
