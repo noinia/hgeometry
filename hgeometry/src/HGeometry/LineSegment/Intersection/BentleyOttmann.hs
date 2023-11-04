@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.LineSegment.Intersection.BentleyOttmann
@@ -27,7 +28,6 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
 
   , IntersectConstraints
   , OrdArounds
-  , Flipped
   ) where
 
 import           Control.Lens hiding (contains)
@@ -45,7 +45,7 @@ import qualified Data.Set as EQ -- event queue
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
-import           HGeometry.Ext
+-- import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
 import           HGeometry.Interval.EndPoint
@@ -53,6 +53,9 @@ import           HGeometry.LineSegment
 import           HGeometry.LineSegment.Intersection.Types
 import           HGeometry.Point
 import qualified HGeometry.Set.Util as SS -- status struct
+import           HGeometry.Interval.Class
+import           HGeometry.LineSegment.Class
+import           HGeometry.Properties (NumType, Dimension)
 
 --------------------------------------------------------------------------------
 
@@ -66,14 +69,13 @@ intersections      :: forall lineSegment point r f.
                       , Ord r, Fractional r
                       , HasOnSegment lineSegment 2
                       , IntersectConstraints lineSegment
-                      -- , IntersectConstraints (lineSegment :+ Flipped)
                       , Foldable f, Functor f
                       )
                    => f lineSegment -> Intersections r lineSegment
-intersections = fmap unflipSegs . intersections'' . fmap tagFlipped
-  where
-    intersections'' :: f (lineSegment :+ Flipped) -> Intersections r (lineSegment :+ Flipped)
-    intersections'' = undefined -- intersections'
+intersections = fmap unflipSegs . intersections' . fmap tagFlipped
+  -- where
+  --   intersections'' :: f (Flipped lineSegment) -> Intersections r (Flipped lineSegment)
+  --   intersections'' = intersections'
 
 
 -- intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
@@ -104,7 +106,6 @@ interiorIntersections :: ( LineSegment_ lineSegment point
                          , Eq lineSegment
                          , Ord r, Fractional r
                          , IntersectConstraints lineSegment
-                         , IntersectConstraints (lineSegment :+ Flipped)
                          , HasOnSegment lineSegment 2
                          , Foldable f, Functor f
                          )
@@ -115,18 +116,78 @@ interiorIntersections = Map.filter isInteriorIntersection . intersections
 --------------------------------------------------------------------------------
 -- * Flipping and unflipping
 
-data Flipped = NotFlipped | Flipped deriving (Show,Eq)
+data Flipped segment = NotFlipped segment
+                     | Flipped segment
+                     deriving (Show,Eq,Functor)
 
-instance Default Flipped where
-  def = NotFlipped
+-- | Access the underlying segment
+rawSegment :: Lens' (Flipped segment) segment
+rawSegment = lens (\case
+                      NotFlipped s -> s
+                      Flipped s    -> s
+                  )
+                  (\fs seg -> seg <$ fs)
+
+type instance NumType   (Flipped segment) = NumType segment
+type instance Dimension (Flipped segment) = Dimension segment
+
+type instance Intersection (Flipped segment) (Flipped segment) =
+  Maybe (LineSegmentLineSegmentIntersection (Flipped segment))
+
+instance HasStart lineSegment point => HasStart (Flipped lineSegment) point where
+  start = rawSegment.start
+instance ( HasStartPoint lineSegment endPoint
+         ) => HasStartPoint (Flipped lineSegment) endPoint where
+  startPoint = rawSegment.startPoint
+
+instance HasEnd lineSegment point => HasEnd (Flipped lineSegment) point where
+  end = rawSegment.end
+instance ( HasEndPoint lineSegment endPoint
+         ) => HasEndPoint (Flipped lineSegment) endPoint where
+  endPoint = rawSegment.endPoint
+
+type instance StartPointOf (Flipped lineSegment) = StartPointOf lineSegment
+type instance EndPointOf   (Flipped lineSegment) = EndPointOf   lineSegment
+
+instance IntervalLike_ lineSegment point => IntervalLike_ (Flipped lineSegment) point where
+  mkInterval s t = NotFlipped $ mkInterval s t
+instance LineSegment_ lineSegment point => LineSegment_ (Flipped lineSegment) point where
+  uncheckedLineSegment s t = NotFlipped $ uncheckedLineSegment s t
+
+
+instance segment `HasIntersectionWith` segment
+          => (Flipped segment) `HasIntersectionWith` (Flipped segment) where
+  a `intersects` b = (a^.rawSegment)  `intersects` (b^.rawSegment)
+
+instance HasOnSegment segment 2 => HasOnSegment (Flipped segment) 2 where
+  onSegment q s = onSegment q (s^.rawSegment)
+
+instance (segment `IsIntersectableWith` segment
+         , Intersection segment segment ~ Maybe (LineSegmentLineSegmentIntersection segment)
+         ) => (Flipped segment) `IsIntersectableWith` (Flipped segment) where
+  a `intersect` b = intersect (a^.rawSegment) (b^.rawSegment) <&> \case
+    LineSegment_x_LineSegment_Point p         -> LineSegment_x_LineSegment_Point p
+    LineSegment_x_LineSegment_LineSegment seg ->
+      LineSegment_x_LineSegment_LineSegment $ NotFlipped seg
+    -- TODO: maybe we should actually unflip segments a and b rather than use rawSegment
+
+
+-- type instance Intersection (geom :+ Flipped) (geom :+ Flipped) =
+--   Maybe (LineSegmentLineSegmentIntersection (geom :+ Flipped))
+
+-- instance IsIntersectableWith geomA geomB
+--          => IsIntersectableWith (geomA :+ extra) (geomB :+ extra) where
+--   ga `intersect` gb = (ga^.core) `intersect` (gb^.core)
+
+
 
 -- | Make sure the 'start' endpoint occurs before the end-endpoints in
 -- terms of the sweep order.
 tagFlipped   :: (LineSegment_ lineSegment point, Point_ point 2 r, Ord r)
-             => lineSegment -> lineSegment :+ Flipped
+             => lineSegment -> Flipped lineSegment
 tagFlipped s = case (s^.start) `ordPoints` (s^.end) of
-                 GT -> flipSeg s :+ Flipped
-                 _  -> s         :+ NotFlipped
+                 GT -> Flipped $ flipSeg s
+                 _  -> NotFlipped s
 
 -- | Flips the segment
 flipSeg     :: LineSegment_ lineSegment point => lineSegment -> lineSegment
@@ -134,11 +195,15 @@ flipSeg seg = seg&start .~ (seg^.end)
                  &end   .~ (seg^.start)
 
 
-isFlipped :: forall f lineSegment.
-             Coercible (f (lineSegment :+ Flipped)) (lineSegment :+ Flipped)
-          => f (lineSegment :+ Flipped) -> Bool
+--------------------------------------------------------------------------------
 
-isFlipped = (== Flipped) . view extra . coerce @_ @(lineSegment :+ Flipped)
+-- | test if the segment is flipped or not.
+isFlipped :: forall f lineSegment.
+             Coercible (f (Flipped lineSegment)) (Flipped lineSegment)
+          => f (Flipped lineSegment) -> Bool
+isFlipped = (\case
+                Flipped _ -> True
+                _         -> False) . coerce @_ @(Flipped lineSegment)
 
 -- | Unflips the segments in an associated.
 unflipSegs                       :: ( LineSegment_ lineSegment point
@@ -146,7 +211,7 @@ unflipSegs                       :: ( LineSegment_ lineSegment point
                                     , Fractional r, Ord r
                                     , IntersectConstraints lineSegment
                                     )
-                                 => Associated (lineSegment :+ Flipped)
+                                 => Associated (Flipped lineSegment)
                                  -> Associated lineSegment
 unflipSegs assocs = Associated (dropFlipped ss1 <> unflipSegs' es)
                                (dropFlipped es1 <> unflipSegs' ss)
@@ -158,17 +223,17 @@ unflipSegs assocs = Associated (dropFlipped ss1 <> unflipSegs' es)
 
     -- | For segments that are not acutally flipped, we can just drop the flipped bit
     dropFlipped :: Functor f
-                => Set.Set (f (lineSegment :+ Flipped)) -> Set.Set (f lineSegment)
-    dropFlipped = Set.mapMonotonic (fmap $ view core)
+                => Set.Set (f (Flipped lineSegment)) -> Set.Set (f lineSegment)
+    dropFlipped = Set.mapMonotonic (fmap $ view rawSegment)
 
--- For flipped segs we unflip them (and appropriately coerce the
--- so that they remain in the same order. I.e. if they were sorted
--- around the start point they are now sorted around the endpoint.
+-- | For flipped segs we unflip them (and appropriately coerce the so that they remain in
+-- the same order. I.e. if they were sorted around the start point they are now sorted
+-- around the endpoint.
 unflipSegs' :: ( Functor f, Coercible (f lineSegment) (g lineSegment)
                , LineSegment_ lineSegment point
                )
-            => Set.Set (f (lineSegment :+ Flipped)) -> Set.Set (g lineSegment)
-unflipSegs' = Set.mapMonotonic (coerce . fmap (flipSeg . view core))
+            => Set.Set (f (Flipped lineSegment)) -> Set.Set (g lineSegment)
+unflipSegs' = Set.mapMonotonic (coerce . fmap (flipSeg . view rawSegment))
 
 --------------------------------------------------------------------------------
 

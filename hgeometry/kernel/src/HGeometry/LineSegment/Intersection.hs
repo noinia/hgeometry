@@ -163,7 +163,7 @@ type instance Intersection (LineSegment AnEndPoint point)
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          LineSegment AnEndPoint point `HasIntersectionWith` LineSegment AnEndPoint point where
-  s `intersects` s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
   {-# INLINE intersects #-}
 
 ----------------------------------------
