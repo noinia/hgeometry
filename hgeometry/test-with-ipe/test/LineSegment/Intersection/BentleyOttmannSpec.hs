@@ -12,10 +12,8 @@ import           Control.Lens
 import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
-import           LineSegmentSpec_ (arrowAsOpen)
-import           Data.List (intercalate)
+import           LineSegmentSpec (arrowAsOpen)
 import qualified Data.Map as Map
-import           Data.Proxy
 import           HGeometry.Number.Real.Rational
 import           Ipe
 import           System.OsPath
@@ -73,7 +71,7 @@ samePointsAsNaive      :: ( LineSegment_ lineSegment point
                           , Ord r, Fractional r
                           , HasOnSegment lineSegment 2
                           , IntersectConstraints lineSegment
-                          -- , IntersectConstraints (lineSegment :+ Flipped)
+                          , StartPointOf lineSegment ~ EndPointOf lineSegment
                           , Show lineSegment, Show r
                           )
                        => [lineSegment] -> Spec
@@ -87,7 +85,7 @@ sameAsNaive      :: ( LineSegment_ lineSegment point
                     , Ord r, Fractional r
                     , HasOnSegment lineSegment 2
                     , IntersectConstraints lineSegment
-                    -- , IntersectConstraints (lineSegment :+ Flipped)
+                    , StartPointOf lineSegment ~ EndPointOf lineSegment
                     , Show lineSegment, Show r
                     )
                  => [lineSegment] -> Spec

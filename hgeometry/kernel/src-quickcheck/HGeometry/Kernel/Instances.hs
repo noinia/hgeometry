@@ -21,6 +21,7 @@ import HGeometry.HalfSpace
 import HGeometry.HyperPlane (HyperPlane(..))
 import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
+import HGeometry.Interval.EndPoint
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -56,10 +57,12 @@ instance ( Arbitrary (endPoint r)
                  pure $ Interval p q
 
 instance ( Arbitrary (endPoint point)
-         , Eq (endPoint point)
+         , IsEndPoint (endPoint point) (endPoint point)
+         , IxValue (endPoint point) ~ point
+         , Eq point
          ) => Arbitrary (LineSegment endPoint point) where
   arbitrary = do p <- arbitrary
-                 q <- arbitrary `suchThat` (/= p)
+                 q <- arbitrary `suchThat` (\q' -> q'^._endPoint /= p^._endPoint)
                  pure $ LineSegment p q
 
 instance ( Arbitrary point

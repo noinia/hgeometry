@@ -1,5 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-module LineSegmentSpec_ where
+module LineSegmentSpec where
 
 import Control.Lens
 import Control.Monad ((>=>))
@@ -31,7 +31,7 @@ getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 
 spec :: Spec
-spec = pure ()
+spec = testI
 {-
 
   describe "linesegment x box intersection tests" $ do
@@ -73,28 +73,3 @@ arrowAsOpen ((LineSegment_ p q) :+ ats) =
     f x = case ats^?_Attr x of
             Just _  -> AnOpenE
             Nothing -> AnClosedE
-
-
-
-test1 :: ClosedLineSegment (Point 2 Int)
-test1 = ClosedLineSegment (Point2 0 10) (Point2 0 20)
-
-test2 :: OpenLineSegment (Point 2 Int)
-test2 = OpenLineSegment (Point2 0 5) (Point2 0 20)
-
-test3 :: ClosedLineSegment (Point 2 Int)
-test3 = ClosedLineSegment (Point2 0 21) (Point2 0 5)
-
-test4 :: LineSegment AnEndPoint (Point 2 Int)
-test4 = LineSegment (AnOpenE $ Point2 0 10) (AnClosedE $ Point2 0 9)
-
--- test = withRank (Vector2 0 1) test1 test4
-
-{-
-testI = describe "some manual intersection tests" $ do
-          it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
-          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
-          it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
-          it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
-
--}

@@ -45,26 +45,55 @@ type instance Intersection (LineEQ r) (LineSegment AnEndPoint point) =
 -- * HasIntersectionWith
 
 instance ( Point_ point 2 r, Num r, Ord r
-         ) => LinePV 2 r `HasIntersectionWith` ClosedLineSegment point where
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         ) => LinePV 2 r `HasIntersectionWith` LineSegment endPoint point where
   intersects = intersectsImpl
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r, Ord r
-         ) => LineEQ r `HasIntersectionWith` ClosedLineSegment point where
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         ) => LineEQ r `HasIntersectionWith` LineSegment endPoint point where
   --
   -- >>> LineEQ 1 2 `intersects` ClosedLineSegment origin (Point2 1 10)
   -- True
   intersects = intersectsImpl
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
-         ) => LineEQ r `HasIntersectionWith` LineSegment AnEndPoint point where
-  intersects = intersectsImpl
-  {-# INLINE intersects #-}
-instance ( Point_ point 2 r, Num r,  Ord r
-         ) => LinePV 2 r `HasIntersectionWith` LineSegment AnEndPoint point where
-  intersects = intersectsImpl
-  {-# INLINE intersects #-}
+
+-- instance ( Point_ point 2 r, Num r, Ord r
+--          ) => LinePV 2 r `HasIntersectionWith` ClosedLineSegment point where
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+
+-- instance ( Point_ point 2 r, Num r, Ord r
+--          ) => LineEQ r `HasIntersectionWith` ClosedLineSegment point where
+--   --
+--   -- >>> LineEQ 1 2 `intersects` ClosedLineSegment origin (Point2 1 10)
+--   -- True
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+
+-- instance ( Point_ point 2 r, Num r,  Ord r
+--          ) => LineEQ r `HasIntersectionWith` LineSegment AnEndPoint point where
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+-- instance ( Point_ point 2 r, Num r,  Ord r
+--          ) => LinePV 2 r `HasIntersectionWith` LineSegment AnEndPoint point where
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+
+-- instance ( Point_ point 2 r, Num r, Ord r
+--          ) => LinePV 2 r `HasIntersectionWith` OpenLineSegment point where
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+
+-- instance ( Point_ point 2 r, Num r, Ord r
+--          ) => LineEQ r `HasIntersectionWith` OpenLineSegment point where
+--   intersects = intersectsImpl
+--   {-# INLINE intersects #-}
+
 
 
 -- | Test whether a line in R^2 intersects a closed linesegment
@@ -115,6 +144,19 @@ instance ( Point_ point 2 r
   intersect = intersectImpl
   {-# INLINE intersect #-}
 
+instance ( Point_ point 2 r
+         , Fractional r,  Ord r
+         ) => LinePV 2 r `IsIntersectableWith` OpenLineSegment point where
+  intersect = intersectImpl
+  {-# INLINE intersect #-}
+
+instance ( Point_ point 2 r
+         , Fractional r,  Ord r
+         ) => LineEQ r `IsIntersectableWith` OpenLineSegment point where
+  intersect = intersectImpl
+  {-# INLINE intersect #-}
+
+
 -- | Implementation for intersects between lines and line segments.
 --
 -- the type is is sufficiently general that for various line or closed line segment types
@@ -135,6 +177,7 @@ l `intersectImpl` s = l `intersect` supportingLine s >>= \case
                         | otherwise       -> Nothing
     Line_x_Line_Line _  -> Just $ Line_x_LineSegment_LineSegment s
 {-# INLINE intersectImpl #-}
+
 
 --------------------------------------------------------------------------------
 -- * LineSegment x LineSegment
@@ -161,8 +204,48 @@ type instance Intersection (LineSegment AnEndPoint point)
 -- * HasIntersectionWith
 
 instance ( Point_ point 2 r, Num r,  Ord r
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
          ) =>
-         LineSegment AnEndPoint point `HasIntersectionWith` LineSegment AnEndPoint point where
+         LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+-- TODO: specialize instance for ClosedLineSegment and AnLineSegment
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+  s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+  {-# INLINE intersects #-}
+
+instance ( Point_ point 2 r, Num r,  Ord r
+         ) =>
+         OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
   {-# INLINE intersects #-}
 

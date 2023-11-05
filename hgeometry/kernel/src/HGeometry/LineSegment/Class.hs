@@ -19,7 +19,7 @@ module HGeometry.LineSegment.Class
 
   , HasStart(..), HasEnd(..)
   , HasStartPoint(..), HasEndPoint(..)
-
+  , StartPointOf, EndPointOf
 
   , ordAtY, ordAtX
   , xCoordAt, yCoordAt

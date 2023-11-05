@@ -1,5 +1,5 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module HGeometry.LineSegmentSpec where
 
 import Control.Lens ((^.), IxValue)
@@ -7,20 +7,21 @@ import Data.Ord (comparing)
 import HGeometry.Ext
 import HGeometry.Intersection
 import HGeometry.Number.Real.Rational
--- import Data.Vinyl
 -- import HGeometry.Boundary
 -- import HGeometry.Box
 import HGeometry.LineSegment
--- import HGeometry.LineSegment.Internal (onSegment, onSegment2)
 import HGeometry.Point
 import HGeometry.Interval
-import HGeometry.Vector ((*^))
+import HGeometry.HyperPlane
+import HGeometry.Vector ((*^), Vector(..))
+import HGeometry.Line.PointAndVector
 import Test.Hspec.QuickCheck
 import Test.Hspec
 import Test.QuickCheck ((===), Arbitrary(..), suchThat, Property, counterexample)
 import Test.QuickCheck.Instances ()
 import HGeometry.Kernel.Instances ()
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 -- main :: IO ()
 -- main = print $ testStartInt
@@ -91,15 +92,20 @@ spec =
           intersects3 = intersects
           intersects2 :: Point 2 R -> ClosedLineSegment (Point 2 R :+ ()) -> Bool
           intersects2 = intersects
+          intersects2' :: Point 2 R -> OpenLineSegment (Point 2 R :+ ()) -> Bool
+          intersects2' = intersects
 
       it "2d on segment tests" $ do
         let seg1 = ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ())
             seg2 = ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ())
+            seg3 = OpenLineSegment   (origin :+ ()) (Point2 3 3 :+ ())
         (Point2 1    0 `intersects2` seg1) `shouldBe`  True
         (Point2 1    1 `intersects2` seg1) `shouldBe` False
         (Point2 5    0 `intersects2` seg1) `shouldBe` False
         (Point2 (-1) 0 `intersects2` seg1) `shouldBe` False
         (Point2 1    1 `intersects2` seg2) `shouldBe`  True
+        (Point2 1    1 `intersects2'` seg3) `shouldBe`  True
+        (Point2 0    0 `intersects2'` seg3) `shouldBe`  False
 
       it "3d on segment tests" $ do
         let seg = ClosedLineSegment (origin :+ ()) (Point3 3 3 3 :+ ())
@@ -194,16 +200,24 @@ test3 = ClosedLineSegment (Point2 0 21) (Point2 0 5)
 test4 :: LineSegment AnEndPoint (Point 2 Int)
 test4 = LineSegment (AnEndPoint Open $ Point2 0 10) (AnEndPoint Closed $ Point2 0 9)
 
+test5 :: OpenLineSegment (Point 2 Int)
+test5 = OpenLineSegment (Point2 0 20) (Point2 200 20)
+
 -- -- test = withRank (Vector2 0 1) test1 test4
 
 testI :: Spec
 testI = describe "some manual intersection tests" $ do
-          pure ()
---           it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
---          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
---           it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
---           it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
+          it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
+          it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
+          it "manual intersection" $ (test2 `intersects` test5 ) `shouldBe` False
 
+          describe "manual intersect with line" $ do
+            let l = LinePV origin (Vector2 0 (1 :: Int))
+            it "man" $ (l `intersects` test1) `shouldBe` True
+            it "sideTest" $ traceShow (hyperPlaneEquation l) $
+              (onSideTest (test1^.start) l) `shouldBe` EQ
 
 
 
