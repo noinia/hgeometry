@@ -9,19 +9,21 @@ module HGeometry.Miso.Svg.Canvas
 
   , InternalCanvasAction
   , handleInternalCanvasAction
+  , subs
 
   , svgCanvas_
   ) where
 
-import           Control.Lens hiding (elements)
-import           HGeometry.Miso.Svg.StaticCanvas
-import           HGeometry.Point
-import           HGeometry.Transformation
-import           HGeometry.Vector
-import           HGeometry.Viewport
-import           Miso (Attribute, View, Effect, height_, width_, noEff, onMouseLeave)
-import           Miso.String (ms)
-import           Miso.Svg (svg_, g_, transform_)
+import Control.Lens hiding (elements)
+import HGeometry.Miso.Svg.StaticCanvas
+import HGeometry.Point
+import HGeometry.Transformation
+import HGeometry.Vector
+import HGeometry.Viewport
+import Miso (Attribute, View, Effect, Sub, height_, width_, noEff, onMouseLeave)
+import Miso.String (MisoString, ms)
+import Miso.Subscription.MouseExtra
+import Miso.Svg (svg_, g_, transform_)
 
 --------------------------------------------------------------------------------
 -- *A Canvas
@@ -89,6 +91,7 @@ handleInternalCanvasAction canvas = noEff . \case
   MouseMove (x,y) -> canvas&mousePosition ?~ Point2 x y
   MouseLeave      -> canvas&mousePosition .~ Nothing
 
+
 --------------------------------------------------------------------------------
 -- * The View
 
@@ -135,3 +138,15 @@ svgCanvas_ canvas ats vs =
 --                                            , rx_ "5", ry_ "5"
 --                                            , fill_ "black"
 --                                            ] <> ats
+
+--------------------------------------------------------------------------------
+-- * Subscriptions
+
+-- | Subscription needed for the iCanvas. In particular, captures the
+-- mouse position
+subs     :: MisoString -- ^ The id of the iCanvas
+                -> (InternalCanvasAction -> action)
+                -> [Sub action]
+subs i f = [ relativeMouseSub i (f . MouseMove)
+                  -- , arrowsSub          (f . ArrowPress)
+                 ]

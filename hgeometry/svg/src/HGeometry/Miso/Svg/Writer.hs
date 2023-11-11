@@ -33,17 +33,15 @@ import           Data.Vinyl.TypeLevel
 import           HGeometry.Ball
 import           HGeometry.Box
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Miso.OrphanInstances ()
--- import           HGeometry.PlanarSubdivision.Basic
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
-import           HGeometry.Foldable.Util
 import           HGeometry.Vector
--- import           HGeometry.Viewport
-import qualified Ipe as Ipe
+import qualified Ipe
 import qualified Ipe.Attributes as IA
 import           Miso hiding (width_,height_,view)
 import           Miso.String (MisoString, ToMisoString(..), ms)
@@ -61,12 +59,12 @@ withAts             ::  ([Attribute action] -> [View action] -> View action)
 withAts f ats1 ats2 = withAts' f ats1 ats2 []
 
 -- | Helper function to construct a View. See 'withAts' for its usage.
-withAts'                  :: ([Attribute action] -> [View action] -> View action)
-                          -> [Attribute action]
-                          -> [Attribute action]
-                          -> [View action]
-                          -> View action
-withAts' f ats1 ats2 body = f (ats1 <> ats2) body
+withAts'             :: ([Attribute action] -> [View action] -> View action)
+                     -> [Attribute action]
+                     -> [Attribute action]
+                     -> [View action]
+                     -> View action
+withAts' f ats1 ats2 = f (ats1 <> ats2)
 
 --------------------------------------------------------------------------------
 -- * Default implementations for drawing geometric objects
@@ -269,9 +267,18 @@ instance ToMisoString r => Drawable (Ipe.Group r) where
   draw (Ipe.Group os) ats = g_ ats (map (flip draw []) os)
 
 instance ToMisoString r => Drawable (Ipe.Image r) where
+  draw _ ats = text_ ats [text "image"]
 instance ToMisoString r => Drawable (Ipe.TextLabel r) where
+  draw (Ipe.Label t p) ats = text_ ([ transform_ $ moveTo p ] <> ats) [text $ ms t ]
 instance ToMisoString r => Drawable (Ipe.MiniPage r) where
+  draw (Ipe.MiniPage t p w) ats = text_ ([ transform_ $ moveTo p
+                                         , width_     $ ms w
+                                         ] <> ats)
+                                        [text $ ms t]
 
+-- | renders a translation matrix
+moveTo :: ToMisoString r => Point 2 r -> MisoString
+moveTo (over coordinates ms -> Point2 x y) = "translate(" <> x <> " " <> y <> ")"
 
 instance ToMisoString r => Drawable (Ipe.IpeSymbol r) where
   draw (Ipe.Symbol p _ ) = withAts ellipse_ [ rx_ r
