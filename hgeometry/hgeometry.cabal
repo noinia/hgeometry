@@ -514,7 +514,7 @@ library vector-quickcheck
 --------------------------------------------------------------------------------
 
 
-test-suite hgeometry-vector-hspec
+test-suite vector-hspec
    import:           all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
    build-tool-depends: hspec-discover:hspec-discover
    type:             exitcode-stdio-1.0
@@ -528,7 +528,7 @@ test-suite hgeometry-vector-hspec
 
 --------------------------------------------------------------------------------
 
-test-suite hgeometry-vector-doctest
+test-suite vector-doctest
     import:           all-setup, all-quickcheck-setup, vector-quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          vector/doctests.hs
@@ -538,7 +538,7 @@ test-suite hgeometry-vector-doctest
 -- ** HGeometry-Point
 
 
-test-suite hgeometry-point-hspec
+test-suite point-hspec
   import:           all-setup, point-setup, all-quickcheck-setup, point-quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
@@ -553,7 +553,7 @@ test-suite hgeometry-point-hspec
   build-depends:
       hgeometry:point-quickcheck
 
-test-suite hgeometry-point-doctest
+test-suite point-doctest
     import:           all-setup, point-setup, all-quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          point/doctests.hs
@@ -563,7 +563,7 @@ test-suite hgeometry-point-doctest
 --------------------------------------------------------------------------------
 -- ** HGeometry-Kernel
 
-test-suite hgeometry-kernel-hspec
+test-suite kernel-hspec
   import:           all-setup, kernel-setup, all-quickcheck-setup, kernel-quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
@@ -583,7 +583,7 @@ test-suite hgeometry-kernel-hspec
   build-depends:
       hgeometry:kernel-quickcheck
 
-test-suite hgeometry-kernel-doctest
+test-suite kernel-doctest
     import:           all-setup, kernel-setup, kernel-quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          kernel/doctests.hs
@@ -592,7 +592,7 @@ test-suite hgeometry-kernel-doctest
 --------------------------------------------------------------------------------
 -- ** HGeometry
 
-test-suite hgeometry-hspec
+test-suite hspec
   import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
@@ -614,14 +614,14 @@ test-suite hgeometry-hspec
   build-depends:
       hgeometry:quickcheck
 
-test-suite hgeometry-doctest
+test-suite doctest
     import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 -- tests with ipe dependency
-test-suite hgeometry-with-ipe-hspec
+test-suite with-ipe-hspec
   import:           all-setup, ipe-setup, all-quickcheck-setup, quickcheck-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
@@ -647,7 +647,7 @@ test-suite hgeometry-with-ipe-hspec
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
 
-test-suite hgeometry-ipe-hspec
+test-suite ipe-hspec
   import:           all-setup, ipe-setup, ipe-test-setup
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
@@ -657,7 +657,7 @@ test-suite hgeometry-ipe-hspec
       Ipe.ReaderSpec
   hs-source-dirs:   ipe/test
 
-test-suite hgeometry-ipe-doctest
+test-suite ipe-doctest
     import:           all-setup, ipe-test-setup, doctest
     type:             exitcode-stdio-1.0
     main-is:          ipe/doctests.hs
@@ -666,14 +666,16 @@ test-suite hgeometry-ipe-doctest
 --------------------------------------------------------------------------------
 -- ** Svg Tests
 
--- test-suite hgeometry-svg-hspec
---   import:           all-setup, all-quickcheck-setup, quickcheck-setup
---   build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   other-modules:
---       Spec
---   hs-source-dirs:   test
+test-suite svg-hspec
+  import:           all-setup, all-quickcheck-setup, quickcheck-setup, svg-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+  hs-source-dirs:   svg/test
+  build-depends:
+      hgeometry:svg
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
@@ -682,7 +684,7 @@ test-suite hgeometry-ipe-doctest
 --------------------------------------------------------------------------------
 -- ** HGeometry Benchmarks
 
-benchmark hgeometry-benchmarks
+benchmark benchmarks
   import: all-setup, hgeometry-setup
   hs-source-dirs: bench
 
@@ -706,7 +708,7 @@ benchmark hgeometry-benchmarks
                , hashable              >= 1.4  && < 2
 
 
-benchmark hgeometry-vector-bench
+benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
     hs-source-dirs: vector/bench
     main-is: Benchmarks.hs

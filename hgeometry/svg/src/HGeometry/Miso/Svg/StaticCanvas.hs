@@ -96,6 +96,7 @@ staticCanvas_ canvas ats vs =
     (Vector2 w h) = canvas^.dimensions
     ts = matrixToMisoString $ canvas^.theViewport.worldToHost.transformationMatrix
 
+-- | Renders a matrix as a MisoString
 matrixToMisoString   :: ToSvgCoordinate r => Matrix 3 3 r -> MisoString
 matrixToMisoString m = "matrix(" <> MisoString.unwords [a,b,c,e,d,f] <> ")"
   where
