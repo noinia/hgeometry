@@ -631,7 +631,7 @@ instance HasEdges (LowerEnvelope plane) (LowerEnvelope plane) where
 -- running time: \(O(n\log n)\)
 --
 -- >>> groupOnCheap fst [ (1,"foo"), (2,"bar"), (2,"blaa"), (1,"boeez"), (1,"blap"), (4,"blax"), (4,"bleh"), (100,"floep")]
---  [[(1,"foo"),(1,"boeez"),(1,"blap")],[(2,"bar"),(2,"blaa")],[(4,"blax"),(4,"bleh")],[(100,"floep")]]
+-- [[(1,"foo"),(1,"boeez"),(1,"blap")],[(2,"bar"),(2,"blaa")],[(4,"blax"),(4,"bleh")],[(100,"floep")]]
 groupOnCheap  :: (Foldable f, Ord b)
               => (a -> b) -> f a -> [NonEmptyV.NonEmptyVector a]
 groupOnCheap f = fmap NonEmptyV.unsafeFromVector . V.groupBy ((==) `on` f) . sortOnCheap f
