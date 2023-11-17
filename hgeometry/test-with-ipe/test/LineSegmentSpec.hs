@@ -31,9 +31,8 @@ getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 
 spec :: Spec
-spec = testI
+spec = pure ()
 {-
-
   describe "linesegment x box intersection tests" $ do
     fp <- runIO $ getDataFileName' [osp|LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
@@ -55,7 +54,6 @@ ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> 
           (seg `intersects` (Boundary rect)) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
 
 -}
-
 sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
 sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
 

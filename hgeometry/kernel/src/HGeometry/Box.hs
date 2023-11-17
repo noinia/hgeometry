@@ -20,6 +20,7 @@ module HGeometry.Box
   ) where
 
 import Control.Lens
+import Data.Maybe (isJust)
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
@@ -28,12 +29,14 @@ import HGeometry.Box.Sides
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
-import HGeometry.Line.LineEQ
 import HGeometry.Line.Class
+import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Properties
 import HGeometry.Transformation
+import HGeometry.Vector.Class
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -132,5 +135,41 @@ instance ( Num r, Ord r
 instance ( Fractional r, Ord r
          , Point_ point 2 r
          ) =>  IsIntersectableWith (LinePV 2 r) (Rectangle point) where
-  (LinePV p v) `intersect` r = (fromPointAndVec @(LineEQ r) p v) `intersect` r
+  (LinePV p v) `intersect` r = fromPointAndVec @(LineEQ r) p v `intersect` r
   {-# INLINE intersect #-}
+
+--------------------------------------------------------------------------------
+-- Box x Box intersection
+
+
+
+type instance Intersection (Box point) (Box point) =
+  Maybe (Box (Point (Dimension point) (NumType point)))
+
+-- TODO, maybe make this more precise:
+
+-- data instance IntersectionOf (Box point) (Box point) =
+--     Box_x_Box_Point point
+--   | Box_x_Box_Segment (ClosedLineSegment point)
+--   | Box_x_Box_Box (Box point)
+
+-- instance (Ord r, Num r, Point_ point d r) => Box point `HasIntersectionWith` Box point where
+--   a `intersects` b = isJust $ a `intersect` b
+
+-- instance  (Ord r, Num r, Point_ point d r) => Box point `IsIntersectableWith` Box point where
+--   bx `intersect` bx' = fmap fromExtent' . sequence
+--                      $ liftI2 intersect (extent bx) (extent bx')
+--     where
+--       fromExtent' = fromExtent . \case
+--         ClosedInterval_x_ClosedInterval_Point x     -> ClosedInterval x x
+--         ClosedInterval_x_ClosedInterval_Contained i -> i
+--         ClosedInterval_x_ClosedInterval_Partial i   -> i
+
+-- fromExtent :: ( Vector_ vector d interval
+--               , Point_ point d r
+--               , ClosedInterval_ interval r
+--               ) => vector -> Box point
+-- fromExtent v = Box minP maxP
+--   where
+--     minP = undefined
+--     maxP = undefined -- v^._Vector.components

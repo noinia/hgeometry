@@ -33,10 +33,10 @@ instance Ixed (NonEmptyVector a) where
   ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
   {-# INLINE ix #-}
 
-instance Foldable1 NonEmptyVector where
-  foldMap1 f v = let (v',x) = NV.unsnoc v
-                 in Vector.foldr (\x' a -> f x' <> a) (f x) v'
-  {-# INLINE foldMap1 #-}
+-- instance Foldable1 NonEmptyVector where
+--   foldMap1 f v = let (v',x) = NV.unsnoc v
+--                  in Vector.foldr (\x' a -> f x' <> a) (f x) v'
+--   {-# INLINE foldMap1 #-}
 
 instance Traversable1 NonEmptyVector where
   traverse1 f (NonEmptyVector v) =

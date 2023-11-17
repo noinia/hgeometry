@@ -55,9 +55,7 @@ data Action = Id
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id               -> noEff m
-    CanvasAction ca  -> do
-                          c' <- Canvas.handleInternalCanvasAction (m^.canvas) ca
-                          pure $ m&canvas .~ c'
+    CanvasAction ca  -> m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
     Select p         -> noEff $ m&selected ?~ p
   where

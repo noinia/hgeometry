@@ -26,7 +26,11 @@ import Prelude hiding (zipWith)
 import Text.Read
 
 --------------------------------------------------------------------------------
+
 -- | D-dimensional boxes.
+--
+-- A box is represented by two points; a point with lexicographically minimal coordinates,
+-- and a point with lexicographically maximal coordinates.
 newtype Box point = MkBox (Vector 2 point)
   deriving stock (Generic)
   deriving newtype (Eq,Ord)
