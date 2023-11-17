@@ -171,7 +171,7 @@ jobs:
       - name: haddock
         run: |
           $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all > haddock.raw.txt
-          $CABAL --with-compiler=$HC haddock-project
+          $CABAL haddock-project --with-compiler=$HC --with-haddock $HADDOCK
       - name: haddock-badge
         run: |
           grep ") in " haddock.raw.txt | sort -hr > haddock.txt
