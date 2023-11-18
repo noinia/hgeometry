@@ -29,7 +29,6 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
-                -optF -package=semigroupoids
                 -optF -package=hiraffe
                 -optF -package=hgeometry
 #-}

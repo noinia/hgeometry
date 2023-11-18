@@ -12,6 +12,7 @@
 module HGeometry.Box.Internal
   ( Box(Box,Rectangle)
   , Rectangle
+  , fromExtent
   ) where
 
 import Control.Lens
@@ -100,3 +101,18 @@ instance (Read point) => Read (Box point) where
                           return (Box p q))
 
 --------------------------------------------------------------------------------
+
+-- | Given a vector of intervals, construct a box.
+--
+-- >>> fromExtent (Vector2 (ClosedInterval 1 2) (ClosedInterval 10 20))
+-- Box (Point2 1 10) (Point2 2 20)
+fromExtent                     :: ( Vector_ vector d interval
+                                  , ClosedInterval_ interval r
+                                  , Has_ Additive_ d r
+                                  , Has_ Vector_   d interval
+                                  , HasComponents (Vector d interval) (Vector d r)
+                                  ) => vector -> Box (Point d r)
+fromExtent (view _Vector -> v) = Box minP maxP
+  where
+    minP = fromVector . over components (view start) $ v
+    maxP = fromVector . over components (view end)   $ v
