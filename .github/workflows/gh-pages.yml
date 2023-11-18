@@ -171,12 +171,11 @@ jobs:
       - name: haddock
         run: |
           "$HOME/.ghcup/bin/ghcup" set ghc "$HCVER"
+          export PATH=~/.ghcup/bin:$PATH
           $CABAL haddock --disable-documentation --haddock-all $ARG_TESTS $ARG_BENCH all > haddock.raw.txt
           # $CABAL haddock-project
         env:
           HCVER: ${{ matrix.compilerVersion }}
-        with:
-          path: ~/.ghcup/bin
       - name: haddock-badge
         run: |
           grep ") in " haddock.raw.txt | sort -hr > haddock.txt
