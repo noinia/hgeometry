@@ -205,6 +205,9 @@ test5 = OpenLineSegment (Point2 0 20) (Point2 200 20)
 
 -- -- test = withRank (Vector2 0 1) test1 test4
 
+vertSeg :: OpenLineSegment (Point 2 Int)
+vertSeg = OpenLineSegment (Point2 20 (-5)) (Point2 20 10)
+
 testI :: Spec
 testI = describe "some manual intersection tests" $ do
           it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
@@ -212,6 +215,15 @@ testI = describe "some manual intersection tests" $ do
           it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
           it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
           it "manual intersection" $ (test2 `intersects` test5 ) `shouldBe` False
+
+          it "open ended segments x vertical Line" $
+            (supportingLine vertSeg `intersects` test2) `shouldBe` False
+
+          it "open ended segments; open endpoint on segment" $
+            (test2 `intersects` vertSeg) `shouldBe` False
+          it "open ended segments; endpointtest" $
+            (Point2 20 (0 :: Int) `onSegment` test2) `shouldBe` False
+
 
           describe "manual intersect with line" $ do
             let l = LinePV origin (Vector2 0 (1 :: Int))

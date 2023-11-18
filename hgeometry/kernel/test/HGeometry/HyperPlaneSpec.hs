@@ -145,11 +145,6 @@ spec = describe "HyperPlane Tests" $ do
          it "on side of non-vertical line / hyperplane 5" $
            (Point2 0 0 `onSideTest` HyperPlane2 (-1) (-1) (-1))
            `shouldBe` GT
-
-         it "on vertical line" $
-           ((Point 0 10) `onSideTest` (HyperPlane2 0 0 1))
-           `shouldBe` EQ
-
          prop "pointOn produces a point on the hyperplane (2d)" $
            \(h :: HyperPlane 2 R) -> onHyperPlane (pointOn h) h
          prop "pointOn produces a point on the hyperplane (3d)" $

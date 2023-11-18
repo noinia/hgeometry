@@ -62,41 +62,6 @@ instance ( Point_ point 2 r, Num r, Ord r
   intersects = intersectsImpl
   {-# INLINE intersects #-}
 
-
--- instance ( Point_ point 2 r, Num r, Ord r
---          ) => LinePV 2 r `HasIntersectionWith` ClosedLineSegment point where
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
-
--- instance ( Point_ point 2 r, Num r, Ord r
---          ) => LineEQ r `HasIntersectionWith` ClosedLineSegment point where
---   --
---   -- >>> LineEQ 1 2 `intersects` ClosedLineSegment origin (Point2 1 10)
---   -- True
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
-
--- instance ( Point_ point 2 r, Num r,  Ord r
---          ) => LineEQ r `HasIntersectionWith` LineSegment AnEndPoint point where
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
--- instance ( Point_ point 2 r, Num r,  Ord r
---          ) => LinePV 2 r `HasIntersectionWith` LineSegment AnEndPoint point where
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
-
--- instance ( Point_ point 2 r, Num r, Ord r
---          ) => LinePV 2 r `HasIntersectionWith` OpenLineSegment point where
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
-
--- instance ( Point_ point 2 r, Num r, Ord r
---          ) => LineEQ r `HasIntersectionWith` OpenLineSegment point where
---   intersects = intersectsImpl
---   {-# INLINE intersects #-}
-
-
-
 -- | Test whether a line in R^2 intersects a closed linesegment
 intersectsImpl       :: ( HyperPlane_ line 2 r
                         , Point_ point 2 r
@@ -112,9 +77,6 @@ l `intersectsImpl` s = case (onSideTest (s^.start) l, onSideTest (s^.end) l) of
                          (GT, LT) -> True
                          (GT, EQ) -> s^.endPoint.to endPointType == Closed
                          (GT, GT) -> False
-  -- case onSideTest (s^.start) l of
-  --                        EQ   -> True
-  --                        side -> side /= onSideTest (s^.end) l
 {-# INLINE intersectsImpl #-}
 
 
@@ -221,8 +183,7 @@ instance ( Point_ point 2 r, Num r,  Ord r
          LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
   {-# INLINE intersects #-}
-
--- TODO: specialize instance for ClosedLineSegment and AnLineSegment
+  -- this does not really work; i.e. if the segments are colinear
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>

@@ -16,10 +16,9 @@ import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Simple
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
-import           Miso.String (ToMisoString(..), ms)
+import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
 --------------------------------------------------------------------------------
