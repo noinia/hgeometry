@@ -144,6 +144,6 @@ textAt                    :: ToMisoString r
                           => Point 2 r
                           -> [Attribute action] -> MisoString -> View action
 textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
-                                  , y_ $ ms y
-                                  ] <> ats
+                                   , y_ $ ms y
+                                   ] <> ats
                                   ) [text t]

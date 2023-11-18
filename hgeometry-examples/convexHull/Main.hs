@@ -72,7 +72,7 @@ recomputeHull m
                                           [ p :+ i | (i,p) <- IntMap.assocs (m^.points)]
                                 in m&hull .~ fmap convexHull pts
 
-insertPoint     :: Point 2 R -> IntMap.IntMap (Point 2 R) -> IntMap.IntMap (Point 2 R)
+insertPoint     :: p -> IntMap.IntMap p -> IntMap.IntMap p
 insertPoint p m = let k = case IntMap.lookupMax m of
                             Nothing    -> 0
                             Just (i,_) -> succ i
@@ -137,6 +137,9 @@ mainJSM = do
                     }
     startApp myApp
 
+textAt                    :: ToMisoString r
+                          => Point 2 r
+                          -> [Attribute action] -> MisoString -> View action
 textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   , y_ $ ms y
                                   ] <> ats

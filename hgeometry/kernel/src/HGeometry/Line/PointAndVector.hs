@@ -78,11 +78,9 @@ instance Num r => HyperPlaneFromPoints (LinePV 2 r) where
 
 instance ( Eq r, Num r
          ) => HyperPlane_ (LinePV 2 r) 2 r where
-  hyperPlaneEquation (LinePV (Point2 px py) (Vector2 vx vy)) = Vector3 a0 vx vy
-    where
-      a0 = if vx == 0 then -px else -vx*px - vy*py
-
-
+  hyperPlaneEquation (LinePV (Point2 px py) (Vector2 vx vy))
+    | vx == 0   = Vector3 (-px)            1  0
+    | otherwise = Vector3 (-vx*px - vy*py) vx vy
 
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.

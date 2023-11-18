@@ -161,8 +161,11 @@ class ( NumType hyperPlane ~ r
 
   -- | Test if a point lies on a hyperplane. For non-vertical
   -- hyperplanes, returns whether the point is *above* the hyperplane
-  -- or not. For vertical hyperplanes, we return 'LT' when the point
+  -- or not with respect to the d^th dimension.
+  --
+  -- For vertical hyperplanes (with respect to dimension d), we return 'LT' when the point
   -- is on the "left".
+  --
   --
   -- >>> Point2 0 2 `onSideTest` myLineAgain
   -- EQ

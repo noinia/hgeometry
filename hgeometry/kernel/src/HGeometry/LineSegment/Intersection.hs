@@ -263,17 +263,17 @@ instance ( Point_ point 2 r, Num r,  Ord r
 ----------------------------------------
 -- * IsIntersectableWith
 
-instance ( Point_ point 2 r, Fractional r,  Ord r
-         ) =>
-         LineSegment AnEndPoint point `IsIntersectableWith` LineSegment AnEndPoint point where
-  s `intersect` s' = supportingLine s `intersect` s' >>= \case
-    Line_x_LineSegment_Point p
-      | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
-      | otherwise                    -> Nothing
-    Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment todo
-      where
-        todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
-  {-# INLINE intersect #-}
+-- instance ( Point_ point 2 r, Fractional r,  Ord r
+--          ) =>
+--          LineSegment AnEndPoint point `IsIntersectableWith` LineSegment AnEndPoint point where
+--   s `intersect` s' = supportingLine s `intersect` s' >>= \case
+--     Line_x_LineSegment_Point p
+--       | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
+--       | otherwise                    -> Nothing
+--     Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment todo
+--       where
+--         todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
+--   {-# INLINE intersect #-}
 
 instance ( Point_ point 2 r, Fractional r,  Ord r
          , IxValue (endPoint point) ~ point
