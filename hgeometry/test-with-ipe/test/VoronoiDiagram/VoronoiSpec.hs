@@ -7,12 +7,12 @@ module VoronoiDiagram.VoronoiSpec
 import Control.Lens
 import Data.Default.Class
 import Golden
-import HGeometry.Combinatorial.Util
-import HGeometry.Duality
+-- import HGeometry.Combinatorial.Util
+-- import HGeometry.Duality
 import HGeometry.Ext
 import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.NonVertical
-import HGeometry.LowerEnvelope
+-- import HGeometry.LowerEnvelope
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Vector
@@ -22,7 +22,7 @@ import Ipe.Color
 import System.OsPath
 import Test.Hspec
 import Test.QuickCheck.Instances ()
-import Test.Util
+-- import Test.Util
 
 --------------------------------------------------------------------------------
 

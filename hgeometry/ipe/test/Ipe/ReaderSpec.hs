@@ -44,7 +44,7 @@ spec = do
     useSym = Symbol (Point2 320 736) "mark/disk(sx)"
 --     symAttrs =
 
-    translatedUse = "<use matrix=\"1 0 0 1 4.44908 -4.21815\" name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
+    -- translatedUse = "<use matrix=\"1 0 0 1 4.44908 -4.21815\" name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
 
 
 

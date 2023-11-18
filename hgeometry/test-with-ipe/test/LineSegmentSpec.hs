@@ -3,23 +3,21 @@ module LineSegmentSpec where
 
 import Control.Lens
 import Control.Monad ((>=>))
-import Data.Bifunctor
 import Data.Vinyl
-import HGeometry.Boundary
-import HGeometry.Box
+-- import HGeometry.Box
+-- import HGeometry.Boundary
 import HGeometry.Ext
-import HGeometry.Intersection
-import HGeometry.Line
+-- import HGeometry.Intersection
+-- import HGeometry.Line
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
-import HGeometry.Vector
+-- import HGeometry.Vector
 import Ipe
 import Ipe.Color
 import Paths_hgeometry
 import System.OsPath
 import Test.Hspec
-import Test.QuickCheck
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------

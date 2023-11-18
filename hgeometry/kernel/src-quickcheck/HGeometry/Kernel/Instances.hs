@@ -21,7 +21,7 @@ import HGeometry.HalfSpace
 import HGeometry.HyperPlane (HyperPlane(..))
 import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
-import HGeometry.Interval.EndPoint
+import HGeometry.Interval.EndPoint()
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment

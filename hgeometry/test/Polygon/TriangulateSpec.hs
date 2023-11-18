@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Polygon.TriangulateSpec (spec) where
 
-import           Control.Lens
-import qualified Data.Vector as V
-import           HGeometry
-import           HGeometry.Ext
+-- import           Control.Lens
+-- import qualified Data.Vector as V
+-- import           HGeometry
+-- import           HGeometry.Ext
 -- import           HGeometry.PlanarSubdivision (PolygonFaceData)
 -- import           HGeometry.PlaneGraph
 -- import           HGeometry.PolygonSpec ()
 -- import           HGeometry.PolygonTriangulation.Triangulate
 -- import           HGeometry.PolygonTriangulation.Types
 import           Test.Hspec
-import           Test.Hspec.QuickCheck
+-- import           Test.Hspec.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
