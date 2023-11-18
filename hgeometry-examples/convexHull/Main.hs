@@ -114,27 +114,20 @@ viewModel m = div_ [ ]
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.run 8080 $ mainJSM
-
-
-mainJSM :: JSM ()
-mainJSM = do
-    let myApp = App { model         = initialModel
-                    , update        = flip updateModel
-                    , view          = viewModel
-                    , subs          = Canvas.subs "mySvg" CanvasAction
-                                      <> [
-                                        -- arrowsSub (CanvasAction . ArrowPress)
-                                      ]
-                    , events        = Map.insert "touchstart" False
-                                    . Map.insert "touchmove" False
-                                    . Map.insert "mousemove" False
-                                    $ defaultEvents
-                    , initialAction = Id
-                    , mountPoint    = Nothing
-                    , logLevel      = Off
-                    }
-    startApp myApp
+main = JSaddle.run 8080 $
+         startApp $
+            App { model         = initialModel
+                , update        = flip updateModel
+                , view          = viewModel
+                , subs          = Canvas.subs "mySvg" CanvasAction
+                , events        = Map.insert "touchstart" False
+                                  . Map.insert "touchmove" False
+                                  . Map.insert "mousemove" False
+                                  $ defaultEvents
+                , initialAction = Id
+                , mountPoint    = Nothing
+                , logLevel      = Off
+                }
 
 textAt                    :: ToMisoString r
                           => Point 2 r
