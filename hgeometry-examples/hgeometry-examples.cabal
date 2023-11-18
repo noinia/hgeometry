@@ -134,9 +134,17 @@ executable hgeometry-lineSegmentIntersection
   hs-source-dirs: lineSegmentIntersection
   main-is:        Main.hs
 
+--------------------------------------------------------------------------------
+-- * Duality
+
+executable hgeometry-duality
+  import:         setup, miso-setup
+  hs-source-dirs: duality
+  main-is:        Main.hs
+
 
 --------------------------------------------------------------------------------
--- * LineSegment Intersect
+-- * Voronoi Diagram
 
 executable hgeometry-voronoi
   import:         setup, miso-setup

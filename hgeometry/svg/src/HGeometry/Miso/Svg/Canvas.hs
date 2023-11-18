@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module HGeometry.Miso.Svg.Canvas
   ( Canvas
+  , theViewport
   , blankCanvas
   , HasDimensions(..)
 
