@@ -15,6 +15,7 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
   , interiorIntersections
 
   , Intersections
+  , intersectionPoints
   , Associated, startPointOf, endPointOf, interiorTo
   , associatedSegments
 

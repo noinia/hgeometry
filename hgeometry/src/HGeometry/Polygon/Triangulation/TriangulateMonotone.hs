@@ -38,7 +38,8 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Algorithms.DivideAndConquer (mergeSortedListsBy)
 import           HGeometry.Lens.Util
-import           Hiraffe.Graph.Class
+-- import           Hiraffe.Graph.Class
+
 --------------------------------------------------------------------------------
 
 -- | Y-monotone polygon. All straight horizontal lines intersects the polygon

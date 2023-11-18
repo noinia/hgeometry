@@ -12,6 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Intersection.Types
   ( Intersections
+  , intersectionPoints
 
   , Associated(Associated), startPointOf, endPointOf, interiorTo
   , mkAssociated
@@ -236,8 +237,9 @@ instance (NFData lineSegment) => NFData (Associated lineSegment)
 -- | For each intersection point the segments intersecting there.
 type Intersections r lineSegment = Map.Map (Point 2 r) (Associated lineSegment)
 
-
-
+-- | Get the set of all intersection points
+intersectionPoints :: Intersections r lineSegment -> Set.Set (Point 2 r)
+intersectionPoints = Map.keysSet
 
 -- | An intersection point together with all segments intersecting at
 -- this point.

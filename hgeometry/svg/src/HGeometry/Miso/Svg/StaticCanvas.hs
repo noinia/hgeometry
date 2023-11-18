@@ -14,9 +14,7 @@ module HGeometry.Miso.Svg.StaticCanvas
   ) where
 
 import           Control.Lens hiding (elements)
-import qualified Data.Map as Map
 import           HGeometry.Matrix
-import           HGeometry.Point
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Viewport

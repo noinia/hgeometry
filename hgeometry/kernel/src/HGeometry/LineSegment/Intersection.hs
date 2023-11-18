@@ -6,6 +6,7 @@ module HGeometry.LineSegment.Intersection
   ) where
 
 import Control.Lens
+import HGeometry.Ext
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval.EndPoint
@@ -200,6 +201,16 @@ type instance Intersection (LineSegment AnEndPoint point)
                            (LineSegment AnEndPoint point) =
   Maybe (LineSegmentLineSegmentIntersection (LineSegment AnEndPoint point))
 
+
+-- | fmap' for lineSegmentIntersections
+fmap'   :: (NumType lineSegment ~ NumType lineSegment')
+        => (lineSegment -> lineSegment')
+        -> LineSegmentLineSegmentIntersection lineSegment
+        -> LineSegmentLineSegmentIntersection lineSegment'
+fmap' f = \case
+  LineSegment_x_LineSegment_Point p       -> LineSegment_x_LineSegment_Point p
+  LineSegment_x_LineSegment_LineSegment s -> LineSegment_x_LineSegment_LineSegment (f s)
+
 ----------------------------------------
 -- * HasIntersectionWith
 
@@ -255,11 +266,33 @@ instance ( Point_ point 2 r, Num r,  Ord r
 instance ( Point_ point 2 r, Fractional r,  Ord r
          ) =>
          LineSegment AnEndPoint point `IsIntersectableWith` LineSegment AnEndPoint point where
-  intersect s s' = intersect (supportingLine s) s' >>= \case
+  s `intersect` s' = supportingLine s `intersect` s' >>= \case
     Line_x_LineSegment_Point p
       | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
       | otherwise                    -> Nothing
-    Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment undefined
+    Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment todo
+      where
+        todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
+  {-# INLINE intersect #-}
+
+instance ( Point_ point 2 r, Fractional r,  Ord r
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         , IsIntersectableWith (LinePV 2 r) (LineSegment endPoint point)
+         , HasOnSegment (LineSegment endPoint point) 2
+         , Intersection (LineSegment endPoint point) (LineSegment endPoint point)
+           ~ Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point))
+         , Intersection (LinePV 2 r) (LineSegment endPoint point)
+           ~ Maybe (LineLineSegmentIntersection (LineSegment endPoint point))
+         ) =>
+         LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
+  s `intersect` s' = supportingLine s `intersect` s' >>= \case
+    Line_x_LineSegment_Point p
+      | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
+      | otherwise                    -> Nothing
+    Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment todo
+      where
+        todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
   {-# INLINE intersect #-}
 
 
@@ -284,3 +317,27 @@ instance ( Point_ point 2 r
   {-# INLINE intersect #-}
 
 -}
+
+
+
+--------------------------------------------------------------------------------
+
+type instance Intersection (LineSegment endPoint point :+ extra)
+                           (LineSegment endPoint point :+ extra) =
+  Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point :+ extra))
+  -- FIXME: hmm, this type is kind of nonsense, since the intersecting segment may be from
+  -- different segments
+
+-- instance ( LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point
+--          ) => (LineSegment endPoint point :+ extra) `HasIntersectionWith`
+--               (LineSegment endPoint point :+ extra') where
+--   (s :+ _) `intersects` (s' :+ _) = s `intersects` s'
+
+instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point
+         , Intersection (LineSegment endPoint point) (LineSegment endPoint point)
+           ~ Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point))
+         ) => (LineSegment endPoint point :+ extra) `IsIntersectableWith`
+              (LineSegment endPoint point :+ extra) where
+  (s :+ _) `intersect` (s' :+ _) = fmap' (:+ undef') <$> s `intersect` s'
+    where
+      undef' = error "intersect semgnets: not possible"
