@@ -9,7 +9,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram
-  ( voronoiVertices
+  ( VoronoiDiagram(..)
+  , voronoiDiagram
+  , voronoiVertices
   ) where
 
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope

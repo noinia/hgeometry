@@ -18,8 +18,11 @@ module HGeometry.Vector.NonEmpty.Util
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.Foldable1
+import           Data.Foldable1.WithIndex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector as Vector
+import qualified Data.Vector.NonEmpty as NonEmptyV
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 
 --------------------------------------------------------------------------------
@@ -31,6 +34,15 @@ type instance IxValue (NonEmptyVector a) = a
 instance Ixed (NonEmptyVector a) where
   ix i f (NonEmptyVector v) = NonEmptyVector <$> ix i f v
   {-# INLINE ix #-}
+
+
+instance Foldable1WithIndex Int NonEmptyVector where
+  ifoldMap1 f = fold1 . NonEmptyV.imap f
+  {-# INLINE ifoldMap1 #-}
+-- -- | ifoldMap1. This will appear in indexedtraversal as of next release
+-- ifoldMap1   :: Semigroup m => (Int -> a -> m) -> NonEmptyV.NonEmptyVector a -> m
+
+
 
 -- instance Foldable1 NonEmptyVector where
 --   foldMap1 f v = let (v',x) = NV.unsnoc v

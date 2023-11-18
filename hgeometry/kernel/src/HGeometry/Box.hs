@@ -20,7 +20,11 @@ module HGeometry.Box
   ) where
 
 import Control.Lens
+import Data.Coerce
+import Data.Foldable1
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe (isJust)
+import HGeometry.Boundary
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
@@ -164,3 +168,50 @@ type instance Intersection (Box point) (Box point) =
 --         ClosedInterval_x_ClosedInterval_Point x     -> ClosedInterval x x
 --         ClosedInterval_x_ClosedInterval_Contained i -> i
 --         ClosedInterval_x_ClosedInterval_Partial i   -> i
+
+
+
+--------------------------------------------------------------------------------
+-- * Intersection with a line
+
+
+-- instance (Ord r, Num r, Point_ point 2 r
+--          ) => LinePV 2 p `HasIntersectionWith` Rectangle point where
+--   l `intersects` r = notAllTheSame (onSide l) $ corners r
+--   {-# INLINE intersects #-}
+
+-- instance (Ord r, Num r, Point_ point 2 r
+--          ) => LineEQ r `HasIntersectionWith` Rectangle point where
+--   l `intersects` r = notAllTheSame (onSide l) $ corners r
+--   {-# INLINE intersects #-}
+
+-- instance (Ord r, Num r, Point_ point 2 r
+--          ) => LinePV 2 p `HasIntersectionWith` Boundary (Rectangle point) where
+--   l `intersects` br = l `intersects` (coerce br :: Rectangle point)
+--   {-# INLINE intersects #-}
+
+-- instance (Ord r, Num r, Point_ point 2 r
+--          ) => LineEQ r `HasIntersectionWith` Boundary (Rectangle point) where
+--   l `intersects` br = l `intersects` (coerce br :: Rectangle point)
+--   {-# INLINE intersects #-}
+
+
+
+-- type instance Intersection (LinePV 2 r) (Rectangle point) =
+--   Maybe (ClosedLineSegment (Point 2 r))
+
+-- type instance Intersection (LineEQ r) (Rectangle point) =
+--   Maybe (ClosedLineSegment (Point 2 r))
+
+
+-- instance (Ord r, Fractional r, Point_ point 2 r) => LinePV 2 p `IsIntersectableWith` Rectangle point where
+--   l `intersect` r = undefined
+
+-- instance (Ord r, Fractional r, Point_ point 2 r) => LineEQ r `IsIntersectableWith` Rectangle point where
+--   l `intersect` r = undefined
+
+-- -- | Verify that not all entries are the same.
+-- notAllTheSame      :: (Foldable1 f, Eq b) => (a -> b) -> f b -> Bool
+-- notAllTheSame f xs = let y :| ys = toNonEmpty xs
+--                          z       = f x
+--                      in any (\y' -> f y' /= z) xs

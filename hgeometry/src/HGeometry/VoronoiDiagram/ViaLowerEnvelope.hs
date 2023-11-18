@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.VoronoiDiagram.ViaLowerEnvelope
@@ -10,7 +11,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram.ViaLowerEnvelope
-  ( voronoiVertices
+  ( VoronoiDiagram(..)
+  , voronoiDiagram
+  , voronoiVertices
   ) where
 
 import           Control.Lens
@@ -30,9 +33,25 @@ import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
-type VoronoiDiagram point = LowerEnvelope (Plane (NumType point) :+ point)
+newtype VoronoiDiagram point =
+  VoronoiDiagram (LowerEnvelope (Plane (NumType point) :+ point))
 
+deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
+deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
 
+--------------------------------------------------------------------------------
+
+-- | Computes the Voronoi Diagram, by lifting the points to planes, and computing
+-- the lower envelope of these planes.
+--
+-- \(O(n\log n)\)
+voronoiDiagram :: ( Point_ point 2 r, Functor f, Default point, Ord point
+                   , Ord r, Fractional r, Foldable f
+                   ) => f point -> VoronoiDiagram point
+voronoiDiagram = VoronoiDiagram
+               . fromVertexForm
+               . upperEnvelopeVertexForm
+               . fmap (\p -> liftPointToPlane p :+ p)
 
 -- | Computes all voronoi vertices
 voronoiVertices :: ( Point_ point 2 r, Functor f, Default point, Ord point

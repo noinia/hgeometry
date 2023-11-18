@@ -175,6 +175,8 @@ jobs:
           # $CABAL haddock-project
         env:
           HCVER: ${{ matrix.compilerVersion }}
+        with:
+          path: ~/.ghcup/bin
       - name: haddock-badge
         run: |
           grep ") in " haddock.raw.txt | sort -hr > haddock.txt

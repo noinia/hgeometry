@@ -34,6 +34,7 @@ import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import           Data.Foldable1.WithIndex
 import           Data.Function (on)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -641,12 +642,3 @@ maxBy         :: (t -> t -> Ordering) -> t -> t -> t
 maxBy cmp a b = case cmp a b of
                   LT -> b
                   _  -> a
-
-
---------------------------------------------------------------------------------
-
--- | ifoldMap1. This will appear in indexedtraversal as of next release
-ifoldMap1   :: Semigroup m => (Int -> a -> m) -> NonEmptyV.NonEmptyVector a -> m
-ifoldMap1 f = fold1 . NonEmptyV.imap f
-
---------------------------------------------------------------------------------
