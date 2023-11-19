@@ -20,11 +20,7 @@ module HGeometry.Box
   ) where
 
 import Control.Lens
-import Data.Coerce
-import Data.Foldable1
-import Data.List.NonEmpty (NonEmpty(..))
-import Data.Maybe (isJust)
-import HGeometry.Boundary
+import HGeometry.Box.Intersection
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
@@ -38,9 +34,8 @@ import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Properties
 import HGeometry.Transformation
-import HGeometry.Vector.Class
+
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -147,27 +142,6 @@ instance ( Fractional r, Ord r
 
 
 
-type instance Intersection (Box point) (Box point) =
-  Maybe (Box (Point (Dimension point) (NumType point)))
-
--- TODO, maybe make this more precise:
-
--- data instance IntersectionOf (Box point) (Box point) =
---     Box_x_Box_Point point
---   | Box_x_Box_Segment (ClosedLineSegment point)
---   | Box_x_Box_Box (Box point)
-
--- instance (Ord r, Num r, Point_ point d r) => Box point `HasIntersectionWith` Box point where
---   a `intersects` b = isJust $ a `intersect` b
-
--- instance  (Ord r, Num r, Point_ point d r) => Box point `IsIntersectableWith` Box point where
---   bx `intersect` bx' = fmap fromExtent' . sequence
---                      $ liftI2 intersect (extent bx) (extent bx')
---     where
---       fromExtent' = fromExtent . \case
---         ClosedInterval_x_ClosedInterval_Point x     -> ClosedInterval x x
---         ClosedInterval_x_ClosedInterval_Contained i -> i
---         ClosedInterval_x_ClosedInterval_Partial i   -> i
 
 
 
