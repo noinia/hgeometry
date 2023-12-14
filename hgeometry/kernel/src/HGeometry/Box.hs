@@ -20,7 +20,7 @@ module HGeometry.Box
   ) where
 
 import Control.Lens
-import HGeometry.Box.Intersection
+import HGeometry.Box.Intersection()
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners

@@ -13,6 +13,8 @@ module HGeometry.Interval.Internal
   ( Interval(Interval,ClosedInterval,OpenInterval)
   , ClosedInterval, OpenInterval
   , IntersectionOf(..)
+  , asClosedInterval, asOpenInterval, asAnInterval
+  , isIntervalOfType
   ) where
 
 import Control.Lens
@@ -112,20 +114,33 @@ instance Read (endPoint r) => Read (Interval endPoint r) where
                           return (Interval p q))
 
 
+--------------------------------------------------------------------------------
 
+-- | Try to interpret the interval as an OpenInterval, i.e. with both endpoints open
+asOpenInterval   :: Interval_ interval r => interval -> Maybe (OpenInterval r)
+asOpenInterval i
+  | isIntervalOfType Open Open i = Just $ OpenInterval (i^.start) (i^.end)
+  | otherwise                    = Nothing
+{-# INLINE asOpenInterval #-}
 
+-- | Try to interpret the interval as a ClosedInterval, i.e. with both endpoints Closed
+asClosedInterval   :: Interval_ interval r => interval -> Maybe (ClosedInterval r)
+asClosedInterval i
+  | isIntervalOfType Closed Closed i = Just $ ClosedInterval (i^.start) (i^.end)
+  | otherwise                        = Nothing
+{-# INLINE asClosedInterval #-}
 
+-- | convert into an interval whose endpoints are explicitly tagged.
+asAnInterval   :: Interval_ interval r => interval -> Interval AnEndPoint r
+asAnInterval i = mkInterval (asAnEndPoint $ i^.startPoint) (asAnEndPoint $ i^.endPoint)
 
-
-
-
-
-
-
-
-
-
-
+-- | Test if the interval is of a particular type
+isIntervalOfType       :: Interval_ interval r
+                       => EndPointType -- ^ startPoint type
+                       -> EndPointType -- ^ endPoint type
+                       -> interval -> Bool
+isIntervalOfType s t i = endPointType (i^.startPoint) == s &&  endPointType (i^.endPoint) == t
+{-# INLINE isIntervalOfType #-}
 
 --------------------------------------------------------------------------------
 
@@ -168,13 +183,13 @@ instance Read (endPoint r) => Read (Interval endPoint r) where
 
 type instance Intersection (Point 1 r) (Interval endPoint r) = Maybe r
 
-instance Ord r => (Point 1 r) `HasIntersectionWith` (ClosedInterval r) where
+instance Ord r => Point 1 r `HasIntersectionWith` ClosedInterval r where
   (Point1 q) `intersects` int = int^.start <= q && q <= int^.end
-instance Ord r => (Point 1 r) `HasIntersectionWith` (OpenInterval r) where
+instance Ord r => Point 1 r `HasIntersectionWith` OpenInterval r where
   (Point1 q) `intersects` int = int^.start < q && q < int^.end
 
 instance Ord r
-         => (Point 1 r) `HasIntersectionWith` (Interval AnEndPoint r) where
+         => Point 1 r `HasIntersectionWith` Interval AnEndPoint r where
   (Point1 q) `intersects` int = compare' (int^.startPoint.to endPointType) (int^.start) q
                              && compare' (int^.endPoint.to endPointType)   q            (int^.end)
     where
@@ -207,8 +222,19 @@ data instance IntersectionOf (ClosedInterval r) (ClosedInterval r) =
 deriving stock instance (Eq r) => Eq (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
 deriving stock instance (Show r) => Show (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
 
+--------------------------------------------------------------------------------
+-- * Closed Interval
 
-instance (Ord r) => ClosedInterval r `HasIntersectionWith` ClosedInterval r where
+----------------------------------------
+-- ** HasIntersection
+
+
+instance ( Ord r
+         , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+         ) => ClosedInterval r `HasIntersectionWith` Interval endPoint r where
+  {-# SPECIALIZE instance Ord r => ClosedInterval r `HasIntersectionWith` ClosedInterval r #-}
+  {-# SPECIALIZE instance Ord r => ClosedInterval r `HasIntersectionWith` OpenInterval r #-}
+  {-# SPECIALIZE instance Ord r => ClosedInterval r `HasIntersectionWith` Interval AnEndPoint r #-}
   intA `intersects` intB = case (intA^.start) `compareInterval` intB of
     LT -> case (intA^.end) `compareInterval` intB of
             LT -> False
@@ -217,8 +243,10 @@ instance (Ord r) => ClosedInterval r `HasIntersectionWith` ClosedInterval r wher
     EQ -> True
     GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
 
-instance ( Ord r
-         ) => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
+----------------------------------------
+-- ** IsIntersectable
+
+instance Ord r => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
   intA `intersect` intB = case (intA^.start) `compareInterval` intB of
       LT -> case (intA^.end) `compareInterval` intB of
               LT -> Nothing
@@ -238,11 +266,58 @@ instance ( Ord r
         | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
 
 
-instance (Ord r) => ClosedInterval r `HasIntersectionWith` Interval AnEndPoint r where
+
+--------------------------------------------------------------------------------
+-- * Open intervals
+
+instance Ord r => OpenInterval r  `HasIntersectionWith` OpenInterval r where
   intA `intersects` intB = case (intA^.start) `compareInterval` intB of
     LT -> case (intA^.end) `compareInterval` intB of
             LT -> False
-            EQ -> True
-            GT -> True
-    EQ -> True
+            EQ -> True -- IntB is non-empty
+            GT -> intB^.start < intB^.end -- intB needs to be non-empty
+    EQ -> True -- IntB is non-empty
     GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
+  {-# INLINE intersects #-}
+
+instance Ord r => OpenInterval r  `HasIntersectionWith` ClosedInterval r where
+  intersects intA intB = intersects intB intA
+  {-# INLINE intersects #-}
+
+instance Ord r => OpenInterval r  `HasIntersectionWith` Interval AnEndPoint r where
+  intA `intersects` intB = case (intA^.start) `compareInterval` intB of
+      LT -> case (intA^.end) `compareInterval` intB of
+              LT -> False
+              EQ -> intA^.end > intB^.start -- we do need to be propertly larger
+              GT -> isIntervalOfType Open Open intB
+                    `implies` (intB^.start < intB^.end) -- intB needs to be non-empty
+      EQ -> True -- IntB is non-empty
+      GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
+    where
+      p `implies` q = not p || q
+  {-# INLINE intersects #-}
+
+--------------------------------------------------------------------------------
+-- * Mixed
+
+instance Ord r => Interval AnEndPoint r `HasIntersectionWith` Interval AnEndPoint r where
+  intA `intersects` intB = case (intA^.start) `compareInterval` intB of
+    LT -> case (intA^.end) `compareInterval` intB of
+            LT -> False
+            EQ -> True -- IntB is non-empty
+            GT -> intB^.start < intB^.end -- intB needs to be non-empty
+    EQ -> True -- IntB is non-empty
+    GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
+  {-# INLINE intersects #-}
+
+instance Ord r => Interval AnEndPoint r `HasIntersectionWith` ClosedInterval r where
+  intersects intA intB = intersects intB intA
+  {-# INLINE intersects #-}
+
+instance Ord r => Interval AnEndPoint r `HasIntersectionWith` OpenInterval r where
+  intersects intA intB = intersects intB intA
+  {-# INLINE intersects #-}
+
+-- instance Ord r => Interval AnEndPoint r `HasIntersectionWith` ClosedInterval r where
+--   intersects intA intB = intersects intB intA
+--   {-# INLINE intersect #-}

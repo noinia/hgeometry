@@ -16,6 +16,7 @@ module HGeometry.LineSegment
   , EndPoint(EndPoint,OpenE,ClosedE)
   , AnEndPoint(AnEndPoint,AnOpenE,AnClosedE)
   , module HGeometry.LineSegment.Class
+  , spanIn
   , EndPoint_(..)
   --
   , LineLineSegmentIntersection(..)

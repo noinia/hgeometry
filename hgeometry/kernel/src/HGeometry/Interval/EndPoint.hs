@@ -17,6 +17,7 @@ module HGeometry.Interval.EndPoint
   , EndPointType(..)
   , EndPoint(EndPoint, OpenE, ClosedE)
   , AnEndPoint(..,AnOpenE,AnClosedE)
+  , asAnEndPoint
   ) where
 
 import Control.Lens
@@ -146,5 +147,10 @@ instance EndPoint_ (AnEndPoint r) where
   -- | By default we consider endpoints closed
   mkEndPoint = AnEndPoint Closed
 
+-- | Convert the endpoint into a, AnEndPoint
+asAnEndPoint   :: EndPoint_ endPoint => endPoint -> AnEndPoint (IxValue endPoint)
+asAnEndPoint p = case endPointType p of
+                   Closed -> AnClosedE (p^._endPoint)
+                   Open   -> AnOpenE   (p^._endPoint)
 
 --------------------------------------------------------------------------------

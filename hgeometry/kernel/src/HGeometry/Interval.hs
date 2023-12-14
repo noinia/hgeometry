@@ -15,6 +15,7 @@ module HGeometry.Interval
   , HalfOpenInterval(HalfOpenInterval)
   , module HGeometry.Interval.Class
   , IntersectionOf(..)
+  , asClosedInterval, asOpenInterval, asAnInterval
   ) where
 
 import HGeometry.Intersection

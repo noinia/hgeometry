@@ -6,10 +6,11 @@ module HGeometry.LineSegment.Intersection
   ) where
 
 import Control.Lens
+import HGeometry.Box.Intersection ()
 import HGeometry.Ext
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
-import HGeometry.Interval.EndPoint
+import HGeometry.Interval
 import HGeometry.Line
 import HGeometry.LineSegment.Internal
 import HGeometry.Point
@@ -176,49 +177,69 @@ fmap' f = \case
 ----------------------------------------
 -- * HasIntersectionWith
 
+-- | Test if the spans of the segments intersect
+spansIntersect      :: forall endPoint endPoint' point r.
+                       ( Point_ point 2 r, Ord r, Num r, Functor endPoint, Functor endPoint'
+                       , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+                       , IxValue (endPoint' r) ~ r, EndPoint_ (endPoint' r)
+                       , HasIntersectionWith (Interval endPoint r) (Interval endPoint' r)
+                       ) => LineSegment endPoint point -> LineSegment endPoint' point -> Bool
+spansIntersect s s' = f xCoord && f yCoord
+  where
+    f         :: Getter point r -> Bool
+    f coord'' = spanIn coord'' s `intersects` spanIn coord'' s'
+
 instance ( Point_ point 2 r, Num r,  Ord r
-         , IxValue (endPoint point) ~ point
-         , EndPoint_ (endPoint point)
+         , Functor endPoint
+         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+         , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
          ) =>
          LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
-  -- this does not really work; i.e. if the segments are colinear
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 instance ( Point_ point 2 r, Num r,  Ord r
          ) =>
          OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
+                      && spansIntersect s s'
   {-# INLINE intersects #-}
 
 ----------------------------------------
@@ -245,6 +266,9 @@ instance ( Point_ point 2 r, Fractional r,  Ord r
            ~ Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point))
          , Intersection (LinePV 2 r) (LineSegment endPoint point)
            ~ Maybe (LineLineSegmentIntersection (LineSegment endPoint point))
+         , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+         , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
+         , Functor endPoint
          ) =>
          LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
   s `intersect` s' = supportingLine s `intersect` s' >>= \case

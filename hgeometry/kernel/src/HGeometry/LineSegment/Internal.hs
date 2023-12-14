@@ -16,6 +16,7 @@ module HGeometry.LineSegment.Internal
   , EndPoint(EndPoint,OpenE,ClosedE)
   , AnEndPoint(AnEndPoint,AnOpenE,AnClosedE)
   , module HGeometry.LineSegment.Class
+  , spanIn
   , EndPoint_(..)
   ) where
 
@@ -87,9 +88,9 @@ pattern OpenLineSegment s t = LineSegment (OpenE s) (OpenE t)
 type instance NumType   (LineSegment endPoint point) = NumType point
 type instance Dimension (LineSegment endPoint point) = Dimension point
 
-deriving instance (Eq (endPoint point)--, OptCVector_ 2 (endPoint point)
+deriving instance (Eq (endPoint point)
                   ) => Eq (LineSegment endPoint point)
-deriving instance (Ord (endPoint point)--, OptCVector_ 2 (endPoint point)
+deriving instance (Ord (endPoint point)
                   ) => Ord (LineSegment endPoint point)
 
 
@@ -365,3 +366,19 @@ onSegmentD q seg = onSegmentDWith f q seg
 
 -- myPoint :: Point 2 R
 -- myPoint = Point2 11 11
+
+
+--------------------------------------------------------------------------------
+
+-- | Computes the span of the interval in the given direction. Note that the returned
+-- interval is a proper interval, i.e. with the start smaller than the end.
+--
+-- >>> span xCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
+-- ClosedInterval 5 20
+-- >>> span yCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
+spanIn                           :: ( Point_ point d r, Ord r, Functor endPoint
+                                    , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r))
+                                 => Getter point r
+                                 -> LineSegment endPoint point -> Interval endPoint r
+spanIn coord'' (MkLineSegment i) = let i'@(Interval s t) = (^.coord'') <$> i
+                                   in if i'^.end > i'^.start then Interval t s else i'

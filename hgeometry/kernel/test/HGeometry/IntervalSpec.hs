@@ -1,5 +1,6 @@
 module HGeometry.IntervalSpec where
 
+import Control.Lens
 import Data.Maybe (isJust)
 import HGeometry.Intersection
 import HGeometry.Interval
@@ -21,6 +22,13 @@ spec = do
     it "show,read" $ test `shouldBe` test'
 
   describe "Interval_x_Interval Intersection" $ do
+    describe "has intersection testing consistent" $ do
+      prop "closedInterval and arbitrary Interval"  $
+        \(intA :: ClosedInterval Int) (intB :: Interval AnEndPoint Int) ->
+          (intA `intersects` intB)
+          `shouldBe`
+          (asAnInterval intA `intersects` intB)
+
     prop "intersects and intersect consistent" $
       \(intA :: ClosedInterval Int) (intB :: ClosedInterval Int) ->
         (intA `intersects` intB) == isJust (intA `intersect` intB)
@@ -100,3 +108,6 @@ answers = [ ( (0,1) , Just $ ClosedInterval_x_ClosedInterval_Partial $ ClosedInt
           , ( (3,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 3 )
           , ( (3,4) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 4 )
           ]
+
+
+--------------------------------------------------------------------------------

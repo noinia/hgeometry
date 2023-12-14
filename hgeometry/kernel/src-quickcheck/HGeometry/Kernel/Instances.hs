@@ -50,11 +50,11 @@ instance Arbitrary r => Arbitrary (AnEndPoint r) where
 
 
 instance ( Arbitrary (endPoint r)
-         , Ord (endPoint r)
+         , Eq (endPoint r), Ord r, IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
          ) => Arbitrary (Interval endPoint r) where
   arbitrary = do p <- arbitrary
-                 q <- arbitrary `suchThat` (> p)
-                 pure $ Interval p q
+                 q <- arbitrary `suchThat` (/= p)
+                 pure $ buildInterval p q
 
 instance ( Arbitrary (endPoint point)
          , IsEndPoint (endPoint point) (endPoint point)
