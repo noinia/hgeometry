@@ -37,12 +37,15 @@ spec = do
     -- it "openInterval cap openrange" $ do
     --   ((OpenInterval 1 (10 :: Int))  `intersect` (OpenInterval 5 (10 :: Int)))
     --   `shouldBe` (ClosedInterval_x_ClosedInterval_Partial $ OpenInterval 5 (10 :: Int))
-    -- it "disjoint open ranges" $ do
-    --   ((OpenInterval 1 (10 :: Int)) `intersect` (OpenInterval 10 (12 :: Int)))
-    --   `shouldBe` (coRec NoIntersection)
-    -- it "closed cap open, disjoint" $ do
-    --   ((ClosedInterval (1::Int) 10) `intersect` (OpenInterval 50 (60 :: Int)))
-    --   `shouldBe` (coRec NoIntersection)
+    it "openInterval cap openrange" $ do
+      ((OpenInterval 1 (10 :: Int))  `intersects` (OpenInterval 5 (10 :: Int)))
+      `shouldBe` True
+    it "disjoint open ranges" $ do
+      ((OpenInterval 1 (10 :: Int)) `intersects` (OpenInterval 10 (12 :: Int)))
+      `shouldBe` False
+    it "closed cap open, disjoint" $ do
+      ((ClosedInterval (1::Int) 10) `intersects` (OpenInterval 50 (60 :: Int)))
+      `shouldBe` False
     -- it "endpoints overlap but open/closed" $ do
 
     it "manual tests " $ do

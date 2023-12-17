@@ -232,6 +232,15 @@ class ( HasOuterBoundary polygon
                   , first1Of (maximumVertexBy (cmpInDirection u)) pg
                   )
 
+  -- | Given a vertexIdx v; get an IndexedLens to access the CCW predecessor of v
+  ccwPredecessorOf :: VertexIx polygon
+                   -> IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+
+  -- | Given a vertexIdx v; get an IndexedLens to access the CCW predecessor of v
+  ccwSuccessorOf :: VertexIx polygon
+                 -> IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+
+
 --------------------------------------------------------------------------------
 -- end of te Polygon_ class
 --------------------------------------------------------------------------------

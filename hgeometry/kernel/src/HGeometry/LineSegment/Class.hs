@@ -23,6 +23,8 @@ module HGeometry.LineSegment.Class
 
   , ordAtY, ordAtX
   , xCoordAt, yCoordAt
+
+  , orientLR, orientBT
   ) where
 
 import Control.Lens
@@ -56,6 +58,7 @@ class ( IntervalLike_ lineSegment point
       , Point_ point (Dimension lineSegment) (NumType lineSegment)
       ) => LineSegment_ lineSegment point | lineSegment -> point where
   {-# MINIMAL uncheckedLineSegment #-}
+
 
   -- | Create a segment
   --
@@ -188,6 +191,17 @@ orientLR seg
   | seg^.start.xCoord <= seg^.end.xCoord = seg
   | otherwise                            = seg&start .~ (seg^.end)
                                               &end   .~ (seg^.start)
+
+
+-- | Orient the segment from bottom to top
+orientBT     :: (LineSegment_ lineSegment point, Point_ point d r, 2 <= d, Ord r)
+             => lineSegment -> lineSegment
+orientBT seg
+  | seg^.start.yCoord <= seg^.end.yCoord = seg
+  | otherwise                            = seg&start .~ (seg^.end)
+                                              &end   .~ (seg^.start)
+
+
 
 -- | Given an x-coordinate and a line segment that intersects the vertical line
 -- through x, compute the y-coordinate of this intersection point.

@@ -53,8 +53,13 @@ instance ( Arbitrary (endPoint r)
          , Eq (endPoint r), Ord r, IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
          ) => Arbitrary (Interval endPoint r) where
   arbitrary = do p <- arbitrary
-                 q <- arbitrary `suchThat` (/= p)
+                 q <- arbitrary `suchThat` (isValid p)
                  pure $ buildInterval p q
+    where
+      isValid p q = p /= q && ((p^._endPoint == q^._endPoint) `implies` bothClosed p q)
+      bothClosed p q = endPointType p == Closed && endPointType q == Closed
+      implies p q = not p || q
+
 
 instance ( Arbitrary (endPoint point)
          , IsEndPoint (endPoint point) (endPoint point)

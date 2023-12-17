@@ -123,7 +123,8 @@ instance ( Point_ point 2 r
          , VertexContainer f point
          ) => Polygon_ (SimplePolygonF f point) point r where
   area = areaSimplePolygon
-
+  ccwPredecessorOf u = singular $ vertexAt (pred u)
+  ccwSuccessorOf   u = singular $ vertexAt (succ u)
 
 instance ( Point_ point 2 r
          , VertexContainer f point
