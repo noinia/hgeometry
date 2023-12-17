@@ -1,7 +1,8 @@
 module Polygon.Triangulation.MakeMonotoneSpec where
 
 import           Control.Lens
-import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Default.Class
+import           Data.Maybe (fromJust)
 import qualified Data.Set as Set
 import           HGeometry.Ext
 import           HGeometry.Point
@@ -18,13 +19,14 @@ spec = describe "GeomBook Example" $ do
          it "Classify Verticese" $
            classifyVertices geomBookPoly
            `shouldBe`
-           (over _2 (view extra._2) <$> geomBookPoly^@..vertices)
+           (over _2 (^.extra._2) <$> geomBookPoly^@..vertices)
 
          it "Diagonals" $
            (Set.fromList . map (sort' . lookupNum geomBookPoly) $ computeDiagonals geomBookPoly)
            `shouldBe` geomBookDiagonals
 
-
+instance Default VertexType where
+  def = Regular
 
 
   -- testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
@@ -33,10 +35,11 @@ sort'               :: Ord a => Vector 2 a-> Vector 2 a
 sort' (Vector2 x y) = Vector2 (min x y) (max x y)
 
 lookupNum    :: SimplePolygon (point :+ (i,e)) -> Vector 2 Int -> Vector 2 i
-lookupNum pg = fmap (\i -> pg^@!vertexAt i.extra._1)
+lookupNum pg = fmap (\i -> pg^?!vertexAt i.extra._1)
 
 geomBookPoly :: SimplePolygon (Point 2 Int :+ (Int, VertexType))
-geomBookPoly = fromPoints [ Point2 20 20 :+ (1 , Start   )
+geomBookPoly = fromJust
+             $ fromPoints [ Point2 20 20 :+ (1 , Start   )
                           , Point2 18 19 :+ (2 , Merge   )
                           , Point2 16 25 :+ (3 , Start   )
                           , Point2 13 23 :+ (4 , Merge   )
@@ -53,7 +56,11 @@ geomBookPoly = fromPoints [ Point2 20 20 :+ (1 , Start   )
                           , Point2 15 12 :+ (15, End     )
                           ]
 
-geomBookDiagonals = Set.fromList [(4,6),(2,8),(8,14),(10,12)]
+geomBookDiagonals = Set.fromList [Vector2 4  6
+                                 ,Vector2 2  8
+                                 ,Vector2 8  14
+                                 ,Vector2 10 12
+                                 ]
 
 
 
