@@ -17,7 +17,7 @@ module HGeometry.Algorithms.LogarithmicMethod
 
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe (mapMaybe)
-import Data.Semigroup.Foldable
+import Data.Foldable1
 
 --------------------------------------------------------------------------------
 

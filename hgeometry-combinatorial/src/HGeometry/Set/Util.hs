@@ -26,11 +26,11 @@ cmpS = comparing (\(S s) -> length s)
 -- >>> cmpS = comparing (\(S s) -> length s)
 --
 
--- | Given a monotonic function f that maps a to b, split the sequence s
+-- | Given a monotonic function f that maps a to b, and a value x, split the sequence s
 -- depending on the b values. I.e. the result (l,m,r) is such that
--- * all (< x) . fmap f $ l
--- * all (== x) . fmap f $ m
--- * all (> x) . fmap f $ r
+-- * all (\y -> f y <  x) l
+-- * all (\y -> f y == x) m
+-- * all (\y -> f y >  x) r
 --
 -- running time: \(O(\log n)\)
 splitOn       :: Ord b => (a -> b) -> b -> Set a -> (Set a, Set a, Set a)
@@ -41,9 +41,9 @@ splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
 
 -- | Given a monotonic function f that orders @a@, split the sequence @s@
 -- into three parts. I.e. the result (lt,eq,gt) is such that
--- * all (\x -> f x == LT) . fmap f $ lt
--- * all (\x -> f x == EQ) . fmap f $ eq
--- * all (\x -> f x == GT) . fmap f $ gt
+-- * all (\x -> f x == LT) lt
+-- * all (\x -> f x == EQ) eq
+-- * all (\x -> f x == GT) gt
 --
 -- running time: \(O(\log n)\)
 splitBy       :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
