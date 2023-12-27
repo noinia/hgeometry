@@ -6,6 +6,7 @@ import           Data.Maybe (fromJust)
 import qualified Data.Set as Set
 import           HGeometry.Ext
 import           HGeometry.Point
+import           HGeometry.LineSegment
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation.MakeMonotone
@@ -16,7 +17,7 @@ import           Test.Hspec
 
 spec :: Spec
 spec = describe "GeomBook Example" $ do
-         it "Classify Verticese" $
+         it "Classify Vertices" $
            classifyVertices geomBookPoly
            `shouldBe`
            (over _2 (^.extra._2) <$> geomBookPoly^@..vertices)
@@ -25,11 +26,23 @@ spec = describe "GeomBook Example" $ do
            (Set.fromList . map (sort' . lookupNum geomBookPoly) $ computeDiagonals geomBookPoly)
            `shouldBe` geomBookDiagonals
 
+         it "cmpXtest" $ do
+           let q = Point2 11 7
+               seg = ClosedLineSegment (Point2 1 10) (Point2 3 5)
+           cmpX q seg `shouldBe` LT
+
+         it "cmpXtest2" $ do
+           let q = Point2 13 23
+               seg1 = ClosedLineSegment (Point2 10 24) (Point2 6  22)
+           cmpX q seg1 `shouldBe` LT
+         it "cmpXtest3" $ do
+           let q = Point2 13 23
+               seg2 = ClosedLineSegment (Point2 16 25) (Point2 13 23)
+           cmpX q seg2 `shouldBe` EQ
+
+
 instance Default VertexType where
   def = Regular
-
-
-  -- testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
 
 sort'               :: Ord a => Vector 2 a-> Vector 2 a
 sort' (Vector2 x y) = Vector2 (min x y) (max x y)
@@ -61,13 +74,3 @@ geomBookDiagonals = Set.fromList [Vector2 4  6
                                  ,Vector2 8  14
                                  ,Vector2 10 12
                                  ]
-
-
-
-  -- let f i     = geomBookPoly !! (i-1)
-  --                       seg i j =
-  --                   in
-
-  -- [Clo
-
-  -- LineSegment (Closed (Point2 [6 % 1,22 % 1] :+ 6)) (Closed (Point2 [13 % 1,23 % 1] :+ 4)),LineSegment (Closed (Point2 [7 % 1,18 % 1] :+ 8)) (Closed (Point2 [18 % 1,19 % 1] :+ 2)),LineSegment (Closed (Point2 [12 % 1,15 % 1] :+ 14)) (Closed (Point2 [7 % 1,18 % 1] :+ 8)),LineSegment (Closed (Point2 [11 % 1,7 % 1] :+ 12)) (Closed (Point2 [1 % 1,10 % 1] :+ 10))]

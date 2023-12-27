@@ -9,6 +9,8 @@ module HGeometry.Polygon.Triangulation.MakeMonotone
   ( computeDiagonals
   , classifyVertices
   , VertexType(..)
+
+  , cmpX
   ) where
 
 import           Control.Lens
@@ -26,6 +28,7 @@ import qualified HGeometry.Set.Util as SS
 import           HGeometry.Vector
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
+
 
 ----------------------------------------------------------------------------------
 
@@ -105,7 +108,7 @@ handle pg (status, diags) (Event et i v p s) = case et of
     -- end, or left-regular vertex; we use it only when we know it exists.)
     j = case lookupLT v status of
           Just (_leftEdge :+ j') -> j'
-          _                      -> error "MakeMonotone.handleSplit: absurd. no j"
+          _                      -> error $ "MakeMonotone.handleSplit: absurd. no j"
     -- the diagonal between the current vertex v and the helper
     diag      = case helper j status of
                   Just h -> Vector2 i h
@@ -142,17 +145,21 @@ handle pg (status, diags) (Event et i v p s) = case et of
     lookupLT      :: point -> StatusSruct polygon -> Maybe (Edge' polygon)
     lookupLT q s' = let (l,_,_) = SS.splitBy (cmpX q) (s'^.tree)
                     in Set.lookupMax l
-    -- TODO: verify; before we used lookup LE here
 
--- | compare the point and the segment horizontally. I.e. returs LT if the point lies left
--- of the segment, EQ if the point is on the segment, and GT otherwise.
+-- | compare the point and the segment horizontally. I.e. returs LT if the segment lies
+-- left of the point, EQ if the point is on the segment, and GT if the segment lies right
+-- of the point.
 cmpX                     :: ( Point_ point  2 r, LineSegment_ lineSegment point'
                             , Point_ point' 2 r, Ord r, Num r
                             ) => point -> lineSegment -> Ordering
-cmpX q (orientLR -> seg) = case ccw (seg^.start.asPoint) (q^.asPoint) (seg^.end.asPoint) of
-                             CCW      -> LT
-                             CoLinear -> EQ
-                             CW       -> GT
+cmpX q (orientLR -> seg)
+    | seg^.start.yCoord <= seg^.end.yCoord = f GT LT
+    | otherwise                            = f LT GT
+  where
+    f lt gt = case ccw (seg^.start.asPoint) (q^.asPoint) (seg^.end.asPoint) of
+                CW       -> lt
+                CoLinear -> EQ
+                CCW      -> gt
 
 
 --------------------------------------------------------------------------------
