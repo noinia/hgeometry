@@ -24,15 +24,13 @@ import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Triangulation.Types
 import qualified HGeometry.Set.Util as SS
 import           HGeometry.Vector
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 
-
 ----------------------------------------------------------------------------------
-
-type Diagonal polygon = Vector 2 (VertexIx polygon)
 
 -- | Given a polygon, find a set of non-intersecting diagonals that partition
 -- the polygon into y-monotone pieces.

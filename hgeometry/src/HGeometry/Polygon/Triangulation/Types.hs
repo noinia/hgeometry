@@ -7,23 +7,35 @@
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Triangulation.Types where
 
--- import           Control.Lens
--- import           Control.Monad (forM_)
--- import qualified Data.Foldable as F
--- import           Data.List.NonEmpty (NonEmpty(..))
--- import qualified Data.List.NonEmpty as NonEmpty
--- import qualified Data.Vector as V
--- -- import qualified Data.Vector.Mutable as MV
--- import           HGeometry.Ext
--- import           HGeometry.LineSegment
+import           Control.Lens
+import           Control.Monad (forM_)
+import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Vector as V
+-- import qualified Data.Vector.Mutable as MV
+import           HGeometry.Ext
+import           HGeometry.LineSegment
 -- import           HGeometry.PlanarSubdivision.Basic
 -- import qualified HGeometry.PlaneGraph as PG
+import           Hiraffe.Graph.Class
+import           HGeometry.PlaneGraph
+import           HGeometry.Polygon.Class
+import           HGeometry.Point
+import           HGeometry.Vector
+import           Hiraffe.PlanarGraph as PlanarGraph
 
 --------------------------------------------------------------------------------
 
 -- | After triangulation, edges are either from the original polygon or a new diagonal.
 data PolygonEdgeType = Original | Diagonal
                      deriving (Show,Read,Eq)
+
+-- | Data type that expresses whether or not we are inside or outside the
+-- polygon.
+data PolygonFaceData = Inside | Outside deriving (Show,Read,Eq)
+
+type Diagonal polygon = Vector 2 (VertexIx polygon)
 
 
 {-
@@ -75,21 +87,23 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 -- -- TODO: Idea: generalize the face data assignment into a function
 -- -- that does something like: [(Dart, fLeft, fRight] -> FaceData
 
+-}
+
+
 
 -- | Given a list of original edges and a list of diagonals, creates a
 -- planar-subdivision
 --
 --
 -- running time: \(O(n\log n)\)
-constructGraph                  :: forall s r p. (Fractional r, Ord r)
-                                      => LineSegment 2 p r -- ^ A counter-clockwise
-                                                         -- edge along the outer
-                                                         -- boundary
-                                      -> [LineSegment 2 p r] -- ^ remaining original edges
-                                      -> [LineSegment 2 p r] -- ^ diagonals
-                                      -> PG.PlaneGraph s
-                                            p PolygonEdgeType PolygonFaceData r
-constructGraph e origs diags =
+constructGraph          :: (Polygon_ polygon point r, Point_ point 2 r
+                           )
+                        => polygon
+                        -> f (Diagonal polygon)
+                        -> PlaneGraph s Primal point PolygonEdgeType PolygonFaceData
+constructGraph pg diags = undefined
+{-
+e origs diags =
     subdiv & PG.vertexData.traverse  %~ NonEmpty.head
            & PG.faceData             .~ faceData'
            & PG.rawDartData.traverse %~ snd
@@ -117,6 +131,7 @@ constructGraph e origs diags =
                   forM_ intFaces $ \(PG.FaceId (PG.VertexId f)) ->
                     MV.write v' f Inside
                   pure v'
+-}
 
 -- -constructSubdivision px e origs diags =
 -- -    subdiv & planeGraph.PG.vertexData.traverse        %~ NonEmpty.head
@@ -145,5 +160,3 @@ constructGraph e origs diags =
 -- -                  forM_ intFaces $ \(PG.FaceId (PG.VertexId f)) ->
 -- -                    MV.write v' f (FaceData [] Inside)
 -- -                  pure v'
-
--}

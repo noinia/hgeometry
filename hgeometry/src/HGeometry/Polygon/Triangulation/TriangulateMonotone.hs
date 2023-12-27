@@ -30,7 +30,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (Down (..), comparing)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
-import           HGeometry.LineSegment
+import           HGeometry.Vector (Vector(Vector2))
 -- import           HGeometry.PlanarSubdivision.Basic (PlanarSubdivision, PolygonFaceData)
 -- import           HGeometry.PlaneGraph (PlaneGraph)
 import           HGeometry.Point
@@ -39,6 +39,7 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Algorithms.DivideAndConquer (mergeSortedListsBy)
 import           HGeometry.Lens.Util
 -- import           Hiraffe.Graph.Class
+import           HGeometry.Polygon.Triangulation.Types
 
 --------------------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ triangulate' pg' = constructGraph e es (computeDiagonals pg)
 --
 -- running time: \(O(n)\)
 computeDiagonals    :: (YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r)
-                    => yMonotonePolygon -> [ClosedLineSegment (point :+ VertexIx yMonotonePolygon)]
+                    => yMonotonePolygon -> [Diagonal yMonotonePolygon]
 computeDiagonals pg = case unsnoc vs of
     Just (u:v:vs',w) -> go u v vs' w
     _                -> error "computeDiagonals. polygon should contain at least 3 vertices"
@@ -108,10 +109,10 @@ chainOf :: P i point r -> LR
 chainOf = view (extra._2)
 
 -- | Produce a diagional
-seg     :: P i point r -> P i point r -> ClosedLineSegment (point :+ i)
-seg u v = ClosedLineSegment (toVtx u) (toVtx v)
+seg     :: P i point r -> P i point r -> Vector 2 i
+seg u v = Vector2 (toVtx u) (toVtx v)
   where
-    toVtx = over extra fst
+    toVtx = view (extra._1)
 
 type Stack a = NonEmpty a
 
@@ -119,7 +120,7 @@ type Stack a = NonEmpty a
 process                    :: (Point_ point 2 r, Ord r, Num r)
                            => P i point r
                            -> Stack (P i point r)
-                           -> SP (Stack (P i point r)) [ClosedLineSegment (point :+ i)]
+                           -> SP (Stack (P i point r)) [Vector 2 i]
 process v stack@(u:|ws)
   | chainOf v /= chainOf u = SP (v:|[u])    (map (seg v) . NonEmpty.init $ stack)
   | otherwise              = SP (v:|w:rest) (map (seg v) popped)

@@ -1,23 +1,24 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Algorithms.Geometry.PolygonTriangulation.Triangulate
+-- Module      :  HGeometry.Polygon.Triangulation.MakeMonotone
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.PolygonTriangulation.Triangulate where
+module HGeometry.Polygon.Triangulation.Triangulate
+  (
+  ) where
 
-
-import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
-import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
-import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
 import           Data.Either (lefts)
-import           Data.Ext
 import qualified Data.Foldable as F
-import           Geometry.LineSegment
-import           Geometry.PlanarSubdivision.Basic
-import           Geometry.Polygon
+import           HGeometry.Ext
+import           HGeometry.LineSegment
+import           HGeometry.PlanarSubdivision.Basic
+import           HGeometry.Polygon
+import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
+import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone.TriangulateMonotone as TM
+import           HGeometry.Polygon.Triangulation.Types
 
 --------------------------------------------------------------------------------
 
