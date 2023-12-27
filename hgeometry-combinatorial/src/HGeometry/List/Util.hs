@@ -43,30 +43,30 @@ leaveOutOne xs = second F.toList . fromJust . extractNext
 
 -- | Safe variant of Prelude.minimum.
 --
--- >>> minimum1 [] :: Maybe ()
+-- >>> minimumMaybe [] :: Maybe ()
 -- Nothing
--- >>> minimum1 [1,2,3]
+-- >>> minimumMaybe [1,2,3]
 -- Just 1
-minimum1 :: Ord a => [a] -> Maybe a
-minimum1 = minimum1By compare
+minimumMaybe :: Ord a => [a] -> Maybe a
+minimumMaybe = minimumMaybeBy compare
 
 -- | Safe variant of Prelude.maximum.
 --
--- >>> maximum1 [] :: Maybe ()
+-- >>> maximumMaybe [] :: Maybe ()
 -- Nothing
--- >>> maximum1 [1,2,3]
+-- >>> maximumMaybe [1,2,3]
 -- Just 3
-maximum1 :: Ord a => [a] -> Maybe a
-maximum1 = minimum1By (flip compare)
+maximumMaybe :: Ord a => [a] -> Maybe a
+maximumMaybe = minimumMaybeBy (flip compare)
 
 -- | Total variant of Data.List.minimumBy.
 --
--- >>> minimum1By (comparing abs) [] :: Maybe Int
+-- >>> minimumMaybeBy (comparing abs) [] :: Maybe Int
 -- Nothing
--- >>> minimum1By (comparing abs) [1,-2,3]
+-- >>> minimumMaybeBy (comparing abs) [1,-2,3]
 -- Just 1
-minimum1By     :: (a -> a -> Ordering) -> [a] -> Maybe a
-minimum1By cmp = \case
+minimumMaybeBy     :: (a -> a -> Ordering) -> [a] -> Maybe a
+minimumMaybeBy cmp = \case
   [] -> Nothing
   xs -> Just $ List.minimumBy cmp xs
 
