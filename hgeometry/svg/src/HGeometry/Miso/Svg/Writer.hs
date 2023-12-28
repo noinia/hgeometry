@@ -93,7 +93,12 @@ instance ( Point_ point 2 r, EndPoint_ (endPoint point), IxValue (endPoint point
          , ToMisoString r) => Drawable (LineSegment endPoint point) where
   draw = dLineSegment
 
-instance (Point_ point 2 r, ToMisoString r) => Drawable (PolyLine point) where
+instance ( Point_ point 2 r, ToMisoString r
+         , Traversable1 f
+         , Ixed (f point), IxValue (f point) ~ point, Index (f point) ~ Int
+         , HasFromFoldable1 f
+         , TraversableWithIndex Int f
+         ) => Drawable (PolyLineF f point) where
   draw = dPolyLine
 
 instance ( Point_ point 2 r, VertexContainer f point, HasFromFoldable1 f
@@ -176,7 +181,9 @@ dSimplePolygon pg = withAts polygon_ [points_ $ toPointsString $ pg^..vertices ]
 -- | Draw a polyline
 dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
              => polyLine -> [Attribute action] -> View action
-dPolyLine pl = withAts polyline_ [points_ . toPointsString $ pl^..vertices ]
+dPolyLine pl = withAts polyline_ [ points_ . toPointsString $ pl^..vertices
+                                 , fill_ "none"
+                                 ]
 
 -- | Draw a line segment
 dLineSegment   :: ( LineSegment_ lineSegment point, Point_ point 2 r, ToMisoString r)

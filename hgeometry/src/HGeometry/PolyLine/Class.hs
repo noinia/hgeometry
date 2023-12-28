@@ -32,10 +32,13 @@ import           Hiraffe.Graph
 
 -- | A class representing PolyLines
 class ( HasVertices polyLine polyLine
+      , HasPoints' polyLine point
       , HasStart polyLine point
       , HasEnd polyLine point
       , Vertex polyLine ~ point
       , Point_ point (Dimension point) (NumType point)
+      , NumType polyLine ~ NumType point
+      , Dimension polyLine ~ Dimension point
       ) => PolyLine_ polyLine point | polyLine -> point where
 
   -- | Constructs a polyline from a given sequence of points.

@@ -5,7 +5,14 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module HGeometry.Set.Util where
+module HGeometry.Set.Util
+  ( splitOn, splitBy
+  , fromListBy
+  , join
+  , insertBy
+  , deleteAllBy
+  , queryBy
+  ) where
 
 import           Data.Ord (comparing)
 import           Data.Set (Set)

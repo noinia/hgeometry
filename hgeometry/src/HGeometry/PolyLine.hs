@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PolyLine
   ( PolyLineF(..), PolyLine
+  , _PolyLineF
   , module HGeometry.PolyLine.Class
   , HasVertices(..)
   , HasEdges(..)
@@ -47,7 +48,7 @@ newtype PolyLineF f point = PolyLine (f point)
 -- | By default we store simple poylline as non-empty vectors.
 type PolyLine = PolyLineF NonEmptyVector
 
-type instance Dimension (PolyLineF f point) = 2
+type instance Dimension (PolyLineF f point) = Dimension point
 type instance NumType   (PolyLineF f point) = NumType point
 
 

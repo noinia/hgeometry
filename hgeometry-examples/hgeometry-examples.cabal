@@ -58,6 +58,7 @@ common setup
       , data-clist              >= 0.2
       , data-default-class      ^>= 0.1
       , array                   >= 0.5
+      , aeson                   >= 2.0     && < 3
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -154,7 +155,17 @@ executable hgeometry-voronoi
 --------------------------------------------------------------------------------
 -- * Polygon Triangulation
 
-executable hgeometry-polygonTriangulation
+-- executable hgeometry-polygonTriangulation
+--   import:         setup, miso-setup
+--   hs-source-dirs: polygonTriangulation
+--   main-is:        Main.hs
+
+--------------------------------------------------------------------------------
+-- * Polyline Drawing
+
+executable hgeometry-polyLineDrawing
   import:         setup, miso-setup
-  hs-source-dirs: polygonTriangulation
+  hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
+  other-modules:
+       Miso.Event.Extra
