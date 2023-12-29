@@ -7,20 +7,78 @@ module Miso.Subscription.MouseExtra
   , onMouseEnterAt
   , onMouseMoveAt
   , onMouseClickAt
+
+  , onTouchStartAt
+  , onTouchMoveAt
+  , onTouchEnd
   ) where
 
-import Control.Monad.IO.Class
-import Data.Aeson (withObject, (.:))
-import GHCJS.Marshal
-import HGeometry.Point
-import JavaScript.Object
-import JavaScript.Object.Internal
-import Language.Javascript.JSaddle (JSVal)
-import Miso
-import Miso.FFI.Extra
-import Miso.String (MisoString)
+import           Control.Monad.IO.Class
+import           Data.Aeson (withObject, withArray, (.:), Value)
+import           Data.Aeson.Types (Parser)
+import qualified Data.Foldable as F
+import           GHCJS.Marshal
+import           HGeometry.Point
+import           JavaScript.Object
+import           JavaScript.Object.Internal
+import           Language.Javascript.JSaddle (JSVal)
+import           Miso
+import           Miso.FFI.Extra
+import           Miso.String (MisoString)
 
-import Debug.Trace
+import           Debug.Trace
+
+--------------------------------------------------------------------------------
+
+-- | onMouseMove event, the position is relative to the target of the event
+onMouseMoveAt :: (Point 2 Int -> action) -> Attribute action
+onMouseMoveAt = on "mousemove" mousePositionDecoder
+
+-- | onMouseEnter event, the position is relative to the target of the event
+onMouseEnterAt :: (Point 2 Int -> action) -> Attribute action
+onMouseEnterAt = on "mouseenter" mousePositionDecoder
+
+-- | onMouseEnter event, the position is relative to the target of the event
+onMouseClickAt :: (Point 2 Int -> action) -> Attribute action
+onMouseClickAt = on "click" mousePositionDecoder
+
+-- | Mouse position decoder that captures the position of the event relative to the
+-- target. In particular, it reads the offsetX and offsetY values of the event.
+mousePositionDecoder :: Decoder (Point 2 Int)
+mousePositionDecoder = Decoder dec dt
+  where
+    dt = DecodeTarget mempty
+    dec = withObject "event" $ \o -> Point2 <$> o .: "offsetX" <*> o .: "offsetY"
+
+--------------------------------------------------------------------------------
+
+onTouchStartAt :: (Point 2 Int -> action) -> Attribute action
+onTouchStartAt = on "touchstart" touchDecoder
+
+onTouchMoveAt :: (Point 2 Int -> action) -> Attribute action
+onTouchMoveAt = on "touchmove" touchDecoder
+
+onTouchEnd     :: action -> Attribute action
+onTouchEnd act = on "touchend" emptyDecoder (const act)
+
+touchDecoder :: Decoder (Point 2 Int)
+touchDecoder = Decoder dec dt
+  where
+    dt = DecodeTarget ["targetTouches"]
+    dec :: Value -> Parser (Point 2 Int)
+    dec = withArray "targetTouches" $ \arr -> case F.toList arr of
+      (tv:_) -> withObject "touch" (\o ->
+                  Point2 <$> o .: "pageX"   <*> o .: "pageY") tv
+      _      -> fail "touchDecoder: expected at least one targetTouches"
+
+
+-- -- | touchmove event
+-- onTouchMove :: (TouchEvent -> action) -> Attribute action
+-- onTouchMove = on "touchmove" touchDecoder
+
+
+
+
 
 --------------------------------------------------------------------------------
 
@@ -28,39 +86,6 @@ import Debug.Trace
 relativeMouseSub          :: MisoString -> (Maybe (Point 2 Int) -> action) -> Sub action
 relativeMouseSub elemId f = \sink -> do
     windowAddEventListener "mousemove" $ relativeMouseSubImpl elemId f sink
-
--- newtype MouseEvent = MouseEvent { offset  :: Point 2 Int
---                                 -- , target  :: JSVal
---                                 } deriving (Show,Eq)
-
--- instance FromJSON MouseEvent where
---   parseJSON =
---     withObject "MouseEvent" $ \o ->
---       MouseEvent <$> (Point2 <$> o .: "offsetX" <*> o .: "offsetY")
---                  -- <*> (o .: "target")
-
-onMouseMoveAt   :: (Point 2 Int -> action) -> Attribute action
-onMouseMoveAt f = on "mousemove" mousePositionDecoder f
-
-onMouseEnterAt   :: (Point 2 Int -> action) -> Attribute action
-onMouseEnterAt f = on "mouseenter" mousePositionDecoder f
-
-onMouseClickAt   :: (Point 2 Int -> action) -> Attribute action
-onMouseClickAt f = on "click" mousePositionDecoder f
-
-
-mousePositionDecoder :: Decoder (Point 2 Int)
-mousePositionDecoder = Decoder dec dt
-  where
-    dt = DecodeTarget mempty
-    dec = withObject "event" $ \o -> Point2 <$> o .: "offsetX" <*> o .: "offsetY"
-
-
-
-
-
-
-
 
 -- | the implementation of the relative Mouse sub
 relativeMouseSubImpl               :: MisoString -> (Maybe (Point 2 Int) -> action)

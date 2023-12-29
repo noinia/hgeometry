@@ -86,7 +86,9 @@ blankCanvas w h = let v = Vector2 w h
 data InternalCanvasAction = MouseEnter (Point 2 Int)
                           | MouseMove (Point 2 Int)
                           | MouseLeave
-                          | TouchMove (Maybe (Point 2 Int))
+                          | TouchStart (Point 2 Int)
+                          | TouchMove (Point 2 Int)
+                          | TouchEnd
                           deriving (Show,Eq)
 
 -- | Handles InternalCanvas Actions
@@ -94,8 +96,10 @@ handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect 
 handleInternalCanvasAction canvas = noEff . \case
   MouseEnter p  -> canvas&mousePosition .~ Just p
   MouseMove  p  -> canvas&mousePosition .~ Just p
-  TouchMove mp  -> canvas&mousePosition .~ mp
   MouseLeave    -> canvas&mousePosition .~ Nothing
+  TouchStart p  -> canvas&mousePosition .~ Just p
+  TouchMove p   -> canvas&mousePosition .~ Just p
+  TouchEnd      -> canvas&mousePosition .~ Nothing
 
 --------------------------------------------------------------------------------
 -- * The View
@@ -114,6 +118,9 @@ svgCanvas_ canvas ats vs =
               , onMouseLeave   $ Left MouseLeave
               , onMouseEnterAt $ Left . MouseEnter
               , onMouseMoveAt  $ Left . MouseMove
+              , onTouchStartAt $ Left . TouchStart
+              , onTouchMoveAt  $ Left . TouchMove
+              , onTouchEnd     $ Left TouchEnd
               ]
               [ rect_ [width_ "100%", height_ "100%", fill_ "none"] []
               , g_ [transform_ ts] (fmap Right <$> vs)
@@ -163,7 +170,7 @@ withCanvasEvents :: Map.Map MisoString Bool -> Map.Map MisoString Bool
 withCanvasEvents = Map.union $ Map.fromList
                    [ ("touchstart"  , False)
                    , ("touchmove"   , False)
-                   , ("touchmove"   , False)
+                   , ("touchend"    , False)
                    , ("mouseleave"  , True)
                    , ("mousemove"   , False)
                    , ("contextmenu" , False)

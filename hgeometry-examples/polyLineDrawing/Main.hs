@@ -83,11 +83,11 @@ data Action = Id
             | SwitchMode
             | CanvasClicked
             | CanvasRightClicked
-            | StartMousdeDown
+            | StartMouseDown
             | StopMouseDown
-            | StartTouch !TouchEvent
-            -- | TouchMove !TouchEvent
-            | EndTouch !TouchEvent
+            | StartTouch
+            | TouchMove
+            | EndTouch
             | MouseMove
             | AddPoint
             | AddPoly
@@ -105,16 +105,16 @@ updateModel m = \case
     CanvasRightClicked -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoly
                             PenMode      -> noEff m
-    StartMousdeDown    -> case m^.mode of
+    StartMouseDown     -> case m^.mode of
                             PolyLineMode -> noEff m
                             PenMode      -> noEff $ m&currentPoly .~ extend Nothing
     StopMouseDown      -> case m^.mode of
                             PolyLineMode -> noEff m
                             PenMode      -> m <# pure AddPoly
 
-    StartTouch evt     -> setMouseCoords evt <# pure StartMousdeDown
-    -- TouchMove evt      -> setMouseCoords evt <# pure MouseMove
-    EndTouch evt       -> setMouseCoords evt <# pure StopMouseDown
+    StartTouch         -> traceShow "touchstart" $ m <# pure StartMouseDown
+    TouchMove          -> traceShow "touchmove"  $ m <# pure MouseMove
+    EndTouch           -> traceShow "touchend"   $ m <# pure StopMouseDown
 
     MouseMove          -> case m^.mode of
                             PolyLineMode -> noEff m
@@ -136,7 +136,7 @@ updateModel m = \case
                                                         Nothing -> Nothing
                                                         Just _  -> extend mp
 
-    setMouseCoords (TouchEvent t) = m
+    -- setMouseCoords (TouchEvent t) = m
       -- let (x,y) = bimap trunc trunc $ page t
       --                               in m&canvas.mousePosition ?~ p
 
@@ -169,9 +169,10 @@ viewModel m = div_ [ ]
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick      CanvasClicked
                                        , onRightClick CanvasRightClicked
-                                       , onMouseDown  StartMousdeDown
-                                       , onTouchStart StartTouch
+                                       , onMouseDown  StartMouseDown
                                        , onMouseUp    StopMouseDown
+                                       , onTouchStart StartTouch
+                                       , onTouchMove  TouchMove
                                        , onTouchEnd   EndTouch
                                        , onMouseMove  MouseMove
                                        , styleInline_ "border: 1px solid black"
@@ -227,3 +228,8 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   , y_ $ ms y
                                   ] <> ats
                                   ) [text t]
+
+
+
+
+--------------------------------------------------------------------------------

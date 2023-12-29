@@ -8,7 +8,7 @@ module Miso.Event.Extra
 
   , onContextMenu
 
-  , Touch(..), TouchEvent(..)
+  -- , Touch(..), TouchEvent(..)
   , onTouchStart
   , onTouchMove
   , onTouchEnd
@@ -70,46 +70,56 @@ onContextMenu act = onWithOptions disabled "contextmenu" emptyDecoder (const act
 --------------------------------------------------------------------------------
 -- * Decoding Touch Events
 
--- taken/adapted from the Miso svg example
+-- -- taken/adapted from the Miso svg example
 
-data Touch = Touch
-  { identifier :: {-# UNPACK #-}!Int
-  , screen     :: Point 2 Int
-  , client     :: Point 2 Int
-  , page       :: Point 2 Int
-  } deriving (Eq, Show)
+-- data Touch = Touch
+--   { identifier :: {-# UNPACK #-}!Int
+--   , screen     :: Point 2 Int
+--   , client     :: Point 2 Int
+--   , page       :: Point 2 Int
+--   } deriving (Eq, Show)
 
-instance FromJSON Touch where
-  parseJSON =
-    withObject "touch" $ \o -> do
-      identifier <- o .: "identifier"
-      screen     <- Point2 <$> o .: "screenX" <*> o .: "screenY"
-      client     <- Point2 <$> o .: "clientX" <*> o .: "clientY"
-      page       <- Point2 <$> o .: "pageX"   <*> o .: "pageY"
-      pure $ Touch identifier screen client page
+-- instance FromJSON Touch where
+--   parseJSON =
+--     withObject "touch" $ \o -> do
+--       identifier <- o .: "identifier"
+--       screen     <- Point2 <$> o .: "screenX" <*> o .: "screenY"
+--       client     <- Point2 <$> o .: "clientX" <*> o .: "clientY"
+--       page       <- Point2 <$> o .: "pageX"   <*> o .: "pageY"
+--       pure $ Touch identifier screen client page
 
-newtype TouchEvent = TouchEvent Touch
-  deriving (Eq, Show)
+-- newtype TouchEvent = TouchEvent Touch
+--   deriving (Eq, Show)
 
-instance FromJSON TouchEvent where
-  parseJSON obj = do
-    ((x:_):_) <- parseJSON obj
-    pure $ TouchEvent x
+-- instance FromJSON TouchEvent where
+--   parseJSON obj = do
+--     ((x:_):_) <- parseJSON obj
+--     pure $ TouchEvent x
 
-touchDecoder :: Decoder TouchEvent
-touchDecoder = Decoder dec dt
-  where
-    dt = DecodeTargets [["changedTouches"], ["targetTouches"], ["touches"]]
-    dec = parseJSON
+-- touchDecoder :: Decoder TouchEvent
+-- touchDecoder = Decoder dec dt
+--   where
+--     dt = DecodeTargets [["changedTouches"], ["targetTouches"], ["touches"]]
+--     dec = parseJSON
 
--- | touchmove event
-onTouchMove :: (TouchEvent -> action) -> Attribute action
-onTouchMove = on "touchmove" touchDecoder
+-- -- | touchmove event
+-- onTouchMove :: (TouchEvent -> action) -> Attribute action
+-- onTouchMove = on "touchmove" touchDecoder
 
--- | touchstart  event
-onTouchStart     :: (TouchEvent -> action) -> Attribute action
-onTouchStart = on "touchstart" touchDecoder
+-- -- | touchstart  event
+-- onTouchStart     :: (TouchEvent -> action) -> Attribute action
+-- onTouchStart = on "touchstart" touchDecoder
 
--- | touchend event
-onTouchEnd :: (TouchEvent -> action) -> Attribute action
-onTouchEnd = on "touchend" touchDecoder
+-- -- | touchend event
+-- onTouchEnd :: (TouchEvent -> action) -> Attribute action
+-- onTouchEnd = on "touchend" touchDecoder
+
+
+onTouchEnd     :: action -> Attribute action
+onTouchEnd act = on "touchend" emptyDecoder (const act)
+
+onTouchStart     :: action -> Attribute action
+onTouchStart act = on "touchstart" emptyDecoder (const act)
+
+onTouchMove     :: action -> Attribute action
+onTouchMove act = on "touchmove" emptyDecoder (const act)
