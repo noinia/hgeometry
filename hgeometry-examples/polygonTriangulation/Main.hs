@@ -107,7 +107,7 @@ viewModel m = div_ [ ]
                          , textAt p [] (ms i)
                          ]
                  | (i,p) <- m^..points.ifolded.withIndex ]
-              <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+              -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
 
 --------------------------------------------------------------------------------
 
@@ -117,11 +117,8 @@ main = JSaddle.run 8080 $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel
-                , subs          = Canvas.subs "mySvg" CanvasAction
-                , events        = Map.insert "touchstart" False
-                                  . Map.insert "touchmove" False
-                                  . Map.insert "mousemove" False
-                                  $ defaultEvents
+                , subs          = mempty
+                , events        = Canvas.withCanvasEvents defaultEvents
                 , initialAction = Id
                 , mountPoint    = Nothing
                 , logLevel      = Off

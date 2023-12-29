@@ -106,14 +106,12 @@ viewModel m = div_ [ ]
                    [ either PrimalCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.primalCanvas)
                                        [ onClick PrimalClick
-                                       , id_ "primalSvg"
                                        , styleInline_ "border: 1px solid black"
                                        ]
                                        primalBody
                    , either DualCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.dualCanvas)
                                        [ onClick DualClick
-                                       , id_ "dualSvg"
                                        , styleInline_ "border: 1px solid black"
                                        ]
                                        dualBody
@@ -142,7 +140,7 @@ viewModel m = div_ [ ]
                           ]
                  ]
          | l :+ color <- m^..lines.folded ]
-      <> [ draw p [ fill_ "blue" ]  | Just p <- [mousePos] ]
+      -- <> [ draw p [ fill_ "blue" ]  | Just p <- [mousePos] ]
 
 instance Drawable (LineEQ R) where
   draw l = let maxP = Point2 large large
@@ -161,12 +159,8 @@ main = JSaddle.run 8080 $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel
-                , subs          =    Canvas.subs "primalSvg" PrimalCanvasAction
-                                  <> Canvas.subs "dualSvg"   DualCanvasAction
-                , events        = Map.insert "touchstart" False
-                                  . Map.insert "touchmove" False
-                                  . Map.insert "mousemove" False
-                                  $ defaultEvents
+                , subs          = mempty
+                , events        = Canvas.withCanvasEvents defaultEvents
                 , initialAction = Id
                 , mountPoint    = Nothing
                 , logLevel      = Off

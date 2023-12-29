@@ -4,7 +4,6 @@ module Main(main) where
 
 import           Control.Lens hiding (view, element)
 import qualified Data.IntMap as IntMap
-import qualified Data.Map as Map
 import           GHC.TypeNats
 import           HGeometry.Ext
 import           HGeometry.LineSegment
@@ -111,7 +110,7 @@ viewModel m = div_ [ ]
               <> [ g_ [] [ draw p [ fill_ "red"]
                          ]
                  | p <- m^..intersections.to intersectionPoints.folded ]
-              <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+              -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
 
     partialSegment p q = [ClosedLineSegment <$> p <*> q ]
 
@@ -126,14 +125,8 @@ mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = Canvas.subs "mySvg" CanvasAction
-                                      <> [
-                                        -- arrowsSub (CanvasAction . ArrowPress)
-                                      ]
-                    , events        = Map.insert "touchstart" False
-                                    . Map.insert "touchmove" False
-                                    . Map.insert "mousemove" False
-                                    $ defaultEvents
+                    , subs          = mempty
+                    , events        = Canvas.withCanvasEvents defaultEvents
                     , initialAction = Id
                     , mountPoint    = Nothing
                     , logLevel      = Off

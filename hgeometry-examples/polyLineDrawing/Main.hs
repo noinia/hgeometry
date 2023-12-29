@@ -185,6 +185,7 @@ viewModel m = div_ [ ]
                         [ "html { overscroll-behavior: none; }"
                         , "html body { overflow: hidden; }"
                         ]
+                        -- these two lines prevent weird janky scrolling on ipad
                    ]
   where
     unlines' = mconcat . List.intersperse "\n"
