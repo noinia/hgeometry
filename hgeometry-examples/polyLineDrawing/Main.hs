@@ -7,6 +7,7 @@ import           Control.Monad.IO.Class
 import           Control.Lens hiding (view, element)
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -26,6 +27,7 @@ import           HGeometry.Sequence.NonEmpty
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso hiding (onMouseUp, onMouseDown)
 import           Miso.Event.Extra
+import qualified Miso.Html.Element as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
@@ -112,9 +114,9 @@ updateModel m = \case
                             PolyLineMode -> noEff m
                             PenMode      -> m <# pure AddPoly
 
-    StartTouch         -> traceShow "touchstart" $ m <# pure StartMouseDown
-    TouchMove          -> traceShow "touchmove"  $ m <# pure MouseMove
-    EndTouch           -> traceShow "touchend"   $ m <# pure StopMouseDown
+    StartTouch         -> m <# pure StartMouseDown
+    TouchMove          -> m <# pure MouseMove
+    EndTouch           -> m <# pure StopMouseDown
 
     MouseMove          -> case m^.mode of
                             PolyLineMode -> noEff m
@@ -135,11 +137,6 @@ updateModel m = \case
     mouseMoveAction = noEff $ m&currentPoly %~ \mp -> case mp of
                                                         Nothing -> Nothing
                                                         Just _  -> extend mp
-
-    -- setMouseCoords (TouchEvent t) = m
-      -- let (x,y) = bimap trunc trunc $ page t
-      --                               in m&canvas.mousePosition ?~ p
-
 
 -- | Extend the current partial polyline with the given point (if it is on the canvas.)
 extendWith          :: Maybe (Point 2 r)
@@ -184,8 +181,14 @@ viewModel m = div_ [ ]
                           [text . ms . show $ m^.canvas.mouseCoordinates ]
                    , div_ []
                           [text . ms . show $ m^.polyLines ]
-                    ]
+                   , Html.style_ [] $ unlines'
+                        [ "html { overscroll-behavior: none; }"
+                        , "html body { overflow: hidden; }"
+                        ]
+                   ]
   where
+    unlines' = mconcat . List.intersperse "\n"
+
     canvasBody = [ g_ [] [ draw v [ stroke_        "red"
                                   , strokeLinecap_ "round"
                                   ]
@@ -200,6 +203,7 @@ viewModel m = div_ [ ]
                          , draw (douglasPeucker 20 p) [ stroke_ "gray"]
                          ]
                  | (_,p) <- m^..polyLines.ifolded.withIndex ]
+
               -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
 
     currentPoly' = case m^.currentPoly of
