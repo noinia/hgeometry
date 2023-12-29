@@ -82,15 +82,15 @@ blankCanvas w h = let v = Vector2 w h
 -- * The Controller
 
 -- | Actions that CanvasAction will handle itself.
-data InternalCanvasAction = MouseMove (Int,Int)
+data InternalCanvasAction = MouseMove (Maybe (Point 2 Int))
                           | MouseLeave
                           deriving (Show,Eq)
 
 -- | Handles InternalCanvas Actions
 handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
 handleInternalCanvasAction canvas = noEff . \case
-  MouseMove (x,y) -> canvas&mousePosition ?~ Point2 x y
-  MouseLeave      -> canvas&mousePosition .~ Nothing
+  MouseMove mp -> canvas&mousePosition .~ mp
+  MouseLeave   -> canvas&mousePosition .~ Nothing
 
 
 --------------------------------------------------------------------------------

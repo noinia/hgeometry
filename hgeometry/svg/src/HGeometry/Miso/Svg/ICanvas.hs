@@ -80,9 +80,8 @@ data CanvasAction = MouseMove (Int,Int)
 
 update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
 update m = \case
-    MouseMove (x,y)         -> let p  = Point2 x y
-                               in noEff $ m&mousePosition .~ Just p
-                                           &canvas.center %~ applyPan (m^.panStatus) p
+    MouseMove p             -> noEff $ m&mousePosition .~ Just p
+                                        &canvas.center %~ applyPan (m^.panStatus) p
     MouseLeave              -> noEff $ m&mousePosition .~ Nothing
     ArrowPress (Arrows x y) -> let v   = ((*2) . fromIntegral) <$> Vector2 x y
                                in noEff $ m&canvas.center %~ (.+^ v)
@@ -174,7 +173,7 @@ view f m ats vs = staticCanvas_ (m^.canvas)
 withCapability                            :: Capability -> ICanvas r -> [a] -> [a]
 withCapability c m as | hasCapability c m = as
                       | otherwise         = []
-
+z
 
 -- whenCap c =
 
