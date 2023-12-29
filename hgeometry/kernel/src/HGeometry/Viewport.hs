@@ -43,7 +43,7 @@ data Viewport r = Viewport { _viewPort    :: Rectangle (Point 2 r)
 
                            -- _hostToWorld :: Transformation 2 r
                            }
-                  deriving stock (Eq)
+                  deriving stock (Eq, Show)
 
 -- | Lens to access the viewport rectangle
 viewPort :: Lens' (Viewport r) (Rectangle (Point 2 r))

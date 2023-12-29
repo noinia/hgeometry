@@ -39,7 +39,7 @@ data Canvas r =
          , _mousePosition     :: Maybe (Point 2 Int)
          -- ^ the mouse position, in raw pixel coordinates
          }
-  deriving stock (Eq)
+  deriving stock (Eq,Show)
 
 -- | Lens to access the viewport
 theViewport :: Lens (Canvas r) (Canvas s) (Viewport r) (Viewport s)
