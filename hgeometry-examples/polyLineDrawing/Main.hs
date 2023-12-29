@@ -2,12 +2,15 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Main (main) where
 
+import           Control.Monad.IO.Class
+
 import           Control.Lens hiding (view, element)
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import           Data.Maybe (maybeToList)
 import qualified Data.Sequence as Sequence
 import           GHC.TypeNats
 import           HGeometry.Ext
@@ -26,6 +29,7 @@ import           Miso.Event.Extra
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -82,7 +86,7 @@ data Action = Id
             | StartMousdeDown
             | StopMouseDown
             | StartTouch !TouchEvent
-            | TouchMove !TouchEvent
+            -- | TouchMove !TouchEvent
             | EndTouch !TouchEvent
             | MouseMove
             | AddPoint
@@ -109,7 +113,7 @@ updateModel m = \case
                             PenMode      -> m <# pure AddPoly
 
     StartTouch evt     -> setMouseCoords evt <# pure StartMousdeDown
-    TouchMove evt      -> setMouseCoords evt <# pure MouseMove
+    -- TouchMove evt      -> setMouseCoords evt <# pure MouseMove
     EndTouch evt       -> setMouseCoords evt <# pure StopMouseDown
 
     MouseMove          -> case m^.mode of
@@ -163,15 +167,13 @@ viewModel       :: Model -> View Action
 viewModel m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
-                                       [ onClick CanvasClicked
+                                       [ onClick      CanvasClicked
                                        , onRightClick CanvasRightClicked
-                                       , onMouseDown StartMousdeDown
+                                       , onMouseDown  StartMousdeDown
                                        , onTouchStart StartTouch
-                                       , onMouseUp StopMouseDown
-                                       , onTouchEnd EndTouch
-                                       , onMouseMove MouseMove
-                                       , onTouchMove TouchMove
-                                       , id_ "mySvg"
+                                       , onMouseUp    StopMouseDown
+                                       , onTouchEnd   EndTouch
+                                       , onMouseMove  MouseMove
                                        , styleInline_ "border: 1px solid black"
                                        ]
                                        canvasBody
@@ -183,17 +185,25 @@ viewModel m = div_ [ ]
                           [text . ms . show $ m^.polyLines ]
                     ]
   where
-    canvasBody = [ g_ [] [ draw v [ stroke_ "red"
+    canvasBody = [ g_ [] [ draw v [ stroke_        "red"
+                                  , strokeLinecap_ "round"
                                   ]
                          ]
-                 | v <- m^..currentPoly.to (extendWith (m^.canvas.mouseCoordinates)).traverse
+                 | v <- currentPoly'
                  ]
-              <> [ g_ [] [ draw p [ stroke_ "black"
+              <> [
+                 ]
+              <> [ g_ [] [ draw p [ stroke_        "black"
+                                  , strokeLinecap_ "round"
                                   ]
                          , draw (douglasPeucker 20 p) [ stroke_ "gray"]
                          ]
-                 | (i,p) <- m^..polyLines.ifolded.withIndex ]
-              <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+                 | (_,p) <- m^..polyLines.ifolded.withIndex ]
+              -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+
+    currentPoly' = case m^.currentPoly of
+                     Nothing     -> []
+                     cp@(Just _) -> maybeToList $ extendWith (m^.canvas.mouseCoordinates) cp
 
 --------------------------------------------------------------------------------
 
@@ -203,12 +213,8 @@ main = JSaddle.run 8080 $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel
-                , subs          = Canvas.subs "mySvg" CanvasAction
-                , events        = Map.insert "touchstart" False
-                                  . Map.insert "touchmove" False
-                                  . Map.insert "mousemove" False
-                                  . Map.insert  "contextmenu" False
-                                  $ defaultEvents
+                , subs          = mempty
+                , events        = Canvas.withCanvasEvents defaultEvents
                 , initialAction = Id
                 , mountPoint    = Nothing
                 , logLevel      = Off

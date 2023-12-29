@@ -201,6 +201,7 @@ onWheel = on "wheel" (Decoder dec dt)
 iCanvasSubs     :: MisoString -- ^ The id of the iCanvas
                 -> (CanvasAction -> action)
                 -> [Sub action]
-iCanvasSubs i f = [ relativeMouseSub i (f . MouseMove)
-                  , arrowsSub          (f . ArrowPress)
+iCanvasSubs i f = [ relativeMouseSub i   (f . MouseMove)
+                  , relativeTouchedSub i (f . TouchMove)
+                  , arrowsSub            (f . ArrowPress)
                   ]

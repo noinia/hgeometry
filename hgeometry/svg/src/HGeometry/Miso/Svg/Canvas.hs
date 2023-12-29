@@ -10,21 +10,22 @@ module HGeometry.Miso.Svg.Canvas
 
   , InternalCanvasAction
   , handleInternalCanvasAction
-  , subs
+  , withCanvasEvents
 
   , svgCanvas_
   ) where
 
-import Control.Lens hiding (elements)
-import HGeometry.Miso.Svg.StaticCanvas
-import HGeometry.Point
-import HGeometry.Transformation
-import HGeometry.Vector
-import HGeometry.Viewport
-import Miso (Attribute, View, Effect, Sub, height_, width_, noEff, onMouseLeave)
-import Miso.String (MisoString, ms)
-import Miso.Subscription.MouseExtra
-import Miso.Svg (svg_, g_, transform_)
+import           Control.Lens hiding (elements)
+import qualified Data.Map as Map
+import           HGeometry.Miso.Svg.StaticCanvas
+import           HGeometry.Point
+import           HGeometry.Transformation
+import           HGeometry.Vector
+import           HGeometry.Viewport
+import           Miso (Attribute, View, Effect, height_, width_, noEff, onMouseLeave)
+import           Miso.String (MisoString, ms)
+import           Miso.Subscription.MouseExtra
+import           Miso.Svg (svg_, g_, rect_, transform_, pointerEvents_, fill_)
 
 --------------------------------------------------------------------------------
 -- *A Canvas
@@ -82,16 +83,19 @@ blankCanvas w h = let v = Vector2 w h
 -- * The Controller
 
 -- | Actions that CanvasAction will handle itself.
-data InternalCanvasAction = MouseMove (Maybe (Point 2 Int))
+data InternalCanvasAction = MouseEnter (Point 2 Int)
+                          | MouseMove (Point 2 Int)
                           | MouseLeave
+                          | TouchMove (Maybe (Point 2 Int))
                           deriving (Show,Eq)
 
 -- | Handles InternalCanvas Actions
 handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
 handleInternalCanvasAction canvas = noEff . \case
-  MouseMove mp -> canvas&mousePosition .~ mp
-  MouseLeave   -> canvas&mousePosition .~ Nothing
-
+  MouseEnter p  -> canvas&mousePosition .~ Just p
+  MouseMove  p  -> canvas&mousePosition .~ Just p
+  TouchMove mp  -> canvas&mousePosition .~ mp
+  MouseLeave    -> canvas&mousePosition .~ Nothing
 
 --------------------------------------------------------------------------------
 -- * The View
@@ -102,12 +106,23 @@ svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                          -> [Attribute action] -> [View action]
                          -> View (Either InternalCanvasAction action)
 svgCanvas_ canvas ats vs =
-  svg_ ([ width_   . ms $ w
-        , height_  . ms $ h
-        , onMouseLeave $ Left MouseLeave
+  svg_ ([ width_    . ms $ w
+        , height_   . ms $ h
+        , pointerEvents_ "all"
         ] <> (fmap Right <$> ats))
-        [ g_ [ transform_ ts ] (fmap Right <$> vs)
-        ]
+       [ svg_ [ width_          "100%"
+              , onMouseLeave   $ Left MouseLeave
+              , onMouseEnterAt $ Left . MouseEnter
+              , onMouseMoveAt  $ Left . MouseMove
+              ]
+              [ rect_ [width_ "100%", height_ "100%", fill_ "none"] []
+              , g_ [transform_ ts] (fmap Right <$> vs)
+              ]
+       ]
+    -- note; we use the two nested svgs so that we can handle additional mouseMove, Enter,
+    -- and leave events specified in ats. The pointerEvents=all in the outer svg is needed
+    -- so that we can also capture the mousemove etc events in the inner svg. The rect
+    -- is so that the inner svg is actually forced to be the full size.
   where
     (Vector2 w h) = canvas^.dimensions
     ts = matrixToMisoString $ canvas^.theViewport.worldToHost.transformationMatrix
@@ -141,13 +156,25 @@ svgCanvas_ canvas ats vs =
 --                                            ] <> ats
 
 --------------------------------------------------------------------------------
--- * Subscriptions
+-- * Canvas events that we should isten to
 
--- | Subscription needed for the iCanvas. In particular, captures the
--- mouse position
-subs     :: MisoString -- ^ The id of the iCanvas
-                -> (InternalCanvasAction -> action)
-                -> [Sub action]
-subs i f = [ relativeMouseSub i (f . MouseMove)
-                  -- , arrowsSub          (f . ArrowPress)
-                 ]
+-- | Events a canvas wants to listen to
+withCanvasEvents :: Map.Map MisoString Bool -> Map.Map MisoString Bool
+withCanvasEvents = Map.union $ Map.fromList
+                   [ ("touchstart"  , False)
+                   , ("touchmove"   , False)
+                   , ("touchmove"   , False)
+                   , ("mouseleave"  , True)
+                   , ("mousemove"   , False)
+                   , ("contextmenu" , False)
+                   ]
+
+-- -- | Subscription needed for the iCanvas. In particular, captures the
+-- -- mouse position
+-- subs     :: MisoString -- ^ The id of the iCanvas
+--                 -> (InternalCanvasAction -> action)
+--                 -> [Sub action]
+-- subs i f = [ relativeMouseSub   i (f . MouseMove)
+--            , relativeTouchedSub i (f . TouchMove)
+--                   -- , arrowsSub          (f . ArrowPress)
+--            ]

@@ -3,25 +3,70 @@
 {-# HLINT ignore "Redundant lambda" #-}
 module Miso.Subscription.MouseExtra
   ( relativeMouseSub
+  , relativeTouchedSub
+  , onMouseEnterAt
+  , onMouseMoveAt
+  , onMouseClickAt
   ) where
 
 import Control.Monad.IO.Class
+import Data.Aeson (withObject, (.:))
 import GHCJS.Marshal
+import HGeometry.Point
 import JavaScript.Object
 import JavaScript.Object.Internal
+import Language.Javascript.JSaddle (JSVal)
 import Miso
 import Miso.FFI.Extra
 import Miso.String (MisoString)
-import HGeometry.Point
-import Language.Javascript.JSaddle (JSVal)
+
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 
 -- | Gets the mouse position relative to the element named by the first argument
 relativeMouseSub          :: MisoString -> (Maybe (Point 2 Int) -> action) -> Sub action
 relativeMouseSub elemId f = \sink -> do
-    windowAddEventListener "mousemove" $
-      \mouseEvent -> do
+    windowAddEventListener "mousemove" $ relativeMouseSubImpl elemId f sink
+
+-- newtype MouseEvent = MouseEvent { offset  :: Point 2 Int
+--                                 -- , target  :: JSVal
+--                                 } deriving (Show,Eq)
+
+-- instance FromJSON MouseEvent where
+--   parseJSON =
+--     withObject "MouseEvent" $ \o ->
+--       MouseEvent <$> (Point2 <$> o .: "offsetX" <*> o .: "offsetY")
+--                  -- <*> (o .: "target")
+
+onMouseMoveAt   :: (Point 2 Int -> action) -> Attribute action
+onMouseMoveAt f = on "mousemove" mousePositionDecoder f
+
+onMouseEnterAt   :: (Point 2 Int -> action) -> Attribute action
+onMouseEnterAt f = on "mouseenter" mousePositionDecoder f
+
+onMouseClickAt   :: (Point 2 Int -> action) -> Attribute action
+onMouseClickAt f = on "click" mousePositionDecoder f
+
+
+mousePositionDecoder :: Decoder (Point 2 Int)
+mousePositionDecoder = Decoder dec dt
+  where
+    dt = DecodeTarget mempty
+    dec = withObject "event" $ \o -> Point2 <$> o .: "offsetX" <*> o .: "offsetY"
+
+
+
+
+
+
+
+
+-- | the implementation of the relative Mouse sub
+relativeMouseSubImpl               :: MisoString -> (Maybe (Point 2 Int) -> action)
+                                   -> Sink action
+                                   -> JSVal -> JSM ()
+relativeMouseSubImpl elemId f sink = \mouseEvent -> do
         elem'  <- getElementById elemId
         rect   <- getInnerRect elem'
         Just x <- fromJSVal =<< getProp "clientX" (Object mouseEvent)
@@ -29,6 +74,29 @@ relativeMouseSub elemId f = \sink -> do
         let mp = inDOMRect (Point2 x y) rect
         -- see https://stackoverflow.com/questions/10298658/mouse-position-inside-autoscaled-svg
         liftIO (sink $ f mp)
+
+-- | Get touchmove events on the given elementId, in coordinates relative to the
+-- element.
+relativeTouchedSub          :: MisoString -> (Maybe (Point 2 Int) -> action) -> Sub action
+relativeTouchedSub elemId f = \sink -> do
+    windowAddEventListener "touchmove" $ relativeTouchSubImpl elemId f sink
+
+
+-- | the implementation of the relative Mouse sub
+relativeTouchSubImpl               :: MisoString -> (Maybe (Point 2 Int) -> action)
+                                   -> Sink action
+                                   -> JSVal -> JSM ()
+relativeTouchSubImpl elemId f sink = \mouseEvent -> do
+        elem'  <- getElementById elemId
+        rect   <- getInnerRect elem'
+        Just (x :: Double) <- fromJSVal =<< getProp "pageX" (Object mouseEvent)
+        Just (y :: Double) <- fromJSVal =<< getProp "pageY" (Object mouseEvent)
+        let mp = inDOMRect (Point2 (round x) (round y)) rect
+        -- liftIO (print (rect,x,y,px,py,mp))
+        -- see https://stackoverflow.com/questions/10298658/mouse-position-inside-autoscaled-svg
+        liftIO (sink $ f mp)
+
+--------------------------------------------------------------------------------
 
 -- | A DOMRect
 data DOMRect = DOMRect { top    :: {-# UNPACK #-} !Int
@@ -80,3 +148,6 @@ getInnerRect elem' = do
 --  relativePositionIn          :: MisoString
 --                             ->
 -- relativePositionIn elemId f =
+
+
+--------------------------------------------------------------------------------
