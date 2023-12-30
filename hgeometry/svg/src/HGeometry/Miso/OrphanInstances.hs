@@ -41,8 +41,10 @@ instance FromMisoString Rational where
   fromMisoStringEither = fmap realToFrac . fromMisoStringEither @Pico
 
 instance ToMisoString r => ToMisoString (RGB r) where
-  toMisoString (RGB r g b) = mconcat . List.intersperse " " . map toMisoString $ [r,g,b]
-
+  toMisoString (RGB r g b) = mconcat [ "rgb("
+                                     , mconcat . List.intersperse " " . map toMisoString $ [r,g,b]
+                                     , ")"
+                                     ]
 
 --------------------------------------------------------------------------------
 -- * Dealing with attributes

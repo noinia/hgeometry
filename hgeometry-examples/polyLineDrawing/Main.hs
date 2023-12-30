@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Main (main) where
 
 import           Control.Monad.IO.Class
@@ -19,7 +20,7 @@ import           GHC.TypeNats
 import           HGeometry.Ext
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
-import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates)
+import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates, dimensions)
 import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
@@ -34,7 +35,6 @@ import qualified Miso.Html.Element as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 import           Miso.Util ((=:))
-
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -61,8 +61,6 @@ switchMode = \case
   PolyLineMode -> PenMode
   PenMode      -> PolyLineMode
 
--- instance ToMisoString a => ToMisoString (RGB a) where
---   toMisoString (RGB r g b) = mconcat . intersperse " " . map toMisoString $ [r,g,b]
 
 type Color = RGB Word8
 
@@ -102,7 +100,7 @@ selectedColor :: Color
 selectedColor = RGB 205 205 205
 
 backgroundColor :: Color
-backgroundColor = RGB 246 246 256
+backgroundColor = RGB 246 246 246
 
 
 data Thickness = Thin | Normal | Thick deriving (Show,Read,Eq,Ord)
@@ -146,7 +144,7 @@ instance Default (Point 2 R :+ Int) where
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model { _canvas       = blankCanvas 300  300
+initialModel = Model { _canvas       = blankCanvas 400 400
                      , _polyLines    = mempty
                      , _currentPoly  = Nothing
                      , _mode         = PenMode
@@ -159,6 +157,7 @@ initialModel = Model { _canvas       = blankCanvas 300  300
 
 data Action = Id
             | CanvasAction Canvas.InternalCanvasAction
+            | WindowResize (Vector 2 Int)
             | SwitchMode
             | CanvasClicked
             | CanvasRightClicked
@@ -170,14 +169,16 @@ data Action = Id
             | MouseMove
             | AddPoint
             | AddPoly
-            | SelectColor !Int !Color
+            | SelectColor {-# UNPACK #-}!Int {-# UNPACK #-}!Color
             deriving (Show,Eq)
 
+windowDeltas = Vector2 50 200
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                 -> noEff m
     CanvasAction ca    -> m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
+    WindowResize dims -> noEff $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
     SwitchMode         -> noEff $ m&mode %~ switchMode
     CanvasClicked      -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoint
@@ -243,52 +244,152 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Action
-viewModel m = div_ [ ]
-                   [ either CanvasAction id <$>
-                     Canvas.svgCanvas_ (m^.canvas)
-                                       [ onClick      CanvasClicked
-                                       , onRightClick CanvasRightClicked
-                                       , onMouseDown  StartMouseDown
-                                       , onMouseUp    StopMouseDown
-                                       , onTouchStart StartTouch
-                                       , onTouchMove  TouchMove
-                                       , onTouchEnd   EndTouch
-                                       , onMouseMove  MouseMove
-                                       , styleInline_ "border: 1px solid black"
-                                       ]
-                                       canvasBody
-                   ,  div_ []
-                           (colorPickers (m^.currentAttrs.color)
-                                         (m^.currentAttrs.colorIndex) (m^.quickColors)
-                           )
-                   , div_ [ onClick SwitchMode ]
-                          [ text . ms . show $ m^.mode ]
-                   , div_ []
-                          [text . ms . show $ m^.canvas.mouseCoordinates ]
-                   , div_ []
-                          [text . ms . show $ m^.polyLines ]
-                   , Html.style_ [] $ unlines'
-                        [ "html { overscroll-behavior: none; }"
-                        , "html body { overflow: hidden; }"
-                        ]
-                        -- these two lines prevent weird janky scrolling on ipad
-                   ]
+viewModel  :: Model -> View Action
+viewModel m =
+    div_ [
+         ]
+         [ theToolbar m
+         , theCanvas m
+         , iconLink
+         ]
+
+
+singleton = (:[])
+
+buttonGroup         :: Foldable f
+                    => f (MisoString, MisoString) -> View action
+buttonGroup buttons =
+    div_ [ ]
+         (foldMap (singleton .  button) buttons)
+  where
+    button (t,icon') =
+      button_ [ class_      "button"
+              , Miso.title_ t
+              ]
+              [ icon icon' ]
+
+theToolbar   :: Model -> View Action
+theToolbar m =
+      div_ [ id_    "toolBar"
+           , styleM_ [ "border"  =: "1px solid black"
+                     , "display" =: "flex"
+                     ]
+           ]
+           [ tools
+           , penProperties
+           , colorSelectors
+           ]
+  where
+    tools =
+      div_ [ styleM_ [ "width" =: "30%"
+                     , "margin" =: "auto"
+                     ]
+           ]
+           [ buttonGroup [ ("pen", "fas fa-pencil-alt")
+                         , ("poly", "fas fa-pencil-ruler")
+                         , ("eraser", "fas fa-eraser")
+                         ]
+           ]
+    penProperties =
+      div_ [ styleM_ [ "width" =: "30%"
+                     , "margin" =: "auto"
+                     ]
+           ]
+           [ toolGroup [ tool "pen-width"
+                       ]
+           ]
+    colorSelectors =
+      div_ [ styleM_ [ "width" =: "30%"
+                     , "margin" =: "auto"
+                     ]
+           ]
+           [ toolGroup $ colorPickers (m^.currentAttrs.color)
+                                      (m^.currentAttrs.colorIndex) (m^.quickColors)
+           ]
+
+    toolGroup = div_ [ ]
+
+    tool t = button_ [ class_ "button" ]
+                     [ text t]
+
+--------------------------------------------------------------------------------
+
+colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color -> [View Action]
+colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && selected == c) j c])
+
+colorPickerButton              :: Bool -> Int -> Color -> View Action
+colorPickerButton selected i c =
+  button_ [ styleM_ [ "background-color" =: ms c
+                    , "width"            =: (ms size <> "px")
+                    , "height"           =: (ms size <> "px")
+                    , "display"          =: "display"
+                    , "margin"           =: "3px"
+                    , "cursor"           =: "pointer"
+                    , "border"           =: "none"
+                    , "border-radius"    =: (ms (size `div` 2) <> "px")
+                    , "outline"          =: if selected then "3px solid " <> ms selectedColor
+                                                        else "none"
+                    ]
+                  , onClick $ SelectColor i c
+                  ] []
+  where
+    size = 30 :: Int
+
+
+--------------------------------------------------------------------------------
+
+
+theCanvas   :: Model -> View Action
+theCanvas m =
+      div_ [ id_ "canvas" ]
+           [ either CanvasAction id <$>
+             Canvas.svgCanvas_ (m^.canvas)
+                               [ onClick      CanvasClicked
+                               , onRightClick CanvasRightClicked
+                               , onMouseDown  StartMouseDown
+                               , onMouseUp    StopMouseDown
+                               , onTouchStart StartTouch
+                               , onTouchMove  TouchMove
+                               , onTouchEnd   EndTouch
+                               , onMouseMove  MouseMove
+                               , styleM_ [ "border"           =: "1px solid black"
+                                         , "background-color" =: "white"
+                                         ]
+
+                               ]
+                               canvasBody
+           -- ,  div_ []
+           --         (colorPickers (m^.currentAttrs.color)
+           --                       (m^.currentAttrs.colorIndex) (m^.quickColors)
+           --         )
+           , div_ [ onClick SwitchMode ]
+                  [ text . ms . show $ m^.mode ]
+           , div_ []
+                  [text . ms . show $ m^.canvas.mouseCoordinates ]
+           -- , div_ []
+           --        [text . ms . show $ m^.polyLines ]
+           , Html.style_ [] $ unlines'
+                [ "html { overscroll-behavior: none; }" -- prevent janky scrolling on ipad
+                , "html body { overflow: hidden; }"     -- more weird scrolling prevent
+                , "body { background-color: " <> ms backgroundColor <> ";}"
+                ]
+
+           ]
   where
     unlines' = mconcat . List.intersperse "\n"
 
-    canvasBody = [ g_ [] [ draw v [ stroke_        "red"
+    canvasBody = [ g_ [] [ draw v [ stroke_        $ ms (m^.currentAttrs.color)
                                   , strokeLinecap_ "round"
                                   , strokeWidth_   $ toInt (m^.currentAttrs.thickness)
                                   ]
                          ]
                  | v <- currentPoly'
                  ]
-              <> [ g_ [] [ draw p [ stroke_        $ "rgb(" <> ms (ats^.color) <> ")"
+              <> [ g_ [] [ draw p [ stroke_        $ ms (ats^.color)
                                   , strokeLinecap_ "round"
                                   , strokeWidth_   $ toInt (ats^.thickness)
                                   ]
-                         , draw (douglasPeucker 20 p) [ stroke_ "gray"]
+                         -- , draw (douglasPeucker 20 p) [ stroke_ "gray"]
                          ]
                  | (_,p :+ ats) <- m^..polyLines.ifolded.withIndex ]
 
@@ -298,41 +399,10 @@ viewModel m = div_ [ ]
                      Nothing     -> []
                      cp@(Just _) -> maybeToList $ extendWith (m^.canvas.mouseCoordinates) cp
 
-
-colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color -> [View Action]
-colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && selected == c) j c])
-
-colorPickerButton              :: Bool -> Int -> Color -> View Action
-colorPickerButton selected i c =
-    button_ [ style_ $ mconcat
-              [ "background-color" =: rgb c
-              , "width"            =: size
-              , "height"           =: size
-              , "display"          =: "display"
-              , "padding"          =: "15px 32px"
-              , "text-align"       =: "center"
-              , "text-decoration"  =: "none"
-              , "display"          =: "inline-block"
-              , "font-size"        =: "16px"
-              , "margin"           =: "4px 2px"
-              , "cursor"           =: "pointer"
-              , "border"           =: if selected then "3px solid " <> rgb selectedColor
-                                                  else "none"
-              ]
-            , onClick $ SelectColor i c
-            ] []
-  where
-    size = "30"
+--------------------------------------------------------------------------------
 
 instance ToMisoString Word8 where
   toMisoString = toMisoString @Int . fromIntegral
-
-rgb             :: ToMisoString a => RGB a -> MisoString
-rgb (RGB r g b) = "rgb(" <> ms r <> "," <> ms g <> "," <> ms b <> ")"
-
--- rgb             :: ToMisoString a => RGB a -> MisoString
--- rgb (RGB r g b) = "rgb(" <> ms r <> "," <> ms g <> "," <> ms b <> ")"
-
 
 --------------------------------------------------------------------------------
 
@@ -342,7 +412,8 @@ main = JSaddle.run 8080 $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel
-                , subs          = mempty
+                , subs          = [ windowDimensionsSub WindowResize
+                                  ]
                 , events        = Canvas.withCanvasEvents defaultEvents
                 , initialAction = Id
                 , mountPoint    = Nothing
@@ -358,6 +429,26 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   ) [text t]
 
 
+-- | Subscription that gets the window dimensions.
+windowDimensionsSub   :: (Vector 2 Int -> action) -> Sub action
+windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 w h)
+
 
 
 --------------------------------------------------------------------------------
+
+styleM_    :: [Map.Map MisoString MisoString] -> Attribute action
+styleM_ xs = style_ $ mconcat xs
+
+
+
+
+-- | Produce an icon
+icon    :: MisoString -> View action
+icon cs = i_ [ class_ cs, textProp "aria-hidden" "true"] []
+
+-- | Produce a linked icon
+iconLink :: View action
+iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+                        , defer_ "true"
+                        ] mempty
