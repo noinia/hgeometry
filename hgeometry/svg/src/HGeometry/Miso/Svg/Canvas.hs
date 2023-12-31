@@ -83,22 +83,22 @@ blankCanvas w h = let v = Vector2 w h
 -- * The Controller
 
 -- | Actions that CanvasAction will handle itself.
-data InternalCanvasAction = MouseEnter (Point 2 Int)
-                          | MouseMove (Point 2 Int)
+data InternalCanvasAction = MouseEnter !(Point 2 Int)
+                          | MouseMove  !(Point 2 Int)
                           | MouseLeave
-                          | TouchStart (Point 2 Int)
-                          | TouchMove (Point 2 Int)
+                          | TouchStart !(Point 2 Int)
+                          | TouchMove  !(Point 2 Int)
                           | TouchEnd
                           deriving (Show,Eq)
 
 -- | Handles InternalCanvas Actions
 handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
 handleInternalCanvasAction canvas = noEff . \case
-  MouseEnter p  -> canvas&mousePosition .~ Just p
-  MouseMove  p  -> canvas&mousePosition .~ Just p
+  MouseEnter p  -> canvas&mousePosition ?~ p
+  MouseMove  p  -> canvas&mousePosition ?~ p
   MouseLeave    -> canvas&mousePosition .~ Nothing
-  TouchStart p  -> canvas&mousePosition .~ Just p
-  TouchMove p   -> canvas&mousePosition .~ Just p
+  TouchStart p  -> canvas&mousePosition ?~ p
+  TouchMove p   -> canvas&mousePosition ?~ p
   TouchEnd      -> canvas&mousePosition .~ Nothing
 
 --------------------------------------------------------------------------------

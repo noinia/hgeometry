@@ -25,7 +25,7 @@ import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
-import           HGeometry.PolyLine.Simplification.DouglasPeucker
+-- import           HGeometry.PolyLine.Simplification.DouglasPeucker
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
@@ -34,7 +34,6 @@ import           Miso.Event.Extra
 import qualified Miso.Html.Element as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
-import           Miso.Util ((=:))
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -105,6 +104,7 @@ backgroundColor = RGB 246 246 246
 
 data Thickness = Thin | Normal | Thick deriving (Show,Read,Eq,Ord)
 
+toInt :: Thickness -> MisoString
 toInt = ms @Int . \case
   Thin   -> 1
   Normal -> 2
@@ -156,8 +156,8 @@ initialModel = Model { _canvas       = blankCanvas 400 400
 
 
 data Action = Id
-            | CanvasAction Canvas.InternalCanvasAction
-            | WindowResize (Vector 2 Int)
+            | CanvasAction !Canvas.InternalCanvasAction
+            | WindowResize !(Vector 2 Int)
             | SwitchMode
             | CanvasClicked
             | CanvasRightClicked
@@ -172,12 +172,18 @@ data Action = Id
             | SelectColor {-# UNPACK #-}!Int {-# UNPACK #-}!Color
             deriving (Show,Eq)
 
+windowDeltas :: Vector 2 Int
 windowDeltas = Vector2 50 200
+
+
+
+
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                 -> noEff m
-    CanvasAction ca    -> m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
+    CanvasAction ca    -> traceShow ("canvas act: ",ca) $
+      m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
     WindowResize dims -> noEff $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
     SwitchMode         -> noEff $ m&mode %~ switchMode
     CanvasClicked      -> case m^.mode of
@@ -186,20 +192,15 @@ updateModel m = \case
     CanvasRightClicked -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoly
                             PenMode      -> noEff m
-    StartMouseDown     -> case m^.mode of
-                            PolyLineMode -> noEff m
-                            PenMode      -> noEff $ m&currentPoly .~ extend Nothing
-    StopMouseDown      -> case m^.mode of
-                            PolyLineMode -> noEff m
-                            PenMode      -> m <# pure AddPoly
 
-    StartTouch         -> m <# pure StartMouseDown
-    TouchMove          -> m <# pure MouseMove
-    EndTouch           -> m <# pure StopMouseDown
+    StartMouseDown     -> startMouseDown
+    MouseMove          -> mouseMove
+    StopMouseDown      -> stopMouseDown
 
-    MouseMove          -> case m^.mode of
-                            PolyLineMode -> noEff m
-                            PenMode      -> mouseMoveAction
+    StartTouch         -> traceShow ("startTouch",m^.canvas.mouseCoordinates) startMouseDown
+    TouchMove          -> traceShow ("touchMove",m^.canvas.mouseCoordinates) mouseMove
+    EndTouch           -> traceShow ("endTouch",m^.canvas.mouseCoordinates) stopMouseDown
+
     AddPoint           -> addPoint
     AddPoly            -> addPoly
     SelectColor i c    -> let setColor a = a&color      .~ c
@@ -208,6 +209,18 @@ updateModel m = \case
                                       &quickColors.ix i .~ c
 
   where
+    startMouseDown = case m^.mode of
+        PolyLineMode -> noEff m
+        PenMode      -> noEff $ m&currentPoly .~ extend Nothing
+    mouseMove      = case m^.mode of
+        PolyLineMode -> noEff m
+        PenMode      -> noEff $ m&currentPoly %~ \mp -> case mp of
+                                                          Nothing -> Nothing
+                                                          Just _  -> extend mp
+    stopMouseDown  = case m^.mode of
+        PolyLineMode -> noEff m
+        PenMode      -> m <# pure AddPoly
+
     extend = extendWith (m^.canvas.mouseCoordinates)
     addPoint = noEff $ m&currentPoly %~ extend
 
@@ -218,9 +231,7 @@ updateModel m = \case
       Just (PartialPolyLine x) -> insertPoly (x :+ m^.currentAttrs)
       _                        -> id
 
-    mouseMoveAction = noEff $ m&currentPoly %~ \mp -> case mp of
-                                                        Nothing -> Nothing
-                                                        Just _  -> extend mp
+
 
 -- | Extend the current partial polyline with the given point (if it is on the canvas.)
 extendWith          :: Eq r => Maybe (Point 2 r)
@@ -246,14 +257,16 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 viewModel  :: Model -> View Action
 viewModel m =
-    div_ [
+    div_ [ styleM_ [ "display" =: "flex"
+                   , "flex-direction" =: "column"
+                   ]
          ]
          [ theToolbar m
          , theCanvas m
          , iconLink
          ]
 
-
+singleton :: a -> [a]
 singleton = (:[])
 
 buttonGroup         :: Foldable f
@@ -341,7 +354,11 @@ colorPickerButton selected i c =
 
 theCanvas   :: Model -> View Action
 theCanvas m =
-      div_ [ id_ "canvas" ]
+      div_ [ id_ "canvas"
+           , styleM_ [ "margin-left"  =: "auto"
+                     , "margin-right" =: "auto"
+                     ]
+           ]
            [ either CanvasAction id <$>
              Canvas.svgCanvas_ (m^.canvas)
                                [ onClick      CanvasClicked
@@ -366,8 +383,8 @@ theCanvas m =
                   [ text . ms . show $ m^.mode ]
            , div_ []
                   [text . ms . show $ m^.canvas.mouseCoordinates ]
-           -- , div_ []
-           --        [text . ms . show $ m^.polyLines ]
+           , div_ []
+                  [text . ms . show $ m^.currentPoly ]
            , Html.style_ [] $ unlines'
                 [ "html { overscroll-behavior: none; }" -- prevent janky scrolling on ipad
                 , "html body { overflow: hidden; }"     -- more weird scrolling prevent
