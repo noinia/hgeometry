@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module HGeometry.LineSegmentSpec where
 
-import Control.Lens ((^.), IxValue)
+import Control.Lens ((^.), IxValue, Lens')
 import Data.Ord (comparing)
 import HGeometry.Ext
 import HGeometry.Intersection
@@ -215,6 +215,27 @@ testI = describe "some manual intersection tests" $ do
           it "manual intersection 14" $ (test1 `intersects` test4 ) `shouldBe` False
           it "manual intersection 24" $ (test2 `intersects` test4 ) `shouldBe` True
           it "manual intersection 25" $ (test2 `intersects` test5 ) `shouldBe` False
+
+          -- it "bug 12" $
+          --   let
+          --     l1 = supportingLine test1
+          --     l2 = supportingLine test2
+          --   in ( l1 `intersects` test2
+          --      , supportingLine l2 `intersects` test1
+          --      , spansIntersect test1 test2
+          --      ) `shouldBe` (True,True,True)
+          it "span 1 x" $
+            spanIn (xCoord :: Lens' (Point 2 Int) Int) test1
+              `shouldBe` Interval (AnClosedE 0) (AnClosedE 0)
+          it "span 1 y" $
+            spanIn (yCoord :: Lens' (Point 2 Int) Int) test1
+              `shouldBe` Interval (AnClosedE 10) (AnClosedE 20)
+          it "span 2 x" $
+            spanIn (xCoord :: Lens' (Point 2 Int) Int) test2
+              `shouldBe` Interval (AnClosedE 0) (AnClosedE 0)
+          it "span 2 y"$
+            spanIn (yCoord :: Lens' (Point 2 Int) Int) test2
+              `shouldBe` Interval (AnOpenE 5) (AnOpenE 20)
 
           it "open ended segments x vertical Line" $
             (supportingLine vertSeg `intersects` test2) `shouldBe` False

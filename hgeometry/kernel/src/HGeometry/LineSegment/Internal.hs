@@ -376,9 +376,17 @@ onSegmentD q seg = onSegmentDWith f q seg
 -- >>> span xCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
 -- ClosedInterval 5 20
 -- >>> span yCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
-spanIn                           :: ( Point_ point d r, Ord r, Functor endPoint
-                                    , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r))
-                                 => Getter point r
-                                 -> LineSegment endPoint point -> Interval endPoint r
-spanIn coord'' (MkLineSegment i) = let i'@(Interval s t) = (^.coord'') <$> i
-                                   in if i'^.end > i'^.start then Interval t s else i'
+spanIn             :: ( Point_ point d r, Ord r
+                      , IxValue (endPoint point) ~ point
+                      -- , EndPoint_ (endPoint r)
+                      , EndPoint_ (endPoint point)
+                      )
+                   => Getter point r
+                   -> LineSegment endPoint point
+                   -> Interval AnEndPoint r
+spanIn coord'' seg = case (i^.start) `compare` (i^.end) of
+                       LT -> i
+                       EQ -> Interval (AnClosedE (s^._endPoint)) (AnClosedE (e^._endPoint))
+                       GT -> Interval e s
+  where
+    i@(Interval s e) = view coord'' <$> seg^._LineSegmentInterval.to asAnInterval

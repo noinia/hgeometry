@@ -3,6 +3,7 @@
 module HGeometry.LineSegment.Intersection
   ( LineLineSegmentIntersection(..)
   , LineSegmentLineSegmentIntersection(..)
+  -- , spansIntersect
   ) where
 
 import Control.Lens
@@ -177,11 +178,14 @@ fmap' f = \case
 ----------------------------------------
 -- * HasIntersectionWith
 
--- | Test if the spans of the segments intersect
+-- | Test if the spans (i.e. the projections onto the x-axis and on the yaxis) of the
+-- segments intersect
 spansIntersect      :: forall endPoint endPoint' point r.
                        ( Point_ point 2 r, Ord r, Num r, Functor endPoint, Functor endPoint'
-                       , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
-                       , IxValue (endPoint' r) ~ r, EndPoint_ (endPoint' r)
+                       , IxValue (endPoint point) ~ point
+                       , EndPoint_ (endPoint point)
+                       , IxValue (endPoint' point) ~ point
+                       , EndPoint_ (endPoint' point)
                        , HasIntersectionWith (Interval endPoint r) (Interval endPoint' r)
                        ) => LineSegment endPoint point -> LineSegment endPoint' point -> Bool
 spansIntersect s s' = f xCoord && f yCoord
