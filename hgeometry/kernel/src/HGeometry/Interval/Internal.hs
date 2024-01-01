@@ -301,13 +301,20 @@ instance Ord r => OpenInterval r  `HasIntersectionWith` Interval AnEndPoint r wh
 -- * Mixed
 
 instance Ord r => Interval AnEndPoint r `HasIntersectionWith` Interval AnEndPoint r where
-  intA `intersects` intB = case (intA^.start) `compareInterval` intB of
-    LT -> case (intA^.end) `compareInterval` intB of
-            LT -> False
-            EQ -> True -- IntB is non-empty
-            GT -> intB^.start < intB^.end -- intB needs to be non-empty
-    EQ -> True -- IntB is non-empty
-    GT -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
+  intA `intersects` intB = case (intA^.start) `compareIntervalExact` intB of
+      Before   -> case (intA^.end) `compareIntervalExact` intB of
+                    Before   -> False
+                    OnStart  -> isClosed (intA^.endPoint) && isClosed (intB^.startPoint)
+                    Interior -> True
+                    OnEnd    -> True
+                    After    -> True
+      OnStart  -> True  -- by invariant, both a and B are non-empty, so they share
+                        -- their endpoint they both contain the point start+eps
+      Interior -> True -- by invariant intA is non-empty, so intA^.start+eps inside intB
+      OnEnd    -> isClosed (intA^.startPoint) && isClosed (intB^.endPoint)
+      After    -> False -- by invariant, intA^.end >= intA.start, so they don't intersect
+    where
+      isClosed = (== Closed) . endPointType
   {-# INLINE intersects #-}
 
 instance Ord r => Interval AnEndPoint r `HasIntersectionWith` ClosedInterval r where
@@ -321,3 +328,7 @@ instance Ord r => Interval AnEndPoint r `HasIntersectionWith` OpenInterval r whe
 -- instance Ord r => Interval AnEndPoint r `HasIntersectionWith` ClosedInterval r where
 --   intersects intA intB = intersects intB intA
 --   {-# INLINE intersect #-}
+
+
+         -- Interval (AnEndPoint Open 2) (AnEndPoint Closed 18)
+         -- Interval (AnEndPoint Open (-26)) (AnEndPoint Closed 2)

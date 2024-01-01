@@ -31,6 +31,8 @@ module HGeometry.Interval.Class
 
   , inInterval, stabsInterval
   , compareInterval
+  , compareIntervalExact
+  , CompareInterval(..)
 
   , shiftLeft, shiftRight
   -- , flipInterval
@@ -257,6 +259,34 @@ compareInterval q i = case q `compare` (i^.start) of
               LT -> EQ
               EQ -> if i^.endPoint.to endPointType == Open then GT else EQ
               GT -> GT
+
+-- | test if te point appears before, in, or after te interval, or on one of its
+-- endpoints.
+--
+-- >>> 1 `compareIntervalExact` (OpenInterval 0 2)
+-- EQ
+-- >>> 1 `compareIntervalExact` (OpenInterval 0 1)
+-- GT
+-- >>> 1 `compareIntervalExact` (ClosedInterval 0 1)
+-- EQ
+-- >>> 10 `compareIntervalExact` (OpenInterval 1 10)
+-- GT
+-- >>> 10 `compareIntervalExact` (ClosedInterval 0 1)
+-- GT
+compareIntervalExact     :: (Ord r, Interval_ interval r) => r -> interval -> CompareInterval
+compareIntervalExact q i = case q `compare` (i^.start) of
+      LT -> Before
+      EQ -> OnStart
+      GT -> case q `compare` (i^.end) of
+              LT -> Interior
+              EQ -> OnEnd
+              GT -> After
+
+
+data CompareInterval = Before | OnStart | Interior | OnEnd | After
+  deriving (Show,Read,Eq,Ord)
+
+
 
 -- | Shifts the interval to the left by delta
 shiftLeft         :: ( Num r, Interval_ interval r) => r -> interval -> interval

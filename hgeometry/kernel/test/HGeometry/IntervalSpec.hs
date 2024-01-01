@@ -1,13 +1,12 @@
 module HGeometry.IntervalSpec where
 
-import Control.Lens
 import Data.Maybe (isJust)
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Kernel.Instances ()
--- import HGeometry.Vector
 import Test.Hspec
 import Test.Hspec.QuickCheck
+import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
@@ -47,6 +46,54 @@ spec = do
       ((ClosedInterval (1::Int) 10) `intersects` (OpenInterval 50 (60 :: Int)))
       `shouldBe` False
     -- it "endpoints overlap but open/closed" $ do
+
+    it "manual test closed x open" $ do
+      ((ClosedInterval (10::Int) 20) `intersects` (OpenInterval 5 (20 :: Int)))
+      `shouldBe` True
+
+    describe "intersection is symmetirc" $ do
+      prop "closed x closed" $
+        \(intA :: ClosedInterval Int) (intB :: ClosedInterval Int) ->
+          intA `intersects` intB === intB `intersects` intA
+      prop "closed x open" $
+        \(intA :: ClosedInterval Int) (intB :: OpenInterval Int) ->
+          intA `intersects` intB === intB `intersects` intA
+      prop "closed x mixed" $
+        \(intA :: ClosedInterval Int) (intB :: Interval AnEndPoint Int) ->
+          intA `intersects` intB === intB `intersects` intA
+      prop "open x open" $
+        \(intA :: OpenInterval Int) (intB :: OpenInterval Int) ->
+          intA `intersects` intB === intB `intersects` intA
+      prop "open x mixed" $
+        \(intA :: OpenInterval Int) (intB :: Interval AnEndPoint Int) ->
+          intA `intersects` intB === intB `intersects` intA
+      prop "mixed x mixed" $
+        \(intA :: Interval AnEndPoint Int) (intB :: Interval AnEndPoint Int) ->
+          intA `intersects` intB === intB `intersects` intA
+
+    it "bug" $
+      let intA = Interval (AnOpenE (-3)) (AnOpenE (-1))   :: Interval AnEndPoint Int
+          intB = Interval (AnClosedE (-1)) (AnClosedE 2)  :: Interval AnEndPoint Int
+      in intA `intersects` intB `shouldBe` False
+    it "bug 2" $
+      let
+        intA, intB :: Interval AnEndPoint Int
+        intA = Interval (AnEndPoint Open 2) (AnEndPoint Closed 18)
+        intB = Interval (AnEndPoint Open (-26)) (AnEndPoint Closed 2)
+      in intA `intersects` intB `shouldBe` False
+    it "bug 3" $
+      let
+        intA, intB :: Interval AnEndPoint Int
+        intA = Interval (AnEndPoint Closed (-1)) (AnEndPoint Closed 0)
+        intB = Interval (AnEndPoint Closed (-2)) (AnEndPoint Open 0)
+      in intA `intersects` intB `shouldBe` True
+    it "bug 4" $
+      let
+        intA, intB :: Interval AnEndPoint Int
+        intA = Interval (AnEndPoint Open (-1)) (AnEndPoint Open 0)
+        intB = Interval (AnEndPoint Closed (-1)) (AnEndPoint Open 0)
+      in intA `intersects` intB `shouldBe` True
+
 
     it "manual tests " $ do
       mapM_ (\t@((i,j),_) -> ((i,j),testInt i `intersect` testInt j) `shouldBe` t ) answers

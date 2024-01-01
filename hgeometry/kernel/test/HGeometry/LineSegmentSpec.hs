@@ -210,11 +210,11 @@ vertSeg = OpenLineSegment (Point2 20 (-5)) (Point2 20 10)
 
 testI :: Spec
 testI = describe "some manual intersection tests" $ do
-          it "manual intersection" $ (test1 `intersects` test2 ) `shouldBe` True
-          it "manual intersection" $ (test1 `intersects` test3 ) `shouldBe` True
-          it "manual intersection" $ (test1 `intersects` test4 ) `shouldBe` False
-          it "manual intersection" $ (test2 `intersects` test4 ) `shouldBe` True
-          it "manual intersection" $ (test2 `intersects` test5 ) `shouldBe` False
+          it "manual intersection 12" $ (test1 `intersects` test2 ) `shouldBe` True
+          it "manual intersection 13" $ (test1 `intersects` test3 ) `shouldBe` True
+          it "manual intersection 14" $ (test1 `intersects` test4 ) `shouldBe` False
+          it "manual intersection 24" $ (test2 `intersects` test4 ) `shouldBe` True
+          it "manual intersection 25" $ (test2 `intersects` test5 ) `shouldBe` False
 
           it "open ended segments x vertical Line" $
             (supportingLine vertSeg `intersects` test2) `shouldBe` False

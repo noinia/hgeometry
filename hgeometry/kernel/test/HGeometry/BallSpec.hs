@@ -1,8 +1,8 @@
 module HGeometry.BallSpec where
 
-import Control.Lens
+-- import Control.Lens
 import Control.Monad (forM_)
-import HGeometry.Ext
+-- import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Ball
 import HGeometry.Intersection
@@ -10,7 +10,7 @@ import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Vector
 import Test.Hspec
-import Test.QuickCheck
+-- import Test.QuickCheck
 -- import Test.Util
 
 --------------------------------------------------------------------------------
