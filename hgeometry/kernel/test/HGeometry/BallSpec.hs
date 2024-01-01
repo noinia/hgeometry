@@ -8,7 +8,7 @@ import HGeometry.Ball
 import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
-import HGeometry.Vector
+-- import HGeometry.Vector
 import Test.Hspec
 -- import Test.QuickCheck
 -- import Test.Util

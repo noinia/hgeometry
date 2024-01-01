@@ -8,6 +8,7 @@ import Golden
 import HGeometry
 import HGeometry.Ext
 import HGeometry.Number.Real.Rational
+import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple
 import HGeometry.Polygon.Triangulation.TriangulateMonotone
 import Ipe
@@ -42,9 +43,10 @@ toSpec (TestCase (poly :+ c) sol) =
     describe ("testing polygions of color " ++ show c) $ do
       it "comparing with manual solution" $ do
         let algSol = computeDiagonals poly
-        (naiveSet . map (over allPoints (view core)) $ algSol) `shouldBe` naiveSet sol
+        (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
   where
     naiveSet = NaiveSet . map S
+    toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
 
 newtype S r = S (ClosedLineSegment (Point 2 r)) deriving (Show)
 
