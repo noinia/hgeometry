@@ -46,17 +46,18 @@ import qualified Data.Set as EQ -- event queue
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
--- import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
+import           HGeometry.Interval.Class
 import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
+import           HGeometry.LineSegment.Class
 import           HGeometry.LineSegment.Intersection.Types
 import           HGeometry.Point
-import qualified HGeometry.Set.Util as SS -- status struct
-import           HGeometry.Interval.Class
-import           HGeometry.LineSegment.Class
 import           HGeometry.Properties (NumType, Dimension)
+import qualified HGeometry.Set.Util as SS -- status struct
+
+-- import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -97,7 +98,7 @@ intersections'      :: ( LineSegment_ lineSegment point
                    => f lineSegment -> Intersections r lineSegment
 intersections' segs = merge $ sweep pts SS.empty
   where
-    pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . id) $ segs
+    pts = EQ.fromAscList . groupStarts . sort . foldMap asEventPts $ segs
 
 
 -- | Computes all intersection points p s.t. p lies in the interior of at least
@@ -207,7 +208,7 @@ isOpen :: EndPoint_ endPoint => endPoint -> Bool
 isOpen = (== Open) . endPointType
 
 isClosed :: EndPoint_ endPoint => endPoint -> Bool
-isClosed = (== Open) . endPointType
+isClosed = (== Closed) . endPointType
 
 -- | Handle an event point
 handle                           :: ( LineSegment_ lineSegment point
@@ -237,7 +238,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     closedEnds = filter (isClosed . view endPoint) ends
 
     toReport = case starts' <> closedEnds <> pureContains of
-                 (_:_:_) -> [mkIntersectionPoint p (starts' <> closedEnds) pureContains]
+                 (_:_:_) -> [ mkIntersectionPoint p (starts' <> closedEnds) pureContains ]
                  _       -> []
 
     -- new status structure
@@ -367,6 +368,12 @@ overlapsOr p q = map fst . filter snd . map (\((a,b),b') -> (a, b || b'))
                . overlapsWithNeighbour (q `on` fst)
                . map (\x -> (x, p x))
 
+
+-- -- | Compute every element together with its neighbours
+-- withNeighbours    :: [a] -> (a,[a])
+-- withNeighbours xs = let xs'@(_:succs) = map (:[]) xs
+--                     in List.zipWith3 (\p x s -> (x,p <> s)) ([]:xs') (succs <> repeat [])
+
 -- | Given a predicate, test and a list, annotate each element whether
 -- it, together with one of its neighbors satisifies the predicate.
 overlapsWithNeighbour   :: (a -> a -> Bool) -> [a] -> [(a,Bool)]
@@ -377,9 +384,18 @@ overlapsWithNeighbour p = go0
       (x:xs) -> go x False xs
 
     go x b = \case
-      []     -> []
+      []     -> [(x,b)]
       (y:ys) -> let b' = p x y
                 in (x,b || b') : go y b' ys
+
+
+  -- map (\(x,ns) -> case ns of
+  --                                           [a]   -> (x, p x a)
+  --                                           [a,b] -> (x, p x a || p x b)
+  --                                           _     -> error "overlapsWithNeighbour. absurd"
+  --                             ) . withNeighbours
+
+
 
 -- annotateReport   :: (a -> Bool) -> [a] -> [(a,Bool)]
 -- annotateReport p = map (\x -> (x, p x))

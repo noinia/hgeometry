@@ -144,10 +144,10 @@ cmpAroundP p s s' = ccwCmpAround (p^.asPoint) (s^.start.asPoint)  (s'^.start.asP
 -- if somehow the segment is degenerate, and p is both the start and
 -- end it is reported only as the start point.
 data Associated lineSegment =
-  Associated { _startPointOf :: Set.Set (AroundEnd lineSegment)
+  Associated { _startPointOf :: Set.Set (AroundStart lineSegment)
              -- ^ segments for which the intersection point is the
              -- start point (i.e. s^.start == p)
-             , _endPointOf   :: Set.Set (AroundStart lineSegment)
+             , _endPointOf   :: Set.Set (AroundEnd lineSegment)
              -- ^ segments for which the intersection point is the end
              -- point (i.e. s^.end == p)
              , _interiorTo   :: Set.Set (AroundIntersection lineSegment)
@@ -206,8 +206,8 @@ mkAssociated      :: ( LineSegment_ lineSegment point
                      )
                   => point' -> lineSegment -> Associated lineSegment
 mkAssociated p s
-  | p^.asPoint == s^.start.asPoint = mempty&startPointOf .~  Set.singleton (AroundEnd s)
-  | p^.asPoint == s^.end.asPoint   = mempty&endPointOf   .~  Set.singleton (AroundStart s)
+  | p^.asPoint == s^.start.asPoint = mempty&startPointOf .~  Set.singleton (AroundStart s)
+  | p^.asPoint == s^.end.asPoint   = mempty&endPointOf   .~  Set.singleton (AroundEnd s)
   | otherwise                      = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 

@@ -30,14 +30,25 @@ spec = do
   describe "Testing Bentley Ottmann LineSegment Intersection" $ do
     -- toSpec (TestCase "myPoints" myPoints)
     -- toSpec (TestCase "myPoints'" myPoints')
-    ipeSpec
+    manualSpec
+    -- ipeSpec
+
+
+manualSpec = describe "manual" $ do
+               let seg1,seg2 :: ClosedLineSegment (Point 2 R)
+                   seg1 = ClosedLineSegment (Point2 16 16) (Point2 144 80)
+                   seg2 = ClosedLineSegment (Point2 144 80) (Point2 225 52)
+               sameAsNaive [seg1,seg2]
 
 testPath = [osp|test-with-ipe//LineSegment/Intersection/|]
 
 ipeSpec :: Spec
 ipeSpec = do -- testCases (testPath <> [osp|open_bug.ipe|])
              testCases (testPath <> [osp|manual.ipe|])
-             -- testCases (testPath <> [osp|open.ipe|])
+             testCases (testPath <> [osp|open.ipe|])
+
+
+
 
 
 -- openCorrect (TestCase name segs) =
@@ -81,12 +92,13 @@ samePointsAsNaive      :: ( LineSegment_ lineSegment point
                           , IntersectConstraints lineSegment
                           , StartPointOf lineSegment ~ EndPointOf lineSegment
                           , Show lineSegment, Show r
+                          , Show point
                           )
                        => [lineSegment] -> Spec
 samePointsAsNaive segs = it "Same points as Naive" $ do
   Map.keys (Sweep.intersections segs) `shouldBe` Map.keys (Naive.intersections segs)
 
--- | Test if they every intersection point has the right segments
+-- | Test if they evzery intersection point has the right segments
 sameAsNaive      :: ( LineSegment_ lineSegment point
                     , Point_ point 2 r
                     , Eq lineSegment
@@ -95,6 +107,7 @@ sameAsNaive      :: ( LineSegment_ lineSegment point
                     , IntersectConstraints lineSegment
                     , StartPointOf lineSegment ~ EndPointOf lineSegment
                     , Show lineSegment, Show r
+                    , Show point
                     )
                  => [lineSegment] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do
