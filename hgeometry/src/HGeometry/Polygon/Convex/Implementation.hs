@@ -107,6 +107,9 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
          ) => Polygon_ (ConvexPolygonF f point) point r where
   area = areaSimplePolygon
   extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
+  ccwPredecessorOf u = _UncheckedConvexPolygon.ccwPredecessorOf u
+  ccwSuccessorOf   u = _UncheckedConvexPolygon.ccwSuccessorOf u
+
 
 instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Point_ point 2 r

@@ -264,15 +264,15 @@ compareInterval q i = case q `compare` (i^.start) of
 -- endpoints.
 --
 -- >>> 1 `compareIntervalExact` (OpenInterval 0 2)
--- EQ
+-- Interior
 -- >>> 1 `compareIntervalExact` (OpenInterval 0 1)
--- GT
+-- OnEnd
 -- >>> 1 `compareIntervalExact` (ClosedInterval 0 1)
--- EQ
+-- OnEnd
 -- >>> 10 `compareIntervalExact` (OpenInterval 1 10)
--- GT
+-- OnEnd
 -- >>> 10 `compareIntervalExact` (ClosedInterval 0 1)
--- GT
+-- After
 compareIntervalExact     :: (Ord r, Interval_ interval r) => r -> interval -> CompareInterval
 compareIntervalExact q i = case q `compare` (i^.start) of
       LT -> Before

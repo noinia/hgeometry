@@ -373,10 +373,10 @@ onSegmentD q seg = onSegmentDWith f q seg
 -- | Computes the span of the interval in the given direction. Note that the returned
 -- interval is a proper interval, i.e. with the start smaller than the end.
 --
--- >>> span xCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
---
--- >>> span yCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
---
+-- >>> spanIn xCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
+-- Interval (AnEndPoint Closed 5) (AnEndPoint Closed 20)
+-- >>> spanIn yCoord (ClosedLineSegment (Point2 5 (10 :: Int)) (Point2 20 0))
+-- Interval (AnEndPoint Closed 0) (AnEndPoint Closed 10)
 spanIn             :: ( Point_ point d r, Ord r
                       , IxValue (endPoint point) ~ point
                       -- , EndPoint_ (endPoint r)
