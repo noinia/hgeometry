@@ -28,8 +28,14 @@ spec = do
           `shouldBe`
           (asAnInterval intA `intersects` intB)
 
-    prop "intersects and intersect consistent" $
+    prop "intersects and intersect consistent (closed)" $
       \(intA :: ClosedInterval Int) (intB :: ClosedInterval Int) ->
+        (intA `intersects` intB) == isJust (intA `intersect` intB)
+    prop "intersects and intersect consistent (open)" $
+      \(intA :: OpenInterval Int) (intB :: OpenInterval Int) ->
+        (intA `intersects` intB) == isJust (intA `intersect` intB)
+    prop "intersects and intersect consistent (mixed)" $
+      \(intA :: Interval AnEndPoint Int) (intB :: Interval AnEndPoint Int) ->
         (intA `intersects` intB) == isJust (intA `intersect` intB)
 
 
@@ -37,18 +43,18 @@ spec = do
     --   ((OpenInterval 1 (10 :: Int))  `intersect` (OpenInterval 5 (10 :: Int)))
     --   `shouldBe` (ClosedInterval_x_ClosedInterval_Partial $ OpenInterval 5 (10 :: Int))
     it "openInterval cap openrange" $ do
-      ((OpenInterval 1 (10 :: Int))  `intersects` (OpenInterval 5 (10 :: Int)))
+      OpenInterval 1 (10 :: Int)  `intersects` OpenInterval 5 (10 :: Int)
       `shouldBe` True
     it "disjoint open ranges" $ do
-      ((OpenInterval 1 (10 :: Int)) `intersects` (OpenInterval 10 (12 :: Int)))
+      OpenInterval 1 (10 :: Int) `intersects` OpenInterval 10 (12 :: Int)
       `shouldBe` False
     it "closed cap open, disjoint" $ do
-      ((ClosedInterval (1::Int) 10) `intersects` (OpenInterval 50 (60 :: Int)))
+      ClosedInterval (1::Int) 10 `intersects` OpenInterval 50 (60 :: Int)
       `shouldBe` False
     -- it "endpoints overlap but open/closed" $ do
 
     it "manual test closed x open" $ do
-      ((ClosedInterval (10::Int) 20) `intersects` (OpenInterval 5 (20 :: Int)))
+      ClosedInterval (10::Int) 20 `intersects` OpenInterval 5 (20 :: Int)
       `shouldBe` True
 
     describe "intersection is symmetirc" $ do
@@ -144,19 +150,19 @@ testInts = [ ClosedInterval 10 20 -- 0
 testInt   :: Int -> ClosedInterval Int
 testInt i = testInts !! i
 
-answers = [ ( (0,1) , Just $ ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval 10 15)
-          , ( (0,2) , Just $ ClosedInterval_x_ClosedInterval_Point 20 )
-          , ( (0,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 0 )
-          , ( (0,4) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 4 )
-          , ( (1,1) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 1 )
+answers = [ ( (0,1) , Just $ Interval_x_Interval_Partial $ ClosedInterval 10 15)
+          , ( (0,2) , Just $ Interval_x_Interval_Point 20 )
+          , ( (0,3) , Just $ Interval_x_Interval_Contained $ testInt 0 )
+          , ( (0,4) , Just $ Interval_x_Interval_Contained $ testInt 4 )
+          , ( (1,1) , Just $ Interval_x_Interval_Contained $ testInt 1 )
           , ( (1,2) , Nothing )
-          , ( (1,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 1  )
-          , ( (1,4) , Just $ ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval 10 15  )
-          , ( (2,2) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 2 )
-          , ( (2,3) , Just $ ClosedInterval_x_ClosedInterval_Point 20  )
+          , ( (1,3) , Just $ Interval_x_Interval_Contained $ testInt 1  )
+          , ( (1,4) , Just $ Interval_x_Interval_Partial $ ClosedInterval 10 15  )
+          , ( (2,2) , Just $ Interval_x_Interval_Contained $ testInt 2 )
+          , ( (2,3) , Just $ Interval_x_Interval_Point 20  )
           , ( (2,4) , Nothing  )
-          , ( (3,3) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 3 )
-          , ( (3,4) , Just $ ClosedInterval_x_ClosedInterval_Contained $ testInt 4 )
+          , ( (3,3) , Just $ Interval_x_Interval_Contained $ testInt 3 )
+          , ( (3,4) , Just $ Interval_x_Interval_Contained $ testInt 4 )
           ]
 
 

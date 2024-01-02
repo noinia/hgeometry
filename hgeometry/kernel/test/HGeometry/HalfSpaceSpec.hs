@@ -7,7 +7,7 @@ import HGeometry.Intersection
 import HGeometry.Kernel.Instances ()
 import HGeometry.Line
 import HGeometry.Point
-import HGeometry.Vector hiding (head)
+-- import HGeometry.Vector hiding (head)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
@@ -50,5 +50,5 @@ spec = describe "halfspace Tests" $ do
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
 
-test :: Ordering
-test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)
+-- test :: Ordering
+-- test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)

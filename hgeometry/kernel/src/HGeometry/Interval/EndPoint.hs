@@ -40,7 +40,7 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
   mkEndPoint :: IxValue endPoint -> endPoint
 
 -- | Possible endpoint types; open or closed
-data EndPointType = Open | Closed deriving (Show,Eq,Enum,Bounded)
+data EndPointType = Open | Closed deriving (Show,Eq,Ord,Enum,Bounded)
 
 
 -- testV :: Vector 2 (Point 2 Double)
@@ -117,7 +117,7 @@ pattern OpenE x = EndPoint x
 
 -- | Data type modelling an endpoint that can both be open and closed.
 data AnEndPoint r = AnEndPoint {-# UNPACK #-} !EndPointType !r
-                  deriving (Show,Eq,Functor,Foldable,Traversable)
+                  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 type instance NumType (AnEndPoint r) = r
 type instance IxValue (AnEndPoint r) = r

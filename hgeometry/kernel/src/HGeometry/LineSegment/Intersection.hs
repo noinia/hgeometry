@@ -261,48 +261,55 @@ instance ( Point_ point 2 r, Num r,  Ord r
 --         todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
 --   {-# INLINE intersect #-}
 
-instance ( Point_ point 2 r, Fractional r,  Ord r
+instance ( Point_ point 2 r, Num r,  Ord r
+         , Functor endPoint
+         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+         , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
          , IxValue (endPoint point) ~ point
+         , IxValue (endPoint (r :+ endPoint point)) ~ (r :+ endPoint point)
          , EndPoint_ (endPoint point)
+         , IsEndPoint (endPoint point) (endPoint (r :+ endPoint point))
          , IsIntersectableWith (LinePV 2 r) (LineSegment endPoint point)
-         , HasOnSegment (LineSegment endPoint point) 2
-         , Intersection (LineSegment endPoint point) (LineSegment endPoint point)
-           ~ Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point))
          , Intersection (LinePV 2 r) (LineSegment endPoint point)
            ~ Maybe (LineLineSegmentIntersection (LineSegment endPoint point))
-         , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
-         , IxValue (endPoint (r :+ point)) ~ (r :+ point)
-         , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
-         , HasIntersectionWith (Interval endPoint (r :+ point)) (Interval endPoint (r :+ point))
-         -- , Intersection (Interval endPoint (r :+ point)) (Interval endPoint (r :+ point))
-         -- ~ Maybe
-         , Functor endPoint
-         ) =>
-         LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
+         , HasOnSegment (LineSegment endPoint point) 2
+         , IsIntersectableWith (Interval endPoint (r :+ endPoint point))
+                               (Interval endPoint (r :+ endPoint point))
+         , Intersection (LineSegment endPoint point) (LineSegment endPoint point)
+           ~ Maybe (LineSegmentLineSegmentIntersection (LineSegment endPoint point))
+         , EndPoint_ (endPoint (r :+ endPoint point))
+         ) => LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
   s `intersect` s' = supportingLine s `intersect` s' >>= \case
-    Line_x_LineSegment_Point p
-      | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
-      | otherwise                    -> Nothing
-    Line_x_LineSegment_LineSegment _ -> undefined -- spanIn' s `intersect` spanIn' s' <&> undefined
-    -- \case
-    --       LineSegment_x_LineSegment_LineSegment $ LineSegment (i&start %~ view core)
-    --                                                           (i&end   %~ view core)
-  {-# INLINE intersect #-}
+      Line_x_LineSegment_Point p
+        | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
+        | otherwise                    -> Nothing
+      Line_x_LineSegment_LineSegment _ -> spanIn' s `intersect` spanIn' s' <&> \case
+        Interval_x_Interval_Point xy   -> LineSegment_x_LineSegment_Point $
+                                            xy^.extra._endPoint.asPoint
+        Interval_x_Interval_Contained i -> mkIntersect i
+        Interval_x_Interval_Partial i   -> mkIntersect i
+    where
+      mkIntersect i =
+        LineSegment_x_LineSegment_LineSegment $ LineSegment (i^.start.extra) (i^.end.extra)
+
 
 spanIn'  :: ( Point_ point 2 r, Ord r
             , IxValue (endPoint point) ~ point
-            , IxValue (endPoint (r :+ point)) ~ (r :+ point)
+            , IxValue (endPoint (r :+ endPoint point)) ~ (r :+ endPoint point)
             , EndPoint_ (endPoint point)
-            , IsEndPoint (endPoint point) (endPoint (r :+ point))
-            ) => LineSegment endPoint point -> Interval endPoint (r :+ point)
+            , IsEndPoint (endPoint point) (endPoint (r :+ endPoint point))
+            ) => LineSegment endPoint point -> Interval endPoint (r :+ endPoint point)
 spanIn' seg@(LineSegment s t) = case (seg^.start.xCoord) `compare` (seg^.end.xCoord) of
     LT                                        -> Interval (xLabel s) (xLabel t)
     EQ | seg^.start.yCoord <= seg^.end.yCoord -> Interval (yLabel s) (yLabel t)
        | otherwise                            -> Interval (yLabel t) (yLabel s)
     GT                                        -> Interval (xLabel t) (xLabel s)
   where
-    xLabel p = p&_endPoint %~ \pt -> pt^.xCoord :+ pt
-    yLabel p = p&_endPoint %~ \pt -> pt^.yCoord :+ pt
+    xLabel p = p&_endPoint %~ \pt -> pt^.xCoord :+ p
+    yLabel p = p&_endPoint %~ \pt -> pt^.yCoord :+ p
+
+-- data XY = X | Y deriving (Show,Eq)
 
 
 {-
