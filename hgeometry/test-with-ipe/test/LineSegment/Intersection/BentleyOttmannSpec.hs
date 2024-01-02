@@ -35,8 +35,8 @@ spec = do
 testPath = [osp|test-with-ipe//LineSegment/Intersection/|]
 
 ipeSpec :: Spec
-ipeSpec = do testCases (testPath <> [osp|open_bug.ipe|])
-             -- testCases (testPath <> [osp|manual.ipe|])
+ipeSpec = do -- testCases (testPath <> [osp|open_bug.ipe|])
+             testCases (testPath <> [osp|manual.ipe|])
              -- testCases (testPath <> [osp|open.ipe|])
 
 
@@ -69,8 +69,8 @@ toSpec                      :: (Fractional r, Ord r, Show r) => TestCase r -> Sp
 toSpec (TestCase name segs) = describe ("testing segments from " <> show name) $ do
                                 samePointsAsNaive segs
                                 sameAsNaive segs
-                                it "bug" $ do
-                                  Map.toList (Naive.intersections segs) `shouldBe` []
+                                -- it "bug" $ do
+                                --   Map.toList (Naive.intersections segs) `shouldBe` []
 
 -- | Test if we have the same intersection points
 samePointsAsNaive      :: ( LineSegment_ lineSegment point
