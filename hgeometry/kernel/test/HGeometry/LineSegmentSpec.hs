@@ -216,6 +216,16 @@ testI = describe "some manual intersection tests" $ do
           it "manual intersection 24" $ (test2 `intersects` test4 ) `shouldBe` True
           it "manual intersection 25" $ (test2 `intersects` test5 ) `shouldBe` False
 
+          it "contained open segments" $
+            let
+              segA, segB, answ :: OpenLineSegment (Point 2 R)
+              segA = OpenLineSegment (Point2 48 56) (Point2 14 0)
+              segB = OpenLineSegment (Point2 48 56) (Point2 31 28)
+              answ = OpenLineSegment (Point2 31 28) (Point2 48 56)
+            in segA `intersect` segB
+               `shouldBe`
+               Just (LineSegment_x_LineSegment_LineSegment answ)
+
           -- it "bug 12" $
           --   let
           --     l1 = supportingLine test1
