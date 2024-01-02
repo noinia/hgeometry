@@ -271,7 +271,11 @@ instance ( Point_ point 2 r, Fractional r,  Ord r
          , Intersection (LinePV 2 r) (LineSegment endPoint point)
            ~ Maybe (LineLineSegmentIntersection (LineSegment endPoint point))
          , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
+         , IxValue (endPoint (r :+ point)) ~ (r :+ point)
          , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
+         , HasIntersectionWith (Interval endPoint (r :+ point)) (Interval endPoint (r :+ point))
+         -- , Intersection (Interval endPoint (r :+ point)) (Interval endPoint (r :+ point))
+         -- ~ Maybe
          , Functor endPoint
          ) =>
          LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
@@ -279,10 +283,26 @@ instance ( Point_ point 2 r, Fractional r,  Ord r
     Line_x_LineSegment_Point p
       | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
       | otherwise                    -> Nothing
-    Line_x_LineSegment_LineSegment _ -> Just $ LineSegment_x_LineSegment_LineSegment todo
-      where
-        todo = error "LineSegment_x_LineSegment_LineSegment, not yet implemented"
+    Line_x_LineSegment_LineSegment _ -> undefined -- spanIn' s `intersect` spanIn' s' <&> undefined
+    -- \case
+    --       LineSegment_x_LineSegment_LineSegment $ LineSegment (i&start %~ view core)
+    --                                                           (i&end   %~ view core)
   {-# INLINE intersect #-}
+
+spanIn'  :: ( Point_ point 2 r, Ord r
+            , IxValue (endPoint point) ~ point
+            , IxValue (endPoint (r :+ point)) ~ (r :+ point)
+            , EndPoint_ (endPoint point)
+            , IsEndPoint (endPoint point) (endPoint (r :+ point))
+            ) => LineSegment endPoint point -> Interval endPoint (r :+ point)
+spanIn' seg@(LineSegment s t) = case (seg^.start.xCoord) `compare` (seg^.end.xCoord) of
+    LT                                        -> Interval (xLabel s) (xLabel t)
+    EQ | seg^.start.yCoord <= seg^.end.yCoord -> Interval (yLabel s) (yLabel t)
+       | otherwise                            -> Interval (yLabel t) (yLabel s)
+    GT                                        -> Interval (xLabel t) (xLabel s)
+  where
+    xLabel p = p&_endPoint %~ \pt -> pt^.xCoord :+ pt
+    yLabel p = p&_endPoint %~ \pt -> pt^.yCoord :+ pt
 
 
 {-

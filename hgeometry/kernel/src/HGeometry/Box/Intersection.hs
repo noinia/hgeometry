@@ -38,7 +38,7 @@ type instance Intersection (Box point) (Box point) =
 --   | Box_x_Box_Box (Box point)
 
 instance (Ord r, Num r, Point_ point d r
-         , HasComponents (Vector d (IntersectionOf (ClosedInterval r) (ClosedInterval r)))
+         , HasComponents (Vector d (Interval_x_IntervalIntersection r (ClosedInterval r)))
                          (Vector d (ClosedInterval r))
          , HasComponents (Vector d (ClosedInterval r)) (Vector d r)
          , Has_ Vector_ d (ClosedInterval r)
@@ -48,7 +48,7 @@ instance (Ord r, Num r, Point_ point d r
   a `intersects` b = isJust $ a `intersect` b
 
 instance  ( Point_ point d r, Ord r, Num r
-          , HasComponents (Vector d (IntersectionOf (ClosedInterval r) (ClosedInterval r)))
+          , HasComponents (Vector d (Interval_x_IntervalIntersection r (ClosedInterval r)))
                           (Vector d (ClosedInterval r))
           , HasComponents (Vector d (ClosedInterval r)) (Vector d r)
           , Has_ Vector_ d (ClosedInterval r)
@@ -59,7 +59,7 @@ instance  ( Point_ point d r, Ord r, Num r
     where
       fromExtent' = fromExtent . over (components @_ @(Vector d (ClosedInterval r))) f
       f = \case
-        ClosedInterval_x_ClosedInterval_Point x     -> ClosedInterval x x
-        ClosedInterval_x_ClosedInterval_Contained i -> i
-        ClosedInterval_x_ClosedInterval_Partial i   -> i
+        Interval_x_Interval_Point x     -> ClosedInterval x x
+        Interval_x_Interval_Contained i -> i
+        Interval_x_Interval_Partial i   -> i
   {-# INLINE intersect #-}

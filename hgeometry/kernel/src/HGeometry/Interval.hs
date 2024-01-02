@@ -14,11 +14,11 @@ module HGeometry.Interval
   , ClosedInterval, OpenInterval
   , HalfOpenInterval(HalfOpenInterval)
   , module HGeometry.Interval.Class
-  , IntersectionOf(..)
   , asClosedInterval, asOpenInterval, asAnInterval
+  , Interval_x_IntervalIntersection(..)
   ) where
 
-import HGeometry.Intersection
+-- import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint ()
 import HGeometry.Interval.Internal

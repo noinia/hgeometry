@@ -12,12 +12,13 @@
 module HGeometry.Interval.Internal
   ( Interval(Interval,ClosedInterval,OpenInterval)
   , ClosedInterval, OpenInterval
-  , IntersectionOf(..)
   , asClosedInterval, asOpenInterval, asAnInterval
   , isIntervalOfType
+  , Interval_x_IntervalIntersection(..)
   ) where
 
 import Control.Lens
+import Control.Monad (guard)
 import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Interval.EndPoint ()
@@ -211,16 +212,74 @@ instance Ord r
   intersect = intersectImpl
 
 
-type instance Intersection (ClosedInterval r) (ClosedInterval r) =
-  Maybe (IntersectionOf (ClosedInterval r) (ClosedInterval r))
+-- type instance Intersection (ClosedInterval r) (ClosedInterval r) =
+--   Maybe (IntersectionOf (ClosedInterval r) (ClosedInterval r))
 
-data instance IntersectionOf (ClosedInterval r) (ClosedInterval r) =
-    ClosedInterval_x_ClosedInterval_Point     !r
-  | ClosedInterval_x_ClosedInterval_Contained !(ClosedInterval r)
-  | ClosedInterval_x_ClosedInterval_Partial   !(ClosedInterval r)
+-- data instance IntersectionOf (ClosedInterval r) (ClosedInterval r) =
+--     ClosedInterval_x_ClosedInterval_Point     !r
+--   | ClosedInterval_x_ClosedInterval_Contained !(ClosedInterval r)
+--   | ClosedInterval_x_ClosedInterval_Partial   !(ClosedInterval r)
 
-deriving stock instance (Eq r) => Eq (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
-deriving stock instance (Show r) => Show (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
+-- deriving stock instance (Eq r) => Eq (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
+-- deriving stock instance (Show r) => Show (IntersectionOf (ClosedInterval r) (ClosedInterval r) )
+
+--------------------------------------------------------------------------------
+
+-- | Data type representing intersections of intervals of the same type
+data Interval_x_IntervalIntersection r interval =
+    Interval_x_Interval_Point     !r
+  | Interval_x_Interval_Contained !interval
+  | Interval_x_Interval_Partial   !interval
+  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+type instance Intersection (Interval endPoint r) (Interval endPoint r) =
+  Maybe (Interval_x_IntervalIntersection r (Interval endPoint r))
+
+-- | Implementation of interval intersection
+intersectIntervalImpl     :: ( Ord r, IxValue (endPoint r) ~ r
+                             , EndPoint_ (endPoint r)
+                             )
+                          => Interval endPoint r -> Interval endPoint r
+                          -> Maybe (Interval_x_IntervalIntersection r (Interval endPoint r))
+intersectIntervalImpl a b = case (a^.start) `compareIntervalExact` b of
+    Before   -> case (a^.end) `compareIntervalExact` b of
+        Before   -> Nothing
+        OnStart  -> do guard $ isClosed (a^.endPoint) && isClosed (b^.startPoint)
+                       pure $ Interval_x_Interval_Point (a^.end)
+        Interior -> Just partialBA
+        OnEnd
+          | isClosed (a^.endPoint) || isOpen (b^.endPoint) ->
+                          Just $ Interval_x_Interval_Contained b
+          | otherwise  -> Just partialBA
+            -- if b's endpoint is "contained" in that of b, i.e. if
+            -- a is closed, or if b is open, then b is fully contained.
+        After    -> Just $ Interval_x_Interval_Contained b
+
+    OnStart
+      | isClosed (b^.endPoint) || isOpen (a^.endPoint) ->
+                      aInteriorCase $ Interval_x_Interval_Contained a
+      | otherwise  -> aInteriorCase partialAB
+
+    Interior -> aInteriorCase $ Interval_x_Interval_Contained a
+    OnEnd    -> do guard $ isClosed (a^.startPoint) && isClosed (b^.endPoint)
+                   pure $ Interval_x_Interval_Point (a^.start)
+    After    -> Nothing -- by invariant, a^.end >= a.start, so they don't intersect
+  where
+    isClosed = (== Closed) . endPointType
+    isOpen = not . isClosed
+    endPointContained = isClosed (a^.endPoint) || not (isClosed (b^.endPoint))
+
+    -- the case when the startpoint of a is contained in B or coincides witht the start of B
+    -- the argument is how to actually construct a contained interval
+    aInteriorCase contained = case (a^.end) `compare` (b^.end) of
+      LT -> Just contained
+      EQ
+        | isClosed (b^.endPoint) || isOpen (a^.endPoint) -> Just contained
+        | otherwise                                      -> Just partialAB
+      GT -> Just partialAB
+
+    partialAB = Interval_x_Interval_Partial $ Interval (a^.startPoint) (b^.endPoint)
+    partialBA = Interval_x_Interval_Partial $ Interval (b^.startPoint) (a^.endPoint)
 
 --------------------------------------------------------------------------------
 -- * Closed Interval
@@ -247,23 +306,25 @@ instance ( Ord r
 -- ** IsIntersectable
 
 instance Ord r => ClosedInterval r `IsIntersectableWith` ClosedInterval r where
-  intA `intersect` intB = case (intA^.start) `compareInterval` intB of
-      LT -> case (intA^.end) `compareInterval` intB of
-              LT -> Nothing
-              EQ -> Just $ mkInterval' (intB^.start) (intA^.end)
-              GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
-                -- intB is fully contained
-      EQ -> case (intA^.end) `compareInterval` intB of
-              LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
-              EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
-              GT -> Just $ if intA^.start == intB^.start then
-                             ClosedInterval_x_ClosedInterval_Contained intB
-                           else mkInterval' (intA^.start) (intB^.end)
-      GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
-    where
-      mkInterval' l r
-        | l == r    = ClosedInterval_x_ClosedInterval_Point l
-        | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
+  intersect = intersectIntervalImpl
+
+  -- intA `intersect` intB = case (intA^.start) `compareInterval` intB of
+  --     LT -> case (intA^.end) `compareInterval` intB of
+  --             LT -> Nothing
+  --             EQ -> Just $ mkInterval' (intB^.start) (intA^.end)
+  --             GT -> Just $ ClosedInterval_x_ClosedInterval_Contained intB
+  --               -- intB is fully contained
+  --     EQ -> case (intA^.end) `compareInterval` intB of
+  --             LT -> error "intersecting intervals; invariant failed, intA should be swapped?"
+  --             EQ -> Just $ ClosedInterval_x_ClosedInterval_Contained intA
+  --             GT -> Just $ if intA^.start == intB^.start then
+  --                            ClosedInterval_x_ClosedInterval_Contained intB
+  --                          else mkInterval' (intA^.start) (intB^.end)
+  --     GT -> Nothing -- by invariant, intA^.end > intA.start, so they don't intersect
+  --   where
+  --     mkInterval' l r
+  --       | l == r    = ClosedInterval_x_ClosedInterval_Point l
+  --       | otherwise = ClosedInterval_x_ClosedInterval_Partial $ ClosedInterval l r
 
 
 
