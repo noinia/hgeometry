@@ -11,11 +11,11 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.SegmentTree.R2
-  ( SegmentTree2
+  ( -- SegmentTree2
 
 
-  , buildAssoc
-  , queryAssoc
+  -- , buildAssoc
+  -- , queryAssoc
   ) where
 
 
@@ -47,7 +47,7 @@ import           HGeometry.Properties
 import           Data.Type.Ord
 
 --------------------------------------------------------------------------------
-
+{-
 newtype OnY s r segment = OnY segment deriving (Show)
 
 data OnYR s r segment = Fixed !r
@@ -60,12 +60,13 @@ type instance Dimension (OnY s r segment) = 1
 -- instance Reifies s r => Point_ (OnY s r segment) 1 r where
 
 instance HasVector (OnY s r segment) (OnY s r segment) where
-  vector = iso Vector1 (\(Vector1 v) -> v)
+  vector = undefined -- iso Vector1 (\(Vector1 v) -> v)
 
 instance HasCoordinates (OnY s r segment) (OnY s r segment)
 instance Affine_ (OnY s r segment) 1 (OnYR s r segment) where
 instance Point_  (OnY s r segment) 1 (OnYR s r segment) where
   fromVector = error "OnY.fromVector not implemented"
+
 
 -- instance Reifies s r => Point_ (OnY s r segment) 1 r where
 
@@ -205,3 +206,5 @@ buildSementTree' :: ( Foldable1 g, Functor g
                     , Point_ point 2 r, Ord r
                     ) => g segment -> Base.SegmentTree Report (XInterval r segment)
 buildSementTree' = Base.buildSegmentTree . fmap coerce
+
+-}
