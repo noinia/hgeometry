@@ -29,6 +29,5 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
-                -optF -package=semigroupoids
                 -optF -package=hgeometry-combinatorial
 #-}

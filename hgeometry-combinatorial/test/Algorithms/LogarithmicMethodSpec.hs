@@ -17,7 +17,7 @@ spec = describe "Logarithmic method successor test" $ do
            \q (xs :: [Int]) ->
              successor q (fromList xs)
              `shouldBe`
-             minimum1 [ x | x <- xs, x >= q]
+             minimumMaybe [ x | x <- xs, x >= q]
 
          it "merge test" $ property $
            \q (xs :: [Int]) (ys :: [Int]) ->
