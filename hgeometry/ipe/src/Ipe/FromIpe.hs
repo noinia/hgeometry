@@ -67,7 +67,7 @@ import           System.OsPath
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.polylineFromPoints . NonEmpty.fromList
+--              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor "red")
@@ -77,7 +77,7 @@ import           System.OsPath
 
 -- testPath :: Path Int
 -- testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.polylineFromPoints . NonEmpty.fromList
+--              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 -- testPathAttrs :: IpeAttributes Path Int
 -- testPathAttrs = attr SStroke (IpeColor "red")

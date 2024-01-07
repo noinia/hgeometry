@@ -18,6 +18,7 @@ module HGeometry.Point.EuclideanDistance
 
 import           Control.Lens
 import           Data.Ord (comparing)
+import           HGeometry.Ext
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point.Class
 import           HGeometry.Point.Type
@@ -91,4 +92,9 @@ instance ( Vector_ v            d r
          , Metric_ (Vector d r) d r
          ) => HasSquaredEuclideanDistance (PointF v) where
   pointClosestTo _ p = Point $ p^.vector
+  {-# INLINE pointClosestTo #-}
+
+
+instance HasSquaredEuclideanDistance p => HasSquaredEuclideanDistance (p :+ extra) where
+  pointClosestTo q = pointClosestTo q . view core
   {-# INLINE pointClosestTo #-}

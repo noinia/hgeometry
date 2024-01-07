@@ -57,7 +57,7 @@ import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import qualified HGeometry.Matrix as Matrix
 import           HGeometry.Point
-import           HGeometry.PolyLine (polylineFromPoints)
+import           HGeometry.PolyLine (polyLineFromPoints)
 import qualified HGeometry.Polygon.Simple as Polygon
 import           HGeometry.Vector
 import           Ipe.Attributes
@@ -240,7 +240,7 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = s NonEmpty.:| q:mapMaybe (^?_LineTo) ls
                                       mPoly = Polygon.fromPoints . dropRepeats $ pts
-                                      pl    = polylineFromPoints pts
+                                      pl    = polyLineFromPoints pts
                                   in case xs of
                                        (ClosePath : xs') -> case mPoly of
                                          Nothing         -> Left "simple polygon failed"

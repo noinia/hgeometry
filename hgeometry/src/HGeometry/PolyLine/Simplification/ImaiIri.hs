@@ -1,15 +1,16 @@
 -- |
--- Module      :  Algorithms.Geometry.PolyLineSimplification.ImaiIri
+-- Module      :  HGeometry.PolyLine.Simplification.ImaiIri
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.PolyLineSimplification.ImaiIri
+module HGeometry.PolyLine.Simplification.ImaiIri
   ( simplify
   , simplifyWith
   ) where
 
 import           Control.Lens
+import qualified Data.Array as Array
 import qualified Data.Foldable as F
 import           Data.Graph (Graph,buildG)
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -17,15 +18,16 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import qualified Data.Sequence as Sequence
 import           Data.Tree
-import qualified Data.Vector as V
-import qualified Data.Vector.NonEmpty as NonEmptyV
+import qualified Data.Vector.NonEmpty as NonEmptyVector
 import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.PolyLine.Class
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector
 import           Hiraffe.BFS (bfs)
+import           Hiraffe.Graph
 import           Hiraffe.Tree (pathsTo)
 import           Witherable
 
@@ -43,9 +45,10 @@ simplify     :: ( PolyLine_ polyLine point
                 , HasSquaredEuclideanDistance point
                 )
              => r -> polyLine -> PolyLine point
-simplify eps = simplifyWith $ \shortcut subPoly -> all (closeTo shortcut) (subPoly^.points)
+simplify eps =
+    simplifyWith $ \shortcut subPoly -> allOf vertices (closeTo shortcut) subPoly
   where
-    closeTo seg (p :+ _) = squaredEuclideanDistTo p seg  <= epsSq
+    closeTo seg p = squaredEuclideanDistTo p seg <= epsSq
     epsSq = eps*eps
 
 -- | Given a function that tests if the shortcut is valid, compute a
@@ -57,28 +60,29 @@ simplifyWith            :: ( PolyLine_ polyLine point
                            , Point_ point d r
                            , Ord r, Fractional r
                            )
-                        => (ClosedLineSegment point -> polyLine -> Bool)
+                        => (ClosedLineSegment point -> PolyLine point -> Bool)
                         -> polyLine -> PolyLine point
-simplifyWith isValid pl = PolyLine $ extract path vs
+simplifyWith isValid pl = PolyLine $ extract path (pl'^._PolyLineF)
   where
-    pl'@(PolyLine vs) = vertices polyLineFromPoints pl
-    g                 = mkGraph isValid vs
-    spt               = bfs 0 g
-    path              = case pathsTo (pl'^.end) spt of
-                          []      -> error "no path found?"
-                          (pth:_) -> pth
+    pl'  = polyLineFromPoints . toNonEmptyOf allPoints $ pl
+    g    = mkGraph isValid pl'
+    spt  = bfs g 0
+    path = case pathsTo (numVertices pl' - 1) spt of
+             []      -> error "no path found?"
+             (pth:_) -> pth
 
 ----------------------------------------
 
 -- | Constructs the shortcut graph
 mkGraph                          :: (ClosedLineSegment point -> PolyLine point  -> Bool)
-                                 -> NonEmptyV.NonEmptyVector point -> Graph
+                                 -> PolyLine point -> Graph
 mkGraph isValid pl@(PolyLine vs) =
     buildG rng [ (i,j) | i <- Array.range rng, j <- Array.range rng, i < j, isValid' i j ]
   where
     rng = (0,numVertices pl-1)
-    isValid' i j = let subPoly = PolyLine $ NonEmptyV.unsafeFromVector $ NonEmptyV.slice i j vs
-                       shortcut = ClosedLineSegment (sybPoly^.start) (subPoly.end)
+    isValid' i j = let subPoly  = PolyLine . NonEmptyVector.unsafeFromVector $
+                                    NonEmptyVector.slice i (j+1-i) vs
+                       shortcut = ClosedLineSegment (subPoly^.start) (subPoly^.end)
                    in isValid shortcut subPoly
 
 -- | Given a non-empty list of indices, and some LSeq, extract the elemnets
@@ -86,7 +90,7 @@ mkGraph isValid pl@(PolyLine vs) =
 --
 -- running time: \(O(n)\)
 extract    :: NonEmpty Int
-           -> NonEmptyV.NonEmptyVector point -> NonEmptyV.NonEmptyVector point
+           -> NonEmptyVector.NonEmptyVector point -> NonEmptyVector.NonEmptyVector point
 extract is = NonEmptyVector.unsafeFromList . extract' (F.toList is) 0 . F.toList
 
 -- | Extract the indices

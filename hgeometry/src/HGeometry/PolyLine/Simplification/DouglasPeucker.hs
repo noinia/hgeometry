@@ -36,10 +36,10 @@ douglasPeucker     :: forall polyLine point d r.
                       , HasSquaredEuclideanDistance point
                       )
                    => r -> polyLine -> PolyLineF ViewR1 point
-douglasPeucker eps = go . polylineFromPoints . toNonEmptyOf allPoints
+douglasPeucker eps = go . polyLineFromPoints . toNonEmptyOf allPoints
   where
     go pl
-      | dst <= (eps*eps) = polylineFromPoints $ a :| [b]
+      | dst <= (eps*eps) = polyLineFromPoints $ a :| [b]
       | otherwise        = go pref `merge` go subf
       where
         a, b :: point

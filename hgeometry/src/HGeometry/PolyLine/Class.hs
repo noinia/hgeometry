@@ -44,7 +44,7 @@ class ( HasVertices polyLine polyLine
   -- | Constructs a polyline from a given sequence of points.
   --
   -- pre: there should be at least two distinct points
-  polylineFromPoints :: Foldable1 f => f point -> polyLine
+  polyLineFromPoints :: Foldable1 f => f point -> polyLine
 
 
 -- maybe make these two functions into a prism instead
@@ -55,7 +55,7 @@ _PolyLineLineSegment :: ( LineSegment_ lineSegment point
                         ) => Prism' polyLine lineSegment
 _PolyLineLineSegment = prism' lineSegmentToPolyLine polyLineToLineSegment
   where
-    lineSegmentToPolyLine s = polylineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
+    lineSegmentToPolyLine s = polyLineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
 
     polyLineToLineSegment pl
       | lengthOf vertices pl == 2 = Just $ uncheckedLineSegment (pl^.start) (pl^.end)                     | otherwise                 = Nothing

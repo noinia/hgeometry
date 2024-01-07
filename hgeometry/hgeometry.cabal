@@ -50,6 +50,7 @@ common all-setup
       , dlist                     >= 0.7           && < 1
       , bytestring                >= 0.11          && < 1
       , vector:vector             >= 0.13          && < 1
+      , array                     >= 0.5           && < 1
       , lens                      >= 5.2           && < 6
       , deepseq                   >= 1.1           && < 2
       , semigroupoids             >= 6.0.0.1       && < 7
@@ -353,7 +354,7 @@ library
         HGeometry.PolyLine
         HGeometry.PolyLine.Class
         HGeometry.PolyLine.Simplification.DouglasPeucker
-        -- HGeometry.PolyLine.Simplification.ImaiIri
+        HGeometry.PolyLine.Simplification.ImaiIri
 
 --
         HGeometry.ConvexHull
@@ -616,6 +617,7 @@ test-suite hspec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
       Polygon.Triangulation.MakeMonotoneSpec
+      PolyLine.Simplification.ImaiIriSpec
       SegmentTreeSpec
       SegmentTree.R2Spec
       RangeTreeSpec

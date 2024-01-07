@@ -240,7 +240,7 @@ extendWith mp state = case mp of
     Nothing -> state
     Just p  -> Just $ case state of
       Nothing                   -> StartPoint p
-      Just (StartPoint s)       -> PartialPolyLine . polylineFromPoints $ s :| [p]
+      Just (StartPoint s)       -> PartialPolyLine . polyLineFromPoints $ s :| [p]
       Just (PartialPolyLine pl) -> PartialPolyLine $ extendPolyLine pl p
 
 extendPolyLine      :: Eq r => PolyLine' r -> Point 2 r -> PolyLine' r

@@ -122,4 +122,4 @@ instance ( Traversable1 f
          , Point_ point d r
          , TraversableWithIndex Int f
          ) => PolyLine_ (PolyLineF f point) point where
-  polylineFromPoints = PolyLine . fromFoldable1
+  polyLineFromPoints = PolyLine . fromFoldable1
