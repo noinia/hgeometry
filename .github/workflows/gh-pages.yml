@@ -1,6 +1,8 @@
 name: GH-Pages
 on:
   - push
+      branches:
+        - hgeom1_again
 jobs:
   linux:
     name: GH-Pages - Linux - ${{ matrix.compiler }}
@@ -41,7 +43,7 @@ jobs:
       - name: build
         run: |
           cabal update
-          cabal build hiraffe
+          cabal build hgeometry
       - name: haddock
         run: |
           ./haddock.sh
