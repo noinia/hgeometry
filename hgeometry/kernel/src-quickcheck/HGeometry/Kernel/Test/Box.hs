@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Kernel.Test.Box
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper Utilities
+--
+--------------------------------------------------------------------------------
 module HGeometry.Kernel.Test.Box where
 
 import Control.Lens
@@ -9,6 +19,7 @@ import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
+--  | Generate an arbitrary point in the given rectangle.
 arbitraryPointInBoundingBox   :: Rectangle (Point 2 Rational) -> Gen (Point 2 Rational)
 arbitraryPointInBoundingBox b = do
   ZeroToOne rX <- arbitrary

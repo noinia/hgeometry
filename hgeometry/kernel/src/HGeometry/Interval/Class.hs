@@ -282,11 +282,9 @@ compareIntervalExact q i = case q `compare` (i^.start) of
               EQ -> OnEnd
               GT -> After
 
-
+-- | Data type to represent the result of where a point is with respect to an interval.
 data CompareInterval = Before | OnStart | Interior | OnEnd | After
   deriving (Show,Read,Eq,Ord)
-
-
 
 -- | Shifts the interval to the left by delta
 shiftLeft         :: ( Num r, Interval_ interval r) => r -> interval -> interval

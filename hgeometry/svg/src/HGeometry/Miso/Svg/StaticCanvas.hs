@@ -1,4 +1,14 @@
 {-# LANGUAGE OverloadedStrings          #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.Svg.StaticCanvas
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Static canvas to be usedi nMiso applications
+--
+--------------------------------------------------------------------------------
 module HGeometry.Miso.Svg.StaticCanvas
   ( StaticCanvas
   , staticCanvas
@@ -35,10 +45,13 @@ data StaticCanvas r =
          }
   deriving stock (Eq)
 
+-- | Lens to access the viewport of a Canvas
 theViewport :: Lens (StaticCanvas r) (StaticCanvas s) (Viewport r) (Viewport s)
 theViewport = lens _theViewport (\c vp -> c { _theViewport = vp })
 
+-- | Class for types that have a 'dimensions' field
 class HasDimensions s a | s -> a where
+  -- | Lens to access the Dimensions field
   dimensions :: Lens' s a
 
 instance HasDimensions (StaticCanvas r) (Vector 2 Int) where
@@ -76,6 +89,7 @@ staticCanvas w h = let v = Vector2 w h
 --------------------------------------------------------------------------------
 -- * The View
 
+-- | Types for which we can convert into a Svg coordinate.
 type ToSvgCoordinate = ToMisoString
 
 

@@ -1,5 +1,16 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Box.Boxable
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Typeclass that expresses that we can compute an axis parallel bounding box of an
+-- object.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Box.Boxable
   ( IsBoxable(..)
   ) where

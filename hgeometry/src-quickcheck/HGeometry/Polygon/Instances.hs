@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Instances
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Arbitrary instances for the polygon types in hgeometry
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Instances
   (
 
