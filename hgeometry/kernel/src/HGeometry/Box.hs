@@ -17,15 +17,21 @@ module HGeometry.Box
   , module HGeometry.Box.Sides
   , IsBoxable(..)
   , LineBoxIntersection(..)
+  , HalfLineBoxIntersection(..)
   ) where
 
 import Control.Lens
-import HGeometry.Box.Intersection()
+import Data.Foldable1
+import Data.Semialign
+import Data.Semigroup (All(..))
+import GHC.Generics (Generic)
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
 import HGeometry.Box.Internal
+import HGeometry.Box.Intersection ()
 import HGeometry.Box.Sides
+import HGeometry.HalfLine
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
@@ -33,15 +39,38 @@ import HGeometry.Line.Class
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
+import HGeometry.LineSegment.Intersection
 import HGeometry.Point
+import HGeometry.Properties
 import HGeometry.Transformation
-
+import HGeometry.Vector
+import Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> myRect = Rectangle origin (Point2 10 20.0) :: Rectangle (Point 2 Rational)
 --
 --
+
+--------------------------------------------------------------------------------
+
+instance ( Point_ point d r, Num r, Ord r
+         , Foldable1 (Vector d), Zip (Vector d)
+         ) => HasIntersectionWith (Point d r) (Box point) where
+  q `intersects` box = getAll . fold1 $
+    zipWith (\x i -> All $ Point1 x `intersects` i) (q^.vector) (extent box)
+  {-# INLINE intersects #-}
+
+type instance Intersection (Point d r) (Box point) = Maybe (Point d r)
+
+instance ( Point_ point d r, Num r, Ord r
+         , Foldable1 (Vector d), Zip (Vector d)
+         ) => IsIntersectableWith (Point d r) (Box point) where
+  q `intersect` box
+    | q `intersects` box = Just q
+    | otherwise          = Nothing
+  {-# INLINE intersect #-}
+
 
 --------------------------------------------------------------------------------
 
@@ -189,3 +218,39 @@ instance ( Fractional r, Ord r
 -- notAllTheSame f xs = let y :| ys = toNonEmpty xs
 --                          z       = f x
 --                      in any (\y' -> f y' /= z) xs
+
+
+--------------------------------------------------------------------------------
+-- * Intersection with a HalfLine
+
+
+instance ( Point_ point 2 r, Ord r, Num r
+         ) => HasIntersectionWith (HalfLine point) (Rectangle point) where
+  hl `intersects` box =
+    (hl^.start.asPoint) `intersects` box || any (hl `intersects`) (sides box)
+  -- the first condition is redundant, but probably sufficiently cheap that it may
+  -- actually help/be faster when the starting point lies inside the box.
+  {-# INLINE intersects #-}
+
+type instance Intersection (HalfLine point) (Rectangle point) =
+  Maybe (HalfLineBoxIntersection (Point 2 (NumType point)))
+
+data HalfLineBoxIntersection point =
+    HalfLine_x_Box_Point       point
+  | HalfLine_x_Box_LineSegment (ClosedLineSegment point)
+  deriving (Show,Eq,Read,Generic,Functor)
+
+instance ( Point_ point 2 r, Ord r, Fractional r
+         ) => IsIntersectableWith (HalfLine point) (Rectangle point) where
+  hl `intersect` box = m `intersect` box >>= \case
+      Line_x_Box_Point p
+        | p `onSide` perpendicularTo m == LeftSide -> Just $ HalfLine_x_Box_Point p
+        | otherwise                                -> Nothing
+      Line_x_Box_Segment seg                       -> case compareColinearInterval m seg of
+        Before   -> Just $ HalfLine_x_Box_LineSegment seg
+        OnStart  -> Just $ HalfLine_x_Box_LineSegment seg
+        Interior -> Just $ HalfLine_x_Box_LineSegment $ seg&start .~ (hl^.start.asPoint)
+        OnEnd    -> Just $ HalfLine_x_Box_Point (seg^.end)
+        After    -> Nothing -- no intersection
+    where
+      m = supportingLine hl

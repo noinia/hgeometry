@@ -3,7 +3,9 @@
 module HGeometry.LineSegment.Intersection
   ( LineLineSegmentIntersection(..)
   , LineSegmentLineSegmentIntersection(..)
+  , HalfLineLineSegmentIntersection(..)
   -- , spansIntersect
+  , compareColinearInterval
   ) where
 
 import Control.Lens
@@ -367,19 +369,17 @@ instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint
 --------------------------------------------------------------------------------
 -- * Intersection with HalfLines
 
-
-instance (Ord r, Num r, Point_ point 2 r
+instance ( Ord r, Num r, Point_ point 2 r
+         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
          ) => HasIntersectionWith (HalfLine point) (LineSegment endPoint point) where
-  hl `intersects` seg = undefined
-
-
-
+  hl `intersects` seg = supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
+  {-# INLINE intersects #-}
 
 type instance Intersection (HalfLine point) (LineSegment endPoint point)
   = Maybe (HalfLineLineSegmentIntersection (Point 2 (NumType point))
                                            (LineSegment endPoint point))
 
--- | Data type representing the intersection of a Line and a HalfLine
+-- | Data type representing the intersection of a HalfLine and a LineSegment
 data HalfLineLineSegmentIntersection point segment =
       HalfLine_x_LineSegment_Point       point
     | HalfLine_x_LineSegment_LineSegment segment

@@ -21,7 +21,7 @@ module HGeometry.LineSegment
   --
   , LineLineSegmentIntersection(..)
   , LineSegmentLineSegmentIntersection(..)
-  -- , spansIntersect
+  , HalfLineLineSegmentIntersection(..)
   ) where
 
 import HGeometry.LineSegment.Class
