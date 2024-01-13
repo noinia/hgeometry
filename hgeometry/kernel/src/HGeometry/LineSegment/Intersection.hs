@@ -7,12 +7,15 @@ module HGeometry.LineSegment.Intersection
   ) where
 
 import Control.Lens
+import GHC.Generics (Generic)
 import HGeometry.Box.Intersection ()
 import HGeometry.Ext
+import HGeometry.HalfLine
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Line
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Internal
 import HGeometry.Point
 import HGeometry.Properties (NumType)
@@ -293,7 +296,9 @@ instance ( Point_ point 2 r, Num r,  Ord r
       mkIntersect i =
         LineSegment_x_LineSegment_LineSegment $ LineSegment (i^.start.extra) (i^.end.extra)
 
-
+-- | Given a line segment, compute the span of the line segment. In principle we compute
+-- the span in terms of the x-coordinate. Except wehn the segment is vertical, then we return
+-- the span in the y-cooridnate instead.
 spanIn'  :: ( Point_ point 2 r, Ord r
             , IxValue (endPoint point) ~ point
             , IxValue (endPoint (r :+ endPoint point)) ~ (r :+ endPoint point)
@@ -357,3 +362,65 @@ instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint
   (s :+ _) `intersect` (s' :+ _) = fmap' (:+ undef') <$> s `intersect` s'
     where
       undef' = error "intersect semgnets: not possible"
+
+
+
+--------------------------------------------------------------------------------
+-- * Intersection with HalfLines
+
+{-
+instance (Ord r, Num r) => HasIntersectionWith (HalfLine 2 r) (LineSegment endPoint point) where
+  hl `intersects` seg = undefined
+
+type instance Intersection (HalfLine 2 r) (LineSegment endPoint point)
+  = Maybe (HalfLineLineSegmentIntersection (LineSegment endPoint) (Point 2 r))
+
+-- | Data type representing the intersection of a Line and a HalfLine
+data HalfLineLineSegmentIntersection segment point =
+      HalfLine_x_LineSegment_Point       point
+    | HalfLine_x_LineSegment_LineSegment (segment point)
+  deriving (Show,Eq,Read,Ord,Generic,Functor)
+
+instance ( Ord r, Fractional r
+         , Functor endPoint
+         ) => IsIntersectableWith (HalfLine 2 r) (LineSegment endPoint point) where
+  hl `intersect` seg = m `intersect` seg >>= \case
+      Line_x_LineSegment_Point q
+        | q `onSide` perpendicularTo m == LeftSide -> Just $ HalfLine_x_LineSegment_Point q
+        | otherwise                                -> Nothing
+      Line_x_LineSegment_LineSegment _             -> case compareColinearInterval m seg of
+        Before   -> Just $ HalfLine_x_LineSegment_LineSegment seg'
+        OnStart  -> Just $ HalfLine_x_LineSegment_LineSegment seg'
+        Interior -> Just $ HalfLine_x_LineSegment_LineSegment $ seg'&start .~ (hl^.start)
+        OnEnd
+          | isClosed (seg^.endPoint) -> Just $ HalfLine_x_LineSegment_Point (seg^.end)
+          | otherwise                -> Nothing
+        After                        -> Nothing -- no intersection
+    where
+      m = supportingLine hl
+      isClosed = (== Closed) . endPointType
+      seg' = view asPoint <$> seg
+
+-- | Given a line l, and a line segment seg that lies on l. Returns where the anchorPoint
+-- of the line is with respect to the line segment (which we can interpret as some
+-- interval along l).
+compareColinearInterval                    :: ( Ord r, Num r
+                                              , Point_ point 2 r
+                                              , IxValue (endPoint point) ~ point
+                                              )
+                                           => LinePV 2 r -> LineSegment endPoint point
+                                           -> CompareInterval
+compareColinearInterval l@(LinePV p v) seg = case p `onSide` mStart of
+    RightSide -> Before
+    OnLine    -> OnStart
+    LeftSide  -> case p `onSide` mEnd of
+      RightSide -> Interior
+      OnLine    -> OnEnd
+      LeftSide  -> After
+  where
+    m = perpendicularTo l
+    mStart = m&anchorPoint .~ seg^.start.asPoint
+    mEnd   = m&anchorPoint .~ seg^.end.asPoint
+    -- the left side is the side in which the vector v points.
+
+-}

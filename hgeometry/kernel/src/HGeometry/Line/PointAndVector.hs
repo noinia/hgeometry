@@ -11,6 +11,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.PointAndVector
   ( LinePV(..)
+  , anchorPoint
+  , HasDirection(..)
   , isIdenticalTo
   , HasSupportingLine(..)
   , fromLinearFunction
@@ -53,6 +55,20 @@ data LinePV d r = LinePV { _anchorPoint :: !(Point  d r)
 
 type instance Dimension (LinePV d r) = d
 type instance NumType   (LinePV d r) = r
+
+-- | Types that have a Direction field
+class HasDirection t where
+  -- | Lens to access the direction field
+  direction :: (Dimension t ~ d, NumType t ~ r) => Lens' t (Vector d r)
+
+instance HasDirection (LinePV d r) where
+  direction = lens _direction (\p v -> p {_direction = v})
+  {-# INLINE direction #-}
+
+-- | Lens to access the anchor point of the line
+anchorPoint :: Lens' (LinePV d r) (Point d r)
+anchorPoint = lens _anchorPoint (\l p -> l { _anchorPoint = p })
+
 
 instance ( Has_ Metric_ d r ) => Line_ (LinePV d r) d r where
   fromPointAndVec p v = LinePV (p^.asPoint) (v^._Vector)
