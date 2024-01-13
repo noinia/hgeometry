@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.IpeOut
@@ -30,7 +30,7 @@ import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
--- import           HGeometry.HalfLine
+import           HGeometry.HalfLine
 import           HGeometry.Line
 -- import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
@@ -148,9 +148,9 @@ instance (Fractional r, Ord r) => HasDefaultIpeOut (LinePV 2 r) where
   type DefaultIpeOut (LinePV 2 r) = Path
   defIO = ipeLine
 
--- instance (Fractional r, Ord r) => HasDefaultIpeOut (HalfLine 2 r) where
---   type DefaultIpeOut (HalfLine 2 r) = Path
---   defIO = ipeHalfLine
+instance (Fractional r, Ord r, Point_ point 2 r) => HasDefaultIpeOut (HalfLine point) where
+  type DefaultIpeOut (HalfLine point) = Path
+  defIO = ipeHalfLine
 
 instance HasDefaultIpeOut (SimplePolygon (Point 2 r)) where
   type DefaultIpeOut (SimplePolygon (Point 2 r)) = Path
@@ -213,48 +213,51 @@ ipeLineIn bBox l = case l `intersect` bBox of
   Just (Line_x_Box_Point _)   -> error "ipeLineIn: precondition failed, single point"
   Just (Line_x_Box_Segment s) -> ipeLineSegment s
 
--- -- | Renders an Halfine.
--- --
--- --
--- -- pre: the intersection of the box with the line is non-empty
--- ipeHalfLine :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
--- ipeHalfLine = ipeHalfLineIn defaultBox
+-- | Renders an Halfine.
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeHalfLine :: (Ord r, Fractional r, Point_ point 2 r) => IpeOut (HalfLine point) Path r
+ipeHalfLine = \(HalfLine p v) -> ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 
--- -- | Renders a ray, i.e. a half line drawing an arrow in the direction
--- -- of the ray.
--- --
--- -- pre: the intersection of the box with the line is non-empty
--- ipeRay :: (Ord r, Fractional r) => IpeOut (HalfLine 2 r) Path r
--- ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
+-- | Renders a ray, i.e. a half line drawing an arrow in the direction
+-- of the ray.
+--
+-- pre: the intersection of the box with the line is non-empty
+ipeRay :: (Ord r, Fractional r, Point_ point 2 r) => IpeOut (HalfLine point) Path r
+ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
 
+-- | Renders the HalfLine in the given box.
+--
+-- pre: the intersection of the box with the halfline is a line segment
+ipeHalfLineIn         :: (Ord r, Fractional r, Point_ point 2 r)
+                      => Rectangle point -> IpeOut (HalfLine point) Path r
+ipeHalfLineIn bBox hl = case hl `intersect` bBox of
+  Nothing                       -> error "ipeHalfLineIn: precondition failed, no intersection"
+  Just (HalfLine_x_Box_Point _) -> error "ipeHalfLineIn: precondition failed, single point"
+  Just (HalfLine_x_Box_LineSegment seg) -> ipeLineSegment seg
 
--- -- | Renders the HalfLine in the given box.
--- --
--- -- pre: the intersection of the box with the line is non-empty
--- ipeHalfLineIn        :: forall p r. (Ord r, Fractional r)
---                      => Rectangle p r -> IpeOut (HalfLine 2 r) Path r
--- ipeHalfLineIn bBox l = match (l `intersect` bBox) $
---      H (\NoIntersection    -> error "ipeHalfLineIn: precondition failed, no intersection")
---   :& H (\(_p :: Point 2 r) -> error "ipeHalfLineIn: precondition failed, single point")
---   :& H ipeLineSegment
---   :& RNil
-
+-- | Renders an line segment to a Path
 ipeLineSegment   :: (LineSegment_ lineSegment point, Point_ point 2 r)
                  => IpeOut lineSegment Path r
 ipeLineSegment s = (path . pathSegment $ s) :+ mempty
 
+-- | Renders a polyline to a Path
 ipePolyLine   :: IpeOut (PolyLine (Point 2 r)) Path r
 ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
 
+-- | Renders an Ellipse to a Path
 ipeEllipse :: IpeOut (Ellipse r) Path r
 ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
 
+-- | Renders a circle to a Path
 ipeCircle :: Radical r => IpeOut (Circle (Point 2 r)) Path r
 ipeCircle = ipeEllipse . circleToEllipse
 
+-- | Renders a Disk to a Path
 ipeDisk   :: Radical r => IpeOut (Disk (Point 2 r)) Path r
 ipeDisk d = ipeCircle (MkSphere d) ! attr SFill (IpeColor "0.722 0.145 0.137")
 
+-- | Renders a Bezier curve to a Path
 ipeBezier :: IpeOut (CubicBezier (Point 2 r)) Path r
 ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
 
@@ -262,6 +265,7 @@ ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
 path :: PathSegment r -> Path r
 path = Path . Seq.singleton
 
+-- | Construct a PolyLine path segment
 pathSegment :: (LineSegment_ lineSegment point, Point_ point 2 r)
             => lineSegment -> PathSegment r
 pathSegment = PolyLineSegment . fmap (^.asPoint) . review _PolyLineLineSegment

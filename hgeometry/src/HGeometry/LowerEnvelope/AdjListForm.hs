@@ -395,7 +395,7 @@ fromLEVertex (VertexForm.LEVertex v defs) = Vertex v defs es
 -- | Given a bunch of halflines that all share their starting point v,
 -- sort them cyclically around the starting point v.
 sortAroundStart :: (Foldable f, Ord r, Num r)
-                => f (HalfLine 2 r :+ e) -> Seq.Seq (HalfLine 2 r :+ e)
+                => f (HalfLine (Point 2 r) :+ e) -> Seq.Seq (HalfLine (Point 2 r) :+ e)
 sortAroundStart = fromFoldable . sortBy @V.Vector compareAroundStart
   where
     compareAroundStart (HalfLine v d  :+ _)
@@ -413,7 +413,7 @@ outgoingUnboundedEdge                   :: ( Plane_ plane r, Ord r, Fractional r
                                         -> Two plane -- ^ the pair of planes for which to compute
                                         -- the halfine
                                         -> f plane -- ^ the other planes intersecting at v
-                                        -> Maybe (HalfLine 2 r :+ EdgeDefiners plane)
+                                        -> Maybe (HalfLine (Point 2 r) :+ EdgeDefiners plane)
 outgoingUnboundedEdge v (Two h1 h2) h3s =
   intersectionLine' h1 h2 >>= toHalfLineFrom (projectPoint v) h3s
   -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
@@ -431,7 +431,7 @@ toHalfLineFrom                  :: (Plane_ plane r, Foldable1 f, Fractional r, O
                                 => Point 2 r -- ^ vertex v
                                 -> f plane     -- ^ the remaining plane(s) hs
                                 -> LinePV 2 r :+ EdgeDefiners plane -- ^ the line l
-                                -> Maybe (HalfLine 2 r :+ EdgeDefiners plane)
+                                -> Maybe (HalfLine (Point 2 r) :+ EdgeDefiners plane)
 toHalfLineFrom v hs ((LinePV _ w) :+ defs@(EdgeDefiners h1 h2)) =
     validate w defs <|> validate ((-1) *^ w) (EdgeDefiners h2 h1)
     -- We try both directions. Note that if we reverse the direction
