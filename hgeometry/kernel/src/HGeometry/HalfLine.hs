@@ -10,14 +10,12 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.HalfLine
-  ( HalfLine(MkHalfLine,HalfLine)
-
+  ( HalfLine(..)
 
   , LineHalfLineIntersection(..)
   ) where
 
 import Control.Lens
-import Data.Coerce
 import GHC.Generics (Generic)
 import GHC.TypeLits
 import HGeometry.Intersection
@@ -32,63 +30,62 @@ import Text.Read
 --------------------------------------------------------------------------------
 
 -- | A Halfline in R^d
-newtype HalfLine d r = MkHalfLine (LinePV d r)
+data HalfLine point = HalfLine !point
+                               !(Vector (Dimension point) (NumType point))
 
-type instance Dimension (HalfLine d r) = d
-type instance NumType   (HalfLine d r) = r
+type instance Dimension (HalfLine point) = Dimension point
+type instance NumType   (HalfLine point) = NumType point
 
--- | Construct a Halfline from its starting point and the vector
-pattern HalfLine     :: Point d r -> Vector d r -> HalfLine d r
-pattern HalfLine p v = MkHalfLine (LinePV p v)
-{-# COMPLETE HalfLine #-}
+deriving instance ( Eq point, Eq (Vector d r)
+                  , d ~ Dimension point, r ~ NumType point) => Eq (HalfLine point)
 
-deriving newtype instance Eq (LinePV d r) => Eq (HalfLine d r)
-
-instance ( Show r, KnownNat d, Has_ Additive_ d r
-         ) => Show (HalfLine d r) where
+instance ( Show point, Show r, d ~ Dimension point, r ~ NumType point
+         , KnownNat d, Has_ Additive_ d r
+         ) => Show (HalfLine point) where
   showsPrec k (HalfLine p v) = showParen (k > appPrec) $
                                  showString "HalfLine "
                                . showsPrec (appPrec+1) p
                                . showChar ' '
                                . showsPrec (appPrec+1) v
 
+-- instance ( Show r, KnownNat d, Has_ Additive_ d r
+--          ) => Show (HalfLine d r) where
+
 appPrec :: Int
 appPrec = 10
 
-instance (Read r, Has_ Additive_ d r, KnownNat d
-         ) => Read (HalfLine d r) where
+instance ( Read r, Read point, Has_ Additive_ d r, KnownNat d
+         , d ~ Dimension point, r ~ NumType point
+         ) => Read (HalfLine point) where
   readPrec = parens (prec appPrec $ do
                         Ident "HalfLine" <- lexP
                         p <- step readPrec
                         v <- step readPrec
                         pure (HalfLine p v))
 
-
-_HalfLineLine :: Iso (HalfLine d r) (HalfLine d' r') (LinePV d r) (LinePV d' r')
-_HalfLineLine = coerced
-
-
-instance HasStart (HalfLine d r) (Point d r) where
-  start = _HalfLineLine.anchorPoint
+instance HasStart (HalfLine point) point where
+  start = lens (\(HalfLine p _) -> p) (\(HalfLine _ v) p -> HalfLine p v)
   {-# INLINE start #-}
 
-instance HasDirection (HalfLine d r) where
-  direction = _HalfLineLine.direction
+instance HasDirection (HalfLine point) where
+  direction = lens (\(HalfLine _ v) -> v) (\(HalfLine p _) v -> HalfLine p v)
   {-# INLINE direction #-}
 
-instance HasSupportingLine (HalfLine d r) where
-  supportingLine = coerce
+instance Point_ point d r => HasSupportingLine (HalfLine point) where
+  supportingLine (HalfLine p v) = LinePV (p^.asPoint) v
+  {-# INLINE supportingLine #-}
 
 --------------------------------------------------------------------------------
 
 
-instance (Ord r, Num r) => HasIntersectionWith (LinePV 2 r) (HalfLine 2 r) where
+instance (Ord r, Num r, Point_ point 2 r
+         ) => HasIntersectionWith (LinePV 2 r) (HalfLine point) where
   l@(LinePV _ u) `intersects` (HalfLine q w) = case q `onSide` l of
       OnLine    -> True
       LeftSide  -> (q .+^ w) `onSide` l' == RightSide
       RightSide -> (q .+^ w) `onSide` l' == LeftSide
     where
-      l' = LinePV q u
+      l' = LinePV (q^.asPoint) u
     -- we construct a line l' parallel to l that goes through the startPoint of our
     -- ray/halfline.
     --
@@ -96,8 +93,8 @@ instance (Ord r, Num r) => HasIntersectionWith (LinePV 2 r) (HalfLine 2 r) where
     -- up right of l'. Symmetrically, if the starting point was right of the ray, we must
     -- go left to intersect instead.
 
-type instance Intersection (LinePV 2 r) (HalfLine 2 r) =
-  Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine 2 r))
+type instance Intersection (LinePV 2 r) (HalfLine point) =
+  Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
 
 -- | Data type representing the intersection of a Line and a HalfLine
 data LineHalfLineIntersection point halfLine =
@@ -106,7 +103,8 @@ data LineHalfLineIntersection point halfLine =
   deriving (Show,Eq,Read,Ord,Generic,Functor)
 
 
-instance (Ord r, Fractional r) => IsIntersectableWith (LinePV 2 r) (HalfLine 2 r) where
+instance ( Ord r, Fractional r, Point_ point 2 r
+         ) => IsIntersectableWith (LinePV 2 r) (HalfLine point) where
   l `intersect` hl = m `intersect` l >>= \case
       Line_x_Line_Point p
         | p `onSide` perpendicularTo m == LeftSide -> Just $ Line_x_HalfLine_Point p
