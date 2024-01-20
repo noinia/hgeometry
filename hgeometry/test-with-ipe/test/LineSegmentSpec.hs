@@ -4,15 +4,15 @@ module LineSegmentSpec where
 import Control.Lens
 import Control.Monad ((>=>))
 import Data.Vinyl
--- import HGeometry.Box
--- import HGeometry.Boundary
+import HGeometry.Box
+import HGeometry.Boundary
 import HGeometry.Ext
--- import HGeometry.Intersection
--- import HGeometry.Line
+import HGeometry.Intersection
+import HGeometry.Line
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
--- import HGeometry.Vector
+import HGeometry.Vector
 import Ipe
 import Ipe.Color
 import Paths_hgeometry
@@ -29,10 +29,9 @@ getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 
 
 spec :: Spec
-spec = pure ()
-{-
+spec =
   describe "linesegment x box intersection tests" $ do
-    fp <- runIO $ getDataFileName' [osp|LineSegment/linesegmentBoxIntersections.ipe|]
+    fp <- runIO $ getDataFileName' [osp|test-with-ipe/LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
 
 
@@ -44,14 +43,13 @@ ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> 
     mkTestCase :: LineSegment AnEndPoint (Point 2 R) :+ IpeAttributes Path R
                -> Rectangle (Point 2 R) :+  IpeAttributes Path R
                -> Spec
-    mkTestCase (seg :+ segAts) (rect :+ rectAts) =
-      describe ("seg x rect intersection " <> show seg <> " X " <> show rect) $ do
+    mkTestCase (seg :+ segAts) (rect' :+ rectAts) =
+      describe ("seg x rect intersection " <> show seg <> " X " <> show rect') $ do
         it "intersects rect" $
-          (seg `intersects` rect) `shouldBe` sameColor segAts rectAts
+          (seg `intersects` rect') `shouldBe` sameColor segAts rectAts
         it "intersects boundary" $
-          (seg `intersects` (Boundary rect)) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
+          (seg `intersects` (Boundary rect')) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
 
--}
 sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
 sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
 

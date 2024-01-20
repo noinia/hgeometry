@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.HalfLine
   ( HalfLine(..)
-
+  , halfLineThrough
   , LineHalfLineIntersection(..)
   ) where
 
@@ -113,3 +113,14 @@ instance ( Ord r, Fractional r, Point_ point 2 r
     where
       m = supportingLine hl
     -- the left side is suposedly the halfplane containing the halfLine
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Given two points p and q, create a halfline from p through q.
+--
+-- >>> halfLineThrough (Point2 5 10) (Point2 10 30 :: Point 2 Int)
+-- HalfLine (Point2 5 10) (Vector2 5 20)
+halfLineThrough     :: (Point_ point d r, Num r) => point -> point -> HalfLine point
+halfLineThrough p q = HalfLine p (q .-. p)

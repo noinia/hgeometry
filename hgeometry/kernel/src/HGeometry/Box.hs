@@ -25,6 +25,7 @@ import Data.Foldable1
 import Data.Semialign
 import Data.Semigroup (All(..))
 import GHC.Generics (Generic)
+import HGeometry.Boundary
 import HGeometry.Box.Boxable
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
@@ -73,6 +74,7 @@ instance ( Point_ point d r, Num r, Ord r
 
 
 --------------------------------------------------------------------------------
+-- * Intersection with a line
 
 -- | Data type representing the intersection of a Box and a line
 data LineBoxIntersection d r = Line_x_Box_Point (Point d r)
@@ -155,7 +157,8 @@ type instance Intersection (LinePV 2 r) (Rectangle point) = Maybe (LineBoxInters
 instance ( Num r, Ord r
          , Point_ point 2 r
          ) =>  HasIntersectionWith (LinePV 2 r) (Rectangle point) where
-  l `intersects` (corners -> Corners tl tr br bl) = onOppositeSides tl br || onOppositeSides tr bl
+  l `intersects` (corners -> Corners tl tr br bl) =
+      onOppositeSides tl br || onOppositeSides tr bl
     where
       onOppositeSides p q = onSideTest p l /= onSideTest q l
   {-# INLINE intersects #-}
@@ -175,18 +178,35 @@ instance ( Fractional r, Ord r
 
 
 --------------------------------------------------------------------------------
--- * Intersection with a line
+-- * Intersection with a linesegment
 
 
--- instance (Ord r, Num r, Point_ point 2 r
---          ) => LinePV 2 p `HasIntersectionWith` Rectangle point where
---   l `intersects` r = notAllTheSame (onSide l) $ corners r
---   {-# INLINE intersects #-}
+instance ( Ord r, Num r, Point_ point 2 r, Point_ point' 2 r
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         , HasIntersectionWith  (LineSegment endPoint point) (ClosedLineSegment point')
+         ) => HasIntersectionWith (LineSegment endPoint point) (Rectangle point') where
+  seg `intersects` rect = (seg^.start.asPoint) `intersects` rect
+                       || (seg^.end.asPoint) `intersects` rect
+                       || seg `intersects` Boundary rect
+  {-# INLINE intersects #-}
 
--- instance (Ord r, Num r, Point_ point 2 r
---          ) => LineEQ r `HasIntersectionWith` Rectangle point where
---   l `intersects` r = notAllTheSame (onSide l) $ corners r
---   {-# INLINE intersects #-}
+instance ( Ord r, Num r, Point_ point 2 r, Point_ point' 2 r
+         -- , IxValue (endPoint point) ~ point
+         -- , EndPoint_ (endPoint point)
+         , HasIntersectionWith  (LineSegment endPoint point) (ClosedLineSegment point')
+         ) => HasIntersectionWith (LineSegment endPoint point) (Boundary (Rectangle point')) where
+  seg `intersects` (Boundary rect) = any (seg `intersects`) (sides rect)
+  -- TODO: I guess we should be able to speed up this implmeentation, since the various
+  -- intersection tests against the sidees are probably doing double work.
+
+
+-- data LineSegmentRectangleIntersection seg point =
+--     LineSegment_x_Box_Point (Point d r)
+--   | LineSegment_x_Box_Segment_Contained seg
+--   | LineSegment_x_Box_Segment_Partial (ClosedLineSegment (Point d r))
+
+
 
 -- instance (Ord r, Num r, Point_ point 2 r
 --          ) => LinePV 2 p `HasIntersectionWith` Boundary (Rectangle point) where
@@ -213,11 +233,6 @@ instance ( Fractional r, Ord r
 -- instance (Ord r, Fractional r, Point_ point 2 r) => LineEQ r `IsIntersectableWith` Rectangle point where
 --   l `intersect` r = undefined
 
--- -- | Verify that not all entries are the same.
--- notAllTheSame      :: (Foldable1 f, Eq b) => (a -> b) -> f b -> Bool
--- notAllTheSame f xs = let y :| ys = toNonEmpty xs
---                          z       = f x
---                      in any (\y' -> f y' /= z) xs
 
 
 --------------------------------------------------------------------------------
