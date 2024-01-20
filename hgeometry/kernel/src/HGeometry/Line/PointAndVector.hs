@@ -95,8 +95,12 @@ instance Num r => HyperPlaneFromPoints (LinePV 2 r) where
 instance ( Eq r, Num r
          ) => HyperPlane_ (LinePV 2 r) 2 r where
   hyperPlaneEquation (LinePV (Point2 px py) (Vector2 vx vy))
-    | vx == 0   = Vector3 (-px)            1  0
-    | otherwise = Vector3 (-vx*px - vy*py) vx vy
+    | vx == 0   = Vector3 (-px)         1  0 -- vertical line at px
+    | otherwise = Vector3 (vx*py-vy*px) vy (-vx)
+    -- we have some non-vertical line: y = a1*x + a0 that goes through p
+    -- so we have: a0 + a1*px + a2*py = 0
+    -- our slope a1 = vy/vx, and our intercept a0 = py-(vy/vx)px, and a2 = (-1)
+    -- multiplying everything by vx gets rid of the fraction, and yields the above equation.
 
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.

@@ -55,6 +55,9 @@ import           Ipe.Reader
 import           Ipe.Types
 import           System.OsPath
 
+
+--------------------------------------------------------------------------------
+
 -- import qualified Data.List.NonEmpty as NonEmpty
 -- import Ipe.Attributes
 -- import Ipe.Color(IpeColor(..))
@@ -135,12 +138,19 @@ _asRectangle = prism' rectToPath pathToRect
 
     asRect    :: SimplePolygon (Point 2  r) -> Maybe (Rectangle (Point 2 r))
     asRect pg = case pg^..outerBoundary of
-        [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (Rectangle a c)
-        [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (Rectangle a c)
-        _                                                    -> Nothing
+        [a,b,c,d]
+          | isH a b && isV b c && isH c d && isV d a ->
+              if a^.xCoord < b^.xCoord then Just (Rectangle a c)
+                                       else Just (Rectangle c a)
+          | isV a b && isH b c && isV c d && isH d a ->
+              if a^.yCoord < b^.yCoord then Just (Rectangle d b)
+                                       else Just (Rectangle b d)
+        _                                            -> Nothing
 
-    isH p q = p^.xCoord == q^.xCoord
-    isV p q = p^.yCoord == q^.yCoord
+    isH p q = p^.yCoord == q^.yCoord -- edge pq is horizontal
+    isV p q = p^.xCoord == q^.xCoord -- edge pq is vertical
+
+
 
 
 -- | Convert to a triangle

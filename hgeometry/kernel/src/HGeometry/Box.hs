@@ -32,6 +32,7 @@ import HGeometry.Box.Corners
 import HGeometry.Box.Internal
 import HGeometry.Box.Intersection ()
 import HGeometry.Box.Sides
+import HGeometry.Direction
 import HGeometry.HalfLine
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
@@ -180,16 +181,64 @@ instance ( Fractional r, Ord r
 --------------------------------------------------------------------------------
 -- * Intersection with a linesegment
 
+-- | Figure out where a query point is with respect to a rectangle
+inBox          :: ( Point_ point 2 r, Point_ queryPoint 2 r, Rectangle_ rectangle point
+                  , Ord r, Num r
+                  ) => queryPoint -> rectangle -> PointLocationResultWith CardinalDirection
+q `inBox` rect = case compareIntervalExact (q^.xCoord) xRange of
+    Before   -> StrictlyOutside
+    OnStart  -> case compareIntervalExact (q^.yCoord) yRange of
+                  Before   -> StrictlyOutside
+                  OnStart  -> OnBoundaryEdge South -- on both south and west even
+                  Interior -> OnBoundaryEdge West
+                  OnEnd    -> OnBoundaryEdge North -- on both north and west
+                  After    -> StrictlyOutside
+    Interior -> case compareIntervalExact (q^.yCoord) yRange of
+                  Before   -> StrictlyOutside
+                  OnStart  -> OnBoundaryEdge South
+                  Interior -> StrictlyInside
+                  OnEnd    -> OnBoundaryEdge North
+                  After    -> StrictlyOutside
+    OnEnd    -> case compareIntervalExact (q^.yCoord) yRange of
+                  Before   -> StrictlyOutside
+                  OnStart  -> OnBoundaryEdge East -- on both south and east even
+                  Interior -> OnBoundaryEdge East
+                  OnEnd    -> OnBoundaryEdge North -- on both north and east
+                  After    -> StrictlyOutside
+    After    -> StrictlyOutside
+  where
+    Vector2 xRange yRange = extent rect
+
 
 instance ( Ord r, Num r, Point_ point 2 r, Point_ point' 2 r
          , IxValue (endPoint point) ~ point
          , EndPoint_ (endPoint point)
          , HasIntersectionWith  (LineSegment endPoint point) (ClosedLineSegment point')
          ) => HasIntersectionWith (LineSegment endPoint point) (Rectangle point') where
-  seg `intersects` rect = (seg^.start.asPoint) `intersects` rect
-                       || (seg^.end.asPoint) `intersects` rect
-                       || seg `intersects` Boundary rect
-  {-# INLINE intersects #-}
+  seg `intersects` rect = intersects'
+    where
+      intersects' = case (seg^.start) `inBox` rect of
+        StrictlyInside   -> True
+        OnBoundaryEdge _ -> isClosed (seg^.startPoint)
+                            || case (seg^.end) `inBox` rect of
+                                 StrictlyInside   -> True
+                                 OnBoundaryEdge _ -> True
+                                 StrictlyOutside  -> intersectsBoundary
+        StrictlyOutside  -> case (seg^.end) `inBox` rect of
+                              StrictlyInside   -> True
+                              OnBoundaryEdge _ -> isClosed (seg^.endPoint) || intersectsBoundary
+                              StrictlyOutside  -> intersectsBoundary
+      intersectsBoundary = seg `intersects` Boundary rect
+      isClosed = (== Closed) . endPointType
+
+-- isOpenSegment     :: ( IxValue (endPoint point) ~ point
+--                      , EndPoint_ (endPoint point)
+--                      ) => LineSegment endPoint point -> Bool
+-- isOpenSegment seg = let isOpen = (== Open) . endPointType
+--                     in isOpen (seg^.startPoint) && isOpen (seg^.endPoint)
+
+-- diagonals (corners -> Corners a b c d) = Vector2 (ClosedLineSegment a c) (ClosedLineSegment b d)
+
 
 instance ( Ord r, Num r, Point_ point 2 r, Point_ point' 2 r
          -- , IxValue (endPoint point) ~ point

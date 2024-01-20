@@ -12,7 +12,7 @@ import HGeometry.Line
 import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
-import HGeometry.Vector
+import HGeometry.HyperPlane.Class
 import Ipe
 import Ipe.Color
 import Paths_hgeometry
@@ -31,6 +31,33 @@ getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
 spec :: Spec
 spec =
   describe "linesegment x box intersection tests" $ do
+    it " seg1 intersect top " $
+      (seg1 `intersects` topSide') `shouldBe` True
+    it "bug" $
+      (supportingLine seg1 `intersects` topSide') `shouldBe` True
+    it "bug2" $
+      (supportingLine topSide' `intersects` seg1) `shouldBe` True
+    it "bug2b"   $
+      let l = supportingLine topSide'
+          eq = hyperPlaneEquation l
+          x = evalHyperPlaneEquation l (seg1^.end)
+      in
+      (eq, x, l, onSideTest (seg1^.start) l, onSideTest (seg1^.end) l) `shouldBe` (eq, x, l,LT,GT)
+    -- it "bug3" $
+    --   (spansIntersect seg1 topSide') `shouldBe` True
+
+
+    it " seg2 intersect left " $
+      (seg2 `intersects` leftSide') `shouldBe` False
+    it "bug4" $
+      (supportingLine seg2 `intersects` leftSide') `shouldBe` True
+    it "bug5" $
+      (supportingLine leftSide' `intersects` seg2) `shouldBe` False
+    -- it "bug6" $
+    --   (spansIntersect seg2 leftSide') `shouldBe` False
+
+
+
     fp <- runIO $ getDataFileName' [osp|test-with-ipe/LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
 
@@ -67,3 +94,25 @@ arrowAsOpen ((LineSegment_ p q) :+ ats) =
     f x = case ats^?_Attr x of
             Just _  -> AnOpenE
             Nothing -> AnClosedE
+
+
+seg1 :: LineSegment AnEndPoint (Point 2 R)
+seg1 = read "LineSegment (AnEndPoint Closed (Point2 160 720)) (AnEndPoint Closed (Point2 192 768))"
+topSide' :: ClosedLineSegment (Point 2 R)
+topSide' = ClosedLineSegment (Point2 128 736) (Point2 256 736)
+
+-- X Box (Point2 128 736) (Point2 256 688), intersects rect
+
+
+seg2 :: LineSegment AnEndPoint (Point 2 R)
+seg2 = read "LineSegment (AnEndPoint Closed (Point2 256 572)) (AnEndPoint Open (Point2 320 584))"
+
+leftSide' :: ClosedLineSegment (Point 2 R)
+leftSide' = ClosedLineSegment (Point2 320 560) (Point2 320 624)
+-- box' = "Box (Point2 320 560) (Point2 448 624)"
+
+
+
+-- seg3= read "LineSegment (AnEndPoint Closed (Point2 256 572)) (AnEndPoint Open (Point2 320 584))"
+
+-- X Box (Point2 320 560) (Point2 448 624),
