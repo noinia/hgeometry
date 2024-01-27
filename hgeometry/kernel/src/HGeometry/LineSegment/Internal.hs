@@ -274,8 +274,8 @@ onSegment2                          :: ( Point_ point 2 r, Point_ point' 2 r, Or
                                        , LineSegment_ lineSegment point')
                                     => point -> lineSegment -> Bool
 onSegment2 q seg@(LineSegment_ s t) =
-    onLine q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) RightSide
-                     && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) LeftSide
+    onLine q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) LeftSide
+                     && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) RightSide
   where
     supLine = LinePV (s^.asPoint) (t .-. s)
     l = perpendicularTo supLine

@@ -48,6 +48,8 @@ import HGeometry.Transformation
 import HGeometry.Vector
 import Prelude hiding (zipWith)
 
+-- import Debug.Trace
+
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> myRect = Rectangle origin (Point2 10 20.0) :: Rectangle (Point 2 Rational)
@@ -79,7 +81,7 @@ instance ( Point_ point d r, Num r, Ord r
 
 -- | Data type representing the intersection of a Box and a line
 data LineBoxIntersection d r = Line_x_Box_Point (Point d r)
-                             | Line_x_Box_Segment (ClosedLineSegment (Point d r))
+                             | Line_x_Box_LineSegment (ClosedLineSegment (Point d r))
 
 deriving instance (Show (Point d r), Show (ClosedLineSegment (Point d r))) =>
                   Show (LineBoxIntersection d r)
@@ -109,14 +111,14 @@ instance (Fractional r, Ord r
               LT -> Nothing
               EQ -> Just . Line_x_Box_Point $ Point2 (p^.xCoord) (p^.yCoord)
               GT -> case ry `compare` (q^.yCoord) of
-                      LT -> let s = if p^.xCoord <= tx then Point2 tx (p^.yCoord)
+                      LT -> let s = if p^.xCoord <= tx then Point2 tx (q^.yCoord)
                                                        else Point2 (p^.xCoord) ly
-                                t = if bx <= q^.xCoord then Point2 bx (q^.yCoord)
+                                t = if bx <= q^.xCoord then Point2 bx (p^.yCoord)
                                                        else Point2 (q^.xCoord) ry
-                            in Just . Line_x_Box_Segment $ ClosedLineSegment s t
+                            in Just . Line_x_Box_LineSegment $ ClosedLineSegment s t
                       EQ -> Just . Line_x_Box_Point $ Point2 (q^.xCoord) (q^.yCoord)
                       GT -> Nothing
-      EQ | inRange   -> Just . Line_x_Box_Segment
+      EQ | inRange   -> Just . Line_x_Box_LineSegment
                       $ ClosedLineSegment (Point2 (p^.xCoord) b) (Point2 (q^.xCoord) b)
          | otherwise -> Nothing
       GT -> case ly `compare` (q^.yCoord) of
@@ -128,7 +130,7 @@ instance (Fractional r, Ord r
                                                        else Point2 (p^.xCoord) ly
                                 t = if tx <= q^.xCoord then Point2 tx (q^.yCoord)
                                                        else Point2 (q^.xCoord) ry
-                            in Just . Line_x_Box_Segment $ ClosedLineSegment s t
+                            in Just . Line_x_Box_LineSegment $ ClosedLineSegment s t
               EQ -> Just . Line_x_Box_Point $ Point2 (p^.xCoord) (q^.yCoord)
               GT -> Nothing
     where
@@ -167,7 +169,7 @@ instance ( Num r, Ord r
 instance ( Fractional r, Ord r
          , Point_ point 2 r
          ) =>  IsIntersectableWith (LinePV 2 r) (Rectangle point) where
-  (LinePV p v) `intersect` r = fromPointAndVec @(LineEQ r) p v `intersect` r
+  (LinePV p v) `intersect` r = (fromPointAndVec @(LineEQ r) p v) `intersect` r
   {-# INLINE intersect #-}
 
 --------------------------------------------------------------------------------
@@ -310,11 +312,26 @@ instance ( Point_ point 2 r, Ord r, Fractional r
       Line_x_Box_Point p
         | p `onSide` perpendicularTo m == LeftSide -> Just $ HalfLine_x_Box_Point p
         | otherwise                                -> Nothing
-      Line_x_Box_Segment seg                       -> case compareColinearInterval m seg of
-        Before   -> Just $ HalfLine_x_Box_LineSegment seg
-        OnStart  -> Just $ HalfLine_x_Box_LineSegment seg
-        Interior -> Just $ HalfLine_x_Box_LineSegment $ seg&start .~ (hl^.start.asPoint)
-        OnEnd    -> Just $ HalfLine_x_Box_Point (seg^.end)
+      Line_x_Box_LineSegment seg                   -> let seg' = reorientTo (hl^.direction) seg
+                                                      in case compareColinearInterval m seg' of
+        Before   -> Just $ HalfLine_x_Box_LineSegment seg'
+        OnStart  -> Just $ HalfLine_x_Box_LineSegment seg'
+        Interior -> Just $ HalfLine_x_Box_LineSegment $ seg'&start .~ (hl^.start.asPoint)
+        OnEnd    -> Just $ HalfLine_x_Box_Point (seg'^.end)
         After    -> Nothing -- no intersection
     where
       m = supportingLine hl
+
+-- | Given some vector v, and a line segment (that suposedly either has direction v or
+-- -v), flip the seg so that it has direction v.
+reorientTo       :: ( Point_ point 2 r, Ord r, Num r
+                    , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+                    )
+                 => Vector 2 r -> LineSegment endPoint point -> LineSegment endPoint point
+reorientTo v seg = case (seg^.end) `onSide` m of
+                     RightSide -> flipSegment seg
+                     _         -> seg
+  where
+    m = perpendicularTo $ LinePV (seg^.start.asPoint) v
+    -- v points into the left halfplane of m
+    flipSegment (LineSegment s t) = LineSegment t s

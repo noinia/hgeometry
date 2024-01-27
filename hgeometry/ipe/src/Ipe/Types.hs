@@ -132,16 +132,15 @@ fromContent obs = IpePage layers' [View layers' a] obs
 -- - if the page does not have any layers, it creates a layer named "alpha", and
 -- - if the page does not have any views, it creates a view in which all layers are visible.
 --
-withDefaults :: IpePage r -> IpePage r
-withDefaults = addView . addLayer
+withDefaults   :: IpePage r -> IpePage r
+withDefaults p = case p^.layers of
+                   []      -> makeNonEmpty "alpha" []
+                   (l:lrs) -> makeNonEmpty l       lrs
   where
-    whenNull ys = \case
-                    [] -> ys
-                    xs -> xs
-    addLayer p = p&layers %~ whenNull ["alpha"]
-    addView  p = p&views  %~ whenNull [View (p^.layers) (head $ p^.layers)]
-                 -- note that the head is save, since we just made sure
-                 -- with 'addLayer' that there is at least one layer
+    makeNonEmpty l lrs = p&layers .~ (l:lrs)
+                          &views %~ \case
+                                      [] -> [View (l:lrs) l]
+                                      vs -> vs
 
 -- | This allows you to filter the objects on some layer.
 --

@@ -64,18 +64,24 @@ spec =
 
 ipeIntersectionTests    :: OsPath -> Spec
 ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> readAllFrom fp
-                             sequence_ $ [ mkTestCase (arrowAsOpen seg) box'
-                                         | seg <- segs, box' <- boxes ]
+                             it "seg x rect intersection" $
+                               sequence_ $ [ mkTestCase (arrowAsOpen seg) box'
+                                           | seg <- segs, box' <- boxes ]
+                             it "seg boundary x rect intersection" $
+                               sequence_ $ [ mkTestCaseB (arrowAsOpen seg) box'
+                                           | seg <- segs, box' <- boxes ]
+
   where
     mkTestCase :: LineSegment AnEndPoint (Point 2 R) :+ IpeAttributes Path R
                -> Rectangle (Point 2 R) :+  IpeAttributes Path R
-               -> Spec
+               -> Expectation
     mkTestCase (seg :+ segAts) (rect' :+ rectAts) =
-      describe ("seg x rect intersection " <> show seg <> " X " <> show rect') $ do
-        it "intersects rect" $
           (seg `intersects` rect') `shouldBe` sameColor segAts rectAts
-        it "intersects boundary" $
-          (seg `intersects` (Boundary rect')) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
+    mkTestCaseB :: LineSegment AnEndPoint (Point 2 R) :+ IpeAttributes Path R
+               -> Rectangle (Point 2 R) :+  IpeAttributes Path R
+               -> Expectation
+    mkTestCaseB (seg :+ segAts) (rect' :+ rectAts) =
+      (seg `intersects` (Boundary rect')) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
 
 sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
 sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke

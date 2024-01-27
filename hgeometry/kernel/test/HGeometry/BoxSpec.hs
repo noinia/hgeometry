@@ -43,7 +43,7 @@ spec = do
       it "intersect" $ do
         (myIncLine `intersect` myRect)
           `shouldBe`
-          Just (Line_x_Box_Segment (ClosedLineSegment (Point2 2 1) (Point2 10.0 17.0)))
+          Just (Line_x_Box_LineSegment (ClosedLineSegment (Point2 2 1) (Point2 10.0 17.0)))
         (myDecLine `intersect` myRect)
           `shouldBe`
           Just (Line_x_Box_Point (Point2 10 20))

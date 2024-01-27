@@ -19,31 +19,27 @@ module Ipe.IpeOut where
 import           Control.Lens hiding (Simple)
 import           Data.Foldable (toList)
 import           Data.Kind
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Sequence as Seq
--- import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Text (Text)
 import qualified Data.Text as Text
--- import           Data.Vinyl (Rec(..))
--- import           Data.Vinyl.CoRec
 import           HGeometry.Ball
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
 import           HGeometry.HalfLine
+import           HGeometry.Intersection
 import           HGeometry.Line
--- import           HGeometry.LineSegment
+import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
-import           HGeometry.Intersection
 import           HGeometry.PolyLine
-import           HGeometry.LineSegment
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
--- import           Ipe.Content (IpeAttributes)
 import           Ipe.FromIpe
 import           Ipe.Types
 
@@ -130,6 +126,11 @@ instance HasDefaultIpeOut a => HasDefaultIpeOut [a] where
   type DefaultIpeOut [a] = Group
   defIO = ipeGroup . map (iO .  defIO)
 
+instance HasDefaultIpeOut a => HasDefaultIpeOut (NonEmpty a) where
+  type DefaultIpeOut (NonEmpty a) = Group
+  defIO = ipeGroup . map (iO .  defIO) . toList
+
+
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
   defIO = ipeDiskMark
@@ -144,11 +145,11 @@ instance HasDefaultIpeOut (PolyLine (Point 2 r)) where
   type DefaultIpeOut (PolyLine (Point 2 r)) = Path
   defIO = ipePolyLine
 
-instance (Fractional r, Ord r) => HasDefaultIpeOut (LinePV 2 r) where
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (LinePV 2 r) where
   type DefaultIpeOut (LinePV 2 r) = Path
   defIO = ipeLine
 
-instance (Fractional r, Ord r, Point_ point 2 r) => HasDefaultIpeOut (HalfLine point) where
+instance (Fractional r, Ord r, Point_ point 2 r,Show r, Show point) => HasDefaultIpeOut (HalfLine point) where
   type DefaultIpeOut (HalfLine point) = Path
   defIO = ipeHalfLine
 
@@ -200,39 +201,41 @@ defaultBox = let z  = 1000
              in Rectangle (Point2 z' z') (Point2 z z)
 
 -- | Renders a line as a Path. The line is clipped to the 'defaultBox'
-ipeLine :: (Ord r, Fractional r) => IpeOut (LinePV 2 r) Path r
+ipeLine :: (Ord r, Fractional r, Show r) => IpeOut (LinePV 2 r) Path r
 ipeLine = ipeLineIn defaultBox
 
 -- | Renders the line in the given box.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeLineIn        :: forall r. (Ord r, Fractional r)
+ipeLineIn        :: forall r. (Ord r, Fractional r, Show r)
                  => Rectangle (Point 2 r) -> IpeOut (LinePV 2 r) Path r
 ipeLineIn bBox l = case l `intersect` bBox of
-  Nothing                     -> error "ipeLineIn: precondition failed, no intersection"
-  Just (Line_x_Box_Point _)   -> error "ipeLineIn: precondition failed, single point"
-  Just (Line_x_Box_Segment s) -> ipeLineSegment s
+  Nothing                         -> error "ipeLineIn: precondition failed, no intersection"
+  Just (Line_x_Box_Point _)       -> error "ipeLineIn: precondition failed, single point"
+  Just (Line_x_Box_LineSegment s) -> ipeLineSegment s
 
 -- | Renders an Halfine.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeHalfLine :: (Ord r, Fractional r, Point_ point 2 r) => IpeOut (HalfLine point) Path r
+ipeHalfLine :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
 ipeHalfLine = \(HalfLine p v) -> ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 
 -- | Renders a ray, i.e. a half line drawing an arrow in the direction
 -- of the ray.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeRay :: (Ord r, Fractional r, Point_ point 2 r) => IpeOut (HalfLine point) Path r
+ipeRay :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
 ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
 
 -- | Renders the HalfLine in the given box.
 --
 -- pre: the intersection of the box with the halfline is a line segment
-ipeHalfLineIn         :: (Ord r, Fractional r, Point_ point 2 r)
+ipeHalfLineIn         :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
                       => Rectangle point -> IpeOut (HalfLine point) Path r
 ipeHalfLineIn bBox hl = case hl `intersect` bBox of
-  Nothing                       -> error "ipeHalfLineIn: precondition failed, no intersection"
+  Nothing                       -> error $ "ipeHalfLineIn: precondition failed, no intersection"
+                                   <> " " <> show (hl,bBox)
+
   Just (HalfLine_x_Box_Point _) -> error "ipeHalfLineIn: precondition failed, single point"
   Just (HalfLine_x_Box_LineSegment seg) -> ipeLineSegment seg
 

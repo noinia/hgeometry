@@ -94,9 +94,11 @@ instance ( MkHyperPlaneConstraints 2 r, Num r
   evalAt p = evalAt' $ p^.xCoord
   hyperPlaneCoefficients = coerced
 
-instance Line_ (LineEQ r) 2 r where
-  fromPointAndVec p (Vector2 vx vy) =
-    fromPointAndNormal p (Vector2 (-vy) vx)
+instance Fractional r => Line_ (LineEQ r) 2 r where
+  fromPointAndVec (Point2_ px py) (Vector2 vx vy) = let a = vy/vx
+                                                    in LineEQ a (py-px*a)
+  -- in principle we get py = a*px + b, with a = (vy/vx), and thus b=py - px*(vy/vx)
+
 
 ----------------------------------------
 

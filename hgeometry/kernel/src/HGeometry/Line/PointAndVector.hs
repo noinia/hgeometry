@@ -347,9 +347,14 @@ bisector p q = let v = q .-. p
 -- oriented such that v points into the left halfplane of m.
 --
 -- >>> perpendicularTo $ LinePV (Point2 3 4) (Vector2 (-1) 2)
--- LinePV (Point2 3 4) (Vector2 (-2) (-1))
-perpendicularTo                             :: Num r => LinePV 2 r -> LinePV 2 r
-perpendicularTo (LinePV p ~(Vector2 vx vy)) = LinePV p (Vector2 (-vy) vx)
+-- LinePV (Point2 3 4) (Vector2 2 1
+-- >>> perpendicularTo $ LinePV (Point2 (-1000) 268) (Vector2 (-50) 8)
+-- LinePV (Point2 (-1000) 268) (Vector2 8 50)
+perpendicularTo   :: Num r => LinePV 2 r -> LinePV 2 r
+perpendicularTo l = l&direction %~ rot90cw
+  where
+    rot90cw (Vector2 vx vy) = Vector2 vy (-vx)
+{-# INLINE perpendicularTo #-}
 
 -- | Test if a vector is perpendicular to the line.
 isPerpendicularTo :: (Num r, Eq r
