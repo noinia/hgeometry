@@ -22,7 +22,7 @@ import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
-import HGeometry.Point.Class
+import HGeometry.Point
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -40,6 +40,10 @@ instance (Eq r, Num r) => HasIntersectionWith (LineEQ r) (LinePV 2 r) where
       -- line, and thus they intersect
   {-# INLINE intersects #-}
 
-instance (Eq r, Fractional r)
+instance (Ord r, Fractional r)
          => IsIntersectableWith (LineEQ r) (LinePV 2 r) where
-  l `intersect` (LinePV p v) = l `intersect` fromPointAndVec @(LineEQ r) p v
+  l `intersect` m = case toLinearFunction m of
+    Nothing    -> let x = m^.anchorPoint.xCoord
+                  in Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
+                  -- m is vertical, l is not, so they intersect in a point
+    Just m'    -> l `intersect` m'

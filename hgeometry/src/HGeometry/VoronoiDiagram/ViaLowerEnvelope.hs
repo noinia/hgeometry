@@ -14,6 +14,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ( VoronoiDiagram(..)
   , voronoiDiagram
   , voronoiVertices
+  , edgeGeometries
   ) where
 
 import           Control.Lens
@@ -38,6 +39,21 @@ newtype VoronoiDiagram point =
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
+
+type instance NumType   (VoronoiDiagram point) = NumType point
+type instance Dimension (VoronoiDiagram point) = Dimension point
+
+-- | Iso to Access the underlying LowerEnvelope
+_VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram point) (VoronoiDiagram point')
+                                    (LowerEnvelope (Plane (NumType point) :+ point))
+                                    (LowerEnvelope (Plane (NumType point') :+ point'))
+_VoronoiDiagramLowerEnvelope = coerced
+
+--------------------------------------------------------------------------------
+
+
+
+
 
 --------------------------------------------------------------------------------
 
@@ -73,3 +89,16 @@ upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
     flipZ = over (hyperPlaneCoefficients.traverse) negate
 
 -- FIXME: define this in some individual module
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Get the halflines and line segments representing the VoronoiDiagram
+edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r, Default point
+
+                  , Show point, Show r
+                  )
+               => Fold (VoronoiDiagram point) (EdgeGeometry (Point 2 r))
+edgeGeometries = _VoronoiDiagramLowerEnvelope.projectedEdgeGeometries
+-- TODO: figure out if this can be an indexed fold

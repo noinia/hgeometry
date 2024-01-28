@@ -36,6 +36,7 @@ import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line.Class
+import           HGeometry.Line.LineEQ
 import           HGeometry.Line.Intersection
 import           HGeometry.Point
 -- import           HGeometry.Point.EuclideanDistance
@@ -108,12 +109,12 @@ instance ( Eq r, Num r
 toLinearFunction                               :: forall r.
                                                   ( Fractional r, Ord r
                                                   )
-                                               => LinePV 2 r -> Maybe (r,r)
+                                               => LinePV 2 r -> Maybe (LineEQ r)
 toLinearFunction l@(LinePV _ ~(Vector2 vx vy)) =
   case l `intersect` verticalLine @r @(LinePV 2 r) 0 of
-  Nothing                               -> Nothing -- l is vertical
-  Just (Line_x_Line_Point (Point2 _ b)) -> Just (vy / vx,b)
-  Just (Line_x_Line_Line _)             -> Nothing -- l is a vertical line (through x=0)
+    Nothing                               -> Nothing -- l is vertical
+    Just (Line_x_Line_Point (Point2 _ b)) -> Just $ LineEQ (vy / vx) b
+    Just (Line_x_Line_Line _)             -> Nothing -- l is a vertical line (through x=0)
 
 
 instance ( Show r, KnownNat d

@@ -37,7 +37,6 @@ import HGeometry.HalfLine
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
-import HGeometry.Line.Class
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -169,7 +168,15 @@ instance ( Num r, Ord r
 instance ( Fractional r, Ord r
          , Point_ point 2 r
          ) =>  IsIntersectableWith (LinePV 2 r) (Rectangle point) where
-  (LinePV p v) `intersect` r = (fromPointAndVec @(LineEQ r) p v) `intersect` r
+  l@(LinePV p _) `intersect` r = case toLinearFunction l of
+      Nothing
+        | (p^.xCoord) `stabsInterval` xRange -> Just . Line_x_Box_LineSegment
+                                              $ ClosedLineSegment (Point2 (p^.xCoord) minY)
+                                                                  (Point2 (p^.xCoord) maxY)
+        | otherwise                          -> Nothing
+      Just l'                                -> l' `intersect` r
+    where
+      Vector2 xRange (ClosedInterval minY maxY) = extent r
   {-# INLINE intersect #-}
 
 --------------------------------------------------------------------------------

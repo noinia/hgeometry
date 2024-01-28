@@ -41,3 +41,9 @@ type instance Dimension [t] = Dimension t
 
 type instance Dimension (NonEmpty g) = Dimension g
 type instance NumType   (NonEmpty g) = NumType g
+
+
+type instance NumType   (Maybe a) = NumType a
+type instance Dimension (Maybe a) = Dimension a
+
+type instance NumType   (Either l r) = NumType r

@@ -6,7 +6,7 @@ module HGeometry.LowerEnvelope.Type
   , traverseBoundedV
 
   , LEEdge(Edge)
-  , destination
+  , destination, leftPlane, rightPlane
   , flipEdge
   ) where
 
@@ -106,3 +106,12 @@ flipEdge u (Edge _ hl hr) = Edge u hr hl
 -- | Getter to access the destination field of an edge.
 destination :: Getter (LEEdge plane) VertexID
 destination = to _destination
+
+
+-- | Lens to access the plane left of/above the edge
+leftPlane :: Lens' (LEEdge plane) plane
+leftPlane = lens _leftPlane (\ed h -> ed { _leftPlane = h })
+
+-- | Lens to access the plane right of/below the edge
+rightPlane :: Lens' (LEEdge plane) plane
+rightPlane = lens _rightPlane (\ed h -> ed { _rightPlane = h })

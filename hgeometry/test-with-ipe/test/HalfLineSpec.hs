@@ -15,13 +15,13 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Ipe
-import           Ipe.Color
+-- import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
-import           Debug.Trace
+-- import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 10

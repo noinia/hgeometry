@@ -22,9 +22,12 @@ module HGeometry.LowerEnvelope.AdjListForm
 
   , UnboundedVertex(UnboundedVertex)
   , unboundedVertexId
+  , HasUnboundedEdges(..)
 
   , LEEdge(Edge)
 
+  , EdgeGeometry
+  , projectedEdgeGeometries, projectedEdgeGeometry
   ) where
 
 
@@ -54,6 +57,7 @@ import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
+import           HGeometry.LineSegment
 import           HGeometry.LowerEnvelope.Type
 import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
@@ -63,6 +67,8 @@ import           HGeometry.Vector
 import qualified HGeometry.Vector as Vec
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
+
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
@@ -240,7 +246,7 @@ oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
 -- the if edge should be oriented from u to v or from v to u.
 twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
              => IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
-twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) = case mh' >>= intersectionLine' h of
+twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) = case mh' >>= intersectionLineWithDefiners h of
     Nothing      -> error "twoVertices. absurd, h and h' don't define an edge!?"
     Just (_ :+ EdgeDefiners hl hr)
       | h == hl   -> ( NonEmpty.fromList [ (ui, Edge vi h hr)
@@ -415,7 +421,7 @@ outgoingUnboundedEdge                   :: ( Plane_ plane r, Ord r, Fractional r
                                         -> f plane -- ^ the other planes intersecting at v
                                         -> Maybe (HalfLine (Point 2 r) :+ EdgeDefiners plane)
 outgoingUnboundedEdge v (Two h1 h2) h3s =
-  intersectionLine' h1 h2 >>= toHalfLineFrom (projectPoint v) h3s
+  intersectionLineWithDefiners h1 h2 >>= toHalfLineFrom (projectPoint v) h3s
   -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
   -- planes either.
 
@@ -458,16 +464,28 @@ data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- ^ above plane
 
 -- | Computes the line in which the two planes intersect, and labels
 -- the halfplanes with the lowest plane.
+--
+-- The returned line will have h to its left and h' to its right.
+intersectionLineWithDefiners      :: ( Plane_ plane r, Ord r, Fractional r)
+                                  => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
+intersectionLineWithDefiners h h' = (:+ EdgeDefiners h h') <$> intersectionLine' h h'
+
+-- | Computes the line in which the two planes intersect. The returned line will have h to
+-- its left and h' to its right.
 intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
-                       => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
+                       => plane -> plane -> Maybe (LinePV 2 r)
 intersectionLine' h h' = intersectionLine h h' <&> \case
-    Vertical x    -> LinePV (Point2 x 0) (Vector2 0 1) :+ definers' (Point2 (x-1) 0)
+    Vertical x    -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
     NonVertical l -> let l'@(LinePV p _) = fromLineEQ l
-                     in l' :+ definers' (p&yCoord %~ (+1))
+                     in reorient l' (p&yCoord %~ (+1))
   where
-    definers' q = let f = evalAt q
-                  in if f h <= f h' then EdgeDefiners h h' else EdgeDefiners h' h
+    -- make sure h is to the left of the line
+    reorient l q = let f = evalAt q
+                   in if f h <= f h' then l else l&direction %~ negated
     fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
+
+
 
 --------------------------------------------------------------------------------
 
@@ -514,9 +532,9 @@ instance HasVertices' (LowerEnvelope plane) where
                                          -> f (Vertex   (LowerEnvelope plane)))
                                       -> LowerEnvelope plane -> f (LowerEnvelope plane)
       travVs f (LowerEnvelope v0 vs)  =
-        LowerEnvelope v0 <$> (vs&ix (i+1) %%~ fmap unRight . f . Right)
+        LowerEnvelope v0 <$> (vs&ix (i-1) %%~ fmap unRight . f . Right)
       itravVs f (LowerEnvelope v0 vs) =
-        LowerEnvelope v0 <$> (vs&ix (i+1) %%~ fmap unRight . f i . Right)
+        LowerEnvelope v0 <$> (vs&ix (i-1) %%~ fmap unRight . f i . Right)
 
       unLeft  = either id (error "LowerEnvelope.vertexAt: trying to convert v_infty into a normal vertex is not allowed")
       unRight = either (error "LowerEnvelope.vertexAt: trying to convert a regular bounded vertex into v_infty is not allowed") id
@@ -605,6 +623,53 @@ instance HasEdges (LowerEnvelope plane) (LowerEnvelope plane) where
 -- for example.
 
 -- instance Graph_ (LowerEnvelope plane) where
+
+class HasUnboundedEdges t e | t -> e where
+  -- | Lens to access the unbounded edges.
+  unboundedEdges :: Lens' t (Seq.Seq e)
+
+instance HasUnboundedEdges (LowerEnvelope plane) (LEEdge plane) where
+  unboundedEdges = theUnboundedVertex.incidentEdgesU
+
+
+-- | Edges are either halflines or Linesegments
+type EdgeGeometry point = Either (HalfLine point) (ClosedLineSegment point)
+
+-- | Get the projected geometries (halflines and edges line segments ) representing the
+-- edges.
+projectedEdgeGeometries :: (Plane_ plane r, Ord r, Fractional r
+                                       , Show plane, Show r
+
+                           )
+                        => IndexedFold (EdgeIx (LowerEnvelope plane))
+                                       (LowerEnvelope plane) (EdgeGeometry (Point 2 r))
+projectedEdgeGeometries = ifolding $ \env ->
+  (\(i,e) -> (i, projectedEdgeGeometry env i e)) <$> env^..edges.withIndex
+  -- TODO; this is kind of horrible, there must be a nicer way of writing this.
+
+-- | Computes the (projected) LineSegment or HalfLine representing a given edge.
+projectedEdgeGeometry               :: (Plane_ plane r, Ord r, Fractional r
+                                       , Show plane, Show r
+                                       )
+                                    => LowerEnvelope plane
+                                    -> EdgeIx (LowerEnvelope plane)
+                                    -> Edge (LowerEnvelope plane)
+                                    -> EdgeGeometry (Point 2 r)
+projectedEdgeGeometry env (ui,vi) e = case env^?!vertexAt ui of
+    Left unboundedVtx -> case env^?!vertexAt vi of
+      Left _  -> error "projectedEdgeGeometry: absurd edge from vInfty to vInfty"
+      Right v -> unboundedEdge unboundedVtx v
+    Right u           -> case env^?!vertexAt vi of
+      Left unboundedVtx -> unboundedEdge unboundedVtx u
+      Right v           -> Right $ ClosedLineSegment (u^.location2) (v^.location2)
+  where
+    unboundedEdge unboundedVtx v = case intersectionLine' (e^.rightPlane) (e^.leftPlane) of
+      Just l  -> Left $ HalfLine (v^.location2) (l^.direction)
+                 -- edge e is oriented from the lowerId towards the higherId,
+                 -- so in particular *from* the unbounded vertex into the bounded vertex
+                 -- that means that to construct the halfline we actually wish to
+                 -- flip the left and right plane, so that the halfline is directed outwards.
+      Nothing -> error "projectedEdgeGeometry: absurd, no intersection between the planes"
 
 
 --------------------------------------------------------------------------------

@@ -130,6 +130,11 @@ instance HasDefaultIpeOut a => HasDefaultIpeOut (NonEmpty a) where
   type DefaultIpeOut (NonEmpty a) = Group
   defIO = ipeGroup . map (iO .  defIO) . toList
 
+instance (HasDefaultIpeOut a, HasDefaultIpeOut b
+         , DefaultIpeOut a ~ DefaultIpeOut b, NumType a ~ NumType b
+         ) => HasDefaultIpeOut (Either a b) where
+  type DefaultIpeOut (Either a b) = DefaultIpeOut a
+  defIO = either defIO defIO
 
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
