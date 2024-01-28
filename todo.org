@@ -29,7 +29,7 @@ this can't be right:
 
 we should really use the in plane point p
 
-* TODO write some tests for testing line x line intersections of the various forms
+* DONE write some tests for testing line x line intersections of the various forms
 
 basically test that converting to a diff line type results in
 consistent results
@@ -60,7 +60,13 @@ consistent results
 *** CANCELED IntersectionSpec
 *** DONE BoxSpec
 *** TODO trianglespec
-*** TODO LineSegmentSpec
+*** DONE LineSegmentSpec
+most of the tests are uncommented. Not sure why
+
+*** DONE halflinespec
+intersecting halflines with boxes seems to go wrong somehow.
+
+
 ** TODO hgeometry
 *** DONE convex polygon spec
 
@@ -97,6 +103,10 @@ consistent results
 
 * TODO 3d-lower-envelope/convex hull
 ** DONE naive
+** TODO define tests
+*** TODO correctly render a lower envelope/vd with 1 vertex and 3 unbounded edges
+*** TODO correctly render bounded edges of some larger set of points
+*** TODO correctly render unbounded edges of some larger set of points
 
 ** TODO Set3 type to clean up and/or speed up the fromVertexForm code ?
 
