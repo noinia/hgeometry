@@ -20,6 +20,7 @@ import qualified Data.Sequence as Seq
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Vector
+import           HGeometry.HalfLine
 import           HGeometry.VoronoiDiagram
 import           Ipe
 import           Ipe.Color
@@ -47,24 +48,14 @@ spec = describe "Voronoi diagram tests" $ do
   runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/simple.ipe|]
              writeIpePage [osp|/tmp/voronoi.ipe|] (fromContent out)
 
-  it "geometries" $
-    (trivialVD^..edgeGeometries `shouldBe` [])
-    -- nonsense, but
-
-  -- let [Left hl1,Left hl2,Left hl3] = trivialVD^..edgeGeometries
-  -- runIO $ print hl1
-
-
-  -- it "hl1" $
-  --   iO' hl1 `shouldBe` undefined
-  -- it "hl2" $
-  --   iO' hl1 `shouldBe` undefined
-  -- it "hl3" $
-  --   iO' hl2 `shouldBe` undefined
-
-
+  it "geometries of the trivial VD correct" $
+    trivialVD^..edgeGeometries
+    `shouldBe` [Left (HalfLine (Point2 5 5) (Vector2 1 0))
+               ,Left (HalfLine (Point2 5 5) (Vector2 0 (-1)))
+               ,Left (HalfLine (Point2 5 5) (Vector2 (-1) 1))
+               ]
   goldenWith [osp|data/test-with-ipe/golden/|]
-             (ipeContentGolden { name = [osp|voronoi|] })
+             (ipeContentGolden { name = [osp|trivalVoronoi|] })
                [ iO' inputs
                , iO' trivialVD
                ]
