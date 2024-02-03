@@ -63,6 +63,7 @@ _VoronoiDiagramLowerEnvelope = coerced
 -- \(O(n\log n)\)
 voronoiDiagram :: ( Point_ point 2 r, Functor f, Default point, Ord point
                    , Ord r, Fractional r, Foldable f
+                   , Show point, Show r
                    ) => f point -> VoronoiDiagram point
 voronoiDiagram = VoronoiDiagram
                . fromVertexForm

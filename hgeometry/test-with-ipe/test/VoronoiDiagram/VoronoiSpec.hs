@@ -43,17 +43,6 @@ spec = describe "Voronoi diagram tests" $ do
     -- it "a trivial voronoi diagram" $
     --   voronoiDiagram inputs `shouldBe` trivialVD
 
-    -- runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/trivial.ipe|]
-    --            writeIpePage [osp|/tmp/trivial.ipe|] (fromContent out)
-
-    -- runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/simplest.ipe|]
-    --            writeIpePage [osp|/tmp/simplest.ipe|] (fromContent out)
-
-    -- runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/simpler.ipe|]
-    --            writeIpePage [osp|/tmp/voronoi.ipe|] (fromContent out)
-    -- -- runIO $ do out <- testIpe [osp|test-with-ipe/VoronoiDiagram/simple.ipe|]
-    -- --            writeIpePage [osp|/tmp/voronoi.ipe|] (fromContent out)
-
     it "geometries of the trivial VD correct" $
       trivialVD^..edgeGeometries
       `shouldBe` [Left (HalfLine (Point2 5 5) (Vector2 1 0))
@@ -70,6 +59,10 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|trivial_out|]
     testIpe [osp|simplest.ipe|]
             [osp|simplest_out|]
+    testIpe [osp|simpler.ipe|]
+            [osp|simpler_out|]
+    -- testIpe [osp|simple.ipe|]
+    --         [osp|simple_out|]
 
 
 
