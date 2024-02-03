@@ -5,7 +5,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Voronoi Diagrams
+-- Voronoi Diagrams of points in the plane
 --
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram

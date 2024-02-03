@@ -100,7 +100,7 @@ constructGraph          :: (Polygon_ polygon point r, Point_ point 2 r
                            )
                         => polygon
                         -> f (Diagonal polygon)
-                        -> PlaneGraph s Primal point PolygonEdgeType PolygonFaceData
+                        -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 constructGraph pg diags = undefined
 {-
 e origs diags =

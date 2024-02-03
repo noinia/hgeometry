@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph
   ( module Hiraffe.Graph.Class
-    , PlaneGraph
+  , PlaneGraph
   ) where
 
 
@@ -21,4 +21,4 @@ import Hiraffe.PlanarGraph
 --------------------------------------------------------------------------------
 
 -- | A Plane graph
-type PlaneGraph s v e f = PlanarGraph s v e f
+type PlaneGraph s v e f = PlanarGraph s Primal v e f
