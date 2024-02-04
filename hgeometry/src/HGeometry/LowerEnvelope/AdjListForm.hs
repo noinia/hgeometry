@@ -42,13 +42,14 @@ import           Data.Function (on)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe, maybeToList)
+import           Data.Maybe (maybeToList)
 import           Data.Ord (comparing)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           Data.Traversable (mapAccumL)
 import qualified Data.Vector as V
 import qualified Data.Vector.NonEmpty as NonEmptyV
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
@@ -67,8 +68,9 @@ import           HGeometry.Vector
 import qualified HGeometry.Vector as Vec
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph
+import           Witherable
 
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
@@ -115,6 +117,30 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
     v0 = UnboundedVertex $ flipEdge i <$> view incidentEdgesB v'
     -- do we need to reverse the sequenceo f edges?
 
+--------------------------------------------------------------------------------
+
+type IntermediateFace plane = NonEmptyVector (IntermediateVertex plane)
+
+-- type IntermediateFace plane = IntermediateFaceF (IntermediateVertex plane)
+
+-- data IntermediateFaceF v = BoundedFace (NonEmptyVector v)
+--                          -- ^ the vertices of a bounded face, in order along the bounded
+--                          -- face starting from the leftmost (and lowest if there are
+--                          -- multiple) vertex
+--                          | UnboundedFace (NonEmptyVector v)
+--                          -- ^ vertices of an unbounded face, starting from the first
+--                          -- vertex to the last one
+--   deriving (Show,Eq,Functor)
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
 -- | Given a Lower envelope in vertex form, construct the AdjacencyList representation out
 -- of it.
 --
@@ -125,7 +151,7 @@ fromVertexForm      :: forall plane r. (Plane_ plane r, Ord plane, Ord r, Fracti
                     => VertexForm.VertexForm plane -> LowerEnvelope plane
 fromVertexForm lEnv = LowerEnvelope v0 boundedVs
   where
-    v0 = UnboundedVertex $ collectUnbounded allEdges
+    v0 = UnboundedVertex unboundedEdges
 
     -- the bounded vertices.
     boundedVs = Seq.zipWith ( \(_,v,_) outs -> v&incidentEdgesB .~ toSeq outs
@@ -134,16 +160,27 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
     toSeq = foldMap (Seq.singleton . snd)
 
     -- all edges leaving from bounded vertices, ordered by their VertexIds
-    boundedEsByOrigin = Seq.fromList . groupOnCheap fst . foldMap (F.toList . fst)
+    boundedEsByOrigin = Seq.fromList . groupOnCheap fst . foldMap F.toList
                       $ allEdges
 
-    -- computes all edges, they are grouped by face
+    -- computes all outgoing edges of all bounded vertices, they are grouped by face
     allEdges :: [FaceEdges plane]
     allEdges = traceShowWith ("allEdges",) .
       fmap (faceToEdges . sortAlongBoundary)
              . traceShowWith ("allFaces",)
              . groupOnCheap definingPlane
              $ foldMap (^._3) boundedVs'
+
+    -- | construct the unbounded edges, by simply filtering and flipping the
+    -- edges towards infinity.
+    unboundedEdges :: Seq.Seq (LEEdge plane)
+    unboundedEdges = mapMaybe (\(u, Edge v hl hr) ->
+                                 if v == unboundedVertexId then Just (Edge u hr hl) else Nothing
+                              -- flip every unbounded edge
+                              )
+                   $ foldMap fromFoldable allEdges
+    -- FIXME: we should probably sort those right?
+
 
     -- | A sequence of bounded vertices, ordered by vertexID, together with a bunch of
     -- copies; one for each face it will appear on
@@ -166,66 +203,62 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
 
     definingPlane (h,_,_,_) = h
 
-    collectUnbounded :: Foldable f => f (a, First1 b) -> Seq.Seq b
-    collectUnbounded = foldMap (first1 mempty Seq.singleton . snd)
 
 
 
 
 
-type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
+-- type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
 
 
-data First1 a = None | First1 a deriving (Show,Eq)
--- todo, rename to UnboundedE or so
+-- data First1 a = None | First1 a deriving (Show,Eq)
+-- -- todo, rename to UnboundedE or so
 
--- | destructor akin to maybe
-first1                  :: b -> (a -> b) -> First1 a -> b
-first1 def _ None       = def
-first1 _   f (First1 x) = f x
+-- -- | destructor akin to maybe
+-- first1                  :: b -> (a -> b) -> First1 a -> b
+-- first1 def _ None       = def
+-- first1 _   f (First1 x) = f x
 
-instance Semigroup (First1 a) where
-  None         <> r    = r
-  l@(First1 _) <> None = l
-  (First1 _)   <> (First1 _) = error "First1, two First1's this should not happen."
+-- instance Semigroup (First1 a) where
+--   None         <> r    = r
+--   l@(First1 _) <> None = l
+--   (First1 _)   <> (First1 _) = error "First1, two First1's this should not happen."
 
 
--- | For each bounded vertex (represented by their ID) the outgoing halfedge, and the
--- half-edge starting from the unbounded vertex (if it exists).
-type FaceEdges plane = ( NonEmpty (VertexID, LEEdge plane)
-                       , First1 (LEEdge plane) -- the halfedge from the unbounded vertex (if it exists)
-                       )
+-- | For each bounded vertex (represented by their ID) the outgoing halfedge.
+type FaceEdges plane = NonEmpty (VertexID, LEEdge plane)
 
 -- | Given a convex face h (represented by its bounded vertices in CCW order along the
 -- face; starting with the leftmost one), compute the half-edges that bound the face
--- (i.e. that have h to their left).
+-- (i.e. that have h to their left), and start at such a bounded vertex.
+--
 --
 -- The result is a vector with for each bounded vertex (represented by their ID) the
--- outgoing halfedge, and the half-edge starting from the unbounded vertex (if it exists).
+-- outgoing halfedge.
 --
 -- running time: \(O(n)\)   (assuming general position)
-faceToEdges      :: (Plane_ plane r, Ord r, Fractional r, Ord plane
+faceToEdges      :: forall plane r. (Plane_ plane r, Ord r, Fractional r, Ord plane
                     , Show plane, Show r
                     )
                  => IntermediateFace plane -> FaceEdges plane
 faceToEdges face = case toNonEmpty face of
-    v1 :| []   -> oneVertex v1
+    v1 :| []   -> traceShowWith ("oneVertex: ", ) $ oneVertex v1
     v1 :| [v2] -> twoVertices v1 v2
     _  :| _    -> manyVertices
   where
     n = length face
     -- | The main case
-    manyVertices = ifoldMap1 computEdge face
-    -- | Compute the outgoing edge from u to
+    manyVertices = traceShowWith ("faceToEdges: ", ) $ ifoldMap1 computEdge face
+    -- | Compute the outgoing edge from u to its successor.
+
+    computEdge                       :: Int -> IntermediateVertex plane -> FaceEdges plane
     computEdge i u@(h,uIdx,up,uDefs) =
       let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n)
           EdgeDefs mh' hu hv = extractEdgeDefs h up uDefs vp vDefs
-      in case mh' of
-        Just h' -> ( NonEmpty.singleton (uIdx, Edge vIdx h h'), None )
-                   -- bounded edge from u to v with h' on the right
-        Nothing -> ( NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
-                   , First1 $ Edge vIdx hv h -- this one should again have h to its right
-                   )
+      in traceShowWith ("computeEdge", h, u, ) $
+        case mh' of
+        Just h' -> NonEmpty.singleton (uIdx, Edge vIdx h h')
+        Nothing -> NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
                   -- unbounded edge from u to v_infty, and from v_infty to v
 
 -- | compute the face edges of the face of h, when v is the only vertex incident to h.
@@ -234,9 +267,7 @@ oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                           )
                        => IntermediateVertex plane -> FaceEdges plane
 oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
-    [ Left hPred, Right hSucc ] -> ( NonEmpty.singleton (i, Edge unboundedVertexId h hSucc)
-                                   , First1 $ Edge i h hPred
-                                   ) -- the sort makes sure we get the left before right
+    [ Left hPred, Right hSucc ] -> NonEmpty.singleton (i, Edge unboundedVertexId h hSucc)
     _ -> error "oneVertex. absurd. Other than a single Left, and Right"
   where
     otherPlanes = Set.delete h defs
@@ -265,19 +296,17 @@ twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane
 twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs)
   | traceShow ("twoVertices",u,v) False = undefined
   | otherwise
-  = case traceShowWith ("withUVO",) $ mh' >>= withUVOrder of
+  = case mh' of
       Nothing  -> error "twoVertices. absurd, h and h' don't define an edge!?"
-      Just (hr, uBeforeV)
-        | uBeforeV  -> ( NonEmpty.fromList [ (ui, Edge vi                h hr)
-                                           , (vi, Edge unboundedVertexId h hv)
-                                           ]
-                       , First1 $ Edge ui h hu
-                       )
-        | otherwise ->  ( NonEmpty.fromList [ (vi, Edge ui                h hr)
-                                            , (ui, Edge unboundedVertexId h hu)
-                                            ]
-                        , First1 $ Edge vi h hv
-                        )
+      Just hr  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
+                                    , (vi, Edge unboundedVertexId h hv)
+                                    ]
+        -- | uBeforeV  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
+        --                                  , (vi, Edge unboundedVertexId h hv)
+        --                                  ]
+        -- | otherwise -> NonEmpty.fromList [ (vi, Edge ui                h hr)
+        --                                  , (ui, Edge unboundedVertexId h hu)
+        --                                  ]
   where
     EdgeDefs mh' hu hv = traceShowId $ extractEdgeDefs h up uDefs vp vDefs
 
@@ -316,7 +345,7 @@ extractEdgeDefs h u uDefs v vDefs = case traceShowWith ("commons",) commons of
     [h'] -> EdgeDefs (Just h') hu hv
     _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
   where
-    commons = F.toList $ Set.delete h $ traceShowWith ("udefs intersect vDefs",)
+    commons = F.toList $ Set.delete h --- $ traceShowWith ("udefs intersect vDefs",)
               (uDefs `Set.intersection` vDefs)
     uOnlies = F.toList $ uDefs Set.\\ vDefs
     vOnlies = F.toList $ vDefs Set.\\ uDefs
@@ -347,14 +376,14 @@ type IntermediateVertex plane =
 
 
 -- | Sort the vertices of a (convex) face in counter clockwise order around its
--- boundary. The first vertex in the output is the leftmost vertex of the face.
+-- boundary.
 --
 -- running time: \(O(n \log n)\)
 sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r)
                        => NonEmptyV.NonEmptyVector (IntermediateVertex plane)
                        -> IntermediateFace plane
 sortAlongBoundary face = case mv0 of
-    Nothing            -> face -- face only has one vertex, so it is already sorted
+    Nothing            -> face -- face only has one vertex, so it is already sorted.
     Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
     -- TODO: I guess that in degenerate situations, there now may be consecutive
     -- points (vertices) at the same location. We should group those and get rid of them?
@@ -699,7 +728,7 @@ projectedEdgeGeometry env (ui,vi) e = case env^?!vertexAt ui of
       Right v           -> Right $ ClosedLineSegment (u^.location2) (v^.location2)
   where
     unboundedEdge unboundedVtx v = case
-      traceShowWith ("unbEdge", e, "h=",e^.rightPlane, "h'=",e^.leftPlane, "line'",) $
+--      traceShowWith ("unbEdge", e, "h=",e^.rightPlane, "h'=",e^.leftPlane, "line'",) $
         intersectionLine' (e^.rightPlane) (e^.leftPlane) of
       Just l  -> Left $ HalfLine (v^.location2) (l^.direction)
                  -- edge e is oriented from the lowerId towards the higherId,
