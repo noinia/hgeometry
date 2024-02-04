@@ -294,25 +294,29 @@ twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                 )
              => IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
 twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs)
-  | traceShow ("twoVertices",u,v) False = undefined
-  | otherwise
-  = case mh' of
+  -- | traceShow ("twoVertices",u,v) False = undefined
+  -- | otherwise
+  = case mh' >>= withUVOrder of
       Nothing  -> error "twoVertices. absurd, h and h' don't define an edge!?"
-      Just hr  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
-                                    , (vi, Edge unboundedVertexId h hv)
-                                    ]
-        -- | uBeforeV  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
-        --                                  , (vi, Edge unboundedVertexId h hv)
-        --                                  ]
-        -- | otherwise -> NonEmpty.fromList [ (vi, Edge ui                h hr)
-        --                                  , (ui, Edge unboundedVertexId h hu)
-        --                                  ]
+      Just (hr,uBeforeV) -- -> traceShowWith ("twoVertices",u,v,uBeforeV,) $
+        -- NonEmpty.fromList [ (ui, Edge vi                h hr)
+        --                   , (vi, Edge unboundedVertexId h hv)
+        --                   ]
+        | uBeforeV -> NonEmpty.fromList [ (vi, Edge ui                h hr)
+                                        , (ui, Edge unboundedVertexId h hu)
+                                        ]
+                      -- the edge must be oriented from v to u
+        | otherwise  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
+                                         , (vi, Edge unboundedVertexId h hv)
+                                         ]
+                        -- the edge must be oriented from u to v
   where
     EdgeDefs mh' hu hv = traceShowId $ extractEdgeDefs h up uDefs vp vDefs
 
     -- determine if u lies before v in the order of u and v along the intersection line of
     -- h and hr.
-    withUVOrder hr = ( \l -> let m = perpendicularTo l &anchorPoint .~ projectPoint up
+    withUVOrder hr = ( \l -> let m = traceShowWith ("uvorder",l,) $
+                                   perpendicularTo l &anchorPoint .~ projectPoint up
                              in (hr, projectPoint vp `onSide` m /= LeftSide)
                                 -- if v lies on the left it lies further along
                                 -- commonLine. So u lies before v if v does not lie in
@@ -334,13 +338,16 @@ data EdgeDefs plane = EdgeDefs { common :: Maybe plane
 -- - the plane hu incident only to u that is adjacent to h, and
 -- - the plane hv incident only to v that is adjacent to h.
 extractEdgeDefs                   :: (Ord plane
-                                     , Show plane
+                                     , Show plane, Show r
                                      )
                                   => plane
                                   -> Point 3 r -> VertexForm.Definers plane
                                   -> Point 3 r -> VertexForm.Definers plane
                                   -> EdgeDefs plane
-extractEdgeDefs h u uDefs v vDefs = case traceShowWith ("commons",) commons of
+extractEdgeDefs h u uDefs v vDefs
+  | traceShow ("extractEdgeDefs",h,u,uDefs,v,vDefs) False = undefined
+  | otherwise
+  = case traceShowWith ("commons",) commons of
     []   -> EdgeDefs Nothing   hu hv
     [h'] -> EdgeDefs (Just h') hu hv
     _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
@@ -353,10 +360,13 @@ extractEdgeDefs h u uDefs v vDefs = case traceShowWith ("commons",) commons of
     hu = from' u uOnlies
     hv = from' v vOnlies
 
-    from' _ = \case
+    from' x hss
+      |traceShow ("from'",x,hss) False = undefined
+      | otherwise
+      = case hss of
       []   -> error "extractEdgeDefs: absurd, too few definers"
       [h'] -> h'
-      _    -> error "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex."
+      hs    -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
              -- TODO we should either the neighbor of h in the order around the given
              -- vertex here.
 
