@@ -22,7 +22,6 @@ import Control.Lens((^.), coerced)
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
-import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Line.NonVertical.Class
 import HGeometry.Point
