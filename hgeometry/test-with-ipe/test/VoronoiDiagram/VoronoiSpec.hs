@@ -18,8 +18,10 @@ import           HGeometry.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
 import qualified Data.Sequence as Seq
 import           HGeometry.Number.Real.Rational
+import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Point
 import           HGeometry.Vector
+import           HGeometry.Box
 import           HGeometry.HalfLine
 import           HGeometry.VoronoiDiagram
 import           Ipe
@@ -65,6 +67,8 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|simple_out|]
     testIpe [osp|simple1.ipe|]
             [osp|simple1_out|]
+    testIpe [osp|foo.ipe|]
+            [osp|foo_out|]
 
 
 
@@ -76,14 +80,21 @@ spec = describe "Voronoi diagram tests" $ do
 
 
 
+grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
+grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                       (q&coordinates %~ (+d))
+
 instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram point) where
   type DefaultIpeOut (VoronoiDiagram point) = Group
-  defIO vd = ipeGroup $ vd^..edgeGeometries.to iO'
-
-
+  defIO vd = ipeGroup $ vd^..edgeGeometries.to render
+    where
+      bRect = boundingBox $ defaultBox :| [grow 1 $ boundingBox vd]
+      render = \case
+        Left hl   -> iO $ ipeHalfLineIn bRect hl
+        Right seg -> iO' seg
 
 
 instance Default (Point 2 R) where

@@ -46,8 +46,9 @@ import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           Data.Traversable (mapAccumL)
 import qualified Data.Vector as V
-import qualified Data.Vector.NonEmpty as NonEmptyV
 import           Data.Vector.NonEmpty (NonEmptyVector)
+import qualified Data.Vector.NonEmpty as NonEmptyV
+import           HGeometry.Box
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
@@ -73,12 +74,22 @@ import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
 
--- | The lower envelope in adjacencylist form.
+-- | A connected lower envelope in adjacencylist form.
+--
+-- invariant: there is always at least one bounded vertex.
 data LowerEnvelope plane =
   LowerEnvelope !(UnboundedVertex plane) (Seq.Seq (BoundedVertex plane))
 
 deriving instance (Show plane, Show (NumType plane)) => Show (LowerEnvelope plane)
 deriving instance (Eq plane, Eq (NumType plane))     => Eq   (LowerEnvelope plane)
+
+type instance NumType   (LowerEnvelope plane) = NumType plane
+type instance Dimension (LowerEnvelope plane) = 3
+
+instance (Ord (NumType plane), Num (NumType plane)) => IsBoxable (LowerEnvelope plane) where
+  -- ^ the bounding box contains all bounded vertices
+  boundingBox env = boundingBox . NonEmpty.fromList $ env^..boundedVertices.traverse.location
+    -- the fromList is safe since there is alwasy at least one vertex
 
 -- instance Functor LowerEnvelope where
 -- instance Foldable LowerEnvelope where

@@ -74,6 +74,9 @@ folding1 sfa agb = phantom . traverse1_ agb . sfa
 --------------------------------------------------------------------------------
 -- Instances
 
+instance IsBoxable (Point d r) where
+  boundingBox p = Box p p
+
 instance ( Box_ (Box point) point
          , Point_ point d r
          ) => IsBoxable (Box point) where

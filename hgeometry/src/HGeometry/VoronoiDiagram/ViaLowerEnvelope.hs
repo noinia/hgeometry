@@ -20,6 +20,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import           Control.Lens
 import           Data.Default.Class
 import qualified Data.Map as Map
+import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -41,7 +42,7 @@ deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram poi
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
 
 type instance NumType   (VoronoiDiagram point) = NumType point
-type instance Dimension (VoronoiDiagram point) = Dimension point
+type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 
 -- | Iso to Access the underlying LowerEnvelope
 _VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram point) (VoronoiDiagram point')
@@ -51,9 +52,8 @@ _VoronoiDiagramLowerEnvelope = coerced
 
 --------------------------------------------------------------------------------
 
-
-
-
+instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram point) where
+  boundingBox vd = projectPoint <$> boundingBox (vd^._VoronoiDiagramLowerEnvelope)
 
 --------------------------------------------------------------------------------
 
