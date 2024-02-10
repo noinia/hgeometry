@@ -84,11 +84,22 @@ grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
 grow d (Box p q) = Box (p&coordinates %~ subtract d)
                        (q&coordinates %~ (+d))
 
+
 instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram point) where
   type DefaultIpeOut (VoronoiDiagram point) = Group
+  defIO = \case
+    AllColinear pts -> ipeGroup []
+    ConnectedVD vd  -> defIO vd
+
+
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
+         , Show r, Show point
+         )
+         => HasDefaultIpeOut (VoronoiDiagram' point) where
+  type DefaultIpeOut (VoronoiDiagram' point) = Group
   defIO vd = ipeGroup $ vd^..edgeGeometries.to render
     where
       bRect = boundingBox $ defaultBox :| [grow 1 $ boundingBox vd]
@@ -104,7 +115,7 @@ inputs :: [Point 2 R]
 inputs = [origin, Point2 10 10, Point2 10 0]
 
 
-trivialVD :: VoronoiDiagram (Point 2 R)
+trivialVD :: VoronoiDiagram' (Point 2 R)
 trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
   where
     vInfty = UnboundedVertex $ Seq.fromList [Edge 1 h2 h3

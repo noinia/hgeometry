@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.LowerEnvelope.Naive
-  ( lowerEnvelopeVertexForm
-  -- , lowerEnvelope
+  ( lowerEnvelope
+  , lowerEnvelopeVertexForm
   -- , triangulatedLowerEnvelope
 
   , asVertex
@@ -21,10 +21,27 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
+import           HGeometry.LowerEnvelope.AdjListForm (LowerEnvelope, fromVertexForm)
 import           HGeometry.LowerEnvelope.VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph
+
+--------------------------------------------------------------------------------
+
+-- | Brute force implementation that computes the lower envelope, by explicitly
+-- considering every triple of planes.
+--
+-- pre: the input forms a *set* of planes, i.e. no duplicates
+--
+--
+-- running time: \(O(n^4 )\)
+lowerEnvelope :: ( Plane_ plane r
+                 , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                 , Show plane, Show r
+                 ) => f plane -> LowerEnvelope plane
+lowerEnvelope = fromVertexForm . lowerEnvelopeVertexForm
+
 
 --------------------------------------------------------------------------------
 -- * Computing a lower envelope in vertex form
@@ -66,13 +83,6 @@ belowAll v hs = all (\h -> onSideTest v h /= GT) hs
 
 
 {-
--- | simple implementation of the lower envelope.
---
--- running time: \(O(n^4 )\)
-lowerEnvelope    :: ( Plane_ plane r
-                    , Ord r, Fractional r, Foldable f, Ord plane
-                    ) => f plane -> LowerEnvelope plane
-lowerEnvelope hs = undefined
 
 triangulatedLowerEnvelope    :: ( Plane_ plane r
                                 , Ord r, Fractional r, Foldable f

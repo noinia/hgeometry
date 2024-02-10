@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram
   ( VoronoiDiagram(..)
+  , VoronoiDiagram'(..)
   , voronoiDiagram
   , voronoiVertices
   , edgeGeometries

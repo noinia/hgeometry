@@ -16,3 +16,6 @@ module HGeometry.LowerEnvelope
 
 import HGeometry.LowerEnvelope.Naive
 import HGeometry.LowerEnvelope.Type
+
+
+--------------------------------------------------------------------------------

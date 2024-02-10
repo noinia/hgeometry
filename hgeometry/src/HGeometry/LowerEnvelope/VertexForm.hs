@@ -12,6 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.LowerEnvelope.VertexForm
   ( VertexForm(VertexForm)
+  , hasVertices
   , singleton
   , LEVertex, pattern LEVertex, Definers
   , BoundedVertexF(Vertex)
@@ -61,6 +62,9 @@ _VertexFormMap :: Iso (VertexForm plane) (VertexForm plane')
                       (Map.Map (Point 3 (NumType plane')) (Definers plane'))
 _VertexFormMap = coerced
 
+-- | Test if there are vertices
+hasVertices :: VertexForm plane -> Bool
+hasVertices = not . Map.null . view _VertexFormMap
 
 deriving instance ( Show plane, Show (NumType plane)
                   ) => Show (VertexForm plane)
